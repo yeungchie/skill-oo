@@ -26,6 +26,15 @@ let((aj)
     _assert(aj->await(?check t) == "" "await with ?check returns stdout on success")
 )
 
+let((aj)
+    aj = ycSubProcess::createJob("sleep 5")
+    aj->start()->wait(1)
+    aj->stop()
+    _assert(errset(aj->await() nil) == nil "await raises while the job is stopped")
+    aj->kill()
+    _assert(aj->state() == 'Dead "the stopped job is cleared by kill")
+)
+
 _TestErrorsDone = t
 
 ; END

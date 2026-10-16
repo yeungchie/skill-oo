@@ -35,6 +35,13 @@ let((aj t_t0 t_t1)
     _assert(aj->returncode == 0 "the finished job reports returncode 0")
 )
 
+let((aj)
+    aj = ycSubProcess::createJob("sleep 2")
+    aj->start()
+    _assert(aj->await() == "" "await waits for a longer job and returns its stdout")
+    _assert(aj->state() == 'Dead "the awaited job is dead")
+)
+
 _TestTimeDone = t
 
 ; END

@@ -246,7 +246,8 @@ defmethod(initializeInstance (self(AsyncJob) \@rest _args)
     )
     self->await = lambda((\@key check "g")  ; -> str
         ; 未启动则先启动，随后等待进程结束；?check 非 nil 且返回码非零时
-        ; 打印 stderr 全量并以 error() 中断。
+        ; 打印 stderr 全量并以 error() 中断；任务处于 'Stopped 时无法等到
+        ; 结束，会以 error() 中断。
         ;
         ; **参数**
         ;   ?check  (t|nil) - 返回码非零时是否报错；默认 nil
@@ -257,7 +258,12 @@ defmethod(initializeInstance (self(AsyncJob) \@rest _args)
             self->start()
         )
         while(!self->returncode
-            self->wait()
+            when(self->state() == 'Stopped
+                _error("job is stopped and cannot finish; continue() or kill() it first"
+                    ?method 'await
+                )
+            )
+            self->wait(1)
         )
         when(check && (self->returncode != 0)
             let((info)
