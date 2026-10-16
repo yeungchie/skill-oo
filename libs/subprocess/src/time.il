@@ -40,21 +40,17 @@ defmethod(initializeInstance (self(Elapsed) \@rest _args)
     ; **返回**
     ;   (t) - 安装完成后返回 t
     let((_start_ts _end_ts _second _humanReadable)
-        procedure(_error(t_formatString \@key method \@rest g_args "tgg")
-            ; 以统一格式 error() 中断：消息形如 <限定类名><->方法>: <说明>。
+        procedure(_error(t_method t_formatString \@rest g_args "ttg")  ; -> never
+            ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
             ;
             ; **参数**
+            ;   t_method        (str) - 出错的方法名
             ;   t_formatString  (str) - 错误说明格式串（lsprintf 格式）
-            ;   ?method         (sym) - 出错的方法名，以 ->名 形式并入消息；省略或 nil 表示不带
             ;   g_args          (list) - 变参：格式串实参
             ;
             ; **返回**
             ;   (never) - 总是调用 error()，不返回
-            error("%A%s: %s"
-                className(self)
-                method && lsprintf(strcat("->" stringp(method) && "%s" || "%A") method) || ""
-                apply('lsprintf t_formatString g_args)
-            )
+            error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString g_args))
         )
         self->mark = lambda(()  ; -> str | nil
             ; 记录时间点：首次调用记开始时间，再次调用记结束时间，此后无效果。
@@ -91,10 +87,10 @@ defmethod(initializeInstance (self(Elapsed) \@rest _args)
             ;   (int) - compareTime(_end_ts _start_ts)
             unless(_second
                 unless(_start_ts
-                    _error("elapsed time has not been started" ?method 'getSeconds)
+                    _error("getSeconds" "elapsed time has not been started")
                 )
                 unless(_end_ts
-                    _error("elapsed time has not been ended" ?method 'getSeconds)
+                    _error("getSeconds" "elapsed time has not been ended")
                 )
                 _second = compareTime(_end_ts _start_ts)
             )
