@@ -1,6 +1,53 @@
 useNamespace("ycSubProcess")
 
 
+; ---------- 函数 ----------
+
+procedure(_formatSeconds(n_second "n")  ; -> str
+    ; 将秒数换算为人类可读耗时串：0 秒为 ~0s，其余为 1s / 1m1s / 1h1m1s 风格。
+    ;
+    ; **参数**
+    ;   n_second  (int) - 耗时秒数
+    ;
+    ; **返回**
+    ;   (str) - 换算后的耗时串
+    cond(
+        (n_second == 0
+            "~0s"
+        )
+        (n_second < 60
+            lsprintf("%ds" n_second)
+        )
+        (n_second < 3600
+            let((s)
+                lsprintf("%dm%s"
+                    n_second/60
+                    if((s = remainder(n_second 60)) == 0
+                        ""
+                        lsprintf("%ds" s)
+                    )
+                )
+            )
+        )
+        (t
+            let((m s)
+                lsprintf("%dh%s%s"
+                    n_second/3600
+                    if((m = remainder(n_second 3600)/60) == 0
+                        ""
+                        lsprintf("%dm" m)
+                    )
+                    if((s = remainder(n_second 60)) == 0
+                        ""
+                        lsprintf("%ds" s)
+                    )
+                )
+            )
+        )
+    )
+)
+
+
 ; ---------- 类定义 ----------
 
 defclass(Elapsed () (
@@ -102,41 +149,7 @@ defmethod(initializeInstance (self(Elapsed) \@rest _args)
             ; **返回**
             ;   (str) - 由 getSeconds() 换算，首次计算后缓存
             unless(_humanReadable
-                self->getSeconds()
-                _humanReadable = cond(
-                    (_second == 0
-                        "~0s"
-                    )
-                    (_second < 60
-                        lsprintf("%ds" _second)
-                    )
-                    (_second < 3600
-                        let((s)
-                            lsprintf("%dm%s"
-                                _second/60
-                                if((s = remainder(_second 60)) == 0
-                                    ""
-                                    lsprintf("%ds" s)
-                                )
-                            )
-                        )
-                    )
-                    (t
-                        let((m s)
-                            lsprintf("%dh%s%s"
-                                _second/3600
-                                if((m = remainder(_second 3600)/60) == 0
-                                    ""
-                                    lsprintf("%dm" m)
-                                )
-                                if((s = remainder(_second 60)) == 0
-                                    ""
-                                    lsprintf("%ds" s)
-                                )
-                            )
-                        )
-                    )
-                )
+                _humanReadable = _formatSeconds(self->getSeconds())
             )
             _humanReadable
         )

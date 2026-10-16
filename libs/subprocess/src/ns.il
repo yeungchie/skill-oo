@@ -7,6 +7,7 @@ addToNamespace("ycSubProcess"
         createJob
         Elapsed
         _rstring
+        _formatSeconds
     ))
 )
 unuseNamespace("ycSubProcess")

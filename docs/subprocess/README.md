@@ -8,6 +8,7 @@ Cadence SKILL++ 的子进程封装库：启动进程、实时读写输出、按�
 + 进程状态以符号表示：`'None`（未启动）/ `'Active`（运行中）/ `'Dead`（已结束）/ `'Stopped`（已暂停）。
 + 输出按条收进 `Stream` 对象：`text()` 全量拼接、`last()`/`shift()` 取单条；耗时由 `Elapsed` 记录。
 + 回调函数按事件符号触发：`'stdout`/`'stderr`/`'post`/`'beforeBegin`/`'afterBegin`。
++ 命令串按 shell 语法解释：引号、`$` 展开、反斜杠转义、管道均照常生效；`print()` 写入的数据直接送达子进程标准输入、不经 shell。
 + 例程中 `; =>` 表示返回值，括注「示例值」者为示意。
 
 ## 快速上手
@@ -54,7 +55,7 @@ ycSubProcess::runJob(
 
 **返回值**
 
-`t | nil` — `t` 表示任务进程正常结束；`nil` 表示执行失败，即进程返回状态码非零（失败进程被强制终止）。
+`t | nil` — `t` 表示任务进程正常结束；`nil` 表示执行失败，即进程返回状态码非零。
 
 **例程**
 
@@ -114,6 +115,10 @@ ycSubProcess::createJob(
     | `'afterBegin` | 任务进程开始执行后 |
 
 + `g_job`为 `AsyncJob` 对象。
+
++ 触发顺序：`'beforeBegin` → `'afterBegin` → `'stdout`/`'stderr`（随输出多次触发、可交错）→ `'post`。
+
++ 回调抛出的错误会被打印，但不会中断任务。
 
 **返回值**
 

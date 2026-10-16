@@ -11,13 +11,10 @@ procedure(runJob(g_arg \@rest g_args "gg")  ; -> t | nil
     ;   g_args  (list) - 命令的其余部分；非字符串同样自动转换
     ;
     ; **返回**
-    ;   (t|nil) - 正常结束（退出码 0）返回 t；失败返回 nil（失败进程被强制终止）
+    ;   (t|nil) - 正常结束（退出码 0）返回 t；退出码非零返回 nil
     let((aj)
         (aj = apply('createJob g_arg ?verbose t g_args))->await()
-        prog1(
-            aj->returncode == 0
-            aj->returncode == 0 || aj->kill()
-        )
+        aj->returncode == 0
     )
 )
 
@@ -183,7 +180,8 @@ defmethod(initializeInstance (self(AsyncJob) \@rest _args)
     )
     self->start = lambda(()  ; -> AsyncJob
         ; 启动子进程：注册 stdout/stderr/退出回调并等待到进程启动完成；
-        ; 'beforeBegin 在启动前、'afterBegin 在启动后触发。已启动（ipcId 非 nil）时 error() 中断。
+        ; 'beforeBegin 在启动前、'afterBegin 在启动后触发；回调抛出的错误只打印、不打断任务。
+        ; 已启动（ipcId 非 nil）时 error() 中断。
         ;
         ; **返回**
         ;   (AsyncJob) - self
@@ -200,7 +198,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest _args)
                     fprintf(inSkill(IL::stdout) "%s" t_data)
                 )
                 when(self->callback
-                    funcall(self->callback 'stdout self)
+                    errset(funcall(self->callback 'stdout self) t)
                 )
             )
             lambda((g_cid t_data)
@@ -209,14 +207,14 @@ defmethod(initializeInstance (self(AsyncJob) \@rest _args)
                     fprintf(inSkill(IL::stderr) "%s" t_data)
                 )
                 when(self->callback
-                    funcall(self->callback 'stderr self)
+                    errset(funcall(self->callback 'stderr self) t)
                 )
             )
             lambda((g_cid n_code)
                 self->returncode = n_code
                 self->elapsed->mark()
                 when(self->callback
-                    funcall(self->callback 'post self)
+                    errset(funcall(self->callback 'post self) t)
                 )
             )
         )
