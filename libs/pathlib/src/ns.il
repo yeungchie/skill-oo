@@ -1,0 +1,42 @@
+makeNamespace("ycPathLib")
+addToNamespace("ycPathLib"
+    mapcar('symbolToString '(
+        Path
+        PathData
+        cwd
+        home
+        currentFile
+        _asPath
+        _parsePath
+        _pathKey
+        _mkPath
+        _lastItem
+        _dropLast
+        _dropFirstN
+        _dotIndex
+        _lstripDots
+        _splitKeep
+        _endsWith
+        _fnmatchBracket
+        _fnmatchToPcre
+        _fnmatch1
+        _canMatchEmpty
+        _allMatchp
+        _suffixMatchp
+        _strMember
+        _shellQuote
+        _installPure
+        _fsName
+        _dirNames
+        _installFs
+        _collapseStars
+        _globDirs
+        _globTree
+        _globChain
+        _globPattern
+        _installGlob
+    ))
+)
+unuseNamespace("ycPathLib")
+
+; END

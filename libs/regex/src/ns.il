@@ -1,0 +1,43 @@
+makeNamespace("ycRegEx")
+addToNamespace("ycRegEx"
+    mapcar('symbolToString '(
+        reCompile
+        reMatch
+        reSearch
+        reFullmatch
+        reFindall
+        reFinditer
+        reSplit
+        reSub
+        reSubn
+        Pattern
+        PatternData
+        Match
+        MatchData
+        _mkPattern
+        _compileChecked
+        _asPat
+        _flagsFromValue
+        _suffix
+        _prefix
+        _splitBy
+        _countSub
+        _nth1
+        _digitAt
+        _foldCat
+        _wholeTemplate
+        _splitTemplate
+        _extractParts
+        _nextMatch
+        _anchorAt
+        _findAllItem
+        _mkMatch
+        _groupWhole
+        _groupAt
+        _installPattern
+        _installMatch
+    ))
+)
+unuseNamespace("ycRegEx")
+
+; END
