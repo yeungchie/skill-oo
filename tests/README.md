@@ -22,4 +22,4 @@ pathlib 与 regex 套件会在 cwd 下创建并清理各自的临时夹具；sub
 PASS: <n> / FAIL: 0
 ```
 
-有失败时以 `*Error* <模块名>: <m> test(s) failed` 终止（`ycPathLib` / `ycRegEx` / `ycSubProcess`）。"预期报错"的用例经 `errset(expr nil)` 静默捕获，不打印红色 `*Error*`；`errset(expr t)` 仅用于加载与守卫包装，只在意料之外出错时打印诊断信息。
+有失败时以 `*Error* <模块名>: <m> test(s) failed` 终止（`ycPathLib` / `ycRegEx` / `ycSubProcess`）。"预期报错"的用例经 `errset(expr nil)` 静默捕获，不打印红色 `*Error*`；`errset(expr t)` 仅用于加载与守卫包装，只在意料之外出错时打印诊断信息。subprocess 的回调错误收敛用例有意触发库内守卫，输出中一行红色 `*Error*` 属预期。

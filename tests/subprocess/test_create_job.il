@@ -68,6 +68,27 @@ let((aj)
     _assert(printself(aj->stdout) == "<ycSubProcess::Stream size=0>" "Stream printself format")
 )
 
+let((aj)
+    aj = ycSubProcess::AsyncJob("echo direct")
+    _assert(aj->state() == 'None "a directly constructed AsyncJob starts in 'None")
+    _assert(aj->await() == "direct\n" "a directly constructed AsyncJob runs its whole command string")
+    _assert(aj->returncode == 0 "a directly constructed AsyncJob finishes with returncode 0")
+    _assert(printself(aj) == "<ycSubProcess::AsyncJob status=Dead, returncode=0>" "direct AsyncJob printself after finish")
+)
+
+_assert(errset(ycSubProcess::AsyncJob("echo" "direct") nil) == nil "a directly constructed AsyncJob accepts one command string only")
+
+let((st)
+    st = makeInstance('ycSubProcess::Stream)
+    _assert(st->isEmpty() == t "a directly built Stream starts empty")
+    st->push("a")
+    _assert(st->isEmpty() == nil "push fills a directly built Stream")
+    _assert(st->last() == "a" "last sees the entry on a directly built Stream")
+    _assert(st->text() == "a" "text joins entries on a directly built Stream")
+    _assert(st->shift() == "a" "shift drains a directly built Stream")
+    _assert(st->isEmpty() == t "a drained directly built Stream is empty")
+)
+
 _TestCreateJobDone = t
 
 ; END

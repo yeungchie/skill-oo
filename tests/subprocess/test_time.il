@@ -44,6 +44,29 @@ let((aj)
     _assert(aj->state() == 'Dead "the awaited job is dead")
 )
 
+let((el)
+    el = makeInstance('ycSubProcess::Elapsed)
+    _assert(el->getStart() == nil "a directly built Elapsed has no start")
+    _assert(el->getEnd() == nil "a directly built Elapsed has no end")
+    _assert(errset(el->getSeconds() nil) == nil "getSeconds raises on a directly built Elapsed")
+    _assert(stringp(el->mark()) "the first mark on a directly built Elapsed records the start")
+    _assert(stringp(el->mark()) "the second mark on a directly built Elapsed records the end")
+    _assert(el->mark() == nil "a third mark on a directly built Elapsed is a no-op")
+    _assert(el->getSeconds() >= 0 "getSeconds yields a number after both marks")
+)
+
+_assert(ycSubProcess::_formatSeconds(0) == "~0s" "formatSeconds: zero seconds")
+_assert(ycSubProcess::_formatSeconds(1) == "1s" "formatSeconds: one second")
+_assert(ycSubProcess::_formatSeconds(59) == "59s" "formatSeconds: under a minute")
+_assert(ycSubProcess::_formatSeconds(60) == "1m" "formatSeconds: exactly one minute")
+_assert(ycSubProcess::_formatSeconds(61) == "1m1s" "formatSeconds: one minute and one second")
+_assert(ycSubProcess::_formatSeconds(3599) == "59m59s" "formatSeconds: under an hour")
+_assert(ycSubProcess::_formatSeconds(3600) == "1h" "formatSeconds: exactly one hour")
+_assert(ycSubProcess::_formatSeconds(3601) == "1h1s" "formatSeconds: one hour and one second")
+_assert(ycSubProcess::_formatSeconds(3660) == "1h1m" "formatSeconds: one hour and one minute")
+_assert(ycSubProcess::_formatSeconds(3661) == "1h1m1s" "formatSeconds: one hour, one minute, one second")
+_assert(ycSubProcess::_formatSeconds(7325) == "2h2m5s" "formatSeconds: mixed multi-hour duration")
+
 _TestTimeDone = t
 
 ; END

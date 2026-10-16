@@ -37,6 +37,19 @@ let((aj l_events)
     _assert(member('post l_events) "post is fired for a failing command")
 )
 
+_TestCallbackThrow = lambda((s_event g_job "sg")
+    when(s_event == 'stdout
+        error("intentional callback failure")
+    )
+    nil
+)
+
+let((aj)
+    aj = ycSubProcess::createJob("echo hi" ?callback _TestCallbackThrow)
+    _assert(aj->await() == "hi\n" "a failing stdout callback does not interrupt the job")
+    _assert(aj->returncode == 0 "the job finishes with returncode 0 despite the callback error")
+)
+
 _TestCallbackDone = t
 
 ; END
