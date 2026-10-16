@@ -89,8 +89,8 @@ defmethod(printself (self(Match))  ; -> str
     ; 返回 Match 的打印描述串，形如 <ycRegEx::Match "10-20">。
     ;
     ; **返回**
-    ;   (str) - lsprintf 按 <类名 "subject"> 模板生成（类名为限定名）
-    lsprintf("<%A \"%s\">" className(self) self->_data->subject)
+    ;   (str) - lsprintf 按 <类名 字面量> 模板生成（类名为限定名）
+    lsprintf("<%A %A>" className(self) self->_data->subject)
 )
 
 

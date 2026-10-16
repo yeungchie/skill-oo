@@ -495,11 +495,11 @@ defclass(Pattern () (
 
 
 defmethod(printself (self(Pattern))  ; -> str
-    ; 返回 Pattern 的打印描述串，形如 <ycRegEx::Pattern "\d+">。
+    ; 返回 Pattern 的打印描述串，形如 <ycRegEx::Pattern "\\d+">。
     ;
     ; **返回**
-    ;   (str) - lsprintf 按 <类名 "pattern"> 模板生成
-    lsprintf("<%A \"%s\">" className(self) self->_data->pattern)
+    ;   (str) - lsprintf 按 <类名 字面量> 模板生成
+    lsprintf("<%A %A>" className(self) self->_data->pattern)
 )
 
 
