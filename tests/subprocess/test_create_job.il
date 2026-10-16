@@ -62,6 +62,12 @@ let((aj)
     _assert(aj->state() == 'Dead "state is 'Dead after kill in the drain block")
 )
 
+let((aj)
+    aj = ycSubProcess::createJob("echo 123")
+    _assert(printself(aj) == "<ycSubProcess::AsyncJob status=None, returncode=nil>" "AsyncJob printself format")
+    _assert(printself(aj->stdout) == "<ycSubProcess::Stream size=0>" "Stream printself format")
+)
+
 _TestCreateJobDone = t
 
 ; END

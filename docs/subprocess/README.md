@@ -123,7 +123,7 @@ ycSubProcess::createJob(
 
 ```lisp
 aj = ycSubProcess::createJob("free -h")
-; => <ycSubProcess::AsyncJob object; status=None, returncode=nil>
+; => <ycSubProcess::AsyncJob status=None, returncode=nil>
 
 printf("%s" aj->await())
 ;               total        used        free      shared  buff/cache   available
@@ -190,7 +190,7 @@ aj->start()
 ```lisp
 aj = ycSubProcess::createJob("whoami")
 aj->start()
-; => <ycSubProcess::AsyncJob object; status=Active, returncode=nil>
+; => <ycSubProcess::AsyncJob status=Active, returncode=nil>
 ```
 
 #### wait <sub>`method`</sub>

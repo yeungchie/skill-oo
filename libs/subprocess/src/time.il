@@ -13,11 +13,11 @@ defclass(Elapsed () (
 ))
 
 defmethod(printself (self(Elapsed))  ; -> str
-    ; 返回耗时对象的打印描述串：已结束显示耗时，已开始显示 active，未开始显示 none。
+    ; 返回耗时对象的打印描述串，形如 <ycSubProcess::Elapsed "1.5s">；未开始/进行中显示 "none"/"active"。
     ;
     ; **返回**
     ;   (str) - lsprintf 生成；按 getEnd()/getStart() 分支取显示值
-    lsprintf("<%A object; %A>"
+    lsprintf("<%A %A>"
         className(self)
         cond(
             (self->getEnd()     self->humanReadable())

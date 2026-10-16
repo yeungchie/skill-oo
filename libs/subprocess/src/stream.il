@@ -14,11 +14,11 @@ defclass(Stream () (
 ))
 
 defmethod(printself (self(Stream))  ; -> str
-    ; 返回流对象的打印描述串，形如 <ycSubProcess::Stream object; size=3>。
+    ; 返回流对象的打印描述串，形如 <ycSubProcess::Stream size=3>。
     ;
     ; **返回**
     ;   (str) - lsprintf 生成；size 取当前条目数
-    lsprintf("<%A object; size=%d>" className(self) self->size())
+    lsprintf("<%A size=%d>" className(self) self->size())
 )
 
 

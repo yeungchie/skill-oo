@@ -120,11 +120,11 @@ defclass(AsyncJob () (
 ))
 
 defmethod(printself (self(AsyncJob))  ; -> str
-    ; 返回任务对象的打印描述串，形如 <ycSubProcess::AsyncJob object; status=None, returncode=nil>。
+    ; 返回任务对象的打印描述串，形如 <ycSubProcess::AsyncJob status=None, returncode=nil>。
     ;
     ; **返回**
     ;   (str) - lsprintf 生成；status 取 state()，returncode 取当前值
-    lsprintf("<%A object; status=%A, returncode=%A>"
+    lsprintf("<%A status=%A, returncode=%A>"
         className(self)
         self->state()
         self->returncode
