@@ -69,6 +69,36 @@ let((l_res t_self t_dir)
         )
     )
 
+    _TestCallbackDone = nil
+    l_res = errset(load(strcat(t_dir "test_callback.il")) t)
+    unless(_TestCallbackDone
+        _TestCount = _TestCount + 1
+        _TestFail = _TestFail + 1
+        printf("TEST FAILED - test_callback.il did not run to completion%s\n"
+            if(l_res "" " (load raised an error)")
+        )
+    )
+
+    _TestControlDone = nil
+    l_res = errset(load(strcat(t_dir "test_control.il")) t)
+    unless(_TestControlDone
+        _TestCount = _TestCount + 1
+        _TestFail = _TestFail + 1
+        printf("TEST FAILED - test_control.il did not run to completion%s\n"
+            if(l_res "" " (load raised an error)")
+        )
+    )
+
+    _TestErrorsDone = nil
+    l_res = errset(load(strcat(t_dir "test_errors.il")) t)
+    unless(_TestErrorsDone
+        _TestCount = _TestCount + 1
+        _TestFail = _TestFail + 1
+        printf("TEST FAILED - test_errors.il did not run to completion%s\n"
+            if(l_res "" " (load raised an error)")
+        )
+    )
+
     printf("\nPASS: %d / FAIL: %d\n"
         _TestCount - _TestFail
         _TestFail
