@@ -16,7 +16,7 @@ procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
 procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
     let((g_ok)
         _TestCount = _TestCount + 1
-        g_ok = errset(funcall(g_funobj) t)
+        g_ok = errset(funcall(g_funobj) nil)
         when(g_ok
             _TestFail = _TestFail + 1
         )
