@@ -20,6 +20,7 @@ let((t_dir t_pkgs)
     t_pkgs = list(
         "regex"
         "subprocess"
+        "codec"
     )
     foreach(t_pkg t_pkgs
         t_dir->join(t_pkg "load.il")->load()

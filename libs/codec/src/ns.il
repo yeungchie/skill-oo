@@ -1,0 +1,42 @@
+makeNamespace("ycCodec")
+addToNamespace("ycCodec"
+    mapcar('symbolToString '(
+        jsonParse
+        jsoncParse
+        jsonlParse
+        jsonDump
+        jsonlDump
+        jsonFalse
+        jsonNull
+        jsonMissing
+        _jsonMaxDepth
+        _jsonCode
+        _jsonDigitp
+        _jsonLineCol
+        _jsonError
+        _jsonBuild
+        _jsonSkipWs
+        _jsonHex4
+        _jsonUtf8Str
+        _jsonLiteral
+        _jsonNumber
+        _jsonString
+        _jsonValue
+        _jsonObject
+        _jsonArray
+        _jsonParseText
+        _jsonLineSplit
+        _jsonLineBlankp
+        _jsonNewlines
+        _jsonKeyStr
+        _jsonIndentStr
+        _jsonDumpString
+        _jsonDumpNumber
+        _jsonDumpValue
+        _jsonDumpList
+        _jsonDumpTable
+    ))
+)
+unuseNamespace("ycCodec")
+
+; END
