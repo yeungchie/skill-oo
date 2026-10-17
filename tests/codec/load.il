@@ -1,5 +1,5 @@
 ;--------------------------
-; Program  : ycCodec(load.il)
+; Program  : ycJson tests(load.il)
 ; Language : Cadence Skill
 ;--------------------------
 
@@ -9,7 +9,7 @@ let((t_res t_self t_dir)
         car(t_res)
     )
     unless(t_self
-        error("ycCodec: can't determine the current file - load this file with an explicit path")
+        error("ycJson: can't determine the current file - load this file with an explicit path")
     )
     unless(pcreMatchp("^[~/]|^\\.{1,2}/" t_self)
         t_self = strcat("./" t_self)
@@ -18,16 +18,7 @@ let((t_res t_self t_dir)
     unless(pcreMatchp("/$" t_dir)
         t_dir = strcat(t_dir "/")
     )
-    if(findNamespace("ycCodec") == nil
-        ; libs/codec/load.il relies on ycPathLib; when ycPathLib is absent,
-        ; enter through libs/load.il so the bootstrap order is respected.
-        if(findNamespace("ycPathLib")
-            loadi(simplifyFilename(strcat(t_dir "../../libs/codec/load.il") t))
-            loadi(simplifyFilename(strcat(t_dir "../../libs/load.il") t))
-        )
-        printf("ycCodec: re-running tests with previously loaded code; restart CIW if you edited libs/codec/src/\n")
-    )
-    loadi(strcat(t_dir "test_init.il"))
+    loadi(strcat(t_dir "json/load.il"))
 )
 
 ; END
