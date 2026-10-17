@@ -3,12 +3,13 @@ addToNamespace("ycJson"
     mapcar('symbolToString '(
         decode
         encode
+        JsonType
+        JsonTypeData
         True
-        TRUE
         False
-        FALSE
         Null
         Missing
+        _JsonTypeCache
         _maxDepth
         _code
         _digitp
