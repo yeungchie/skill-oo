@@ -7,6 +7,7 @@
 + [ycPathLib](docs/pathlib/README.md) —— POSIX 路径与文件系统操作。
 + [ycRegEx](docs/regex/README.md) —— 正则表达式搜索、匹配与替换。
 + [ycSubProcess](docs/subprocess/README.md) —— 子进程启动、交互与输出管理。
++ [ycCodec](docs/codec/README.md) —— JSON、jsonc、jsonl 的解析与输出。
 
 ## 安装
 
