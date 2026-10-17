@@ -55,10 +55,10 @@ procedure(_assertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil（错误消�
     )
 )
 
-procedure(_assertDumpEq(g_actual g_expected t_msg "ggt")  ; -> t | nil（经 jsonDump 规范化串比较结构）
+procedure(_assertDumpEq(g_actual g_expected t_msg "ggt")  ; -> t | nil（经 encode 规范化串比较结构）
     let((t_a t_b g_ok)
-        t_a = ycCodec::jsonDump(g_actual)
-        t_b = ycCodec::jsonDump(g_expected)
+        t_a = ycJson::encode(g_actual)
+        t_b = ycJson::encode(g_expected)
         g_ok = t_a == t_b
         unless(g_ok
             printf("  expected: %s\n" t_b)
@@ -98,7 +98,7 @@ let((l_res t_self t_dir)
         car(l_res)
     )
     unless(t_self
-        error("ycCodec: can't determine the current file - load this file with an explicit path")
+        error("ycJson: can't determine the current file - load this file with an explicit path")
     )
     unless(pcreMatchp("^[~/]|^\\.{1,2}/" t_self)
         t_self = strcat("./" t_self)
@@ -108,22 +108,22 @@ let((l_res t_self t_dir)
         t_dir = strcat(t_dir "/")
     )
 
-    _TestParseDone = nil
-    l_res = errset(load(strcat(t_dir "test_parse.il")) t)
-    unless(_TestParseDone
+    _TestDecodeDone = nil
+    l_res = errset(load(strcat(t_dir "test_decode.il")) t)
+    unless(_TestDecodeDone
         _TestCount = _TestCount + 1
         _TestFail = _TestFail + 1
-        printf("TEST FAILED - test_parse.il did not run to completion%s\n"
+        printf("TEST FAILED - test_decode.il did not run to completion%s\n"
             if(l_res "" " (load raised an error)")
         )
     )
 
-    _TestDumpDone = nil
-    l_res = errset(load(strcat(t_dir "test_dump.il")) t)
-    unless(_TestDumpDone
+    _TestEncodeDone = nil
+    l_res = errset(load(strcat(t_dir "test_encode.il")) t)
+    unless(_TestEncodeDone
         _TestCount = _TestCount + 1
         _TestFail = _TestFail + 1
-        printf("TEST FAILED - test_dump.il did not run to completion%s\n"
+        printf("TEST FAILED - test_encode.il did not run to completion%s\n"
             if(l_res "" " (load raised an error)")
         )
     )
@@ -144,7 +144,7 @@ let((l_res t_self t_dir)
     )
 
     when(_TestFail > 0
-        error("ycCodec: %d test(s) failed" _TestFail)
+        error("ycJson: %d test(s) failed" _TestFail)
     )
 )
 
