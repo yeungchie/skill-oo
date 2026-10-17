@@ -409,11 +409,11 @@ defclass(Path () (
 ))
 
 defmethod(printself (self(Path))  ; -> str
-    ; 返回 Path 的打印描述串，形如 <ycPathLib::Path "/a/b">。
+    ; 返回 Path 的打印描述串，形如 Path("/a/b")（圆括号构造器形式，eval 可复得同一驻留实例）。
     ;
     ; **返回**
-    ;   (str) - lsprintf 按 <类名 字面量> 模板生成
-    lsprintf("<%A %A>" className(self) self->str())
+    ;   (str) - lsprintf 按 Path(%A) 模板生成
+    lsprintf("Path(%A)" self->str())
 )
 
 

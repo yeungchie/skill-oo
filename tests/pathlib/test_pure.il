@@ -29,7 +29,7 @@ _assert(_p("//a")->isAbsolute()  "isAbsolute: double slash")
 
 _assert(_p(_p("/a/b"))->str() == "/a/b"  "Path: accepts Path instance")
 _assertError(lambda(() ycPathLib::Path(42) t)  "Path: non string/Path errors")
-_assert(printself(_p("/a/b")) == "<ycPathLib::Path \"/a/b\">"  "printself format")
+_assert(printself(_p("/a/b")) == "Path(\"/a/b\")"  "printself format")
 
 ; --- name / stem / suffix / suffixes ---
 _assert(_p("/a/b/c.txt")->name() == "c.txt"  "name: file")
