@@ -69,6 +69,8 @@ ycPathLib::Path("a" 5)
 ; *Error* ycPathLib::Path: expected string or Path, got 5
 ```
 
+实例显示为构造调用形式（如 `Path("a/b")`）；在 `useNamespace("ycPathLib")` 上下文中执行该串可得同一驻留实例。
+
 **方法**
 
 > 必须使用 `->` 符号调用方法。

@@ -409,7 +409,7 @@ defclass(Path () (
 ))
 
 defmethod(printself (self(Path))  ; -> str
-    ; 返回 Path 的打印描述串，形如 Path("/a/b")（圆括号构造器形式，eval 可复得同一驻留实例）。
+    ; 返回 Path 的打印描述串，形如 Path("/a/b")（圆括号构造器形式，命名空间上下文中 eval 可复得同一驻留实例）。
     ;
     ; **返回**
     ;   (str) - lsprintf 按 Path(%A) 模板生成
