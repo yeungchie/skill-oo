@@ -1,9 +1,9 @@
-useNamespace("ycCodec")
+useNamespace("ycJson")
 
 
 ; ---------- jsonl 切分与辅助 ----------
 
-procedure(_jsonLineSplit(t_s "t")  ; -> list
+procedure(_lineSplit(t_s "t")  ; -> list
     ; 按 \n 切分文本为行列表（保留空行，供行号对应）。
     ;
     ; **参数**
@@ -17,7 +17,7 @@ procedure(_jsonLineSplit(t_s "t")  ; -> list
         when(0 < n_len
             n_start = 1
             for(n_k 1 n_len
-                when(_jsonCode(t_s n_k) == 10
+                when(_code(t_s n_k) == 10
                     l_res = tconc(l_res substring(t_s n_start n_k - n_start))
                     n_start = n_k + 1
                 )
@@ -30,7 +30,7 @@ procedure(_jsonLineSplit(t_s "t")  ; -> list
     )
 )
 
-procedure(_jsonLineBlankp(t_line "t")  ; -> t | nil
+procedure(_lineBlankp(t_line "t")  ; -> t | nil
     ; 判断一行是否全为空（空格/制表/回车）。
     ;
     ; **参数**
@@ -43,7 +43,7 @@ procedure(_jsonLineBlankp(t_line "t")  ; -> t | nil
         n_len = length(t_line)
         when(0 < n_len
             for(n_k 1 n_len
-                unless(_jsonCode(t_line n_k) == 32 || _jsonCode(t_line n_k) == 9 || _jsonCode(t_line n_k) == 13
+                unless(_code(t_line n_k) == 32 || _code(t_line n_k) == 9 || _code(t_line n_k) == 13
                     g_blank = nil
                 )
             )
@@ -52,7 +52,7 @@ procedure(_jsonLineBlankp(t_line "t")  ; -> t | nil
     )
 )
 
-procedure(_jsonNewlines(n_n "n")  ; -> str
+procedure(_newlines(n_n "n")  ; -> str
     ; 生成 n_n 个换行符组成的串（jsonl 错误路径的行号前缀）。
     ;
     ; **参数**
@@ -80,21 +80,21 @@ procedure(jsonlParse(t_str "t")  ; -> list
     ; **返回**
     ;   (list) - 按行序的解析产物列表；无有效行时为 nil
     unless(stringp(t_str)
-        error("ycCodec: jsonlParse expects a string")
+        error("ycJson: jsonlParse expects a string")
     )
     let((l_lines l_res l_r t_line n_idx)
-        l_lines = _jsonLineSplit(t_str)
+        l_lines = _lineSplit(t_str)
         l_res = nil
         n_idx = 0
         while(l_lines
             t_line = car(l_lines)
             n_idx = n_idx + 1
-            unless(_jsonLineBlankp(t_line)
-                l_r = errset(_jsonParseText(t_line nil) nil)
+            unless(_lineBlankp(t_line)
+                l_r = errset(_decodeText(t_line nil) nil)
                 if(l_r
                     l_res = tconc(l_res car(l_r))
                     ; 行内报错：以等长换行前缀重跑，令错误行列指向原始行号
-                    _jsonParseText(strcat(_jsonNewlines(n_idx - 1) t_line) nil)
+                    _decodeText(strcat(_newlines(n_idx - 1) t_line) nil)
                 )
             )
             l_lines = cdr(l_lines)
@@ -113,12 +113,12 @@ procedure(jsonlDump(l_vals \@key (sortKeys t) "lg")  ; -> str
     ; **返回**
     ;   (str) - 每值一行、行间换行的文本
     unless(listp(l_vals)
-        error("ycCodec: jsonlDump expects a list")
+        error("ycJson: jsonlDump expects a list")
     )
     let((l_p t_s)
         l_p = nil
         foreach(g_val l_vals
-            l_p = tconc(l_p _jsonDumpValue(g_val 0 0 sortKeys))
+            l_p = tconc(l_p _encodeValue(g_val 0 0 sortKeys))
         )
         t_s = buildString(car(l_p) "\n")
         if(t_s == ""
@@ -128,6 +128,6 @@ procedure(jsonlDump(l_vals \@key (sortKeys t) "lg")  ; -> str
     )
 )
 
-unuseNamespace("ycCodec")
+unuseNamespace("ycJson")
 
 ; END

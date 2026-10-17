@@ -1,9 +1,9 @@
-useNamespace("ycCodec")
+useNamespace("ycJson")
 
 
 ; ---------- 扫描器 ----------
 
-procedure(_jsonSkipWs(t_s n_i g_relaxed "tng")  ; -> int
+procedure(_skipWs(t_s n_i g_relaxed "tng")  ; -> int
     ; 跳过空白（空格/制表/换行/回车）；jsonc 模式另跳 // 与 /* */ 注释。
     ;
     ; **参数**
@@ -17,25 +17,25 @@ procedure(_jsonSkipWs(t_s n_i g_relaxed "tng")  ; -> int
         n_len = length(t_s)
         g_stop = nil
         while(!g_stop && n_i <= n_len
-            n_c = _jsonCode(t_s n_i)
+            n_c = _code(t_s n_i)
             cond(
                 (n_c == 32 || n_c == 9 || n_c == 10 || n_c == 13
                     n_i = n_i + 1
                 )
-                (g_relaxed && n_c == 47 && _jsonCode(t_s n_i + 1) == 47
+                (g_relaxed && n_c == 47 && _code(t_s n_i + 1) == 47
                     n_i = n_i + 2
-                    while(n_i <= n_len && _jsonCode(t_s n_i) != 10
+                    while(n_i <= n_len && _code(t_s n_i) != 10
                         n_i = n_i + 1
                     )
                 )
-                (g_relaxed && n_c == 47 && _jsonCode(t_s n_i + 1) == 42
+                (g_relaxed && n_c == 47 && _code(t_s n_i + 1) == 42
                     n_close = n_i + 2
-                    while(n_close <= n_len - 1 && !(_jsonCode(t_s n_close) == 42 && _jsonCode(t_s n_close + 1) == 47)
+                    while(n_close <= n_len - 1 && !(_code(t_s n_close) == 42 && _code(t_s n_close + 1) == 47)
                         n_close = n_close + 1
                     )
                     if(n_close <= n_len - 1
                         n_i = n_close + 2
-                        _jsonError(t_s n_i "unterminated block comment")
+                        _error(t_s n_i "unterminated block comment")
                     )
                 )
                 (t
@@ -47,7 +47,7 @@ procedure(_jsonSkipWs(t_s n_i g_relaxed "tng")  ; -> int
     )
 )
 
-procedure(_jsonHex4(t_s n_i "tn")  ; -> int
+procedure(_hex4(t_s n_i "tn")  ; -> int
     ; 解析 \uXXXX 的 4 位十六进制（大小写均可）。
     ;
     ; **参数**
@@ -59,16 +59,16 @@ procedure(_jsonHex4(t_s n_i "tn")  ; -> int
     let((n_len n_v n_c n_d)
         n_len = length(t_s)
         when(n_i + 3 > n_len
-            _jsonError(t_s n_len + 1 "invalid \\u escape")
+            _error(t_s n_len + 1 "invalid \\u escape")
         )
         n_v = 0
         for(n_k n_i n_i + 3
-            n_c = _jsonCode(t_s n_k)
+            n_c = _code(t_s n_k)
             cond(
                 (n_c >= 48 && n_c <= 57 n_d = n_c - 48)
                 (n_c >= 97 && n_c <= 102 n_d = n_c - 87)
                 (n_c >= 65 && n_c <= 70 n_d = n_c - 55)
-                (t _jsonError(t_s n_k "invalid \\u escape"))
+                (t _error(t_s n_k "invalid \\u escape"))
             )
             n_v = n_v * 16 + n_d
         )
@@ -76,7 +76,7 @@ procedure(_jsonHex4(t_s n_i "tn")  ; -> int
     )
 )
 
-procedure(_jsonUtf8Str(n_cp "n")  ; -> str
+procedure(_utf8Str(n_cp "n")  ; -> str
     ; 将 Unicode 码点编码为 UTF-8 字节串（1..4 字节，逐字节拼接）。
     ;
     ; **参数**
@@ -109,7 +109,7 @@ procedure(_jsonUtf8Str(n_cp "n")  ; -> str
     )
 )
 
-procedure(_jsonLiteral(t_s n_i "tn")  ; -> list
+procedure(_literal(t_s n_i "tn")  ; -> list
     ; 在位置处匹配 true/false/null 字面量（大小写敏感）。
     ;
     ; **参数**
@@ -117,24 +117,24 @@ procedure(_jsonLiteral(t_s n_i "tn")  ; -> list
     ;   n_i  (int) - 字面量首字符位置
     ;
     ; **返回**
-    ;   (list) - (值 下一位置)；值分别为 t、jsonFalse、jsonNull
+    ;   (list) - (值 下一位置)；值分别为 t、False、Null
     cond(
         (substring(t_s n_i 4) == "true"
             list(t n_i + 4)
         )
         (substring(t_s n_i 5) == "false"
-            list(jsonFalse n_i + 5)
+            list(False n_i + 5)
         )
         (substring(t_s n_i 4) == "null"
-            list(jsonNull n_i + 4)
+            list(Null n_i + 4)
         )
         (t
-            _jsonError(t_s n_i "invalid literal")
+            _error(t_s n_i "invalid literal")
         )
     )
 )
 
-procedure(_jsonNumber(t_s n_i "tn")  ; -> list
+procedure(_number(t_s n_i "tn")  ; -> list
     ; 按 JSON 语法扫描数字：严格校验整数/小数/指数写法，超 fixnum 范围回 flonum。
     ;
     ; **参数**
@@ -146,10 +146,10 @@ procedure(_jsonNumber(t_s n_i "tn")  ; -> list
     let((n_len n_k n_c t_tok n_v g_num)
         n_len = length(t_s)
         n_k = n_i
-        n_c = _jsonCode(t_s n_k)
+        n_c = _code(t_s n_k)
         when(n_c == 45
             n_k = n_k + 1
-            n_c = _jsonCode(t_s n_k)
+            n_c = _code(t_s n_k)
         )
         cond(
             (n_c == 48
@@ -157,37 +157,37 @@ procedure(_jsonNumber(t_s n_i "tn")  ; -> list
             )
             (n_c >= 49 && n_c <= 57
                 n_k = n_k + 1
-                while(n_k <= n_len && _jsonDigitp(_jsonCode(t_s n_k))
+                while(n_k <= n_len && _digitp(_code(t_s n_k))
                     n_k = n_k + 1
                 )
             )
             (t
-                _jsonError(t_s n_i "invalid number")
+                _error(t_s n_i "invalid number")
             )
         )
-        when(n_c == 48 && _jsonDigitp(_jsonCode(t_s n_k))
-            _jsonError(t_s n_k "invalid number")
+        when(n_c == 48 && _digitp(_code(t_s n_k))
+            _error(t_s n_k "invalid number")
         )
-        when(_jsonCode(t_s n_k) == 46
+        when(_code(t_s n_k) == 46
             n_k = n_k + 1
-            unless(_jsonDigitp(_jsonCode(t_s n_k))
-                _jsonError(t_s n_i "invalid number")
+            unless(_digitp(_code(t_s n_k))
+                _error(t_s n_i "invalid number")
             )
-            while(n_k <= n_len && _jsonDigitp(_jsonCode(t_s n_k))
+            while(n_k <= n_len && _digitp(_code(t_s n_k))
                 n_k = n_k + 1
             )
         )
-        n_c = _jsonCode(t_s n_k)
+        n_c = _code(t_s n_k)
         when(n_c == 101 || n_c == 69
             n_k = n_k + 1
-            n_c = _jsonCode(t_s n_k)
+            n_c = _code(t_s n_k)
             when(n_c == 43 || n_c == 45
                 n_k = n_k + 1
             )
-            unless(_jsonDigitp(_jsonCode(t_s n_k))
-                _jsonError(t_s n_i "invalid number")
+            unless(_digitp(_code(t_s n_k))
+                _error(t_s n_i "invalid number")
             )
-            while(n_k <= n_len && _jsonDigitp(_jsonCode(t_s n_k))
+            while(n_k <= n_len && _digitp(_code(t_s n_k))
                 n_k = n_k + 1
             )
         )
@@ -206,7 +206,7 @@ procedure(_jsonNumber(t_s n_i "tn")  ; -> list
     )
 )
 
-procedure(_jsonString(t_s n_i "tn")  ; -> list
+procedure(_string(t_s n_i "tn")  ; -> list
     ; 扫描字符串：转义解出实际字符，\uXXXX 合成 UTF-8，代理对合并，孤立代理项报错。
     ;
     ; **参数**
@@ -222,9 +222,9 @@ procedure(_jsonString(t_s n_i "tn")  ; -> list
         g_done = nil
         while(!g_done
             when(n_k > n_len
-                _jsonError(t_s n_k "unterminated string")
+                _error(t_s n_k "unterminated string")
             )
-            n_c = _jsonCode(t_s n_k)
+            n_c = _code(t_s n_k)
             cond(
                 (n_c == 34
                     when(n_run < n_k
@@ -239,9 +239,9 @@ procedure(_jsonString(t_s n_i "tn")  ; -> list
                     )
                     n_esc = n_k
                     n_k = n_k + 1
-                    n_c = _jsonCode(t_s n_k)
+                    n_c = _code(t_s n_k)
                     when(!n_c
-                        _jsonError(t_s n_esc "unterminated string")
+                        _error(t_s n_esc "unterminated string")
                     )
                     cond(
                         (n_c == 34
@@ -294,45 +294,45 @@ procedure(_jsonString(t_s n_i "tn")  ; -> list
                         )
                         (n_c == 117
                             {
-                            n_cp = _jsonHex4(t_s n_k + 1)
+                            n_cp = _hex4(t_s n_k + 1)
                             n_k = n_k + 5
                             when(n_cp >= 55296 && n_cp <= 56319
-                                unless(_jsonCode(t_s n_k) == 92 && _jsonCode(t_s n_k + 1) == 117
-                                    _jsonError(t_s n_esc "invalid surrogate pair")
+                                unless(_code(t_s n_k) == 92 && _code(t_s n_k + 1) == 117
+                                    _error(t_s n_esc "invalid surrogate pair")
                                 )
-                                n_lo = _jsonHex4(t_s n_k + 2)
+                                n_lo = _hex4(t_s n_k + 2)
                                 unless(n_lo >= 56320 && n_lo <= 57343
-                                    _jsonError(t_s n_esc "invalid surrogate pair")
+                                    _error(t_s n_esc "invalid surrogate pair")
                                 )
                                 n_cp = 65536 + (n_cp - 55296) * 1024 + n_lo - 56320
                                 n_k = n_k + 6
                             )
                             when(n_cp >= 56320 && n_cp <= 57343
-                                _jsonError(t_s n_esc "invalid surrogate pair")
+                                _error(t_s n_esc "invalid surrogate pair")
                             )
-                            l_p = tconc(l_p _jsonUtf8Str(n_cp))
+                            l_p = tconc(l_p _utf8Str(n_cp))
                             }
                         )
                         (t
-                            _jsonError(t_s n_esc "invalid escape")
+                            _error(t_s n_esc "invalid escape")
                         )
                     )
                     n_run = n_k
                     }
                 )
                 (n_c < 32
-                    _jsonError(t_s n_k "control character in string")
+                    _error(t_s n_k "control character in string")
                 )
                 (t
                     n_k = n_k + 1
                 )
             )
         )
-        list(_jsonBuild(l_p) n_k + 1)
+        list(_build(l_p) n_k + 1)
     )
 )
 
-procedure(_jsonValue(t_s n_i g_relaxed n_depth "tngn")  ; -> list
+procedure(_value(t_s n_i g_relaxed n_depth "tngn")  ; -> list
     ; 解析任意值：按首字符派发到字符串/对象/数组/字面量/数字。
     ;
     ; **参数**
@@ -344,28 +344,28 @@ procedure(_jsonValue(t_s n_i g_relaxed n_depth "tngn")  ; -> list
     ; **返回**
     ;   (list) - (值 下一位置)；深度超限或字符非法报错
     let((n_c)
-        when(n_depth > _jsonMaxDepth
-            _jsonError(t_s n_i lsprintf("nesting too deep (limit %d)" _jsonMaxDepth))
+        when(n_depth > _maxDepth
+            _error(t_s n_i lsprintf("nesting too deep (limit %d)" _maxDepth))
         )
-        n_c = _jsonCode(t_s n_i)
+        n_c = _code(t_s n_i)
         when(!n_c
-            _jsonError(t_s n_i "unexpected end of input")
+            _error(t_s n_i "unexpected end of input")
         )
         cond(
-            (n_c == 34 _jsonString(t_s n_i))
-            (n_c == 123 _jsonObject(t_s n_i g_relaxed n_depth))
-            (n_c == 91 _jsonArray(t_s n_i g_relaxed n_depth))
-            (n_c == 116 _jsonLiteral(t_s n_i))
-            (n_c == 102 _jsonLiteral(t_s n_i))
-            (n_c == 110 _jsonLiteral(t_s n_i))
-            ((n_c == 45 || _jsonDigitp(n_c)) _jsonNumber(t_s n_i))
-            (t _jsonError(t_s n_i "unexpected character"))
+            (n_c == 34 _string(t_s n_i))
+            (n_c == 123 _object(t_s n_i g_relaxed n_depth))
+            (n_c == 91 _array(t_s n_i g_relaxed n_depth))
+            (n_c == 116 _literal(t_s n_i))
+            (n_c == 102 _literal(t_s n_i))
+            (n_c == 110 _literal(t_s n_i))
+            ((n_c == 45 || _digitp(n_c)) _number(t_s n_i))
+            (t _error(t_s n_i "unexpected character"))
         )
     )
 )
 
-procedure(_jsonObject(t_s n_i g_relaxed n_depth "tngn")  ; -> list
-    ; 解析对象：键值对写入 table（缺省标记 jsonMissing）；jsonc 模式允许尾逗号。
+procedure(_object(t_s n_i g_relaxed n_depth "tngn")  ; -> list
+    ; 解析对象：键值对写入 table（缺省标记 Missing）；jsonc 模式允许尾逗号。
     ;
     ; **参数**
     ;   t_s        (str) - 输入串
@@ -376,29 +376,29 @@ procedure(_jsonObject(t_s n_i g_relaxed n_depth "tngn")  ; -> list
     ; **返回**
     ;   (list) - (table 闭括号后一位置)
     let((n_k n_c l_r t_key t_obj g_done)
-        n_k = _jsonSkipWs(t_s n_i + 1 g_relaxed)
-        t_obj = makeTable("ycCodec" jsonMissing)
+        n_k = _skipWs(t_s n_i + 1 g_relaxed)
+        t_obj = makeTable("ycJson" Missing)
         g_done = nil
-        when(_jsonCode(t_s n_k) == 125
+        when(_code(t_s n_k) == 125
             g_done = t
             n_k = n_k + 1
         )
         while(!g_done
-            n_k = _jsonSkipWs(t_s n_k g_relaxed)
-            unless(_jsonCode(t_s n_k) == 34
-                _jsonError(t_s n_k "expected string key")
+            n_k = _skipWs(t_s n_k g_relaxed)
+            unless(_code(t_s n_k) == 34
+                _error(t_s n_k "expected string key")
             )
-            l_r = _jsonString(t_s n_k)
+            l_r = _string(t_s n_k)
             t_key = car(l_r)
-            n_k = _jsonSkipWs(t_s cadr(l_r) g_relaxed)
-            unless(_jsonCode(t_s n_k) == 58
-                _jsonError(t_s n_k "expected ':'")
+            n_k = _skipWs(t_s cadr(l_r) g_relaxed)
+            unless(_code(t_s n_k) == 58
+                _error(t_s n_k "expected ':'")
             )
-            n_k = _jsonSkipWs(t_s n_k + 1 g_relaxed)
-            l_r = _jsonValue(t_s n_k g_relaxed n_depth + 1)
+            n_k = _skipWs(t_s n_k + 1 g_relaxed)
+            l_r = _value(t_s n_k g_relaxed n_depth + 1)
             t_obj[t_key] = car(l_r)
-            n_k = _jsonSkipWs(t_s cadr(l_r) g_relaxed)
-            n_c = _jsonCode(t_s n_k)
+            n_k = _skipWs(t_s cadr(l_r) g_relaxed)
+            n_c = _code(t_s n_k)
             cond(
                 (n_c == 125
                     {
@@ -408,15 +408,15 @@ procedure(_jsonObject(t_s n_i g_relaxed n_depth "tngn")  ; -> list
                 )
                 (n_c == 44
                     {
-                    n_k = _jsonSkipWs(t_s n_k + 1 g_relaxed)
-                    when(g_relaxed && _jsonCode(t_s n_k) == 125
+                    n_k = _skipWs(t_s n_k + 1 g_relaxed)
+                    when(g_relaxed && _code(t_s n_k) == 125
                         g_done = t
                         n_k = n_k + 1
                     )
                     }
                 )
                 (t
-                    _jsonError(t_s n_k "expected ',' or '}'")
+                    _error(t_s n_k "expected ',' or '}'")
                 )
             )
         )
@@ -424,7 +424,7 @@ procedure(_jsonObject(t_s n_i g_relaxed n_depth "tngn")  ; -> list
     )
 )
 
-procedure(_jsonArray(t_s n_i g_relaxed n_depth "tngn")  ; -> list
+procedure(_array(t_s n_i g_relaxed n_depth "tngn")  ; -> list
     ; 解析数组：元素累积为 list（空数组即 nil）；jsonc 模式允许尾逗号。
     ;
     ; **参数**
@@ -436,19 +436,19 @@ procedure(_jsonArray(t_s n_i g_relaxed n_depth "tngn")  ; -> list
     ; **返回**
     ;   (list) - (列表或 nil 闭括号后一位置)
     let((n_k n_c l_res l_r g_done)
-        n_k = _jsonSkipWs(t_s n_i + 1 g_relaxed)
+        n_k = _skipWs(t_s n_i + 1 g_relaxed)
         l_res = nil
         g_done = nil
-        when(_jsonCode(t_s n_k) == 93
+        when(_code(t_s n_k) == 93
             g_done = t
             n_k = n_k + 1
         )
         while(!g_done
-            n_k = _jsonSkipWs(t_s n_k g_relaxed)
-            l_r = _jsonValue(t_s n_k g_relaxed n_depth + 1)
+            n_k = _skipWs(t_s n_k g_relaxed)
+            l_r = _value(t_s n_k g_relaxed n_depth + 1)
             l_res = tconc(l_res car(l_r))
-            n_k = _jsonSkipWs(t_s cadr(l_r) g_relaxed)
-            n_c = _jsonCode(t_s n_k)
+            n_k = _skipWs(t_s cadr(l_r) g_relaxed)
+            n_c = _code(t_s n_k)
             cond(
                 (n_c == 93
                     {
@@ -458,15 +458,15 @@ procedure(_jsonArray(t_s n_i g_relaxed n_depth "tngn")  ; -> list
                 )
                 (n_c == 44
                     {
-                    n_k = _jsonSkipWs(t_s n_k + 1 g_relaxed)
-                    when(g_relaxed && _jsonCode(t_s n_k) == 93
+                    n_k = _skipWs(t_s n_k + 1 g_relaxed)
+                    when(g_relaxed && _code(t_s n_k) == 93
                         g_done = t
                         n_k = n_k + 1
                     )
                     }
                 )
                 (t
-                    _jsonError(t_s n_k "expected ',' or ']'")
+                    _error(t_s n_k "expected ',' or ']'")
                 )
             )
         )
@@ -474,6 +474,6 @@ procedure(_jsonArray(t_s n_i g_relaxed n_depth "tngn")  ; -> list
     )
 )
 
-unuseNamespace("ycCodec")
+unuseNamespace("ycJson")
 
 ; END

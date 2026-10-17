@@ -1,9 +1,9 @@
-useNamespace("ycCodec")
+useNamespace("ycJson")
 
 
 ; ---------- 输出 ----------
 
-procedure(_jsonKeyStr(g_key "g")  ; -> str
+procedure(_keyStr(g_key "g")  ; -> str
     ; 将 table 键转为输出用字符串：字符串原样、符号取名、fixnum 转十进制。
     ;
     ; **参数**
@@ -16,12 +16,12 @@ procedure(_jsonKeyStr(g_key "g")  ; -> str
         (symbolp(g_key) symbolToString(g_key))
         (fixp(g_key) sprintf(nil "%d" g_key))
         (t
-            error("ycCodec: unsupported table key of type %s" symbolToString(type(g_key)))
+            error("ycJson: unsupported table key of type %s" symbolToString(type(g_key)))
         )
     )
 )
 
-procedure(_jsonIndentStr(n_level n_indent "nn")  ; -> str
+procedure(_indentStr(n_level n_indent "nn")  ; -> str
     ; 生成 n_level 层、每层 n_indent 个空格的缩进串。
     ;
     ; **参数**
@@ -41,7 +41,7 @@ procedure(_jsonIndentStr(n_level n_indent "nn")  ; -> str
     )
 )
 
-procedure(_jsonDumpString(t_s "t")  ; -> str
+procedure(_encodeString(t_s "t")  ; -> str
     ; 输出字符串：引号/反斜杠/控制字节转义，其余字节（含 UTF-8）原样透传。
     ;
     ; **参数**
@@ -55,7 +55,7 @@ procedure(_jsonDumpString(t_s "t")  ; -> str
         l_p = nil
         when(0 < n_len
             for(n_k 1 n_len
-                n_c = _jsonCode(t_s n_k)
+                n_c = _code(t_s n_k)
                 cond(
                     (n_c == 34 || n_c == 92 || n_c < 32
                         {
@@ -83,11 +83,11 @@ procedure(_jsonDumpString(t_s "t")  ; -> str
                 l_p = tconc(l_p substring(t_s n_run n_len - n_run + 1))
             )
         )
-        lsprintf("\"%s\"" _jsonBuild(l_p))
+        lsprintf("\"%s\"" _build(l_p))
     )
 )
 
-procedure(_jsonDumpNumber(g_n "g")  ; -> str
+procedure(_encodeNumber(g_n "g")  ; -> str
     ; 数字输出：fixnum 直出；flonum 用 %.15g、不可回环时回退 %.17g，缺小数点/指数时补 .0。
     ;
     ; **参数**
@@ -99,7 +99,7 @@ procedure(_jsonDumpNumber(g_n "g")  ; -> str
         sprintf(nil "%d" g_n)
         let((t_s)
             when(isNaN(g_n) || isInfinity(g_n)
-                error("ycCodec: cannot dump non-finite float")
+                error("ycJson: cannot dump non-finite float")
             )
             t_s = sprintf(nil "%.15g" g_n)
             unless(atof(t_s) == g_n
@@ -113,7 +113,7 @@ procedure(_jsonDumpNumber(g_n "g")  ; -> str
     )
 )
 
-procedure(_jsonDumpValue(g_val n_depth n_indent g_sort "gnng")  ; -> str
+procedure(_encodeValue(g_val n_depth n_indent g_sort "gnng")  ; -> str
     ; 单值输出分发：nil 即空数组、t/哨兵出字面量，其余按类型派发；超深或不可表示类型报错。
     ;
     ; **参数**
@@ -124,29 +124,29 @@ procedure(_jsonDumpValue(g_val n_depth n_indent g_sort "gnng")  ; -> str
     ;
     ; **返回**
     ;   (str) - 该值的 JSON 文本
-    when(n_depth > _jsonMaxDepth
-        error("ycCodec: nesting too deep (limit %d)" _jsonMaxDepth)
+    when(n_depth > _maxDepth
+        error("ycJson: nesting too deep (limit %d)" _maxDepth)
     )
     cond(
         (g_val == nil "[]")
         (g_val == t "true")
-        (g_val == jsonFalse "false")
-        (g_val == jsonNull "null")
-        (g_val == jsonMissing
-            error("ycCodec: cannot dump the jsonMissing marker")
+        (g_val == False "false")
+        (g_val == Null "null")
+        (g_val == Missing
+            error("ycJson: cannot dump the Missing marker")
         )
-        (stringp(g_val) _jsonDumpString(g_val))
-        (fixp(g_val) _jsonDumpNumber(g_val))
-        (floatp(g_val) _jsonDumpNumber(g_val))
-        (tablep(g_val) _jsonDumpTable(g_val n_depth n_indent g_sort))
-        (listp(g_val) _jsonDumpList(g_val n_depth n_indent g_sort))
+        (stringp(g_val) _encodeString(g_val))
+        (fixp(g_val) _encodeNumber(g_val))
+        (floatp(g_val) _encodeNumber(g_val))
+        (tablep(g_val) _encodeTable(g_val n_depth n_indent g_sort))
+        (listp(g_val) _encodeList(g_val n_depth n_indent g_sort))
         (t
-            error("ycCodec: cannot dump value of type %s" symbolToString(type(g_val)))
+            error("ycJson: cannot dump value of type %s" symbolToString(type(g_val)))
         )
     )
 )
 
-procedure(_jsonDumpList(l_arr n_depth n_indent g_sort "lnng")  ; -> str
+procedure(_encodeList(l_arr n_depth n_indent g_sort "lnng")  ; -> str
     ; 输出列表为 JSON 数组；n_indent 为正时逐元素换行缩进。
     ;
     ; **参数**
@@ -159,12 +159,12 @@ procedure(_jsonDumpList(l_arr n_depth n_indent g_sort "lnng")  ; -> str
     ;   (str) - JSON 数组文本
     let((l_items l_q t_pad t_padIn)
         when(n_indent > 0
-            t_pad = _jsonIndentStr(n_depth n_indent)
-            t_padIn = _jsonIndentStr(n_depth + 1 n_indent)
+            t_pad = _indentStr(n_depth n_indent)
+            t_padIn = _indentStr(n_depth + 1 n_indent)
         )
         l_items = nil
         foreach(g_item l_arr
-            l_items = tconc(l_items _jsonDumpValue(g_item n_depth + 1 n_indent g_sort))
+            l_items = tconc(l_items _encodeValue(g_item n_depth + 1 n_indent g_sort))
         )
         l_items = car(l_items)
         if(n_indent > 0
@@ -187,7 +187,7 @@ procedure(_jsonDumpList(l_arr n_depth n_indent g_sort "lnng")  ; -> str
     )
 )
 
-procedure(_jsonDumpTable(t_obj n_depth n_indent g_sort "gnng")  ; -> str
+procedure(_encodeTable(t_obj n_depth n_indent g_sort "gnng")  ; -> str
     ; 输出 table 为 JSON 对象；键限字符串/符号/fixnum，g_sort 非 nil 时按 alphalessp 排序。
     ;
     ; **参数**
@@ -206,10 +206,10 @@ procedure(_jsonDumpTable(t_obj n_depth n_indent g_sort "gnng")  ; -> str
                 l_keys = tconc(l_keys g_k)
             )
             l_keys = car(l_keys)
-            t_orig = makeTable("ycCodecKeys")
+            t_orig = makeTable("ycJsonKeys")
             l_strs = nil
             foreach(g_k l_keys
-                t_ks = _jsonKeyStr(g_k)
+                t_ks = _keyStr(g_k)
                 l_strs = tconc(l_strs t_ks)
                 t_orig[t_ks] = g_k
             )
@@ -218,8 +218,8 @@ procedure(_jsonDumpTable(t_obj n_depth n_indent g_sort "gnng")  ; -> str
                 l_strs = sort(l_strs 'alphalessp)
             )
             when(n_indent > 0
-                t_pad = _jsonIndentStr(n_depth n_indent)
-                t_padIn = _jsonIndentStr(n_depth + 1 n_indent)
+                t_pad = _indentStr(n_depth n_indent)
+                t_padIn = _indentStr(n_depth + 1 n_indent)
             )
             l_p = nil
             foreach(t_ks l_strs
@@ -227,12 +227,12 @@ procedure(_jsonDumpTable(t_obj n_depth n_indent g_sort "gnng")  ; -> str
                     if(n_indent > 0
                         lsprintf("%s%s: %s"
                             t_padIn
-                            _jsonDumpString(t_ks)
-                            _jsonDumpValue(t_obj[t_orig[t_ks]] n_depth + 1 n_indent g_sort)
+                            _encodeString(t_ks)
+                            _encodeValue(t_obj[t_orig[t_ks]] n_depth + 1 n_indent g_sort)
                         )
                         lsprintf("%s:%s"
-                            _jsonDumpString(t_ks)
-                            _jsonDumpValue(t_obj[t_orig[t_ks]] n_depth + 1 n_indent g_sort)
+                            _encodeString(t_ks)
+                            _encodeValue(t_obj[t_orig[t_ks]] n_depth + 1 n_indent g_sort)
                         )
                     )
                 )
@@ -259,16 +259,16 @@ procedure(jsonDump(g_val \@key (indent nil) (sortKeys t) "ggg")  ; -> str
         n_indent = 0
         when(indent
             unless(fixp(indent)
-                error("ycCodec: ?indent must be a fixnum")
+                error("ycJson: ?indent must be a fixnum")
             )
             when(indent > 0
                 n_indent = indent
             )
         )
-        _jsonDumpValue(g_val 0 n_indent sortKeys)
+        _encodeValue(g_val 0 n_indent sortKeys)
     )
 )
 
-unuseNamespace("ycCodec")
+unuseNamespace("ycJson")
 
 ; END
