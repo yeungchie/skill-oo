@@ -35,6 +35,12 @@ let((aj)
     _assert(aj->state() == 'Dead "the stopped job is cleared by kill")
 )
 
+let((aj)
+    aj = ycSubProcess::createJob("echo hi")
+    aj->await()
+    _assert(errset(aj->print("x") nil) == nil "print raises when the job has exited")
+)
+
 _TestErrorsDone = t
 
 ; END
