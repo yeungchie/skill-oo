@@ -7,7 +7,7 @@ Cadence SKILL++ 的 JSON 家族编解码库：JSON、放宽 JSON（jsonc）与 J
 + 解码入口：`decode()`；`?format` 选 `"json"`（严格单文档）、`"jsonc"`（允许注释与尾逗号）或 `"jsonl"`（逐行文档）。
 + 编码入口：`encode()`；`?format` 选 `"json"`/`"jsonc"`（单值）或 `"jsonl"`（值列表逐行）。
 + 函数均在 `ycJson` 命名空间下，以 `ycJson::` 前缀调用。
-+ `true`、`false` 与 `null` 不坍缩为 `t`/`nil`，分别解码为哨兵符号 `ycJson::True`（`TRUE` 等效）、`ycJson::False`（`FALSE` 等效）与 `ycJson::Null`；`nil` 仅表示空数组。
++ `true`、`false` 与 `null` 不坍缩为 `t`/`nil`，分别解码为哨兵对象 `ycJson::True`、`ycJson::False` 与 `ycJson::Null`（均为 `JsonType` 唯一实例，可用 `->toSkill()` 显式转为 SKILL 原生值）；`nil` 仅表示空数组。
 + 例程中 `; =>` 表示返回值；`(...)` 为省略的输出或示意值。
 
 ## 快速上手
@@ -15,7 +15,7 @@ Cadence SKILL++ 的 JSON 家族编解码库：JSON、放宽 JSON（jsonc）与 J
 ```lisp
 ; 解码
 t_v = ycJson::decode("{\"a\":[1,2.5,true,null]}")
-t_v["a"]                                            ; => (1 2.5 True Null)
+t_v["a"]                                            ; => (1 2.5 ycJson::JsonType("True") ycJson::JsonType("Null"))
 
 ; 编码（默认紧凑、对象键排序）
 ycJson::encode(t_v)                                 ; => "{\"a\":[1,2.5,true,null]}"
@@ -39,11 +39,11 @@ ycJson::encode(list(1 "x") ?format "jsonl")                   ; => "1\n\"x\"\n"
 | string | 字符串（UTF-8 字节级透传） |
 | number（整数） | fixnum（32 位范围内），超出为 flonum |
 | number（含小数或指数） | flonum |
-| true | `ycJson::True` |
-| false | `ycJson::False` |
-| null | `ycJson::Null` |
+| true | `ycJson::True`（`JsonType` 实例） |
+| false | `ycJson::False`（`JsonType` 实例） |
+| null | `ycJson::Null`（`JsonType` 实例） |
 
-编码方向兼容：`t` 输出 `true`（与 `ycJson::True` 同义）；要输出 `false`/`null` 须使用对应哨兵。
+编码方向兼容：`t` 与 `ycJson::True` 均输出 `true`；要输出 `false`/`null` 须使用对应哨兵实例。
 
 对象缺键以 `ycJson::Missing` 表示：解码出的 table 以此为缺省值，读取不存在的键返回它；它一旦作为待编码值出现即报错。判断缺键写法：
 
@@ -147,19 +147,41 @@ ycJson::encode(list(ycJson::Null) ?format "jsonl")  ; => "null\n"
 
 ### ycJson::True <sub>`constant`</sub>
 
-`true` 的哨兵符号：解码 `true` 得到该符号；编码该符号（或 `t`）得 `true`。`TRUE` 为等效别名。
+`true` 的哨兵对象（`JsonType` 唯一实例）：解码 `true` 得到该对象；编码该对象（或 `t`）得 `true`。
 
 ### ycJson::False <sub>`constant`</sub>
 
-`false` 的哨兵符号：解码 `false` 得到该符号；编码该符号得 `false`。`FALSE` 为等效别名。
+`false` 的哨兵对象（`JsonType` 唯一实例）：解码 `false` 得到该对象；编码该对象得 `false`。
 
 ### ycJson::Null <sub>`constant`</sub>
 
-`null` 的哨兵符号：解码 `null` 得到该符号；编码该符号得 `null`。
+`null` 的哨兵对象（`JsonType` 唯一实例）：解码 `null` 得到该对象；编码该对象得 `null`。
 
 ### ycJson::Missing <sub>`constant`</sub>
 
-对象缺键的缺省标记：解码出的 table 以它为缺省值；编码时作为值出现即报错。
+对象缺键的缺省标记（`JsonType` 唯一实例）：解码出的 table 以它为缺省值；编码时作为值出现即报错。
+
+## JsonType 类型对象
+
+哨兵对象由 `ycJson::JsonType` 类定义。构造器接受四种类型名（大小写不敏感：`true`/`false`/`null`/`missing` 的任意大小写），返回规范名对应的**唯一实例**——相同参数总是同一对象，可直接用 `==` 比较：
+
+```lisp
+ycJson::JsonType("true") == ycJson::True           ; => t
+ycJson::JsonType("TRUE") == ycJson::True           ; => t
+ycJson::JsonType("xml")
+; *Error* ycJson: JsonType: unknown type name "xml"
+```
+
+实例提供 `->toSkill()` 转换为 SKILL 原生值（有损：`false` 与空数组同域、`null`/`missing` 同域）：
+
+| 实例 | `->toSkill()` |
+| --- | --- |
+| `ycJson::True` | `t` |
+| `ycJson::False` | `nil` |
+| `ycJson::Null` | `'unbound` |
+| `ycJson::Missing` | `'unbound` |
+
+对象显示为命名空间限定的构造调用形式（如 `ycJson::JsonType("True")`）；顶层用 `evalstring` 执行该打印串可复得同一驻留实例。
 
 ## 边界与限制
 
