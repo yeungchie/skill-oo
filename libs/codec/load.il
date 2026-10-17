@@ -7,7 +7,7 @@
 ; only needs currentFile() and Path::load to reach every source below.
 let((t_dir)
     t_dir = ycPathLib::currentFile()->parent()
-    foreach(t_file '("ns.il" "json.il")
+    foreach(t_file '("ns.il" "json.il" "parse.il" "dump.il" "jsonl.il")
         t_dir->join("src" t_file)->load()
     )
 )
