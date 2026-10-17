@@ -71,17 +71,14 @@ procedure(_newlines(n_n "n")  ; -> str
     )
 )
 
-procedure(jsonlParse(t_str "t")  ; -> list
-    ; 逐行解析 JSON Lines：空行/全空白行跳过，各非空行须为完整文档，错误带原始行号。
+procedure(_decodeLines(t_str "t")  ; -> list
+    ; 逐行解码 JSON Lines：空行/全空白行跳过，各非空行须为完整文档，错误带原始行号。
     ;
     ; **参数**
     ;   t_str  (str) - JSON Lines 文本
     ;
     ; **返回**
-    ;   (list) - 按行序的解析产物列表；无有效行时为 nil
-    unless(stringp(t_str)
-        error("ycJson: jsonlParse expects a string")
-    )
+    ;   (list) - 按行序的解码产物列表；无有效行时为 nil
     let((l_lines l_res l_r t_line n_idx)
         l_lines = _lineSplit(t_str)
         l_res = nil
@@ -100,31 +97,6 @@ procedure(jsonlParse(t_str "t")  ; -> list
             l_lines = cdr(l_lines)
         )
         car(l_res)
-    )
-)
-
-procedure(jsonlDump(l_vals \@key (sortKeys t) "lg")  ; -> str
-    ; 逐行输出值列表为 JSON Lines 文本；非空输入末尾补一个换行。
-    ;
-    ; **参数**
-    ;   l_vals     (list) - 待输出值列表（空表输出空串）
-    ;   ?sortKeys  (t|nil) - 对象键排序开关；默认 t
-    ;
-    ; **返回**
-    ;   (str) - 每值一行、行间换行的文本
-    unless(listp(l_vals)
-        error("ycJson: jsonlDump expects a list")
-    )
-    let((l_p t_s)
-        l_p = nil
-        foreach(g_val l_vals
-            l_p = tconc(l_p _encodeValue(g_val 0 0 sortKeys))
-        )
-        t_s = buildString(car(l_p) "\n")
-        if(t_s == ""
-            ""
-            strcat(t_s "\n")
-        )
     )
 )
 

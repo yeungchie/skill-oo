@@ -1,7 +1,10 @@
 useNamespace("ycJson")
 
-; 哨兵：false/null 不坍缩为 nil（nil 仅表示空数组）；Missing 为对象缺键的默认标记。
+; 哨兵：true/false/null 不坍缩为 t/nil（nil 仅表示空数组）；Missing 为对象缺键的默认标记。
+True = 'True
+TRUE = True
 False = 'False
+FALSE = False
 Null = 'Null
 Missing = 'Missing
 
@@ -91,7 +94,7 @@ procedure(_build(l_p "l")  ; -> str
 )
 
 
-; ---------- 严格解析入口 ----------
+; ---------- 解码入口 ----------
 
 procedure(_decodeText(t_s g_relaxed "tg")  ; -> any
     ; 解析单个 JSON 文档：前导/尾随空白允许，尾随非空白字符报错。
@@ -114,32 +117,26 @@ procedure(_decodeText(t_s g_relaxed "tg")  ; -> any
     )
 )
 
-procedure(jsonParse(t_str "t")  ; -> any
-    ; 解析严格 JSON 单文档；前导/尾随空白允许，尾随非空白字符报错。
+procedure(decode(t_str \@key (format "json") "tt")  ; -> any | list
+    ; 解码文本：?format 选 "json"（严格单文档）、"jsonc"（注释与尾逗号放宽）或 "jsonl"（逐行）。
     ;
     ; **参数**
-    ;   t_str  (str) - JSON 文本
+    ;   t_str   (str) - 输入文本
+    ;   ?format (str) - 格式；默认 "json"
     ;
     ; **返回**
-    ;   (any) - 解析产物（table/list/fixnum/flonum/字符串/t/哨兵）
+    ;   (any|list) - 解码产物；"jsonl" 返回按行序的列表
     unless(stringp(t_str)
-        error("ycJson: jsonParse expects a string")
+        error("ycJson: decode expects a string")
     )
-    _decodeText(t_str nil)
-)
-
-procedure(jsoncParse(t_str "t")  ; -> any
-    ; 解析放宽 JSON 单文档：支持 // 与 /* */ 注释、数组/对象尾逗号。
-    ;
-    ; **参数**
-    ;   t_str  (str) - JSON 文本
-    ;
-    ; **返回**
-    ;   (any) - 解析产物（table/list/fixnum/flonum/字符串/t/哨兵）
-    unless(stringp(t_str)
-        error("ycJson: jsoncParse expects a string")
+    cond(
+        (format == "json" _decodeText(t_str nil))
+        (format == "jsonc" _decodeText(t_str t))
+        (format == "jsonl" _decodeLines(t_str))
+        (t
+            error("ycJson: decode: unknown format %A" format)
+        )
     )
-    _decodeText(t_str t)
 )
 
 unuseNamespace("ycJson")

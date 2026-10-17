@@ -117,10 +117,10 @@ procedure(_literal(t_s n_i "tn")  ; -> list
     ;   n_i  (int) - 字面量首字符位置
     ;
     ; **返回**
-    ;   (list) - (值 下一位置)；值分别为 t、False、Null
+    ;   (list) - (值 下一位置)；值分别为 True、False、Null
     cond(
         (substring(t_s n_i 4) == "true"
-            list(t n_i + 4)
+            list(True n_i + 4)
         )
         (substring(t_s n_i 5) == "false"
             list(False n_i + 5)

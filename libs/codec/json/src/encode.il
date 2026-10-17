@@ -130,6 +130,7 @@ procedure(_encodeValue(g_val n_depth n_indent g_sort "gnng")  ; -> str
     cond(
         (g_val == nil "[]")
         (g_val == t "true")
+        (g_val == True "true")
         (g_val == False "false")
         (g_val == Null "null")
         (g_val == Missing
@@ -245,27 +246,51 @@ procedure(_encodeTable(t_obj n_depth n_indent g_sort "gnng")  ; -> str
     )
 )
 
-procedure(jsonDump(g_val \@key (indent nil) (sortKeys t) "ggg")  ; -> str
-    ; 输出值为 JSON 文本；?indent 为正整数时按该空格数缩进美化，?sortKeys 默认排序对象键。
+procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys t) "gtgg")  ; -> str
+    ; 编码值为文本：?format 选 "json"/"jsonc"（单值）或 "jsonl"（值列表逐行）。
     ;
     ; **参数**
-    ;   g_val      (any) - 待输出值
+    ;   g_val      (any) - 待输出值；"jsonl" 时为列表
+    ;   ?format    (str) - 格式；默认 "json"
     ;   ?indent    (int) - 缩进空格数；默认 nil（紧凑输出）
     ;   ?sortKeys  (t|nil) - 对象键排序开关；默认 t
     ;
     ; **返回**
-    ;   (str) - JSON 文本
-    let((n_indent)
-        n_indent = 0
-        when(indent
-            unless(fixp(indent)
-                error("ycJson: ?indent must be a fixnum")
-            )
-            when(indent > 0
-                n_indent = indent
+    ;   (str) - 文本；无法表示时以 error() 中断
+    cond(
+        (format == "json" || format == "jsonc"
+            let((n_indent)
+                n_indent = 0
+                when(indent
+                    unless(fixp(indent)
+                        error("ycJson: ?indent must be a fixnum")
+                    )
+                    when(indent > 0
+                        n_indent = indent
+                    )
+                )
+                _encodeValue(g_val 0 n_indent sortKeys)
             )
         )
-        _encodeValue(g_val 0 n_indent sortKeys)
+        (format == "jsonl"
+            unless(listp(g_val)
+                error("ycJson: encode: format \"jsonl\" expects a list")
+            )
+            let((l_p t_s)
+                l_p = nil
+                foreach(g_item g_val
+                    l_p = tconc(l_p _encodeValue(g_item 0 0 sortKeys))
+                )
+                t_s = buildString(car(l_p) "\n")
+                if(t_s == ""
+                    ""
+                    strcat(t_s "\n")
+                )
+            )
+        )
+        (t
+            error("ycJson: encode: unknown format %A" format)
+        )
     )
 )
 
