@@ -409,11 +409,11 @@ defclass(Path () (
 ))
 
 defmethod(printself (self(Path))  ; -> str
-    ; 返回 Path 的打印描述串，形如 Path("/a/b")（圆括号构造器形式，命名空间上下文中 eval 可复得同一驻留实例）。
+    ; 返回 Path 的打印描述串，形如 ycPathLib::Path("/a/b")（命名空间限定构造调用形式，顶层 evalstring 可复得同一驻留实例）。
     ;
     ; **返回**
-    ;   (str) - lsprintf 按 Path(%A) 模板生成
-    lsprintf("Path(%A)" self->str())
+    ;   (str) - lsprintf 按 %A(%A) 模板生成（类名取 className，参数为路径串）
+    lsprintf("%A(%A)" className(self) self->str())
 )
 
 

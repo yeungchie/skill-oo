@@ -59,17 +59,17 @@ ycPathLib::Path(g_args ...)
 **例程**
 
 ```lisp
-ycPathLib::Path()                    ; => Path(".")
-ycPathLib::Path("")                  ; => Path(".")
-ycPathLib::Path("/a/b/c.txt")        ; => Path("/a/b/c.txt")
-ycPathLib::Path("a" "b")             ; => Path("a/b")
-ycPathLib::Path("a" "/b" "c")        ; => Path("/b/c")
-ycPathLib::Path(ycPathLib::Path("a") "b")  ; => Path("a/b")
+ycPathLib::Path()                    ; => ycPathLib::Path(".")
+ycPathLib::Path("")                  ; => ycPathLib::Path(".")
+ycPathLib::Path("/a/b/c.txt")        ; => ycPathLib::Path("/a/b/c.txt")
+ycPathLib::Path("a" "b")             ; => ycPathLib::Path("a/b")
+ycPathLib::Path("a" "/b" "c")        ; => ycPathLib::Path("/b/c")
+ycPathLib::Path(ycPathLib::Path("a") "b")  ; => ycPathLib::Path("a/b")
 ycPathLib::Path("a" 5)
 ; *Error* ycPathLib::Path: expected string or Path, got 5
 ```
 
-实例显示为构造调用形式（如 `Path("a/b")`）；在 `useNamespace("ycPathLib")` 上下文中执行该串可得同一驻留实例。
+实例显示为命名空间限定的构造调用形式（如 `ycPathLib::Path("a/b")`）；顶层用 `evalstring` 执行该串可得同一驻留实例。
 
 **方法**
 
