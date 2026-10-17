@@ -141,17 +141,17 @@ _assertErrorMsg(lambda(() ycJson::decode("\"abc")) "unterminated string"  "decod
 _assertError(lambda(() ycJson::decode(5))  "decode: rejects non-string input")
 _assertError(lambda(() ycJson::decode(nil))  "decode: rejects nil input")
 
-; --- JsonType（哨兵对象） ---
-_assert(ycJson::JsonType("TRUE") == ycJson::True  "decode: constructor canonicalizes TRUE")
-_assert(ycJson::JsonType("FALSE") == ycJson::False  "decode: constructor canonicalizes FALSE")
-_assert(ycJson::JsonType("true") == ycJson::True  "decode: constructor returns the unique True instance")
+; --- Type（哨兵对象） ---
+_assert(ycJson::Type("TRUE") == ycJson::True  "decode: constructor canonicalizes TRUE")
+_assert(ycJson::Type("FALSE") == ycJson::False  "decode: constructor canonicalizes FALSE")
+_assert(ycJson::Type("true") == ycJson::True  "decode: constructor returns the unique True instance")
 _assert(ycJson::True->toSkill() == t  "decode: True toSkill is t")
 _assert(ycJson::False->toSkill() == nil  "decode: False toSkill is nil")
 _assert(ycJson::Null->toSkill() == 'unbound  "decode: Null toSkill is unbound")
 _assert(ycJson::Missing->toSkill() == 'unbound  "decode: Missing toSkill is unbound")
-_assertError(lambda(() ycJson::JsonType("xml"))  "decode: unknown JsonType name errors")
-_assert(printself(ycJson::True) == "ycJson::JsonType(\"True\")"  "decode: JsonType printself format")
-_assert(car(errset(evalstring(printself(ycJson::True)) nil)) == ycJson::True  "decode: JsonType evalstring roundtrip")
+_assertError(lambda(() ycJson::Type("xml"))  "decode: unknown Type name errors")
+_assert(printself(ycJson::True) == "ycJson::Type(\"True\")"  "decode: Type printself format")
+_assert(car(errset(evalstring(printself(ycJson::True)) nil)) == ycJson::True  "decode: Type evalstring roundtrip")
 _assert(ycJson::decode("1 // c" ?format "jsonc") == 1  "decode: jsonc format dispatch")
 _assertErrorMsg(lambda(() ycJson::decode("1" ?format "xml")) "unknown format"  "decode: unknown format errors")
 _TestDecodeDone = t

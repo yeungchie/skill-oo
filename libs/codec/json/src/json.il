@@ -1,17 +1,17 @@
 useNamespace("ycJson")
 
-; ---------- JsonType 类型对象 ----------
+; ---------- Type 类型对象 ----------
 
-defclass(JsonTypeData () (
-    ; JsonTypeData 数据桶：收纳哨兵规范名（"True"/"False"/"Null"/"Missing"），构造后禁写。
+defclass(TypeData () (
+    ; TypeData 数据桶：收纳哨兵规范名（"True"/"False"/"Null"/"Missing"），构造后禁写。
     name(
         \@initarg name
         \@initform ""
     )
 ))
 
-defclass(JsonType () (
-    ; JsonType 实例：JSON 字面量哨兵对象，同规范名驻留共享同一实例。
+defclass(Type () (
+    ; Type 实例：JSON 字面量哨兵对象，同规范名驻留共享同一实例。
     _data(
         \@initarg _data
         \@initform nil
@@ -20,8 +20,8 @@ defclass(JsonType () (
     toSkill()
 ))
 
-defmethod(printself (self(JsonType))  ; -> str
-    ; 返回 JsonType 的打印描述串，形如 ycJson::JsonType("True")。
+defmethod(printself (self(Type))  ; -> str
+    ; 返回 Type 的打印描述串，形如 ycJson::Type("True")。
     ;
     ; **返回**
     ;   (str) - lsprintf 按 %A(%A) 模板生成（类名取 className，参数为规范名）
@@ -29,8 +29,8 @@ defmethod(printself (self(JsonType))  ; -> str
 )
 
 inScheme(
-defmethod(initializeInstance (self(JsonType) \@rest _args)
-    ; 构造 JsonType 实例时安装方法集：toSkill。
+defmethod(initializeInstance (self(Type) \@rest _args)
+    ; 构造 Type 实例时安装方法集：toSkill。
     ;
     ; **参数**
     ;   _args  (list) - 变参：附加初始化参数，本实现忽略
@@ -52,20 +52,20 @@ defmethod(initializeInstance (self(JsonType) \@rest _args)
 )
 )
 
-; JsonType 实例驻留表：规范名 → 唯一实例（固定四键，无需容量上限）。
-_JsonTypeCache = makeTable("jsonTypeCache" nil)
+; Type 实例驻留表：规范名 → 唯一实例（固定四键，无需容量上限）。
+_TypeCache = makeTable("typeCache" nil)
 
-procedure(JsonType(t_name "t")  ; -> JsonType
+procedure(Type(t_name "t")  ; -> Type
     ; 取回/构造哨兵唯一实例：大小写不敏感接受 true/false/null/missing 四名。
     ;
     ; **参数**
     ;   t_name  (str) - 类型名（任意大小写，如 "true"/"True"/"TRUE"）
     ;
     ; **返回**
-    ;   (JsonType) - 规范名对应的唯一实例；非字符串或未知名报错
+    ;   (Type) - 规范名对应的唯一实例；非字符串或未知名报错
     let((t_canon g_inst)
         unless(stringp(t_name)
-            error("ycJson: JsonType: unknown type name %A" t_name)
+            error("ycJson: Type: unknown type name %A" t_name)
         )
         t_canon = cond(
             (pcreMatchp("(?i)^true\\z" t_name) "True")
@@ -74,23 +74,23 @@ procedure(JsonType(t_name "t")  ; -> JsonType
             (pcreMatchp("(?i)^missing\\z" t_name) "Missing")
         )
         unless(t_canon
-            error("ycJson: JsonType: unknown type name %A" t_name)
+            error("ycJson: Type: unknown type name %A" t_name)
         )
-        g_inst = _JsonTypeCache[t_canon]
+        g_inst = _TypeCache[t_canon]
         unless(g_inst
-            g_inst = makeInstance('JsonType ?_data makeInstance('JsonTypeData ?name t_canon))
-            _JsonTypeCache[t_canon] = g_inst
+            g_inst = makeInstance('Type ?_data makeInstance('TypeData ?name t_canon))
+            _TypeCache[t_canon] = g_inst
         )
         g_inst
     )
 )
 
 ; 哨兵：true/false/null 不坍缩为 t/nil（nil 仅表示空数组）；Missing 为对象缺键的默认标记。
-; 四常量均为 JsonType 唯一实例，可经 ->toSkill() 转为 SKILL 原生值。
-True    = JsonType("true")
-False   = JsonType("false")
-Null    = JsonType("null")
-Missing = JsonType("missing")
+; 四常量均为 Type 唯一实例，可经 ->toSkill() 转为 SKILL 原生值。
+True    = Type("true")
+False   = Type("false")
+Null    = Type("null")
+Missing = Type("missing")
 
 ; 解析与输出的嵌套深度上限。
 _maxDepth = 1000
