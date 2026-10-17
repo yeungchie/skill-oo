@@ -1,0 +1,91 @@
+; --- jsonc：注释 ---
+_assert(let((t_v) t_v = ycCodec::jsoncParse("{ // c\n \"a\": 1 }") t_v["a"] == 1)  "jsonc: line comment")
+_assert(ycCodec::jsoncParse("1 // c") == 1  "jsonc: comment after scalar")
+_assert(ycCodec::jsoncParse("// c\n1") == 1  "jsonc: leading line comment")
+_assert(ycCodec::jsoncParse("/* c */ 1") == 1  "jsonc: leading block comment")
+_assertDumpEq(ycCodec::jsoncParse("[1, /* c */ 2]") list(1 2)  "jsonc: block comment inside array")
+_assert(let((t_v) t_v = ycCodec::jsoncParse("{ \"a\" /* c */ : /* c */ 1 }") t_v["a"] == 1)  "jsonc: comments between tokens")
+_assert(ycCodec::jsoncParse("\"a//b\"") == "a//b"  "jsonc: comment marker inside string")
+_assert(ycCodec::jsoncParse("[] // c") == nil  "jsonc: comment after empty array")
+
+; --- jsonc：尾逗号 ---
+_assertDumpEq(ycCodec::jsoncParse("[1,2,]") list(1 2)  "jsonc: trailing comma array")
+_assert(let((t_v) t_v = ycCodec::jsoncParse("{\"a\":1,}") t_v["a"] == 1)  "jsonc: trailing comma object")
+_assertError(lambda(() ycCodec::jsoncParse("[1,,]"))  "jsonc: still rejects double comma")
+_assertError(lambda(() ycCodec::jsoncParse("[,]"))  "jsonc: rejects leading comma")
+_assertError(lambda(() ycCodec::jsoncParse("{,}"))  "jsonc: rejects leading comma in object")
+_assertError(lambda(() ycCodec::jsoncParse("/* c"))  "jsonc: unclosed block comment errors")
+_assertErrorMsg(lambda(() ycCodec::jsoncParse("/* c")) "unterminated block comment"  "jsonc: unclosed comment message")
+
+; --- 严格模式不接受放宽 ---
+_assertError(lambda(() ycCodec::jsonParse("[1,]"))  "strict: rejects trailing comma")
+_assertError(lambda(() ycCodec::jsonParse("1 // c"))  "strict: rejects line comment")
+_assertError(lambda(() ycCodec::jsonParse("/* c */ 1"))  "strict: rejects block comment")
+
+; --- jsonl：解析 ---
+let((l_v)
+    l_v = ycCodec::jsonlParse("1\n2\n")
+    _assert(length(l_v) == 2  "jsonl: two scalars count")
+    _assert(car(l_v) == 1  "jsonl: first scalar")
+    _assert(cadr(l_v) == 2  "jsonl: second scalar")
+)
+_assert(ycCodec::jsonlParse("") == nil  "jsonl: empty input -> nil")
+_assert(ycCodec::jsonlParse("\n \n\t\n") == nil  "jsonl: blank lines only -> nil")
+let((l_v)
+    l_v = ycCodec::jsonlParse("1\n\n   \n2\n")
+    _assert(length(l_v) == 2  "jsonl: skips blank lines")
+    _assert(cadr(l_v) == 2  "jsonl: value after blank lines")
+)
+let((l_v)
+    l_v = ycCodec::jsonlParse("1\r\n2\r\n")
+    _assert(length(l_v) == 2  "jsonl: CRLF lines count")
+    _assert(car(l_v) == 1 && cadr(l_v) == 2  "jsonl: CRLF values")
+)
+let((l_v t_v)
+    l_v = ycCodec::jsonlParse("{\"a\":1}\n[1,2]\n")
+    t_v = car(l_v)
+    _assert(length(l_v) == 2  "jsonl: mixed line count")
+    _assert(t_v["a"] == 1  "jsonl: object line")
+    _assertDumpEq(cadr(l_v) list(1 2)  "jsonl: array line")
+)
+let((l_v)
+    l_v = ycCodec::jsonlParse("null\nfalse\ntrue\n")
+    _assert(car(l_v) == ycCodec::jsonNull  "jsonl: null line")
+    _assert(cadr(l_v) == ycCodec::jsonFalse  "jsonl: false line")
+    _assert(caddr(l_v) == t  "jsonl: true line")
+)
+_assert(length(ycCodec::jsonlParse("[]")) == 1  "jsonl: empty array line kept")
+_assert(car(ycCodec::jsonlParse("[]")) == nil  "jsonl: empty array line is nil")
+
+; --- jsonl：错误与行号 ---
+_assertErrorMsg(lambda(() ycCodec::jsonlParse("1\n2\nx")) "line 3, column 1"  "jsonl: error line 3")
+_assertErrorMsg(lambda(() ycCodec::jsonlParse("1\nbad")) "line 2, column 1"  "jsonl: error line 2")
+_assertErrorMsg(lambda(() ycCodec::jsonlParse("\n\nbad")) "line 3, column 1"  "jsonl: blank lines count in numbering")
+_assertErrorMsg(lambda(() ycCodec::jsonlParse("{\"a\":1}\n{\"b\":}")) "line 2"  "jsonl: object error line 2")
+_assertErrorMsg(lambda(() ycCodec::jsonlParse("{\"a\":\n1}")) "line 1"  "jsonl: split document error line 1")
+_assertError(lambda(() ycCodec::jsonlParse("[1,]"))  "jsonl: is strict")
+_assertError(lambda(() ycCodec::jsonlParse("1 // c"))  "jsonl: rejects comments")
+
+; --- jsonlDump ---
+_assert(ycCodec::jsonlDump(nil) == ""  "jsonlDump: empty list -> empty string")
+_assert(ycCodec::jsonlDump(list(1)) == "1\n"  "jsonlDump: single line trailing newline")
+_assert(ycCodec::jsonlDump(list(1 2)) == "1\n2\n"  "jsonlDump: two lines")
+_assert(ycCodec::jsonlDump(list(nil)) == "[]\n"  "jsonlDump: nil element is empty array")
+_assert(ycCodec::jsonlDump(list(ycCodec::jsonFalse ycCodec::jsonNull)) == "false\nnull\n"  "jsonlDump: literals")
+_assert(ycCodec::jsonlDump(list(strcat("a" intToChar(10) "b"))) == "\"a\\nb\"\n"  "jsonlDump: escapes newline inside string")
+let((t_v)
+    t_v = makeTable("ycTest")
+    t_v["b"] = 1
+    t_v["a"] = 2
+    _assert(ycCodec::jsonlDump(list(t_v)) == "{\"a\":2,\"b\":1}\n"  "jsonlDump: sorts keys")
+)
+_assertError(lambda(() ycCodec::jsonlDump(5))  "jsonlDump: non-list errors")
+let((l_v t_s)
+    l_v = list(1 ycCodec::jsonParse("{\"b\":[1],\"a\":2}") 1.5 "x" ycCodec::jsonNull)
+    t_s = ycCodec::jsonlDump(l_v)
+    _assertDumpEq(ycCodec::jsonlParse(t_s) l_v  "jsonlDump: dump/parse roundtrip")
+)
+
+_TestVariantsDone = t
+
+; END
