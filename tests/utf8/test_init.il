@@ -116,6 +116,16 @@ let((l_res t_self t_dir)
         )
     )
 
+    _TestWidthDone = nil
+    l_res = errset(load(strcat(t_dir "test_width.il")) t)
+    unless(_TestWidthDone
+        _TestCount = _TestCount + 1
+        _TestFail = _TestFail + 1
+        printf("TEST FAILED - test_width.il did not run to completion%s\n"
+            if(l_res "" " (load raised an error)")
+        )
+    )
+
     printf("\nPASS: %d / FAIL: %d\n"
         _TestCount - _TestFail
         _TestFail
