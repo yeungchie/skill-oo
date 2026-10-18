@@ -78,6 +78,44 @@ _assertErrorMsg(
     "join: non-list"
 )
 
+; ---- startsWith / endsWith ----
+_assert(ycString::startsWith("abc" "ab")  "startsWith: hit")
+_assert(ycString::startsWith("abc" "")  "startsWith: empty prefix")
+_assert(ycString::startsWith("abc" "abcd") == nil  "startsWith: too long")
+_assert(ycString::startsWith("中文abc" "中文")  "startsWith: cjk")
+_assert(ycString::endsWith("abc" "bc")  "endsWith: hit")
+_assert(ycString::endsWith("abc" "")  "endsWith: empty suffix")
+_assert(ycString::endsWith("abc" "abcd") == nil  "endsWith: too long")
+_assert(ycString::endsWith("中文abc" "abc")  "endsWith: cjk")
+
+; ---- replace ----
+_assert(ycString::replace("aaa" "a" "b") == "bbb"  "replace: literal all")
+_assert(ycString::replace("aaa" "aa" "b") == "ba"  "replace: non-overlap")
+_assert(ycString::replace("abc" "x" "y") == "abc"  "replace: no match")
+_assert(ycString::replace("a1b22c" "[0-9]+" "N" ?regex t) == "aNbNc"  "replace: regex")
+_assert(ycString::replace("baaacaa" "a+" "X" ?regex t) == "bXcX"  "replace: regex all")
+_assertErrorMsg(
+    lambda(() ycString::replace("a" "" "b"))
+    "ycString::replace: search string must not be empty"
+    "replace: empty search"
+)
+_assertErrorMsg(
+    lambda(() ycString::replace("a" "" "b" ?regex t))
+    "ycString::replace: pattern must not be empty"
+    "replace: empty pattern"
+)
+
+; ---- count ----
+_assert(ycString::count("banana" "a") == 3  "count: literal")
+_assert(ycString::count("aaaa" "aa") == 2  "count: non-overlap")
+_assert(ycString::count("abc" "x") == 0  "count: none")
+_assert(ycString::count("banana" "a+" ?regex t) == 3  "count: regex")
+_assertErrorMsg(
+    lambda(() ycString::count("a" ""))
+    "ycString::count: search string must not be empty"
+    "count: empty search"
+)
+
 _TestCoreDone = t
 
 ; END

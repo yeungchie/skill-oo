@@ -319,6 +319,143 @@ procedure(join(l_items \@key (sep "") "lg")  ; -> str
     )
 )
 
+procedure(startsWith(t_s t_prefix "tt")  ; -> t | nil
+    ; 判断字符串是否以指定前缀开始。
+    ;
+    ; **参数**
+    ;   t_s      (str) - 输入串
+    ;   t_prefix (str) - 前缀
+    ;
+    ; **返回**
+    ;   (t|nil) - 是则为 t；空前缀回 t
+    let((n_lp n_ls)
+        n_lp = length(t_prefix)
+        n_ls = length(t_s)
+        if(n_lp == 0
+            t
+            n_lp <= n_ls && substring(t_s 1 n_lp) == t_prefix
+        )
+    )
+)
+
+procedure(endsWith(t_s t_suffix "tt")  ; -> t | nil
+    ; 判断字符串是否以指定后缀结束。
+    ;
+    ; **参数**
+    ;   t_s      (str) - 输入串
+    ;   t_suffix (str) - 后缀
+    ;
+    ; **返回**
+    ;   (t|nil) - 是则为 t；空后缀回 t
+    let((n_lx n_ls)
+        n_lx = length(t_suffix)
+        n_ls = length(t_s)
+        cond(
+            (n_lx == 0 t)
+            (n_lx > n_ls nil)
+            (t substring(t_s n_ls - n_lx + 1 n_lx) == t_suffix)
+        )
+    )
+)
+
+procedure(replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
+    ; 替换全部出现（字面量或正则；非重叠）。
+    ;
+    ; **参数**
+    ;   t_s    (str) - 输入串
+    ;   t_old  (str) - 待替换串或正则模式
+    ;   t_new  (str) - 替换串（正则模式下按 ycRegEx 的替换模板展开）
+    ;   ?regex (any) - 非 nil 时 t_old 按正则模式解释
+    ;
+    ; **返回**
+    ;   (str) - 替换后的串；无匹配原样返回
+    cond(
+        (regex
+            when(t_old == ""
+                error("ycString::replace: pattern must not be empty")
+            )
+            ycRegEx:::reSub(t_old t_new t_s ?all t)
+        )
+        (t
+            when(t_old == ""
+                error("ycString::replace: search string must not be empty")
+            )
+            let((l_p t_rest n_cut n_pos n_len n_old g_done)
+                t_rest = t_s
+                n_old = length(t_old)
+                while(!g_done
+                    n_cut = index(t_rest t_old)
+                    if(n_cut
+                        {
+                        n_len = length(t_rest)
+                        n_pos = n_len - length(n_cut) + 1
+                        l_p = tconc(l_p if(n_pos > 1 substring(t_rest 1 n_pos - 1) ""))
+                        l_p = tconc(l_p t_new)
+                        t_rest = if(n_pos + n_old > n_len
+                            ""
+                            substring(t_rest n_pos + n_old n_len - n_pos - n_old + 1)
+                        )
+                        }
+                        {
+                        l_p = tconc(l_p t_rest)
+                        g_done = t
+                        }
+                    )
+                )
+                apply('strcat car(l_p))
+            )
+        )
+    )
+)
+
+procedure(count(t_s t_sub \@key (regex nil) "ttg")  ; -> int
+    ; 统计非重叠出现次数（字面量或正则）。
+    ;
+    ; **参数**
+    ;   t_s    (str) - 输入串
+    ;   t_sub  (str) - 待计数子串或正则模式
+    ;   ?regex (any) - 非 nil 时 t_sub 按正则模式解释
+    ;
+    ; **返回**
+    ;   (int) - 出现次数
+    cond(
+        (regex
+            when(t_sub == ""
+                error("ycString::count: pattern must not be empty")
+            )
+            length(ycRegEx:::reFindall(t_sub t_s))
+        )
+        (t
+            when(t_sub == ""
+                error("ycString::count: search string must not be empty")
+            )
+            let((n_n t_rest n_cut n_pos n_len n_sub g_done)
+                n_n = 0
+                t_rest = t_s
+                n_sub = length(t_sub)
+                while(!g_done
+                    n_cut = index(t_rest t_sub)
+                    if(n_cut
+                        {
+                        n_n = n_n + 1
+                        n_len = length(t_rest)
+                        n_pos = n_len - length(n_cut) + 1
+                        t_rest = if(n_pos + n_sub > n_len
+                            ""
+                            substring(t_rest n_pos + n_sub n_len - n_pos - n_sub + 1)
+                        )
+                        }
+                        {
+                        g_done = t
+                        }
+                    )
+                )
+                n_n
+            )
+        )
+    )
+)
+
 unuseNamespace("ycString")
 
 ; END
