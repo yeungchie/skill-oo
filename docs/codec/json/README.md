@@ -17,7 +17,7 @@ Cadence SKILL++ 的 JSON 家族编解码库：JSON、放宽 JSON（jsonc）与 J
 t_v = ycJson::decode("{\"a\":[1,2.5,true,null]}")
 t_v["a"]                                            ; => (1 2.5 ycJson::Type("True") ycJson::Type("Null"))
 
-; 编码（默认紧凑、对象键排序）
+; 编码（默认紧凑、键序随表；?sortKeys t 可排序）
 ycJson::encode(t_v)                                 ; => "{\"a\":[1,2.5,true,null]}"
 
 ; 缩进美化
@@ -61,13 +61,14 @@ t_v["nope"] == ycJson::Missing  ; 键不存在
 ycJson::decode(
     t_str
     [ ?format t_format ]
+    [ ?maxDepth n_max ]
 )
 => any | list
 ```
 
 **描述**
 
-解码文本为库内表示。`?format "json"`（默认）解析严格单文档：前导与尾随空白允许；尾随非空白字符、注释、尾逗号均报错；重复键取最后值。`?format "jsonc"` 在严格规则之外允许 `//` 行注释、`/* */` 块注释与数组/对象尾逗号，双引号字符串内的注释标记不生效。`?format "jsonl"` 逐行解码：每个非空行须是完整且严格的 JSON 文档（不支持注释与跨行），空行与全空白行跳过。
+解码文本为库内表示。`?format "json"`（默认）解析严格单文档：前导与尾随空白允许；尾随非空白字符、注释、尾逗号均报错；重复键取最后值。`?format "jsonc"` 在严格规则之外允许 `//` 行注释、`/* */` 块注释与数组/对象尾逗号，双引号字符串内的注释标记不生效。`?format "jsonl"` 逐行解码：每个非空行须是完整且严格的 JSON 文档（不支持注释与跨行），空行与全空白行跳过。`?maxDepth` 调整嵌套深度上限（默认 800）；超过语言递归能力时由运行环境报栈溢出错误（可捕获）。
 
 **参数**
 
@@ -75,6 +76,7 @@ ycJson::decode(
 | --- | --- | --- | --- |
 | t_str | str | | 输入文本 |
 | ?format | str | "json" | `"json"`、`"jsonc"` 或 `"jsonl"`；其他值报错 |
+| ?maxDepth | int | 800 | 最大嵌套深度（≥1；超限报错） |
 
 **返回值**
 
@@ -108,13 +110,17 @@ ycJson::encode(
     [ ?format t_format ]
     [ ?indent n_indent ]
     [ ?sortKeys g_sort ]
+    [ ?strict g_strict ]
+    [ ?nilAs t_nilAs ]
+    [ ?finalNewline g_finalNewline ]
+    [ ?maxDepth n_max ]
 )
 => str
 ```
 
 **描述**
 
-编码库内表示为文本。`?format "json"`（默认）或 `"jsonc"` 输出单个值：`nil` 输出 `[]`、`t` 与 `ycJson::True` 输出 `true`、其余哨兵输出对应字面量；对象键支持字符串（原样）、符号（取符号名）与 fixnum（十进制），其他键型报错；不可表示的值（普通符号、缺键标记、非有限浮点、其他类型）报错。`?format "jsonl"` 把值列表逐行输出：每个元素按紧凑规则输出为一行，非空输入末尾带一个换行，`g_val` 非列表即报错；`?indent` 仅对单值格式生效。
+编码库内表示为文本。`?format "json"`（默认）或 `"jsonc"` 输出单个值：`nil` 按 `?nilAs` 输出 `[]` 或 `false`、`t` 与 `ycJson::True` 输出 `true`、其余哨兵输出对应字面量；对象键默认把字符串原样、符号取符号名、fixnum 转为十进制（`?strict t` 时非字符串键报错；其他键型始终报错）；不可表示的值（普通符号、缺键标记、非有限浮点、其他类型）报错。`?format "jsonl"` 把值列表逐行输出：每个元素按紧凑规则输出为一行，行间以换行分隔，非空输入末尾默认补一个换行（`?finalNewline nil` 可关），`g_val` 非列表即报错；`?indent` 仅对单值格式生效。对象键默认不排序（随表序），需要确定性输出时传 `?sortKeys t`。
 
 **参数**
 
@@ -123,7 +129,11 @@ ycJson::encode(
 | g_val | any | | 待编码值；`"jsonl"` 时为列表 |
 | ?format | str | "json" | `"json"`/`"jsonc"` 或 `"jsonl"`；其他值报错 |
 | ?indent | int | nil | 缩进空格数；正整数启用多行美化，其余等价紧凑输出 |
-| ?sortKeys | t \| nil | t | 对象键是否按字符串升序输出 |
+| ?sortKeys | t \| nil | nil | 对象键是否按字符串升序输出；默认随表序 |
+| ?strict | t \| nil | nil | t 时对象键必须为字符串，符号/整数键报错 |
+| ?nilAs | str | "array" | `nil` 的输出形式：`"array"`（`[]`）或 `"false"` |
+| ?finalNewline | t \| nil | t | `"jsonl"` 非空输出末尾是否补换行 |
+| ?maxDepth | int | 800 | 最大嵌套深度（≥1；超限报错） |
 
 **返回值**
 
@@ -185,7 +195,8 @@ ycJson::Type("xml")
 
 ## 边界与限制
 
-+ 嵌套深度上限 1000：解码与编码在更深的嵌套处报错（消息含 `nesting too deep`）。
++ 嵌套深度默认上限 800，可用 `?maxDepth` 调整（≥1）；超限报错（消息含 `nesting too deep`）。实测解码约 900 层、编码约 1150 层触语言递归栈上界（简单递归实测语言栈约 8000–9000 帧；编解码每层耗多帧），默认值留安全余量；超过语言栈能力时由运行环境报栈溢出（可捕获）。
++ `?nilAs "false"` 有损：`nil` 编码为 `false` 后解码得 `ycJson::False`；默认模式同一表内 `"1"` 与 `1` 会坍缩为同一输出键（`?strict t` 可规避）。
 + 整数字面量在 32 位范围内解码为 fixnum，超出为 flonum；编码 fixnum 为精确十进制，编码 flonum 为最短可回环形式（整数值保留一位小数，如 `1.0`）。
 + 非有限浮点（无穷、NaN）不可编码，报错。
 + `\u0000`（NUL）无法保存在字符串中，解码时被丢弃。
