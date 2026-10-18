@@ -225,14 +225,14 @@ procedure(_string(t_s n_i "tn")  ; -> list
                 _error(t_s n_k "unterminated string")
             )
             n_c = _code(t_s n_k)
-            cond(
-                (n_c == 34
+            case(n_c
+                (34
                     when(n_run < n_k
                         l_p = tconc(l_p substring(t_s n_run n_k - n_run))
                     )
                     g_done = t
                 )
-                (n_c == 92
+                (92
                     {
                     when(n_run < n_k
                         l_p = tconc(l_p substring(t_s n_run n_k - n_run))
@@ -243,56 +243,56 @@ procedure(_string(t_s n_i "tn")  ; -> list
                     when(!n_c
                         _error(t_s n_esc "unterminated string")
                     )
-                    cond(
-                        (n_c == 34
+                    case(n_c
+                        (34
                             {
                             l_p = tconc(l_p "\"")
                             n_k = n_k + 1
                             }
                         )
-                        (n_c == 92
+                        (92
                             {
                             l_p = tconc(l_p "\\")
                             n_k = n_k + 1
                             }
                         )
-                        (n_c == 47
+                        (47
                             {
                             l_p = tconc(l_p "/")
                             n_k = n_k + 1
                             }
                         )
-                        (n_c == 98
+                        (98
                             {
                             l_p = tconc(l_p strcat(intToChar(8)))
                             n_k = n_k + 1
                             }
                         )
-                        (n_c == 102
+                        (102
                             {
                             l_p = tconc(l_p strcat(intToChar(12)))
                             n_k = n_k + 1
                             }
                         )
-                        (n_c == 110
+                        (110
                             {
                             l_p = tconc(l_p strcat(intToChar(10)))
                             n_k = n_k + 1
                             }
                         )
-                        (n_c == 114
+                        (114
                             {
                             l_p = tconc(l_p strcat(intToChar(13)))
                             n_k = n_k + 1
                             }
                         )
-                        (n_c == 116
+                        (116
                             {
                             l_p = tconc(l_p strcat(intToChar(9)))
                             n_k = n_k + 1
                             }
                         )
-                        (n_c == 117
+                        (117
                             {
                             n_cp = _hex4(t_s n_k + 1)
                             n_k = n_k + 5
@@ -320,11 +320,11 @@ procedure(_string(t_s n_i "tn")  ; -> list
                     n_run = n_k
                     }
                 )
-                (n_c < 32
-                    _error(t_s n_k "control character in string")
-                )
                 (t
-                    n_k = n_k + 1
+                    if(n_c < 32
+                        _error(t_s n_k "control character in string")
+                        n_k = n_k + 1
+                    )
                 )
             )
         )
@@ -351,15 +351,19 @@ procedure(_value(t_s n_i g_relaxed n_depth "tngn")  ; -> list
         when(!n_c
             _error(t_s n_i "unexpected end of input")
         )
-        cond(
-            (n_c == 34 _string(t_s n_i))
-            (n_c == 123 _object(t_s n_i g_relaxed n_depth))
-            (n_c == 91 _array(t_s n_i g_relaxed n_depth))
-            (n_c == 116 _literal(t_s n_i))
-            (n_c == 102 _literal(t_s n_i))
-            (n_c == 110 _literal(t_s n_i))
-            ((n_c == 45 || _digitp(n_c)) _number(t_s n_i))
-            (t _error(t_s n_i "unexpected character"))
+        case(n_c
+            (34 _string(t_s n_i))
+            (123 _object(t_s n_i g_relaxed n_depth))
+            (91 _array(t_s n_i g_relaxed n_depth))
+            (116 _literal(t_s n_i))
+            (102 _literal(t_s n_i))
+            (110 _literal(t_s n_i))
+            (t
+                if(n_c == 45 || _digitp(n_c)
+                    _number(t_s n_i)
+                    _error(t_s n_i "unexpected character")
+                )
+            )
         )
     )
 )
@@ -399,14 +403,14 @@ procedure(_object(t_s n_i g_relaxed n_depth "tngn")  ; -> list
             t_obj[t_key] = car(l_r)
             n_k = _skipWs(t_s cadr(l_r) g_relaxed)
             n_c = _code(t_s n_k)
-            cond(
-                (n_c == 125
+            case(n_c
+                (125
                     {
                     g_done = t
                     n_k = n_k + 1
                     }
                 )
-                (n_c == 44
+                (44
                     {
                     n_k = _skipWs(t_s n_k + 1 g_relaxed)
                     when(g_relaxed && _code(t_s n_k) == 125
@@ -449,14 +453,14 @@ procedure(_array(t_s n_i g_relaxed n_depth "tngn")  ; -> list
             l_res = tconc(l_res car(l_r))
             n_k = _skipWs(t_s cadr(l_r) g_relaxed)
             n_c = _code(t_s n_k)
-            cond(
-                (n_c == 93
+            case(n_c
+                (93
                     {
                     g_done = t
                     n_k = n_k + 1
                     }
                 )
-                (n_c == 44
+                (44
                     {
                     n_k = _skipWs(t_s n_k + 1 g_relaxed)
                     when(g_relaxed && _code(t_s n_k) == 93

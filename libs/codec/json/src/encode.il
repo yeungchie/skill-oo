@@ -63,16 +63,16 @@ procedure(_encodeString(t_s "t")  ; -> str
                             l_p = tconc(l_p substring(t_s n_run n_k - n_run))
                         )
                         l_p = tconc(l_p
-                            cond(
-                                (n_c == 34 "\\\"")
-                                (n_c == 92 "\\\\")
-                                (n_c == 8 "\\b")
-                                (n_c == 12 "\\f")
-                                (n_c == 10 "\\n")
-                                (n_c == 13 "\\r")
-                                (n_c == 9 "\\t")
-                                (t sprintf(nil "\\u%04x" n_c))
-                            )
+                        case(n_c
+                            (34 "\\\"")
+                            (92 "\\\\")
+                            (8 "\\b")
+                            (12 "\\f")
+                            (10 "\\n")
+                            (13 "\\r")
+                            (9 "\\t")
+                            (t sprintf(nil "\\u%04x" n_c))
+                        )
                         )
                         n_run = n_k + 1
                         }
@@ -257,8 +257,8 @@ procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys t) "gtgg")  
     ;
     ; **返回**
     ;   (str) - 文本；无法表示时以 error() 中断
-    cond(
-        (format == "json" || format == "jsonc"
+    case(format
+        (("json" "jsonc")
             let((n_indent)
                 n_indent = 0
                 when(indent
@@ -272,7 +272,7 @@ procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys t) "gtgg")  
                 _encodeValue(g_val 0 n_indent sortKeys)
             )
         )
-        (format == "jsonl"
+        ("jsonl"
             unless(listp(g_val)
                 error("ycJson::encode: format \"jsonl\" expects a list")
             )

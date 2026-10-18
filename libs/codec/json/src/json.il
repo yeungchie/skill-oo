@@ -217,10 +217,10 @@ procedure(decode(t_str \@key (format "json") "tt")  ; -> any | list
     unless(stringp(t_str)
         error("ycJson::decode: expects a string")
     )
-    cond(
-        (format == "json" _decodeText(t_str nil))
-        (format == "jsonc" _decodeText(t_str t))
-        (format == "jsonl" _decodeLines(t_str))
+    case(format
+        ("json" _decodeText(t_str nil))
+        ("jsonc" _decodeText(t_str t))
+        ("jsonl" _decodeLines(t_str))
         (t
             error("ycJson::decode: unknown format %A" format)
         )
