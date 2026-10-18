@@ -249,7 +249,7 @@ procedure(_keepNonEmpty(l_items "l")  ; -> list[str]
     )
 )
 
-procedure(split(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> list[str]
+procedure(strSplit(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> list[str]
     ; 切分字符串：默认按空白符；字面分隔保留空段；?regex 委托正则切分。
     ;
     ; **参数**
@@ -264,16 +264,16 @@ procedure(split(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> list
         cond(
             (regex
                 unless(stringp(sep) && sep != ""
-                    error("ycString::split: regex mode needs a non-empty pattern (%A)" sep)
+                    error("ycString::strSplit: regex mode needs a non-empty pattern (%A)" sep)
                 )
                 l_parts = ycRegEx:::reSplit(sep t_s ?all t)
             )
             (sep
                 unless(stringp(sep)
-                    error("ycString::split: separator must be a string (%A)" sep)
+                    error("ycString::strSplit: separator must be a string (%A)" sep)
                 )
                 unless(sep != ""
-                    error("ycString::split: separator must not be empty")
+                    error("ycString::strSplit: separator must not be empty")
                 )
                 l_parts = _splitLiteral(t_s sep)
             )
@@ -288,7 +288,7 @@ procedure(split(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> list
     )
 )
 
-procedure(join(l_items \@key (sep "") "lg")  ; -> str
+procedure(strJoin(l_items \@key (sep "") "lg")  ; -> str
     ; 以分隔符连接字符串列表。
     ;
     ; **参数**
@@ -298,14 +298,14 @@ procedure(join(l_items \@key (sep "") "lg")  ; -> str
     ; **返回**
     ;   (str) - 连接结果；空列表为空串
     unless(stringp(sep)
-        error("ycString::join: separator must be a string (%A)" sep)
+        error("ycString::strJoin: separator must be a string (%A)" sep)
     )
     let((l_p n_i)
         n_i = 0
         foreach(g_item l_items
             n_i = n_i + 1
             unless(stringp(g_item)
-                error("ycString::join: item #%d is not a string (%A)" n_i g_item)
+                error("ycString::strJoin: item #%d is not a string (%A)" n_i g_item)
             )
             unless(n_i == 1
                 l_p = tconc(l_p sep)
