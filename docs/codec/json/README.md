@@ -88,16 +88,16 @@ ycJson::decode("1e3")                       ; => 1000.0
 ycJson::decode("2147483648")                ; => 2147483648.0
 ycJson::decode("\"a\\u4e2d\"")              ; => "a中"
 ycJson::decode("[1, 2,]")
-; *Error* ycJson: unexpected character at line 1, column 7
+; *Error* ycJson::decode: unexpected character at line 1, column 7
 
 ycJson::decode("{ \"a\": 1, }" ?format "jsonc")     ; => <table: a = 1>
 ycJson::decode("[1, /* c */ 2]" ?format "jsonc")    ; => (1 2)
 ycJson::decode("1\n2\n" ?format "jsonl")            ; => (1 2)
 ycJson::decode("1\n2\nbad" ?format "jsonl")
-; *Error* ycJson: invalid literal at line 3, column 1
+; *Error* ycJson::decode: invalid literal at line 3, column 1
 
 ycJson::decode("1" ?format "xml")
-; *Error* ycJson: decode: unknown format "xml"
+; *Error* ycJson::decode: unknown format "xml"
 ```
 
 ### ycJson::encode <sub>`function`</sub>
@@ -137,7 +137,7 @@ ycJson::encode(1.0)                         ; => "1.0"
 ycJson::encode("a\"b")                      ; => "\"a\\\"b\""
 ycJson::encode(list(nil))                   ; => "[[]]"
 ycJson::encode('foo)
-; *Error* ycJson: cannot dump value of type symbol
+; *Error* ycJson::encode: cannot dump value of type symbol
 
 ycJson::encode(list(1 2) ?format "jsonl")           ; => "1\n2\n"
 ycJson::encode(list(ycJson::Null) ?format "jsonl")  ; => "null\n"
@@ -169,7 +169,7 @@ ycJson::encode(list(ycJson::Null) ?format "jsonl")  ; => "null\n"
 ycJson::Type("true") == ycJson::True           ; => t
 ycJson::Type("TRUE") == ycJson::True           ; => t
 ycJson::Type("xml")
-; *Error* ycJson: Type: unknown type name "xml"
+; *Error* ycJson::Type: unknown type name "xml"
 ```
 
 实例提供 `->toSkill()` 转换为 SKILL 原生值（有损：`false` 与空数组同域、`null`/`missing` 同域）：
@@ -189,4 +189,4 @@ ycJson::Type("xml")
 + 整数字面量在 32 位范围内解码为 fixnum，超出为 flonum；编码 fixnum 为精确十进制，编码 flonum 为最短可回环形式（整数值保留一位小数，如 `1.0`）。
 + 非有限浮点（无穷、NaN）不可编码，报错。
 + `\u0000`（NUL）无法保存在字符串中，解码时被丢弃。
-+ 错误消息以 `ycJson: ` 前缀标识来源；解码错误格式为 `ycJson: <说明> at line <行>, column <列>`（均从 1 起，列按字节计）。
++ 错误消息以当前上下文前缀标识来源：解码为 `ycJson::decode: <说明> at line <行>, column <列>`（均从 1 起，列按字节计），编码为 `ycJson::encode:`，类型对象为 `ycJson::Type:` / `ycJson::Type->toSkill:`。

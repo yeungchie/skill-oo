@@ -16,7 +16,7 @@ procedure(_keyStr(g_key "g")  ; -> str
         (symbolp(g_key) symbolToString(g_key))
         (fixp(g_key) sprintf(nil "%d" g_key))
         (t
-            error("ycJson: unsupported table key of type %s" symbolToString(type(g_key)))
+            error("ycJson::encode: unsupported table key of type %s" symbolToString(type(g_key)))
         )
     )
 )
@@ -99,7 +99,7 @@ procedure(_encodeNumber(g_n "g")  ; -> str
         sprintf(nil "%d" g_n)
         let((t_s)
             when(isNaN(g_n) || isInfinity(g_n)
-                error("ycJson: cannot dump non-finite float")
+                error("ycJson::encode: cannot dump non-finite float")
             )
             t_s = sprintf(nil "%.15g" g_n)
             unless(atof(t_s) == g_n
@@ -125,7 +125,7 @@ procedure(_encodeValue(g_val n_depth n_indent g_sort "gnng")  ; -> str
     ; **返回**
     ;   (str) - 该值的 JSON 文本
     when(n_depth > _maxDepth
-        error("ycJson: nesting too deep (limit %d)" _maxDepth)
+        error("ycJson::encode: nesting too deep (limit %d)" _maxDepth)
     )
     cond(
         (g_val == nil "[]")
@@ -134,7 +134,7 @@ procedure(_encodeValue(g_val n_depth n_indent g_sort "gnng")  ; -> str
         (g_val == False "false")
         (g_val == Null "null")
         (g_val == Missing
-            error("ycJson: cannot dump the Missing marker")
+            error("ycJson::encode: cannot dump the Missing marker")
         )
         (stringp(g_val) _encodeString(g_val))
         (fixp(g_val) _encodeNumber(g_val))
@@ -142,7 +142,7 @@ procedure(_encodeValue(g_val n_depth n_indent g_sort "gnng")  ; -> str
         (tablep(g_val) _encodeTable(g_val n_depth n_indent g_sort))
         (listp(g_val) _encodeList(g_val n_depth n_indent g_sort))
         (t
-            error("ycJson: cannot dump value of type %s" symbolToString(type(g_val)))
+            error("ycJson::encode: cannot dump value of type %s" symbolToString(type(g_val)))
         )
     )
 )
@@ -263,7 +263,7 @@ procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys t) "gtgg")  
                 n_indent = 0
                 when(indent
                     unless(fixp(indent)
-                        error("ycJson: ?indent must be a fixnum")
+                        error("ycJson::encode: ?indent must be a fixnum")
                     )
                     when(indent > 0
                         n_indent = indent
@@ -274,7 +274,7 @@ procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys t) "gtgg")  
         )
         (format == "jsonl"
             unless(listp(g_val)
-                error("ycJson: encode: format \"jsonl\" expects a list")
+                error("ycJson::encode: format \"jsonl\" expects a list")
             )
             let((l_p t_s)
                 l_p = nil
@@ -289,7 +289,7 @@ procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys t) "gtgg")  
             )
         )
         (t
-            error("ycJson: encode: unknown format %A" format)
+            error("ycJson::encode: unknown format %A" format)
         )
     )
 )

@@ -42,10 +42,14 @@ defmethod(initializeInstance (self(Type) \@rest _args)
         ;
         ; **返回**
         ;   (any) - 转换结果；有损（False 与空数组、Null/Missing 同域），仅供 SKILL 侧消费
-        cond(
-            (self->_data->name == "True" t)
-            (self->_data->name == "False" nil)
-            (t 'unbound)
+        case(self->_data->name
+            ("True"     t)
+            ("False"    nil)
+            ("Null"     'unbound)
+            ("Missing"  'unbound)
+            (t
+                error("%A->toSkill: unknown type name %A" className(self) self->_data->name)
+            )
         )
     )
     t
@@ -65,7 +69,7 @@ procedure(Type(t_name "t")  ; -> Type
     ;   (Type) - 规范名对应的唯一实例；非字符串或未知名报错
     let((t_canon g_inst)
         unless(stringp(t_name)
-            error("ycJson: Type: unknown type name %A" t_name)
+            error("ycJson::Type: unknown type name %A" t_name)
         )
         t_canon = cond(
             (pcreMatchp("(?i)^true\\z" t_name) "True")
@@ -74,7 +78,7 @@ procedure(Type(t_name "t")  ; -> Type
             (pcreMatchp("(?i)^missing\\z" t_name) "Missing")
         )
         unless(t_canon
-            error("ycJson: Type: unknown type name %A" t_name)
+            error("ycJson::Type: unknown type name %A" t_name)
         )
         g_inst = _TypeCache[t_canon]
         unless(g_inst
@@ -151,7 +155,7 @@ procedure(_lineCol(t_s n_i "tn")  ; -> list
 )
 
 procedure(_error(t_s n_i t_msg "tnt")  ; -> never
-    ; 按统一格式 error() 中断：ycJson: <说明> at line <行>, column <列>。
+    ; 按统一格式 error() 中断：ycJson::decode: <说明> at line <行>, column <列>。
     ;
     ; **参数**
     ;   t_s    (str) - 输入串
@@ -162,7 +166,7 @@ procedure(_error(t_s n_i t_msg "tnt")  ; -> never
     ;   (never) - 总是调用 error()，不返回
     let((l_pos)
         l_pos = _lineCol(t_s n_i)
-        error("ycJson: %s at line %d, column %d" t_msg car(l_pos) cadr(l_pos))
+        error("ycJson::decode: %s at line %d, column %d" t_msg car(l_pos) cadr(l_pos))
     )
 )
 
@@ -211,14 +215,14 @@ procedure(decode(t_str \@key (format "json") "tt")  ; -> any | list
     ; **返回**
     ;   (any|list) - 解码产物；"jsonl" 返回按行序的列表
     unless(stringp(t_str)
-        error("ycJson: decode expects a string")
+        error("ycJson::decode: expects a string")
     )
     cond(
         (format == "json" _decodeText(t_str nil))
         (format == "jsonc" _decodeText(t_str t))
         (format == "jsonl" _decodeLines(t_str))
         (t
-            error("ycJson: decode: unknown format %A" format)
+            error("ycJson::decode: unknown format %A" format)
         )
     )
 )
