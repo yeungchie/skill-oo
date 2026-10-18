@@ -8,6 +8,7 @@
 + [ycRegEx](docs/regex/README.md) —— 正则表达式搜索、匹配与替换。
 + [ycSubProcess](docs/subprocess/README.md) —— 子进程启动、交互与输出管理。
 + [ycJson](docs/codec/json/README.md) —— JSON、jsonc、jsonl 的解码与编码。
++ [ycUtf8](docs/utf8/README.md) —— UTF-8 编解码、码点操作与显示宽度。
 
 ## 安装
 
