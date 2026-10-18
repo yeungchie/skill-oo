@@ -87,14 +87,14 @@ procedure(_fnmatchToPcre(t_pattern "t")  ; -> str
         while(n_i <= n_len
             t_c = substring(t_pattern n_i 1)
             n_i = n_i + 1
-            cond(
-                (t_c == "*"
+            case(t_c
+                ("*"
                     t_res = strcat(t_res "[^/]*")
                 )
-                (t_c == "?"
+                ("?"
                     t_res = strcat(t_res "[^/]")
                 )
-                (t_c == "["
+                ("["
                     let((t_br)
                         t_br = _fnmatchBracket(t_pattern n_i - 1 n_len)
                         t_res = strcat(t_res car(t_br))
