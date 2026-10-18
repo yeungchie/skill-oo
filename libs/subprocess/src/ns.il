@@ -1,4 +1,6 @@
-makeNamespace("ycSubProcess")
+unless(findNamespace("ycSubProcess")
+    makeNamespace("ycSubProcess")
+)
 addToNamespace("ycSubProcess"
     mapcar('symbolToString '(
         Stream

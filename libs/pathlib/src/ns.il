@@ -1,4 +1,6 @@
-makeNamespace("ycPathLib")
+unless(findNamespace("ycPathLib")
+    makeNamespace("ycPathLib")
+)
 addToNamespace("ycPathLib"
     mapcar('symbolToString '(
         Path

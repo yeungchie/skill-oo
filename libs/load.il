@@ -3,13 +3,16 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-; Bootstrap ycPathLib first - this loader needs ycPathLib::currentFile below.
-let((t_self)
+; Load the namespace registry first (no dependencies), then bootstrap
+; ycPathLib - this loader needs ycPathLib::currentFile below.
+let((t_self t_dir)
     t_self = get_filename(piport)
     unless(pcreMatchp("/" t_self)
         t_self = strcat("./" t_self)
     )
-    load(strcat(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") t_self "" 0) "pathlib/load.il"))
+    t_dir = pcreReplace(pcreCompile("(?<=/)[^/]+/*$") t_self "" 0)
+    load(strcat(t_dir "registry.il"))
+    load(strcat(t_dir "pathlib/load.il"))
 )
 
 ; pathlib stays outside the loop because the loop itself depends on it;

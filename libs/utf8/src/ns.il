@@ -1,4 +1,6 @@
-makeNamespace("ycUtf8")
+unless(findNamespace("ycUtf8")
+    makeNamespace("ycUtf8")
+)
 addToNamespace("ycUtf8"
     mapcar('symbolToString '(
         decode

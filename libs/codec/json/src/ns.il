@@ -1,4 +1,6 @@
-makeNamespace("ycJson")
+unless(findNamespace("ycJson")
+    makeNamespace("ycJson")
+)
 addToNamespace("ycJson"
     mapcar('symbolToString '(
         decode

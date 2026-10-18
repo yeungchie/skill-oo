@@ -1,4 +1,6 @@
-makeNamespace("ycRegEx")
+unless(findNamespace("ycRegEx")
+    makeNamespace("ycRegEx")
+)
 addToNamespace("ycRegEx"
     mapcar('symbolToString '(
         reCompile
