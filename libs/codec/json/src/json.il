@@ -96,8 +96,9 @@ False   = Type("false")
 Null    = Type("null")
 Missing = Type("missing")
 
-; 解析与输出的默认嵌套深度上限：实测解码约 900 层触语言栈上界、编码约 1150，取 800 留安全余量；可用 ?maxDepth 调整。
-_maxDepth = 800
+; 默认嵌套深度上限：解码实测约 900 层、编码约 1150 层触语言栈上界，二者取 800 留安全余量；可用 ?maxDepth 调整。
+_maxDecodeDepth = 800
+_maxEncodeDepth = 800
 
 
 ; ---------- 基础工具 ----------
@@ -220,7 +221,7 @@ procedure(decode(t_str \@key (format "json") (maxDepth nil) "ttg")  ; -> any | l
         error("ycJson::decode: expects a string")
     )
     when(maxDepth == nil
-        maxDepth = _maxDepth
+        maxDepth = _maxDecodeDepth
     )
     unless(fixp(maxDepth) && maxDepth >= 1
         error("ycJson::decode: ?maxDepth must be a positive fixnum")

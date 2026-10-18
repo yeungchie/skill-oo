@@ -10,7 +10,8 @@ addToNamespace("ycJson"
         Null
         Missing
         _TypeCache
-        _maxDepth
+        _maxDecodeDepth
+        _maxEncodeDepth
         _code
         _digitp
         _lineCol

@@ -273,7 +273,7 @@ procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys nil) (strict
         error("ycJson::encode: unknown ?nilAs value %A" nilAs)
     )
     when(maxDepth == nil
-        maxDepth = _maxDepth
+        maxDepth = _maxEncodeDepth
     )
     unless(fixp(maxDepth) && maxDepth >= 1
         error("ycJson::encode: ?maxDepth must be a positive fixnum")
