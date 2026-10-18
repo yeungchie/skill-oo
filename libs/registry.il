@@ -15,6 +15,7 @@ _ycModules = list(
     "ycSubProcess"
     "ycJson"
     "ycUtf8"
+    "ycString"
 )
 
 procedure(ycRequireNamespace(@rest l_names "t")  ; -> t

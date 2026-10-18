@@ -1,0 +1,41 @@
+unless(findNamespace("ycString")
+    makeNamespace("ycString")
+)
+addToNamespace("ycString"
+    mapcar('symbolToString '(
+        trim
+        trimStart
+        trimEnd
+        pad
+        width
+        split
+        join
+        startsWith
+        endsWith
+        replace
+        count
+        escape
+        unescape
+        words
+        joinWords
+        sanitize
+        toSnake
+        toKebab
+        toCamel
+        toPascal
+        _trimSide
+        _repeat
+        _isWhitespace
+        _splitWhitespace
+        _splitLiteral
+        _keepNonEmpty
+        _isUpperChar
+        _isLowerChar
+        _isDigitChar
+        _isWordChar
+        _capWord
+    ))
+)
+unuseNamespace("ycString")
+
+; END
