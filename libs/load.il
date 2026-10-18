@@ -21,6 +21,7 @@ let((t_dir t_pkgs)
         "regex"
         "subprocess"
         "codec"
+        "utf8"
     )
     foreach(t_pkg t_pkgs
         t_dir->join(t_pkg "load.il")->load()
