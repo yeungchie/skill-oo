@@ -1,5 +1,8 @@
 useNamespace("ycJson")
 
+; 编码默认嵌套深度上限：实测约 1150 层触语言栈上界，取 800 留安全余量；可用 ?maxDepth 调整。
+_maxEncodeDepth = 800
+
 
 ; ---------- 输出 ----------
 

@@ -1,5 +1,8 @@
 useNamespace("ycJson")
 
+; 解码默认嵌套深度上限：实测约 900 层触语言栈上界，取 800 留安全余量；可用 ?maxDepth 调整。
+_maxDecodeDepth = 800
+
 
 ; ---------- 扫描器 ----------
 
@@ -105,103 +108,6 @@ procedure(_utf8Str(n_cp "n")  ; -> str
                 intToChar(128 + remainder(n_cp/64 64))
                 intToChar(128 + remainder(n_cp 64))
             )
-        )
-    )
-)
-
-procedure(_literal(t_s n_i "tn")  ; -> list
-    ; 在位置处匹配 true/false/null 字面量（大小写敏感）。
-    ;
-    ; **参数**
-    ;   t_s  (str) - 输入串
-    ;   n_i  (int) - 字面量首字符位置
-    ;
-    ; **返回**
-    ;   (list) - (值 下一位置)；值分别为 True、False、Null
-    cond(
-        (substring(t_s n_i 4) == "true"
-            list(True n_i + 4)
-        )
-        (substring(t_s n_i 5) == "false"
-            list(False n_i + 5)
-        )
-        (substring(t_s n_i 4) == "null"
-            list(Null n_i + 4)
-        )
-        (t
-            _error(t_s n_i "invalid literal")
-        )
-    )
-)
-
-procedure(_number(t_s n_i "tn")  ; -> list
-    ; 按 JSON 语法扫描数字：严格校验整数/小数/指数写法，超 fixnum 范围回 flonum。
-    ;
-    ; **参数**
-    ;   t_s  (str) - 输入串
-    ;   n_i  (int) - 数字首字符位置（'-' 或数字）
-    ;
-    ; **返回**
-    ;   (list) - (数值 下一位置)；整数走 fixnum（范围内），否则 flonum
-    let((n_len n_k n_c t_tok n_v g_num)
-        n_len = length(t_s)
-        n_k = n_i
-        n_c = _code(t_s n_k)
-        when(n_c == 45
-            n_k = n_k + 1
-            n_c = _code(t_s n_k)
-        )
-        cond(
-            (n_c == 48
-                n_k = n_k + 1
-            )
-            (n_c >= 49 && n_c <= 57
-                n_k = n_k + 1
-                while(n_k <= n_len && _digitp(_code(t_s n_k))
-                    n_k = n_k + 1
-                )
-            )
-            (t
-                _error(t_s n_i "invalid number")
-            )
-        )
-        when(n_c == 48 && _digitp(_code(t_s n_k))
-            _error(t_s n_k "invalid number")
-        )
-        when(_code(t_s n_k) == 46
-            n_k = n_k + 1
-            unless(_digitp(_code(t_s n_k))
-                _error(t_s n_i "invalid number")
-            )
-            while(n_k <= n_len && _digitp(_code(t_s n_k))
-                n_k = n_k + 1
-            )
-        )
-        n_c = _code(t_s n_k)
-        when(n_c == 101 || n_c == 69
-            n_k = n_k + 1
-            n_c = _code(t_s n_k)
-            when(n_c == 43 || n_c == 45
-                n_k = n_k + 1
-            )
-            unless(_digitp(_code(t_s n_k))
-                _error(t_s n_i "invalid number")
-            )
-            while(n_k <= n_len && _digitp(_code(t_s n_k))
-                n_k = n_k + 1
-            )
-        )
-        t_tok = substring(t_s n_i n_k - n_i)
-        if(pcreMatchp("[.eE]" t_tok)
-            list(atof(t_tok) n_k)
-            {
-            n_v = atof(t_tok)
-            if(n_v >= (-2147483647 - 1) && n_v <= 2147483647
-                g_num = atoi(t_tok)
-                g_num = n_v
-            )
-            list(g_num n_k)
-            }
         )
     )
 )
@@ -478,6 +384,57 @@ procedure(_array(t_s n_i g_relaxed n_depth n_max "tngnn")  ; -> list
             )
         )
         list(car(l_res) n_k)
+    )
+)
+
+procedure(_decodeText(t_s g_relaxed n_max "tgn")  ; -> any
+    ; 解析单个 JSON 文档：前导/尾随空白允许，尾随非空白字符报错。
+    ;
+    ; **参数**
+    ;   t_s        (str) - 输入串
+    ;   g_relaxed  (t|nil) - jsonc 放宽开关
+    ;   n_max      (int) - 最大嵌套深度
+    ;
+    ; **返回**
+    ;   (any) - 解析产物
+    let((n_k l_r g_val)
+        n_k = _skipWs(t_s 1 g_relaxed)
+        l_r = _value(t_s n_k g_relaxed 0 n_max)
+        g_val = car(l_r)
+        n_k = _skipWs(t_s cadr(l_r) g_relaxed)
+        when(n_k <= length(t_s)
+            _error(t_s n_k "unexpected trailing characters")
+        )
+        g_val
+    )
+)
+
+procedure(decode(t_str \@key (format "json") (maxDepth nil) "ttg")  ; -> any | list
+    ; 解码文本：?format 选 "json"（严格单文档）、"jsonc"（注释与尾逗号放宽）或 "jsonl"（逐行）。
+    ;
+    ; **参数**
+    ;   t_str     (str) - 输入文本
+    ;   ?format   (str) - 格式；默认 "json"
+    ;   ?maxDepth (int) - 最大嵌套深度；默认 1000
+    ;
+    ; **返回**
+    ;   (any|list) - 解码产物；"jsonl" 返回按行序的列表
+    unless(stringp(t_str)
+        error("ycJson::decode: expects a string")
+    )
+    when(maxDepth == nil
+        maxDepth = _maxDecodeDepth
+    )
+    unless(fixp(maxDepth) && maxDepth >= 1
+        error("ycJson::decode: ?maxDepth must be a positive fixnum")
+    )
+    case(format
+        ("json" _decodeText(t_str nil maxDepth))
+        ("jsonc" _decodeText(t_str t maxDepth))
+        ("jsonl" _decodeLines(t_str maxDepth))
+        (t
+            error("ycJson::decode: unknown format %A" format)
+        )
     )
 )
 
