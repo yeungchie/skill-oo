@@ -5,6 +5,9 @@ _assert(ycJson::encode(ycJson::False) == "false"  "encode: False -> false")
 _assert(ycJson::encode(ycJson::Null) == "null"  "encode: Null -> null")
 _assertError(lambda(() ycJson::encode(ycJson::Missing))  "encode: Missing errors")
 _assertError(lambda(() ycJson::encode('foo))  "encode: plain symbol errors")
+_assert(ycJson::encode(nil ?nilAs "false") == "false"  "encode: nilAs false")
+_assert(ycJson::encode(nil ?nilAs "array") == "[]"  "encode: nilAs array")
+_assertError(lambda(() ycJson::encode(nil ?nilAs "null"))  "encode: nilAs null invalid")
 
 ; --- 数字 ---
 _assert(ycJson::encode(42) == "42"  "encode: fixnum 42")
@@ -49,18 +52,24 @@ let((t_v)
     t_v = makeTable("ycTest")
     t_v["b"] = 1
     t_v["a"] = 2
-    _assert(ycJson::encode(t_v) == "{\"a\":2,\"b\":1}"  "encode: sorts keys by default")
+    _assert(ycJson::encode(t_v ?sortKeys t) == "{\"a\":2,\"b\":1}"  "encode: sorts keys when requested")
     _assert(
-        index(ycJson::encode(t_v ?sortKeys nil) "\"a\":2")
-            && index(ycJson::encode(t_v ?sortKeys nil) "\"b\":1")
-        "encode: unsorted output contains all entries"
+        index(ycJson::encode(t_v) "\"a\":2")
+            && index(ycJson::encode(t_v) "\"b\":1")
+        "encode: default keeps table order entries"
     )
 )
 let((t_v)
     t_v = makeTable("ycTest")
     t_v['k] = 1
     t_v[3] = 2
-    _assert(ycJson::encode(t_v) == "{\"3\":2,\"k\":1}"  "encode: symbol and fixnum keys")
+    _assert(ycJson::encode(t_v ?sortKeys t) == "{\"3\":2,\"k\":1}"  "encode: symbol and fixnum keys")
+)
+let((t_v)
+    t_v = makeTable("ycTest")
+    t_v['k] = 1
+    t_v[3] = 2
+    _assertError(lambda(() ycJson::encode(t_v ?strict t))  "encode: strict rejects non-string keys")
 )
 let((t_v)
     t_v = makeTable("ycTest")
@@ -95,8 +104,12 @@ _assert(ycJson::encode(makeTable("ycTest") ?indent 2) == "{}"  "encode: indent e
 _assertError(lambda(() ycJson::encode(5 ?indent "x"))  "encode: indent type error")
 
 ; --- 嵌套深度 ---
-_assert(errset(ycJson::encode(_nestArrayValue(1000)) nil) != nil  "encode: 1000-deep nesting ok")
-_assertError(lambda(() ycJson::encode(_nestArrayValue(1001)))  "encode: 1001-deep nesting errors")
+_assert(errset(ycJson::encode(_nestArrayValue(800)) nil) != nil  "encode: 800-deep nesting ok")
+_assertError(lambda(() ycJson::encode(_nestArrayValue(801)))  "encode: 801-deep nesting errors")
+_assert(errset(ycJson::encode(_nestArrayValue(900) ?maxDepth 1000) nil) != nil  "encode: custom maxDepth allows deeper nesting")
+_assertError(lambda(() ycJson::encode(list(list(1)) ?maxDepth 1))  "encode: maxDepth rejects deeper than limit")
+_assertError(lambda(() ycJson::encode(1 ?maxDepth 0))  "encode: maxDepth zero errors")
+_assertError(lambda(() ycJson::encode(1 ?maxDepth "x"))  "encode: maxDepth type error")
 
 ; --- 往返一致性 ---
 let((g_v t_s)

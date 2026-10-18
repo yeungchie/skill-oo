@@ -57,8 +57,8 @@ procedure(_assertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil（错误消�
 
 procedure(_assertDumpEq(g_actual g_expected t_msg "ggt")  ; -> t | nil（经 encode 规范化串比较结构）
     let((t_a t_b g_ok)
-        t_a = ycJson::encode(g_actual)
-        t_b = ycJson::encode(g_expected)
+        t_a = ycJson::encode(g_actual ?sortKeys t)
+        t_b = ycJson::encode(g_expected ?sortKeys t)
         g_ok = t_a == t_b
         unless(g_ok
             printf("  expected: %s\n" t_b)

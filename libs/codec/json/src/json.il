@@ -96,8 +96,8 @@ False   = Type("false")
 Null    = Type("null")
 Missing = Type("missing")
 
-; 解析与输出的嵌套深度上限。
-_maxDepth = 1000
+; 解析与输出的默认嵌套深度上限：实测解码约 900 层触语言栈上界、编码约 1150，取 800 留安全余量；可用 ?maxDepth 调整。
+_maxDepth = 800
 
 
 ; ---------- 基础工具 ----------
@@ -184,18 +184,19 @@ procedure(_build(l_p "l")  ; -> str
 
 ; ---------- 解码入口 ----------
 
-procedure(_decodeText(t_s g_relaxed "tg")  ; -> any
+procedure(_decodeText(t_s g_relaxed n_max "tgn")  ; -> any
     ; 解析单个 JSON 文档：前导/尾随空白允许，尾随非空白字符报错。
     ;
     ; **参数**
     ;   t_s        (str) - 输入串
     ;   g_relaxed  (t|nil) - jsonc 放宽开关
+    ;   n_max      (int) - 最大嵌套深度
     ;
     ; **返回**
     ;   (any) - 解析产物
     let((n_k l_r g_val)
         n_k = _skipWs(t_s 1 g_relaxed)
-        l_r = _value(t_s n_k g_relaxed 0)
+        l_r = _value(t_s n_k g_relaxed 0 n_max)
         g_val = car(l_r)
         n_k = _skipWs(t_s cadr(l_r) g_relaxed)
         when(n_k <= length(t_s)
@@ -205,22 +206,29 @@ procedure(_decodeText(t_s g_relaxed "tg")  ; -> any
     )
 )
 
-procedure(decode(t_str \@key (format "json") "tt")  ; -> any | list
+procedure(decode(t_str \@key (format "json") (maxDepth nil) "ttg")  ; -> any | list
     ; 解码文本：?format 选 "json"（严格单文档）、"jsonc"（注释与尾逗号放宽）或 "jsonl"（逐行）。
     ;
     ; **参数**
-    ;   t_str   (str) - 输入文本
-    ;   ?format (str) - 格式；默认 "json"
+    ;   t_str     (str) - 输入文本
+    ;   ?format   (str) - 格式；默认 "json"
+    ;   ?maxDepth (int) - 最大嵌套深度；默认 1000
     ;
     ; **返回**
     ;   (any|list) - 解码产物；"jsonl" 返回按行序的列表
     unless(stringp(t_str)
         error("ycJson::decode: expects a string")
     )
+    when(maxDepth == nil
+        maxDepth = _maxDepth
+    )
+    unless(fixp(maxDepth) && maxDepth >= 1
+        error("ycJson::decode: ?maxDepth must be a positive fixnum")
+    )
     case(format
-        ("json" _decodeText(t_str nil))
-        ("jsonc" _decodeText(t_str t))
-        ("jsonl" _decodeLines(t_str))
+        ("json" _decodeText(t_str nil maxDepth))
+        ("jsonc" _decodeText(t_str t maxDepth))
+        ("jsonl" _decodeLines(t_str maxDepth))
         (t
             error("ycJson::decode: unknown format %A" format)
         )

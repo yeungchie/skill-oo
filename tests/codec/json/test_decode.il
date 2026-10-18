@@ -126,9 +126,12 @@ _assertError(lambda(() ycJson::decode("{\"a\":1 \"b\":2}"))  "decode: rejects mi
 _assertError(lambda(() ycJson::decode("{,}"))  "decode: rejects comma without key")
 
 ; --- 嵌套深度 ---
-_assert(errset(ycJson::decode(_nestArrays(1000)) nil) != nil  "decode: 1000-deep nesting ok")
-_assertError(lambda(() ycJson::decode(_nestArrays(1001)))  "decode: 1001-deep nesting errors")
-_assertErrorMsg(lambda(() ycJson::decode(_nestArrays(1001))) "nesting too deep"  "decode: deep nesting message")
+_assert(errset(ycJson::decode(_nestArrays(800)) nil) != nil  "decode: 800-deep nesting ok")
+_assertError(lambda(() ycJson::decode(_nestArrays(801)))  "decode: 801-deep nesting errors")
+_assertErrorMsg(lambda(() ycJson::decode(_nestArrays(801))) "nesting too deep"  "decode: deep nesting message")
+_assert(errset(ycJson::decode(_nestArrays(900) ?maxDepth 1000) nil) != nil  "decode: custom maxDepth allows deeper nesting")
+_assertError(lambda(() ycJson::decode("[]" ?maxDepth 0))  "decode: maxDepth zero errors")
+_assertError(lambda(() ycJson::decode("[]" ?maxDepth "x"))  "decode: maxDepth type error")
 
 ; --- 错误位置 ---
 _assertErrorMsg(lambda(() ycJson::decode("x")) "line 1, column 1"  "decode: error position line 1")

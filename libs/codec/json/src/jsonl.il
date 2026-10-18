@@ -71,11 +71,12 @@ procedure(_newlines(n_n "n")  ; -> str
     )
 )
 
-procedure(_decodeLines(t_str "t")  ; -> list
+procedure(_decodeLines(t_str n_max "tn")  ; -> list
     ; 逐行解码 JSON Lines：空行/全空白行跳过，各非空行须为完整文档，错误带原始行号。
     ;
     ; **参数**
     ;   t_str  (str) - JSON Lines 文本
+    ;   n_max  (int) - 最大嵌套深度
     ;
     ; **返回**
     ;   (list) - 按行序的解码产物列表；无有效行时为 nil
@@ -87,11 +88,11 @@ procedure(_decodeLines(t_str "t")  ; -> list
             t_line = car(l_lines)
             n_idx = n_idx + 1
             unless(_lineBlankp(t_line)
-                l_r = errset(_decodeText(t_line nil) nil)
+                l_r = errset(_decodeText(t_line nil n_max) nil)
                 if(l_r
                     l_res = tconc(l_res car(l_r))
                     ; 行内报错：以等长换行前缀重跑，令错误行列指向原始行号
-                    _decodeText(strcat(_newlines(n_idx - 1) t_line) nil)
+                    _decodeText(strcat(_newlines(n_idx - 1) t_line) nil n_max)
                 )
             )
             l_lines = cdr(l_lines)

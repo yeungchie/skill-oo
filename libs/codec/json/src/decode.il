@@ -332,7 +332,7 @@ procedure(_string(t_s n_i "tn")  ; -> list
     )
 )
 
-procedure(_value(t_s n_i g_relaxed n_depth "tngn")  ; -> list
+procedure(_value(t_s n_i g_relaxed n_depth n_max "tngnn")  ; -> list
     ; 解析任意值：按首字符派发到字符串/对象/数组/字面量/数字。
     ;
     ; **参数**
@@ -340,12 +340,13 @@ procedure(_value(t_s n_i g_relaxed n_depth "tngn")  ; -> list
     ;   n_i        (int) - 值首字符位置
     ;   g_relaxed  (t|nil) - jsonc 放宽开关
     ;   n_depth    (int) - 当前嵌套深度（顶层值 0）
+    ;   n_max      (int) - 最大嵌套深度
     ;
     ; **返回**
     ;   (list) - (值 下一位置)；深度超限或字符非法报错
     let((n_c)
-        when(n_depth > _maxDepth
-            _error(t_s n_i lsprintf("nesting too deep (limit %d)" _maxDepth))
+        when(n_depth > n_max
+            _error(t_s n_i lsprintf("nesting too deep (limit %d)" n_max))
         )
         n_c = _code(t_s n_i)
         when(!n_c
@@ -353,8 +354,8 @@ procedure(_value(t_s n_i g_relaxed n_depth "tngn")  ; -> list
         )
         case(n_c
             (34 _string(t_s n_i))
-            (123 _object(t_s n_i g_relaxed n_depth))
-            (91 _array(t_s n_i g_relaxed n_depth))
+            (123 _object(t_s n_i g_relaxed n_depth n_max))
+            (91 _array(t_s n_i g_relaxed n_depth n_max))
             (116 _literal(t_s n_i))
             (102 _literal(t_s n_i))
             (110 _literal(t_s n_i))
@@ -368,7 +369,7 @@ procedure(_value(t_s n_i g_relaxed n_depth "tngn")  ; -> list
     )
 )
 
-procedure(_object(t_s n_i g_relaxed n_depth "tngn")  ; -> list
+procedure(_object(t_s n_i g_relaxed n_depth n_max "tngnn")  ; -> list
     ; 解析对象：键值对写入 table（缺省标记 Missing）；jsonc 模式允许尾逗号。
     ;
     ; **参数**
@@ -376,6 +377,7 @@ procedure(_object(t_s n_i g_relaxed n_depth "tngn")  ; -> list
     ;   n_i        (int) - '{' 位置
     ;   g_relaxed  (t|nil) - jsonc 放宽开关
     ;   n_depth    (int) - 当前嵌套深度
+    ;   n_max      (int) - 最大嵌套深度
     ;
     ; **返回**
     ;   (list) - (table 闭括号后一位置)
@@ -399,7 +401,7 @@ procedure(_object(t_s n_i g_relaxed n_depth "tngn")  ; -> list
                 _error(t_s n_k "expected ':'")
             )
             n_k = _skipWs(t_s n_k + 1 g_relaxed)
-            l_r = _value(t_s n_k g_relaxed n_depth + 1)
+            l_r = _value(t_s n_k g_relaxed n_depth + 1 n_max)
             t_obj[t_key] = car(l_r)
             n_k = _skipWs(t_s cadr(l_r) g_relaxed)
             n_c = _code(t_s n_k)
@@ -428,7 +430,7 @@ procedure(_object(t_s n_i g_relaxed n_depth "tngn")  ; -> list
     )
 )
 
-procedure(_array(t_s n_i g_relaxed n_depth "tngn")  ; -> list
+procedure(_array(t_s n_i g_relaxed n_depth n_max "tngnn")  ; -> list
     ; 解析数组：元素累积为 list（空数组即 nil）；jsonc 模式允许尾逗号。
     ;
     ; **参数**
@@ -436,6 +438,7 @@ procedure(_array(t_s n_i g_relaxed n_depth "tngn")  ; -> list
     ;   n_i        (int) - '[' 位置
     ;   g_relaxed  (t|nil) - jsonc 放宽开关
     ;   n_depth    (int) - 当前嵌套深度
+    ;   n_max      (int) - 最大嵌套深度
     ;
     ; **返回**
     ;   (list) - (列表或 nil 闭括号后一位置)
@@ -449,7 +452,7 @@ procedure(_array(t_s n_i g_relaxed n_depth "tngn")  ; -> list
         )
         while(!g_done
             n_k = _skipWs(t_s n_k g_relaxed)
-            l_r = _value(t_s n_k g_relaxed n_depth + 1)
+            l_r = _value(t_s n_k g_relaxed n_depth + 1 n_max)
             l_res = tconc(l_res car(l_r))
             n_k = _skipWs(t_s cadr(l_r) g_relaxed)
             n_c = _code(t_s n_k)
