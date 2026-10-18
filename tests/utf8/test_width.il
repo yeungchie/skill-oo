@@ -30,7 +30,8 @@ _assert(
     "width: soft hyphen stays narrow"
 )
 _assert(ycUtf8::width(strcat("a" intToChar(128)) ?strict nil) == 2  "width: lenient replacement")
-_assertError(lambda(() ycUtf8::width("a" ?ambiguous 0))  "width: invalid ambiguous")
+_assertErrorMsg(lambda(() ycUtf8::width("a" ?ambiguous 0)) "ycUtf8::width: ambiguous must be 1 or 2"  "width: invalid ambiguous")
+_assertErrorMsg(lambda(() ycUtf8::width(123 ?ambiguous 0)) "argument #1 should be a string"  "width: non-string")
 _assertError(lambda(() ycUtf8::width(strcat(intToChar(128))))  "width: strict invalid")
 
 _assert(ycUtf8::charWidth(97) == 1  "charWidth: ascii")
@@ -46,6 +47,7 @@ _assertError(lambda(() ycUtf8::charWidth(-1))  "charWidth: negative")
 _assertError(lambda(() ycUtf8::charWidth(55296))  "charWidth: surrogate")
 _assertError(lambda(() ycUtf8::charWidth(1114112))  "charWidth: above max")
 _assertError(lambda(() ycUtf8::charWidth(97 ?ambiguous 3))  "charWidth: invalid ambiguous")
+_assertErrorMsg(lambda(() ycUtf8::charWidth("x")) "argument #1 should be a number"  "charWidth: non-fixnum")
 
 _TestWidthDone = t
 

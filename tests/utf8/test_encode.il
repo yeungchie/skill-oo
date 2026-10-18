@@ -30,12 +30,12 @@ _assert(
         == strcat(intToChar(244) intToChar(143) intToChar(191) intToChar(191))
     "encode: u+10ffff"
 )
-_assertErrorMsg(lambda(() ycUtf8::encode(list(0))) "cannot be represented"  "encode: nul rejected")
+_assertErrorMsg(lambda(() ycUtf8::encode(list(0))) "ycUtf8::encode: codepoint at index 1"  "encode: nul rejected")
 _assertError(lambda(() ycUtf8::encode(list(-1)))  "encode: negative")
 _assertError(lambda(() ycUtf8::encode(list(55296)))  "encode: surrogate")
 _assertError(lambda(() ycUtf8::encode(list(1114112)))  "encode: above max")
 _assertError(lambda(() ycUtf8::encode(list(97.5)))  "encode: float")
-_assertErrorMsg(lambda(() ycUtf8::encode(list(97 "x"))) "at index 2"  "encode: element index")
+_assertErrorMsg(lambda(() ycUtf8::encode(list(97 "x"))) "ycUtf8::encode: invalid codepoint at index 2"  "encode: element index")
 _assertError(lambda(() ycUtf8::encode("abc"))  "encode: non-list")
 _assert(
     ycUtf8::decode(ycUtf8::encode(list(127 128 2047 2048 65535 65536 1114111 128512)))

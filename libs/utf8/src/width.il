@@ -51,16 +51,16 @@ procedure(width(t_str \@key (strict t) (ambiguous 1) "tgg")  ; -> int
     ;
     ; **参数**
     ;   t_str      (str) - UTF-8 字节串
-    ;   strict     (any) - 非 nil 时非法序列报错；nil 时以 U+FFFD 替换
-    ;   ambiguous  (int) - East Asian Ambiguous 的宽度（1 或 2）
+    ;   ?strict    (any) - 非 nil 时非法序列报错；nil 时以 U+FFFD 替换；默认 t
+    ;   ?ambiguous (int) - East Asian Ambiguous 的宽度（1 或 2）；默认 1
     ;
     ; **返回**
     ;   (int) - 显示列宽；空串为 0
-    unless(stringp(t_str)
-        error("ycUtf8::width: expects a string")
-    )
     unless(ambiguous == 1 || ambiguous == 2
         error("ycUtf8::width: ambiguous must be 1 or 2")
+    )
+    unless(stringp(t_str)
+        error("ycUtf8::width: expects a string")
     )
     let((l_res n_i n_sum)
         n_i = 1
@@ -79,7 +79,7 @@ procedure(charWidth(n_cp \@key (ambiguous 1) "ng")  ; -> int
     ;
     ; **参数**
     ;   n_cp       (int) - 码点（0..0x10FFFF，非代理区）
-    ;   ambiguous  (int) - East Asian Ambiguous 的宽度（1 或 2）
+    ;   ?ambiguous (int) - East Asian Ambiguous 的宽度（1 或 2）；默认 1
     ;
     ; **返回**
     ;   (int) - 0 / 1 / 2

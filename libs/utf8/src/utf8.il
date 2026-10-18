@@ -146,7 +146,7 @@ procedure(decode(t_str \@key (strict t) "tg")  ; -> list | nil
     ;
     ; **参数**
     ;   t_str   (str) - UTF-8 字节串
-    ;   strict  (any) - 非 nil 时非法序列报错；nil 时逐字节替换为 U+FFFD
+    ;   ?strict (any) - 非 nil 时非法序列报错；nil 时逐字节替换为 U+FFFD；默认 t
     ;
     ; **返回**
     ;   (list|nil) - 码点列表；空串为 nil
@@ -199,7 +199,7 @@ procedure(charCount(t_str \@key (strict t) "tg")  ; -> int
     ;
     ; **参数**
     ;   t_str   (str) - UTF-8 字节串
-    ;   strict  (any) - 非 nil 时非法序列报错；nil 时逐字节替换为 U+FFFD
+    ;   ?strict (any) - 非 nil 时非法序列报错；nil 时逐字节替换为 U+FFFD；默认 t
     ;
     ; **返回**
     ;   (int) - 码点个数；空串为 0
@@ -225,7 +225,7 @@ procedure(slice(t_str n_start n_len \@key (strict t) "tnng")  ; -> str | nil
     ;   t_str    (str) - UTF-8 字节串
     ;   n_start  (int) - 1-based 码点起点（>= 1）
     ;   n_len    (int) - 码点长度（>= 0）
-    ;   strict   (any) - 非 nil 时非法序列报错；nil 时以 U+FFFD 替换
+    ;   ?strict  (any) - 非 nil 时非法序列报错；nil 时以 U+FFFD 替换；默认 t
     ;
     ; **返回**
     ;   (str|nil) - 切片结果；起点超过码点总数时为 nil
@@ -247,9 +247,7 @@ procedure(slice(t_str n_start n_len \@key (strict t) "tnng")  ; -> str | nil
             n_i = cadr(l_res)
             n_seen = n_seen + 1
         )
-        if(n_i > n_total
-            nil
-            {
+        unless(n_i > n_total
             n_take = 0
             while(n_i <= n_total && n_take < n_len
                 l_res = _read(t_str n_i strict "ycUtf8::slice")
@@ -258,7 +256,6 @@ procedure(slice(t_str n_start n_len \@key (strict t) "tnng")  ; -> str | nil
                 n_take = n_take + 1
             )
             _build(l_p)
-            }
         )
     )
 )

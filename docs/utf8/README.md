@@ -44,7 +44,7 @@ ycUtf8::decode(strcat(intToChar(128)))                 ; 报错：invalid UTF-8 
 ycUtf8::decode(strcat(intToChar(128)) ?strict nil)     ; => (65533)
 ```
 
-宽松模式每遇到一个非法字节产出一个 U+FFFD 并前进一字节；`slice` 返回重新编码后的替换字符，不保留原始非法字节。
+宽松模式每遇到一个非法字节产出一个 U+FFFD 并前进一字节；`slice` 返回重新编码后的替换字符，不保留原始非法字节。严格模式下 `slice` 只校验扫描经过的字节（窗口及其前导段）；窗口之后的非法字节不影响切片结果，需要整串校验时用 `isValid`。
 
 ## 宽度规则
 
