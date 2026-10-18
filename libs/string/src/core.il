@@ -158,6 +158,167 @@ procedure(pad(t_s n_width \@key (fill " ") (side "end") (unit "display") (ambigu
     )
 )
 
+procedure(_isWhitespace(t_ch "t")  ; -> t | nil
+    ; 判断单字符是否为默认空白字符（空格/制表/回车/换行）。
+    ;
+    ; **参数**
+    ;   t_ch (str) - 单字符
+    ;
+    ; **返回**
+    ;   (t|nil) - 命中回 t
+    index(" \t\r\n" t_ch)
+)
+
+procedure(_splitWhitespace(t_s "t")  ; -> list[str]
+    ; 按空白字符连续段切分并丢弃空段（内部实现）。
+    ;
+    ; **参数**
+    ;   t_s (str) - 输入串
+    ;
+    ; **返回**
+    ;   (list[str]) - 非空词列表；无词时为 nil
+    let((l_p n_i n_j n_len)
+        n_len = length(t_s)
+        n_i = 1
+        while(n_i <= n_len
+            while(n_i <= n_len && _isWhitespace(substring(t_s n_i 1))
+                n_i = n_i + 1
+            )
+            n_j = n_i
+            while(n_j <= n_len && !_isWhitespace(substring(t_s n_j 1))
+                n_j = n_j + 1
+            )
+            when(n_j > n_i
+                l_p = tconc(l_p substring(t_s n_i n_j - n_i))
+            )
+            n_i = n_j
+        )
+        car(l_p)
+    )
+)
+
+procedure(_splitLiteral(t_s t_sep "tt")  ; -> list[str]
+    ; 按字面分隔符切分并保留空段（内部实现）。
+    ;
+    ; **参数**
+    ;   t_s   (str) - 输入串
+    ;   t_sep (str) - 非空字面分隔符
+    ;
+    ; **返回**
+    ;   (list[str]) - 切分段（含空段）
+    let((l_p t_rest n_cut n_pos n_len n_sep g_done)
+        t_rest = t_s
+        n_sep = length(t_sep)
+        while(!g_done
+            n_cut = index(t_rest t_sep)
+            if(n_cut
+                {
+                n_len = length(t_rest)
+                n_pos = n_len - length(n_cut) + 1
+                l_p = tconc(l_p if(n_pos > 1 substring(t_rest 1 n_pos - 1) ""))
+                t_rest = if(n_pos + n_sep > n_len
+                    ""
+                    substring(t_rest n_pos + n_sep n_len - n_pos - n_sep + 1)
+                )
+                }
+                {
+                l_p = tconc(l_p t_rest)
+                g_done = t
+                }
+            )
+        )
+        car(l_p)
+    )
+)
+
+procedure(_keepNonEmpty(l_items "l")  ; -> list[str]
+    ; 过滤列表中的空串（内部实现）。
+    ;
+    ; **参数**
+    ;   l_items (list[str]) - 待过滤列表
+    ;
+    ; **返回**
+    ;   (list[str]) - 过滤结果；全为空串时为 nil
+    let((l_p)
+        foreach(t_item l_items
+            unless(t_item == ""
+                l_p = tconc(l_p t_item)
+            )
+        )
+        car(l_p)
+    )
+)
+
+procedure(split(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> list[str]
+    ; 切分字符串：默认按空白符；字面分隔保留空段；?regex 委托正则切分。
+    ;
+    ; **参数**
+    ;   t_s        (str)     - 输入串
+    ;   ?sep       (str|nil) - 分隔符或正则模式；缺省时按空白符切分
+    ;   ?regex     (any)     - 非 nil 时 ?sep 按正则模式解释
+    ;   ?keepEmpty (any)     - 非 nil 时保留空段；默认 t
+    ;
+    ; **返回**
+    ;   (list[str]) - 切分段列表
+    let((l_parts)
+        cond(
+            (regex
+                unless(stringp(sep) && sep != ""
+                    error("ycString::split: regex mode needs a non-empty pattern (%A)" sep)
+                )
+                l_parts = ycRegEx:::reSplit(sep t_s ?all t)
+            )
+            (sep
+                unless(stringp(sep)
+                    error("ycString::split: separator must be a string (%A)" sep)
+                )
+                unless(sep != ""
+                    error("ycString::split: separator must not be empty")
+                )
+                l_parts = _splitLiteral(t_s sep)
+            )
+            (t
+                l_parts = _splitWhitespace(t_s)
+            )
+        )
+        if(keepEmpty
+            l_parts
+            _keepNonEmpty(l_parts)
+        )
+    )
+)
+
+procedure(join(l_items \@key (sep "") "lg")  ; -> str
+    ; 以分隔符连接字符串列表。
+    ;
+    ; **参数**
+    ;   l_items (list[str]) - 待连接项（全部须为字符串）
+    ;   ?sep    (str)       - 分隔符；默认空串
+    ;
+    ; **返回**
+    ;   (str) - 连接结果；空列表为空串
+    unless(stringp(sep)
+        error("ycString::join: separator must be a string (%A)" sep)
+    )
+    let((l_p n_i)
+        n_i = 0
+        foreach(g_item l_items
+            n_i = n_i + 1
+            unless(stringp(g_item)
+                error("ycString::join: item #%d is not a string (%A)" n_i g_item)
+            )
+            unless(n_i == 1
+                l_p = tconc(l_p sep)
+            )
+            l_p = tconc(l_p g_item)
+        )
+        if(l_p
+            apply('strcat car(l_p))
+            ""
+        )
+    )
+)
+
 unuseNamespace("ycString")
 
 ; END

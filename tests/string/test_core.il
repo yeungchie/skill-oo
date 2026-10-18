@@ -41,6 +41,43 @@ _assertErrorMsg(
     "pad: empty fill"
 )
 
+; ---- split ----
+_assert(ycString::split("  a\tb\n c ") == list("a" "b" "c")  "split: default whitespace")
+_assert(ycString::split("") == nil  "split: empty input")
+_assert(ycString::split("a,,b" ?sep ",") == list("a" "" "b")  "split: literal keeps empties")
+_assert(ycString::split(",a," ?sep ",") == list("" "a" "")  "split: literal edge empties")
+_assert(ycString::split("a,,b" ?sep "," ?keepEmpty nil) == list("a" "b")  "split: drop empties")
+_assert(ycString::split("a1b22c" ?sep "[0-9]+" ?regex t) == list("a" "b" "c")  "split: regex")
+_assert(
+    ycString::split(" a  b " ?sep "\\s+" ?regex t ?keepEmpty nil) == list("a" "b")
+    "split: regex drop empties"
+)
+_assertErrorMsg(
+    lambda(() ycString::split("a" ?sep ""))
+    "ycString::split: separator must not be empty"
+    "split: empty separator"
+)
+_assertErrorMsg(
+    lambda(() ycString::split("a" ?regex t))
+    "ycString::split: regex mode needs a non-empty pattern"
+    "split: regex without pattern"
+)
+
+; ---- join ----
+_assert(ycString::join(list("a" "b" "c")) == "abc"  "join: default")
+_assert(ycString::join(list("a" "b") ?sep "-") == "a-b"  "join: custom separator")
+_assert(ycString::join(nil) == ""  "join: empty list")
+_assertErrorMsg(
+    lambda(() ycString::join(list("a" 1)))
+    "ycString::join: item #2 is not a string"
+    "join: non-string item"
+)
+_assertErrorMsg(
+    lambda(() ycString::join("x"))
+    "argument #1 should be a list"
+    "join: non-list"
+)
+
 _TestCoreDone = t
 
 ; END
