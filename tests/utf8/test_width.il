@@ -47,7 +47,7 @@ _assertError(lambda(() ycUtf8::charWidth(-1))  "charWidth: negative")
 _assertError(lambda(() ycUtf8::charWidth(55296))  "charWidth: surrogate")
 _assertError(lambda(() ycUtf8::charWidth(1114112))  "charWidth: above max")
 _assertError(lambda(() ycUtf8::charWidth(97 ?ambiguous 3))  "charWidth: invalid ambiguous")
-_assertErrorMsg(lambda(() ycUtf8::charWidth("x")) "argument #1 should be a number"  "charWidth: non-fixnum")
+_assertErrorMsg(lambda(() ycUtf8::charWidth("x")) "argument #1 should be an integer"  "charWidth: non-fixnum")
 
 _TestWidthDone = t
 

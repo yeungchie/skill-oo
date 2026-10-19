@@ -103,6 +103,12 @@ _assertErrorMsg(
     "wrap: zero width"
 )
 _assertErrorMsg(
+    lambda(() ycTextwrap::wrap("a" ?width 7.5))
+    "argument for keyword ?width should be an integer"
+    "wrap: float width"
+)
+
+_assertErrorMsg(
     lambda(() ycTextwrap::wrap("a" ?width 2 ?initialIndent "   "))
     "ycTextwrap::wrap: initialIndent leaves no room"
     "wrap: indent overflow"

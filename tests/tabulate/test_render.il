@@ -105,6 +105,12 @@ _assertErrorMsg(
     "render: maxColWidth"
 )
 _assertErrorMsg(
+    lambda(() ycTabulate::render(list(list("a")) ?maxColWidth 3.5))
+    "ycTabulate::render: maxColWidth must be"
+    "render: float maxColWidth"
+)
+
+_assertErrorMsg(
     lambda(() ycTabulate::render(list(list("a")) ?floatFmt "%d"))
     "ycTabulate::render: invalid floatFmt"
     "render: floatFmt"

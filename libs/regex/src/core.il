@@ -3,7 +3,7 @@ useNamespace("ycRegEx")
 
 ; ---------- string/list helper ----------
 
-procedure(_suffix(t_str n_pos "tn")  ; -> str
+procedure(_suffix(t_str n_pos "tx")  ; -> str
     ; 返回从 n_pos 到串尾的子串（1-based）。
     ;
     ; **参数**
@@ -19,7 +19,7 @@ procedure(_suffix(t_str n_pos "tn")  ; -> str
     )
 )
 
-procedure(_prefix(t_str n_len "tn")  ; -> str
+procedure(_prefix(t_str n_len "tx")  ; -> str
     ; 返回串的前 n_len 个字符（1-based，越界收敛到串边界）。
     ;
     ; **参数**
@@ -95,7 +95,7 @@ procedure(_countSub(t_str t_sub "tt")  ; -> int
     )
 )
 
-procedure(_nth1(l_list n_i "ln")  ; -> any | nil
+procedure(_nth1(l_list n_i "lx")  ; -> any | nil
     ; 取列表的第 n_i 个元素（1-based）。
     ;
     ; **参数**
@@ -112,7 +112,7 @@ procedure(_nth1(l_list n_i "ln")  ; -> any | nil
     )
 )
 
-procedure(_digitAt(n_k "n")  ; -> str
+procedure(_digitAt(n_k "x")  ; -> str
     ; 返回 "123456789" 中第 n_k 个字符（拼接捕获组反向引用用）。
     ;
     ; **参数**

@@ -9,7 +9,7 @@ useNamespace("ycTextwrap")
 
 ; ---------- 基础度量 ----------
 
-procedure(_isSpaceCp(n_cp "n")  ; -> t | nil
+procedure(_isSpaceCp(n_cp "x")  ; -> t | nil
     ; 判断码点是否为折行语义中的空白。
     ;
     ; **参数**
@@ -20,7 +20,7 @@ procedure(_isSpaceCp(n_cp "n")  ; -> t | nil
     n_cp == 32 || n_cp == 9 || n_cp == 10 || n_cp == 13 || n_cp == 12 || n_cp == 11
 )
 
-procedure(_checkUnit(t_ctx t_unit n_amb "ttn")  ; -> nil
+procedure(_checkUnit(t_ctx t_unit n_amb "ttx")  ; -> nil
     ; 校验宽度单位与 ambiguous 选项（内部实现）。
     ;
     ; **参数**
@@ -38,7 +38,7 @@ procedure(_checkUnit(t_ctx t_unit n_amb "ttn")  ; -> nil
     )
 )
 
-procedure(_cpWidth(n_cp t_unit n_amb "ntn")  ; -> int
+procedure(_cpWidth(n_cp t_unit n_amb "xtx")  ; -> int
     ; 单个码点在指定单位下的宽度（内部实现）。
     ;
     ; **参数**
@@ -54,7 +54,7 @@ procedure(_cpWidth(n_cp t_unit n_amb "ntn")  ; -> int
     )
 )
 
-procedure(_widthText(t_s t_unit n_amb "ttn")  ; -> int
+procedure(_widthText(t_s t_unit n_amb "ttx")  ; -> int
     ; 字符串在指定单位下的宽度（内部实现）。
     ;
     ; **参数**
@@ -70,7 +70,7 @@ procedure(_widthText(t_s t_unit n_amb "ttn")  ; -> int
     )
 )
 
-procedure(_widthCps(l_cps t_unit n_amb "ltn")  ; -> int
+procedure(_widthCps(l_cps t_unit n_amb "ltx")  ; -> int
     ; 码点列表在指定单位下的宽度（内部实现）。
     ;
     ; **参数**
@@ -91,7 +91,7 @@ procedure(_widthCps(l_cps t_unit n_amb "ltn")  ; -> int
 
 ; ---------- 列表与换行 ----------
 
-procedure(_takeCps(l_cps n_count "ln")  ; -> list[int]
+procedure(_takeCps(l_cps n_count "lx")  ; -> list[int]
     ; 取码点列表前 n 项（内部实现）。
     ;
     ; **参数**
@@ -111,7 +111,7 @@ procedure(_takeCps(l_cps n_count "ln")  ; -> list[int]
     )
 )
 
-procedure(_dropCps(l_cps n_count "ln")  ; -> list[int]
+procedure(_dropCps(l_cps n_count "lx")  ; -> list[int]
     ; 丢弃码点列表前 n 项（内部实现）。
     ;
     ; **参数**
@@ -127,7 +127,7 @@ procedure(_dropCps(l_cps n_count "ln")  ; -> list[int]
     l_cps
 )
 
-procedure(_fitCount(l_cps n_max t_unit n_amb "lntn")  ; -> int
+procedure(_fitCount(l_cps n_max t_unit n_amb "lxtx")  ; -> int
     ; 计算在宽度上限内可完整容纳的码点数（内部实现）。
     ;
     ; **参数**
@@ -150,7 +150,7 @@ procedure(_fitCount(l_cps n_max t_unit n_amb "lntn")  ; -> int
     )
 )
 
-procedure(_cutCount(l_cps n_max t_unit n_amb "lntn")  ; -> int
+procedure(_cutCount(l_cps n_max t_unit n_amb "lxtx")  ; -> int
     ; 计算硬切码点数，至少前进一个码点（内部实现）。
     ;
     ; **参数**
@@ -167,7 +167,7 @@ procedure(_cutCount(l_cps n_max t_unit n_amb "lntn")  ; -> int
     )
 )
 
-procedure(_firstChunk(l_word n_max g_hyphen t_unit n_amb "lngtn")  ; -> list[int]
+procedure(_firstChunk(l_word n_max g_hyphen t_unit n_amb "lxgtx")  ; -> list[int]
     ; 从超宽词中切出首个可容纳片段（内部实现）。
     ;
     ; **参数**

@@ -6,7 +6,7 @@ _maxDecodeDepth = 800
 
 ; ---------- 结构扫描 ----------
 
-procedure(_skipWs(t_s n_i g_relaxed "tng")  ; -> int
+procedure(_skipWs(t_s n_i g_relaxed "txg")  ; -> int
     ; 跳过空白（空格/制表/换行/回车）；jsonc 模式另跳 // 与 /* */ 注释。
     ;
     ; **参数**
@@ -50,7 +50,7 @@ procedure(_skipWs(t_s n_i g_relaxed "tng")  ; -> int
     )
 )
 
-procedure(_value(t_s n_i g_relaxed n_depth n_max "tngnn")  ; -> list
+procedure(_value(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
     ; 解析任意值：按首字符派发到字符串/对象/数组/字面量/数字。
     ;
     ; **参数**
@@ -87,7 +87,7 @@ procedure(_value(t_s n_i g_relaxed n_depth n_max "tngnn")  ; -> list
     )
 )
 
-procedure(_object(t_s n_i g_relaxed n_depth n_max "tngnn")  ; -> list
+procedure(_object(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
     ; 解析对象：键值对写入 table（缺省标记 Missing）；jsonc 模式允许尾逗号。
     ;
     ; **参数**
@@ -148,7 +148,7 @@ procedure(_object(t_s n_i g_relaxed n_depth n_max "tngnn")  ; -> list
     )
 )
 
-procedure(_array(t_s n_i g_relaxed n_depth n_max "tngnn")  ; -> list
+procedure(_array(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
     ; 解析数组：元素累积为 list（空数组即 nil）；jsonc 模式允许尾逗号。
     ;
     ; **参数**
@@ -199,7 +199,7 @@ procedure(_array(t_s n_i g_relaxed n_depth n_max "tngnn")  ; -> list
     )
 )
 
-procedure(_decodeText(t_s g_relaxed n_max "tgn")  ; -> any
+procedure(_decodeText(t_s g_relaxed n_max "tgx")  ; -> any
     ; 解析单个 JSON 文档：前导/尾随空白允许，尾随非空白字符报错。
     ;
     ; **参数**

@@ -3,7 +3,7 @@ useNamespace("ycSubProcess")
 
 ; ---------- 函数 ----------
 
-procedure(_formatSeconds(n_second "n")  ; -> str
+procedure(_formatSeconds(n_second "x")  ; -> str
     ; 将秒数换算为人类可读耗时串：0 秒为 ~0s，其余为 1s / 1m1s / 1h1m1s 风格。
     ;
     ; **参数**

@@ -9,7 +9,7 @@ useNamespace("ycTabulate")
 
 ; ---------- 公开入口 ----------
 
-procedure(render(l_rows \@key (headers nil) (format "simple") (align "left") (floatFmt "%g") (missingVal "") (maxColWidth nil) (unit "display") (ambiguous 1) "lgtgttgtn")  ; -> str
+procedure(render(l_rows \@key (headers nil) (format "simple") (align "left") (floatFmt "%g") (missingVal "") (maxColWidth nil) (unit "display") (ambiguous 1) "lgtgttgtx")  ; -> str
     ; 将行数据渲染为文本表格。
     ;
     ; **参数**

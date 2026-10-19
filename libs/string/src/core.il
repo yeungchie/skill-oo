@@ -92,7 +92,7 @@ procedure(width(t_s \@key (unit "display") (ambiguous 1) "tgg")  ; -> int
     )
 )
 
-procedure(_repeat(t_fill n_times "tn")  ; -> str
+procedure(_repeat(t_fill n_times "tx")  ; -> str
     ; 重复单字符若干次（内部实现）。
     ;
     ; **参数**
@@ -112,7 +112,7 @@ procedure(_repeat(t_fill n_times "tn")  ; -> str
     )
 )
 
-procedure(pad(t_s n_width \@key (fill " ") (side "end") (unit "display") (ambiguous 1) "tngggg")  ; -> str
+procedure(pad(t_s n_width \@key (fill " ") (side "end") (unit "display") (ambiguous 1) "txgggg")  ; -> str
     ; 将字符串补足到目标宽度（永不截断）。
     ;
     ; **参数**

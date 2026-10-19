@@ -5,7 +5,7 @@
 
 useNamespace("ycTabulate")
 
-procedure(_rowLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltn")  ; -> list[str]
+procedure(_rowLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; -> list[str]
     ; 渲染一行单元格的物理行（plain / simple；内部实现）。
     ;
     ; **参数**
@@ -50,7 +50,7 @@ procedure(_rowLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltn")  ; 
     )
 )
 
-procedure(_boxLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltn")  ; -> list[str]
+procedure(_boxLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; -> list[str]
     ; 渲染带竖线边框的物理行（grid / pipe；内部实现）。
     ;
     ; **参数**
@@ -159,7 +159,7 @@ procedure(_pipeSep(l_widths l_aligns "ll")  ; -> str
     )
 )
 
-procedure(_formatPlain(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltn")  ; -> str
+procedure(_formatPlain(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltx")  ; -> str
     ; 渲染 plain 格式（内部实现）。
     ;
     ; **参数**
@@ -189,7 +189,7 @@ procedure(_formatPlain(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llll
     )
 )
 
-procedure(_formatSimple(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltn")  ; -> str
+procedure(_formatSimple(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltx")  ; -> str
     ; 渲染 simple 格式（内部实现）。
     ;
     ; **参数**
@@ -220,7 +220,7 @@ procedure(_formatSimple(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "lll
     )
 )
 
-procedure(_formatGrid(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltn")  ; -> str
+procedure(_formatGrid(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltx")  ; -> str
     ; 渲染 grid 格式（内部实现）。
     ;
     ; **参数**
@@ -253,7 +253,7 @@ procedure(_formatGrid(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "lllll
     )
 )
 
-procedure(_formatPipe(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltn")  ; -> str
+procedure(_formatPipe(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltx")  ; -> str
     ; 渲染 pipe 格式（内部实现）。
     ;
     ; **参数**

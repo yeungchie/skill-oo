@@ -9,7 +9,7 @@ useNamespace("ycTabulate")
 
 ; ---------- 宽度与对齐 ----------
 
-procedure(_checkUnit(t_ctx t_unit n_amb "ttn")  ; -> nil
+procedure(_checkUnit(t_ctx t_unit n_amb "ttx")  ; -> nil
     ; 校验宽度单位与 ambiguous 选项（内部实现）。
     ;
     ; **参数**
@@ -27,7 +27,7 @@ procedure(_checkUnit(t_ctx t_unit n_amb "ttn")  ; -> nil
     )
 )
 
-procedure(_widthText(t_s t_unit n_amb "ttn")  ; -> int
+procedure(_widthText(t_s t_unit n_amb "ttx")  ; -> int
     ; 计算字符串在指定单位下的宽度（内部实现）。
     ;
     ; **参数**
@@ -43,7 +43,7 @@ procedure(_widthText(t_s t_unit n_amb "ttn")  ; -> int
     )
 )
 
-procedure(_repeatChar(t_ch n_times "tn")  ; -> str
+procedure(_repeatChar(t_ch n_times "tx")  ; -> str
     ; 重复单字符（内部实现）。
     ;
     ; **参数**
@@ -142,7 +142,7 @@ procedure(_splitCellLines(t_s "t")  ; -> list[str]
     )
 )
 
-procedure(_cellLines(g_cell t_floatFmt t_missing g_max t_unit n_amb "gttgtn")  ; -> list[str]
+procedure(_cellLines(g_cell t_floatFmt t_missing g_max t_unit n_amb "gttgtx")  ; -> list[str]
     ; 转换单元格并按需折行（内部实现）。
     ;
     ; **参数**
@@ -230,7 +230,7 @@ procedure(_splitDecimal(t_s "t")  ; -> list[str]
 
 ; ---------- 对齐与矩阵 ----------
 
-procedure(_normalizeAlign(g_align n_cols "gn")  ; -> list[str]
+procedure(_normalizeAlign(g_align n_cols "gx")  ; -> list[str]
     ; 校验并展开对齐选项（内部实现）。
     ;
     ; **参数**
@@ -269,7 +269,7 @@ procedure(_normalizeAlign(g_align n_cols "gn")  ; -> list[str]
     )
 )
 
-procedure(_columnBlocks(l_head l_rows n_col "lln")  ; -> list
+procedure(_columnBlocks(l_head l_rows n_col "llx")  ; -> list
     ; 收集某列的全部单元格块（内部实现）。
     ;
     ; **参数**
@@ -291,7 +291,7 @@ procedure(_columnBlocks(l_head l_rows n_col "lln")  ; -> list
     )
 )
 
-procedure(_decInfo(l_blocks t_unit n_amb "ltn")  ; -> list[int]
+procedure(_decInfo(l_blocks t_unit n_amb "ltx")  ; -> list[int]
     ; 计算小数点对齐的左右最大宽度（内部实现）。
     ;
     ; **参数**
@@ -321,7 +321,7 @@ procedure(_decInfo(l_blocks t_unit n_amb "ltn")  ; -> list[int]
     )
 )
 
-procedure(_colWidth(l_blocks l_dec t_unit n_amb "lltn")  ; -> int
+procedure(_colWidth(l_blocks l_dec t_unit n_amb "lltx")  ; -> int
     ; 计算某列宽度（内部实现）。
     ;
     ; **参数**
@@ -348,7 +348,7 @@ procedure(_colWidth(l_blocks l_dec t_unit n_amb "lltn")  ; -> int
     )
 )
 
-procedure(_padText(t_s n_width t_align t_unit n_amb "tnttn")  ; -> str
+procedure(_padText(t_s n_width t_align t_unit n_amb "txttx")  ; -> str
     ; 按左/右/中对齐补宽（内部实现）。
     ;
     ; **参数**
@@ -383,7 +383,7 @@ procedure(_padText(t_s n_width t_align t_unit n_amb "tnttn")  ; -> str
     )
 )
 
-procedure(_padCell(t_line n_width t_align l_dec t_unit n_amb "tntltn")  ; -> str
+procedure(_padCell(t_line n_width t_align l_dec t_unit n_amb "txtltx")  ; -> str
     ; 按列对齐方式补宽（含小数点对齐；内部实现）。
     ;
     ; **参数**

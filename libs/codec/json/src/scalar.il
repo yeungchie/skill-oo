@@ -3,7 +3,7 @@ useNamespace("ycJson")
 
 ; ---------- 标量值解析（字符串/数字/字面量） ----------
 
-procedure(_hex4(t_s n_i "tn")  ; -> int
+procedure(_hex4(t_s n_i "tx")  ; -> int
     ; 解析 \uXXXX 的 4 位十六进制（大小写均可）。
     ;
     ; **参数**
@@ -32,7 +32,7 @@ procedure(_hex4(t_s n_i "tn")  ; -> int
     )
 )
 
-procedure(_utf8Str(n_cp "n")  ; -> str
+procedure(_utf8Str(n_cp "x")  ; -> str
     ; 将 Unicode 码点编码为 UTF-8 字节串（1..4 字节，逐字节拼接）。
     ;
     ; **参数**
@@ -65,7 +65,7 @@ procedure(_utf8Str(n_cp "n")  ; -> str
     )
 )
 
-procedure(_string(t_s n_i "tn")  ; -> list
+procedure(_string(t_s n_i "tx")  ; -> list
     ; 扫描字符串：转义解出实际字符，\uXXXX 合成 UTF-8，代理对合并，孤立代理项报错。
     ;
     ; **参数**
@@ -191,7 +191,7 @@ procedure(_string(t_s n_i "tn")  ; -> list
     )
 )
 
-procedure(_literal(t_s n_i "tn")  ; -> list
+procedure(_literal(t_s n_i "tx")  ; -> list
     ; 在位置处匹配 true/false/null 字面量（大小写敏感）。
     ;
     ; **参数**
@@ -216,7 +216,7 @@ procedure(_literal(t_s n_i "tn")  ; -> list
     )
 )
 
-procedure(_number(t_s n_i "tn")  ; -> list
+procedure(_number(t_s n_i "tx")  ; -> list
     ; 按 JSON 语法扫描数字：严格校验整数/小数/指数写法，超 fixnum 范围回 flonum。
     ;
     ; **参数**

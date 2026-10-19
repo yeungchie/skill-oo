@@ -99,7 +99,7 @@ Missing = Type("missing")
 
 ; ---------- 基础工具 ----------
 
-procedure(_code(t_s n_i "tn")  ; -> int | nil
+procedure(_code(t_s n_i "tx")  ; -> int | nil
     ; 取字节索引处的字符码（1-based）；索引越界返回 nil。
     ;
     ; **参数**
@@ -127,7 +127,7 @@ procedure(_digitp(g_c "g")  ; -> t | nil
     g_c && g_c >= 48 && g_c <= 57
 )
 
-procedure(_lineCol(t_s n_i "tn")  ; -> list
+procedure(_lineCol(t_s n_i "tx")  ; -> list
     ; 按字节索引计算行列：行/列均 1-based，列按行内字节偏移。
     ;
     ; **参数**
@@ -151,7 +151,7 @@ procedure(_lineCol(t_s n_i "tn")  ; -> list
     )
 )
 
-procedure(_error(t_s n_i t_msg "tnt")  ; -> never
+procedure(_error(t_s n_i t_msg "txt")  ; -> never
     ; 按统一格式 error() 中断：ycJson::decode: <说明> at line <行>, column <列>。
     ;
     ; **参数**

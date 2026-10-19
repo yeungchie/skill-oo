@@ -2,7 +2,7 @@ useNamespace("ycUtf8")
 
 ; ---------- 共享扫描器 ----------
 
-procedure(_next(t_s n_i "tn")  ; -> list
+procedure(_next(t_s n_i "tx")  ; -> list
     ; 从 1-based 字节位置读取一个 UTF-8 码点。
     ;
     ; **参数**
@@ -72,7 +72,7 @@ procedure(_next(t_s n_i "tn")  ; -> list
     )
 )
 
-procedure(_read(t_s n_i g_strict t_ctx "tngt")  ; -> list
+procedure(_read(t_s n_i g_strict t_ctx "txgt")  ; -> list
     ; 读取一个码点；严格模式非法即报错，宽松模式以 U+FFFD 替换并前进一字节。
     ;
     ; **参数**
@@ -95,7 +95,7 @@ procedure(_read(t_s n_i g_strict t_ctx "tngt")  ; -> list
     )
 )
 
-procedure(_encCp(n_cp "n")  ; -> str
+procedure(_encCp(n_cp "x")  ; -> str
     ; 将码点编码为 UTF-8 字节串（1..4 字节）。
     ;
     ; **参数**
@@ -218,7 +218,7 @@ procedure(charCount(t_str \@key (strict t) "tg")  ; -> int
     )
 )
 
-procedure(slice(t_str n_start n_len \@key (strict t) "tnng")  ; -> str | nil
+procedure(slice(t_str n_start n_len \@key (strict t) "txxg")  ; -> str | nil
     ; 按码点切片（1-based 起点）。
     ;
     ; **参数**

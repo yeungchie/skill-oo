@@ -9,7 +9,7 @@ useNamespace("ycTextwrap")
 
 ; ---------- 折行 ----------
 
-procedure(_packCps(l_words n_first n_rest g_breakLong g_hyphen t_unit n_amb "lnnggtn")  ; -> list
+procedure(_packCps(l_words n_first n_rest g_breakLong g_hyphen t_unit n_amb "lxxggtx")  ; -> list
     ; 按逐行可用宽度贪心装词（内部实现）。
     ;
     ; **参数**
@@ -80,7 +80,7 @@ procedure(_packCps(l_words n_first n_rest g_breakLong g_hyphen t_unit n_amb "lnn
     )
 )
 
-procedure(_wrapCps(l_cps n_first n_rest g_breakLong g_hyphen t_unit n_amb "lnnggtn")  ; -> list | nil
+procedure(_wrapCps(l_cps n_first n_rest g_breakLong g_hyphen t_unit n_amb "lxxggtx")  ; -> list | nil
     ; 折行单个逻辑行（内部实现）。
     ;
     ; **参数**
@@ -121,7 +121,7 @@ procedure(_trimTrailingSpaces(l_cps "l")  ; -> list[int]
     )
 )
 
-procedure(_cutAtSpace(l_cps n_max t_unit n_amb "lntn")  ; -> list[int]
+procedure(_cutAtSpace(l_cps n_max t_unit n_amb "lxtx")  ; -> list[int]
     ; 在宽度上限内按最后一个空格断词（内部实现）。
     ;
     ; **参数**
@@ -147,7 +147,7 @@ procedure(_cutAtSpace(l_cps n_max t_unit n_amb "lntn")  ; -> list[int]
     )
 )
 
-procedure(_fitPlaceholder(l_cps t_ph n_max t_unit n_amb "ltntn")  ; -> list[int]
+procedure(_fitPlaceholder(l_cps t_ph n_max t_unit n_amb "ltxtx")  ; -> list[int]
     ; 为被截断的末行保留占位符宽度并去除余下内容（内部实现）。
     ;
     ; **参数**
@@ -173,7 +173,7 @@ procedure(_fitPlaceholder(l_cps t_ph n_max t_unit n_amb "ltntn")  ; -> list[int]
     )
 )
 
-procedure(_shortenCps(l_cps n_max t_ph t_unit n_amb "lnttn")  ; -> list[int]
+procedure(_shortenCps(l_cps n_max t_ph t_unit n_amb "lxttx")  ; -> list[int]
     ; 内容超宽时断词并追加占位符（内部实现）。
     ;
     ; **参数**
@@ -193,7 +193,7 @@ procedure(_shortenCps(l_cps n_max t_ph t_unit n_amb "lnttn")  ; -> list[int]
 
 ; ---------- 公开入口 ----------
 
-procedure(wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") (breakLongWords t) (breakOnHyphens t) (maxLines nil) (placeholder "...") (unit "display") (ambiguous 1) "tnttgggttn")  ; -> list[str] | nil
+procedure(wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") (breakLongWords t) (breakOnHyphens t) (maxLines nil) (placeholder "...") (unit "display") (ambiguous 1) "txttgggttx")  ; -> list[str] | nil
     ; 按宽度折行文本，返回行列表。
     ;
     ; **参数**
@@ -325,7 +325,7 @@ procedure(wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") 
     )
 )
 
-procedure(fill(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") (breakLongWords t) (breakOnHyphens t) (maxLines nil) (placeholder "...") (unit "display") (ambiguous 1) (sep "\n") "tnttgggttnt")  ; -> str
+procedure(fill(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") (breakLongWords t) (breakOnHyphens t) (maxLines nil) (placeholder "...") (unit "display") (ambiguous 1) (sep "\n") "txttgggttxt")  ; -> str
     ; 折行文本并以分隔符拼回。
     ;
     ; **参数**

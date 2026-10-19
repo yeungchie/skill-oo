@@ -153,7 +153,7 @@ procedure(indent(t_text \@key (prefix "  ") "tt")  ; -> str
     )
 )
 
-procedure(shorten(t_text n_width \@key (placeholder "...") (unit "display") (ambiguous 1) "tnttn")  ; -> str
+procedure(shorten(t_text n_width \@key (placeholder "...") (unit "display") (ambiguous 1) "txttx")  ; -> str
     ; 将文本截断到指定宽度并追加占位符。
     ;
     ; **参数**

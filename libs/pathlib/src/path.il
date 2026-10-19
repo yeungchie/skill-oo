@@ -121,7 +121,7 @@ procedure(_dropLast(l_parts "l")  ; -> list
     )
 )
 
-procedure(_dropFirstN(l_parts n_count "ln")  ; -> list
+procedure(_dropFirstN(l_parts n_count "lx")  ; -> list
     ; 返回去掉前 n_count 个元素后的列表。
     ;
     ; **参数**

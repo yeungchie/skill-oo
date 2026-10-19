@@ -52,7 +52,7 @@ procedure(_lineBlankp(t_line "t")  ; -> t | nil
     )
 )
 
-procedure(_newlines(n_n "n")  ; -> str
+procedure(_newlines(n_n "x")  ; -> str
     ; 生成 n_n 个换行符组成的串（jsonl 错误路径的行号前缀）。
     ;
     ; **参数**
@@ -71,7 +71,7 @@ procedure(_newlines(n_n "n")  ; -> str
     )
 )
 
-procedure(_decodeLines(t_str n_max "tn")  ; -> list
+procedure(_decodeLines(t_str n_max "tx")  ; -> list
     ; 逐行解码 JSON Lines：空行/全空白行跳过，各非空行须为完整文档，错误带原始行号。
     ;
     ; **参数**

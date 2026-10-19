@@ -14,7 +14,7 @@ procedure(_groupWhole(self "g")  ; -> str
     )
 )
 
-procedure(_groupAt(self n_i n_g "gnn")  ; -> str
+procedure(_groupAt(self n_i n_g "gxx")  ; -> str
     ; 按组序号取组值（group 单参与多参路径共用；0 表示整体）。
     ;
     ; **参数**
@@ -39,7 +39,7 @@ procedure(_groupAt(self n_i n_g "gnn")  ; -> str
 
 ; ---------- extraction templates: "&" whole + delimited groups, one substitute ----------
 
-procedure(_wholeTemplate(n_g "n")  ; -> str
+procedure(_wholeTemplate(n_g "x")  ; -> str
     ; 构造「整体 + 组值」提取模板：& 后按 <YC-B> 定界各组反向引用。
     ;
     ; **参数**
@@ -58,7 +58,7 @@ procedure(_wholeTemplate(n_g "n")  ; -> str
     )
 )
 
-procedure(_splitTemplate(n_g "n")  ; -> str
+procedure(_splitTemplate(n_g "x")  ; -> str
     ; 构造 split 替换模板：匹配处整体换成 <YC-S> 定界与组值交替的串。
     ;
     ; **参数**
@@ -95,7 +95,7 @@ procedure(_extractParts(g_pat g_obj "gg")  ; -> (str . list[str])
     )
 )
 
-procedure(_anchorAt(g_pat n_off "gn")  ; -> compiled
+procedure(_anchorAt(g_pat n_off "gx")  ; -> compiled
     ; 生成在字节偏移 n_off 处精确锚定的编译对象，不截断左侧上下文。
     ;
     ; **参数**
@@ -118,7 +118,7 @@ procedure(_anchorAt(g_pat n_off "gn")  ; -> compiled
     )
 )
 
-procedure(_nextMatch(g_pat t_subj n_from "gtn")  ; -> (int, int . list[str]) | nil
+procedure(_nextMatch(g_pat t_subj n_from "gtx")  ; -> (int, int . list[str]) | nil
     ; 慢路径内核：从 n_from 起逐位置锚定扫描，取最左命中。
     ;
     ; **参数**

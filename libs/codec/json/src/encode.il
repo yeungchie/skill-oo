@@ -28,7 +28,7 @@ procedure(_keyStr(g_key g_opt "gg")  ; -> str
     )
 )
 
-procedure(_indentStr(n_level n_indent "nn")  ; -> str
+procedure(_indentStr(n_level n_indent "xx")  ; -> str
     ; 生成 n_level 层、每层 n_indent 个空格的缩进串。
     ;
     ; **参数**
@@ -120,7 +120,7 @@ procedure(_encodeNumber(g_n "g")  ; -> str
     )
 )
 
-procedure(_encodeValue(g_val n_depth g_opt "gng")  ; -> str
+procedure(_encodeValue(g_val n_depth g_opt "gxg")  ; -> str
     ; 单值输出分发：nil 即空数组、t/哨兵出字面量，其余按类型派发；超深或不可表示类型报错。
     ;
     ; **参数**
@@ -158,7 +158,7 @@ procedure(_encodeValue(g_val n_depth g_opt "gng")  ; -> str
     )
 )
 
-procedure(_encodeList(l_arr n_depth g_opt "lng")  ; -> str
+procedure(_encodeList(l_arr n_depth g_opt "lxg")  ; -> str
     ; 输出列表为 JSON 数组；缩进为正时逐元素换行缩进。
     ;
     ; **参数**
@@ -199,7 +199,7 @@ procedure(_encodeList(l_arr n_depth g_opt "lng")  ; -> str
     )
 )
 
-procedure(_encodeTable(t_obj n_depth g_opt "gng")  ; -> str
+procedure(_encodeTable(t_obj n_depth g_opt "gxg")  ; -> str
     ; 输出 table 为 JSON 对象；键限字符串/符号/fixnum，sortKeys 非 nil 时按 alphalessp 排序。
     ;
     ; **参数**

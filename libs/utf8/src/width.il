@@ -2,7 +2,7 @@ useNamespace("ycUtf8")
 
 ; ---------- 宽度规则 ----------
 
-procedure(_inRanges(l_ranges n_cp "ln")  ; -> t | nil
+procedure(_inRanges(l_ranges n_cp "lx")  ; -> t | nil
     ; 在升序闭区间表中二分查找码点。
     ;
     ; **参数**
@@ -27,7 +27,7 @@ procedure(_inRanges(l_ranges n_cp "ln")  ; -> t | nil
     )
 )
 
-procedure(_widthOf(n_cp n_ambiguous "nn")  ; -> int
+procedure(_widthOf(n_cp n_ambiguous "xx")  ; -> int
     ; 按规则计算单码点显示宽度。
     ;
     ; **参数**
@@ -74,7 +74,7 @@ procedure(width(t_str \@key (strict t) (ambiguous 1) "tgg")  ; -> int
     )
 )
 
-procedure(charWidth(n_cp \@key (ambiguous 1) "ng")  ; -> int
+procedure(charWidth(n_cp \@key (ambiguous 1) "xg")  ; -> int
     ; 计算单个码点的显示宽度。
     ;
     ; **参数**
