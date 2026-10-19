@@ -20,6 +20,8 @@ ycNamespace:::_validNames = list(
     "ycJson"
     "ycUtf8"
     "ycString"
+    "ycTextwrap"
+    "ycTabulate"
 )
 
 procedure(ycNamespace:::require(@rest l_names "t")  ; -> t

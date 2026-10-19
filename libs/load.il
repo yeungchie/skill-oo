@@ -26,6 +26,8 @@ let((t_dir t_pkgs)
         "codec"
         "utf8"
         "string"
+        "textwrap"
+        "tabulate"
     )
     foreach(t_pkg t_pkgs
         t_dir->join(t_pkg "load.il")->load()
