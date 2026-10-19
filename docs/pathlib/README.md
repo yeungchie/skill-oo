@@ -1037,7 +1037,7 @@ p->readText()  ; => "hi\n"
 
 ```text
 p->readJson(
-    l_args ...
+    [ l_args ... ]
 )
 => any | list
 ```
