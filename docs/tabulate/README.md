@@ -9,14 +9,17 @@ Cadence SKILL++ 的文本表格库：把行数据渲染为定宽文本表。
 + 四种输出格式：`"plain"`、`"simple"`（默认）、`"grid"`、`"pipe"`（竖线表格）。
 + 对齐支持 `"left"`、`"right"`、`"center"`、`"decimal"`；可单值应用于所有列，也可逐列指定。
 + `?maxColWidth` 对单元格折行（复用 `ycTextwrap::wrap`）；多行单元格在非 pipe 格式中展开为多物理行。
-+ 记法约定：例程注释中 `; =>` 标记返回值，`; *Error*` 标记错误消息；错误消息以 `ycTabulate::render:` 为前缀。
++ 记法约定：例程注释中 `; =>` 标记返回值，多行输出在后续 `;` 注释中逐行展示；`; *Error*` 标记错误消息；错误消息以 `ycTabulate::render:` 为前缀。
 
 ## 快速上手
 
 ```lisp
 ; 基本表格
 ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n"))
-; => "name  n\n----  --\na     1\nbb    22"
+; => name  n
+;    ----  --
+;    a     1
+;    bb    22
 
 ; 网格与小数点对齐
 ycTabulate::render(
@@ -25,7 +28,13 @@ ycTabulate::render(
     ?format "grid"
     ?align "decimal"
 )
-; => "+--------+------+\n|  a     |  b   |\n+========+======+\n|  1.2   | 10   |\n+--------+------+\n| 22.345 |  3.4 |\n+--------+------+"
+; => +--------+------+
+;    |  a     |  b   |
+;    +========+======+
+;    |  1.2   | 10   |
+;    +--------+------+
+;    | 22.345 |  3.4 |
+;    +--------+------+
 
 ; 单元格折行
 ycTabulate::render(
@@ -33,11 +42,17 @@ ycTabulate::render(
     ?headers list("long" "z")
     ?maxColWidth 5
 )
-; => "long   z\n-----  -\nalpha  x\nbeta\nc      y"
+; => long   z
+;    -----  -
+;    alpha  x
+;    beta
+;    c      y
 
 ; pipe 格式（多行转 <br>，竖线转义）
 ycTabulate::render(list(list("a\nb" "c|d")) ?headers list("h1" "h2") ?format "pipe")
-; => "| h1     | h2   |\n| :----- | :--- |\n| a<br>b | c\\|d |"
+; => | h1     | h2   |
+;    | :----- | :--- |
+;    | a<br>b | c\|d |
 ```
 
 ## API 参考
@@ -87,16 +102,26 @@ ycTabulate::render(
 
 ```lisp
 ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n"))
-; => "name  n\n----  --\na     1\nbb    22"
+; => name  n
+;    ----  --
+;    a     1
+;    bb    22
 
 ycTabulate::render(list(list(nil 'sym "s")) ?headers list("a" "b" "c") ?missingVal "NA" ?format "grid")
-; => "+----+-----+---+\n| a  | b   | c |\n+====+=====+===+\n| NA | sym | s |\n+----+-----+---+"
+; => +----+-----+---+
+;    | a  | b   | c |
+;    +====+=====+===+
+;    | NA | sym | s |
+;    +----+-----+---+
 
 ycTabulate::render(list(list(1.23456 2.0)) ?floatFmt "%.2f")
 ; => "1.23  2.00"
 
 ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?align list("left" "right"))
-; => "name   n\n----  --\na      1\nbb    22"
+; => name   n
+;    ----  --
+;    a      1
+;    bb    22
 
 ycTabulate::render(list(list("a" 1)) ?format "unknown")
 ; => 以 error() 中断（未知格式）
@@ -115,10 +140,19 @@ ycTabulate::render(list(list("a" 1)) ?format "unknown")
 
 ```lisp
 ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?format "grid")
-; => "+------+----+\n| name | n  |\n+======+====+\n| a    | 1  |\n+------+----+\n| bb   | 22 |\n+------+----+"
+; => +------+----+
+;    | name | n  |
+;    +======+====+
+;    | a    | 1  |
+;    +------+----+
+;    | bb   | 22 |
+;    +------+----+
 
 ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?format "pipe")
-; => "| name | n   |\n| :--- | :-- |\n| a    | 1   |\n| bb   | 22  |"
+; => | name | n   |
+;    | :--- | :-- |
+;    | a    | 1   |
+;    | bb   | 22  |
 ```
 
 ## 对齐
@@ -136,8 +170,15 @@ ycTabulate::render(
     ?headers list("a" "b")
     ?align "decimal"
 )
-; => " a       b\n------  -----\n 1.2    10\n22.345   3.4\n 5       6.78"
+; =>  a       b
+;    ------  -----
+;     1.2    10
+;    22.345   3.4
+;     5       6.78
 
 ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?align "center")
-; => "name  n\n----  --\n a    1\n bb   22"
+; => name  n
+;    ----  --
+;     a    1
+;     bb   22
 ```
