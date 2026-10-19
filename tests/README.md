@@ -1,6 +1,6 @@
 # skill-oo 测试
 
-本文件描述测试套件的运行方式。使用 API 见 [ycPathLib](../docs/pathlib/README.md)、[ycRegEx](../docs/regex/README.md)、[ycSubProcess](../docs/subprocess/README.md)、[ycJson](../docs/json/README.md)、[ycUtf8](../docs/utf8/README.md)、[ycString](../docs/string/README.md)、[ycUnits](../docs/units/README.md)、[ycTextwrap](../docs/textwrap/README.md)与 [ycTabulate](../docs/tabulate/README.md)。
+本文件描述测试套件的运行方式。使用 API 见 [ycPathLib](../docs/pathlib/README.md)、[ycRegEx](../docs/regex/README.md)、[ycSubProcess](../docs/subprocess/README.md)、[ycJson](../docs/codec/json/README.md)、[ycUtf8](../docs/utf8/README.md)、[ycString](../docs/string/README.md)、[ycUnits](../docs/units/README.md)、[ycTextwrap](../docs/textwrap/README.md)与 [ycTabulate](../docs/tabulate/README.md)。
 
 ## 运行测试
 

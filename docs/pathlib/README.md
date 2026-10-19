@@ -1050,7 +1050,7 @@ p->readJson(
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| l_args ... | any | 原样透传给 `ycJson::decode` 的实参（`?format`、`?maxDepth` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycJson 手册](../json/README.md) 的 `decode` 条目。 |
+| l_args ... | any | 原样透传给 `ycJson::decode` 的实参（`?format`、`?maxDepth` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycJson 手册](../codec/json/README.md) 的 `decode` 条目。 |
 
 **返回值**
 
