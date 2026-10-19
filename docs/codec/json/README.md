@@ -30,29 +30,6 @@ ycJson::decode("1\n{\"a\":2}\n" ?format "jsonl")              ; => (1 <table: a 
 ycJson::encode(list(1 "x") ?format "jsonl")                   ; => "1\n\"x\"\n"
 ```
 
-## 类型映射
-
-| JSON | 库内表示 |
-| --- | --- |
-| object | table |
-| array | list（空数组为 `nil`） |
-| string | 字符串（UTF-8 字节级透传） |
-| number（整数） | fixnum（32 位范围内），超出为 flonum |
-| number（含小数或指数） | flonum |
-| true | `ycJson::True`（`Type` 实例） |
-| false | `ycJson::False`（`Type` 实例） |
-| null | `ycJson::Null`（`Type` 实例） |
-
-编码方向兼容：`t` 与 `ycJson::True` 均输出 `true`；要输出 `false`/`null` 须使用对应哨兵实例。
-
-对象缺键以 `ycJson::Missing` 表示：解码出的 table 以此为缺省值，读取不存在的键返回它；它一旦作为待编码值出现即报错。判断缺键写法：
-
-```lisp
-t_v["flag"] == ycJson::False    ; 值为 false
-t_v["list"] == nil              ; 值为空数组
-t_v["nope"] == ycJson::Missing  ; 键不存在
-```
-
 ## API 参考
 
 ### ycJson::decode <sub>`function`</sub>
@@ -151,6 +128,29 @@ ycJson::encode('foo)
 
 ycJson::encode(list(1 2) ?format "jsonl")           ; => "1\n2\n"
 ycJson::encode(list(ycJson::Null) ?format "jsonl")  ; => "null\n"
+```
+
+## 类型映射
+
+| JSON | 库内表示 |
+| --- | --- |
+| object | table |
+| array | list（空数组为 `nil`） |
+| string | 字符串（UTF-8 字节级透传） |
+| number（整数） | fixnum（32 位范围内），超出为 flonum |
+| number（含小数或指数） | flonum |
+| true | `ycJson::True`（`Type` 实例） |
+| false | `ycJson::False`（`Type` 实例） |
+| null | `ycJson::Null`（`Type` 实例） |
+
+编码方向兼容：`t` 与 `ycJson::True` 均输出 `true`；要输出 `false`/`null` 须使用对应哨兵实例。
+
+对象缺键以 `ycJson::Missing` 表示：解码出的 table 以此为缺省值，读取不存在的键返回它；它一旦作为待编码值出现即报错。判断缺键写法：
+
+```lisp
+t_v["flag"] == ycJson::False    ; 值为 false
+t_v["list"] == nil              ; 值为空数组
+t_v["nope"] == ycJson::Missing  ; 键不存在
 ```
 
 ## 哨兵常量
