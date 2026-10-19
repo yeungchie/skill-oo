@@ -1,6 +1,6 @@
 # ycJson
 
-Cadence SKILL++ 的 JSON 家族编解码库：JSON、放宽 JSON（jsonc）与 JSON Lines（jsonl）的解码与编码。所属集合索引见 [codec](../README.md)。
+Cadence SKILL++ 的 JSON 家族编解码库：JSON、放宽 JSON（jsonc）与 JSON Lines（jsonl）的解码与编码。
 
 ## 概要
 
