@@ -31,6 +31,13 @@ _assert(_near(car(ycUnits::parse("1G")) 1e9 1e-3)  "parse: giga")
 _assert(_near(car(ycUnits::parse("1milliF")) 0.001 1e-15)  "parse: milli alias")
 _assert(_near(car(ycUnits::parse("1megaHz")) 1e6 1e-6)  "parse: mega alias")
 
+_assert(_near(car(ycUnits::parse("1K")) 1000.0 1e-12)  "parse: K alias")
+_assert(_near(car(ycUnits::parse("5%")) 0.05 1e-15)  "parse: percent")
+_assert(cadr(ycUnits::parse("5%")) == ""  "parse: percent unit")
+_assert(_near(car(ycUnits::parse("1 K")) 1.0 1e-12)  "parse: spaced K")
+_assert(cadr(ycUnits::parse("1 K")) == "K"  "parse: spaced K unit")
+_assert(_near(car(ycUnits::parse("1uF")) 1e-6 1e-15)  "parse: uF")
+
 ; ---- 单位与歧义 ----
 _assert(cadr(ycUnits::parse("1k")) == ""  "parse: no unit")
 _assert(cadr(ycUnits::parse("1kHz")) == "Hz"  "parse: unit after prefix")

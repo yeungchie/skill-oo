@@ -96,6 +96,8 @@ procedure(_shortFactor(n_ch "x")  ; -> num | nil
         (n_ch == 117 1e-6)
         (n_ch == 109 1e-3)
         (n_ch == 107 1e3)
+        (n_ch == 75 1e3)
+        (n_ch == 37 1e-2)
         (n_ch == 77 1e6)
         (n_ch == 71 1e9)
         (n_ch == 84 1e12)
