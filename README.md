@@ -10,6 +10,7 @@
 + [ycJson](docs/codec/json/README.md) —— JSON、jsonc、jsonl 的解码与编码。
 + [ycUtf8](docs/utf8/README.md) —— UTF-8 编解码、码点操作与显示宽度。
 + [ycString](docs/string/README.md) —— 字符串操作、转义与标识符转换。
++ [ycUnits](docs/units/README.md) —— SI 工程计数与单位解析/格式化。
 + [ycTextwrap](docs/textwrap/README.md) —— 定宽折行、缩进与截断。
 + [ycTabulate](docs/tabulate/README.md) —— 文本表格渲染。
 

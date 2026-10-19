@@ -26,6 +26,7 @@ let((t_dir t_pkgs)
         "codec"
         "utf8"
         "string"
+        "units"
         "textwrap"
         "tabulate"
     )
