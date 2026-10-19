@@ -406,6 +406,9 @@ defclass(Path () (
     ; glob
     glob()
     rglob()
+
+    ; codec
+    readJson()
 ))
 
 defmethod(printself (self(Path))  ; -> str
@@ -421,16 +424,17 @@ defmethod(printself (self(Path))  ; -> str
 
 inScheme(
 defmethod(initializeInstance (self(Path) \@rest _args)
-    ; 构造 Path 实例时安装全部方法集：纯路径、文件系统与 glob。
+    ; 构造 Path 实例时安装全部方法集：纯路径、文件系统、glob 与 codec。
     ;
     ; **参数**
     ;   _args  (list) - 变参：附加初始化参数，本实现忽略
     ;
     ; **返回**
-    ;   (t) - 依次调用 _installPure、_installFs、_installGlob 后返回 t
+    ;   (t) - 依次调用 _installPure、_installFs、_installGlob、_installCodec 后返回 t
     _installPure(self)
     _installFs(self)
     _installGlob(self)
+    _installCodec(self)
     t
 )
 )

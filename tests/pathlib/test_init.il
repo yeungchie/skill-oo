@@ -123,6 +123,11 @@ procedure(_assertOk(g_r t_msg "gt")  ; -> t | nil（errset 结果：捕获成功
     )
 )
 
+procedure(_sameJson(g_a g_b t_format "ggt")  ; -> t | nil
+    ycJson::encode(g_a ?format t_format ?sortKeys t)
+        == ycJson::encode(g_b ?format t_format ?sortKeys t)
+)
+
 let((l_res t_self t_dir)
     l_res = errset(get_filename(piport) nil)
     t_self = when(l_res && car(l_res) && stringp(car(l_res)) && car(l_res) != ""
@@ -155,6 +160,16 @@ let((l_res t_self t_dir)
         _TestCount = _TestCount + 1
         _TestFail = _TestFail + 1
         printf("TEST FAILED - test_fs.il did not run to completion%s\n"
+            if(l_res "" " (load raised an error)")
+        )
+    )
+
+    _TestCodecDone = nil
+    l_res = errset(load(strcat(t_dir "test_codec.il")) t)
+    unless(_TestCodecDone
+        _TestCount = _TestCount + 1
+        _TestFail = _TestFail + 1
+        printf("TEST FAILED - test_codec.il did not run to completion%s\n"
             if(l_res "" " (load raised an error)")
         )
     )

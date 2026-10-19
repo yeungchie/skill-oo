@@ -18,11 +18,22 @@ let((t_res t_self t_dir)
     unless(pcreMatchp("/$" t_dir)
         t_dir = strcat(t_dir "/")
     )
+    unless(boundp('_ycModules)
+        loadi(strcat(t_dir "../../libs/registry.il"))
+    )
     if(findNamespace("ycPathLib") == nil
         loadi(strcat(t_dir "../../libs/pathlib/load.il"))
         printf("ycPathLib: re-running tests with previously loaded code; restart CIW if you edited libs/pathlib/src/\n")
     )
-    loadi(strcat(t_dir "test_init.il"))
+    _TestPathlibDir = t_dir
 )
+
+; load reads and evaluates one top-level form at a time; the ycJson shell
+; keeps the quoted symbol below readable on a fresh CIW.
+ycRequireNamespace("ycJson")
+unless(fboundp('ycJson:::decode)
+    loadi(strcat(_TestPathlibDir "../../libs/codec/json/load.il"))
+)
+loadi(strcat(_TestPathlibDir "test_init.il"))
 
 ; END

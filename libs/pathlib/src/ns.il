@@ -37,6 +37,7 @@ addToNamespace("ycPathLib"
         _globChain
         _globPattern
         _installGlob
+        _installCodec
     ))
 )
 unuseNamespace("ycPathLib")
