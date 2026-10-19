@@ -18,7 +18,7 @@ let((t_res t_self t_dir)
     unless(pcreMatchp("/$" t_dir)
         t_dir = strcat(t_dir "/")
     )
-    unless(boundp('_ycModules)
+    unless(boundp('_ycNamespaces)
         loadi(strcat(t_dir "../../libs/registry.il"))
     )
     if(findNamespace("ycPathLib") == nil
