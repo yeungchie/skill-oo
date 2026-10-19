@@ -18,7 +18,7 @@ let((t_res t_self t_dir)
     unless(pcreMatchp("/$" t_dir)
         t_dir = strcat(t_dir "/")
     )
-    unless(boundp('_ycNamespaces)
+    unless(findNamespace("ycNamespace")
         loadi(strcat(t_dir "../../libs/registry.il"))
     )
     if(findNamespace("ycPathLib") == nil
@@ -30,7 +30,7 @@ let((t_res t_self t_dir)
 
 ; load reads and evaluates one top-level form at a time; the ycJson shell
 ; keeps the quoted symbol below readable on a fresh CIW.
-ycRequireNamespace("ycJson")
+ycNamespace:::require("ycJson")
 unless(fboundp('ycJson:::decode)
     loadi(strcat(_TestPathlibDir "../../libs/codec/json/load.il"))
 )

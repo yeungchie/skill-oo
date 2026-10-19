@@ -3,7 +3,7 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-ycRequireNamespace("ycJson")
+ycNamespace:::require("ycJson")
 
 useNamespace("ycPathLib")
 

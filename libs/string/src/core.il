@@ -3,7 +3,7 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-ycRequireNamespace("ycRegEx" "ycUtf8")
+ycNamespace:::require("ycRegEx" "ycUtf8")
 
 useNamespace("ycString")
 
