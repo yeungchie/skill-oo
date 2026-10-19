@@ -1033,6 +1033,46 @@ p->writeText("hi\n")
 p->readText()  ; => "hi\n"
 ```
 
+##### readJson <sub>`method`</sub>
+
+```text
+p->readJson(
+    l_args ...
+)
+=> any | list
+```
+
+**描述**
+
+读取整个文件内容并解码为 JSON 值。需要先加载 `ycJson`；未加载时以 `error()` 中断（`ycPathLib::Path->readJson: ycJson is not loaded - load it first`）。解码选项与错误契约由 `ycJson::decode` 提供，本方法原样透传实参，不复制其校验逻辑。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| l_args ... | any | 原样透传给 `ycJson::decode` 的实参（`?format`、`?maxDepth` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycJson 手册](../codec/json/README.md) 的 `decode` 条目。 |
+
+**返回值**
+
+`any | list` — `ycJson::decode` 的返回值（`jsonl` 为 list）。
+
+**例程**
+
+```lisp
+p = ycPathLib::Path("./a.json")
+p->writeText("42")
+p->readJson()                    ; => 42
+
+p->writeText("{\"a\": [1, 2]}")
+p->readJson()                    ; => table（绑定 "a" → (1 2)）
+
+p->writeText("{\"a\": 1}\n{\"a\": 2}\n")
+p->readJson(?format "jsonl")     ; => list of 2 tables
+
+p->readJson(?format "xml")
+; *Error* ycJson::decode: unknown format "xml"
+```
+
 ##### writeText <sub>`method`</sub>
 
 ```text
