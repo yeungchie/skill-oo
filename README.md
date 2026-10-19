@@ -20,7 +20,8 @@
 
 ### 数据与报告
 
-+ [codec](docs/codec/README.md) —— 编解码分类索引：ycJson（JSON、jsonc、jsonl）。
++ [codec](docs/codec/README.md) —— 编解码分类索引。
+  + [ycJson](docs/codec/json/README.md) —— JSON、jsonc、jsonl 的解码与编码。
 + [ycUnits](docs/units/README.md) —— SI 工程计数与单位解析/格式化。
 + [ycTabulate](docs/tabulate/README.md) —— 文本表格渲染。
 
