@@ -227,7 +227,7 @@ procedure(decode(t_str \@key (format "json") (maxDepth nil) "ttg")  ; -> any | l
     ; **参数**
     ;   t_str     (str) - 输入文本
     ;   ?format   (str) - 格式；默认 "json"
-    ;   ?maxDepth (int) - 最大嵌套深度；默认 1000
+    ;   ?maxDepth (int) - 最大嵌套深度；默认 800
     ;
     ; **返回**
     ;   (any|list) - 解码产物；"jsonl" 返回按行序的列表

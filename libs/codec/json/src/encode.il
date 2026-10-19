@@ -268,7 +268,7 @@ procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys nil) (strict
     ;   ?strict       (t|nil) - t 时对象键必须为字符串；默认 nil
     ;   ?nilAs        (str) - nil 的输出形式："array"（默认）或 "false"
     ;   ?finalNewline (t|nil) - jsonl 末尾换行；默认 t
-    ;   ?maxDepth     (int) - 最大嵌套深度；默认 1000
+    ;   ?maxDepth     (int) - 最大嵌套深度；默认 800
     ;
     ; **返回**
     ;   (str) - 文本；无法表示时以 error() 中断
