@@ -303,6 +303,9 @@ let((p)
         _assertSameSpan(m 2 3  "execOpts: lazy span keeps option")
         _assert(m->expand("&") == "a"  "execOpts: expand keeps option")
     )
+    _assertSameSeq(ycRegEx::reFindall("x*" "abc" ?execOpts 'anchored) '("")
+        "execOpts: anchored zero-width findall"
+    )
 )
 
 ; --- 9d. partial probe ---

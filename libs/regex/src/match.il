@@ -291,17 +291,19 @@ procedure(_hasNumericGroupRef(t_pat "t")  ; -> t | nil
     )
 )
 
-procedure(_zeroWidthRecords(g_pat t_subj "gt")  ; -> list | sym
+procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     ; 用「消费一字符 + 前瞻」批量导出零宽匹配；不适用时回 'fallback。
     ;
     ; **参数**
     ;   g_pat   (Pattern) - Pattern 实例
     ;   t_subj  (str)     - 主题串
+    ;   n_exec  (int)     - 执行选项位值
     ;
     ; **返回**
     ;   (list|sym) - (start end . groups) 记录列表；需回退 'fallback
     let((t_qpat g_qobj n_q g_qpat l_q l_0 l_parts l_res l_qgroups t_pw n_start g_bad l_m)
         cond(
+            (n_exec != 0 'fallback)
             (g_pat->_data->compileOpts != 0 'fallback)
             (_hasNumericGroupRef(g_pat->_data->pattern) 'fallback)
             (t
@@ -316,7 +318,7 @@ procedure(_zeroWidthRecords(g_pat t_subj "gt")  ; -> list | sym
                             ?pcre g_qobj ?nGroups n_q))
                         l_q = _exportRecords(g_qpat t_subj 0)
                         when(l_q == 'fallback g_bad = t)
-                        when(pcreMatchp(g_pat->_data->span t_subj 0 0)
+                        when(pcreMatchp(g_pat->_data->span t_subj 0 n_exec)
                             l_parts = _extractParts(g_pat g_pat->_data->span)
                             if(length(car(l_parts)) == 0
                                 progn(
