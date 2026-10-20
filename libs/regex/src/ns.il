@@ -40,6 +40,7 @@ addToNamespace("ycRegEx"
         _exportMarkers
         _exportTemplate
         _exportRecords
+        _hasBit
         _hasNumericGroupRef
         _zeroWidthRecords
         _walkRecords

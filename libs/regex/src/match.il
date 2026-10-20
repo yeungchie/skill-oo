@@ -267,6 +267,18 @@ procedure(_exportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     )
 )
 
+procedure(_hasBit(n_val n_bit "xx")  ; -> t | nil
+    ; 判断位值是否包含某一位。
+    ;
+    ; **参数**
+    ;   n_val  (int) - 位值
+    ;   n_bit  (int) - 单个位
+    ;
+    ; **返回**
+    ;   (t|nil) - 含该位时为 t
+    remainder(n_val n_bit * 2) >= n_bit
+)
+
 procedure(_hasNumericGroupRef(t_pat "t")  ; -> t | nil
     ; 判断 pattern 是否含数字组引用/条件/子程序调用。
     ;
@@ -303,20 +315,22 @@ procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     ;   (list|sym) - (start end . groups) 记录列表；需回退 'fallback
     let((t_qpat g_qobj n_q g_qpat l_q l_0 l_parts l_res l_qgroups t_pw n_start g_bad l_m)
         cond(
-            (n_exec != 0 'fallback)
-            (g_pat->_data->compileOpts != 0 'fallback)
+            (_hasBit(g_pat->_data->compileOpts 16) 'fallback)
+            (_hasBit(g_pat->_data->compileOpts 4096) 'fallback)
+            (_hasBit(n_exec 16) 'fallback)
+            (_hasBit(n_exec 1024) 'fallback)
             (_hasNumericGroupRef(g_pat->_data->pattern) 'fallback)
             (t
                 progn(
                 t_qpat = lsprintf("%s([\\s\\S])(?=((?:%s)))"
                     g_pat->_data->flags g_pat->_data->pattern)
-                g_qobj = _compileChecked(t_qpat "ycRegEx: zero-width probe" 0)
+                g_qobj = _compileChecked(t_qpat "ycRegEx: zero-width probe" g_pat->_data->compileOpts)
                 if(g_qobj
                     progn(
                         n_q = pcreSubpatCount(g_qobj)
                         g_qpat = makeInstance('Pattern ?_data makeInstance('PatternData
                             ?pcre g_qobj ?nGroups n_q))
-                        l_q = _exportRecords(g_qpat t_subj 0)
+                        l_q = _exportRecords(g_qpat t_subj n_exec)
                         when(l_q == 'fallback g_bad = t)
                         when(pcreMatchp(g_pat->_data->span t_subj 0 n_exec)
                             l_parts = _extractParts(g_pat g_pat->_data->span)
