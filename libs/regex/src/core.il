@@ -215,18 +215,20 @@ procedure(_flagsFromValue(g_flags t_ctx "gt")  ; -> str
     )
 )
 
-procedure(_compileChecked(t_str "t")  ; -> compiled | nil
-    ; 编译 PCRE 串；失败时透传引擎原生诊断并返回 nil。
+procedure(_compileChecked(t_str t_ctx "tt")  ; -> compiled
+    ; 编译 PCRE 串；原生诊断照常打印，失败统一转成带上下文的 error()。
     ;
     ; **参数**
     ;   t_str  (str) - 待编译的正则串
+    ;   t_ctx  (str) - 出错上下文名（拼入错误消息）
     ;
     ; **返回**
-    ;   (compiled|nil) - 编译成功返回对象；失败返回 nil（原生错误已打印）
+    ;   (compiled) - 编译成功返回对象；失败不返回
     let((l_res)
         l_res = errset(pcreCompile(t_str) t)
-        when(l_res && pcreObjectp(car(l_res))
+        if(l_res && pcreObjectp(car(l_res))
             car(l_res)
+            error("%A: pattern compilation failed" t_ctx)
         )
     )
 )
@@ -245,18 +247,9 @@ procedure(_mkPattern(g_pat t_flags t_ctx "gtt")  ; -> Pattern
         unless(stringp(g_pat)
             error("%A: pattern must be a string, got %A" t_ctx g_pat)
         )
-        g_faithful = _compileChecked(strcat(t_flags g_pat))
-        unless(g_faithful
-            error("%A: pattern compilation failed" t_ctx)
-        )
-        g_span = _compileChecked(lsprintf("%s\\A(?:%s)" t_flags g_pat))
-        unless(g_span
-            error("%A: anchor compilation failed" t_ctx)
-        )
-        g_full = _compileChecked(lsprintf("%s\\A(?:%s)\\z" t_flags g_pat))
-        unless(g_full
-            error("%A: fullmatch compilation failed" t_ctx)
-        )
+        g_faithful = _compileChecked(strcat(t_flags g_pat) t_ctx)
+        g_span = _compileChecked(lsprintf("%s\\A(?:%s)" t_flags g_pat) t_ctx)
+        g_full = _compileChecked(lsprintf("%s\\A(?:%s)\\z" t_flags g_pat) t_ctx)
         n_g = pcreSubpatCount(g_faithful)
         makeInstance('Pattern ?_data makeInstance('PatternData
             ?pattern g_pat ?flags t_flags ?pcre g_faithful

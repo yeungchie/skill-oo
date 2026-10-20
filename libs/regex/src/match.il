@@ -111,10 +111,9 @@ procedure(_anchorAt(g_pat n_off "gx")  ; -> compiled
     if(n_off == 0
         g_pat->_data->span
         let((g_obj)
-            g_obj = _compileChecked(lsprintf("%s(?<=\\A[\\s\\S]{%d})(?:%s)"
-                g_pat->_data->flags n_off g_pat->_data->pattern))
-            unless(g_obj
-                error("ycRegEx: cannot compile anchor at offset %d" n_off)
+            g_obj = _compileChecked(
+                lsprintf("%s(?<=\\A[\\s\\S]{%d})(?:%s)" g_pat->_data->flags n_off g_pat->_data->pattern)
+                lsprintf("ycRegEx: anchor at offset %d" n_off)
             )
             g_obj
         )
