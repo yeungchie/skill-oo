@@ -261,6 +261,29 @@ procedure(_compileOptsBits(g_opts t_ctx "gt")  ; -> int
     )
 )
 
+procedure(_execOptsBits(g_opts t_ctx "gt")  ; -> int
+    ; 把执行选项符号列表转成引擎位值。
+    ;
+    ; **参数**
+    ;   g_opts  (sym|list|nil) - anchored / notbol / noteol / notempty
+    ;   t_ctx   (str)          - 出错上下文名（拼入错误消息）
+    ;
+    ; **返回**
+    ;   (int) - pcreGenExecOptBits 的位值；无选项返回 0
+    let((l_args)
+        foreach(g_opt _optsList(g_opts t_ctx)
+            case(g_opt
+                (anchored l_args = append(l_args list('?anchored t)))
+                (notbol l_args = append(l_args list('?notbol t)))
+                (noteol l_args = append(l_args list('?noteol t)))
+                (notempty l_args = append(l_args list('?notempty t)))
+                (t error("%A: unknown execution option %A" t_ctx g_opt))
+            )
+        )
+        apply('pcreGenExecOptBits l_args)
+    )
+)
+
 procedure(_compileChecked(t_str t_ctx n_opts "ttx")  ; -> compiled
     ; 编译 PCRE 串；原生诊断照常打印，失败统一转成带上下文的 error()。
     ;
@@ -350,7 +373,7 @@ procedure(reCompile(g_pat \@key flags compileOpts "gg")  ; -> Pattern
         _compileOptsBits(compileOpts "ycRegEx::reCompile"))
 )
 
-procedure(reMatch(g_pat t_subj \@key flags "gtg")  ; -> Match | nil
+procedure(reMatch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Match | nil
     ; 在主题串开头做锚定匹配（语义同 Python re.match，前锚 \A）。
     ;
     ; **参数**
@@ -362,11 +385,11 @@ procedure(reMatch(g_pat t_subj \@key flags "gtg")  ; -> Match | nil
     ;   (Match|nil) - 主题串起始处命中返回 Match，未命中返回 nil
     let((p)
         p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reMatch") "ycRegEx::reMatch" 0)
-        p->match(t_subj)
+        p->match(t_subj ?execOpts execOpts)
     )
 )
 
-procedure(reSearch(g_pat t_subj \@key flags "gtg")  ; -> Match | nil
+procedure(reSearch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Match | nil
     ; 在主题串中搜索首个匹配（语义同 Python re.search）。
     ;
     ; **参数**
@@ -378,11 +401,11 @@ procedure(reSearch(g_pat t_subj \@key flags "gtg")  ; -> Match | nil
     ;   (Match|nil) - 命中返回 Match（span 惰性），未命中返回 nil
     let((p)
         p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reSearch") "ycRegEx::reSearch" 0)
-        p->search(t_subj)
+        p->search(t_subj ?execOpts execOpts)
     )
 )
 
-procedure(reFullmatch(g_pat t_subj \@key flags "gtg")  ; -> Match | nil
+procedure(reFullmatch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Match | nil
     ; 整串匹配（语义同 Python re.fullmatch，经 \A(?:…)\z 第三编译对象）。
     ;
     ; **参数**
@@ -394,11 +417,11 @@ procedure(reFullmatch(g_pat t_subj \@key flags "gtg")  ; -> Match | nil
     ;   (Match|nil) - 匹配覆盖整个主题串返回 Match，否则返回 nil
     let((p)
         p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reFullmatch") "ycRegEx::reFullmatch" 0)
-        p->fullmatch(t_subj)
+        p->fullmatch(t_subj ?execOpts execOpts)
     )
 )
 
-procedure(reFindall(g_pat t_subj \@key flags "gtg")  ; -> list
+procedure(reFindall(g_pat t_subj \@key flags execOpts "gtgg")  ; -> list
     ; 返回主题串中全部匹配的结果列表（语义同 Python re.findall）。
     ;
     ; **参数**
@@ -410,11 +433,11 @@ procedure(reFindall(g_pat t_subj \@key flags "gtg")  ; -> list
     ;   (list) - 0 组整体串列表 / 1 组扁平组值列表 / ≥2 组每匹配一个子列表
     let((p)
         p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reFindall") "ycRegEx::reFindall" 0)
-        p->findall(t_subj)
+        p->findall(t_subj ?execOpts execOpts)
     )
 )
 
-procedure(reFinditer(g_pat t_subj \@key flags "gtg")  ; -> list[Match]
+procedure(reFinditer(g_pat t_subj \@key flags execOpts "gtgg")  ; -> list[Match]
     ; 返回全部匹配的 Match 列表（语义同 Python re.finditer，全量返回）。
     ;
     ; **参数**
@@ -426,11 +449,11 @@ procedure(reFinditer(g_pat t_subj \@key flags "gtg")  ; -> list[Match]
     ;   (list[Match]) - 全量 Match 列表；慢路径逐位置扫描
     let((p)
         p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reFinditer") "ycRegEx::reFinditer" 0)
-        p->finditer(t_subj)
+        p->finditer(t_subj ?execOpts execOpts)
     )
 )
 
-procedure(reSplit(g_pat t_subj \@key flags all "gtgg")  ; -> list[str]
+procedure(reSplit(g_pat t_subj \@key flags all execOpts "gtggg")  ; -> list[str]
     ; 按模式切分主题串（语义同 Python re.split）。
     ;
     ; **参数**
@@ -443,11 +466,11 @@ procedure(reSplit(g_pat t_subj \@key flags all "gtgg")  ; -> list[str]
     ;   (list[str]) - 切分段列表（保留捕获组段）
     let((p)
         p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reSplit") "ycRegEx::reSplit" 0)
-        p->split(t_subj ?all all)
+        p->split(t_subj ?all all ?execOpts execOpts)
     )
 )
 
-procedure(reSub(g_pat t_repl t_subj \@key flags all "gttgg")  ; -> str
+procedure(reSub(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> str
     ; 替换主题串中的匹配（语义同 Python re.sub，参数序为 pattern repl subj）。
     ;
     ; **参数**
@@ -461,11 +484,11 @@ procedure(reSub(g_pat t_repl t_subj \@key flags all "gttgg")  ; -> str
     ;   (str) - 替换后的串
     let((p)
         p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reSub") "ycRegEx::reSub" 0)
-        p->sub(t_repl t_subj ?all all)
+        p->sub(t_repl t_subj ?all all ?execOpts execOpts)
     )
 )
 
-procedure(reSubn(g_pat t_repl t_subj \@key flags all "gttgg")  ; -> (str, int)
+procedure(reSubn(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> (str, int)
     ; 同 reSub，另返回实际替换次数（语义同 Python re.subn）。
     ;
     ; **参数**
@@ -479,7 +502,7 @@ procedure(reSubn(g_pat t_repl t_subj \@key flags all "gttgg")  ; -> (str, int)
     ;   (str, int) - (替换后的串, 实际替换次数)
     let((p)
         p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reSubn") "ycRegEx::reSubn" 0)
-        p->subn(t_repl t_subj ?all all)
+        p->subn(t_repl t_subj ?all all ?execOpts execOpts)
     )
 )
 

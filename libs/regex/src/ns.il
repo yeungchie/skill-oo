@@ -21,6 +21,7 @@ addToNamespace("ycRegEx"
         _mkPattern
         _optsList
         _compileOptsBits
+        _execOptsBits
         _compileChecked
         _asPat
         _flagsFromValue

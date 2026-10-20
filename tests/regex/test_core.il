@@ -254,6 +254,40 @@ let((p)
         "compileOpts: non-symbol option raises")
 )
 
+; --- 9c. execution options ---
+let((p)
+    _assert(ycRegEx::reSearch("^a" "a" ?execOpts 'notbol) == nil
+        "execOpts: notbol"
+    )
+    _assert(ycRegEx::reSearch("a$" "a" ?execOpts 'noteol) == nil
+        "execOpts: noteol"
+    )
+    _assert(ycRegEx::reSearch("a?" "b" ?execOpts 'notempty) == nil
+        "execOpts: notempty"
+    )
+    _assert(ycRegEx::reSearch("b" "ab" ?execOpts 'anchored) == nil
+        "execOpts: anchored"
+    )
+    _assert(ycRegEx::reSearch("^a" "a" ?execOpts list('notbol 'notempty)) == nil
+        "execOpts: list form"
+    )
+    p = ycRegEx::reCompile("^a")
+    _assert(p->search("a" ?execOpts 'notbol) == nil
+        "execOpts: Pattern method"
+    )
+    _assertError(lambda(() ycRegEx::reSearch("a" "a" ?execOpts 'bogus) t)
+        "execOpts: unknown option raises"
+    )
+    _assertError(lambda(() ycRegEx::reSearch("a" "a" ?execOpts 42) t)
+        "execOpts: non-symbol option raises"
+    )
+    let((m)
+        m = ycRegEx::reSearch("a?" "b a" ?execOpts 'notempty)
+        _assertSameSpan(m 2 3  "execOpts: lazy span keeps option")
+        _assert(m->expand("&") == "a"  "execOpts: expand keeps option")
+    )
+)
+
 ; --- 10. recursion limit wrappers ---
 let((n_orig)
     n_orig = ycRegEx::reGetRecursionLimit()

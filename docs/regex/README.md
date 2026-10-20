@@ -68,7 +68,7 @@ ycRegEx::reCompile("(")         ; => 以 error() 中断（语法错误）
 ### ycRegEx::reMatch <sub>`function`</sub>
 
 ```text
-ycRegEx::reMatch(g_pat t_subj [ ?flags g_flags ])
+ycRegEx::reMatch(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 => Match | nil
 ```
 
@@ -83,6 +83,7 @@ ycRegEx::reMatch(g_pat t_subj [ ?flags g_flags ])
 | g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -98,7 +99,7 @@ ycRegEx::reMatch("\\d+" "a123")  ; => nil
 ### ycRegEx::reSearch <sub>`function`</sub>
 
 ```text
-ycRegEx::reSearch(g_pat t_subj [ ?flags g_flags ])
+ycRegEx::reSearch(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 => Match | nil
 ```
 
@@ -113,6 +114,7 @@ ycRegEx::reSearch(g_pat t_subj [ ?flags g_flags ])
 | g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -130,7 +132,7 @@ m->groups()            ; => ("10" "20")
 ### ycRegEx::reFullmatch <sub>`function`</sub>
 
 ```text
-ycRegEx::reFullmatch(g_pat t_subj [ ?flags g_flags ])
+ycRegEx::reFullmatch(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 => Match | nil
 ```
 
@@ -145,6 +147,7 @@ ycRegEx::reFullmatch(g_pat t_subj [ ?flags g_flags ])
 | g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -160,7 +163,7 @@ ycRegEx::reFullmatch("\\d+" "123a") ; => nil
 ### ycRegEx::reFindall <sub>`function`</sub>
 
 ```text
-ycRegEx::reFindall(g_pat t_subj [ ?flags g_flags ])
+ycRegEx::reFindall(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 => list
 ```
 
@@ -175,6 +178,7 @@ ycRegEx::reFindall(g_pat t_subj [ ?flags g_flags ])
 | g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -190,7 +194,7 @@ ycRegEx::reFindall("(a)|(b)" "ab")  ; => (("a" "") ("" "b"))
 ### ycRegEx::reFinditer <sub>`function`</sub>
 
 ```text
-ycRegEx::reFinditer(g_pat t_subj [ ?flags g_flags ])
+ycRegEx::reFinditer(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 => list[Match]
 ```
 
@@ -205,6 +209,7 @@ ycRegEx::reFinditer(g_pat t_subj [ ?flags g_flags ])
 | g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -219,7 +224,7 @@ length(ycRegEx::reFinditer("\\d+" "a1b22"))  ; => 2
 ### ycRegEx::reSplit <sub>`function`</sub>
 
 ```text
-ycRegEx::reSplit(g_pat t_subj [ ?flags g_flags ] [ ?all g_all ])
+ycRegEx::reSplit(g_pat t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_execOpts ])
 => list[str]
 ```
 
@@ -234,6 +239,7 @@ ycRegEx::reSplit(g_pat t_subj [ ?flags g_flags ] [ ?all g_all ])
 | g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 | ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
 
 **返回值**
@@ -251,7 +257,7 @@ ycRegEx::reSplit("(\\d)" "a1b2c" ?all t) ; => ("a" "1" "b" "2" "c")
 ### ycRegEx::reSub <sub>`function`</sub>
 
 ```text
-ycRegEx::reSub(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ])
+ycRegEx::reSub(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_execOpts ])
 => str
 ```
 
@@ -267,6 +273,7 @@ ycRegEx::reSub(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ])
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 | ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
 
 **返回值**
@@ -284,7 +291,7 @@ ycRegEx::reSub("x*" "-" "abc")            ; => "-abc"（零宽仅首处）
 ### ycRegEx::reSubn <sub>`function`</sub>
 
 ```text
-ycRegEx::reSubn(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ])
+ycRegEx::reSubn(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_execOpts ])
 => (str, int)
 ```
 
@@ -300,6 +307,7 @@ ycRegEx::reSubn(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ])
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 | ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
 
 **返回值**
@@ -377,7 +385,7 @@ ycRegEx::reSetRecursionLimit(10000000)  ; => t（恢复默认）
 ##### match <sub>`method`</sub>
 
 ```text
-p->match(t_subj)
+p->match(t_subj [ ?execOpts g_execOpts ])
 => Match | nil
 ```
 
@@ -390,6 +398,7 @@ p->match(t_subj)
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
 | t_subj | str | 被处理字符串 |
+| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -406,7 +415,7 @@ p->match("a123")  ; => nil
 ##### search <sub>`method`</sub>
 
 ```text
-p->search(t_subj)
+p->search(t_subj [ ?execOpts g_execOpts ])
 => Match | nil
 ```
 
@@ -419,6 +428,7 @@ p->search(t_subj)
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
 | t_subj | str | 被处理字符串 |
+| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -434,7 +444,7 @@ p->search("a123")  ; => Match
 ##### fullmatch <sub>`method`</sub>
 
 ```text
-p->fullmatch(t_subj)
+p->fullmatch(t_subj [ ?execOpts g_execOpts ])
 => Match | nil
 ```
 
@@ -447,6 +457,7 @@ p->fullmatch(t_subj)
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
 | t_subj | str | 被处理字符串 |
+| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -465,7 +476,7 @@ p->fullmatch("123a")  ; => nil
 ##### findall <sub>`method`</sub>
 
 ```text
-p->findall(t_subj)
+p->findall(t_subj [ ?execOpts g_execOpts ])
 => list
 ```
 
@@ -478,6 +489,7 @@ p->findall(t_subj)
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
 | t_subj | str | 被处理字符串 |
+| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -493,7 +505,7 @@ p->findall("a1b22")  ; => ("1" "22")
 ##### finditer <sub>`method`</sub>
 
 ```text
-p->finditer(t_subj)
+p->finditer(t_subj [ ?execOpts g_execOpts ])
 => list[Match]
 ```
 
@@ -506,6 +518,7 @@ p->finditer(t_subj)
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
 | t_subj | str | 被处理字符串 |
+| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -523,7 +536,7 @@ length(p->finditer("a1b22"))  ; => 2
 ##### split <sub>`method`</sub>
 
 ```text
-p->split(t_subj [ ?all g_all ])
+p->split(t_subj [ ?all g_all ] [ ?execOpts g_execOpts ])
 => list[str]
 ```
 
@@ -537,6 +550,7 @@ p->split(t_subj [ ?all g_all ])
 | --- | --- | --- | --- |
 | t_subj | str |  | 被处理字符串 |
 | ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -555,7 +569,7 @@ p->split("a,b,c" ?all t)  ; => ("a" "b" "c")
 ##### sub <sub>`method`</sub>
 
 ```text
-p->sub(t_repl t_subj [ ?all g_all ])
+p->sub(t_repl t_subj [ ?all g_all ] [ ?execOpts g_execOpts ])
 => str
 ```
 
@@ -570,6 +584,7 @@ p->sub(t_repl t_subj [ ?all g_all ])
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
 | ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -586,7 +601,7 @@ p->sub("#" "a1b2" ?all t) ; => "a#b#"
 ##### subn <sub>`method`</sub>
 
 ```text
-p->subn(t_repl t_subj [ ?all g_all ])
+p->subn(t_repl t_subj [ ?all g_all ] [ ?execOpts g_execOpts ])
 => (str, int)
 ```
 
@@ -601,6 +616,7 @@ p->subn(t_repl t_subj [ ?all g_all ])
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
 | ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -914,3 +930,24 @@ ycRegEx::reCompile("b" ?compileOpts '(anchored firstline))->search("ab")  ; => n
 ```
 
 未知选项或非符号/列表参数以 `error()` 中断。
+
+## 执行选项
+
+`?execOpts` 为每次匹配调用的执行选项，接受单个选项符号或符号列表（默认 `nil`）。它不改变已编译的 `Pattern`，可逐次调用覆盖。
+
+| 符号 | 语义 |
+| --- | --- |
+| `anchored` | 仅从主题串首处起尝试匹配 |
+| `notbol` | 主题串首字符不视为行首，`^` 不在该处命中 |
+| `noteol` | 主题串末尾不视为行尾，`$` 不在该处命中 |
+| `notempty` | 空匹配不算有效命中 |
+
+```lisp
+ycRegEx::reSearch("^a" "a" ?execOpts 'notbol)                  ; => nil
+ycRegEx::reSearch("a$" "a" ?execOpts 'noteol)                  ; => nil
+ycRegEx::reSearch("a?" "b" ?execOpts 'notempty)                ; => nil
+ycRegEx::reSearch("b" "ab" ?execOpts 'anchored)                ; => nil
+ycRegEx::reSearch("^a" "a" ?execOpts list('notbol 'notempty))  ; => nil
+```
+
+未知选项或非符号/列表参数以 `error()` 中断。`partial` 暂不开放：当前 `Match` 模型无法表达部分匹配的结果。

@@ -121,13 +121,14 @@ procedure(_anchorAt(g_pat n_off "gx")  ; -> compiled
     )
 )
 
-procedure(_nextMatch(g_pat t_subj n_from "gtx")  ; -> (int, int . list[str]) | nil
+procedure(_nextMatch(g_pat t_subj n_from n_exec "gtxx")  ; -> (int, int . list[str]) | nil
     ; 慢路径内核：从 n_from 起逐位置锚定扫描，取最左命中。
     ;
     ; **参数**
     ;   g_pat   (Pattern) - Pattern 实例
     ;   t_subj  (str)     - 主题串
     ;   n_from  (int)     - 起始扫描的 0-based 字节偏移
+    ;   n_exec  (int)     - 执行选项位值（0 表示默认）
     ;
     ; **返回**
     ;   (int, int . list[str])|nil - 点对 (start end . 组值列表)：start/end 为 0-based
@@ -139,7 +140,7 @@ procedure(_nextMatch(g_pat t_subj n_from "gtx")  ; -> (int, int . list[str]) | n
         while(l_res == nil && n_i <= n_len
             let((g_obj)
                 g_obj = _anchorAt(g_pat n_i)
-                if(pcreMatchp(g_obj t_subj)
+                if(pcreMatchp(g_obj t_subj 0 n_exec)
                     let((l_parts)
                         l_parts = _extractParts(g_pat g_obj)
                         l_res = cons(n_i cons(n_i + length(car(l_parts)) cdr(l_parts)))
@@ -178,7 +179,7 @@ procedure(_findAllItem(g_pat t_subj l_m "gtl")  ; -> str | list[str]
     )
 )
 
-procedure(_mkMatch(g_pat t_subj g_start g_end l_groups g_anchor "gtgggg")  ; -> Match
+procedure(_mkMatch(g_pat t_subj g_start g_end l_groups g_anchor n_exec "gtggggx")  ; -> Match
     ; 构造 Match 实例，收纳整体位置、捕获组值与锚对象。
     ;
     ; **参数**
@@ -188,20 +189,21 @@ procedure(_mkMatch(g_pat t_subj g_start g_end l_groups g_anchor "gtgggg")  ; -> 
     ;   g_end     (int|nil)  - 结束字节位（开区间）；search 路径传 nil（惰性定位）
     ;   l_groups  (list)     - 捕获组值列表（非参与组为 ""）
     ;   g_anchor  (compiled) - 锚对象（span 或 full），供惰性定位与 expand 重挂状态
+    ;   n_exec    (int)      - 执行选项位值（0 表示默认）
     ;
     ; **返回**
     ;   (Match) - 新 Match 实例
     makeInstance('Match ?_data makeInstance('MatchData
         ?pattern g_pat ?subject t_subj ?start g_start ?end g_end
-        ?groups l_groups ?anchor g_anchor))
+        ?groups l_groups ?anchor g_anchor ?execOpts n_exec))
 )
 
 
 ; ---------- class definition ----------
 
-; 数据桶：Match 状态（pattern subject start end groups anchor）收敛为单一 _data 槽
+; 数据桶：Match 状态（pattern subject start end groups anchor execOpts）收敛为单一 _data 槽
 defclass(MatchData () (
-    ; MatchData 数据桶：收纳 Match 的 pattern/subject/start/end/groups/anchor 状态，构造后禁写。
+    ; MatchData 数据桶：收纳 Match 的 pattern/subject/start/end/groups/anchor/execOpts 状态，构造后禁写。
     pattern(
         \@initarg pattern
         \@initform nil
@@ -226,11 +228,15 @@ defclass(MatchData () (
         \@initarg anchor
         \@initform nil
     )
+    execOpts(
+        \@initarg execOpts
+        \@initform 0
+    )
 ))
 
 defclass(Match () (
     ; Match 实例：re 系匹配/查找（reFinditer、Pattern->match/search/fullmatch 等）返回的匹配对象，提供串值、组值、span 位置与模板展开等查询。
-    ; 状态桶（MatchData：pattern subject start end groups anchor），构造后禁写
+    ; 状态桶（MatchData：pattern subject start end groups anchor execOpts），构造后禁写
     _data(
         \@initarg _data
         \@initform nil
@@ -290,7 +296,7 @@ self->span = lambda((\@rest g_args "g")  ; -> (int, int)
             _error("span" "group arguments are not supported yet (reserved)")
         )
         when(self->_data->start == nil
-            l_rec = _nextMatch(self->_data->pattern self->_data->subject 0)
+            l_rec = _nextMatch(self->_data->pattern self->_data->subject 0 self->_data->execOpts)
             when(l_rec
                 self->_data->start = car(l_rec)
                 self->_data->end = car(cdr(l_rec))
@@ -414,7 +420,7 @@ self->expand = lambda((t_tpl "t")  ; -> str
             self->_data->anchor
             _anchorAt(self->_data->pattern car(l_sp))
         )
-        g_ok = errset(pcreMatchp(g_obj self->_data->subject) nil)
+        g_ok = errset(pcreMatchp(g_obj self->_data->subject 0 self->_data->execOpts) nil)
         unless(g_ok && car(g_ok)
             _error("expand" "cannot re-establish match state")
         )
