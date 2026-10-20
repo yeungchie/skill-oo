@@ -371,18 +371,18 @@ self->group = lambda((\@rest g_args "g")  ; -> str | list[str]
     )
 )
 
-self->groups = lambda((\@optional g_empty("") "g")  ; -> list[str]
-    ; 返回全部捕获组值列表，并可用 g_empty 替换空结果。
+self->groups = lambda((\@key empty("") "g")  ; -> list
+    ; 返回全部捕获组值列表，并用 ?empty 替换空结果。
     ;
     ; **参数**
-    ;   g_empty  (any) - 空结果替换值（默认 ""）
+    ;   ?empty  (any) - 空结果替换值（默认 ""）
     ;
     ; **返回**
-    ;   (list[str]) - 组值按序号排列；空字符串（含未参与组）替换为 g_empty；
-    ;                 无捕获组时为 nil（空列表）
+    ;   (list) - 组值按序号排列；空字符串（含未参与组）替换为 empty；
+    ;            无捕获组时为 nil（空列表）
     let((l_res)
         foreach(g self->_data->groups
-            l_res = tconc(l_res if(g == "" g_empty g))
+            l_res = tconc(l_res if(g == "" empty g))
         )
         car(l_res)
     )
