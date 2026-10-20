@@ -158,6 +158,9 @@ self->finditer = lambda((t_subj \@key execOpts "tg")  ; -> list[Match]
         n_exec = _execOptsBits(execOpts "ycRegEx::Pattern->finditer")
         l_recs = _exportRecords(self t_subj n_exec)
         when(l_recs == 'fallback
+            l_recs = _zeroWidthRecords(self t_subj)
+        )
+        when(l_recs == 'fallback
             l_recs = _walkRecords(self t_subj n_exec)
         )
         foreach(l_m l_recs
@@ -180,6 +183,9 @@ self->findall = lambda((t_subj \@key execOpts "tg")  ; -> list
     let((l_res l_recs n_exec l_m)
         n_exec = _execOptsBits(execOpts "ycRegEx::Pattern->findall")
         l_recs = _exportRecords(self t_subj n_exec)
+        when(l_recs == 'fallback
+            l_recs = _zeroWidthRecords(self t_subj)
+        )
         when(l_recs == 'fallback
             l_recs = _walkRecords(self t_subj n_exec)
         )

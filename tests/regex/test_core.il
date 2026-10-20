@@ -70,7 +70,13 @@ let((t_subj m)
     _assertSameSeq(ycRegEx::reFindall("x" t_subj) '("x")  "findall: >64KB")
     m = car(ycRegEx::reFinditer("x" t_subj))
     _assert(m && m->start() == 70000  "finditer: >64KB start")
+    _assertSameSeq(ycRegEx::reFindall("(?=x)" t_subj) '("")  "findall: >64KB zero-width")
+    m = car(ycRegEx::reFinditer("(?=x)" t_subj))
+    _assert(m && m->start() == 70000  "finditer: >64KB zero-width start")
+    m = car(ycRegEx::reFinditer("(?<=x)" t_subj))
+    _assert(m && m->start() == 70001  "finditer: >64KB lookbehind zero-width")
 )
+_assertSameSeq(ycRegEx::reFindall("(?=(a))" "aa") '("a" "a")  "findall: zero-width capture")
 
 ; --- 5. group family ---
 let((m)

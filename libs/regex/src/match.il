@@ -267,6 +267,93 @@ procedure(_exportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     )
 )
 
+procedure(_hasNumericGroupRef(t_pat "t")  ; -> t | nil
+    ; 判断 pattern 是否含数字组引用/条件/子程序调用。
+    ;
+    ; **参数**
+    ;   t_pat  (str) - 正则 pattern
+    ;
+    ; **返回**
+    ;   (t|nil) - 含数字组引用时为 t
+    let((n_i t_ref g_found)
+        n_i = 1
+        while(n_i <= 9 && !g_found
+            t_ref = strcat("\\" sprintf(nil "%d" n_i))
+            when(index(t_pat t_ref) g_found = t)
+            when(index(t_pat strcat("(?" sprintf(nil "%d" n_i))) g_found = t)
+            when(index(t_pat strcat("(?(" sprintf(nil "%d" n_i))) g_found = t)
+            when(index(t_pat strcat("\\g{" sprintf(nil "%d" n_i) "}")) g_found = t)
+            when(index(t_pat strcat("\\g<" sprintf(nil "%d" n_i) ">")) g_found = t)
+            when(index(t_pat strcat("\\k<" sprintf(nil "%d" n_i) ">")) g_found = t)
+            n_i = n_i + 1
+        )
+        g_found
+    )
+)
+
+procedure(_zeroWidthRecords(g_pat t_subj "gt")  ; -> list | sym
+    ; 用「消费一字符 + 前瞻」批量导出零宽匹配；不适用时回 'fallback。
+    ;
+    ; **参数**
+    ;   g_pat   (Pattern) - Pattern 实例
+    ;   t_subj  (str)     - 主题串
+    ;
+    ; **返回**
+    ;   (list|sym) - (start end . groups) 记录列表；需回退 'fallback
+    let((t_qpat g_qobj n_q g_qpat l_q l_0 l_parts l_res l_qgroups t_pw n_start g_bad l_m)
+        cond(
+            (g_pat->_data->compileOpts != 0 'fallback)
+            (_hasNumericGroupRef(g_pat->_data->pattern) 'fallback)
+            (t
+                progn(
+                t_qpat = lsprintf("%s([\\s\\S])(?=((?:%s)))"
+                    g_pat->_data->flags g_pat->_data->pattern)
+                g_qobj = _compileChecked(t_qpat "ycRegEx: zero-width probe" 0)
+                if(g_qobj
+                    progn(
+                        n_q = pcreSubpatCount(g_qobj)
+                        g_qpat = makeInstance('Pattern ?_data makeInstance('PatternData
+                            ?pcre g_qobj ?nGroups n_q))
+                        l_q = _exportRecords(g_qpat t_subj 0)
+                        when(l_q == 'fallback g_bad = t)
+                        when(pcreMatchp(g_pat->_data->span t_subj 0 0)
+                            l_parts = _extractParts(g_pat g_pat->_data->span)
+                            if(length(car(l_parts)) == 0
+                                progn(
+                                    l_0 = cons(0 cons(0 cdr(l_parts)))
+                                )
+                                g_bad = t
+                            )
+                        )
+                        when(!g_bad
+                            l_res = if(l_0 tconc(nil l_0) nil)
+                            foreach(l_m l_q
+                                l_qgroups = cdr(cdr(l_m))
+                                if(length(l_qgroups) < 2
+                                    g_bad = t
+                                    progn(
+                                        t_pw = car(cdr(l_qgroups))
+                                        if(t_pw != ""
+                                            g_bad = t
+                                            progn(
+                                                n_start = car(l_m) + 1
+                                                l_res = tconc(l_res cons(n_start cons(n_start cdr(cdr(l_qgroups)))))
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                        if(g_bad 'fallback car(l_res))
+                    )
+                    'fallback
+                )
+                )
+            )
+        )
+    )
+)
+
 procedure(_walkRecords(g_pat t_subj n_exec "gtx")  ; -> list
     ; 逐位置锚定扫描全部匹配（零宽回退路径）。
     ;
