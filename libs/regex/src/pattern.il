@@ -236,7 +236,7 @@ self->groups = lambda(()  ; -> int
     ; 返回编译模式的捕获组数（注意与 Match.groups() 返回组值列表不同）。
     ;
     ; **返回**
-    ;   (int) - 捕获组数；> 9 在编译阶段（_mkPattern）即 error() 中断
+    ;   (int) - 捕获组数（不设自设上限）
     self->_data->nGroups
 )
 

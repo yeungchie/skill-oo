@@ -78,6 +78,62 @@ let((m)
     _assert(printself(m) == "<ycRegEx::Match \"a10-20b\">"  "Match: printself literal format")
 )
 
+; --- 5b. >9 capture groups ---
+let((l_pat m p)
+    l_pat = "(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)"
+    m = ycRegEx::reSearch(l_pat "abcdefghijkl")
+    _assert(m != nil  "groups>9: search")
+    _assert(m->group(10) == "j"  "groups>9: group(10)")
+    _assert(m->group(12) == "l"  "groups>9: group(12)")
+    _assertSameSeq(m->groups()
+        '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l")
+        "groups>9: groups()"
+    )
+    _assert(m->expand("\\{10}\\{12}") == "jl"  "groups>9: expand")
+    p = ycRegEx::reCompile(l_pat)
+    _assert(p->groups() == 12  "groups>9: Pattern->groups")
+    _assertSameSeq(car(p->findall("abcdefghijkl"))
+        '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l")
+        "groups>9: findall"
+    )
+    _assert(p->sub("\\{12}\\{1}" "abcdefghijkl") == "la"  "groups>9: sub")
+)
+
+; --- 5c. group type contract / groups isolation ---
+let((m l_g)
+    m = ycRegEx::reSearch("(\\d+)-(\\d+)" "a10-20b")
+    _assertError(lambda(() m->group(1.0) t)  "group: float 1.0 raises")
+    _assertError(lambda(() m->group(1.5) t)  "group: float 1.5 raises")
+    _assertError(lambda(() m->group(0.0) t)  "group: float 0.0 raises")
+    let((l_r t_msg)
+        l_r = errset(m->group(1.0) nil)
+        t_msg = car(car(cdr(cdr(cdr(cdr(errset.errset))))))
+        _assert(!l_r && pcreMatchp("expected group number" t_msg)
+            "group: float error has Match->group context"
+        )
+    )
+    l_g = m->groups()
+    setcar(l_g "X")
+    _assert(m->group(1) == "10"  "groups: returned list is a copy")
+    _assertSameSeq(m->groups() '("10" "20")  "groups: internal state unchanged")
+)
+
+; --- 5d. anchor offset hard limit ---
+let((p l_r t_msg)
+    p = ycRegEx::reCompile("x")
+    _assert(pcreObjectp(ycRegEx:::_anchorAt(p 65535))  "anchor: 65535 allowed")
+    l_r = errset(ycRegEx:::_anchorAt(p 65536) nil)
+    t_msg = car(car(cdr(cdr(cdr(cdr(errset.errset))))))
+    _assert(!l_r && pcreMatchp("65535-byte limit" t_msg)
+        "anchor: 65536 has explicit limit message"
+    )
+    l_r = errset(ycRegEx:::_anchorAt(p 70000) nil)
+    t_msg = car(car(cdr(cdr(cdr(cdr(errset.errset))))))
+    _assert(!l_r && pcreMatchp("65535-byte limit" t_msg)
+        "anchor: 70000 has explicit limit message"
+    )
+)
+
 ; --- 6. non-participating groups (pinned: CPython None -> "") ---
 let((m)
     m = ycRegEx::reFullmatch("(a)|(ab)" "ab")

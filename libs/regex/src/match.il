@@ -43,15 +43,15 @@ procedure(_wholeTemplate(n_g "x")  ; -> str
     ; 构造「整体 + 组值」提取模板：& 后按 <YC-B> 定界各组反向引用。
     ;
     ; **参数**
-    ;   n_g  (int) - 捕获组数（0..9）
+    ;   n_g  (int) - 捕获组数（≥ 0）
     ;
     ; **返回**
-    ;   (str) - 形如 "&<YC-B>\1<YC-B>\2" 的模板，供一次 pcreSubstitute 展开
+    ;   (str) - 形如 "&<YC-B>\{1}<YC-B>\{2}" 的模板，供一次 pcreSubstitute 展开
     let((t_t n_k)
         t_t = "&"
         n_k = 1
         while(n_k <= n_g
-            t_t = lsprintf("%s<YC-B>\\%s" t_t _digitAt(n_k))
+            t_t = lsprintf("%s<YC-B>%s" t_t _backref(n_k))
             n_k = n_k + 1
         )
         t_t
@@ -62,15 +62,15 @@ procedure(_splitTemplate(n_g "x")  ; -> str
     ; 构造 split 替换模板：匹配处整体换成 <YC-S> 定界与组值交替的串。
     ;
     ; **参数**
-    ;   n_g  (int) - 捕获组数（0..9）
+    ;   n_g  (int) - 捕获组数（≥ 0）
     ;
     ; **返回**
-    ;   (str) - 形如 "<YC-S>\1<YC-S>" 的模板，替换后按 <YC-S> 拆分
+    ;   (str) - 形如 "<YC-S>\{1}<YC-S>" 的模板，替换后按 <YC-S> 拆分
     let((t_t n_k)
         t_t = "<YC-S>"
         n_k = 1
         while(n_k <= n_g
-            t_t = lsprintf("%s\\%s<YC-S>" t_t _digitAt(n_k))
+            t_t = lsprintf("%s%s<YC-S>" t_t _backref(n_k))
             n_k = n_k + 1
         )
         t_t
@@ -103,8 +103,11 @@ procedure(_anchorAt(g_pat n_off "gx")  ; -> compiled
     ;   n_off  (int)     - 0-based 起始字节偏移
     ;
     ; **返回**
-    ;   (compiled) - n_off 为 0 时复用 span 对象；否则以 (?<=\A[\s\S]{n_off})(?:…) 编译，
-    ;                编译失败 error() 中断
+    ;   (compiled) - n_off 为 0 时复用 span 对象；否则以 (?<=\A[\s\S]{n_off})(?:…) 编译；
+    ;                n_off > 65535 或编译失败时 error() 中断
+    when(n_off > 65535
+        error("ycRegEx: anchor offset %d exceeds the 65535-byte limit" n_off)
+    )
     if(n_off == 0
         g_pat->_data->span
         let((g_obj)
@@ -341,7 +344,7 @@ self->group = lambda((\@rest g_args "g")  ; -> str | list[str]
     ;                     非数字或按名参数走 _error() 中断
     let((n_g)
         foreach(g g_args
-            unless(numberp(g)
+            unless(fixp(g)
                 if(stringp(g)
                     _error("group" "group by name is not supported yet (reserved)")
                     _error("group" "expected group number, got %A" g)
@@ -374,7 +377,7 @@ self->groups = lambda(()  ; -> list[str]
     ; **返回**
     ;   (list[str]) - 组值按序号排列，非参与组为 ""（CPython None → ""）；
     ;                 无捕获组时为 nil（空列表）
-    self->_data->groups
+    copy(self->_data->groups)
 )
 
 self->groupdict = lambda(()  ; -> never
