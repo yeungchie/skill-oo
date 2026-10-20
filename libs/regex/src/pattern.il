@@ -48,6 +48,7 @@ defclass(Pattern () (
     fullmatch()
     findall()
     finditer()
+    partialp()
     split()
     sub()
     subn()
@@ -193,6 +194,22 @@ self->findall = lambda((t_subj \@key execOpts "tg")  ; -> list
             )
         )
         car(l_res)
+    )
+)
+
+self->partialp = lambda((t_subj \@key execOpts "tg")  ; -> t | nil
+    ; 判断主题串是否为部分匹配或完整匹配（同函数 ycRegEx::rePartialp）。
+    ;
+    ; **参数**
+    ;   t_subj     (str)         - 主题串
+    ;   ?execOpts  (sym|list|nil) - 执行选项符号或列表（默认 nil）
+    ;
+    ; **返回**
+    ;   (t|nil) - 主题串可完成该模式（含完整匹配）时为 t，否则为 nil
+    let((n_exec)
+        n_exec = _execOptsBits(execOpts "ycRegEx::Pattern->partialp")
+            + pcreGenExecOptBits(?partial t)
+        pcreMatchp(self->_data->pcre t_subj 0 n_exec)
     )
 )
 

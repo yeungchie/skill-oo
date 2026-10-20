@@ -453,6 +453,23 @@ procedure(reFinditer(g_pat t_subj \@key flags execOpts "gtgg")  ; -> list[Match]
     )
 )
 
+procedure(rePartialp(g_pat t_subj \@key flags execOpts "gtgg")  ; -> t | nil
+    ; 判断主题串是否为部分匹配或完整匹配。
+    ;
+    ; **参数**
+    ;   g_pat   (any)         - 模式串或已编译 Pattern（双表皮）
+    ;   t_subj  (str)         - 主题串
+    ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
+    ;   ?execOpts (sym|list|nil) - 执行选项符号或列表（默认 nil）
+    ;
+    ; **返回**
+    ;   (t|nil) - 主题串可完成该模式（含完整匹配）时为 t，否则为 nil
+    let((p)
+        p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::rePartialp") "ycRegEx::rePartialp" 0)
+        p->partialp(t_subj ?execOpts execOpts)
+    )
+)
+
 procedure(reSplit(g_pat t_subj \@key flags all execOpts "gtggg")  ; -> list[str]
     ; 按模式切分主题串（语义同 Python re.split）。
     ;

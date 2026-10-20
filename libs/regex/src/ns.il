@@ -9,6 +9,7 @@ addToNamespace("ycRegEx"
         reFullmatch
         reFindall
         reFinditer
+        rePartialp
         reSplit
         reSub
         reSubn

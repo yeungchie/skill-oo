@@ -288,6 +288,15 @@ let((p)
     )
 )
 
+; --- 9d. partial probe ---
+_assert(ycRegEx::rePartialp("ab" "a")  "partialp: incomplete prefix")
+_assert(ycRegEx::rePartialp("ab" "ab")  "partialp: complete match")
+_assert(ycRegEx::rePartialp("ab" "ac") == nil  "partialp: impossible prefix")
+_assert(ycRegEx::reCompile("ab")->partialp("a")  "partialp: Pattern method")
+_assertError(lambda(() ycRegEx::rePartialp("ab" "a" ?execOpts 'bogus) t)
+    "partialp: unknown exec option raises"
+)
+
 ; --- 10. recursion limit wrappers ---
 let((n_orig)
     n_orig = ycRegEx::reGetRecursionLimit()

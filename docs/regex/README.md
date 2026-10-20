@@ -221,6 +221,38 @@ ycRegEx::reFinditer(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 length(ycRegEx::reFinditer("\\d+" "a1b22"))  ; => 2
 ```
 
+### ycRegEx::rePartialp <sub>`function`</sub>
+
+```text
+ycRegEx::rePartialp(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+=> t | nil
+```
+
+**描述**
+
+判断主题串是否为该模式的部分匹配或完整匹配：主题串是模式前缀时可完成匹配，或已完整匹配，均返回 `t`。用于流式输入/截断文本的探测，不返回 `Match`。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
+| t_subj | str |  | 被处理字符串 |
+| ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+
+**返回值**
+
+`t | nil` — 可完成匹配（含完整匹配）为 `t`，否则为 `nil`。
+
+**例程**
+
+```lisp
+ycRegEx::rePartialp("ab" "a")   ; => t
+ycRegEx::rePartialp("ab" "ab")  ; => t
+ycRegEx::rePartialp("ab" "ac")  ; => nil
+```
+
 ### ycRegEx::reSplit <sub>`function`</sub>
 
 ```text
@@ -532,6 +564,31 @@ length(p->finditer("a1b22"))  ; => 2
 ```
 
 #### 拆分
+
+##### partialp <sub>`method`</sub>
+
+```text
+p->partialp(t_subj [ ?execOpts g_execOpts ])
+=> t | nil
+```
+
+**描述**
+
+判断 `t_subj` 是否为该模式的部分匹配或完整匹配；语义同 `rePartialp`，不产生 `Match`。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| t_subj | str | 被处理字符串 |
+| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+
+**例程**
+
+```lisp
+ycRegEx::reCompile("ab")->partialp("a")   ; => t
+ycRegEx::reCompile("ab")->partialp("ac")  ; => nil
+```
 
 ##### split <sub>`method`</sub>
 
@@ -950,4 +1007,4 @@ ycRegEx::reSearch("b" "ab" ?execOpts 'anchored)                ; => nil
 ycRegEx::reSearch("^a" "a" ?execOpts list('notbol 'notempty))  ; => nil
 ```
 
-未知选项或非符号/列表参数以 `error()` 中断。`partial` 暂不开放：当前 `Match` 模型无法表达部分匹配的结果。
+未知选项或非符号/列表参数以 `error()` 中断。`partial` 不放入 `?execOpts`，需要用 `rePartialp` / `Pattern->partialp` 做布尔探测，因为它只表示主题串可完成匹配，不产生完整 `Match`。
