@@ -7,7 +7,7 @@
 ; only needs currentFile() and Path::load to reach every format below.
 let((t_dir)
     t_dir = ycPathLib::currentFile()->parent()
-    foreach(t_format '("json")
+    foreach(t_format '("json" "yaml")
         t_dir->join(t_format "load.il")->load()
     )
 )

@@ -19,6 +19,7 @@ let((t_res t_self t_dir)
         t_dir = strcat(t_dir "/")
     )
     loadi(strcat(t_dir "json/load.il"))
+    loadi(strcat(t_dir "yaml/load.il"))
 )
 
 ; END

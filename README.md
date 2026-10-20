@@ -22,6 +22,7 @@
 
 + codec
   + [ycJson](docs/codec/json/README.md) —— JSON、jsonc、jsonl 的解码与编码。
+  + [ycYaml](docs/codec/yaml/README.md) —— YAML 1.2 的解码与编码。
 + [ycUnits](docs/units/README.md) —— SI 工程计数与单位解析/格式化。
 + [ycTabulate](docs/tabulate/README.md) —— 文本表格渲染。
 

@@ -1,0 +1,77 @@
+unless(findNamespace("ycYaml")
+    makeNamespace("ycYaml")
+)
+addToNamespace("ycYaml"
+    mapcar('symbolToString '(
+        decode
+        encode
+        YamlType
+        YamlTypeData
+        YamlTrue
+        YamlFalse
+        YamlNull
+        YamlMissing
+        _typeCache
+        _maxDecodeDepth
+        _maxEncodeDepth
+        _anchors
+        _activeAnchors
+        _aliasValue
+        _blankp
+        _blockLines
+        _build
+        _chompCr
+        _code
+        _decodeStream
+        _decodeText
+        _encodeFlow
+        _encodeKey
+        _encodeScalar
+        _encodeString
+        _errorLine
+        _findKeyColon
+        _flowKey
+        _flowMap
+        _flowPrefix
+        _flowSeq
+        _flowSkip
+        _flowTokenEnd
+        _flowValue
+        _hexVal
+        _indentStr
+        _joinBuild
+        _lineCol
+        _lineIndent
+        _ltrim
+        _mergeInto
+        _nth1
+        _numText
+        _parseBlock
+        _parseBlockScalar
+        _parseChild
+        _parseIntText
+        _parseKeyText
+        _parseMap
+        _parseMapInto
+        _parseQuoted
+        _parseScalarText
+        _parseSeq
+        _parseSeqNested
+        _parseValueText
+        _plainSafe
+        _resolvePlain
+        _rtrim
+        _scalarText
+        _skipIgnorable
+        _specialStart
+        _splitDocuments
+        _splitLines
+        _stripComment
+        _tagValue
+        _tail
+        _utf8Str
+    ))
+)
+unuseNamespace("ycYaml")
+
+; END
