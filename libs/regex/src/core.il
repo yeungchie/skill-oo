@@ -112,15 +112,15 @@ procedure(_nth1(l_list n_i "lx")  ; -> any | nil
     )
 )
 
-procedure(_digitAt(n_k "x")  ; -> str
-    ; 返回 "123456789" 中第 n_k 个字符（拼接捕获组反向引用用）。
+procedure(_backref(n_k "x")  ; -> str
+    ; 返回引擎两参模板的组反向引用 `\{n}`。
     ;
     ; **参数**
-    ;   n_k  (int) - 序号，调用方保证 1..9（编译期已限捕获组 ≤ 9）
+    ;   n_k  (int) - 捕获组序号（≥ 1）
     ;
     ; **返回**
-    ;   (str) - 对应的数字字符
-    substring("123456789" n_k 1)
+    ;   (str) - 形如 `\{1}`、`\{10}` 的模板片段
+    lsprintf("\\{%d}" n_k)
 )
 
 procedure(_foldCat(l_list "l")  ; -> str
@@ -240,7 +240,7 @@ procedure(_mkPattern(g_pat t_flags t_ctx "gtt")  ; -> Pattern
     ;   t_ctx    (str) - 出错上下文名（拼入错误消息）
     ;
     ; **返回**
-    ;   (Pattern) - 非串模式、编译失败或捕获组数 > 9 时 error() 中断，否则返回新实例
+    ;   (Pattern) - 非串模式或编译失败时 error() 中断，否则返回新实例
     let((g_faithful g_span g_full n_g)
         unless(stringp(g_pat)
             error("%A: pattern must be a string, got %A" t_ctx g_pat)
@@ -252,9 +252,6 @@ procedure(_mkPattern(g_pat t_flags t_ctx "gtt")  ; -> Pattern
             error("%A: invalid pattern: %s" t_ctx g_pat)
         )
         n_g = pcreSubpatCount(g_faithful)
-        when(n_g > 9
-            error("%A: too many capture groups (%d), max 9" t_ctx n_g)
-        )
         makeInstance('Pattern ?_data makeInstance('PatternData
             ?pattern g_pat ?flags t_flags ?pcre g_faithful
             ?span g_span ?full g_full ?nGroups n_g))
@@ -298,7 +295,7 @@ procedure(reCompile(g_pat \@key flags "gg")  ; -> Pattern
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（大小写皆可，默认 nil 不修饰）
     ;
     ; **返回**
-    ;   (Pattern) - 编译失败、非法 pattern、捕获组数 > 9、类型非法，或 Pattern 与 flags 同用时 error() 中断
+    ;   (Pattern) - 编译失败、非法 pattern、类型非法，或 Pattern 与 flags 同用时 error() 中断
     _asPat(g_pat _flagsFromValue(flags "ycRegEx::reCompile") "ycRegEx::reCompile")
 )
 

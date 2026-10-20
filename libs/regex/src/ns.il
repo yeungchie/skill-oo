@@ -25,7 +25,7 @@ addToNamespace("ycRegEx"
         _splitBy
         _countSub
         _nth1
-        _digitAt
+        _backref
         _foldCat
         _wholeTemplate
         _splitTemplate
