@@ -239,8 +239,8 @@ ycRegEx::reSplit(g_pat t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_ex
 | g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 | ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -273,8 +273,8 @@ ycRegEx::reSub(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 | ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -307,8 +307,8 @@ ycRegEx::reSubn(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpt
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 | ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
