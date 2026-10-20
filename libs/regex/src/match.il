@@ -156,6 +156,144 @@ procedure(_matchStart(g_pat t_subj n_exec "gtx")  ; -> int
     )
 )
 
+procedure(_exportMarkers(t_subj "t")  ; -> list[str]
+    ; 返回两个在主题串中不存在的导出标记（匹配标记、组标记）。
+    ;
+    ; **参数**
+    ;   t_subj  (str) - 主题串
+    ;
+    ; **返回**
+    ;   (list[str]) - (匹配标记 组标记)
+    let((t_m t_g)
+        t_m = "<YC-M>"
+        while(index(t_subj t_m)
+            t_m = strcat(t_m "x")
+        )
+        t_g = "<YC-G>"
+        while(index(t_subj t_g)
+            t_g = strcat(t_g "x")
+        )
+        list(t_m t_g)
+    )
+)
+
+procedure(_exportTemplate(n_g t_m t_g "xtt")  ; -> str
+    ; 构造批量导出模板：匹配标记 + 整体 + 组标记 + 各组 + 尾组标记。
+    ;
+    ; **参数**
+    ;   n_g  (int) - 捕获组数
+    ;   t_m  (str) - 匹配标记
+    ;   t_g  (str) - 组标记
+    ;
+    ; **返回**
+    ;   (str) - pcreReplace 全量替换模板
+    let((t_t n_k)
+        t_t = strcat(t_m "&" t_g)
+        n_k = 1
+        while(n_k <= n_g
+            t_t = strcat(t_t _backref(n_k) t_g)
+            n_k = n_k + 1
+        )
+        t_t
+    )
+)
+
+procedure(_exportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
+    ; 用一次全量替换导出全部非空匹配的记录；零宽/格式异常回 'fallback。
+    ;
+    ; **参数**
+    ;   g_pat   (Pattern) - Pattern 实例
+    ;   t_subj  (str)     - 主题串
+    ;   n_exec  (int)     - 执行选项位值
+    ;
+    ; **返回**
+    ;   (list|sym) - (start end . groups) 记录列表；无命中 nil；需回退 'fallback
+    let((l_marks t_m t_g t_tpl t_out t_rest t_seg t_tail t_whole l_groups l_res
+          n_delta n_out n_start n_consumed n_k t_cur)
+        if(pcreMatchp(g_pat->_data->pcre t_subj 0 n_exec)
+            progn(
+                l_marks = _exportMarkers(t_subj)
+                t_m = car(l_marks)
+                t_g = car(cdr(l_marks))
+                t_tpl = _exportTemplate(g_pat->_data->nGroups t_m t_g)
+                t_out = pcreReplace(g_pat->_data->pcre t_subj t_tpl 0 n_exec)
+                t_rest = t_out
+                n_delta = 0
+                n_out = 0
+                while((t_seg = index(t_rest t_m))
+                    n_out = n_out + length(t_rest) - length(t_seg)
+                    n_start = n_out - n_delta
+                    t_rest = _suffix(t_seg length(t_m) + 1)
+                    t_tail = index(t_rest t_g)
+                    when(!t_tail
+                        l_res = 'fallback
+                        t_rest = ""
+                    )
+                    when(l_res == nil || l_res != 'fallback
+                        n_consumed = length(t_rest) - length(t_tail)
+                        t_whole = substring(t_rest 1 n_consumed)
+                        t_rest = _suffix(t_tail length(t_g) + 1)
+                        l_groups = nil
+                        n_k = 1
+                        while(l_res != 'fallback && n_k <= g_pat->_data->nGroups
+                            t_tail = index(t_rest t_g)
+                            when(!t_tail
+                                l_res = 'fallback
+                                t_rest = ""
+                            )
+                            when(l_res != 'fallback
+                                t_cur = substring(t_rest 1 length(t_rest) - length(t_tail))
+                                l_groups = tconc(l_groups t_cur)
+                                t_rest = _suffix(t_tail length(t_g) + 1)
+                                n_k = n_k + 1
+                            )
+                        )
+                        when(l_res != 'fallback
+                            if(n_consumed == 0
+                                l_res = 'fallback
+                                progn(
+                                    l_res = tconc(l_res cons(n_start cons(n_start + n_consumed car(l_groups))))
+                                    n_delta = n_delta + (length(t_seg) - length(t_rest)) - n_consumed
+                                    n_out = n_out + (length(t_seg) - length(t_rest))
+                                )
+                            )
+                        )
+                    )
+                )
+                if(l_res == 'fallback 'fallback car(l_res))
+            )
+            nil
+        )
+    )
+)
+
+procedure(_walkRecords(g_pat t_subj n_exec "gtx")  ; -> list
+    ; 逐位置锚定扫描全部匹配（零宽回退路径）。
+    ;
+    ; **参数**
+    ;   g_pat   (Pattern) - Pattern 实例
+    ;   t_subj  (str)     - 主题串
+    ;   n_exec  (int)     - 执行选项位值
+    ;
+    ; **返回**
+    ;   (list) - (start end . groups) 记录列表
+    let((l_res l_m n_from)
+        n_from = 0
+        l_m = t
+        while(l_m
+            l_m = _nextMatch(g_pat t_subj n_from n_exec)
+            when(l_m
+                l_res = tconc(l_res l_m)
+                n_from = if(car(cdr(l_m)) > car(l_m)
+                    car(cdr(l_m))
+                    car(l_m) + 1
+                )
+            )
+        )
+        car(l_res)
+    )
+)
+
 procedure(_nextMatch(g_pat t_subj n_from n_exec "gtxx")  ; -> (int, int . list[str]) | nil
     ; 慢路径内核：从 n_from 起逐位置锚定扫描，取最左命中。
     ;

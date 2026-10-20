@@ -67,6 +67,9 @@ let((t_subj m)
     m = ycRegEx::reSearch("x" t_subj)
     _assert(m && m->start() == 70000  "search: >64KB start")
     _assert(m && m->end() == 70001    "search: >64KB end")
+    _assertSameSeq(ycRegEx::reFindall("x" t_subj) '("x")  "findall: >64KB")
+    m = car(ycRegEx::reFinditer("x" t_subj))
+    _assert(m && m->start() == 70000  "finditer: >64KB start")
 )
 
 ; --- 5. group family ---
@@ -189,7 +192,7 @@ let((l_r)
     _assert(car(l_r) == "y"  "subn: marker-in-subject stripped (CPython '<YC-N>y')")
     _assert(car(cdr(l_r)) == 2  "subn: marker double counted (CPython 1)")
 )
-_assertSameSeq(ycRegEx::reFindall("(<YC-B>)" "<YC-B>") '("")  "findall: marker inside group collapses (CPython ['<YC-B>'])")
+_assertSameSeq(ycRegEx::reFindall("(<YC-B>)" "<YC-B>") '("<YC-B>")  "findall: marker inside group preserved")
 
 ; --- 9. byte engine facts ---
 _assert(length("中文") == 6  "byte engine: length counts bytes")

@@ -37,6 +37,10 @@ addToNamespace("ycRegEx"
         _splitTemplate
         _extractParts
         _posMarker
+        _exportMarkers
+        _exportTemplate
+        _exportRecords
+        _walkRecords
         _matchStart
         _nextMatch
         _anchorAt

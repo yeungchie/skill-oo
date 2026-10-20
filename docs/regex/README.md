@@ -329,7 +329,7 @@ ycRegEx::reSubn(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpt
 
 **描述**
 
-语义同 `reSub`。内部计数经定界标记实现，`t_subj`/`t_repl` 或组值中若含 `<YC-B>`/`<YC-N>`/`<YC-S>` 会被误剥离或误切。pattern 语法错误或参数类型不符时以 `error()` 中断。
+语义同 `reSub`。内部计数经 `<YC-N>` 标记实现；`t_subj`/`t_repl` 或组值中若含 `<YC-N>` 会被误剥离或误切。`reSplit` 的 `<YC-S>`、`reSearch`/`reMatch` 组提取的 `<YC-B>` 同理会与输入冲突。pattern 语法错误或参数类型不符时以 `error()` 中断。
 
 **参数**
 

@@ -153,20 +153,16 @@ self->finditer = lambda((t_subj \@key execOpts "tg")  ; -> list[Match]
     ;   ?execOpts  (sym|list|nil) - 执行选项符号或列表（默认 nil）
     ;
     ; **返回**
-    ;   (list[Match]) - 全量 Match 列表；逐位置锚定扫描，零宽命中按 start + 1 推进
-    let((l_res l_m n_from n_exec)
+    ;   (list[Match]) - 全量 Match 列表；非空匹配批量导出，零宽匹配回退逐位置扫描并按 start + 1 推进
+    let((l_res l_recs n_exec l_m)
         n_exec = _execOptsBits(execOpts "ycRegEx::Pattern->finditer")
-        n_from = 0
-        l_m = t
-        while(l_m
-            l_m = _nextMatch(self t_subj n_from n_exec)
-            when(l_m
-                l_res = tconc(l_res _mkMatch(self t_subj car(l_m) car(cdr(l_m)) cdr(cdr(l_m)) self->_data->span n_exec))
-                n_from = if(car(cdr(l_m)) > car(l_m)
-                    car(cdr(l_m))
-                    car(l_m) + 1
-                )
-            )
+        l_recs = _exportRecords(self t_subj n_exec)
+        when(l_recs == 'fallback
+            l_recs = _walkRecords(self t_subj n_exec)
+        )
+        foreach(l_m l_recs
+            l_res = tconc(l_res _mkMatch(self t_subj car(l_m) car(cdr(l_m))
+                cdr(cdr(l_m)) self->_data->span n_exec))
         )
         car(l_res)
     )
@@ -181,19 +177,14 @@ self->findall = lambda((t_subj \@key execOpts "tg")  ; -> list
     ;
     ; **返回**
     ;   (list) - 0 组整体串列表 / 1 组扁平组值列表 / ≥2 组每匹配一个子列表
-    let((l_res l_m n_from n_exec)
+    let((l_res l_recs n_exec l_m)
         n_exec = _execOptsBits(execOpts "ycRegEx::Pattern->findall")
-        n_from = 0
-        l_m = t
-        while(l_m
-            l_m = _nextMatch(self t_subj n_from n_exec)
-            when(l_m
-                l_res = tconc(l_res _findAllItem(self t_subj l_m))
-                n_from = if(car(cdr(l_m)) > car(l_m)
-                    car(cdr(l_m))
-                    car(l_m) + 1
-                )
-            )
+        l_recs = _exportRecords(self t_subj n_exec)
+        when(l_recs == 'fallback
+            l_recs = _walkRecords(self t_subj n_exec)
+        )
+        foreach(l_m l_recs
+            l_res = tconc(l_res _findAllItem(self t_subj l_m))
         )
         car(l_res)
     )
