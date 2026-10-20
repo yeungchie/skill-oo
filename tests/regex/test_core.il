@@ -78,6 +78,9 @@ let((t_subj m)
     _assertSameSeq(ycRegEx::reCompile("(?=x)" ?compileOpts 'caseLess)->findall(t_subj)
         '("")  "findall: >64KB zero-width with compileOpts"
     )
+    _assertSameSeq(ycRegEx::reFindall("(?= )" t_subj ?execOpts 'anchored)
+        '("")  "findall: >64KB anchored zero-width"
+    )
 )
 _assertSameSeq(ycRegEx::reFindall("(?=(a))" "aa") '("a" "a")  "findall: zero-width capture")
 

@@ -303,6 +303,30 @@ procedure(_hasNumericGroupRef(t_pat "t")  ; -> t | nil
     )
 )
 
+procedure(_zeroAtStart(g_pat t_subj n_exec "gtx")  ; -> list | sym
+    ; 执行选项 anchored 下的零宽导出：只检查位置 0。
+    ;
+    ; **参数**
+    ;   g_pat   (Pattern) - Pattern 实例
+    ;   t_subj  (str)     - 主题串
+    ;   n_exec  (int)     - 执行选项位值
+    ;
+    ; **返回**
+    ;   (list|sym) - 位置 0 的零宽记录；非零宽或不匹配时回 'fallback/nil
+    let((l_parts)
+        if(pcreMatchp(g_pat->_data->span t_subj 0 n_exec)
+            progn(
+                l_parts = _extractParts(g_pat g_pat->_data->span)
+                if(length(car(l_parts)) == 0
+                    list(cons(0 cons(0 cdr(l_parts))))
+                    'fallback
+                )
+            )
+            nil
+        )
+    )
+)
+
 procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     ; 用「消费一字符 + 前瞻」批量导出零宽匹配；不适用时回 'fallback。
     ;
@@ -317,9 +341,9 @@ procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
         cond(
             (_hasBit(g_pat->_data->compileOpts 16) 'fallback)
             (_hasBit(g_pat->_data->compileOpts 4096) 'fallback)
-            (_hasBit(n_exec 16) 'fallback)
             (_hasBit(n_exec 1024) 'fallback)
             (_hasNumericGroupRef(g_pat->_data->pattern) 'fallback)
+            (_hasBit(n_exec 16) _zeroAtStart(g_pat t_subj n_exec))
             (t
                 progn(
                 t_qpat = lsprintf("%s([\\s\\S])(?=((?:%s)))"
