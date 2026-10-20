@@ -442,7 +442,7 @@ procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     ; **返回**
     ;   (list|sym) - (start end . groups) 记录列表；需回退 'fallback
     let((t_qpat t_pat2 g_qobj n_q g_qpat l_q l_0 l_parts l_res l_qgroups
-          t_pw n_start n_skip g_bad l_m)
+          l_m t_pw n_start n_skip g_bad)
         cond(
             ((_hasBit(g_pat->_data->compileOpts 16) || _hasBit(n_exec 16))
                 _zeroAtStart(g_pat t_subj n_exec))
@@ -451,7 +451,7 @@ procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
                 if(t_pat2 == 'fallback
                     'fallback
                     progn(
-                        t_qpat = lsprintf("%s(?P<yc_qc>[\\s\\S])(?=(?P<yc_qw>(?:%s)))"
+                        t_qpat = lsprintf("%s([\\s\\S])(?=((?:%s)))"
                             g_pat->_data->flags t_pat2)
                         g_qobj = _compileChecked(t_qpat
                             "ycRegEx: zero-width probe" g_pat->_data->compileOpts)
@@ -465,12 +465,10 @@ procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
                                 when(l_q == 'fallback g_bad = t)
                                 when(pcreMatchp(g_pat->_data->span t_subj 0 n_exec)
                                     l_parts = _extractParts(g_pat g_pat->_data->span)
-                                    when(length(car(l_parts)) == 0
+                                    if(length(car(l_parts)) == 0
                                         unless(_hasBit(n_exec 1024)
                                             l_0 = cons(0 cons(0 cdr(l_parts)))
                                         )
-                                    )
-                                    when(length(car(l_parts)) > 0
                                         g_bad = t
                                     )
                                 )
@@ -486,15 +484,13 @@ procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
                                                 cond(
                                                     (n_start < n_skip nil)
                                                     (t_pw == "" && _hasBit(n_exec 1024) nil)
-                                                    (t_pw != ""
+                                                    (t
                                                         progn(
-                                                            unless(_hasBit(n_exec 1024)
-                                                                g_bad = t
+                                                            l_res = tconc(l_res cons(n_start cons(n_start + length(t_pw) cdr(cdr(l_qgroups)))))
+                                                            when(length(t_pw) > 0
+                                                                n_skip = n_start + length(t_pw)
                                                             )
                                                         )
-                                                    )
-                                                    (t
-                                                        (l_res = tconc(l_res cons(n_start cons(n_start cdr(cdr(l_qgroups))))))
                                                     )
                                                 )
                                             )
