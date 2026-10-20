@@ -134,6 +134,18 @@ let((p l_r t_msg)
     )
 )
 
+; --- 5e. groups empty replacement ---
+let((m)
+    m = ycRegEx::reSearch("(a)|(b)" "a")
+    _assertSameSeq(m->groups() '("a" "")  "groups: default keeps empty")
+    _assertSameSeq(m->groups("NA") '("a" "NA")  "groups: replaces empty")
+    _assert(car(cdr(m->groups(0))) == 0  "groups: replacement accepts any type")
+    _assert(car(cdr(m->groups(nil))) == nil  "groups: nil replacement")
+    m = ycRegEx::reSearch("(a)()" "a")
+    _assertSameSeq(m->groups("NA") '("a" "NA")  "groups: matched empty also replaced")
+)
+_assert(ycRegEx::reSearch("a" "a")->groups("NA") == nil  "groups: no groups stays nil")
+
 ; --- 6. non-participating groups (pinned: CPython None -> "") ---
 let((m)
     m = ycRegEx::reFullmatch("(a)|(ab)" "ab")
