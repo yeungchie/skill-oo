@@ -12,6 +12,8 @@ addToNamespace("ycRegEx"
         reSplit
         reSub
         reSubn
+        reGetRecursionLimit
+        reSetRecursionLimit
         Pattern
         PatternData
         Match

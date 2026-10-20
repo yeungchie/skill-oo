@@ -431,6 +431,28 @@ procedure(reSubn(g_pat t_repl t_subj \@key flags all "gttgg")  ; -> (str, int)
     )
 )
 
+procedure(reGetRecursionLimit()  ; -> int
+    ; 返回 PCRE 匹配算法的当前最大递归深度（进程级设置）。
+    ;
+    ; **参数**
+    ;   无
+    ;
+    ; **返回**
+    ;   (int) - 当前最大递归深度（默认 10000000）
+    pcreGetRecursionLimit()
+)
+
+procedure(reSetRecursionLimit(n_limit "x")  ; -> t
+    ; 设置 PCRE 匹配算法的最大递归深度（进程级设置）。
+    ;
+    ; **参数**
+    ;   n_limit  (int) - 最大递归深度
+    ;
+    ; **返回**
+    ;   (t) - 设置成功
+    pcreSetRecursionLimit(n_limit)
+)
+
 unuseNamespace("ycRegEx")
 
 ; END

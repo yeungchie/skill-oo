@@ -310,6 +310,60 @@ ycRegEx::reSubn(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ])
 ycRegEx::reSubn("\\d" "#" "a1b2" ?all t)  ; => ("a#b#" 2)
 ```
 
+### ycRegEx::reGetRecursionLimit <sub>`function`</sub>
+
+```text
+ycRegEx::reGetRecursionLimit()
+=> int
+```
+
+**描述**
+
+返回 PCRE 匹配算法当前的最大递归深度（进程级设置），默认 `10000000`。修改后影响后续所有匹配。
+
+**参数**
+
+无
+
+**返回值**
+
+`int` — 当前最大递归深度。
+
+**例程**
+
+```lisp
+ycRegEx::reGetRecursionLimit()  ; => 10000000
+```
+
+### ycRegEx::reSetRecursionLimit <sub>`function`</sub>
+
+```text
+ycRegEx::reSetRecursionLimit(n_limit)
+=> t
+```
+
+**描述**
+
+设置 PCRE 匹配算法的最大递归深度（进程级设置）。非整数参数以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| n_limit | int |  | 最大递归深度 |
+
+**返回值**
+
+`t` — 设置成功。
+
+**例程**
+
+```lisp
+ycRegEx::reSetRecursionLimit(1000)  ; => t
+ycRegEx::reGetRecursionLimit()      ; => 1000
+ycRegEx::reSetRecursionLimit(10000000)  ; => t（恢复默认）
+```
+
 ### ycRegEx::Pattern <sub>`class`</sub>
 
 **描述**

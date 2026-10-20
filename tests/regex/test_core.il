@@ -215,5 +215,15 @@ let((p2)
     _assert(p2->groups() == 2  "Pattern: groups count 2")
 )
 
+; --- 10. recursion limit wrappers ---
+let((n_orig)
+    n_orig = ycRegEx::reGetRecursionLimit()
+    _assert(n_orig == 10000000  "recursion: default 10000000")
+    _assert(ycRegEx::reSetRecursionLimit(1000)  "recursion: set 1000")
+    _assert(ycRegEx::reGetRecursionLimit() == 1000  "recursion: get 1000")
+    _assert(ycRegEx::reSetRecursionLimit(n_orig)  "recursion: restore")
+    _assertError(lambda(() ycRegEx::reSetRecursionLimit(1.5) t)  "recursion: float rejected")
+)
+
 _TestCoreDone = t
 ; END
