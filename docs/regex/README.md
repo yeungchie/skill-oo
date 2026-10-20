@@ -37,13 +37,13 @@ let((p)
 ### ycRegEx::reCompile <sub>`function`</sub>
 
 ```text
-ycRegEx::reCompile(g_pat [ ?flags g_flags ])
+ycRegEx::reCompile(g_pat [ ?flags g_flags ] [ ?compileOpts g_compileOpts ])
 => Pattern
 ```
 
 **描述**
 
-编译 pattern，返回可复用的 `Pattern`。`g_pat` 可为模式串或已编译 `Pattern`——传 `Pattern` 时直接复用、不重编译，此时不能带 `?flags`。pattern 语法错误或参数类型不符时以 `error()` 中断。
+编译 pattern，返回可复用的 `Pattern`。`g_pat` 可为模式串或已编译 `Pattern`——传 `Pattern` 时直接复用、不重编译，此时不能带 `?flags` 或 `?compileOpts`。pattern 语法错误或参数类型不符时以 `error()` 中断。
 
 **参数**
 
@@ -51,6 +51,7 @@ ycRegEx::reCompile(g_pat [ ?flags g_flags ])
 | --- | --- | --- | --- |
 | g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?compileOpts g_compileOpts | sym \| list \| nil | nil | 编译选项符号或列表；详见 [编译选项](#编译选项) |
 
 **返回值**
 
@@ -60,6 +61,7 @@ ycRegEx::reCompile(g_pat [ ?flags g_flags ])
 
 ```lisp
 p = ycRegEx::reCompile("\\d+")  ; => Pattern
+ycRegEx::reCompile("ABC" ?compileOpts 'caseLess)->match("abc")  ; => Match
 ycRegEx::reCompile("(")         ; => 以 error() 中断（语法错误）
 ```
 
@@ -882,3 +884,29 @@ ycRegEx::reSearch("a.b" "a\nb" ?flags 'S)  ; => Match，span (0 3)
 ycRegEx::reSearch("a b" "a b")            ; => Match，span (0 3)
 ycRegEx::reSearch("a b" "xab" ?flags 'X)  ; => Match，span (1 3)
 ```
+
+## 编译选项
+
+`reCompile` 的 `?compileOpts` 接受单个选项符号或符号列表（默认 `nil`）。编译选项作用于返回的 `Pattern`，可与 `?flags` 同时使用；传已编译 `Pattern` 时不能带 `?compileOpts`。
+
+| 符号 | 语义 |
+| --- | --- |
+| `caseLess` | 大小写不敏感 |
+| `multiLine` | `^`/`$` 匹配每行首尾 |
+| `dotAll` | `.` 匹配换行 |
+| `extended` | 忽略 pattern 中空白与 `#` 注释 |
+| `anchored` | 仅从主题串首处起匹配 |
+| `dollar_endonly` | `$` 只匹配主题串末尾 |
+| `ungreedy` | 反转量词贪婪方向 |
+| `no_auto_capture` | 普通括号不捕获，命名组仍可捕获 |
+| `firstline` | 命中不得晚于首个换行 |
+
+```lisp
+ycRegEx::reCompile("ABC" ?compileOpts 'caseLess)->match("abc")       ; => Match
+ycRegEx::reCompile("b" ?compileOpts 'anchored)->search("ab")         ; => nil
+ycRegEx::reCompile("(a)" ?compileOpts 'no_auto_capture)->groups()    ; => 0
+ycRegEx::reCompile("a+" ?compileOpts 'ungreedy)->match("aaa")->group()  ; => "a"
+ycRegEx::reCompile("b" ?compileOpts '(anchored firstline))->search("ab")  ; => nil
+```
+
+未知选项或非符号/列表参数以 `error()` 中断。

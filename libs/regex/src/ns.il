@@ -19,6 +19,8 @@ addToNamespace("ycRegEx"
         Match
         MatchData
         _mkPattern
+        _optsList
+        _compileOptsBits
         _compileChecked
         _asPat
         _flagsFromValue

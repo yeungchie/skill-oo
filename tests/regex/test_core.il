@@ -215,6 +215,33 @@ let((p2)
     _assert(p2->groups() == 2  "Pattern: groups count 2")
 )
 
+; --- 9b. compile options ---
+let((p)
+    _assert(ycRegEx::reCompile("ABC" ?compileOpts 'caseLess)->match("abc") != nil
+        "compileOpts: caseLess")
+    _assert(ycRegEx::reCompile("b" ?compileOpts 'anchored)->search("ab") == nil
+        "compileOpts: anchored")
+    _assert(ycRegEx::reCompile("(a)" ?compileOpts 'no_auto_capture)->groups() == 0
+        "compileOpts: no_auto_capture")
+    _assert(ycRegEx::reCompile("a$" ?compileOpts 'dollar_endonly)->search(strcat("a" "\n")) == nil
+        "compileOpts: dollar_endonly")
+    _assert(ycRegEx::reCompile("a+" ?compileOpts 'ungreedy)->match("aaa")->group() == "a"
+        "compileOpts: ungreedy")
+    _assert(ycRegEx::reCompile("b" ?compileOpts 'firstline)->search(strcat("a" "\n" "b")) == nil
+        "compileOpts: firstline")
+    _assert(ycRegEx::reCompile("a b" ?compileOpts 'extended)->match("ab") != nil
+        "compileOpts: extended")
+    _assert(ycRegEx::reCompile("ABC" ?compileOpts list('caseLess 'anchored))->match("abc") != nil
+        "compileOpts: list form")
+    p = ycRegEx::reCompile("a")
+    _assertError(lambda(() ycRegEx::reCompile(p ?compileOpts 'caseLess) t)
+        "compileOpts: compiled Pattern rejects options")
+    _assertError(lambda(() ycRegEx::reCompile("a" ?compileOpts 'bogus) t)
+        "compileOpts: unknown option raises")
+    _assertError(lambda(() ycRegEx::reCompile("a" ?compileOpts 42) t)
+        "compileOpts: non-symbol option raises")
+)
+
 ; --- 10. recursion limit wrappers ---
 let((n_orig)
     n_orig = ycRegEx::reGetRecursionLimit()
