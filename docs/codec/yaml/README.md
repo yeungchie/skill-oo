@@ -125,7 +125,7 @@ ycYaml::encode(
 | --- | --- | --- | --- |
 | g_val | any | | 待编码值；`"yaml-stream"` 时为文档列表 |
 | ?format | str | "yaml" | `"yaml"` 或 `"yaml-stream"`；其他值以 `error()` 中断 |
-| ?indent | int | nil | 每层缩进空格数；默认 2，须为正整数 |
+| ?indent | int | 2 | 每层缩进空格数（须为正整数） |
 | ?sortKeys | t \| nil | nil | t 时映射键按编码后的文本升序输出 |
 | ?strict | t \| nil | nil | t 时映射键必须为字符串 |
 | ?flow | t \| nil | nil | t 时全部使用流式风格 |
