@@ -61,6 +61,14 @@ let((m)
     _assert(m && m->expand("x") == "x"  "fullmatch: expand re-establishes on _full anchor")
 )
 
+; --- 4b. search beyond the old 64KB anchor limit ---
+let((t_subj m)
+    t_subj = strcat(sprintf(nil "%70000s" "") "x")
+    m = ycRegEx::reSearch("x" t_subj)
+    _assert(m && m->start() == 70000  "search: >64KB start")
+    _assert(m && m->end() == 70001    "search: >64KB end")
+)
+
 ; --- 5. group family ---
 let((m)
     m = ycRegEx::reSearch("(\\d+)-(\\d+)" "a10-20b")

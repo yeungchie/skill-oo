@@ -121,6 +121,41 @@ procedure(_anchorAt(g_pat n_off "gx")  ; -> compiled
     )
 )
 
+procedure(_posMarker(t_subj "t")  ; -> str
+    ; 返回一个在主题串中不存在的替换标记。
+    ;
+    ; **参数**
+    ;   t_subj  (str) - 主题串
+    ;
+    ; **返回**
+    ;   (str) - 不与主题串冲突的标记串
+    let((t_m)
+        t_m = "<YC-POS>"
+        while(index(t_subj t_m)
+            t_m = strcat(t_m "x")
+        )
+        t_m
+    )
+)
+
+procedure(_matchStart(g_pat t_subj n_exec "gtx")  ; -> int
+    ; 用一次首处替换定位匹配起点（不依赖 lookbehind 锚定）。
+    ;
+    ; **参数**
+    ;   g_pat   (compiled) - 已匹配成功的编译对象
+    ;   t_subj  (str)      - 主题串
+    ;   n_exec  (int)      - 执行选项位值
+    ;
+    ; **返回**
+    ;   (int) - 首个匹配的 0-based 起始字节位
+    let((t_m t_hit t_suf)
+        t_m = _posMarker(t_subj)
+        t_hit = pcreReplace(g_pat t_subj t_m 1 n_exec)
+        t_suf = index(t_hit t_m)
+        length(t_hit) - length(t_suf)
+    )
+)
+
 procedure(_nextMatch(g_pat t_subj n_from n_exec "gtxx")  ; -> (int, int . list[str]) | nil
     ; 慢路径内核：从 n_from 起逐位置锚定扫描，取最左命中。
     ;
@@ -289,8 +324,8 @@ self->span = lambda((\@rest g_args "g")  ; -> (int, int)
     ;   g_args  (list) - 变参：组选择参数（span(g) 预留），传入任意参数即 _error() 中断
     ;
     ; **返回**
-    ;   (int, int) - (start end) 字节位；search 路径构造的 Match 位置惰性，首次调用才走
-    ;                慢路径逐位置锚定回填，回填无命中走 _error() 中断
+    ;   (int, int) - (start end) 字节位；位置由构造方给出，缺失时走慢路径回填
+    ;                无命中走 _error() 中断
     let((l_rec)
         when(g_args
             _error("span" "group arguments are not supported yet (reserved)")

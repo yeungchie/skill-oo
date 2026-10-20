@@ -115,12 +115,14 @@ self->search = lambda((t_subj \@key execOpts "tg")  ; -> Match | nil
     ;   ?execOpts  (sym|list|nil) - 执行选项符号或列表（默认 nil）
     ;
     ; **返回**
-    ;   (Match|nil) - 命中返回 Match（位置惰性，首次 span()/start()/end() 走慢路径回填），未命中返回 nil
-    let((l_parts n_exec)
+    ;   (Match|nil) - 命中返回 Match（位置已定位），未命中返回 nil
+    let((l_parts n_exec n_start)
         n_exec = _execOptsBits(execOpts "ycRegEx::Pattern->search")
         when(pcreMatchp(self->_data->pcre t_subj 0 n_exec)
             l_parts = _extractParts(self self->_data->pcre)
-            _mkMatch(self t_subj nil nil cdr(l_parts) self->_data->span n_exec)
+            n_start = _matchStart(self->_data->pcre t_subj n_exec)
+            _mkMatch(self t_subj n_start n_start + length(car(l_parts))
+                cdr(l_parts) self->_data->span n_exec)
         )
     )
 )

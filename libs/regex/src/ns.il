@@ -36,6 +36,8 @@ addToNamespace("ycRegEx"
         _wholeTemplate
         _splitTemplate
         _extractParts
+        _posMarker
+        _matchStart
         _nextMatch
         _anchorAt
         _findAllItem
