@@ -216,19 +216,14 @@ procedure(_flagsFromValue(g_flags t_ctx "gt")  ; -> str
 )
 
 procedure(_compileChecked(t_str "t")  ; -> compiled | nil
-    ; 编译 PCRE 串，用 errset 捕获错误并抑制输出。
+    ; 编译 PCRE 串；失败时透传引擎原生诊断并返回 nil。
     ;
     ; **参数**
     ;   t_str  (str) - 待编译的正则串
     ;
     ; **返回**
-    ;   (compiled|nil) - 编译成功返回对象；失败返回 nil（错误不外抛、不打印）
-    let((l_res)
-        l_res = errset(pcreCompile(t_str) nil)
-        when(l_res
-            car(l_res)
-        )
-    )
+    ;   (compiled|nil) - 编译成功返回对象；失败返回 nil（原生错误已打印）
+    pcreCompile(t_str)
 )
 
 procedure(_mkPattern(g_pat t_flags t_ctx "gtt")  ; -> Pattern
@@ -246,10 +241,16 @@ procedure(_mkPattern(g_pat t_flags t_ctx "gtt")  ; -> Pattern
             error("%A: pattern must be a string, got %A" t_ctx g_pat)
         )
         g_faithful = _compileChecked(strcat(t_flags g_pat))
+        unless(g_faithful
+            error("%A: pattern compilation failed" t_ctx)
+        )
         g_span = _compileChecked(lsprintf("%s\\A(?:%s)" t_flags g_pat))
+        unless(g_span
+            error("%A: anchor compilation failed" t_ctx)
+        )
         g_full = _compileChecked(lsprintf("%s\\A(?:%s)\\z" t_flags g_pat))
-        unless(g_faithful && g_span && g_full
-            error("%A: invalid pattern: %s" t_ctx g_pat)
+        unless(g_full
+            error("%A: fullmatch compilation failed" t_ctx)
         )
         n_g = pcreSubpatCount(g_faithful)
         makeInstance('Pattern ?_data makeInstance('PatternData
