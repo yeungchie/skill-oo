@@ -223,7 +223,12 @@ procedure(_compileChecked(t_str "t")  ; -> compiled | nil
     ;
     ; **返回**
     ;   (compiled|nil) - 编译成功返回对象；失败返回 nil（原生错误已打印）
-    pcreCompile(t_str)
+    let((l_res)
+        l_res = errset(pcreCompile(t_str) t)
+        when(l_res && pcreObjectp(car(l_res))
+            car(l_res)
+        )
+    )
 )
 
 procedure(_mkPattern(g_pat t_flags t_ctx "gtt")  ; -> Pattern
