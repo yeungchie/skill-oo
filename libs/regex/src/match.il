@@ -303,6 +303,110 @@ procedure(_hasNumericGroupRef(t_pat "t")  ; -> t | nil
     )
 )
 
+procedure(_shiftNumericRefs(t_pat n_g "tx")  ; -> str | sym
+    ; 把数字组引用/条件/子程序号整体 +2，供零宽前瞻包装使用。
+    ;
+    ; **参数**
+    ;   t_pat  (str) - 原 pattern
+    ;   n_g    (int) - 原捕获组数
+    ;
+    ; **返回**
+    ;   (str|sym) - 平移后的 pattern；含不支持结构时回 'fallback
+    let((t_res n_i n_len t_c t_next n_j n_num n_first t_tail)
+        unless(_hasNumericGroupRef(t_pat)
+            t_res = t_pat
+        )
+        when(_hasNumericGroupRef(t_pat)
+            cond(
+                (index(t_pat "[") 'fallback)
+                (index(t_pat "\\Q") 'fallback)
+                (index(t_pat "\\g") 'fallback)
+                (index(t_pat "\\k") 'fallback)
+                (index(t_pat "(?#") 'fallback)
+                (index(t_pat "(?R") 'fallback)
+                (index(t_pat "(?0") 'fallback)
+                (t
+                    t_res = ""
+                    n_i = 1
+                    n_len = length(t_pat)
+                    while(n_i <= n_len && t_res != 'fallback
+                        t_c = substring(t_pat n_i 1)
+                        cond(
+                            (t_c == "\\"
+                                t_next = substring(t_pat n_i + 1 1)
+                                if(index("123456789" t_next)
+                                    progn(
+                                        n_j = n_i + 1
+                                        while(n_j <= n_len && index("0123456789" substring(t_pat n_j 1))
+                                            n_j = n_j + 1
+                                        )
+                                        n_num = atoi(substring(t_pat n_i + 1 n_j - n_i - 1))
+                                        if(n_num <= n_g
+                                            progn(
+                                                t_res = strcat(t_res "\\" sprintf(nil "%d" n_num + 2))
+                                                n_i = n_j
+                                            )
+                                            progn(
+                                                n_first = atoi(t_next)
+                                                if(n_first <= n_g
+                                                    progn(
+                                                        t_res = strcat(t_res "\\" sprintf(nil "%d" n_first + 2)
+                                                            if(n_j - n_i - 2 > 0 substring(t_pat n_i + 2 n_j - n_i - 2) ""))
+                                                        n_i = n_j
+                                                    )
+                                                    t_res = 'fallback
+                                                )
+                                            )
+                                        )
+                                    )
+                                    progn(
+                                        t_res = strcat(t_res t_c t_next)
+                                        n_i = n_i + 2
+                                    )
+                                )
+                            )
+                            (t_c == "(" && substring(t_pat n_i 2) == "(?"
+                                t_next = substring(t_pat n_i + 2 1)
+                                if(index("123456789" t_next)
+                                    progn(
+                                        n_j = n_i + 2
+                                        while(n_j <= n_len && index("0123456789" substring(t_pat n_j 1))
+                                            n_j = n_j + 1
+                                        )
+                                        n_num = atoi(substring(t_pat n_i + 2 n_j - n_i - 2))
+                                        t_res = strcat(t_res "(?" sprintf(nil "%d" n_num + 2))
+                                        n_i = n_j
+                                    )
+                                    if(t_next == "(" && index("123456789" substring(t_pat n_i + 3 1))
+                                        progn(
+                                            n_j = n_i + 3
+                                            while(n_j <= n_len && index("0123456789" substring(t_pat n_j 1))
+                                                n_j = n_j + 1
+                                            )
+                                            n_num = atoi(substring(t_pat n_i + 3 n_j - n_i - 3))
+                                            t_res = strcat(t_res "(?(" sprintf(nil "%d" n_num + 2))
+                                            n_i = n_j
+                                        )
+                                        progn(
+                                            t_res = strcat(t_res t_c)
+                                            n_i = n_i + 1
+                                        )
+                                    )
+                                )
+                            )
+                            (t
+                                t_res = strcat(t_res t_c)
+                                n_i = n_i + 1
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        t_res
+    )
+)
+
 procedure(_zeroAtStart(g_pat t_subj n_exec "gtx")  ; -> list | sym
     ; 执行选项 anchored 下的零宽导出：只检查位置 0。
     ;
@@ -337,57 +441,71 @@ procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     ;
     ; **返回**
     ;   (list|sym) - (start end . groups) 记录列表；需回退 'fallback
-    let((t_qpat g_qobj n_q g_qpat l_q l_0 l_parts l_res l_qgroups t_pw n_start g_bad l_m)
+    let((t_qpat t_pat2 g_qobj n_q g_qpat l_q l_0 l_parts l_res l_qgroups
+          t_pw n_start n_skip g_bad l_m)
         cond(
-            (_hasBit(g_pat->_data->compileOpts 16) 'fallback)
-            (_hasBit(g_pat->_data->compileOpts 4096) 'fallback)
-            (_hasBit(n_exec 1024) 'fallback)
-            (_hasNumericGroupRef(g_pat->_data->pattern) 'fallback)
-            (_hasBit(n_exec 16) _zeroAtStart(g_pat t_subj n_exec))
+            ((_hasBit(g_pat->_data->compileOpts 16) || _hasBit(n_exec 16))
+                _zeroAtStart(g_pat t_subj n_exec))
             (t
-                progn(
-                t_qpat = lsprintf("%s([\\s\\S])(?=((?:%s)))"
-                    g_pat->_data->flags g_pat->_data->pattern)
-                g_qobj = _compileChecked(t_qpat "ycRegEx: zero-width probe" g_pat->_data->compileOpts)
-                if(g_qobj
+                t_pat2 = _shiftNumericRefs(g_pat->_data->pattern g_pat->_data->nGroups)
+                if(t_pat2 == 'fallback
+                    'fallback
                     progn(
-                        n_q = pcreSubpatCount(g_qobj)
-                        g_qpat = makeInstance('Pattern ?_data makeInstance('PatternData
-                            ?pcre g_qobj ?nGroups n_q))
-                        l_q = _exportRecords(g_qpat t_subj n_exec)
-                        when(l_q == 'fallback g_bad = t)
-                        when(pcreMatchp(g_pat->_data->span t_subj 0 n_exec)
-                            l_parts = _extractParts(g_pat g_pat->_data->span)
-                            if(length(car(l_parts)) == 0
-                                progn(
-                                    l_0 = cons(0 cons(0 cdr(l_parts)))
+                        t_qpat = lsprintf("%s(?P<yc_qc>[\\s\\S])(?=(?P<yc_qw>(?:%s)))"
+                            g_pat->_data->flags t_pat2)
+                        g_qobj = _compileChecked(t_qpat
+                            "ycRegEx: zero-width probe" g_pat->_data->compileOpts)
+                        if(g_qobj
+                            progn(
+                                n_q = pcreSubpatCount(g_qobj)
+                                g_qpat = makeInstance('Pattern ?_data makeInstance('PatternData
+                                    ?pcre g_qobj ?nGroups n_q))
+                                l_q = _exportRecords(g_qpat t_subj n_exec)
+                                n_skip = 0
+                                when(l_q == 'fallback g_bad = t)
+                                when(pcreMatchp(g_pat->_data->span t_subj 0 n_exec)
+                                    l_parts = _extractParts(g_pat g_pat->_data->span)
+                                    when(length(car(l_parts)) == 0
+                                        unless(_hasBit(n_exec 1024)
+                                            l_0 = cons(0 cons(0 cdr(l_parts)))
+                                        )
+                                    )
+                                    when(length(car(l_parts)) > 0
+                                        g_bad = t
+                                    )
                                 )
-                                g_bad = t
-                            )
-                        )
-                        when(!g_bad
-                            l_res = if(l_0 tconc(nil l_0) nil)
-                            foreach(l_m l_q
-                                l_qgroups = cdr(cdr(l_m))
-                                if(length(l_qgroups) < 2
-                                    g_bad = t
-                                    progn(
-                                        t_pw = car(cdr(l_qgroups))
-                                        if(t_pw != ""
+                                when(!g_bad
+                                    l_res = if(l_0 tconc(nil l_0) nil)
+                                    foreach(l_m l_q
+                                        l_qgroups = cdr(cdr(l_m))
+                                        if(length(l_qgroups) < 2
                                             g_bad = t
                                             progn(
+                                                t_pw = car(cdr(l_qgroups))
                                                 n_start = car(l_m) + 1
-                                                l_res = tconc(l_res cons(n_start cons(n_start cdr(cdr(l_qgroups)))))
+                                                cond(
+                                                    (n_start < n_skip nil)
+                                                    (t_pw == "" && _hasBit(n_exec 1024) nil)
+                                                    (t_pw != ""
+                                                        progn(
+                                                            unless(_hasBit(n_exec 1024)
+                                                                g_bad = t
+                                                            )
+                                                        )
+                                                    )
+                                                    (t
+                                                        (l_res = tconc(l_res cons(n_start cons(n_start cdr(cdr(l_qgroups))))))
+                                                    )
+                                                )
                                             )
                                         )
                                     )
                                 )
+                                if(g_bad 'fallback car(l_res))
                             )
+                            'fallback
                         )
-                        if(g_bad 'fallback car(l_res))
                     )
-                    'fallback
-                )
                 )
             )
         )

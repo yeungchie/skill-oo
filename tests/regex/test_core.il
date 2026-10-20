@@ -80,8 +80,7 @@ let((t_subj m)
     )
     _assertSameSeq(ycRegEx::reFindall("(?= )" t_subj ?execOpts 'anchored)
         '("")  "findall: >64KB anchored zero-width"
-    )
-)
+    ))
 _assertSameSeq(ycRegEx::reFindall("(?=(a))" "aa") '("a" "a")  "findall: zero-width capture")
 
 ; --- 5. group family ---
@@ -120,6 +119,13 @@ let((l_pat m p)
         "groups>9: findall"
     )
     _assert(p->sub("\\{12}\\{1}" "abcdefghijkl") == "la"  "groups>9: sub")
+)
+
+; --- 5b2. zero-width numeric references ---
+_assertSameSeq(ycRegEx::reFindall("(a)?\1?" "b") '("" "")  "zero-width: numeric backref")
+_assertSameSeq(ycRegEx::reFindall("(a)?(?(1)b|)" "b") '("" "")  "zero-width: numeric conditional")
+_assertSameSeq(ycRegEx::reCompile("(?P<n>a)?" ?compileOpts 'no_auto_capture)->findall("b")
+    '("" "")  "zero-width: no_auto_capture"
 )
 
 ; --- 5c. group type contract / groups isolation ---
@@ -311,6 +317,15 @@ let((p)
     )
     _assertSameSeq(ycRegEx::reFindall("x*" "abc" ?execOpts 'anchored) '("")
         "execOpts: anchored zero-width findall"
+    )
+    _assertSameSeq(ycRegEx::reFindall("a*" "aaa" ?execOpts 'notempty) '("aaa")
+        "execOpts: notempty zero-width/mixed"
+    )
+    _assert(ycRegEx::reFindall("x*" "abc" ?execOpts 'notempty) == nil
+        "execOpts: notempty rejects all empty"
+    )
+    _assertSameSeq(ycRegEx::reFindall("a?" "b a" ?execOpts 'notempty) '("a")
+        "execOpts: notempty advances to nonempty"
     )
 )
 
