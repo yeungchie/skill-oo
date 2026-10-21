@@ -84,10 +84,9 @@ procedure(_specialStart(n_c "x")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 是危险起始字符时为 t
-    n_c == 91 || n_c == 93 || n_c == 123 || n_c == 125
-        || n_c == 35 || n_c == 38 || n_c == 42 || n_c == 33
-        || n_c == 124 || n_c == 62 || n_c == 39 || n_c == 34
-        || n_c == 37 || n_c == 64 || n_c == 96 || n_c == 44
+    when(member(n_c '(91 93 123 125 35 38 42 33 124 62 39 34 37 64 96 44))
+        t
+    )
 )
 
 procedure(_encodeString(t_s "t")  ; -> str
