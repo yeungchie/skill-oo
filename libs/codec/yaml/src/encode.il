@@ -34,7 +34,7 @@ procedure(_plainSafe(t_s "t")  ; -> t | nil
     ;   (t|nil) - 可安全输出为 t
     prog((n_len n_c n_i g_bad)
         n_len = length(t_s)
-        when(n_len == 0
+        when(n_len == 0 || t_s == "..."
             return(nil)
         )
         n_c = _code(t_s 1)
@@ -241,10 +241,13 @@ procedure(_encodeFlow(g_val n_level g_opt "gxg")  ; -> str
                     l_keys = tconc(l_keys g_k)
                 )
                 l_keys = car(l_keys)
-                t_orig = makeTable("ycYamlKeys")
+                t_orig = makeTable("ycYamlKeys" ycCodec:::Missing)
                 l_p = nil
                 foreach(g_k l_keys
                     t_ks = _encodeKey(g_k g_opt)
+                    when(t_orig[t_ks] != ycCodec:::Missing
+                        error("ycYaml::encode: duplicate mapping key %A after encoding" t_ks)
+                    )
                     t_orig[t_ks] = g_k
                     l_p = tconc(l_p lsprintf("%s: %s"
                         t_ks
@@ -298,9 +301,12 @@ procedure(_blockLines(g_val n_level g_opt "gxg")  ; -> list[str]
             )
             prog((l_keys l_res t_ks t_orig t_pad t_child l_child t_first)
                 l_keys = nil
-                t_orig = makeTable("ycYamlKeys")
+                t_orig = makeTable("ycYamlKeys" ycCodec:::Missing)
                 foreach(g_k g_val
                     t_ks = _encodeKey(g_k g_opt)
+                    when(t_orig[t_ks] != ycCodec:::Missing
+                        error("ycYaml::encode: duplicate mapping key %A after encoding" t_ks)
+                    )
                     t_orig[t_ks] = g_k
                     l_keys = tconc(l_keys t_ks)
                 )

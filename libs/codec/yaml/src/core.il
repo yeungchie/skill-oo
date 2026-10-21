@@ -227,11 +227,12 @@ procedure(_splitLines(t_s "t")  ; -> list
     )
 )
 
-procedure(_lineIndent(t_line "t")  ; -> int
+procedure(_lineIndent(t_line n_line "tx")  ; -> int
     ; 计算行首空格数；缩进内的制表符报错。
     ;
     ; **参数**
     ;   t_line  (str) - 单行文本
+    ;   n_line  (int) - 行号（错误消息）
     ;
     ; **返回**
     ;   (int) - 行首空格数
@@ -242,7 +243,7 @@ procedure(_lineIndent(t_line "t")  ; -> int
             n_c = _code(t_line n_i + 1)
             cond(
                 (n_c == 32 n_i = n_i + 1)
-                (n_c == 9 _errorLine("tab character in indentation" 1 n_i + 1))
+                (n_c == 9 _errorLine("tab character in indentation" n_line n_i + 1))
                 (t g_stop = t)
             )
         )

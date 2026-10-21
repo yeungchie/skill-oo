@@ -99,7 +99,7 @@ procedure(_parseChild(l_lines n_pos n_parentIndent n_max "lxnn")  ; -> list
             return(list(ycCodec:::Null n_pos))
         )
         t_line = _nth1(n_pos l_lines)
-        n_ind = _lineIndent(t_line)
+        n_ind = _lineIndent(t_line n_pos)
         return(
             if(n_ind <= n_parentIndent
                 list(ycCodec:::Null n_pos)
@@ -241,7 +241,7 @@ procedure(_parseMapInto(t_map l_lines n_pos n_indent n_max t_first n_line n_col 
                     )
                     when(n_pos <= n_len
                         t_line = _nth1(n_pos l_lines)
-                        n_ind = _lineIndent(t_line)
+                        n_ind = _lineIndent(t_line n_pos)
                         when(n_ind < n_indent
                             g_stop = t
                         )
@@ -327,7 +327,7 @@ procedure(_parseSeqNested(l_lines n_pos n_indent n_max t_first n_line n_col "lxn
             )
             unless(g_stop
                 t_line = _nth1(n_pos l_lines)
-                n_ind = _lineIndent(t_line)
+                n_ind = _lineIndent(t_line n_pos)
                 cond(
                     (n_ind < n_indent
                         g_stop = t
@@ -370,7 +370,7 @@ procedure(_parseSeq(l_lines n_pos n_indent n_max "lxnn")  ; -> list
             n_pos = _skipIgnorable(l_lines n_pos)
             when(n_pos <= n_len
                 t_line = _nth1(n_pos l_lines)
-                n_ind = _lineIndent(t_line)
+                n_ind = _lineIndent(t_line n_pos)
                 cond(
                     (n_ind < n_indent
                         g_stop = t
@@ -435,7 +435,7 @@ procedure(_parseBlock(l_lines n_pos n_indent n_max "lxnn")  ; -> list
             return(list(ycCodec:::Null n_pos))
         )
         t_line = _nth1(n_pos l_lines)
-        n_ind = _lineIndent(t_line)
+        n_ind = _lineIndent(t_line n_pos)
         when(n_ind < n_indent
             return(list(ycCodec:::Null n_pos))
         )

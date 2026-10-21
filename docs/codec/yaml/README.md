@@ -57,7 +57,7 @@ ycYaml::decode(
 
 解码 YAML 文本。`?format "yaml"`（默认）解析单个文档，多文档输入以 `error()` 中断；空输入或仅含注释的输入返回 `ycCodec::Null`。`?format "yaml-stream"` 按 `---`/`...` 拆分并返回文档列表，空输入返回 `nil`。
 
-块映射与序列按缩进解析；空序列解码为 `nil`，空映射解码为长度为 0 的 table。流式集合须位于同一行。单引号按 YAML 规则转义单引号，双引号支持常见转义与 `\xNN`、`\uNNNN`、`\UNNNNNNNN`。
+块映射与序列按缩进解析；空序列解码为 `nil`，空映射解码为长度为 0 的 table。流式集合须位于同一行。单引号按 YAML 规则转义单引号，双引号支持常见转义与 `\xNN`、`\uNNNN`、`\UNNNNNNNN`。`\u0000`（NUL）无法保存在字符串中，解码时被丢弃。
 
 锚点定义后可用 `*name` 引用；别名与锚点值共享同一对象。`<<` 合并键接受映射或映射列表，已存在的显式键优先，`<<` 本身不保留在结果 table 中。支持核心标签 `!!str`、`!!int`、`!!float`、`!!bool`、`!!null`、`!!seq`、`!!map` 及其 `tag:yaml.org,2002:` 形式。
 
@@ -114,7 +114,7 @@ ycYaml::encode(
 
 把库内表示编码为 YAML 文本。默认块式风格；`?flow t` 时全部值使用流式风格。`nil` 输出 `[]`（空序列），`ycCodec::Null` 输出 `null`，`ycCodec::True`/`ycCodec::False` 输出 `true`/`false`；普通符号、`ycCodec::Missing` 与无法表示的容器以 `error()` 中断。
 
-映射键支持字符串、符号与 fixnum：字符串按需加双引号，符号取符号名，fixnum 输出十进制数字；`?strict t` 时非字符串键以 `error()` 中断；其他键型始终以 `error()` 中断。默认不排序映射键；`?sortKeys t` 按编码后的键文本升序输出。
+映射键支持字符串、符号与 fixnum：字符串按需加双引号，符号取符号名，fixnum 输出十进制数字；`?strict t` 时非字符串键以 `error()` 中断；其他键型始终以 `error()` 中断；不同键转为同一文本时以 `error()` 中断。默认不排序映射键；`?sortKeys t` 按编码后的键文本升序输出。
 
 `?indent` 指定每层空格数（默认 2）。`?explicitStart`/`?explicitEnd` 只在单文档格式添加 `---`/`...`，对 `"yaml-stream"` 不生效。`?format "yaml-stream"` 要求 `g_val` 为列表，每个元素输出为一个 `---` 文档；空列表输出空串。`?finalNewline nil` 去掉单文档末尾换行；非空流输出同样受此控制。
 

@@ -258,14 +258,14 @@ self->touch = lambda(()  ; -> t
     ; 文件不存在则创建；已存在则更新修改时间、不截断内容（与 CPython Path.touch() 一致）。
     ;
     ; **返回**
-    ;   (t) - 成功返回 t；目标是目录、或 touch 后仍不存在，走 _error() 中断
-    let((t_str)
+    ;   (t) - 成功返回 t；目标是目录、touch 命令失败或文件未生成，走 _error() 中断
+    let((t_str n_rc)
         t_str = self->str()
         when(self->isDir()
             _error("touch" "is a directory: %s" t_str)
         )
-        system(strcat("touch " _shellQuote(t_str)))
-        unless(self->exists()
+        n_rc = system(strcat("touch " _shellQuote(t_str)))
+        unless(n_rc == 0 && self->exists()
             _error("touch" "cannot touch: %s" t_str)
         )
         t

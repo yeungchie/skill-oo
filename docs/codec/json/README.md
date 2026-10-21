@@ -97,7 +97,7 @@ ycJson::encode(
 
 **描述**
 
-编码库内表示为文本。`?format "json"`（默认）或 `"jsonc"` 输出单个值：`nil` 按 `?nilAs` 输出 `[]` 或 `false`、`t` 与 `ycCodec::True` 输出 `true`、其余哨兵输出对应字面量；对象键默认把字符串原样、符号取符号名、fixnum 转为十进制（`?strict t` 时非字符串键以 `error()` 中断；其他键型始终以 `error()` 中断）；不可表示的值（普通符号、缺键标记、非有限浮点、其他类型）以 `error()` 中断。`?format "jsonl"` 把值列表逐行输出：每个元素按紧凑规则输出为一行，行间以换行分隔，非空输入末尾默认补一个换行（`?finalNewline nil` 可关），`g_val` 非列表即以 `error()` 中断；`?indent` 仅对单值格式生效。对象键默认不排序（随表序），需要确定性输出时传 `?sortKeys t`。
+编码库内表示为文本。`?format "json"`（默认）或 `"jsonc"` 输出单个值：`nil` 按 `?nilAs` 输出 `[]` 或 `false`、`t` 与 `ycCodec::True` 输出 `true`、其余哨兵输出对应字面量；对象键默认把字符串原样、符号取符号名、fixnum 转为十进制（`?strict t` 时非字符串键以 `error()` 中断；其他键型始终以 `error()` 中断）；不同键转为同一文本时以 `error()` 中断；不可表示的值（普通符号、缺键标记、非有限浮点、其他类型）以 `error()` 中断。`?format "jsonl"` 把值列表逐行输出：每个元素按紧凑规则输出为一行，行间以换行分隔，非空输入末尾默认补一个换行（`?finalNewline nil` 可关），`g_val` 非列表即以 `error()` 中断；`?indent` 仅对单值格式生效。对象键默认不排序（随表序），需要确定性输出时传 `?sortKeys t`。
 
 **参数**
 

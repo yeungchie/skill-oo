@@ -320,6 +320,9 @@ let((p_t t_before t_after)
     _assert(t_after > t_before  "touch: updates mtime of existing file (CPython updates)")
     _assert(p_t->readText() == "keep"  "touch: content preserved after mtime bump")
 )
+when(isFileName("/proc/version")
+    _assertError(lambda(() _p("/proc/version")->touch() t)  "touch: unwritable target errors")
+)
 
 ; --- open ---
 let((g_port)

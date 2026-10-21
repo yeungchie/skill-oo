@@ -215,10 +215,13 @@ procedure(_encodeTable(t_obj n_depth g_opt "gxg")  ; -> str
                 l_keys = tconc(l_keys g_k)
             )
             l_keys = car(l_keys)
-            t_orig = makeTable("ycJsonKeys")
+            t_orig = makeTable("ycJsonKeys" ycCodec:::Missing)
             l_strs = nil
             foreach(g_k l_keys
                 t_ks = _keyStr(g_k g_opt)
+                when(t_orig[t_ks] != ycCodec:::Missing
+                    error("ycJson::encode: duplicate object key %A after string conversion" t_ks)
+                )
                 l_strs = tconc(l_strs t_ks)
                 t_orig[t_ks] = g_k
             )

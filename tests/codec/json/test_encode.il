@@ -73,6 +73,18 @@ let((t_v)
 )
 let((t_v)
     t_v = makeTable("ycTest")
+    t_v["a"] = 1
+    t_v['a] = 2
+    _assertError(lambda(() ycJson::encode(t_v))  "encode: stringified key collision errors")
+)
+let((t_v)
+    t_v = makeTable("ycTest")
+    t_v["1"] = 1
+    t_v[1] = 2
+    _assertError(lambda(() ycJson::encode(t_v))  "encode: fixnum and string key collision errors")
+)
+let((t_v)
+    t_v = makeTable("ycTest")
     t_v["a"] = nil
     _assert(ycJson::encode(t_v) == "{\"a\":[]}"  "encode: nil table value as empty array")
 )

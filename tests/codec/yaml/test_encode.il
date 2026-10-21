@@ -21,6 +21,8 @@ _assert(ycYaml::encode("a: b") == "\"a: b\"\n"  "encode: colon-space string quot
 _assert(ycYaml::encode("a # b") == "\"a # b\"\n"  "encode: comment-like string quoted")
 _assert(ycYaml::encode("a#b") == "a#b\n"  "encode: hash without space stays plain")
 _assert(ycYaml::encode("- x") == "\"- x\"\n"  "encode: sequence-like string quoted")
+_assert(ycYaml::encode("...") == "\"...\"\n"  "encode: document-end marker string quoted")
+_assert(ycYaml::decode(ycYaml::encode("...")) == "..."  "encode: document-end marker roundtrip")
 _assert(ycYaml::encode("a\nb") == "\"a\\nb\"\n"  "encode: newline escaped")
 _assert(ycYaml::encode("中") == "中\n"  "encode: unicode passes through")
 _assertError(lambda(() ycYaml::encode('foo))  "encode: symbol errors")
@@ -75,6 +77,13 @@ let((t_v)
 )
 let((t_v)
     t_v = makeTable("ycTest")
+    t_v["a"] = 1
+    t_v['a] = 2
+    _assertError(lambda(() ycYaml::encode(t_v))  "encode: stringified key collision errors")
+)
+
+let((t_v)
+    t_v = makeTable("ycTest")
     t_v["a"] = nil
     _assert(ycYaml::encode(t_v) == "a: []\n"  "encode: nil map value is empty sequence")
 )
@@ -97,6 +106,12 @@ let((t_v)
     t_v["a"] = 1
     t_v["b"] = list(2 3)
     _assert(ycYaml::encode(t_v ?flow t ?sortKeys t) == "{a: 1, b: [2, 3]}\n"  "flow encode: map")
+)
+let((t_v)
+    t_v = makeTable("ycTest")
+    t_v["a"] = 1
+    t_v['a] = 2
+    _assertError(lambda(() ycYaml::encode(t_v ?flow t))  "flow encode: key collision errors")
 )
 
 ; --- 文档与选项 ---

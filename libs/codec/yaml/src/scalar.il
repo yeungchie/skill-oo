@@ -374,7 +374,7 @@ procedure(_parseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
     ;
     ; **返回**
     ;   (list) - (字符串 下一行号)
-    prog((n_len n_i n_c n_style n_chomp n_hint n_indent n_last l_raw t_line n_ind n_content n_count n_tail t_body l_p g_stop g_prevBlank)
+    prog((n_len n_i n_c n_style n_chomp n_hint n_indent n_last l_raw t_line n_ind n_content n_count n_tail t_body l_p g_stop g_prevBlank g_prevMore)
         n_len = length(t_header)
         n_style = _code(t_header 1)
         n_chomp = 0
@@ -397,7 +397,7 @@ procedure(_parseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
         g_stop = nil
         while(!g_stop && n_last <= length(l_lines)
             t_line = _nth1(n_last l_lines)
-            n_ind = _lineIndent(t_line)
+            n_ind = _lineIndent(t_line n_last)
             when(_rtrim(t_line) == ""
                 l_raw = tconc(l_raw "")
                 n_last = n_last + 1
@@ -428,22 +428,21 @@ procedure(_parseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
                 g_prevBlank = t
                 for(n_i 1 length(l_raw)
                     t_line = _nth1(n_i l_raw)
-                    cond(
-                        (n_i == 1
+                    let((g_more t_sep)
+                        g_more = length(t_line) > 0 && (_code(t_line 1) == 32 || _code(t_line 1) == 9)
+                        if(n_i == 1
                             t_body = t_line
-                            g_prevBlank = t_line == ""
+                            progn(
+                                t_sep = cond(
+                                    (t_line == "" && !g_prevMore && !g_prevBlank "")
+                                    (t_line == "" || g_prevBlank || g_more || g_prevMore "\n")
+                                    (t " ")
+                                )
+                                t_body = strcat(t_body t_sep t_line)
+                            )
                         )
-                        (t_line == ""
-                            t_body = strcat(t_body intToChar(10))
-                            g_prevBlank = t
-                        )
-                        (g_prevBlank
-                            t_body = strcat(t_body t_line)
-                            g_prevBlank = nil
-                        )
-                        (t
-                            t_body = strcat(t_body " " t_line)
-                        )
+                        g_prevBlank = t_line == ""
+                        g_prevMore = g_more
                     )
                 )
                 t_body = strcat(t_body intToChar(10))
