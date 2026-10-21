@@ -197,8 +197,7 @@ procedure(_encodeScalar(g_val g_opt "gg")  ; -> str
     ;   (str) - 标量文本
     cond(
         (g_val == nil "[]")
-        (g_val == t "true")
-        (g_val == ycCodec:::True "true")
+        (or(g_val == t g_val == ycCodec:::True) "true")
         (g_val == ycCodec:::False "false")
         (g_val == ycCodec:::Null "null")
         (g_val == ycCodec:::Missing
@@ -210,8 +209,7 @@ procedure(_encodeScalar(g_val g_opt "gg")  ; -> str
                 _encodeString(g_val)
             )
         )
-        (fixp(g_val) _numText(g_val))
-        (floatp(g_val) _numText(g_val))
+        (numberp(g_val) _numText(g_val))
         (t
             error("ycYaml::encode: cannot dump value of type %s" symbolToString(type(g_val)))
         )

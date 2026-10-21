@@ -142,16 +142,14 @@ procedure(_encodeValue(g_val n_depth g_opt "gxg")  ; -> str
                 "[]"
             )
         )
-        (g_val == t "true")
-        (g_val == ycCodec:::True "true")
+        (or(g_val == t g_val == ycCodec:::True) "true")
         (g_val == ycCodec:::False "false")
         (g_val == ycCodec:::Null "null")
         (g_val == ycCodec:::Missing
             error("ycJson::encode: cannot dump the Missing marker")
         )
         (stringp(g_val) _encodeString(g_val))
-        (fixp(g_val) _encodeNumber(g_val))
-        (floatp(g_val) _encodeNumber(g_val))
+        (numberp(g_val) _encodeNumber(g_val))
         (tablep(g_val) _encodeTable(g_val n_depth g_opt))
         (listp(g_val) _encodeList(g_val n_depth g_opt))
         (t
