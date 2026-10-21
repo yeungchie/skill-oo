@@ -137,12 +137,9 @@ procedure(_encodeValue(g_val n_depth g_opt "gxg")  ; -> str
     )
     cond(
         (g_val == nil
-            if(g_opt["nilAs"] == "false"
-                "false"
-                "[]"
-            )
+            if(g_opt["nilAs"] == "array" "[]" "false")
         )
-        (or(g_val == t g_val == ycCodec:::True) "true")
+        (member(g_val list(t ycCodec:::True)) "true")
         (g_val == ycCodec:::False "false")
         (g_val == ycCodec:::Null "null")
         (g_val == ycCodec:::Missing
