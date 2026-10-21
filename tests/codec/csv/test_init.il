@@ -1,0 +1,125 @@
+_TestCount = 0
+_TestFail = 0
+
+procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
+    _TestCount = _TestCount + 1
+    unless(g_cond
+        _TestFail = _TestFail + 1
+    )
+    if(g_cond
+        printf("TEST PASSED - %s\n" t_msg)
+        printf("TEST FAILED - %s\n" t_msg)
+    )
+    g_cond
+)
+
+procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
+    let((g_ok)
+        _TestCount = _TestCount + 1
+        g_ok = errset(funcall(g_funobj) nil)
+        when(g_ok
+            _TestFail = _TestFail + 1
+        )
+        if(g_ok
+            printf("TEST FAILED - %s\n" t_msg)
+            printf("TEST PASSED - %s\n" t_msg)
+        )
+        !g_ok
+    )
+)
+
+procedure(_assertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil
+    let((g_ok t_text t_tail g_pass)
+        _TestCount = _TestCount + 1
+        g_ok = errset(funcall(g_funobj) nil)
+        when(!g_ok
+            t_tail = errset.errset
+            when(t_tail && 4 <= length(t_tail)
+                t_text = car(car(cdr(cdr(cdr(cdr(t_tail))))))
+            )
+        )
+        g_pass = !g_ok && t_text && index(t_text t_sub)
+        unless(g_pass
+            _TestFail = _TestFail + 1
+        )
+        if(g_pass
+            printf("TEST PASSED - %s\n" t_msg)
+            printf("TEST FAILED - %s\n" t_msg)
+        )
+        unless(g_pass
+            printf("  expected message containing: %A\n" t_sub)
+            printf("  actual: %A\n" if(t_text t_text "no error detail"))
+        )
+        g_pass
+    )
+)
+
+procedure(_sameRows(l_a l_b "ll")  ; -> t | nil
+    cond(
+        ((l_a == nil && l_b == nil) t)
+        ((l_a == nil || l_b == nil) nil)
+        (t (car(l_a) == car(l_b) && _sameRows(cdr(l_a) cdr(l_b))))
+    )
+)
+
+procedure(_assertRows(l_a l_b t_msg "llt")  ; -> t | nil
+    _assert(_sameRows(l_a l_b) t_msg)
+)
+
+let((l_res t_self t_dir)
+    l_res = errset(get_filename(piport) nil)
+    t_self = when(l_res && car(l_res) && stringp(car(l_res)) && car(l_res) != ""
+        car(l_res)
+    )
+    unless(t_self
+        error("ycCsv: can't determine the current file - load this file with an explicit path")
+    )
+    unless(pcreMatchp("^[~/]|^\\.{1,2}/" t_self)
+        t_self = strcat("./" t_self)
+    )
+    t_dir = simplifyFilename(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") t_self "" 0) t)
+    unless(pcreMatchp("/$" t_dir)
+        t_dir = strcat(t_dir "/")
+    )
+
+    _TestTableDone = nil
+    l_res = errset(load(strcat(t_dir "test_table.il")) t)
+    unless(_TestTableDone
+        _TestCount = _TestCount + 1
+        _TestFail = _TestFail + 1
+        printf("TEST FAILED - test_table.il did not run to completion%s\n"
+            if(l_res "" " (load raised an error)")
+        )
+    )
+
+    _TestDecodeDone = nil
+    l_res = errset(load(strcat(t_dir "test_decode.il")) t)
+    unless(_TestDecodeDone
+        _TestCount = _TestCount + 1
+        _TestFail = _TestFail + 1
+        printf("TEST FAILED - test_decode.il did not run to completion%s\n"
+            if(l_res "" " (load raised an error)")
+        )
+    )
+
+    _TestEncodeDone = nil
+    l_res = errset(load(strcat(t_dir "test_encode.il")) t)
+    unless(_TestEncodeDone
+        _TestCount = _TestCount + 1
+        _TestFail = _TestFail + 1
+        printf("TEST FAILED - test_encode.il did not run to completion%s\n"
+            if(l_res "" " (load raised an error)")
+        )
+    )
+
+    printf("\nPASS: %d / FAIL: %d\n"
+        _TestCount - _TestFail
+        _TestFail
+    )
+
+    when(_TestFail > 0
+        error("ycCsv: %d test(s) failed" _TestFail)
+    )
+)
+
+; END

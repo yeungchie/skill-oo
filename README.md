@@ -24,6 +24,7 @@
   + [ycCodec](docs/codec/core/README.md) —— 编解码库共享的哨兵类型。
   + [ycJson](docs/codec/json/README.md) —— JSON、jsonc、jsonl 的解码与编码。
   + [ycYaml](docs/codec/yaml/README.md) —— YAML 1.2 的解码与编码。
+  + [ycCsv](docs/codec/csv/README.md) —— CSV/TSV 编解码与 Table 模型。
 + [ycUnits](docs/units/README.md) —— SI 工程计数与单位解析/格式化。
 + [ycTabulate](docs/tabulate/README.md) —— 文本表格渲染。
 

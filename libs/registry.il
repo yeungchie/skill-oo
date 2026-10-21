@@ -20,6 +20,7 @@ ycNamespace:::_validNames = list(
     "ycCodec"
     "ycJson"
     "ycYaml"
+    "ycCsv"
     "ycUtf8"
     "ycString"
     "ycUnits"

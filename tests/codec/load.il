@@ -21,6 +21,7 @@ let((t_res t_self t_dir)
     loadi(strcat(t_dir "core/load.il"))
     loadi(strcat(t_dir "json/load.il"))
     loadi(strcat(t_dir "yaml/load.il"))
+    loadi(strcat(t_dir "csv/load.il"))
 )
 
 ; END
