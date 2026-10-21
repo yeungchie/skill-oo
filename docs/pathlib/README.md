@@ -1073,6 +1073,82 @@ p->readJson(?format "xml")
 ; *Error* ycJson::decode: unknown format "xml"
 ```
 
+##### readYaml <sub>`method`</sub>
+
+```text
+p->readYaml(
+    [ l_args ... ]
+)
+=> any | list
+```
+
+**描述**
+
+读取整个文件内容并解码为 YAML 值。需要先加载 `ycYaml`；未加载时以 `error()` 中断（`ycPathLib::Path->readYaml: ycYaml is not loaded - load it first`）。解码选项与错误契约由 `ycYaml::decode` 提供，本方法原样透传实参，不复制其校验逻辑。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| l_args ... | any | 原样透传给 `ycYaml::decode` 的实参（`?format`、`?maxDepth` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycYaml 手册](../codec/yaml/README.md) 的 `decode` 条目。 |
+
+**返回值**
+
+`any | list` — `ycYaml::decode` 的返回值（`yaml-stream` 为 list）。
+
+**例程**
+
+```lisp
+p = ycPathLib::Path("./a.yaml")
+p->writeText("a: 1\nb: [true, null]\n")
+t = p->readYaml()
+t["a"]                           ; => 1
+
+p->writeText("---\n1\n---\n2\n")
+p->readYaml(?format "yaml-stream")  ; => (1 2)
+
+p->readYaml(?format "xml")
+; *Error* ycYaml::decode: unknown format "xml"
+```
+
+##### readCsv <sub>`method`</sub>
+
+```text
+p->readCsv(
+    [ l_args ... ]
+)
+=> Table
+```
+
+**描述**
+
+读取整个文件内容并解码为 CSV/TSV `Table`。需要先加载 `ycCsv`；未加载时以 `error()` 中断（`ycPathLib::Path->readCsv: ycCsv is not loaded - load it first`）。解码选项与错误契约由 `ycCsv::decode` 提供，本方法原样透传实参，不复制其校验逻辑。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| l_args ... | any | 原样透传给 `ycCsv::decode` 的实参（`?format`、`?header`、`?delimiter` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycCsv 手册](../codec/csv/README.md) 的 `decode` 条目。 |
+
+**返回值**
+
+`Table` — `ycCsv::Table` 实例；文件读取或解码失败以 `error()` 中断。
+
+**例程**
+
+```lisp
+p = ycPathLib::Path("./a.csv")
+p->writeText("name,qty\napple,3\n")
+t = p->readCsv(?header t)
+t->value(1 "qty")                ; => "3"
+
+p->writeText("a\tb\n")
+p->readCsv(?format "tsv")->row(1)  ; => ("a" "b")
+
+p->readCsv(?format "xml")
+; *Error* ycCsv::decode: unknown format "xml"
+```
+
 ##### writeText <sub>`method`</sub>
 
 ```text

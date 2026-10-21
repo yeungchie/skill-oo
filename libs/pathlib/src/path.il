@@ -409,6 +409,8 @@ defclass(Path () (
 
     ; codec
     readJson()
+    readYaml()
+    readCsv()
 ))
 
 defmethod(printself (self(Path))  ; -> str

@@ -4,6 +4,8 @@
 ;--------------------------
 
 ycNamespace:::require("ycJson")
+ycNamespace:::require("ycYaml")
+ycNamespace:::require("ycCsv")
 
 useNamespace("ycPathLib")
 
@@ -39,6 +41,34 @@ self->readJson = lambda((\@rest l_args "g")  ; -> any | list
         _error("readJson" "ycJson is not loaded - load it first")
     )
     apply('ycJson:::decode self->readText() l_args)
+)
+
+self->readYaml = lambda((\@rest l_args "g")  ; -> any | list
+    ; 读取整个文件内容并解码为 YAML 值；实参原样透传给 ycYaml::decode。
+    ;
+    ; **参数**
+    ;   l_args  (list) - 原样透传给 ycYaml::decode 的实参（?format、?maxDepth 等；可全部省略）
+    ;
+    ; **返回**
+    ;   (any|list) - ycYaml::decode 的返回值（yaml-stream 为 list）；ycYaml 未加载、文件错误、解码失败均以 error() 中断
+    unless(fboundp('ycYaml:::decode)
+        _error("readYaml" "ycYaml is not loaded - load it first")
+    )
+    apply('ycYaml:::decode self->readText() l_args)
+)
+
+self->readCsv = lambda((\@rest l_args "g")  ; -> Table
+    ; 读取整个文件内容并解码为 CSV/TSV Table；实参原样透传给 ycCsv::decode。
+    ;
+    ; **参数**
+    ;   l_args  (list) - 原样透传给 ycCsv::decode 的实参（?format、?header、?delimiter 等；可全部省略）
+    ;
+    ; **返回**
+    ;   (Table) - ycCsv::Table；ycCsv 未加载、文件错误、解码失败均以 error() 中断
+    unless(fboundp('ycCsv:::decode)
+        _error("readCsv" "ycCsv is not loaded - load it first")
+    )
+    apply('ycCsv:::decode self->readText() l_args)
 )
 )
 )

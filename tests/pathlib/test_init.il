@@ -128,6 +128,11 @@ procedure(_sameJson(g_a g_b t_format "ggt")  ; -> t | nil
         == ycJson::encode(g_b ?format t_format ?sortKeys t)
 )
 
+procedure(_sameYaml(g_a g_b "gg")  ; -> t | nil
+    ycYaml::encode(g_a ?sortKeys t)
+        == ycYaml::encode(g_b ?sortKeys t)
+)
+
 let((l_res t_self t_dir)
     l_res = errset(get_filename(piport) nil)
     t_self = when(l_res && car(l_res) && stringp(car(l_res)) && car(l_res) != ""
