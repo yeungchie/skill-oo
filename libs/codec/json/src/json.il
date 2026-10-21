@@ -1,5 +1,3 @@
-ycNamespace:::require("ycCodec")
-
 useNamespace("ycJson")
 
 ; ---------- 基础工具 ----------

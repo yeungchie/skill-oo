@@ -1,5 +1,3 @@
-ycNamespace:::require("ycCodec")
-
 useNamespace("ycYaml")
 
 ; ---------- 基础工具 ----------
