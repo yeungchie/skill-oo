@@ -26,7 +26,6 @@ procedure(_quoteField(t_s n_delim g_quoteAll "tng")  ; -> str
         if(!g_need
             t_s
             progn(
-                l_p = nil
                 n_run = 1
                 for(n_i 1 n_len
                     n_c = _code(t_s n_i)
@@ -101,7 +100,6 @@ procedure(encode(g_table \@key (format "csv") (delimiter nil) (eol "\n") (quoteA
         )
         n_delim = _delimCode(delimiter _formatDelim(format "ycCsv::encode") "ycCsv::encode")
         t_eol = _eolText(eol)
-        l_lines = nil
         when(l_header
             t_line = _recordText(l_header n_delim quoteAll)
             when(!finalNewline && l_rows == nil && t_line == ""

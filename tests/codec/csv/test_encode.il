@@ -109,6 +109,10 @@ _assert(
     "encode: custom delimiter"
 )
 _assert(
+    ycCsv::encode(ycCsv::Table(list(list("a;b" "c"))) ?delimiter ";") == "\"a;b\";c\n"
+    "encode: custom delimiter triggers quote"
+)
+_assert(
     ycCsv::encode(ycCsv::Table(list(list("a,b" "c"))) ?delimiter ";") == "a,b;c\n"
     "encode: comma is content with semicolon delimiter"
 )

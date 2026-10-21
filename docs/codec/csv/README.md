@@ -9,7 +9,7 @@ Cadence SKILL++ 的 CSV/TSV 编解码库：RFC 4180 风格字段规则与带可�
 + 字段一律为字符串，不做数字/布尔推断；不 trim、不排序、不做 Unicode 规范化。
 + 支持引号内分隔符与换行、双引号转义、LF/CRLF/CR 行尾、可选表头、BOM 剥离与自定义单字节分隔符。
 + 表格行列均 1-based；无表头时可按索引访问，有表头时另可按列名取值。
-+ 空行解码为含一个空字段的记录；有表头时短行缺位为 `ycCodec::Missing`，超长行以 `error()` 中断。
++ 空行解码为含一个空字段的记录；有表头时短行缺位为 `ycCodec::Missing`（见 [ycCodec](../core/README.md)），超长行以 `error()` 中断。
 + 只处理内存文本；文件读写请配合 pathlib 的 `readText()` / `writeText()`。
 
 ## 快速上手
@@ -58,7 +58,7 @@ ycCsv::Table(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | l_rows | list[list[str]] | | 数据行 |
-| ?header | list[str] | nil | 可选列名列表；`nil` 表示无表头 |
+| ?header | list[str] \| nil | nil | 可选列名列表；`nil` 表示无表头 |
 
 **返回值**
 
@@ -192,7 +192,7 @@ ycCsv::decode(
 
 **描述**
 
-解码 CSV/TSV 文本为 `Table`。`?format "csv"`（默认）以逗号为分隔符，`"tsv"` 以制表符为分隔符；`?delimiter` 可覆盖为任意单字节字符（不能是引号、CR、LF）。`?header t` 取首条记录作列名，`?header list` 使用给定列名，默认 `nil` 表示无表头。`?skipEmpty t` 跳过“单个空字段”的记录；`?stripBom` 默认 `t`，剥离开头 UTF-8 BOM。字段仅当以 `"` 开头时按引号规则解析；引号内 `""` 表示一个 `"`，可含分隔符与换行。空文本返回空 Table；行尾只作记录终止符，不额外产生空记录。
+解码 CSV/TSV 文本为 `Table`。`?format "csv"`（默认）以逗号为分隔符，`"tsv"` 以制表符为分隔符；`?delimiter` 可覆盖为任意单字节字符（不能是引号、CR、LF）。`?header t` 取首条记录作列名（`?skipEmpty t` 时取首条非空记录），`?header list` 使用给定列名，默认 `nil` 表示无表头。`?skipEmpty t` 跳过“单个空字段”的记录；`?stripBom` 默认 `t`，剥离开头 UTF-8 BOM。字段仅当以 `"` 开头时按引号规则解析；引号内 `""` 表示一个 `"`，可含分隔符与换行。空文本返回空 Table；行尾只作记录终止符，不额外产生空记录。
 
 **参数**
 
@@ -200,8 +200,8 @@ ycCsv::decode(
 | --- | --- | --- | --- |
 | t_str | str | | 输入文本 |
 | ?format | str | "csv" | `"csv"` 或 `"tsv"`；其他值以 `error()` 中断 |
-| ?header | t \| list[str] \| nil | nil | `t` 首行作表头；列表使用给定列名；`nil` 无表头 |
-| ?delimiter | str | nil | 单字节分隔符覆盖；默认逗号或制表符 |
+| ?header | t \| list[str] \| nil | nil | `t` 首行作表头（`?skipEmpty t` 时为首个非空行）；列表使用给定列名；`nil` 无表头 |
+| ?delimiter | str \| nil | nil | 单字节分隔符覆盖；默认逗号或制表符 |
 | ?skipEmpty | t \| nil | nil | t 时跳过单空字段记录 |
 | ?stripBom | t \| nil | t | t 时剥离开头 UTF-8 BOM |
 
@@ -257,7 +257,7 @@ ycCsv::encode(
 | --- | --- | --- | --- |
 | g_table | Table | | 待编码表格 |
 | ?format | str | "csv" | `"csv"` 或 `"tsv"`；其他值以 `error()` 中断 |
-| ?delimiter | str | nil | 单字节分隔符覆盖；默认逗号或制表符 |
+| ?delimiter | str \| nil | nil | 单字节分隔符覆盖；默认逗号或制表符 |
 | ?eol | str | "\n" | 行尾 `"\n"` 或 `"\r\n"` |
 | ?quoteAll | t \| nil | nil | t 时所有字段加引号 |
 | ?finalNewline | t \| nil | t | 非空输出末尾是否补行尾 |
@@ -304,7 +304,7 @@ ycCsv::encode(ycCsv::Table(list(list("a"))) ?eol "\r")
 
 ## 表头与缺位
 
-+ `?header t` 时首条记录为表头；只有表头时返回 0 行、`columnCount()` 等于列名数的 Table。
++ `?header t` 时首条记录为表头（`?skipEmpty t` 时为首条非空记录）；只有表头时返回 0 行、`columnCount()` 等于列名数的 Table。
 + `?header list` 时全部记录都是数据；空文本返回仅含表头的 0 行 Table。
 + 列名重复以 `error()` 中断；空列名允许，但必须唯一。
 + 有表头时，记录字段数超过列名数会以 `error()` 中断；短行合法，`cell()` / `columnAt()` / `value()` 返回 `ycCodec::Missing`。

@@ -143,18 +143,18 @@ procedure(_delimCode(g_delim n_default t_ctx "gnt")  ; -> int
     )
 )
 
-procedure(_eolText(g_eol "g")  ; -> str
+procedure(_eolText(t_eol "t")  ; -> str
     ; 校验编码行尾：只接受 LF 或 CRLF。
     ;
     ; **参数**
-    ;   g_eol  (str) - 行尾串
+    ;   t_eol  (str) - 行尾串
     ;
     ; **返回**
     ;   (str) - 原样返回 "\n" 或 "\r\n"；其他值报错
-    unless(g_eol == "\n" || g_eol == "\r\n"
+    unless(t_eol == "\n" || t_eol == "\r\n"
         error("ycCsv::encode: ?eol must be \"\\n\" or \"\\r\\n\"")
     )
-    g_eol
+    t_eol
 )
 
 procedure(_checkHeader(l_header t_ctx "lt")  ; -> list[str] | nil
@@ -211,8 +211,8 @@ procedure(_checkRows(l_rows t_ctx "lt")  ; -> list
                 let((g_cell)
                     g_cell = nth(n_j - 1 l_row)
                     unless(stringp(g_cell)
-                        error("%s: row %d, field %d: expected a string, got %s"
-                            t_ctx n_i n_j symbolToString(type(g_cell)))
+                        error("%s: row %d, field %d: expected a string, got %A"
+                            t_ctx n_i n_j g_cell)
                     )
                 )
             )

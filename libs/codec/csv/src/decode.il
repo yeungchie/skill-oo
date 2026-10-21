@@ -19,8 +19,6 @@ procedure(_parseQuoted(t_s n_i n_delim "txn")  ; -> list
         n_open = n_i
         n_i = n_i + 1
         n_run = n_i
-        l_p = nil
-        g_closed = nil
         while(n_i <= n_len && !g_closed
             n_c = _code(t_s n_i)
             if(n_c == 34
@@ -70,7 +68,6 @@ procedure(_parseField(t_s n_i n_delim "txn")  ; -> list
             _parseQuoted(t_s n_i n_delim)
             progn(
                 n_start = n_i
-                g_stop = nil
                 while(n_i <= n_len && !g_stop
                     n_c = _code(t_s n_i)
                     cond(

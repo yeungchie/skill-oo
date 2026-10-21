@@ -104,6 +104,7 @@ let((t_bom t_tab)
 _assertRows(ycCsv::decode("a\tb\n" ?format "tsv")->rows() list(list("a" "b"))  "decode: TSV")
 _assertRows(ycCsv::decode("\"a\tb\"\tc\n" ?format "tsv")->rows() list(list("a\tb" "c"))  "decode: TSV quoted tab")
 _assertRows(ycCsv::decode("a;b\n" ?delimiter ";")->rows() list(list("a" "b"))  "decode: custom delimiter")
+_assertRows(ycCsv::decode("\"a;b\";c\n" ?delimiter ";")->rows() list(list("a;b" "c"))  "decode: quoted custom delimiter")
 _assertRows(
     ycCsv::decode("a\tb\n" ?format "tsv" ?delimiter ",")->rows()
     list(list("a\tb"))
