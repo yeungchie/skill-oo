@@ -239,4 +239,6 @@ procedure(decode(t_str \@key (format "csv") (header nil) (delimiter nil) (skipEm
     )
 )
 
+unuseNamespace("ycCsv")
+
 ; END

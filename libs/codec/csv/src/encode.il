@@ -129,4 +129,6 @@ procedure(encode(g_table \@key (format "csv") (delimiter nil) (eol "\n") (quoteA
     )
 )
 
+unuseNamespace("ycCsv")
+
 ; END

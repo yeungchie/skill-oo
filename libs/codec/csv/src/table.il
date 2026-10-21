@@ -244,4 +244,6 @@ procedure(Table(l_rows \@key (header nil) "gg")  ; -> Table
     )
 )
 
+unuseNamespace("ycCsv")
+
 ; END

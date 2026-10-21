@@ -221,4 +221,6 @@ procedure(_checkRows(l_rows t_ctx "lt")  ; -> list
     l_rows
 )
 
+unuseNamespace("ycCsv")
+
 ; END
