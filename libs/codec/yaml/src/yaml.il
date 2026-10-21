@@ -2,16 +2,16 @@ useNamespace("ycYaml")
 
 ; ---------- 类型 ----------
 
-defclass(YamlTypeData () (
-    ; YamlTypeData 数据桶：收纳规范名（"True"/"False"/"Null"/"Missing"），构造后禁写。
+defclass(TypeData () (
+    ; TypeData 数据桶：收纳规范名（"True"/"False"/"Null"/"Missing"），构造后禁写。
     name(
         \@initarg name
         \@initform ""
     )
 ))
 
-defclass(YamlType () (
-    ; YamlType 实例：YAML 类型哨兵，同规范名驻留共享同一实例。
+defclass(Type () (
+    ; Type 实例：YAML 类型哨兵，同规范名驻留共享同一实例。
     _data(
         \@initarg _data
         \@initform nil
@@ -20,8 +20,8 @@ defclass(YamlType () (
     toSkill()
 ))
 
-defmethod(printself (self(YamlType))  ; -> str
-    ; 返回 YamlType 的打印描述串，形如 ycYaml::YamlType("True")。
+defmethod(printself (self(Type))  ; -> str
+    ; 返回 Type 的打印描述串，形如 ycYaml::Type("True")。
     ;
     ; **返回**
     ;   (str) - lsprintf 按 %A(%A) 模板生成（类名取 className，参数为规范名）
@@ -29,8 +29,8 @@ defmethod(printself (self(YamlType))  ; -> str
 )
 
 inScheme(
-defmethod(initializeInstance (self(YamlType) \@rest _args)
-    ; 构造 YamlType 实例时安装方法集：toSkill。
+defmethod(initializeInstance (self(Type) \@rest _args)
+    ; 构造 Type 实例时安装方法集：toSkill。
     ;
     ; **参数**
     ;   _args  (list) - 变参：附加初始化参数，本实现忽略
@@ -56,19 +56,19 @@ defmethod(initializeInstance (self(YamlType) \@rest _args)
 )
 )
 
-_typeCache = makeTable("yamlTypeCache" nil)
+_TypeCache = makeTable("yamlTypeCache" nil)
 
-procedure(YamlType(t_name "t")  ; -> YamlType
+procedure(Type(t_name "t")  ; -> Type
     ; 取回/构造哨兵唯一实例：大小写不敏感接受 true/false/null/missing 四名。
     ;
     ; **参数**
     ;   t_name  (str) - 类型名（任意大小写，如 "true"/"True"）
     ;
     ; **返回**
-    ;   (YamlType) - 规范名对应的唯一实例；非字符串或未知名报错
+    ;   (Type) - 规范名对应的唯一实例；非字符串或未知名报错
     let((t_canon g_inst)
         unless(stringp(t_name)
-            error("ycYaml::YamlType: unknown type name %A" t_name)
+            error("ycYaml::Type: unknown type name %A" t_name)
         )
         t_canon = cond(
             (pcreMatchp("(?i)^true\\z" t_name) "True")
@@ -77,21 +77,21 @@ procedure(YamlType(t_name "t")  ; -> YamlType
             (pcreMatchp("(?i)^missing\\z" t_name) "Missing")
         )
         unless(t_canon
-            error("ycYaml::YamlType: unknown type name %A" t_name)
+            error("ycYaml::Type: unknown type name %A" t_name)
         )
-        g_inst = _typeCache[t_canon]
+        g_inst = _TypeCache[t_canon]
         unless(g_inst
-            g_inst = makeInstance('YamlType ?_data makeInstance('YamlTypeData ?name t_canon))
-            _typeCache[t_canon] = g_inst
+            g_inst = makeInstance('Type ?_data makeInstance('TypeData ?name t_canon))
+            _TypeCache[t_canon] = g_inst
         )
         g_inst
     )
 )
 
-YamlTrue    = YamlType("true")
-YamlFalse   = YamlType("false")
-YamlNull    = YamlType("null")
-YamlMissing = YamlType("missing")
+True    = Type("true")
+False   = Type("false")
+Null    = Type("null")
+Missing = Type("missing")
 
 ; ---------- 基础工具 ----------
 
@@ -419,5 +419,7 @@ procedure(_blankp(t_line "t")  ; -> t | nil
     ;   (t|nil) - 空白/注释为 t
     _rtrim(_stripComment(t_line)) == ""
 )
+
+unuseNamespace("ycYaml")
 
 ; END

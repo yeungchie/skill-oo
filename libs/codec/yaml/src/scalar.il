@@ -205,16 +205,16 @@ procedure(_resolvePlain(t_s "t")  ; -> any
     ;   t_s  (str) - 去首尾空白后的标量文本
     ;
     ; **返回**
-    ;   (any) - YamlNull/布尔哨兵/数字/字符串
+    ;   (any) - Null/布尔哨兵/数字/字符串
     prog((t_low t_clean n_v)
         when(t_s == "" || t_s == "~" || pcreMatchp("(?i)^null\\z" t_s)
-            return(YamlNull)
+            return(Null)
         )
         when(pcreMatchp("(?i)^true\\z" t_s)
-            return(YamlTrue)
+            return(True)
         )
         when(pcreMatchp("(?i)^false\\z" t_s)
-            return(YamlFalse)
+            return(False)
         )
         when(pcreMatchp("(?i)^[+-]?\\.inf\\z" t_s)
             return(if(_code(t_s 1) == 45 -atof("1e999") atof("1e999")))
@@ -252,7 +252,7 @@ procedure(_parseScalarText(t_text "t")  ; -> any
             n_i = n_i + 1
         )
         when(n_i > n_len
-            return(YamlNull)
+            return(Null)
         )
         if(_code(t_text n_i) == 34 || _code(t_text n_i) == 39
             progn(
@@ -280,9 +280,9 @@ procedure(_scalarText(g_val "g")  ; -> str
         (fixp(g_val) sprintf(nil "%d" g_val))
         (floatp(g_val) sprintf(nil "%.17g" g_val))
         (g_val == t "true")
-        (g_val == YamlTrue "true")
-        (g_val == YamlFalse "false")
-        (g_val == YamlNull "null")
+        (g_val == True "true")
+        (g_val == False "false")
+        (g_val == Null "null")
         (t
             error("ycYaml::decode: cannot convert value to string")
         )
@@ -330,16 +330,16 @@ procedure(_tagValue(g_val t_tag "gt")  ; -> any
                 )
             )
             ("!!bool"
-                if(g_val == YamlTrue || g_val == YamlFalse
+                if(g_val == True || g_val == False
                     g_val
                     case(pcreReplace(pcreCompile("(?i)^\\s+|\\s+\\z") _scalarText(g_val) "" 0)
-                        (("yes" "on" "true") YamlTrue)
-                        (("no" "off" "false") YamlFalse)
+                        (("yes" "on" "true") True)
+                        (("no" "off" "false") False)
                         (t error("ycYaml::decode: !!bool value is not a boolean"))
                     )
                 )
             )
-            ("!!null" YamlNull)
+            ("!!null" Null)
             ("!!seq"
                 if(listp(g_val) || g_val == nil
                     g_val
@@ -472,4 +472,7 @@ procedure(_parseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
         return(list(t_body n_last))
     )
 )
+
+unuseNamespace("ycYaml")
+
 ; END

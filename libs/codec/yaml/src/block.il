@@ -73,7 +73,7 @@ procedure(_mergeInto(t_map g_src "gg")  ; -> t
             error("ycYaml::decode: merge value must be a mapping or a sequence of mappings")
         )
         foreach(g_key g_item
-            when(t_map[g_key] == YamlMissing
+            when(t_map[g_key] == Missing
                 t_map[g_key] = g_item[g_key]
             )
         )
@@ -94,13 +94,13 @@ procedure(_parseChild(l_lines n_pos n_parentIndent n_max "lxnn")  ; -> list
     prog((n_ind t_line)
         n_pos = _skipIgnorable(l_lines n_pos)
         when(n_pos > length(l_lines)
-            return(list(YamlNull n_pos))
+            return(list(Null n_pos))
         )
         t_line = _nth1(n_pos l_lines)
         n_ind = _lineIndent(t_line)
         return(
             if(n_ind <= n_parentIndent
-                list(YamlNull n_pos)
+                list(Null n_pos)
                 _parseBlock(l_lines n_pos n_ind n_max - 1)
             )
         )
@@ -291,7 +291,7 @@ procedure(_parseMap(l_lines n_pos n_indent n_max "lxnn")  ; -> list
     ; **返回**
     ;   (list) - (table 下一行号)
     let((t_map)
-        t_map = makeTable("ycYaml" YamlMissing)
+        t_map = makeTable("ycYaml" Missing)
         _parseMapInto(t_map l_lines n_pos n_indent n_max nil 1 1)
     )
 )
@@ -394,7 +394,7 @@ procedure(_parseSeq(l_lines n_pos n_indent n_max "lxnn")  ; -> list
                                 n_pos = cadr(l_v)
                             )
                             (_findKeyColon(t_rest)
-                                t_map = makeTable("ycYaml" YamlMissing)
+                                t_map = makeTable("ycYaml" Missing)
                                 l_v = _parseMapInto(t_map l_lines n_pos + 1 n_indent + 2 n_max t_rest n_pos n_ind + 3)
                                 l_res = tconc(l_res car(l_v))
                                 n_pos = cadr(l_v)
@@ -430,12 +430,12 @@ procedure(_parseBlock(l_lines n_pos n_indent n_max "lxnn")  ; -> list
         n_len = length(l_lines)
         n_pos = _skipIgnorable(l_lines n_pos)
         when(n_pos > n_len
-            return(list(YamlNull n_pos))
+            return(list(Null n_pos))
         )
         t_line = _nth1(n_pos l_lines)
         n_ind = _lineIndent(t_line)
         when(n_ind < n_indent
-            return(list(YamlNull n_pos))
+            return(list(Null n_pos))
         )
         n_indent = n_ind
         t_content = _stripComment(substring(t_line n_ind + 1 length(t_line) - n_ind))
@@ -558,7 +558,7 @@ procedure(decode(t_str \@key (format "yaml") (maxDepth nil) "ttg")  ; -> any | l
         case(format
             ("yaml"
                 cond(
-                    (l_docs == nil YamlNull)
+                    (l_docs == nil Null)
                     (cadr(l_docs) _errorLine("multiple documents; use yaml-stream" 1 1))
                     (t _decodeText(car(l_docs) maxDepth))
                 )
@@ -568,4 +568,7 @@ procedure(decode(t_str \@key (format "yaml") (maxDepth nil) "ttg")  ; -> any | l
         )
     )
 )
+
+unuseNamespace("ycYaml")
+
 ; END

@@ -199,10 +199,10 @@ procedure(_encodeScalar(g_val g_opt "gg")  ; -> str
     cond(
         (g_val == nil "[]")
         (g_val == t "true")
-        (g_val == YamlTrue "true")
-        (g_val == YamlFalse "false")
-        (g_val == YamlNull "null")
-        (g_val == YamlMissing
+        (g_val == True "true")
+        (g_val == False "false")
+        (g_val == Null "null")
+        (g_val == Missing
             error("ycYaml::encode: cannot dump the Missing marker")
         )
         (stringp(g_val)
@@ -450,5 +450,7 @@ procedure(encode(g_val \@key (format "yaml") (indent nil) (sortKeys nil) (strict
         )
     )
 )
+
+unuseNamespace("ycYaml")
 
 ; END
