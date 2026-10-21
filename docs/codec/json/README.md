@@ -7,7 +7,7 @@ Cadence SKILL++ 的 JSON 家族编解码库：JSON、放宽 JSON（jsonc）与 J
 + 解码入口：`decode()`；`?format` 选 `"json"`（严格单文档）、`"jsonc"`（允许注释与尾逗号）或 `"jsonl"`（逐行文档）。
 + 编码入口：`encode()`；`?format` 选 `"json"`/`"jsonc"`（单值）或 `"jsonl"`（值列表逐行）。
 + 函数均在 `ycJson` 命名空间下，以 `ycJson::` 前缀调用。
-+ `true`、`false` 与 `null` 不坍缩为 `t`/`nil`，分别解码为哨兵对象 `ycJson::True`、`ycJson::False` 与 `ycJson::Null`（均为 `Type` 唯一实例，可用 `->toSkill()` 显式转为 SKILL 原生值）；`nil` 仅表示空数组。
++ `true`、`false` 与 `null` 不坍缩为 `t`/`nil`，分别解码为哨兵对象 `ycCodec::True`、`ycCodec::False` 与 `ycCodec::Null`（均为 `ycCodec::Type` 唯一实例，所有编解码库共用同一组对象，可用 `->toSkill()` 显式转为 SKILL 原生值）；`nil` 仅表示空数组；哨兵类型见 [ycCodec](../core/README.md)。
 + 例程中 `; =>` 表示返回值；`(...)` 为省略的输出或示意值。
 
 ## 快速上手
@@ -15,7 +15,7 @@ Cadence SKILL++ 的 JSON 家族编解码库：JSON、放宽 JSON（jsonc）与 J
 ```lisp
 ; 解码
 t_v = ycJson::decode("{\"a\":[1,2.5,true,null]}")
-t_v["a"]                                            ; => (1 2.5 ycJson::Type("True") ycJson::Type("Null"))
+t_v["a"]                                            ; => (1 2.5 ycCodec::Type("True") ycCodec::Type("Null"))
 
 ; 编码（默认紧凑、键序随表；?sortKeys t 可排序）
 ycJson::encode(t_v)                                 ; => "{\"a\":[1,2.5,true,null]}"
@@ -97,7 +97,7 @@ ycJson::encode(
 
 **描述**
 
-编码库内表示为文本。`?format "json"`（默认）或 `"jsonc"` 输出单个值：`nil` 按 `?nilAs` 输出 `[]` 或 `false`、`t` 与 `ycJson::True` 输出 `true`、其余哨兵输出对应字面量；对象键默认把字符串原样、符号取符号名、fixnum 转为十进制（`?strict t` 时非字符串键以 `error()` 中断；其他键型始终以 `error()` 中断）；不可表示的值（普通符号、缺键标记、非有限浮点、其他类型）以 `error()` 中断。`?format "jsonl"` 把值列表逐行输出：每个元素按紧凑规则输出为一行，行间以换行分隔，非空输入末尾默认补一个换行（`?finalNewline nil` 可关），`g_val` 非列表即以 `error()` 中断；`?indent` 仅对单值格式生效。对象键默认不排序（随表序），需要确定性输出时传 `?sortKeys t`。
+编码库内表示为文本。`?format "json"`（默认）或 `"jsonc"` 输出单个值：`nil` 按 `?nilAs` 输出 `[]` 或 `false`、`t` 与 `ycCodec::True` 输出 `true`、其余哨兵输出对应字面量；对象键默认把字符串原样、符号取符号名、fixnum 转为十进制（`?strict t` 时非字符串键以 `error()` 中断；其他键型始终以 `error()` 中断）；不可表示的值（普通符号、缺键标记、非有限浮点、其他类型）以 `error()` 中断。`?format "jsonl"` 把值列表逐行输出：每个元素按紧凑规则输出为一行，行间以换行分隔，非空输入末尾默认补一个换行（`?finalNewline nil` 可关），`g_val` 非列表即以 `error()` 中断；`?indent` 仅对单值格式生效。对象键默认不排序（随表序），需要确定性输出时传 `?sortKeys t`。
 
 **参数**
 
@@ -127,69 +127,8 @@ ycJson::encode('foo)
 ; *Error* ycJson::encode: cannot dump value of type symbol
 
 ycJson::encode(list(1 2) ?format "jsonl")           ; => "1\n2\n"
-ycJson::encode(list(ycJson::Null) ?format "jsonl")  ; => "null\n"
+ycJson::encode(list(ycCodec::Null) ?format "jsonl")  ; => "null\n"
 ```
-
-### ycJson::Type <sub>`function`</sub> <sub>`class`</sub>
-
-```text
-ycJson::Type(t_name)
-=> ycJson::Type
-```
-
-**描述**
-
-构造哨兵对象（JSON `true`/`false`/`null` 与缺键标记 `missing` 的库内表示）：`t_name` 接受任意大小写，返回规范名对应的**唯一实例**——相同参数总是同一对象，可直接用 `==` 比较。
-
-**参数**
-
-| 名称 | 类型 | 说明 |
-| --- | --- | --- |
-| t_name | str | `"true"`、`"false"`、`"null"` 或 `"missing"`（任意大小写）；其他值以 `error()` 中断 |
-
-**返回值**
-
-`ycJson::Type` — 规范名对应的驻留唯一实例。
-
-**例程**
-
-```lisp
-ycJson::Type("true") == ycJson::True           ; => t
-ycJson::Type("TRUE") == ycJson::True           ; => t
-ycJson::Type("xml")
-; *Error* ycJson::Type: unknown type name "xml"
-```
-
-实例显示为命名空间限定的构造调用形式（如 `ycJson::Type("True")`）；顶层用 `evalstring` 执行该串可得同一驻留实例。
-
-**方法**
-
-> 必须使用 `->` 符号调用方法。
-
-#### toSkill <sub>`method`</sub>
-
-```text
-inst->toSkill()
-=> any
-```
-
-转换为 SKILL 原生值：`ycJson::True` 回 `t`、`ycJson::False` 回 `nil`、`ycJson::Null`/`ycJson::Missing` 回 `'unbound`（有损：`false` 与空数组同域、`null`/`missing` 同域）。
-
-### ycJson::True <sub>`constant`</sub>
-
-`true` 的哨兵对象（`Type` 唯一实例）：解码 `true` 得到该对象；编码该对象（或 `t`）得 `true`。
-
-### ycJson::False <sub>`constant`</sub>
-
-`false` 的哨兵对象（`Type` 唯一实例）：解码 `false` 得到该对象；编码该对象得 `false`。
-
-### ycJson::Null <sub>`constant`</sub>
-
-`null` 的哨兵对象（`Type` 唯一实例）：解码 `null` 得到该对象；编码该对象得 `null`。
-
-### ycJson::Missing <sub>`constant`</sub>
-
-对象缺键的缺省标记（`Type` 唯一实例）：解码出的 table 以它为缺省值；编码时作为值出现即以 `error()` 中断。
 
 ## 类型映射
 
@@ -200,25 +139,25 @@ inst->toSkill()
 | string | 字符串（UTF-8 字节级透传） |
 | number（整数） | fixnum（32 位范围内），超出为 flonum |
 | number（含小数或指数） | flonum |
-| true | `ycJson::True`（`Type` 实例） |
-| false | `ycJson::False`（`Type` 实例） |
-| null | `ycJson::Null`（`Type` 实例） |
+| true | `ycCodec::True`（`ycCodec::Type` 实例） |
+| false | `ycCodec::False`（`ycCodec::Type` 实例） |
+| null | `ycCodec::Null`（`ycCodec::Type` 实例） |
 
-编码方向兼容：`t` 与 `ycJson::True` 均输出 `true`；要输出 `false`/`null` 须使用对应哨兵实例。
+编码方向兼容：`t` 与 `ycCodec::True` 均输出 `true`；要输出 `false`/`null` 须使用对应哨兵实例。
 
-对象缺键以 `ycJson::Missing` 表示：解码出的 table 以此为缺省值，读取不存在的键返回它；它一旦作为待编码值出现即以 `error()` 中断。判断缺键写法：
+对象缺键以 `ycCodec::Missing` 表示：解码出的 table 以此为缺省值，读取不存在的键返回它；它一旦作为待编码值出现即以 `error()` 中断。判断缺键写法：
 
 ```lisp
-t_v["flag"] == ycJson::False    ; 值为 false
+t_v["flag"] == ycCodec::False    ; 值为 false
 t_v["list"] == nil              ; 值为空数组
-t_v["nope"] == ycJson::Missing  ; 键不存在
+t_v["nope"] == ycCodec::Missing  ; 键不存在
 ```
 
 ## 边界与限制
 
 + 嵌套深度默认上限 800，可用 `?maxDepth` 调整（≥1）；超限以 `error()` 中断（消息含 `nesting too deep`）。解码约 900 层、编码约 1150 层触语言递归栈上界（简单递归语言栈约 8000–9000 帧；编解码每层耗多帧），默认值留安全余量；超过语言栈能力时由运行环境以栈溢出错误中断（可捕获）。
-+ `?nilAs "false"` 有损：`nil` 编码为 `false` 后解码得 `ycJson::False`；默认模式同一表内 `"1"` 与 `1` 会坍缩为同一输出键（`?strict t` 可规避）。
++ `?nilAs "false"` 有损：`nil` 编码为 `false` 后解码得 `ycCodec::False`；默认模式同一表内 `"1"` 与 `1` 会坍缩为同一输出键（`?strict t` 可规避）。
 + 整数字面量在 32 位范围内解码为 fixnum，超出为 flonum；编码 fixnum 为精确十进制，编码 flonum 为最短可回环形式（整数值保留一位小数，如 `1.0`）。
 + 非有限浮点（无穷、NaN）不可编码，以 `error()` 中断。
 + `\u0000`（NUL）无法保存在字符串中，解码时被丢弃。
-+ 错误消息以当前上下文前缀标识来源：解码为 `ycJson::decode: <说明> at line <行>, column <列>`（均从 1 起，列按字节计），编码为 `ycJson::encode:`，类型对象为 `ycJson::Type:` / `ycJson::Type->toSkill:`。
++ 错误消息以当前上下文前缀标识来源：解码为 `ycJson::decode: <说明> at line <行>, column <列>`（均从 1 起，列按字节计），编码为 `ycJson::encode:`，类型对象为 `ycCodec::Type:` / `ycCodec::Type->toSkill:`。

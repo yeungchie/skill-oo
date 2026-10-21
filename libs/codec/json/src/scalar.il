@@ -1,3 +1,5 @@
+ycNamespace:::require("ycCodec")
+
 useNamespace("ycJson")
 
 
@@ -199,16 +201,16 @@ procedure(_literal(t_s n_i "tx")  ; -> list
     ;   n_i  (int) - 字面量首字符位置
     ;
     ; **返回**
-    ;   (list) - (值 下一位置)；值分别为 True、False、Null
+    ;   (list) - (值 下一位置)；值分别为 ycCodec::True、ycCodec::False、ycCodec::Null
     cond(
         (substring(t_s n_i 4) == "true"
-            list(True n_i + 4)
+            list(ycCodec:::True n_i + 4)
         )
         (substring(t_s n_i 5) == "false"
-            list(False n_i + 5)
+            list(ycCodec:::False n_i + 5)
         )
         (substring(t_s n_i 4) == "null"
-            list(Null n_i + 4)
+            list(ycCodec:::Null n_i + 4)
         )
         (t
             _error(t_s n_i "invalid literal")

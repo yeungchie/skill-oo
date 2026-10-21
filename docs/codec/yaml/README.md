@@ -6,8 +6,9 @@ Cadence SKILL++ 的 YAML 1.2 编解码库：块式与流式集合、块标量、
 
 + 解码入口：`decode()`；`?format` 选 `"yaml"`（单文档，默认）或 `"yaml-stream"`（多文档流）。
 + 编码入口：`encode()`；默认块式输出，`?flow t` 切换流式风格；`?format "yaml-stream"` 逐文档输出。
-+ `null`、`true`、`false` 解码为哨兵对象 `ycYaml::Null`、`ycYaml::True`、`ycYaml::False`；`nil` 表示空序列，不表示 `null`。
-+ 解码得到的 table 以 `ycYaml::Missing` 为缺键默认值；空映射是长度为 0 的 table，空序列是 `nil`。
++ `null`、`true`、`false` 解码为哨兵对象 `ycCodec::Null`、`ycCodec::True`、`ycCodec::False`；`nil` 表示空序列，不表示 `null`。
++ 解码得到的 table 以 `ycCodec::Missing` 为缺键默认值；空映射是长度为 0 的 table，空序列是 `nil`。
++ 哨兵对象由 `ycCodec` 命名空间统一提供，各编解码库共用同一组实例；类型与转换规则见 [ycCodec](../core/README.md)。
 + 支持块映射/序列、流式映射/序列、单双引号标量、字面/折叠块标量、注释、文档标记、锚点别名、`<<` 合并键与核心标签。
 + 不支持复杂映射键（`?` 形式）、自定义标签与跨行流式集合；这些输入以 `error()` 中断。`%YAML` 指令会被跳过，不做版本校验。
 + 例程中 `; =>` 表示返回值；字符串输出中的 `\n` 是转义表示。
@@ -21,8 +22,8 @@ t_v["name"]                                         ; => "demo"
 t_v["items"]                                        ; => (1 2)
 
 ; 标量类型与哨兵
-ycYaml::decode("null")                              ; => ycYaml::Type("Null")
-ycYaml::decode("true")                              ; => ycYaml::Type("True")
+ycYaml::decode("null")                              ; => ycCodec::Type("Null")
+ycYaml::decode("true")                              ; => ycCodec::Type("True")
 ycYaml::decode("0x10")                              ; => 16
 ycYaml::decode("[]")                                ; => nil
 
@@ -54,7 +55,7 @@ ycYaml::decode(
 
 **描述**
 
-解码 YAML 文本。`?format "yaml"`（默认）解析单个文档，多文档输入以 `error()` 中断；空输入或仅含注释的输入返回 `ycYaml::Null`。`?format "yaml-stream"` 按 `---`/`...` 拆分并返回文档列表，空输入返回 `nil`。
+解码 YAML 文本。`?format "yaml"`（默认）解析单个文档，多文档输入以 `error()` 中断；空输入或仅含注释的输入返回 `ycCodec::Null`。`?format "yaml-stream"` 按 `---`/`...` 拆分并返回文档列表，空输入返回 `nil`。
 
 块映射与序列按缩进解析；空序列解码为 `nil`，空映射解码为长度为 0 的 table。流式集合须位于同一行。单引号按 YAML 规则转义单引号，双引号支持常见转义与 `\xNN`、`\uNNNN`、`\UNNNNNNNN`。
 
@@ -72,14 +73,14 @@ ycYaml::decode(
 
 **返回值**
 
-`any|list` — 单文档值，或 `"yaml-stream"` 的文档值列表；空文档为 `ycYaml::Null`。输入非法、格式未知或标签/别名无法解析时以 `error()` 中断。
+`any|list` — 单文档值，或 `"yaml-stream"` 的文档值列表；空文档为 `ycCodec::Null`。输入非法、格式未知或标签/别名无法解析时以 `error()` 中断。
 
 **例程**
 
 ```lisp
 ycYaml::decode("a: 1\nb: 2\n")                    ; => <table: a = 1, b = 2>
 ycYaml::decode("[1, 2.5, true, null]")
-; => (1 2.5 ycYaml::Type("True") ycYaml::Type("Null"))
+; => (1 2.5 ycCodec::Type("True") ycCodec::Type("Null"))
 ycYaml::decode("s: |\n  a\n  b\n")["s"]            ; => "a\nb\n"
 ycYaml::decode("s: >\n  a\n  b\n")["s"]            ; => "a b\n"
 ycYaml::decode("a: 1\r\nb: 2\r\n")["b"]            ; => 2
@@ -111,7 +112,7 @@ ycYaml::encode(
 
 **描述**
 
-把库内表示编码为 YAML 文本。默认块式风格；`?flow t` 时全部值使用流式风格。`nil` 输出 `[]`（空序列），`ycYaml::Null` 输出 `null`，`ycYaml::True`/`ycYaml::False` 输出 `true`/`false`；普通符号、`ycYaml::Missing` 与无法表示的容器以 `error()` 中断。
+把库内表示编码为 YAML 文本。默认块式风格；`?flow t` 时全部值使用流式风格。`nil` 输出 `[]`（空序列），`ycCodec::Null` 输出 `null`，`ycCodec::True`/`ycCodec::False` 输出 `true`/`false`；普通符号、`ycCodec::Missing` 与无法表示的容器以 `error()` 中断。
 
 映射键支持字符串、符号与 fixnum：字符串按需加双引号，符号取符号名，fixnum 输出十进制数字；`?strict t` 时非字符串键以 `error()` 中断；其他键型始终以 `error()` 中断。默认不排序映射键；`?sortKeys t` 按编码后的键文本升序输出。
 
@@ -151,77 +152,6 @@ ycYaml::encode(list(1 2) ?format "yaml-stream")    ; => "---\n1\n---\n2\n"
 
 ycYaml::encode('foo)
 ; *Error* ycYaml::encode: cannot dump value of type symbol
-ycYaml::encode(ycYaml::Missing)
+ycYaml::encode(ycCodec::Missing)
 ; *Error* ycYaml::encode: cannot dump the Missing marker
 ```
-
-### ycYaml::Type <sub>`function`</sub> <sub>`class`</sub>
-
-```text
-ycYaml::Type(t_name)
-=> ycYaml::Type
-```
-
-**描述**
-
-构造 YAML 类型哨兵：`t_name` 接受任意大小写，返回规范名对应的唯一实例，可直接用 `==` 比较。规范名为 `"True"`、`"False"`、`"Null"`、`"Missing"`。
-
-**参数**
-
-| 名称 | 类型 | 说明 |
-| --- | --- | --- |
-| t_name | str | `"true"`、`"false"`、`"null"` 或 `"missing"`（任意大小写）；其他值以 `error()` 中断 |
-
-**返回值**
-
-`ycYaml::Type` — 规范名对应的驻留唯一实例。
-
-**例程**
-
-```lisp
-ycYaml::Type("true") == ycYaml::True           ; => t
-ycYaml::Type("TRUE") == ycYaml::True           ; => t
-ycYaml::Type("xml")
-; *Error* ycYaml::Type: unknown type name "xml"
-```
-
-实例显示为命名空间限定的构造调用形式（如 `ycYaml::Type("True")`）；顶层用 `evalstring` 执行该串可得同一驻留实例。
-
-**方法**
-
-> 必须使用 `->` 符号调用方法。
-
-#### toSkill <sub>`method`</sub>
-
-```text
-inst->toSkill()
-=> any
-```
-
-**描述**
-
-把哨兵转换为 SKILL 原生值：`ycYaml::True` → `t`，`ycYaml::False` → `nil`，`ycYaml::Null`/`ycYaml::Missing` → `'unbound`。该转换有损：`ycYaml::False` 与空序列同域，`ycYaml::Null` 与 `ycYaml::Missing` 同域，仅供 SKILL 侧取值使用。
-
-**例程**
-
-```lisp
-ycYaml::True->toSkill()                        ; => t
-ycYaml::False->toSkill()                       ; => nil
-ycYaml::Null->toSkill()                        ; => unbound
-```
-
-### ycYaml::True <sub>`constant`</sub>
-
-表示 YAML 布尔 `true` 的哨兵，等价于 `ycYaml::Type("true")`。
-
-### ycYaml::False <sub>`constant`</sub>
-
-表示 YAML 布尔 `false` 的哨兵，等价于 `ycYaml::Type("false")`。
-
-### ycYaml::Null <sub>`constant`</sub>
-
-表示 YAML `null` 的哨兵，等价于 `ycYaml::Type("null")`。解码 `null`/`~`/空文档时返回该实例；编码时输出 `null`。
-
-### ycYaml::Missing <sub>`constant`</sub>
-
-解码 table 的缺键默认值，等价于 `ycYaml::Type("missing")`。读取不存在的键得到该哨兵；把它作为编码值会以 `error()` 中断。

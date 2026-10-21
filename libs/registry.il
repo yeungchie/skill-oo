@@ -17,6 +17,7 @@ ycNamespace:::_validNames = list(
     "ycPathLib"
     "ycRegEx"
     "ycSubProcess"
+    "ycCodec"
     "ycJson"
     "ycYaml"
     "ycUtf8"

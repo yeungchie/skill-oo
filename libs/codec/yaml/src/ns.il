@@ -5,13 +5,6 @@ addToNamespace("ycYaml"
     mapcar('symbolToString '(
         decode
         encode
-        Type
-        TypeData
-        True
-        False
-        Null
-        Missing
-        _TypeCache
         _maxDecodeDepth
         _maxEncodeDepth
         _anchors

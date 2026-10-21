@@ -1,3 +1,5 @@
+ycNamespace:::require("ycCodec")
+
 useNamespace("ycJson")
 
 ; 解码默认嵌套深度上限：实测约 900 层触语言栈上界，取 800 留安全余量；可用 ?maxDepth 调整。
@@ -88,7 +90,7 @@ procedure(_value(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
 )
 
 procedure(_object(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
-    ; 解析对象：键值对写入 table（缺省标记 Missing）；jsonc 模式允许尾逗号。
+    ; 解析对象：键值对写入 table（缺省标记 ycCodec::Missing）；jsonc 模式允许尾逗号。
     ;
     ; **参数**
     ;   t_s        (str) - 输入串
@@ -101,7 +103,7 @@ procedure(_object(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
     ;   (list) - (table 闭括号后一位置)
     let((n_k n_c l_r t_key t_obj g_done)
         n_k = _skipWs(t_s n_i + 1 g_relaxed)
-        t_obj = makeTable("ycJson" Missing)
+        t_obj = makeTable("ycJson" ycCodec:::Missing)
         g_done = nil
         when(_code(t_s n_k) == 125
             g_done = t

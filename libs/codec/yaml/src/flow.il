@@ -1,3 +1,5 @@
+ycNamespace:::require("ycCodec")
+
 useNamespace("ycYaml")
 
 ; ---------- 流式解析 ----------
@@ -328,7 +330,7 @@ procedure(_flowMap(t_s n_i n_max "txn")  ; -> list
             error("ycYaml::decode: nesting too deep")
         )
         n_len = length(t_s)
-        t_map = makeTable("ycYaml" Missing)
+        t_map = makeTable("ycYaml" ycCodec:::Missing)
         g_done = nil
         n_i = _flowSkip(t_s n_i)
         when(n_i <= n_len && _code(t_s n_i) == 125
@@ -340,7 +342,7 @@ procedure(_flowMap(t_s n_i n_max "txn")  ; -> list
             n_i = _flowSkip(t_s cadr(l_k) + 1)
             cond(
                 (n_i > n_len || _code(t_s n_i) == 44 || _code(t_s n_i) == 125
-                    l_v = list(Null n_i)
+                    l_v = list(ycCodec:::Null n_i)
                 )
                 (t
                     l_v = _flowValue(t_s n_i n_max)

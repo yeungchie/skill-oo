@@ -1,3 +1,5 @@
+ycNamespace:::require("ycCodec")
+
 useNamespace("ycJson")
 
 ; 编码默认嵌套深度上限：实测约 1150 层触语言栈上界，取 800 留安全余量；可用 ?maxDepth 调整。
@@ -141,10 +143,10 @@ procedure(_encodeValue(g_val n_depth g_opt "gxg")  ; -> str
             )
         )
         (g_val == t "true")
-        (g_val == True "true")
-        (g_val == False "false")
-        (g_val == Null "null")
-        (g_val == Missing
+        (g_val == ycCodec:::True "true")
+        (g_val == ycCodec:::False "false")
+        (g_val == ycCodec:::Null "null")
+        (g_val == ycCodec:::Missing
             error("ycJson::encode: cannot dump the Missing marker")
         )
         (stringp(g_val) _encodeString(g_val))

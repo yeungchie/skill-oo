@@ -1,3 +1,5 @@
+ycNamespace:::require("ycCodec")
+
 useNamespace("ycYaml")
 
 ; ---------- 编码 ----------
@@ -199,10 +201,10 @@ procedure(_encodeScalar(g_val g_opt "gg")  ; -> str
     cond(
         (g_val == nil "[]")
         (g_val == t "true")
-        (g_val == True "true")
-        (g_val == False "false")
-        (g_val == Null "null")
-        (g_val == Missing
+        (g_val == ycCodec:::True "true")
+        (g_val == ycCodec:::False "false")
+        (g_val == ycCodec:::Null "null")
+        (g_val == ycCodec:::Missing
             error("ycYaml::encode: cannot dump the Missing marker")
         )
         (stringp(g_val)

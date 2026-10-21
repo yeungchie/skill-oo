@@ -1,9 +1,9 @@
 ; --- 标量输出 ---
-_assert(ycYaml::encode(ycYaml::Null) == "null\n"  "encode: null")
+_assert(ycYaml::encode(ycCodec::Null) == "null\n"  "encode: null")
 _assert(ycYaml::encode(t) == "true\n"  "encode: t")
-_assert(ycYaml::encode(ycYaml::True) == "true\n"  "encode: True")
-_assert(ycYaml::encode(ycYaml::False) == "false\n"  "encode: False")
-_assertError(lambda(() ycYaml::encode(ycYaml::Missing))  "encode: Missing errors")
+_assert(ycYaml::encode(ycCodec::True) == "true\n"  "encode: True")
+_assert(ycYaml::encode(ycCodec::False) == "false\n"  "encode: False")
+_assertError(lambda(() ycYaml::encode(ycCodec::Missing))  "encode: Missing errors")
 _assert(ycYaml::encode(42) == "42\n"  "encode: fixnum")
 _assert(ycYaml::encode(-7) == "-7\n"  "encode: negative fixnum")
 _assert(ycYaml::encode(3.14) == "3.14\n"  "encode: float")
@@ -30,7 +30,7 @@ _assert(ycYaml::encode(nil) == "[]\n"  "encode: empty sequence")
 _assert(ycYaml::encode(list(1 2)) == "- 1\n- 2\n"  "encode: sequence")
 _assert(ycYaml::encode(list(1 list(2 3))) == "- 1\n-\n  - 2\n  - 3\n"  "encode: nested sequence")
 _assert(ycYaml::encode(list()) == "[]\n"  "encode: empty list")
-_assert(ycYaml::encode(list(t ycYaml::False ycYaml::Null)) == "- true\n- false\n- null\n"  "encode: literal sequence")
+_assert(ycYaml::encode(list(t ycCodec::False ycCodec::Null)) == "- true\n- false\n- null\n"  "encode: literal sequence")
 _assert(ycYaml::encode(list(nil)) == "- []\n"  "encode: nil sequence item is empty sequence")
 _assert(ycYaml::encode(list(makeTable("ycTest"))) == "- {}\n"  "encode: empty map sequence item")
 
@@ -80,7 +80,7 @@ let((t_v)
 )
 let((t_v)
     t_v = makeTable("ycTest")
-    t_v["a"] = ycYaml::Missing
+    t_v["a"] = ycCodec::Missing
     _assertError(lambda(() ycYaml::encode(t_v))  "encode: Missing value errors")
 )
 
