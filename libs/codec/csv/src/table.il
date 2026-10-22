@@ -205,7 +205,7 @@ procedure(_installRender(self "g")  ; -> t
     ;
     ; **返回**
     ;   (t) - 安装完成
-    self->render = lambda((\@key (format "simple") (align "left") (missingVal "") (maxColWidth nil) (unit "display") (ambiguous 1) "gggggg")  ; -> str
+    self->render = lambda((\@key (format "simple") (align "left") (missingVal "") (maxColWidth nil) (unit "display") (ambiguous 1) "tgtgtx")  ; -> str
         ; 渲染美化表格文本；表头自动取自 Table，短行/Missing 填 missingVal。
         ;
         ; **参数**
@@ -235,28 +235,16 @@ procedure(_installRender(self "g")  ; -> t
         )
     )
 
-    self->print = lambda((\@key (format "simple") (align "left") (missingVal "") (maxColWidth nil) (unit "display") (ambiguous 1) "gggggg")  ; -> t
-        ; 打印美化表格文本并返回 t；空表不输出。
+    self->print = lambda((\@rest l_args "g")  ; -> t
+        ; 打印美化表格文本并返回 t；参数原样透传给 render，空表不输出。
         ;
         ; **参数**
-        ;   ?format      (str) - 输出格式：plain/simple/grid/pipe；默认 "simple"
-        ;   ?align       (str|list) - 对齐方式；默认 "left"
-        ;   ?missingVal  (str) - 缺失单元格替代文本；默认 ""
-        ;   ?maxColWidth (int|nil) - 单元格折行宽度；默认 nil
-        ;   ?unit        (str) - 宽度单位；默认 "display"
-        ;   ?ambiguous   (int) - East Asian Ambiguous 宽度；默认 1
+        ;   l_args  (list) - 原样透传给 render 的实参（?format、?align、?missingVal、?maxColWidth、?unit、?ambiguous；可全部省略）
         ;
         ; **返回**
         ;   (t) - 打印成功；ycTabulate 未加载或渲染失败时报错
         let((t_text)
-            t_text = self->render(
-                ?format format
-                ?align align
-                ?missingVal missingVal
-                ?maxColWidth maxColWidth
-                ?unit unit
-                ?ambiguous ambiguous
-            )
+            t_text = apply(self->render l_args)
             when(t_text != ""
                 printf("%s\n" t_text)
             )

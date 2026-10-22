@@ -42,6 +42,8 @@ _assert(ycCsv::decode("")->render() == ""  "render: empty table")
 _assert(ycCsv::decode("")->print() == t  "print: empty table returns t")
 _assertError(lambda(() ycCsv::decode("a\n1\n" ?header t)->render(?format "xml"))
     "render: invalid format forwards")
+_assertError(lambda(() ycCsv::decode("a\n1\n" ?header t)->print(?format "xml"))
+    "print: options forward to render")
 
 _TestRenderDone = t
 

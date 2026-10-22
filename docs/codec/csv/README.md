@@ -258,26 +258,16 @@ t_v->render(?format "grid")
 
 ```text
 print(
-    [ ?format t_format ]
-    [ ?align g_align ]
-    [ ?missingVal t_missingVal ]
-    [ ?maxColWidth n_max ]
-    [ ?unit t_unit ]
-    [ ?ambiguous n_amb ]
+    [ l_args ... ]
 )
 => t
 ```
 
 `print` 使用与 `render` 相同的选项渲染表格并输出到 stdout，末尾补一个换行；空表不输出。需要先加载 `ycTabulate`，否则以 `error()` 中断。
 
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| ?format | str | "simple" | `plain` / `simple` / `grid` / `pipe` |
-| ?align | str \| list | "left" | 单列或逐列对齐 |
-| ?missingVal | str | "" | 缺失单元格替代文本 |
-| ?maxColWidth | int \| nil | nil | 单元格折行宽度 |
-| ?unit | str | "display" | `display` 或 `char` |
-| ?ambiguous | int | 1 | East Asian Ambiguous 宽度 |
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| l_args ... | any | 原样透传给 `render` 的实参（`?format`、`?align`、`?missingVal`、`?maxColWidth`、`?unit`、`?ambiguous`，可全部省略）；详见上面的 `render` 条目。 |
 
 **例程**
 
