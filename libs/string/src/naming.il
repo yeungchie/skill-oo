@@ -117,7 +117,7 @@ procedure(_capWord(t_w "t")  ; -> str
     )
 )
 
-procedure(joinWords(l_words \@key (style "snake") "lg")  ; -> str
+procedure(joinWords(l_words \@key (style "snake") "lt")  ; -> str
     ; 按命名风格拼接词列表。
     ;
     ; **参数**
@@ -166,7 +166,7 @@ procedure(joinWords(l_words \@key (style "snake") "lg")  ; -> str
     )
 )
 
-procedure(sanitize(t_s \@key (style "snake") "tg")  ; -> str
+procedure(sanitize(t_s \@key (style "snake") "tt")  ; -> str
     ; 清洗为合法标识符形态。
     ;
     ; **参数**

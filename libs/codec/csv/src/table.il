@@ -256,18 +256,18 @@ procedure(_installRender(self "g")  ; -> t
 )
 )
 
-procedure(_renderRows(t_self t_missing "gt")  ; -> list
+procedure(_renderRows(g_self t_missing "gt")  ; -> list
     ; 将 CSV 行补齐为等宽单元格，并把 Missing 替换为 t_missing（内部实现）。
     ;
     ; **参数**
-    ;   t_self    (Table) - 待渲染表格
+    ;   g_self    (Table) - 待渲染表格
     ;   t_missing (str) - 缺失单元格替代文本
     ;
     ; **返回**
     ;   (list) - 等宽行列表
     let((n_cols l_res l_row l_cells n_i g_cell)
-        n_cols = t_self->columnCount()
-        foreach(l_row t_self->rows()
+        n_cols = g_self->columnCount()
+        foreach(l_row g_self->rows()
             l_cells = nil
             for(n_i 1 n_cols
                 g_cell = if(n_i <= length(l_row) nth(n_i - 1 l_row) _missing())
@@ -304,7 +304,7 @@ procedure(_maxWidth(l_rows "l")  ; -> int
     )
 )
 
-procedure(Table(l_rows \@key (header nil) "gg")  ; -> Table
+procedure(Table(l_rows \@key (header nil) "lg")  ; -> Table
     ; 构造不可变 CSV 表格：校验行/表头并拷贝输入。
     ;
     ; **参数**

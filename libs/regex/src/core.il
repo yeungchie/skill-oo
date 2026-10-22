@@ -358,7 +358,7 @@ procedure(_asPat(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
 
 ; ---------- module-level free functions (Python re skin) ----------
 
-procedure(reCompile(g_pat \@key flags compileOpts "gg")  ; -> Pattern
+procedure(reCompile(g_pat \@key flags compileOpts "ggg")  ; -> Pattern
     ; 编译模式串并返回可复用的 Pattern（双表皮 API 的编译入口）。
     ;
     ; **参数**

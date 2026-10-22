@@ -114,7 +114,7 @@ procedure(_encodeString(t_s "t")  ; -> str
     )
 )
 
-procedure(_encodeNumber(g_n "g")  ; -> str
+procedure(_encodeNumber(g_n "n")  ; -> str
     ; 数字输出：fixnum 十进制；flonum 最短可回环，inf/nan 按 TOML 字面量输出。
     ;
     ; **参数**

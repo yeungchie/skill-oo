@@ -157,7 +157,7 @@ procedure(_encodeKey(g_key g_opt "gg")  ; -> str
     )
 )
 
-procedure(_numText(g_n "g")  ; -> str
+procedure(_numText(g_n "n")  ; -> str
     ; 输出 YAML 数字文本；非有限浮点输出 .inf/-.inf/.nan。
     ;
     ; **参数**

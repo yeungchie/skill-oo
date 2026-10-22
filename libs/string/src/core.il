@@ -39,7 +39,7 @@ procedure(_trimSide(t_s t_chars g_left g_right "ttgg")  ; -> str
     )
 )
 
-procedure(trim(t_s \@key (chars " \t\r\n") "tg")  ; -> str
+procedure(trim(t_s \@key (chars " \t\r\n") "tt")  ; -> str
     ; 去除两端字符集中的字符。
     ;
     ; **参数**
@@ -51,7 +51,7 @@ procedure(trim(t_s \@key (chars " \t\r\n") "tg")  ; -> str
     _trimSide(t_s chars t t)
 )
 
-procedure(trimStart(t_s \@key (chars " \t\r\n") "tg")  ; -> str
+procedure(trimStart(t_s \@key (chars " \t\r\n") "tt")  ; -> str
     ; 同 trim，仅去除前端字符。
     ;
     ; **参数**
@@ -63,7 +63,7 @@ procedure(trimStart(t_s \@key (chars " \t\r\n") "tg")  ; -> str
     _trimSide(t_s chars t nil)
 )
 
-procedure(trimEnd(t_s \@key (chars " \t\r\n") "tg")  ; -> str
+procedure(trimEnd(t_s \@key (chars " \t\r\n") "tt")  ; -> str
     ; 同 trim，仅去除尾端字符。
     ;
     ; **参数**
@@ -75,7 +75,7 @@ procedure(trimEnd(t_s \@key (chars " \t\r\n") "tg")  ; -> str
     _trimSide(t_s chars nil t)
 )
 
-procedure(width(t_s \@key (unit "display") (ambiguous 1) "tgg")  ; -> int
+procedure(width(t_s \@key (unit "display") (ambiguous 1) "ttx")  ; -> int
     ; 计算字符串的显示列宽或码点数。
     ;
     ; **参数**
@@ -112,7 +112,7 @@ procedure(_repeat(t_fill n_times "tx")  ; -> str
     )
 )
 
-procedure(pad(t_s n_width \@key (fill " ") (side "end") (unit "display") (ambiguous 1) "txgggg")  ; -> str
+procedure(pad(t_s n_width \@key (fill " ") (side "end") (unit "display") (ambiguous 1) "txtttx")  ; -> str
     ; 将字符串补足到目标宽度（永不截断）。
     ;
     ; **参数**
@@ -288,7 +288,7 @@ procedure(strSplit(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> l
     )
 )
 
-procedure(strJoin(l_items \@key (sep "") "lg")  ; -> str
+procedure(strJoin(l_items \@key (sep "") "lt")  ; -> str
     ; 以分隔符连接字符串列表。
     ;
     ; **参数**

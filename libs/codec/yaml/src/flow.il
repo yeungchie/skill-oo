@@ -68,7 +68,7 @@ procedure(_aliasValue(t_name "t")  ; -> any
     _anchors[t_name]
 )
 
-procedure(_flowPrefix(t_s n_i l_state "txg")  ; -> list
+procedure(_flowPrefix(t_s n_i l_state "txl")  ; -> list
     ; 解析流式值前的标签与锚点前缀。
     ;
     ; **参数**

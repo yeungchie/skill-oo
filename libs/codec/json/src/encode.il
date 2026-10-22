@@ -96,7 +96,7 @@ procedure(_encodeString(t_s "t")  ; -> str
     )
 )
 
-procedure(_encodeNumber(g_n "g")  ; -> str
+procedure(_encodeNumber(g_n "n")  ; -> str
     ; 数字输出：fixnum 直出；flonum 用 %.15g、不可回环时回退 %.17g，缺小数点/指数时补 .0。
     ;
     ; **参数**
@@ -257,7 +257,7 @@ procedure(_encodeTable(t_obj n_depth g_opt "gxg")  ; -> str
     )
 )
 
-procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys nil) (strict nil) (nilAs "array") (finalNewline t) (maxDepth nil) "gtggggg")  ; -> str
+procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys nil) (strict nil) (nilAs "array") (finalNewline t) (maxDepth nil) "gtgggtgg")  ; -> str
     ; 编码值为文本：?format 选 "json"/"jsonc"（单值）或 "jsonl"（值列表逐行）。
     ;
     ; **参数**

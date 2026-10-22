@@ -46,7 +46,7 @@ procedure(_widthOf(n_cp n_ambiguous "xx")  ; -> int
     )
 )
 
-procedure(width(t_str \@key (strict t) (ambiguous 1) "tgg")  ; -> int
+procedure(width(t_str \@key (strict t) (ambiguous 1) "tgx")  ; -> int
     ; 计算 UTF-8 字节串的显示列宽。
     ;
     ; **参数**
@@ -74,7 +74,7 @@ procedure(width(t_str \@key (strict t) (ambiguous 1) "tgg")  ; -> int
     )
 )
 
-procedure(charWidth(n_cp \@key (ambiguous 1) "xg")  ; -> int
+procedure(charWidth(n_cp \@key (ambiguous 1) "xx")  ; -> int
     ; 计算单个码点的显示宽度。
     ;
     ; **参数**

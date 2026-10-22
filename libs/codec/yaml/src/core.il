@@ -152,7 +152,7 @@ procedure(_lineCol(t_s n_i "tx")  ; -> list
     )
 )
 
-procedure(_errorLine(t_msg n_line n_col "tx")  ; -> never
+procedure(_errorLine(t_msg n_line n_col "txx")  ; -> never
     ; 按统一格式报错：ycYaml::decode: <说明> at line <行>, column <列>。
     ;
     ; **参数**

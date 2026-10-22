@@ -593,7 +593,7 @@ procedure(_findAllItem(g_pat t_subj l_m "gtl")  ; -> str | list[str]
     )
 )
 
-procedure(_mkMatch(g_pat t_subj g_start g_end l_groups g_anchor n_exec "gtggggx")  ; -> Match
+procedure(_mkMatch(g_pat t_subj g_start g_end l_groups g_anchor n_exec "gtgglgx")  ; -> Match
     ; 构造 Match 实例，收纳整体位置、捕获组值与锚对象。
     ;
     ; **参数**

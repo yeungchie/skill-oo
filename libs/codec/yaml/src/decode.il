@@ -500,7 +500,7 @@ procedure(_splitDocuments(t_s "t")  ; -> list
         car(l_docs)
     )
 )
-procedure(_decodeText(l_lines n_max "lxn")  ; -> any
+procedure(_decodeText(l_lines n_max "lx")  ; -> any
     ; 解析单个文档并检查尾随内容。
     ;
     ; **参数**
