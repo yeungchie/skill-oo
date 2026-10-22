@@ -12,9 +12,32 @@ Cadence SKILL++ 的 JSON 家族编解码库：JSON、放宽 JSON（jsonc）与 J
 
 ## 快速上手
 
+`t_json` 的值如下所示：
+
+```text
+{
+  "a": [1, 2.5, true, null]
+}
+```
+
+`t_jsonc` 的值如下所示：
+
+```text
+{ // 备注
+  "a": 1,
+}
+```
+
+`t_jsonl` 的值如下所示：
+
+```text
+1
+{"a": 2}
+```
+
 ```lisp
 ; 解码
-t_v = ycJson::decode("{\"a\":[1,2.5,true,null]}")
+t_v = ycJson::decode(t_json)
 t_v["a"]                                            ; => (1 2.5 ycCodec::Type("True") ycCodec::Type("Null"))
 
 ; 编码（默认紧凑、键序随表；?sortKeys t 可排序）
@@ -25,9 +48,9 @@ ycJson::encode(t_v ?indent 2)
 ; => "{\n  \"a\": [\n    1,\n    2.5,\n    true,\n    null\n  ]\n}"
 
 ; 放宽文本与逐行格式
-ycJson::decode("{ // 备注\n \"a\": 1, }" ?format "jsonc")    ; => <table: a = 1>
-ycJson::decode("1\n{\"a\":2}\n" ?format "jsonl")              ; => (1 <table: a = 2>)
-ycJson::encode(list(1 "x") ?format "jsonl")                   ; => "1\n\"x\"\n"
+ycJson::decode(t_jsonc ?format "jsonc")             ; => <table: a = 1>
+ycJson::decode(t_jsonl ?format "jsonl")             ; => (1 <table: a = 2>)
+ycJson::encode(list(1 "x") ?format "jsonl")          ; => "1\n\"x\"\n"
 ```
 
 ## API 参考
@@ -61,6 +84,27 @@ ycJson::decode(
 
 **例程**
 
+`t_jsonc_array` 的值如下所示：
+
+```text
+[1, /* c */ 2]
+```
+
+`t_jsonl_values` 的值如下所示：
+
+```text
+1
+2
+```
+
+`t_jsonl_bad` 的值如下所示：
+
+```text
+1
+2
+bad
+```
+
 ```lisp
 ycJson::decode("42")                        ; => 42
 ycJson::decode("1e3")                       ; => 1000.0
@@ -69,10 +113,10 @@ ycJson::decode("\"a\\u4e2d\"")              ; => "a中"
 ycJson::decode("[1, 2,]")
 ; *Error* ycJson::decode: unexpected character at line 1, column 7
 
-ycJson::decode("{ \"a\": 1, }" ?format "jsonc")     ; => <table: a = 1>
-ycJson::decode("[1, /* c */ 2]" ?format "jsonc")    ; => (1 2)
-ycJson::decode("1\n2\n" ?format "jsonl")            ; => (1 2)
-ycJson::decode("1\n2\nbad" ?format "jsonl")
+ycJson::decode(t_jsonc ?format "jsonc")             ; => <table: a = 1>
+ycJson::decode(t_jsonc_array ?format "jsonc")       ; => (1 2)
+ycJson::decode(t_jsonl_values ?format "jsonl")      ; => (1 2)
+ycJson::decode(t_jsonl_bad ?format "jsonl")
 ; *Error* ycJson::decode: invalid literal at line 3, column 1
 
 ycJson::decode("1" ?format "xml")

@@ -1058,15 +1058,34 @@ p->readJson(
 
 **例程**
 
+`t_json_scalar` 的值如下所示：
+
+```text
+42
+```
+
+`t_json_doc` 的值如下所示：
+
+```text
+{"a": [1, 2]}
+```
+
+`t_jsonl` 的值如下所示：
+
+```text
+{"a": 1}
+{"a": 2}
+```
+
 ```lisp
 p = ycPathLib::Path("./a.json")
-p->writeText("42")
+p->writeText(t_json_scalar)
 p->readJson()                    ; => 42
 
-p->writeText("{\"a\": [1, 2]}")
+p->writeText(t_json_doc)
 p->readJson()                    ; => table（绑定 "a" → (1 2)）
 
-p->writeText("{\"a\": 1}\n{\"a\": 2}\n")
+p->writeText(t_jsonl)
 p->readJson(?format "jsonl")     ; => list of 2 tables
 
 p->readJson(?format "xml")
@@ -1098,13 +1117,29 @@ p->readYaml(
 
 **例程**
 
+`t_yaml` 的值如下所示：
+
+```text
+a: 1
+b: [true, null]
+```
+
+`t_yaml_stream` 的值如下所示：
+
+```text
+---
+1
+---
+2
+```
+
 ```lisp
 p = ycPathLib::Path("./a.yaml")
-p->writeText("a: 1\nb: [true, null]\n")
+p->writeText(t_yaml)
 t = p->readYaml()
 t["a"]                           ; => 1
 
-p->writeText("---\n1\n---\n2\n")
+p->writeText(t_yaml_stream)
 p->readYaml(?format "yaml-stream")  ; => (1 2)
 
 p->readYaml(?format "xml")
@@ -1136,13 +1171,26 @@ p->readCsv(
 
 **例程**
 
+`t_csv` 的值如下所示：
+
+```text
+name,qty
+apple,3
+```
+
+`t_tsv` 的值如下所示（字段之间是制表符）：
+
+```text
+a	b
+```
+
 ```lisp
 p = ycPathLib::Path("./a.csv")
-p->writeText("name,qty\napple,3\n")
+p->writeText(t_csv)
 t = p->readCsv(?header t)
 t->value(1 "qty")                ; => "3"
 
-p->writeText("a\tb\n")
+p->writeText(t_tsv)
 p->readCsv(?format "tsv")->row(1)  ; => ("a" "b")
 
 p->readCsv(?format "xml")
@@ -1174,15 +1222,29 @@ p->readToml(
 
 **例程**
 
+`t_toml` 的值如下所示：
+
+```text
+title = "demo"
+
+[server]
+host = "localhost"
+```
+
+`t_toml_deep` 的值如下所示：
+
+```text
+a = [[1]]
+```
+
 ```lisp
 p = ycPathLib::Path("./a.toml")
-p->writeText("title = \"demo\"\n[server]\nhost = \"localhost\"\n")
+p->writeText(t_toml)
 t = p->readToml()
 t["title"]                       ; => "demo"
 t["server"]["host"]              ; => "localhost"
 
-p->writeText("a = [[1]]
-")
+p->writeText(t_toml_deep)
 p->readToml(?maxDepth 1)
 ; => 以 error() 中断（嵌套过深）
 ```

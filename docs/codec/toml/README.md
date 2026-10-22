@@ -15,8 +15,37 @@ Cadence SKILL++ 的 TOML 1.0 编解码库。
 
 ## 快速上手
 
+`t_toml` 的值如下所示：
+
+```text
+title = "demo"
+
+[server]
+host = "localhost"
+ports = [8000, 8001]
+```
+
+`t_toml_date` 的值如下所示：
+
+```text
+d = 1979-05-27
+```
+
+`t_toml_products` 的值如下所示：
+
+```text
+[[products]]
+name = "Hammer"
+```
+
+`t_toml_bad_int` 的值如下所示：
+
+```text
+x = 2147483648
+```
+
 ```lisp
-t_v = ycToml::decode("title = \"demo\"\n[server]\nhost = \"localhost\"\nports = [8000, 8001]\n")
+t_v = ycToml::decode(t_toml)
 t_v["title"]                                        ; => "demo"
 t_v["server"]["host"]                               ; => "localhost"
 t_v["server"]["ports"]                              ; => (8000 8001)
@@ -29,11 +58,11 @@ ycToml::encode(t_v ?sortKeys t)
 ;    host = "localhost"
 ;    ports = [8000, 8001]
 
-ycToml::decode("d = 1979-05-27\n")["d"]             ; => "1979-05-27"
-ycToml::decode("[[products]]\nname = \"Hammer\"\n")["products"]
+ycToml::decode(t_toml_date)["d"]                    ; => "1979-05-27"
+ycToml::decode(t_toml_products)["products"]
 ; => (<table: name = "Hammer">)
 
-ycToml::decode("x = 2147483648\n")
+ycToml::decode(t_toml_bad_int)
 ; *Error* ycToml::decode: integer out of fixnum range at line 1, column 5
 ```
 
@@ -68,24 +97,66 @@ ycToml::decode(
 
 **例程**
 
+`t_toml_dotted` 的值如下所示：
+
+```text
+a.b = 1
+```
+
+`t_toml_escape` 的值如下所示：
+
+```text
+name = "a\tb"
+```
+
+`t_toml_arrays` 的值如下所示：
+
+```text
+[[a]]
+x = 1
+
+[[a]]
+x = 2
+```
+
+`t_toml_numbers` 的值如下所示：
+
+```text
+f = 1e3
+n = nan
+```
+
+`t_toml_duplicate` 的值如下所示：
+
+```text
+a = 1
+a = 2
+```
+
+`t_toml_bad_date` 的值如下所示：
+
+```text
+a = 2023-02-29
+```
+
 ```lisp
-t_v = ycToml::decode("a.b = 1\n")
+t_v = ycToml::decode(t_toml_dotted)
 t_v["a"]["b"]                                        ; => 1
 
-t_v = ycToml::decode("name = \"a\\tb\"\n")
+t_v = ycToml::decode(t_toml_escape)
 t_v["name"]                                          ; => "a\tb"
 
-t_v = ycToml::decode("[[a]]\nx = 1\n[[a]]\nx = 2\n")
+t_v = ycToml::decode(t_toml_arrays)
 t_v["a"]                                             ; => (<table: x = 1> <table: x = 2>)
 
-t_v = ycToml::decode("f = 1e3\nn = nan\n")
+t_v = ycToml::decode(t_toml_numbers)
 t_v["f"]                                             ; => 1000.0
 isNaN(t_v["n"])                                      ; => t
 
-ycToml::decode("a = 1\na = 2\n")
+ycToml::decode(t_toml_duplicate)
 ; *Error* ycToml::decode: duplicate key at line 2, column 1
 
-ycToml::decode("a = 2023-02-29\n")
+ycToml::decode(t_toml_bad_date)
 ; *Error* ycToml::decode: invalid date at line 1, column 5
 ```
 
@@ -126,8 +197,17 @@ ycToml::encode(
 
 **例程**
 
+`t_toml_encode` 的值如下所示：
+
+```text
+title = "demo"
+
+[server]
+host = "localhost"
+```
+
 ```lisp
-t_v = ycToml::decode("title = \"demo\"\n[server]\nhost = \"localhost\"\n")
+t_v = ycToml::decode(t_toml_encode)
 ycToml::encode(t_v ?sortKeys t)
 ; => title = "demo"
 ;

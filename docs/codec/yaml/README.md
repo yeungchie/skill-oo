@@ -15,9 +15,34 @@ Cadence SKILL++ 的 YAML 1.2 编解码库：块式与流式集合、块标量、
 
 ## 快速上手
 
+`t_yaml` 的值如下所示：
+
+```text
+name: demo
+items:
+  - 1
+  - 2
+```
+
+`t_yaml_anchor` 的值如下所示：
+
+```text
+base: &b {a: 1}
+copy: *b
+```
+
+`t_yaml_stream` 的值如下所示：
+
+```text
+---
+1
+---
+2
+```
+
 ```lisp
 ; 块式文档
-t_v = ycYaml::decode("name: demo\nitems:\n  - 1\n  - 2\n")
+t_v = ycYaml::decode(t_yaml)
 t_v["name"]                                         ; => "demo"
 t_v["items"]                                        ; => (1 2)
 
@@ -28,11 +53,11 @@ ycYaml::decode("0x10")                              ; => 16
 ycYaml::decode("[]")                                ; => nil
 
 ; 锚点、别名与合并
-t_v = ycYaml::decode("base: &b {a: 1}\ncopy: *b\n")
+t_v = ycYaml::decode(t_yaml_anchor)
 t_v["copy"]["a"]                                    ; => 1
 
 ; 多文档流
-ycYaml::decode("---\n1\n---\n2\n" ?format "yaml-stream")
+ycYaml::decode(t_yaml_stream ?format "yaml-stream")
 ; => (1 2)
 
 ; 编码
@@ -77,12 +102,35 @@ ycYaml::decode(
 
 **例程**
 
+`t_yaml_map` 的值如下所示：
+
+```text
+a: 1
+b: 2
+```
+
+`t_yaml_literal` 的值如下所示：
+
+```text
+s: |
+  a
+  b
+```
+
+`t_yaml_folded` 的值如下所示：
+
+```text
+s: >
+  a
+  b
+```
+
 ```lisp
-ycYaml::decode("a: 1\nb: 2\n")                    ; => <table: a = 1, b = 2>
+ycYaml::decode(t_yaml_map)                        ; => <table: a = 1, b = 2>
 ycYaml::decode("[1, 2.5, true, null]")
 ; => (1 2.5 ycCodec::Type("True") ycCodec::Type("Null"))
-ycYaml::decode("s: |\n  a\n  b\n")["s"]            ; => "a\nb\n"
-ycYaml::decode("s: >\n  a\n  b\n")["s"]            ; => "a b\n"
+ycYaml::decode(t_yaml_literal)["s"]                ; => "a\nb\n"
+ycYaml::decode(t_yaml_folded)["s"]                 ; => "a b\n"
 ycYaml::decode("a: 1\r\nb: 2\r\n")["b"]            ; => 2
 
 ycYaml::decode("a: [1, 2\n")
