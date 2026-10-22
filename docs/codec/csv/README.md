@@ -11,6 +11,7 @@ Cadence SKILL++ 的 CSV/TSV 编解码库：RFC 4180 风格字段规则与带可�
 + 表格行列均 1-based；无表头时可按索引访问，有表头时另可按列名取值。
 + 空行解码为含一个空字段的记录；有表头时短行缺位为 `ycCodec::Missing`（见 [ycCodec](../core/README.md)），超长行以 `error()` 中断。
 + 只处理内存文本；文件读写请配合 pathlib 的 `readText()` / `writeText()`。
++ `Table->render()` / `Table->print()` 可渲染美化表格；依赖 `ycTabulate`，`?maxColWidth` 折行由 `ycTextwrap` 提供。
 
 ## 快速上手
 
@@ -203,6 +204,93 @@ value(g_row g_name)
 | --- | --- |
 | g_row | 行号（1-based） |
 | g_name | 列名（字符串） |
+
+#### render <sub>`method`</sub>
+
+```text
+render(
+    [ ?format t_format ]
+    [ ?align g_align ]
+    [ ?missingVal t_missingVal ]
+    [ ?maxColWidth n_max ]
+    [ ?unit t_unit ]
+    [ ?ambiguous n_amb ]
+)
+=> str
+```
+
+渲染美化表格文本。表头自动取自 Table；有表头时按表头宽度补齐短行，无表头时按最长行宽补齐；`ycCodec::Missing` 与补齐单元格均使用 `?missingVal`。需要先加载 `ycTabulate`，未加载时以 `error()` 中断。`?maxColWidth` 非 nil 时由 tabulate 调用 textwrap 对单元格折行。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?format | str | "simple" | `plain` / `simple` / `grid` / `pipe` |
+| ?align | str \| list | "left" | 单列或逐列对齐 |
+| ?missingVal | str | "" | 缺失单元格替代文本 |
+| ?maxColWidth | int \| nil | nil | 单元格折行宽度 |
+| ?unit | str | "display" | `display` 或 `char` |
+| ?ambiguous | int | 1 | East Asian Ambiguous 宽度 |
+
+`t_csv` 的值如下所示：
+
+```text
+name,qty
+apple,3
+```
+
+**例程**
+
+```lisp
+t_v = ycCsv::decode(t_csv ?header t)
+t_v->render()
+; => name   qty
+;    -----  ---
+;    apple  3
+
+t_v->render(?format "grid")
+; => +-------+-----+
+;    | name  | qty |
+;    +=======+=====+
+;    | apple | 3   |
+;    +-------+-----+
+```
+
+#### print <sub>`method`</sub>
+
+```text
+print(
+    [ ?format t_format ]
+    [ ?align g_align ]
+    [ ?missingVal t_missingVal ]
+    [ ?maxColWidth n_max ]
+    [ ?unit t_unit ]
+    [ ?ambiguous n_amb ]
+)
+=> t
+```
+
+`print` 使用与 `render` 相同的选项渲染表格并输出到 stdout，末尾补一个换行；空表不输出。需要先加载 `ycTabulate`，否则以 `error()` 中断。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?format | str | "simple" | `plain` / `simple` / `grid` / `pipe` |
+| ?align | str \| list | "left" | 单列或逐列对齐 |
+| ?missingVal | str | "" | 缺失单元格替代文本 |
+| ?maxColWidth | int \| nil | nil | 单元格折行宽度 |
+| ?unit | str | "display" | `display` 或 `char` |
+| ?ambiguous | int | 1 | East Asian Ambiguous 宽度 |
+
+**例程**
+
+```lisp
+t_v->print(?format "grid")
+; 输出：
+; +-------+-----+
+; | name  | qty |
+; +=======+=====+
+; | apple | 3   |
+; +-------+-----+
+; => t
+```
 
 #### 打印形式
 

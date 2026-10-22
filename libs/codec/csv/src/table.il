@@ -1,4 +1,4 @@
-ycNamespace:::require("ycCodec")
+ycNamespace:::require("ycCodec" "ycTabulate")
 
 useNamespace("ycCsv")
 
@@ -46,6 +46,8 @@ defclass(Table () (
     cell()
     columnAt()
     value()
+    render()
+    print()
 ))
 
 defmethod(printself (self(Table))  ; -> str
@@ -58,7 +60,7 @@ defmethod(printself (self(Table))  ; -> str
 
 inScheme(
 defmethod(initializeInstance (self(Table) \@rest _args)
-    ; 构造 Table 实例时安装方法集：rowCount/columnCount/header/rows/row/cell/columnAt/value。
+    ; 构造 Table 实例时安装方法集：rowCount/columnCount/header/rows/row/cell/columnAt/value/render/print。
     ;
     ; **参数**
     ;   _args  (list) - 变参：附加初始化参数，本实现忽略
@@ -188,11 +190,112 @@ defmethod(initializeInstance (self(Table) \@rest _args)
         )
     )
 
+    _installRender(self)
+
     t
 )
 )
 
+inScheme(
+procedure(_installRender(self "g")  ; -> t
+    ; 安装 render/print 方法（内部实现；供 initializeInstance 与 Table 构造器调用）。
+    ;
+    ; **参数**
+    ;   self    (Table) - 目标实例
+    ;
+    ; **返回**
+    ;   (t) - 安装完成
+    self->render = lambda((\@key (format "simple") (align "left") (missingVal "") (maxColWidth nil) (unit "display") (ambiguous 1) "gggggg")  ; -> str
+        ; 渲染美化表格文本；表头自动取自 Table，短行/Missing 填 missingVal。
+        ;
+        ; **参数**
+        ;   ?format      (str) - 输出格式：plain/simple/grid/pipe；默认 "simple"
+        ;   ?align       (str|list) - 对齐方式；默认 "left"
+        ;   ?missingVal  (str) - 缺失单元格替代文本；默认 ""
+        ;   ?maxColWidth (int|nil) - 单元格折行宽度；默认 nil
+        ;   ?unit        (str) - 宽度单位；默认 "display"
+        ;   ?ambiguous   (int) - East Asian Ambiguous 宽度；默认 1
+        ;
+        ; **返回**
+        ;   (str) - ycTabulate::render 生成的文本
+        unless(fboundp('ycTabulate:::render)
+            error("%A->render: ycTabulate is not loaded - load it first" className(self))
+        )
+        apply('ycTabulate:::render
+            list(
+                _renderRows(self missingVal)
+                '?headers self->header()
+                '?format format
+                '?align align
+                '?missingVal missingVal
+                '?maxColWidth maxColWidth
+                '?unit unit
+                '?ambiguous ambiguous
+            )
+        )
+    )
+
+    self->print = lambda((\@key (format "simple") (align "left") (missingVal "") (maxColWidth nil) (unit "display") (ambiguous 1) "gggggg")  ; -> t
+        ; 打印美化表格文本并返回 t；空表不输出。
+        ;
+        ; **参数**
+        ;   ?format      (str) - 输出格式：plain/simple/grid/pipe；默认 "simple"
+        ;   ?align       (str|list) - 对齐方式；默认 "left"
+        ;   ?missingVal  (str) - 缺失单元格替代文本；默认 ""
+        ;   ?maxColWidth (int|nil) - 单元格折行宽度；默认 nil
+        ;   ?unit        (str) - 宽度单位；默认 "display"
+        ;   ?ambiguous   (int) - East Asian Ambiguous 宽度；默认 1
+        ;
+        ; **返回**
+        ;   (t) - 打印成功；ycTabulate 未加载或渲染失败时报错
+        let((t_text)
+            t_text = self->render(
+                ?format format
+                ?align align
+                ?missingVal missingVal
+                ?maxColWidth maxColWidth
+                ?unit unit
+                ?ambiguous ambiguous
+            )
+            when(t_text != ""
+                printf("%s\n" t_text)
+            )
+            t
+        )
+    )
+
+    t
+)
+)
+
+procedure(_renderRows(t_self t_missing "gt")  ; -> list
+    ; 将 CSV 行补齐为等宽单元格，并把 Missing 替换为 t_missing（内部实现）。
+    ;
+    ; **参数**
+    ;   t_self    (Table) - 待渲染表格
+    ;   t_missing (str) - 缺失单元格替代文本
+    ;
+    ; **返回**
+    ;   (list) - 等宽行列表
+    let((n_cols l_res l_row l_cells n_i g_cell)
+        n_cols = t_self->columnCount()
+        foreach(l_row t_self->rows()
+            l_cells = nil
+            for(n_i 1 n_cols
+                g_cell = if(n_i <= length(l_row) nth(n_i - 1 l_row) _missing())
+                when(g_cell == _missing()
+                    g_cell = t_missing
+                )
+                l_cells = tconc(l_cells g_cell)
+            )
+            l_res = tconc(l_res car(l_cells))
+        )
+        car(l_res)
+    )
+)
+
 ; ---------- 构造 ----------
+
 
 procedure(_maxWidth(l_rows "l")  ; -> int
     ; 返回行列表中的最长行宽。
@@ -222,7 +325,7 @@ procedure(Table(l_rows \@key (header nil) "gg")  ; -> Table
     ;
     ; **返回**
     ;   (Table) - 新实例；行/表头类型非法、空行、重复列名或行宽超过表头时报错
-    let((l_names l_index n_width)
+    let((l_names l_index n_width t_obj)
         l_names = _checkHeader(header "ycCsv::Table")
         l_rows = _copyRows(_checkRows(l_rows "ycCsv::Table"))
         when(l_names
@@ -238,9 +341,11 @@ procedure(Table(l_rows \@key (header nil) "gg")  ; -> Table
                 l_index[nth(n_i - 1 l_names)] = n_i
             )
         )
-        makeInstance('Table ?_data
+        t_obj = makeInstance('Table ?_data
             makeInstance('TableData ?header l_names ?rows l_rows ?index l_index)
         )
+        _installRender(t_obj)
+        t_obj
     )
 )
 

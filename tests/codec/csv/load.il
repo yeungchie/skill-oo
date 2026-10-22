@@ -27,6 +27,20 @@ let((t_res t_self t_dir)
         )
         printf("ycCsv: re-running tests with previously loaded code; restart CIW if you edited libs/codec/csv/src/\n")
     )
+    _TestCsvDir = t_dir
+)
+
+let((t_dir)
+    t_dir = _TestCsvDir
+    unless(findNamespace("ycUtf8")
+        loadi(simplifyFilename(strcat(t_dir "../../../libs/utf8/load.il") t))
+    )
+    unless(findNamespace("ycTextwrap")
+        loadi(simplifyFilename(strcat(t_dir "../../../libs/textwrap/load.il") t))
+    )
+    unless(fboundp('ycTabulate:::render)
+        loadi(simplifyFilename(strcat(t_dir "../../../libs/tabulate/load.il") t))
+    )
     loadi(strcat(t_dir "test_init.il"))
 )
 
