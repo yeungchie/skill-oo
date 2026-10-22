@@ -73,6 +73,9 @@ procedure(_encodeString(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 带双引号的 TOML 基本字符串
+    unless(_validUtf8(t_s)
+        error("ycToml::encode: invalid UTF-8 string")
+    )
     let((n_len n_run l_p n_c)
         n_len = length(t_s)
         n_run = 1
@@ -342,6 +345,9 @@ procedure(_emitBody(l_p t_obj l_path n_depth g_opt "lglxg")  ; -> list
     ;
     ; **返回**
     ;   (list) - 更新后的行容器
+    when(n_depth > g_opt["maxDepth"]
+        error("ycToml::encode: nesting too deep (limit %d)" g_opt["maxDepth"])
+    )
     let((l_keys g_val l_child)
         l_keys = _tableKeys(t_obj g_opt)
         foreach(t_key l_keys

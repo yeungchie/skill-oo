@@ -270,6 +270,9 @@ procedure(decode(t_str \@key (maxDepth nil) "tg")  ; -> table
     unless(stringp(t_str)
         error("ycToml::decode: expects a string")
     )
+    unless(_validUtf8(t_str)
+        error("ycToml::decode: invalid UTF-8")
+    )
     when(maxDepth == nil
         maxDepth = _maxDecodeDepth
     )

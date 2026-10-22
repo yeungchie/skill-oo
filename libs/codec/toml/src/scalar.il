@@ -71,6 +71,9 @@ procedure(_parseBasicString(t_s n_i g_key "txg")  ; -> list
                         )
                         if(n_run >= 3
                             {
+                            when(n_run > 5
+                                _error(t_s n_k "too many consecutive quotation marks")
+                            )
                             when(n_seg < n_k
                                 l_p = tconc(l_p substring(t_s n_seg n_k - n_seg))
                             )
@@ -237,6 +240,9 @@ procedure(_parseLiteralString(t_s n_i g_key "txg")  ; -> list
                     )
                     if(n_run >= 3
                         {
+                        when(n_run > 5
+                            _error(t_s n_k "too many consecutive quotation marks")
+                        )
                         when(n_seg < n_k
                             l_p = tconc(l_p substring(t_s n_seg n_k - n_seg))
                         )

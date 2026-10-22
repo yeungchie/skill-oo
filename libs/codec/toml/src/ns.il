@@ -29,6 +29,7 @@ addToNamespace("ycToml"
         _isTableList
         _markInline
         _utf8Str
+        _validUtf8
         _hexVal
         _readHex
         _readDigits

@@ -132,7 +132,7 @@ procedure(_skipWs(t_s n_i g_newlines g_comments "txgg")  ; -> int
     ;
     ; **返回**
     ;   (int) - 首个未跳过的位置
-    let((n_len g_stop)
+    let((n_len g_stop n_c)
         n_len = length(t_s)
         g_stop = nil
         while(!g_stop && n_i <= n_len
@@ -150,6 +150,10 @@ procedure(_skipWs(t_s n_i g_newlines g_comments "txgg")  ; -> int
                     if(g_comments
                         progn(
                             while(n_i <= n_len && _code(t_s n_i) != 10
+                                n_c = _code(t_s n_i)
+                                when((n_c < 32 && n_c != 9) || n_c == 127
+                                    _error(t_s n_i "control character in comment")
+                                )
                                 n_i = n_i + 1
                             )
                             when(!g_newlines
@@ -371,6 +375,102 @@ procedure(_hexVal(n_c "x")  ; -> int | nil
         (n_c >= 97 && n_c <= 102 n_c - 87)
         (n_c >= 65 && n_c <= 70 n_c - 55)
         (t nil)
+    )
+)
+
+procedure(_contByte(g_c "g")  ; -> t | nil
+    ; 判断字符码是否为 UTF-8 连续字节（0x80..0xBF）。
+    ;
+    ; **参数**
+    ;   g_c  (any) - 字符码或 nil
+    ;
+    ; **返回**
+    ;   (t|nil) - 连续字节时为 t
+    g_c && g_c >= 128 && g_c <= 191
+)
+
+procedure(_validUtf8(t_s "t")  ; -> t | nil
+    ; 校验文本是否为合法 UTF-8：拒绝无效首字节、过长编码、代理区与超范围码点。
+    ;
+    ; **参数**
+    ;   t_s  (str) - 输入文本
+    ;
+    ; **返回**
+    ;   (t|nil) - 合法时为 t
+    let((n_len n_i n_b n_b1 n_b2 n_b3 g_ok)
+        n_len = length(t_s)
+        n_i = 1
+        g_ok = t
+        while(g_ok && n_i <= n_len
+            n_b = _code(t_s n_i)
+            cond(
+                (n_b <= 127
+                    n_i = n_i + 1
+                )
+                ((n_b >= 194 && n_b <= 223)
+                    n_b1 = _code(t_s n_i + 1)
+                    if(_contByte(n_b1)
+                        n_i = n_i + 2
+                        g_ok = nil
+                    )
+                )
+                (n_b == 224
+                    n_b1 = _code(t_s n_i + 1)
+                    n_b2 = _code(t_s n_i + 2)
+                    if(n_b1 && n_b1 >= 160 && n_b1 <= 191 && _contByte(n_b2)
+                        n_i = n_i + 3
+                        g_ok = nil
+                    )
+                )
+                ((n_b >= 225 && n_b <= 236) || (n_b >= 238 && n_b <= 239)
+                    n_b1 = _code(t_s n_i + 1)
+                    n_b2 = _code(t_s n_i + 2)
+                    if(_contByte(n_b1) && _contByte(n_b2)
+                        n_i = n_i + 3
+                        g_ok = nil
+                    )
+                )
+                (n_b == 237
+                    n_b1 = _code(t_s n_i + 1)
+                    n_b2 = _code(t_s n_i + 2)
+                    if(n_b1 && n_b1 >= 128 && n_b1 <= 159 && _contByte(n_b2)
+                        n_i = n_i + 3
+                        g_ok = nil
+                    )
+                )
+                (n_b == 240
+                    n_b1 = _code(t_s n_i + 1)
+                    n_b2 = _code(t_s n_i + 2)
+                    n_b3 = _code(t_s n_i + 3)
+                    if(n_b1 && n_b1 >= 144 && n_b1 <= 191 && _contByte(n_b2) && _contByte(n_b3)
+                        n_i = n_i + 4
+                        g_ok = nil
+                    )
+                )
+                ((n_b >= 241 && n_b <= 243)
+                    n_b1 = _code(t_s n_i + 1)
+                    n_b2 = _code(t_s n_i + 2)
+                    n_b3 = _code(t_s n_i + 3)
+                    if(_contByte(n_b1) && _contByte(n_b2) && _contByte(n_b3)
+                        n_i = n_i + 4
+                        g_ok = nil
+                    )
+                )
+                (n_b == 244
+                    n_b1 = _code(t_s n_i + 1)
+                    n_b2 = _code(t_s n_i + 2)
+                    n_b3 = _code(t_s n_i + 3)
+                    if(n_b1 && n_b1 >= 128 && n_b1 <= 143 && _contByte(n_b2) && _contByte(n_b3)
+                        n_i = n_i + 4
+                        g_ok = nil
+                    )
+                )
+                (t
+                    g_ok = nil
+                )
+            )
+        )
+        g_ok
     )
 )
 

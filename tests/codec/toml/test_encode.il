@@ -71,6 +71,10 @@ let((t_v t_a t_b t_out)
     _assert(ycToml::encode(t_v) == "s = \"\\u007f\"\n"  "encode: DEL escape")
 
     t_v = _table()
+    t_v["s"] = strcat(intToChar(255))
+    _assertError(lambda(() ycToml::encode(t_v))  "encode: invalid UTF-8 string errors")
+
+    t_v = _table()
     t_v["a"] = 1.0
     t_v["b"] = -0.0
     t_v["c"] = 5e+22
@@ -137,6 +141,11 @@ let((t_v t_a t_b t_out)
     t_v = _table()
     t_v["a"] = list(list(1))
     _assertError(lambda(() ycToml::encode(t_v ?maxDepth 1))  "encode: array depth limit")
+    t_v = _table()
+    t_a = _table()
+    t_v["a"] = list(t_a)
+    t_a["b"] = list(_table())
+    _assertError(lambda(() ycToml::encode(t_v ?maxDepth 1))  "encode: empty array table depth limit")
 
     _assertError(lambda(() ycToml::encode("x"))  "encode: non-table root errors")
     _assertError(lambda(() ycToml::encode(nil))  "encode: nil root errors")

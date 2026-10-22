@@ -129,9 +129,6 @@ procedure(_headerTarget(t_s t_root t_meta l_path n_pos g_array n_max "tgglxgx") 
                         when(t_kind == "array"
                             _error(t_s n_pos "key path is not a table")
                         )
-                        when(t_kind == "dotted"
-                            _error(t_s n_pos "cannot extend a table defined by a dotted key")
-                        )
                         l_cur = append1(l_cur t_key)
                         t_obj = g_val
                         }
