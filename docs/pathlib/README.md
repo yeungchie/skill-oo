@@ -1149,6 +1149,44 @@ p->readCsv(?format "xml")
 ; *Error* ycCsv::decode: unknown format "xml"
 ```
 
+##### readToml <sub>`method`</sub>
+
+```text
+p->readToml(
+    [ l_args ... ]
+)
+=> table
+```
+
+**描述**
+
+读取整个文件内容并解码为 TOML 根 `table`。需要先加载 `ycToml`；未加载时以 `error()` 中断（`ycPathLib::Path->readToml: ycToml is not loaded - load it first`）。解码选项与错误契约由 `ycToml::decode` 提供，本方法原样透传实参，不复制其校验逻辑。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| l_args ... | any | 原样透传给 `ycToml::decode` 的实参（`?maxDepth` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycToml 手册](../codec/toml/README.md) 的 `decode` 条目。 |
+
+**返回值**
+
+`table` — `ycToml::decode` 的根表；文件读取或解码失败以 `error()` 中断。
+
+**例程**
+
+```lisp
+p = ycPathLib::Path("./a.toml")
+p->writeText("title = \"demo\"\n[server]\nhost = \"localhost\"\n")
+t = p->readToml()
+t["title"]                       ; => "demo"
+t["server"]["host"]              ; => "localhost"
+
+p->writeText("a = [[1]]
+")
+p->readToml(?maxDepth 1)
+; => 以 error() 中断（嵌套过深）
+```
+
 ##### writeText <sub>`method`</sub>
 
 ```text

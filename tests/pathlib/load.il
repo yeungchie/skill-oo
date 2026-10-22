@@ -42,6 +42,10 @@ ycNamespace:::require("ycCsv")
 unless(fboundp('ycCsv:::decode)
     loadi(strcat(_TestPathlibDir "../../libs/codec/csv/load.il"))
 )
+ycNamespace:::require("ycToml")
+unless(fboundp('ycToml:::decode)
+    loadi(strcat(_TestPathlibDir "../../libs/codec/toml/load.il"))
+)
 loadi(strcat(_TestPathlibDir "test_init.il"))
 
 ; END

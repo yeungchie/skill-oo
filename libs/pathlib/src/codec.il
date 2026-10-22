@@ -6,6 +6,7 @@
 ycNamespace:::require("ycJson")
 ycNamespace:::require("ycYaml")
 ycNamespace:::require("ycCsv")
+ycNamespace:::require("ycToml")
 
 useNamespace("ycPathLib")
 
@@ -69,6 +70,20 @@ self->readCsv = lambda((\@rest l_args "g")  ; -> Table
         _error("readCsv" "ycCsv is not loaded - load it first")
     )
     apply('ycCsv:::decode self->readText() l_args)
+)
+
+self->readToml = lambda((\@rest l_args "g")  ; -> table
+    ; 读取整个文件内容并解码为 TOML 根 table；实参原样透传给 ycToml::decode。
+    ;
+    ; **参数**
+    ;   l_args  (list) - 原样透传给 ycToml::decode 的实参（?maxDepth 等；可全部省略）
+    ;
+    ; **返回**
+    ;   (table) - ycToml::decode 的根 table；ycToml 未加载、文件错误、解码失败均以 error() 中断
+    unless(fboundp('ycToml:::decode)
+        _error("readToml" "ycToml is not loaded - load it first")
+    )
+    apply('ycToml:::decode self->readText() l_args)
 )
 )
 )
