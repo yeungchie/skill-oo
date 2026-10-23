@@ -30,6 +30,12 @@
 + [ycUnits](docs/units/README.md) —— SI 工程计数与单位解析/格式化。
 + [ycTabulate](docs/tabulate/README.md) —— 文本表格渲染。
 
+## 调用约定
+
++ 类名、函数名与命名空间全局变量使用大驼峰；前导 `_` 的私有名使用 `_XXX`。方法使用小驼峰。
++ 跨库访问一律写全限定名：公开符号用 `ycXxx::Xxx`，库内私有符号用 `ycXxx:::_XXX`；方法用 `obj->method()`。
++ 不依赖 `useNamespace` 的短名。调用方主动使用 `useNamespace` 后，同名短名被覆盖的风险由调用方自行承担。
+
 ## 安装
 
 在 `.cdsinit` 文件中追加：
