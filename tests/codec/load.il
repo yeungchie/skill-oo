@@ -23,6 +23,7 @@ let((t_res t_self t_dir)
     loadi(strcat(t_dir "yaml/load.il"))
     loadi(strcat(t_dir "csv/load.il"))
     loadi(strcat(t_dir "toml/load.il"))
+    loadi(strcat(t_dir "ini/load.il"))
 )
 
 ; END
