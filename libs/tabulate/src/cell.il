@@ -244,7 +244,7 @@ procedure(_normalizeAlign(g_align n_cols "gx")  ; -> list[str]
         if(stringp(g_align)
             progn(
                 unless(member(g_align '("left" "right" "center" "decimal"))
-                    error("ycTabulate::render: unknown align %A" g_align)
+                    error("ycTabulate::renderTable: unknown align %A" g_align)
                 )
                 for(n_i 1 n_cols
                     tconc(l_res g_align)
@@ -253,16 +253,16 @@ procedure(_normalizeAlign(g_align n_cols "gx")  ; -> list[str]
             if(listp(g_align)
                 progn(
                     unless(length(g_align) == n_cols
-                        error("ycTabulate::render: align list has %d entries for %d columns" length(g_align) n_cols)
+                        error("ycTabulate::renderTable: align list has %d entries for %d columns" length(g_align) n_cols)
                     )
                     foreach(g_item g_align
                         unless(stringp(g_item) && member(g_item '("left" "right" "center" "decimal"))
-                            error("ycTabulate::render: unknown align %A" g_item)
+                            error("ycTabulate::renderTable: unknown align %A" g_item)
                         )
                         tconc(l_res g_item)
                     )
                 )
-                error("ycTabulate::render: align must be a string or a list (%A)" g_align)
+                error("ycTabulate::renderTable: align must be a string or a list (%A)" g_align)
             )
         )
         car(l_res)

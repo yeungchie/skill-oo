@@ -9,20 +9,20 @@ Cadence SKILL++ 的文本表格库：把行数据渲染为定宽文本表。
 + 四种输出格式：`"plain"`、`"simple"`（默认）、`"grid"`、`"pipe"`（竖线表格）。
 + 对齐支持 `"left"`、`"right"`、`"center"`、`"decimal"`；可单值应用于所有列，也可逐列指定。
 + `?maxColWidth` 对单元格折行（复用 `ycTextwrap::wrap`）；多行单元格在非 pipe 格式中展开为多物理行。
-+ 记法约定：例程注释中 `; =>` 标记返回值，多行输出在后续 `;` 注释中逐行展示；`; *Error*` 标记错误消息；错误消息以 `ycTabulate::render:` 为前缀。
++ 记法约定：例程注释中 `; =>` 标记返回值，多行输出在后续 `;` 注释中逐行展示；`; *Error*` 标记错误消息；错误消息以 `ycTabulate::renderTable:` 为前缀。
 
 ## 快速上手
 
 ```lisp
 ; 基本表格
-ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n"))
+ycTabulate::renderTable(list(list("a" 1) list("bb" 22)) ?headers list("name" "n"))
 ; => name  n
 ;    ----  --
 ;    a     1
 ;    bb    22
 
 ; 网格与小数点对齐
-ycTabulate::render(
+ycTabulate::renderTable(
     list(list("1.2" 10) list("22.345" 3.4))
     ?headers list("a" "b")
     ?format "grid"
@@ -37,7 +37,7 @@ ycTabulate::render(
 ;    +--------+------+
 
 ; 单元格折行
-ycTabulate::render(
+ycTabulate::renderTable(
     list(list("alpha beta" "x") list("c" "y"))
     ?headers list("long" "z")
     ?maxColWidth 5
@@ -49,7 +49,7 @@ ycTabulate::render(
 ;    c      y
 
 ; pipe 格式（多行转 <br>，竖线转义）
-ycTabulate::render(list(list("a\nb" "c|d")) ?headers list("h1" "h2") ?format "pipe")
+ycTabulate::renderTable(list(list("a\nb" "c|d")) ?headers list("h1" "h2") ?format "pipe")
 ; => | h1     | h2   |
 ;    | :----- | :--- |
 ;    | a<br>b | c\|d |
@@ -57,10 +57,10 @@ ycTabulate::render(list(list("a\nb" "c|d")) ?headers list("h1" "h2") ?format "pi
 
 ## API 参考
 
-### ycTabulate::render <sub>`function`</sub>
+### ycTabulate::renderTable <sub>`function`</sub>
 
 ```text
-ycTabulate::render(
+ycTabulate::renderTable(
     l_rows
     [ ?headers nil ]
     [ ?format "simple" ]
@@ -101,29 +101,29 @@ ycTabulate::render(
 **例程**
 
 ```lisp
-ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n"))
+ycTabulate::renderTable(list(list("a" 1) list("bb" 22)) ?headers list("name" "n"))
 ; => name  n
 ;    ----  --
 ;    a     1
 ;    bb    22
 
-ycTabulate::render(list(list(nil 'sym "s")) ?headers list("a" "b" "c") ?missingVal "NA" ?format "grid")
+ycTabulate::renderTable(list(list(nil 'sym "s")) ?headers list("a" "b" "c") ?missingVal "NA" ?format "grid")
 ; => +----+-----+---+
 ;    | a  | b   | c |
 ;    +====+=====+===+
 ;    | NA | sym | s |
 ;    +----+-----+---+
 
-ycTabulate::render(list(list(1.23456 2.0)) ?floatFmt "%.2f")
+ycTabulate::renderTable(list(list(1.23456 2.0)) ?floatFmt "%.2f")
 ; => "1.23  2.00"
 
-ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?align list("left" "right"))
+ycTabulate::renderTable(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?align list("left" "right"))
 ; => name   n
 ;    ----  --
 ;    a      1
 ;    bb    22
 
-ycTabulate::render(list(list("a" 1)) ?format "unknown")
+ycTabulate::renderTable(list(list("a" 1)) ?format "unknown")
 ; => 以 error() 中断（未知格式）
 ```
 
@@ -139,7 +139,7 @@ ycTabulate::render(list(list("a" 1)) ?format "unknown")
 `pipe` 格式中，单元格内的 `|` 写成 `\|`，多行单元格以 `<br>` 连接；列宽至少为 3，保证分隔行有效。其余格式中，多行单元格展开为多物理行，较短单元格补空白。
 
 ```lisp
-ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?format "grid")
+ycTabulate::renderTable(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?format "grid")
 ; => +------+----+
 ;    | name | n  |
 ;    +======+====+
@@ -148,7 +148,7 @@ ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?fo
 ;    | bb   | 22 |
 ;    +------+----+
 
-ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?format "pipe")
+ycTabulate::renderTable(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?format "pipe")
 ; => | name | n   |
 ;    | :--- | :-- |
 ;    | a    | 1   |
@@ -165,7 +165,7 @@ ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?fo
 | `decimal` | 按各物理行首个 `.` 分左右两段，分别取最大宽度后对齐小数点；无小数点视为右段为空 |
 
 ```lisp
-ycTabulate::render(
+ycTabulate::renderTable(
     list(list("1.2" "10") list("22.345" "3.4") list("5" "6.78"))
     ?headers list("a" "b")
     ?align "decimal"
@@ -176,7 +176,7 @@ ycTabulate::render(
 ;    22.345   3.4
 ;     5       6.78
 
-ycTabulate::render(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?align "center")
+ycTabulate::renderTable(list(list("a" 1) list("bb" 22)) ?headers list("name" "n") ?align "center")
 ; => name  n
 ;    ----  --
 ;     a    1

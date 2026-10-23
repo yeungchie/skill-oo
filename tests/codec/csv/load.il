@@ -38,12 +38,9 @@ let((t_dir)
     unless(findNamespace("ycTextwrap")
         loadi(simplifyFilename(strcat(t_dir "../../../libs/textwrap/load.il") t))
     )
-    unless(fboundp('ycTabulate:::render)
+    unless(fboundp('ycTabulate:::renderTable)
         loadi(simplifyFilename(strcat(t_dir "../../../libs/tabulate/load.il") t))
     )
-    ; Load ycCsv after ycTabulate: the latter exports render, which would
-    ; otherwise shadow Table->render when ycCsv was preloaded.
-    loadi(simplifyFilename(strcat(t_dir "../../../libs/codec/csv/load.il") t))
     loadi(strcat(t_dir "test_init.il"))
 )
 

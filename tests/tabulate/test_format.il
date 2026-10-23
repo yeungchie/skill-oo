@@ -6,22 +6,22 @@ let((l_rows l_head)
 
     ; ---- four formats ----
     _assert(
-        ycTabulate::render(l_rows ?headers l_head)
+        ycTabulate::renderTable(l_rows ?headers l_head)
             == "name  n\n----  --\na     1\nbb    22"
         "format: simple"
     )
     _assert(
-        ycTabulate::render(l_rows ?headers l_head ?format "plain")
+        ycTabulate::renderTable(l_rows ?headers l_head ?format "plain")
             == "name  n\na     1\nbb    22"
         "format: plain"
     )
     _assert(
-        ycTabulate::render(l_rows ?headers l_head ?format "grid")
+        ycTabulate::renderTable(l_rows ?headers l_head ?format "grid")
             == "+------+----+\n| name | n  |\n+======+====+\n| a    | 1  |\n+------+----+\n| bb   | 22 |\n+------+----+"
         "format: grid"
     )
     _assert(
-        ycTabulate::render(l_rows ?headers l_head ?format "pipe")
+        ycTabulate::renderTable(l_rows ?headers l_head ?format "pipe")
             == "| name | n   |\n| :--- | :-- |\n| a    | 1   |\n| bb   | 22  |"
         "format: pipe"
     )
@@ -29,7 +29,7 @@ let((l_rows l_head)
 
 ; ---- pipe alignment markers ----
 _assert(
-    ycTabulate::render(
+    ycTabulate::renderTable(
         list(list("a" 1) list("bb" 22))
         ?headers list("name" "n")
         ?format "pipe"
@@ -38,7 +38,7 @@ _assert(
     "format: pipe right"
 )
 _assert(
-    ycTabulate::render(
+    ycTabulate::renderTable(
         list(list("a" 1) list("bb" 22))
         ?headers list("name" "n")
         ?format "pipe"
@@ -49,18 +49,18 @@ _assert(
 
 ; ---- multiline ----
 _assert(
-    ycTabulate::render(list(list("a\nb" "c")) ?headers list("h1" "h2"))
+    ycTabulate::renderTable(list(list("a\nb" "c")) ?headers list("h1" "h2"))
         == "h1  h2\n--  --\na   c\nb"
     "format: multiline simple"
 )
 _assert(
-    ycTabulate::render(list(list("a\nb" "c|d")) ?headers list("h1" "h2") ?format "pipe")
+    ycTabulate::renderTable(list(list("a\nb" "c|d")) ?headers list("h1" "h2") ?format "pipe")
         == "| h1     | h2   |\n| :----- | :--- |\n| a<br>b | c\\|d |"
     "format: multiline pipe"
 )
 
 _assert(
-    ycTabulate::render(
+    ycTabulate::renderTable(
         list(list("1.2" 10) list("22.345" 3.4))
         ?headers list("a" "b")
         ?format "pipe"
@@ -79,26 +79,26 @@ _assert(
 
 ; ---- header only / no header ----
 _assert(
-    ycTabulate::render(nil ?headers list("a" "b"))
+    ycTabulate::renderTable(nil ?headers list("a" "b"))
         == "a  b\n-  -"
     "format: header only simple"
 )
 _assert(
-    ycTabulate::render(nil ?headers list("a" "b") ?format "grid")
+    ycTabulate::renderTable(nil ?headers list("a" "b") ?format "grid")
         == "+---+---+\n| a | b |\n+===+===+"
     "format: header only grid"
 )
 _assert(
-    ycTabulate::render(list(list("a" "b") list("cc" "d")) ?format "grid")
+    ycTabulate::renderTable(list(list("a" "b") list("cc" "d")) ?format "grid")
         == "+----+---+\n| a  | b |\n+----+---+\n| cc | d |\n+----+---+"
     "format: grid no header"
 )
 _assert(
-    ycTabulate::render(list(list("a" "b"))) == "a  b"
+    ycTabulate::renderTable(list(list("a" "b"))) == "a  b"
     "format: plain no header"
 )
 _assert(
-    ycTabulate::render(list(list("a" "b")) ?format "pipe") == "| a   | b   |"
+    ycTabulate::renderTable(list(list("a" "b")) ?format "pipe") == "| a   | b   |"
     "format: pipe no header"
 )
 

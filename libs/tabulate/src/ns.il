@@ -3,7 +3,7 @@ unless(findNamespace("ycTabulate")
 )
 addToNamespace("ycTabulate"
     mapcar('symbolToString '(
-        render
+        renderTable
         _checkUnit
         _widthText
         _repeatChar

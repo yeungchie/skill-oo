@@ -9,7 +9,7 @@ useNamespace("ycTabulate")
 
 ; ---------- 公开入口 ----------
 
-procedure(render(l_rows \@key (headers nil) (format "simple") (align "left") (floatFmt "%g") (missingVal "") (maxColWidth nil) (unit "display") (ambiguous 1) "lgtgttgtx")  ; -> str
+procedure(renderTable(l_rows \@key (headers nil) (format "simple") (align "left") (floatFmt "%g") (missingVal "") (maxColWidth nil) (unit "display") (ambiguous 1) "lgtgttgtx")  ; -> str
     ; 将行数据渲染为文本表格。
     ;
     ; **参数**
@@ -26,26 +26,26 @@ procedure(render(l_rows \@key (headers nil) (format "simple") (align "left") (fl
     ; **返回**
     ;   (str) - 表格文本；无列时为空串
     unless(l_rows == nil || listp(l_rows)
-        error("ycTabulate::render: rows must be a list (%A)" l_rows)
+        error("ycTabulate::renderTable: rows must be a list (%A)" l_rows)
     )
     unless(headers == nil || listp(headers)
-        error("ycTabulate::render: headers must be a list or nil (%A)" headers)
+        error("ycTabulate::renderTable: headers must be a list or nil (%A)" headers)
     )
     unless(format == "plain" || format == "simple" || format == "grid" || format == "pipe"
-        error("ycTabulate::render: unknown format %A" format)
+        error("ycTabulate::renderTable: unknown format %A" format)
     )
     unless(stringp(floatFmt)
-        error("ycTabulate::render: floatFmt must be a string (%A)" floatFmt)
+        error("ycTabulate::renderTable: floatFmt must be a string (%A)" floatFmt)
     )
     unless(stringp(missingVal)
-        error("ycTabulate::render: missingVal must be a string (%A)" missingVal)
+        error("ycTabulate::renderTable: missingVal must be a string (%A)" missingVal)
     )
     unless(maxColWidth == nil || (fixp(maxColWidth) && maxColWidth >= 1)
-        error("ycTabulate::render: maxColWidth must be nil or a positive integer (%A)" maxColWidth)
+        error("ycTabulate::renderTable: maxColWidth must be nil or a positive integer (%A)" maxColWidth)
     )
-    _checkUnit("ycTabulate::render" unit ambiguous)
+    _checkUnit("ycTabulate::renderTable" unit ambiguous)
     unless(errset(sprintf(nil floatFmt 0.0) nil)
-        error("ycTabulate::render: invalid floatFmt %A" floatFmt)
+        error("ycTabulate::renderTable: invalid floatFmt %A" floatFmt)
     )
     let((n_cols l_head l_cellRows l_aligns l_decs l_widths)
         n_cols = if(headers length(headers) if(l_rows length(car(l_rows)) 0))
@@ -61,11 +61,11 @@ procedure(render(l_rows \@key (headers nil) (format "simple") (align "left") (fl
         l_cellRows = cons(nil nil)
         foreach(l_row l_rows
             unless(listp(l_row)
-                error("ycTabulate::render: row %d is not a list" length(car(l_cellRows)) + 1)
+                error("ycTabulate::renderTable: row %d is not a list" length(car(l_cellRows)) + 1)
             )
             unless(length(l_row) == n_cols
                 error(
-                    "ycTabulate::render: row %d has %d cells, expected %d"
+                    "ycTabulate::renderTable: row %d has %d cells, expected %d"
                     length(car(l_cellRows)) + 1
                     length(l_row)
                     n_cols

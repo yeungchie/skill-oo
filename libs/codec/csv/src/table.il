@@ -217,11 +217,11 @@ procedure(_installRender(self "g")  ; -> t
         ;   ?ambiguous   (int) - East Asian Ambiguous 宽度；默认 1
         ;
         ; **返回**
-        ;   (str) - ycTabulate::render 生成的文本
-        unless(fboundp('ycTabulate:::render)
+        ;   (str) - ycTabulate::renderTable 生成的文本
+        unless(fboundp('ycTabulate:::renderTable)
             error("%A->render: ycTabulate is not loaded - load it first" className(self))
         )
-        apply('ycTabulate:::render
+        apply('ycTabulate:::renderTable
             list(
                 _renderRows(self missingVal)
                 '?headers self->header()
