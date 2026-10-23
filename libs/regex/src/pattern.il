@@ -37,7 +37,7 @@ defclass(PatternData () (
 ))
 
 defclass(Pattern () (
-    ; Pattern 实例：ReCompile() 返回的已编译模式对象，方法语义同对应函数 ycRegEx::reXxx。
+    ; Pattern 实例：ReCompile() 返回的已编译模式对象，方法语义同对应函数 ycRegEx::ReXxx。
     ; 状态桶（PatternData：pattern flags compileOpts pcre span full nGroups），构造后禁写
     _data(
         \@initarg _data
@@ -288,7 +288,7 @@ self->pattern = lambda(()  ; -> str
 
 inScheme(
 defmethod(initializeInstance (self(Pattern) \@rest _args)
-    ; 构造 Pattern 实例时调用 _installPattern 安装全部方法集。
+    ; 构造 Pattern 实例时调用 _InstallPattern 安装全部方法集。
     ;
     ; **参数**
     ;   _args  (list) - 变参：附加初始化参数，本实现忽略

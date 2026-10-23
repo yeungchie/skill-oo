@@ -336,7 +336,7 @@ procedure(_AsPat(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
     ;   t_ctx    (str) - 出错上下文名（拼入错误消息）
     ;
     ; **返回**
-    ;   (Pattern) - 字符串走 _mkPattern；Pattern 经 ->pattern() 校验为串后原样返回
+    ;   (Pattern) - 字符串走 _MkPattern；Pattern 经 ->pattern() 校验为串后原样返回
     if(stringp(g_pat)
         _MkPattern(g_pat t_flags t_ctx n_opts)
         let((l_pat)
@@ -506,7 +506,7 @@ procedure(ReSub(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> str
 )
 
 procedure(ReSubn(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> (str, int)
-    ; 同 reSub，另返回实际替换次数（语义同 Python re.subn）。
+    ; 同 ReSub，另返回实际替换次数（语义同 Python re.subn）。
     ;
     ; **参数**
     ;   g_pat   (any)         - 模式串或已编译 Pattern（双表皮）

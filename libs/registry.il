@@ -5,7 +5,7 @@
 
 ; Known namespaces accepted by ycNamespace:::Require. This is a plain name
 ; list: loading order and file lists stay in libs/load.il and each package
-; load.il; shells created by require hold no code - they only make
+; load.il; shells created by Require hold no code - they only make
 ; cross-library references (ycOther:::name) readable before that library is
 ; loaded. Keep this list in sync with the packages under libs/.
 

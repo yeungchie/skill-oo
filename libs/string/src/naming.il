@@ -171,7 +171,7 @@ procedure(Sanitize(t_s \@key (style "snake") "tt")  ; -> str
     ;
     ; **参数**
     ;   t_s    (str) - 输入串
-    ;   ?style (str) - 目标风格（同 joinWords）；默认 snake
+    ;   ?style (str) - 目标风格（同 JoinWords）；默认 snake
     ;
     ; **返回**
     ;   (str) - 标识符；数字开头补下划线；无可用字符时报错
@@ -189,7 +189,7 @@ procedure(Sanitize(t_s \@key (style "snake") "tt")  ; -> str
 )
 
 procedure(ToSnake(t_s "t")  ; -> str
-    ; sanitize 的 snake 风格便捷形式。
+    ; Sanitize 的 snake 风格便捷形式。
     ;
     ; **参数**
     ;   t_s (str) - 输入串
@@ -200,7 +200,7 @@ procedure(ToSnake(t_s "t")  ; -> str
 )
 
 procedure(ToKebab(t_s "t")  ; -> str
-    ; sanitize 的 kebab 风格便捷形式。
+    ; Sanitize 的 kebab 风格便捷形式。
     ;
     ; **参数**
     ;   t_s (str) - 输入串
@@ -211,7 +211,7 @@ procedure(ToKebab(t_s "t")  ; -> str
 )
 
 procedure(ToCamel(t_s "t")  ; -> str
-    ; sanitize 的 camel 风格便捷形式。
+    ; Sanitize 的 camel 风格便捷形式。
     ;
     ; **参数**
     ;   t_s (str) - 输入串
@@ -222,7 +222,7 @@ procedure(ToCamel(t_s "t")  ; -> str
 )
 
 procedure(ToPascal(t_s "t")  ; -> str
-    ; sanitize 的 pascal 风格便捷形式。
+    ; Sanitize 的 pascal 风格便捷形式。
     ;
     ; **参数**
     ;   t_s (str) - 输入串

@@ -42,7 +42,7 @@ procedure(Escape(t_s \@key (quote nil) "tg")  ; -> str
 )
 
 procedure(Unescape(t_s \@key (strict nil) "tg")  ; -> str
-    ; 还原 escape 的转义序列。
+    ; 还原 Escape 的转义序列。
     ;
     ; **参数**
     ;   t_s     (str) - 输入串

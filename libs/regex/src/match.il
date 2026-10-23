@@ -573,7 +573,7 @@ procedure(_FindAllItem(g_pat t_subj l_m "gtl")  ; -> str | list[str]
     ; **参数**
     ;   g_pat   (Pattern) - 提供捕获组数的 Pattern 实例
     ;   t_subj  (str)     - 主题串
-    ;   l_m     (list)    - _nextMatch 的命中记录 (start end . 组值列表)
+    ;   l_m     (list)    - _NextMatch 的命中记录 (start end . 组值列表)
     ;
     ; **返回**
     ;   (str|list[str]) - 0 组返回整体串，1 组返回该组串，≥2 组返回组值列表
@@ -649,7 +649,7 @@ defclass(MatchData () (
 ))
 
 defclass(Match () (
-    ; Match 实例：re 系匹配/查找（reFinditer、Pattern->match/search/fullmatch 等）返回的匹配对象，提供串值、组值、span 位置与模板展开等查询。
+    ; Match 实例：re 系匹配/查找（ReFinditer、Pattern->match/search/fullmatch 等）返回的匹配对象，提供串值、组值、span 位置与模板展开等查询。
     ; 状态桶（MatchData：pattern subject start end groups anchor execOpts），构造后禁写
     _data(
         \@initarg _data
@@ -760,7 +760,7 @@ self->group = lambda((\@rest g_args "g")  ; -> str | list[str]
     ;
     ; **返回**
     ;   (str|list[str]) - 无参返回整体串，单参返回该组串，多参返回组值列表；
-    ;                     非参与组为 ""（CPython None → ""）；序号越界走 error()（_groupAt 直调）；
+    ;                     非参与组为 ""（CPython None → ""）；序号越界走 error()（_GroupAt 直调）；
     ;                     非数字或按名参数走 _Error() 中断
     let((n_g)
         foreach(g g_args
@@ -850,7 +850,7 @@ self->expand = lambda((t_tpl "t")  ; -> str
 
 inScheme(
 defmethod(initializeInstance (self(Match) \@rest _args)
-    ; 构造 Match 实例时调用 _installMatch 安装全部方法集。
+    ; 构造 Match 实例时调用 _InstallMatch 安装全部方法集。
     ;
     ; **参数**
     ;   _args  (list) - 变参：附加初始化参数，本实现忽略

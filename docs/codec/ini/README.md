@@ -122,9 +122,9 @@ ycIni::Encode(g_val [ ?sortKeys ] [ ?strict ] [ ?delimiter ] [ ?finalNewline ])
 **例程**
 
 ```lisp
-t_cfg = makeTable("demo" ycCodec:::Missing)
+t_cfg = makeTable("demo" ycCodec::Missing)
 t_cfg["title"] = "demo"
-t_cfg["server"] = makeTable("demo" ycCodec:::Missing)
+t_cfg["server"] = makeTable("demo" ycCodec::Missing)
 t_cfg["server"]["host"] = "localhost"
 
 ycIni::Encode(t_cfg ?sortKeys t)

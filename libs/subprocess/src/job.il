@@ -43,7 +43,7 @@ procedure(CreateJob(g_arg \@key callback userData verbose \@rest g_args "ggggg")
 
 
 procedure(AsyncJob(t_cmd \@key callback userData verbose "tggg")  ; -> AsyncJob
-    ; 构造 AsyncJob 实例（未启动）；一般经 createJob 使用，后者先拼接命令。
+    ; 构造 AsyncJob 实例（未启动）；一般经 CreateJob 使用，后者先拼接命令。
     ;
     ; **参数**
     ;   t_cmd      (str) - 完整命令串
@@ -167,7 +167,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest _args)
         error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString g_args))
     )
     procedure(_CheckStarted(t_method "t")
-        ; 前置校验：任务未启动（ipcId 为 nil）时以 _error 中断。
+        ; 前置校验：任务未启动（ipcId 为 nil）时以 _Error 中断。
         ;
         ; **参数**
         ;   t_method  (str) - 归属的方法名，并入错误消息

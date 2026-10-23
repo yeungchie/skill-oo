@@ -149,7 +149,7 @@ procedure(_AllMatchp(l_names l_comps "ll")  ; -> t | nil
     ;   l_comps  (list) - pattern 段列表（str）
     ;
     ; **返回**
-    ;   (t|nil) - 等长且逐段 _fnmatch1 全通过返回 t；长度不同或任一段不匹配返回 nil
+    ;   (t|nil) - 等长且逐段 _Fnmatch1 全通过返回 t；长度不同或任一段不匹配返回 nil
     let((g_ok l_rest)
         g_ok = length(l_names) == length(l_comps)
         l_rest = l_names

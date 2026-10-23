@@ -433,7 +433,7 @@ defmethod(initializeInstance (self(Path) \@rest _args)
     ;   _args  (list) - 变参：附加初始化参数，本实现忽略
     ;
     ; **返回**
-    ;   (t) - 依次调用 _installPure、_installFs、_installGlob、_installCodec 后返回 t
+    ;   (t) - 依次调用 _InstallPure、_InstallFs、_InstallGlob、_InstallCodec 后返回 t
     _InstallPure(self)
     _InstallFs(self)
     _InstallGlob(self)

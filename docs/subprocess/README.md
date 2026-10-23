@@ -84,6 +84,7 @@ ycSubProcess::CreateJob(
     g_arg
     [ g_args ... ]
     [ ?callback g_funcobj ]
+    [ ?userData g_data ]
     [ ?verbose g_enable ]
 )
 => ycSubProcess::AsyncJob
@@ -100,6 +101,7 @@ ycSubProcess::CreateJob(
 | g_arg | Any | | 命令，非字符串会自动转换 |
 | g_args | Any | | 命令的其余部分 |
 | ?callback g_funcobj | nil / symbol / funobj | nil | 可选，回调函数 |
+| ?userData g_data | any | nil | 可选，随任务对象携带的数据 |
 | ?verbose g_enable | nil / t | nil | 可选，控制是否实时打印子进程输出 |
 
 回调函数签名：`callback(s_event, g_job)`

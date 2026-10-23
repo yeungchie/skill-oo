@@ -52,7 +52,7 @@ procedure(Trim(t_s \@key (chars " \t\r\n") "tt")  ; -> str
 )
 
 procedure(TrimStart(t_s \@key (chars " \t\r\n") "tt")  ; -> str
-    ; 同 trim，仅去除前端字符。
+    ; 同 Trim，仅去除前端字符。
     ;
     ; **参数**
     ;   t_s    (str) - 输入串
@@ -64,7 +64,7 @@ procedure(TrimStart(t_s \@key (chars " \t\r\n") "tt")  ; -> str
 )
 
 procedure(TrimEnd(t_s \@key (chars " \t\r\n") "tt")  ; -> str
-    ; 同 trim，仅去除尾端字符。
+    ; 同 Trim，仅去除尾端字符。
     ;
     ; **参数**
     ;   t_s    (str) - 输入串
