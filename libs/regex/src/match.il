@@ -3,18 +3,18 @@ useNamespace("ycRegEx")
 
 ; ---------- Match helpers ----------
 
-procedure(_groupWhole(self "g")  ; -> str
+procedure(_GroupWhole(self "g")  ; -> str
     ; 取整体匹配串（group() / group(0) 路径）：按 span 位置从主题串切片。
     ;
     ; **返回**
     ;   (str) - 主题串上 [start, end) 字节区间的切片；span 未定位时先经 span() 慢路径回填
     let((l_sp)
         l_sp = self->span()
-        _prefix(_suffix(self->_data->subject car(l_sp) + 1) car(cdr(l_sp)) - car(l_sp))
+        _Prefix(_Suffix(self->_data->subject car(l_sp) + 1) car(cdr(l_sp)) - car(l_sp))
     )
 )
 
-procedure(_groupAt(self n_i n_g "gxx")  ; -> str
+procedure(_GroupAt(self n_i n_g "gxx")  ; -> str
     ; 按组序号取组值（group 单参与多参路径共用；0 表示整体）。
     ;
     ; **参数**
@@ -25,13 +25,13 @@ procedure(_groupAt(self n_i n_g "gxx")  ; -> str
     ;   (str) - 0 返回整体串，其余返回对应组值（非参与组为 ""）；n_i < 1 或 > n_g 时 error() 中断
     cond(
         (n_i == 0
-            _groupWhole(self)
+            _GroupWhole(self)
         )
         (n_i < 1 || n_i > n_g
             error("ycRegEx::Match->group: no such group: %d" n_i)
         )
         (t
-            _nth1(self->_data->groups n_i)
+            _Nth1(self->_data->groups n_i)
         )
     )
 )
@@ -39,7 +39,7 @@ procedure(_groupAt(self n_i n_g "gxx")  ; -> str
 
 ; ---------- extraction templates: "&" whole + delimited groups, one substitute ----------
 
-procedure(_wholeTemplate(n_g "x")  ; -> str
+procedure(_WholeTemplate(n_g "x")  ; -> str
     ; 构造「整体 + 组值」提取模板：& 后按 <YC-B> 定界各组反向引用。
     ;
     ; **参数**
@@ -51,14 +51,14 @@ procedure(_wholeTemplate(n_g "x")  ; -> str
         t_t = "&"
         n_k = 1
         while(n_k <= n_g
-            t_t = lsprintf("%s<YC-B>%s" t_t _backref(n_k))
+            t_t = lsprintf("%s<YC-B>%s" t_t _Backref(n_k))
             n_k = n_k + 1
         )
         t_t
     )
 )
 
-procedure(_splitTemplate(n_g "x")  ; -> str
+procedure(_SplitTemplate(n_g "x")  ; -> str
     ; 构造 split 替换模板：匹配处整体换成 <YC-S> 定界与组值交替的串。
     ;
     ; **参数**
@@ -70,14 +70,14 @@ procedure(_splitTemplate(n_g "x")  ; -> str
         t_t = "<YC-S>"
         n_k = 1
         while(n_k <= n_g
-            t_t = lsprintf("%s%s<YC-S>" t_t _backref(n_k))
+            t_t = lsprintf("%s%s<YC-S>" t_t _Backref(n_k))
             n_k = n_k + 1
         )
         t_t
     )
 )
 
-procedure(_extractParts(g_pat g_obj "gg")  ; -> (str . list[str])
+procedure(_ExtractParts(g_pat g_obj "gg")  ; -> (str . list[str])
     ; 从 g_obj 刚建立的匹配状态提取整体与各捕获组值（须在 pcreReplace 之前）。
     ;
     ; **参数**
@@ -87,15 +87,15 @@ procedure(_extractParts(g_pat g_obj "gg")  ; -> (str . list[str])
     ; **返回**
     ;   (str . list[str]) - 点对 (整体串 . 组值列表)；0 个捕获组时组值列表为空
     let((t_buf)
-        t_buf = pcreSubstitute(g_obj _wholeTemplate(g_pat->_data->nGroups))
+        t_buf = pcreSubstitute(g_obj _WholeTemplate(g_pat->_data->nGroups))
         if(g_pat->_data->nGroups == 0
             list(t_buf)
-            _splitBy(t_buf "<YC-B>")
+            _SplitBy(t_buf "<YC-B>")
         )
     )
 )
 
-procedure(_anchorAt(g_pat n_off "gx")  ; -> compiled
+procedure(_AnchorAt(g_pat n_off "gx")  ; -> compiled
     ; 生成在字节偏移 n_off 处精确锚定的编译对象，不截断左侧上下文。
     ;
     ; **参数**
@@ -111,7 +111,7 @@ procedure(_anchorAt(g_pat n_off "gx")  ; -> compiled
     if(n_off == 0
         g_pat->_data->span
         let((g_obj)
-            g_obj = _compileChecked(
+            g_obj = _CompileChecked(
                 lsprintf("%s(?<=\\A[\\s\\S]{%d})(?:%s)" g_pat->_data->flags n_off g_pat->_data->pattern)
                 lsprintf("ycRegEx: anchor at offset %d" n_off)
                 g_pat->_data->compileOpts
@@ -121,7 +121,7 @@ procedure(_anchorAt(g_pat n_off "gx")  ; -> compiled
     )
 )
 
-procedure(_posMarker(t_subj "t")  ; -> str
+procedure(_PosMarker(t_subj "t")  ; -> str
     ; 返回一个在主题串中不存在的替换标记。
     ;
     ; **参数**
@@ -138,7 +138,7 @@ procedure(_posMarker(t_subj "t")  ; -> str
     )
 )
 
-procedure(_matchStart(g_pat t_subj n_exec "gtx")  ; -> int
+procedure(_MatchStart(g_pat t_subj n_exec "gtx")  ; -> int
     ; 用一次首处替换定位匹配起点（不依赖 lookbehind 锚定）。
     ;
     ; **参数**
@@ -149,14 +149,14 @@ procedure(_matchStart(g_pat t_subj n_exec "gtx")  ; -> int
     ; **返回**
     ;   (int) - 首个匹配的 0-based 起始字节位
     let((t_m t_hit t_suf)
-        t_m = _posMarker(t_subj)
+        t_m = _PosMarker(t_subj)
         t_hit = pcreReplace(g_pat t_subj t_m 1 n_exec)
         t_suf = index(t_hit t_m)
         length(t_hit) - length(t_suf)
     )
 )
 
-procedure(_exportMarkers(t_subj "t")  ; -> list[str]
+procedure(_ExportMarkers(t_subj "t")  ; -> list[str]
     ; 返回两个在主题串中不存在的导出标记（匹配标记、组标记）。
     ;
     ; **参数**
@@ -177,7 +177,7 @@ procedure(_exportMarkers(t_subj "t")  ; -> list[str]
     )
 )
 
-procedure(_exportTemplate(n_g t_m t_g "xtt")  ; -> str
+procedure(_ExportTemplate(n_g t_m t_g "xtt")  ; -> str
     ; 构造批量导出模板：匹配标记 + 整体 + 组标记 + 各组 + 尾组标记。
     ;
     ; **参数**
@@ -191,14 +191,14 @@ procedure(_exportTemplate(n_g t_m t_g "xtt")  ; -> str
         t_t = strcat(t_m "&" t_g)
         n_k = 1
         while(n_k <= n_g
-            t_t = strcat(t_t _backref(n_k) t_g)
+            t_t = strcat(t_t _Backref(n_k) t_g)
             n_k = n_k + 1
         )
         t_t
     )
 )
 
-procedure(_exportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
+procedure(_ExportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     ; 用一次全量替换导出全部非空匹配的记录；零宽/格式异常回 'fallback。
     ;
     ; **参数**
@@ -212,10 +212,10 @@ procedure(_exportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
           n_delta n_out n_start n_consumed n_k t_cur)
         if(pcreMatchp(g_pat->_data->pcre t_subj 0 n_exec)
             progn(
-                l_marks = _exportMarkers(t_subj)
+                l_marks = _ExportMarkers(t_subj)
                 t_m = car(l_marks)
                 t_g = car(cdr(l_marks))
-                t_tpl = _exportTemplate(g_pat->_data->nGroups t_m t_g)
+                t_tpl = _ExportTemplate(g_pat->_data->nGroups t_m t_g)
                 t_out = pcreReplace(g_pat->_data->pcre t_subj t_tpl 0 n_exec)
                 t_rest = t_out
                 n_delta = 0
@@ -223,7 +223,7 @@ procedure(_exportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
                 while((t_seg = index(t_rest t_m))
                     n_out = n_out + length(t_rest) - length(t_seg)
                     n_start = n_out - n_delta
-                    t_rest = _suffix(t_seg length(t_m) + 1)
+                    t_rest = _Suffix(t_seg length(t_m) + 1)
                     t_tail = index(t_rest t_g)
                     when(!t_tail
                         l_res = 'fallback
@@ -232,7 +232,7 @@ procedure(_exportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
                     when(l_res == nil || l_res != 'fallback
                         n_consumed = length(t_rest) - length(t_tail)
                         t_whole = substring(t_rest 1 n_consumed)
-                        t_rest = _suffix(t_tail length(t_g) + 1)
+                        t_rest = _Suffix(t_tail length(t_g) + 1)
                         l_groups = nil
                         n_k = 1
                         while(l_res != 'fallback && n_k <= g_pat->_data->nGroups
@@ -244,7 +244,7 @@ procedure(_exportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
                             when(l_res != 'fallback
                                 t_cur = substring(t_rest 1 length(t_rest) - length(t_tail))
                                 l_groups = tconc(l_groups t_cur)
-                                t_rest = _suffix(t_tail length(t_g) + 1)
+                                t_rest = _Suffix(t_tail length(t_g) + 1)
                                 n_k = n_k + 1
                             )
                         )
@@ -267,7 +267,7 @@ procedure(_exportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     )
 )
 
-procedure(_hasBit(n_val n_bit "xx")  ; -> t | nil
+procedure(_HasBit(n_val n_bit "xx")  ; -> t | nil
     ; 判断位值是否包含某一位。
     ;
     ; **参数**
@@ -279,7 +279,7 @@ procedure(_hasBit(n_val n_bit "xx")  ; -> t | nil
     remainder(n_val n_bit * 2) >= n_bit
 )
 
-procedure(_hasNumericGroupRef(t_pat "t")  ; -> t | nil
+procedure(_HasNumericGroupRef(t_pat "t")  ; -> t | nil
     ; 判断 pattern 是否含数字组引用/条件/子程序调用。
     ;
     ; **参数**
@@ -303,7 +303,7 @@ procedure(_hasNumericGroupRef(t_pat "t")  ; -> t | nil
     )
 )
 
-procedure(_shiftNumericRefs(t_pat n_g "tx")  ; -> str | sym
+procedure(_ShiftNumericRefs(t_pat n_g "tx")  ; -> str | sym
     ; 把数字组引用/条件/子程序号整体 +2，供零宽前瞻包装使用。
     ;
     ; **参数**
@@ -313,10 +313,10 @@ procedure(_shiftNumericRefs(t_pat n_g "tx")  ; -> str | sym
     ; **返回**
     ;   (str|sym) - 平移后的 pattern；含不支持结构时回 'fallback
     let((t_res n_i n_len t_c t_next n_j n_num n_first t_tail)
-        unless(_hasNumericGroupRef(t_pat)
+        unless(_HasNumericGroupRef(t_pat)
             t_res = t_pat
         )
-        when(_hasNumericGroupRef(t_pat)
+        when(_HasNumericGroupRef(t_pat)
             cond(
                 (index(t_pat "[") 'fallback)
                 (index(t_pat "\\Q") 'fallback)
@@ -407,7 +407,7 @@ procedure(_shiftNumericRefs(t_pat n_g "tx")  ; -> str | sym
     )
 )
 
-procedure(_zeroAtStart(g_pat t_subj n_exec "gtx")  ; -> list | sym
+procedure(_ZeroAtStart(g_pat t_subj n_exec "gtx")  ; -> list | sym
     ; 执行选项 anchored 下的零宽导出：只检查位置 0。
     ;
     ; **参数**
@@ -420,7 +420,7 @@ procedure(_zeroAtStart(g_pat t_subj n_exec "gtx")  ; -> list | sym
     let((l_parts)
         if(pcreMatchp(g_pat->_data->span t_subj 0 n_exec)
             progn(
-                l_parts = _extractParts(g_pat g_pat->_data->span)
+                l_parts = _ExtractParts(g_pat g_pat->_data->span)
                 if(length(car(l_parts)) == 0
                     list(cons(0 cons(0 cdr(l_parts))))
                     'fallback
@@ -431,7 +431,7 @@ procedure(_zeroAtStart(g_pat t_subj n_exec "gtx")  ; -> list | sym
     )
 )
 
-procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
+procedure(_ZeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     ; 用「消费一字符 + 前瞻」批量导出零宽匹配；不适用时回 'fallback。
     ;
     ; **参数**
@@ -444,29 +444,29 @@ procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     let((t_qpat t_pat2 g_qobj n_q g_qpat l_q l_0 l_parts l_res l_qgroups
           l_m t_pw n_start n_skip g_bad)
         cond(
-            ((_hasBit(g_pat->_data->compileOpts 16) || _hasBit(n_exec 16))
-                _zeroAtStart(g_pat t_subj n_exec))
+            ((_HasBit(g_pat->_data->compileOpts 16) || _HasBit(n_exec 16))
+                _ZeroAtStart(g_pat t_subj n_exec))
             (t
-                t_pat2 = _shiftNumericRefs(g_pat->_data->pattern g_pat->_data->nGroups)
+                t_pat2 = _ShiftNumericRefs(g_pat->_data->pattern g_pat->_data->nGroups)
                 if(t_pat2 == 'fallback
                     'fallback
                     progn(
                         t_qpat = lsprintf("%s([\\s\\S])(?=((?:%s)))"
                             g_pat->_data->flags t_pat2)
-                        g_qobj = _compileChecked(t_qpat
+                        g_qobj = _CompileChecked(t_qpat
                             "ycRegEx: zero-width probe" g_pat->_data->compileOpts)
                         if(g_qobj
                             progn(
                                 n_q = pcreSubpatCount(g_qobj)
                                 g_qpat = makeInstance('Pattern ?_data makeInstance('PatternData
                                     ?pcre g_qobj ?nGroups n_q))
-                                l_q = _exportRecords(g_qpat t_subj n_exec)
+                                l_q = _ExportRecords(g_qpat t_subj n_exec)
                                 n_skip = 0
                                 when(l_q == 'fallback g_bad = t)
                                 when(pcreMatchp(g_pat->_data->span t_subj 0 n_exec)
-                                    l_parts = _extractParts(g_pat g_pat->_data->span)
+                                    l_parts = _ExtractParts(g_pat g_pat->_data->span)
                                     if(length(car(l_parts)) == 0
-                                        unless(_hasBit(n_exec 1024)
+                                        unless(_HasBit(n_exec 1024)
                                             l_0 = cons(0 cons(0 cdr(l_parts)))
                                         )
                                         g_bad = t
@@ -483,7 +483,7 @@ procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
                                                 n_start = car(l_m) + 1
                                                 cond(
                                                     (n_start < n_skip nil)
-                                                    (t_pw == "" && _hasBit(n_exec 1024) nil)
+                                                    (t_pw == "" && _HasBit(n_exec 1024) nil)
                                                     (t
                                                         progn(
                                                             l_res = tconc(l_res cons(n_start cons(n_start + length(t_pw) cdr(cdr(l_qgroups)))))
@@ -508,7 +508,7 @@ procedure(_zeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     )
 )
 
-procedure(_walkRecords(g_pat t_subj n_exec "gtx")  ; -> list
+procedure(_WalkRecords(g_pat t_subj n_exec "gtx")  ; -> list
     ; 逐位置锚定扫描全部匹配（零宽回退路径）。
     ;
     ; **参数**
@@ -522,7 +522,7 @@ procedure(_walkRecords(g_pat t_subj n_exec "gtx")  ; -> list
         n_from = 0
         l_m = t
         while(l_m
-            l_m = _nextMatch(g_pat t_subj n_from n_exec)
+            l_m = _NextMatch(g_pat t_subj n_from n_exec)
             when(l_m
                 l_res = tconc(l_res l_m)
                 n_from = if(car(cdr(l_m)) > car(l_m)
@@ -535,7 +535,7 @@ procedure(_walkRecords(g_pat t_subj n_exec "gtx")  ; -> list
     )
 )
 
-procedure(_nextMatch(g_pat t_subj n_from n_exec "gtxx")  ; -> (int, int . list[str]) | nil
+procedure(_NextMatch(g_pat t_subj n_from n_exec "gtxx")  ; -> (int, int . list[str]) | nil
     ; 慢路径内核：从 n_from 起逐位置锚定扫描，取最左命中。
     ;
     ; **参数**
@@ -553,10 +553,10 @@ procedure(_nextMatch(g_pat t_subj n_from n_exec "gtxx")  ; -> (int, int . list[s
         n_len = length(t_subj)
         while(l_res == nil && n_i <= n_len
             let((g_obj)
-                g_obj = _anchorAt(g_pat n_i)
+                g_obj = _AnchorAt(g_pat n_i)
                 if(pcreMatchp(g_obj t_subj 0 n_exec)
                     let((l_parts)
-                        l_parts = _extractParts(g_pat g_obj)
+                        l_parts = _ExtractParts(g_pat g_obj)
                         l_res = cons(n_i cons(n_i + length(car(l_parts)) cdr(l_parts)))
                     )
                     n_i = n_i + 1
@@ -567,7 +567,7 @@ procedure(_nextMatch(g_pat t_subj n_from n_exec "gtxx")  ; -> (int, int . list[s
     )
 )
 
-procedure(_findAllItem(g_pat t_subj l_m "gtl")  ; -> str | list[str]
+procedure(_FindAllItem(g_pat t_subj l_m "gtl")  ; -> str | list[str]
     ; 把单个命中记录转换为 findall 的结果项（对齐 Python 形态）。
     ;
     ; **参数**
@@ -581,7 +581,7 @@ procedure(_findAllItem(g_pat t_subj l_m "gtl")  ; -> str | list[str]
         l_gr = cdr(cdr(l_m))
         case(g_pat->_data->nGroups
             (0
-                _prefix(_suffix(t_subj car(l_m) + 1) car(cdr(l_m)) - car(l_m))
+                _Prefix(_Suffix(t_subj car(l_m) + 1) car(cdr(l_m)) - car(l_m))
             )
             (1
                 car(l_gr)
@@ -593,7 +593,7 @@ procedure(_findAllItem(g_pat t_subj l_m "gtl")  ; -> str | list[str]
     )
 )
 
-procedure(_mkMatch(g_pat t_subj g_start g_end l_groups g_anchor n_exec "gtgglgx")  ; -> Match
+procedure(_MkMatch(g_pat t_subj g_start g_end l_groups g_anchor n_exec "gtgglgx")  ; -> Match
     ; 构造 Match 实例，收纳整体位置、捕获组值与锚对象。
     ;
     ; **参数**
@@ -677,13 +677,13 @@ defmethod(printself (self(Match))  ; -> str
 ; ---------- method installation ----------
 
 inScheme(
-procedure(_installMatch(self "g")  ; -> any
+procedure(_InstallMatch(self "g")  ; -> any
     ; 把 Match 方法安装到 Match 类（由 initializeInstance 调用）。
     ;
     ; **返回**
     ;   (any) - 返回最后一条安装赋值的结果，调用方忽略
 
-procedure(_error(t_method t_formatString \@rest g_args "ttg")  ; -> never
+procedure(_Error(t_method t_formatString \@rest g_args "ttg")  ; -> never
     ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
     ;
     ; **参数**
@@ -700,24 +700,24 @@ self->span = lambda((\@rest g_args "g")  ; -> (int, int)
     ; 返回匹配区间 (start end) 的 0-based 字节位（end 开区间）。
     ;
     ; **参数**
-    ;   g_args  (list) - 变参：组选择参数（span(g) 预留），传入任意参数即 _error() 中断
+    ;   g_args  (list) - 变参：组选择参数（span(g) 预留），传入任意参数即 _Error() 中断
     ;
     ; **返回**
     ;   (int, int) - (start end) 字节位；位置由构造方给出，缺失时走慢路径回填
-    ;                无命中走 _error() 中断
+    ;                无命中走 _Error() 中断
     let((l_rec)
         when(g_args
-            _error("span" "group arguments are not supported yet (reserved)")
+            _Error("span" "group arguments are not supported yet (reserved)")
         )
         when(self->_data->start == nil
-            l_rec = _nextMatch(self->_data->pattern self->_data->subject 0 self->_data->execOpts)
+            l_rec = _NextMatch(self->_data->pattern self->_data->subject 0 self->_data->execOpts)
             when(l_rec
                 self->_data->start = car(l_rec)
                 self->_data->end = car(cdr(l_rec))
             )
         )
         when(self->_data->start == nil
-            _error("span" "position walk failed unexpectedly")
+            _Error("span" "position walk failed unexpectedly")
         )
         list(self->_data->start self->_data->end)
     )
@@ -727,12 +727,12 @@ self->start = lambda((\@rest g_args "g")  ; -> int
     ; 返回匹配起始字节位（0-based）。
     ;
     ; **参数**
-    ;   g_args  (list) - 变参：组选择参数（start(g) 预留），传入任意参数即 _error() 中断
+    ;   g_args  (list) - 变参：组选择参数（start(g) 预留），传入任意参数即 _Error() 中断
     ;
     ; **返回**
     ;   (int) - span() 的 start；位置惰性时首次调用走慢路径回填
     when(g_args
-        _error("start" "group arguments are not supported yet (reserved)")
+        _Error("start" "group arguments are not supported yet (reserved)")
     )
     car(self->span())
 )
@@ -741,12 +741,12 @@ self->end = lambda((\@rest g_args "g")  ; -> int
     ; 返回匹配结束字节位（0-based，开区间）。
     ;
     ; **参数**
-    ;   g_args  (list) - 变参：组选择参数（end(g) 预留），传入任意参数即 _error() 中断
+    ;   g_args  (list) - 变参：组选择参数（end(g) 预留），传入任意参数即 _Error() 中断
     ;
     ; **返回**
     ;   (int) - span() 的 end（start + 整体串字节长）；位置惰性时首次调用走慢路径回填
     when(g_args
-        _error("end" "group arguments are not supported yet (reserved)")
+        _Error("end" "group arguments are not supported yet (reserved)")
     )
     car(cdr(self->span()))
 )
@@ -761,28 +761,28 @@ self->group = lambda((\@rest g_args "g")  ; -> str | list[str]
     ; **返回**
     ;   (str|list[str]) - 无参返回整体串，单参返回该组串，多参返回组值列表；
     ;                     非参与组为 ""（CPython None → ""）；序号越界走 error()（_groupAt 直调）；
-    ;                     非数字或按名参数走 _error() 中断
+    ;                     非数字或按名参数走 _Error() 中断
     let((n_g)
         foreach(g g_args
             unless(fixp(g)
                 if(stringp(g)
-                    _error("group" "group by name is not supported yet (reserved)")
-                    _error("group" "expected group number, got %A" g)
+                    _Error("group" "group by name is not supported yet (reserved)")
+                    _Error("group" "expected group number, got %A" g)
                 )
             )
         )
         n_g = length(self->_data->groups)
         cond(
             (g_args == nil
-                _groupWhole(self)
+                _GroupWhole(self)
             )
             (length(g_args) == 1
-                _groupAt(self car(g_args) n_g)
+                _GroupAt(self car(g_args) n_g)
             )
             (t
                 let((l_res)
                     foreach(g g_args
-                        l_res = tconc(l_res _groupAt(self g n_g))
+                        l_res = tconc(l_res _GroupAt(self g n_g))
                     )
                     car(l_res)
                 )
@@ -812,8 +812,8 @@ self->groupdict = lambda(()  ; -> never
     ; 返回组名到组值的字典（按名取组预留），本实现调用即 error() 中断。
     ;
     ; **返回**
-    ;   (never) - 总是走 _error() 中断（按名取组预留），不返回
-    _error("groupdict" "not supported yet (reserved)")
+    ;   (never) - 总是走 _Error() 中断（按名取组预留），不返回
+    _Error("groupdict" "not supported yet (reserved)")
 )
 
 self->expand = lambda((t_tpl "t")  ; -> str
@@ -824,23 +824,23 @@ self->expand = lambda((t_tpl "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 在全主题串上按匹配偏移重挂锚状态后由 pcreSubstitute 展开的结果；
-    ;           t_tpl 非串、状态重挂失败或模板非法走 _error() 中断
+    ;           t_tpl 非串、状态重挂失败或模板非法走 _Error() 中断
     let((l_sp g_ok g_obj l_res)
         unless(stringp(t_tpl)
-            _error("expand" "expected string template, got %A" t_tpl)
+            _Error("expand" "expected string template, got %A" t_tpl)
         )
         l_sp = self->span()
         g_obj = if(car(l_sp) == 0
             self->_data->anchor
-            _anchorAt(self->_data->pattern car(l_sp))
+            _AnchorAt(self->_data->pattern car(l_sp))
         )
         g_ok = errset(pcreMatchp(g_obj self->_data->subject 0 self->_data->execOpts) nil)
         unless(g_ok && car(g_ok)
-            _error("expand" "cannot re-establish match state")
+            _Error("expand" "cannot re-establish match state")
         )
         l_res = errset(pcreSubstitute(g_obj t_tpl) nil)
         unless(l_res && stringp(car(l_res))
-            _error("expand" "bad template: %s" t_tpl)
+            _Error("expand" "bad template: %s" t_tpl)
         )
         car(l_res)
     )
@@ -857,7 +857,7 @@ defmethod(initializeInstance (self(Match) \@rest _args)
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
-    _installMatch(self)
+    _InstallMatch(self)
     t
 )
 )

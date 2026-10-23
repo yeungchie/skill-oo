@@ -4,7 +4,7 @@ Cadence SKILL++ 的 TOML 1.0 编解码库。
 
 ## 概要
 
-+ 解码入口：`decode()`；编码入口：`encode()`。
++ 解码入口：`Decode()`；编码入口：`Encode()`。
 + 解码返回根 `table`；编码输入必须是 `table`。
 + 日期与时间解码为原始文本字符串，编码时按普通字符串加引号；不做日期时间对象转换。
 + 布尔值使用 `ycCodec::True` / `ycCodec::False`；缺键返回 `ycCodec::Missing`；TOML 无 null。
@@ -45,33 +45,33 @@ x = 2147483648
 ```
 
 ```lisp
-t_v = ycToml::decode(t_toml)
+t_v = ycToml::Decode(t_toml)
 t_v["title"]                                        ; => "demo"
 t_v["server"]["host"]                               ; => "localhost"
 t_v["server"]["ports"]                              ; => (8000 8001)
 t_v["missing"]                                      ; => ycCodec::Missing
 
-ycToml::encode(t_v ?sortKeys t)
+ycToml::Encode(t_v ?sortKeys t)
 ; => title = "demo"
 ;
 ;    [server]
 ;    host = "localhost"
 ;    ports = [8000, 8001]
 
-ycToml::decode(t_toml_date)["d"]                    ; => "1979-05-27"
-ycToml::decode(t_toml_products)["products"]
+ycToml::Decode(t_toml_date)["d"]                    ; => "1979-05-27"
+ycToml::Decode(t_toml_products)["products"]
 ; => (<table: name = "Hammer">)
 
-ycToml::decode(t_toml_bad_int)
-; *Error* ycToml::decode: integer out of fixnum range at line 1, column 5
+ycToml::Decode(t_toml_bad_int)
+; *Error* ycToml::Decode: integer out of fixnum range at line 1, column 5
 ```
 
 ## API 参考
 
-### ycToml::decode <sub>`function`</sub>
+### ycToml::Decode <sub>`function`</sub>
 
 ```text
-ycToml::decode(
+ycToml::Decode(
     t_str
     [ ?maxDepth n_max ]
 )
@@ -140,30 +140,30 @@ a = 2023-02-29
 ```
 
 ```lisp
-t_v = ycToml::decode(t_toml_dotted)
+t_v = ycToml::Decode(t_toml_dotted)
 t_v["a"]["b"]                                        ; => 1
 
-t_v = ycToml::decode(t_toml_escape)
+t_v = ycToml::Decode(t_toml_escape)
 t_v["name"]                                          ; => "a\tb"
 
-t_v = ycToml::decode(t_toml_arrays)
+t_v = ycToml::Decode(t_toml_arrays)
 t_v["a"]                                             ; => (<table: x = 1> <table: x = 2>)
 
-t_v = ycToml::decode(t_toml_numbers)
+t_v = ycToml::Decode(t_toml_numbers)
 t_v["f"]                                             ; => 1000.0
 isNaN(t_v["n"])                                      ; => t
 
-ycToml::decode(t_toml_duplicate)
-; *Error* ycToml::decode: duplicate key at line 2, column 1
+ycToml::Decode(t_toml_duplicate)
+; *Error* ycToml::Decode: duplicate key at line 2, column 1
 
-ycToml::decode(t_toml_bad_date)
-; *Error* ycToml::decode: invalid date at line 1, column 5
+ycToml::Decode(t_toml_bad_date)
+; *Error* ycToml::Decode: invalid date at line 1, column 5
 ```
 
-### ycToml::encode <sub>`function`</sub>
+### ycToml::Encode <sub>`function`</sub>
 
 ```text
-ycToml::encode(
+ycToml::Encode(
     g_val
     [ ?sortKeys g_sort ]
     [ ?strict g_strict ]
@@ -207,8 +207,8 @@ host = "localhost"
 ```
 
 ```lisp
-t_v = ycToml::decode(t_toml_encode)
-ycToml::encode(t_v ?sortKeys t)
+t_v = ycToml::Decode(t_toml_encode)
+ycToml::Encode(t_v ?sortKeys t)
 ; => title = "demo"
 ;
 ;    [server]
@@ -217,16 +217,16 @@ ycToml::encode(t_v ?sortKeys t)
 t_v = makeTable("demo")
 t_v["a"] = list(1 2)
 t_v["s"] = "a\"b"
-ycToml::encode(t_v ?sortKeys t)
+ycToml::Encode(t_v ?sortKeys t)
 ; => "a = [1, 2]\ns = \"a\\\"b\"\n"
 
-ycToml::encode(makeTable("demo") ?finalNewline nil)  ; => ""
+ycToml::Encode(makeTable("demo") ?finalNewline nil)  ; => ""
 
-ycToml::encode("not a table")
-; *Error* ycToml::encode: root value must be a table
+ycToml::Encode("not a table")
+; *Error* ycToml::Encode: root value must be a table
 
-ycToml::encode(list(1 2))
-; *Error* ycToml::encode: root value must be a table
+ycToml::Encode(list(1 2))
+; *Error* ycToml::Encode: root value must be a table
 ```
 
 ## 类型映射

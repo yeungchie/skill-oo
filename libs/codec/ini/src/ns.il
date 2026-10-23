@@ -8,34 +8,34 @@ unless(findNamespace("ycIni")
 )
 addToNamespace("ycIni"
     mapcar('symbolToString '(
-        decode
-        encode
-        _build
-        _code
-        _find
-        _hasControl
-        _lineIndent
-        _ltrim
-        _normalize
-        _rtrim
-        _splitLines
-        _trim
-        _delim
-        _policy
-        _error
-        _newTable
-        _hasKey
-        _keyText
-        _sectionText
-        _nameText
-        _valueText
-        _numText
-        _tableKeys
-        _decodeText
-        _headerName
-        _keyValue
-        _emitScalar
-        _emitSection
+        Decode
+        Encode
+        _Build
+        _Code
+        _Find
+        _HasControl
+        _LineIndent
+        _Ltrim
+        _Normalize
+        _Rtrim
+        _SplitLines
+        _Trim
+        _Delim
+        _Policy
+        _Error
+        _NewTable
+        _HasKey
+        _KeyText
+        _SectionText
+        _NameText
+        _ValueText
+        _NumText
+        _TableKeys
+        _DecodeText
+        _HeaderName
+        _KeyValue
+        _EmitScalar
+        _EmitSection
     ))
 )
 unuseNamespace("ycIni")

@@ -7,7 +7,7 @@ useNamespace("ycUnits")
 
 ; ---------- 基础字符 ----------
 
-procedure(_isWs(n_b "x")  ; -> t | nil
+procedure(_IsWs(n_b "x")  ; -> t | nil
     ; 判断字节是否为空白（内部实现）。
     ;
     ; **参数**
@@ -18,7 +18,7 @@ procedure(_isWs(n_b "x")  ; -> t | nil
     n_b == 32 || n_b == 9 || n_b == 10 || n_b == 13
 )
 
-procedure(_isDigit(n_b "x")  ; -> t | nil
+procedure(_IsDigit(n_b "x")  ; -> t | nil
     ; 判断字节是否为十进制数字（内部实现）。
     ;
     ; **参数**
@@ -29,7 +29,7 @@ procedure(_isDigit(n_b "x")  ; -> t | nil
     n_b >= 48 && n_b <= 57
 )
 
-procedure(_hasWs(t_s "t")  ; -> t | nil
+procedure(_HasWs(t_s "t")  ; -> t | nil
     ; 判断字符串是否含空白（内部实现）。
     ;
     ; **参数**
@@ -41,7 +41,7 @@ procedure(_hasWs(t_s "t")  ; -> t | nil
         n_i = 1
         n_len = length(t_s)
         while(n_i <= n_len && !g_found
-            when(_isWs(charToInt(getchar(t_s n_i)))
+            when(_IsWs(charToInt(getchar(t_s n_i)))
                 g_found = t
             )
             n_i = n_i + 1
@@ -52,7 +52,7 @@ procedure(_hasWs(t_s "t")  ; -> t | nil
 
 ; ---------- 前缀 ----------
 
-procedure(_prefixAliases()  ; -> list
+procedure(_PrefixAliases()  ; -> list
     ; 返回长前缀别名表（内部实现）。
     ;
     ; **返回**
@@ -78,7 +78,7 @@ procedure(_prefixAliases()  ; -> list
     )
 )
 
-procedure(_shortFactor(n_ch "x")  ; -> num | nil
+procedure(_ShortFactor(n_ch "x")  ; -> num | nil
     ; 返回单字符 SI 前缀倍率（内部实现）。
     ;
     ; **参数**
@@ -109,7 +109,7 @@ procedure(_shortFactor(n_ch "x")  ; -> num | nil
     )
 )
 
-procedure(_tailAfter(t_s n_start "tx")  ; -> str
+procedure(_TailAfter(t_s n_start "tx")  ; -> str
     ; 取从 n_start 开始的尾部（内部实现）。
     ;
     ; **参数**
@@ -121,7 +121,7 @@ procedure(_tailAfter(t_s n_start "tx")  ; -> str
     if(n_start > length(t_s) "" substring(t_s n_start length(t_s) - n_start + 1))
 )
 
-procedure(_prefixScale(t_rest t_space "tg")  ; -> list
+procedure(_PrefixScale(t_rest t_space "tg")  ; -> list
     ; 把后缀拆为倍率与单位（内部实现）。
     ;
     ; **参数**
@@ -133,7 +133,7 @@ procedure(_prefixScale(t_rest t_space "tg")  ; -> list
     if(t_space
         list(1.0 t_rest)
         let((l_found t_factor t_tail)
-            foreach(l_pair _prefixAliases()
+            foreach(l_pair _PrefixAliases()
                 when(!l_found
                     let((t_name)
                         t_name = car(l_pair)
@@ -141,7 +141,7 @@ procedure(_prefixScale(t_rest t_space "tg")  ; -> list
                             when(substring(t_rest 1 length(t_name)) == t_name
                                 l_found = t
                                 t_factor = cadr(l_pair)
-                                t_tail = _tailAfter(t_rest length(t_name) + 1)
+                                t_tail = _TailAfter(t_rest length(t_name) + 1)
                             )
                         )
                     )
@@ -152,9 +152,9 @@ procedure(_prefixScale(t_rest t_space "tg")  ; -> list
                 if(t_rest == ""
                     list(1.0 "")
                     let((n_factor)
-                        n_factor = _shortFactor(charToInt(getchar(t_rest 1)))
+                        n_factor = _ShortFactor(charToInt(getchar(t_rest 1)))
                         if(n_factor
-                            list(n_factor _tailAfter(t_rest 2))
+                            list(n_factor _TailAfter(t_rest 2))
                             list(1.0 t_rest)
                         )
                     )
@@ -164,7 +164,7 @@ procedure(_prefixScale(t_rest t_space "tg")  ; -> list
     )
 )
 
-procedure(_prefixForExp(n_exp "x")  ; -> str
+procedure(_PrefixForExp(n_exp "x")  ; -> str
     ; 返回 3 的倍数指数对应的前缀（内部实现）。
     ;
     ; **参数**
@@ -195,7 +195,7 @@ procedure(_prefixForExp(n_exp "x")  ; -> str
 
 ; ---------- 解析 ----------
 
-procedure(_parse(t_str t_ctx "tt")  ; -> list
+procedure(_Parse(t_str t_ctx "tt")  ; -> list
     ; 解析工程计数串（内部实现）。
     ;
     ; **参数**
@@ -207,7 +207,7 @@ procedure(_parse(t_str t_ctx "tt")  ; -> list
     let((n_len n_i n_start n_b n_digits n_edigits n_expStart g_space t_num t_unit l_pf)
         n_len = length(t_str)
         n_i = 1
-        while(n_i <= n_len && _isWs(charToInt(getchar(t_str n_i)))
+        while(n_i <= n_len && _IsWs(charToInt(getchar(t_str n_i)))
             n_i = n_i + 1
         )
         unless(n_i <= n_len
@@ -219,13 +219,13 @@ procedure(_parse(t_str t_ctx "tt")  ; -> list
             n_i = n_i + 1
         )
         n_digits = 0
-        while(n_i <= n_len && _isDigit(charToInt(getchar(t_str n_i)))
+        while(n_i <= n_len && _IsDigit(charToInt(getchar(t_str n_i)))
             n_i = n_i + 1
             n_digits = n_digits + 1
         )
         when(n_i <= n_len && charToInt(getchar(t_str n_i)) == 46
             n_i = n_i + 1
-            while(n_i <= n_len && _isDigit(charToInt(getchar(t_str n_i)))
+            while(n_i <= n_len && _IsDigit(charToInt(getchar(t_str n_i)))
                 n_i = n_i + 1
                 n_digits = n_digits + 1
             )
@@ -241,7 +241,7 @@ procedure(_parse(t_str t_ctx "tt")  ; -> list
                 n_i = n_i + 1
             )
             n_edigits = 0
-            while(n_i <= n_len && _isDigit(charToInt(getchar(t_str n_i)))
+            while(n_i <= n_len && _IsDigit(charToInt(getchar(t_str n_i)))
                 n_i = n_i + 1
                 n_edigits = n_edigits + 1
             )
@@ -250,32 +250,32 @@ procedure(_parse(t_str t_ctx "tt")  ; -> list
             )
         )
         t_num = substring(t_str n_start n_i - n_start)
-        g_space = when(n_i <= n_len _isWs(charToInt(getchar(t_str n_i))))
-        while(n_i <= n_len && _isWs(charToInt(getchar(t_str n_i)))
+        g_space = when(n_i <= n_len _IsWs(charToInt(getchar(t_str n_i))))
+        while(n_i <= n_len && _IsWs(charToInt(getchar(t_str n_i)))
             n_i = n_i + 1
         )
         t_unit = if(n_i <= n_len substring(t_str n_i n_len - n_i + 1) "")
         while(
             length(t_unit) > 0
-            && _isWs(charToInt(getchar(t_unit length(t_unit))))
+            && _IsWs(charToInt(getchar(t_unit length(t_unit))))
             t_unit = substring(t_unit 1 length(t_unit) - 1)
         )
-        when(_hasWs(t_unit)
+        when(_HasWs(t_unit)
             error("%s: whitespace inside unit (%A)" t_ctx t_str)
         )
         when(
             t_unit != ""
-            && (_isDigit(charToInt(getchar(t_unit 1))) || charToInt(getchar(t_unit 1)) == 46)
+            && (_IsDigit(charToInt(getchar(t_unit 1))) || charToInt(getchar(t_unit 1)) == 46)
             error("%s: invalid number (%A)" t_ctx t_str)
         )
-        l_pf = _prefixScale(t_unit g_space)
+        l_pf = _PrefixScale(t_unit g_space)
         list(atof(t_num) * car(l_pf) cadr(l_pf))
     )
 )
 
 ; ---------- 公开入口 ----------
 
-procedure(parse(t_text "t")  ; -> list
+procedure(Parse(t_text "t")  ; -> list
     ; 解析工程计数串。
     ;
     ; **参数**
@@ -283,10 +283,10 @@ procedure(parse(t_text "t")  ; -> list
     ;
     ; **返回**
     ;   (list) - (数值 单位)；无单位时单位为空串
-    _parse(t_text "ycUnits::parse")
+    _Parse(t_text "ycUnits::Parse")
 )
 
-procedure(format(n_value \@key (unit "") (precision 6) "ntx")  ; -> str
+procedure(Format(n_value \@key (unit "") (precision 6) "ntx")  ; -> str
     ; 把数值格式化为工程计数。
     ;
     ; **参数**
@@ -297,7 +297,7 @@ procedure(format(n_value \@key (unit "") (precision 6) "ntx")  ; -> str
     ; **返回**
     ;   (str) - 工程计数文本，如 "1.234k"、"2.5uF"
     unless(fixp(precision) && precision >= 1 && precision <= 15
-        error("ycUnits::format: precision must be an integer from 1 to 15 (%A)" precision)
+        error("ycUnits::Format: precision must be an integer from 1 to 15 (%A)" precision)
     )
     if(n_value == 0
         strcat("0" unit)
@@ -325,7 +325,7 @@ procedure(format(n_value \@key (unit "") (precision 6) "ntx")  ; -> str
                         )
                     )
                     if(n_exp
-                        strcat(t_mant _prefixForExp(n_exp) unit)
+                        strcat(t_mant _PrefixForExp(n_exp) unit)
                         strcat(t_mant unit)
                     )
                 )
@@ -334,7 +334,7 @@ procedure(format(n_value \@key (unit "") (precision 6) "ntx")  ; -> str
     )
 )
 
-procedure(toNumber(t_text "t")  ; -> num
+procedure(ToNumber(t_text "t")  ; -> num
     ; 解析工程计数串并返回数值。
     ;
     ; **参数**
@@ -342,10 +342,10 @@ procedure(toNumber(t_text "t")  ; -> num
     ;
     ; **返回**
     ;   (num) - 数值部分（前缀已折算）
-    car(_parse(t_text "ycUnits::toNumber"))
+    car(_Parse(t_text "ycUnits::ToNumber"))
 )
 
-procedure(toUnit(t_text "t")  ; -> str
+procedure(ToUnit(t_text "t")  ; -> str
     ; 解析工程计数串并返回单位。
     ;
     ; **参数**
@@ -353,7 +353,7 @@ procedure(toUnit(t_text "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 单位部分；无单位为 ""
-    cadr(_parse(t_text "ycUnits::toUnit"))
+    cadr(_Parse(t_text "ycUnits::ToUnit"))
 )
 
 unuseNamespace("ycUnits")

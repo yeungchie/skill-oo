@@ -5,8 +5,8 @@ Cadence SKILL++ 的字符串工具库：常用操作、转义与标识符转换�
 ## 概要
 
 + 字符级操作按 UTF-8 码点处理；显示宽度与 `ycUtf8` 的宽度规则一致。
-+ 字面量接口（`ycString::replace` / `ycString::count` / `ycString::strSplit`）默认区分大小写、按字面量匹配；`?regex t` 时按 `ycRegEx` 的模式与替换模板语义。
-+ 命名风格转换（`ycString::words` / `ycString::joinWords` / `ycString::sanitize`）按大小写与数字边界切词；ASCII 字母数字以外的码点算词内字符。
++ 字面量接口（`ycString::Replace` / `ycString::Count` / `ycString::StrSplit`）默认区分大小写、按字面量匹配；`?regex t` 时按 `ycRegEx` 的模式与替换模板语义。
++ 命名风格转换（`ycString::Words` / `ycString::JoinWords` / `ycString::Sanitize`）按大小写与数字边界切词；ASCII 字母数字以外的码点算词内字符。
 + 记法约定：例程注释中 `; =>` 标记返回值，`; *Error*` 标记错误消息。
 + 库内校验触发的错误消息以 `ycString::<过程>:` 为前缀，可用 `errset` 捕获。
 
@@ -14,31 +14,31 @@ Cadence SKILL++ 的字符串工具库：常用操作、转义与标识符转换�
 
 ```lisp
 ; 修剪、补宽与宽度
-ycString::trim("  hello  ")                    ; => "hello"
-ycString::pad("ab" 5 ?fill "-")                ; => "ab---"
-ycString::width("中文")                        ; => 4
+ycString::Trim("  hello  ")                    ; => "hello"
+ycString::Pad("ab" 5 ?fill "-")                ; => "ab---"
+ycString::Width("中文")                        ; => 4
 
 ; 切分与连接
-ycString::strSplit("a,,b" ?sep ",")            ; => ("a" "" "b")
-ycString::strJoin(list("a" "b") ?sep "-")      ; => "a-b"
+ycString::StrSplit("a,,b" ?sep ",")            ; => ("a" "" "b")
+ycString::StrJoin(list("a" "b") ?sep "-")      ; => "a-b"
 
 ; 替换、统计与转义
-ycString::replace("baaacaa" "a+" "X" ?regex t) ; => "bXcX"
-ycString::count("banana" "a")                  ; => 3
-ycString::escape("a\nb")                       ; => "a\\nb"
-ycString::unescape("a\\nb")                    ; => "a\nb"
+ycString::Replace("baaacaa" "a+" "X" ?regex t) ; => "bXcX"
+ycString::Count("banana" "a")                  ; => 3
+ycString::Escape("a\nb")                       ; => "a\\nb"
+ycString::Unescape("a\\nb")                    ; => "a\nb"
 
 ; 标识符转换
-ycString::toSnake("HTMLParser")                ; => "html_parser"
-ycString::toPascal("html_parser")              ; => "HtmlParser"
+ycString::ToSnake("HTMLParser")                ; => "html_parser"
+ycString::ToPascal("html_parser")              ; => "HtmlParser"
 ```
 
 ## API 参考
 
-### ycString::trim <sub>`function`</sub>
+### ycString::Trim <sub>`function`</sub>
 
 ```text
-ycString::trim(
+ycString::Trim(
     t_s
     [ ?chars ]
 )
@@ -63,15 +63,15 @@ ycString::trim(
 **例程**
 
 ```lisp
-ycString::trim("  ab  ")               ; => "ab"
-ycString::trim("xxabxx" ?chars "x")    ; => "ab"
-ycString::trim("中中a中中" ?chars "中") ; => "a"
+ycString::Trim("  ab  ")               ; => "ab"
+ycString::Trim("xxabxx" ?chars "x")    ; => "ab"
+ycString::Trim("中中a中中" ?chars "中") ; => "a"
 ```
 
-### ycString::trimStart <sub>`function`</sub>
+### ycString::TrimStart <sub>`function`</sub>
 
 ```text
-ycString::trimStart(
+ycString::TrimStart(
     t_s
     [ ?chars ]
 )
@@ -80,7 +80,7 @@ ycString::trimStart(
 
 **描述**
 
-同 `ycString::trim`，仅去除前端字符。
+同 `ycString::Trim`，仅去除前端字符。
 
 **参数**
 
@@ -96,13 +96,13 @@ ycString::trimStart(
 **例程**
 
 ```lisp
-ycString::trimStart("  ab  ") ; => "ab  "
+ycString::TrimStart("  ab  ") ; => "ab  "
 ```
 
-### ycString::trimEnd <sub>`function`</sub>
+### ycString::TrimEnd <sub>`function`</sub>
 
 ```text
-ycString::trimEnd(
+ycString::TrimEnd(
     t_s
     [ ?chars ]
 )
@@ -111,7 +111,7 @@ ycString::trimEnd(
 
 **描述**
 
-同 `ycString::trim`，仅去除尾端字符。
+同 `ycString::Trim`，仅去除尾端字符。
 
 **参数**
 
@@ -127,13 +127,13 @@ ycString::trimEnd(
 **例程**
 
 ```lisp
-ycString::trimEnd("  ab  ") ; => "  ab"
+ycString::TrimEnd("  ab  ") ; => "  ab"
 ```
 
-### ycString::pad <sub>`function`</sub>
+### ycString::Pad <sub>`function`</sub>
 
 ```text
-ycString::pad(
+ycString::Pad(
     t_s
     n_width
     [ ?fill ]
@@ -166,21 +166,21 @@ ycString::pad(
 **例程**
 
 ```lisp
-ycString::pad("ab" 5 ?fill "-")               ; => "ab---"
-ycString::pad("ab" 5 ?side "start" ?fill "-") ; => "---ab"
-ycString::pad("中" 4 ?unit "char" ?fill "-")  ; => "中---"
-ycString::pad("ab" 1)                         ; => "ab"
-ycString::pad("a" 2 ?unit "char" ?fill "中")  ; => "a中"
-ycString::pad("a" -1)
-; *Error* ycString::pad: width must be a non-negative integer (-1)
-ycString::pad("a" 2 ?fill "中")
-; *Error* ycString::pad: fill must be single width in display mode ("中")
+ycString::Pad("ab" 5 ?fill "-")               ; => "ab---"
+ycString::Pad("ab" 5 ?side "start" ?fill "-") ; => "---ab"
+ycString::Pad("中" 4 ?unit "char" ?fill "-")  ; => "中---"
+ycString::Pad("ab" 1)                         ; => "ab"
+ycString::Pad("a" 2 ?unit "char" ?fill "中")  ; => "a中"
+ycString::Pad("a" -1)
+; *Error* ycString::Pad: width must be a non-negative integer (-1)
+ycString::Pad("a" 2 ?fill "中")
+; *Error* ycString::Pad: fill must be single width in display mode ("中")
 ```
 
-### ycString::width <sub>`function`</sub>
+### ycString::Width <sub>`function`</sub>
 
 ```text
-ycString::width(
+ycString::Width(
     t_s
     [ ?unit ]
     [ ?ambiguous ]
@@ -207,17 +207,17 @@ ycString::width(
 **例程**
 
 ```lisp
-ycString::width("中文")              ; => 4
-ycString::width("中文" ?unit "char") ; => 2
-ycString::width("")                  ; => 0
-ycString::width("a" ?unit "px")
-; *Error* ycString::width: unknown unit "px"
+ycString::Width("中文")              ; => 4
+ycString::Width("中文" ?unit "char") ; => 2
+ycString::Width("")                  ; => 0
+ycString::Width("a" ?unit "px")
+; *Error* ycString::Width: unknown unit "px"
 ```
 
-### ycString::strSplit <sub>`function`</sub>
+### ycString::StrSplit <sub>`function`</sub>
 
 ```text
-ycString::strSplit(
+ycString::StrSplit(
     t_s
     [ ?sep ]
     [ ?regex ]
@@ -246,20 +246,20 @@ ycString::strSplit(
 **例程**
 
 ```lisp
-ycString::strSplit("  a\tb\n c ")                   ; => ("a" "b" "c")
-ycString::strSplit("")                              ; => nil
-ycString::strSplit("a,,b" ?sep ",")                 ; => ("a" "" "b")
-ycString::strSplit(",a," ?sep ",")                  ; => ("" "a" "")
-ycString::strSplit("a,,b" ?sep "," ?keepEmpty nil)  ; => ("a" "b")
-ycString::strSplit("a1b22c" ?sep "[0-9]+" ?regex t) ; => ("a" "b" "c")
-ycString::strSplit("a" ?sep "")
-; *Error* ycString::strSplit: separator must not be empty
+ycString::StrSplit("  a\tb\n c ")                   ; => ("a" "b" "c")
+ycString::StrSplit("")                              ; => nil
+ycString::StrSplit("a,,b" ?sep ",")                 ; => ("a" "" "b")
+ycString::StrSplit(",a," ?sep ",")                  ; => ("" "a" "")
+ycString::StrSplit("a,,b" ?sep "," ?keepEmpty nil)  ; => ("a" "b")
+ycString::StrSplit("a1b22c" ?sep "[0-9]+" ?regex t) ; => ("a" "b" "c")
+ycString::StrSplit("a" ?sep "")
+; *Error* ycString::StrSplit: separator must not be empty
 ```
 
-### ycString::strJoin <sub>`function`</sub>
+### ycString::StrJoin <sub>`function`</sub>
 
 ```text
-ycString::strJoin(
+ycString::StrJoin(
     l_items
     [ ?sep ]
 )
@@ -284,17 +284,17 @@ ycString::strJoin(
 **例程**
 
 ```lisp
-ycString::strJoin(list("a" "b" "c"))      ; => "abc"
-ycString::strJoin(list("a" "b") ?sep "-") ; => "a-b"
-ycString::strJoin(nil)                    ; => ""
-ycString::strJoin(list("a" 1))
-; *Error* ycString::strJoin: item #2 is not a string (1)
+ycString::StrJoin(list("a" "b" "c"))      ; => "abc"
+ycString::StrJoin(list("a" "b") ?sep "-") ; => "a-b"
+ycString::StrJoin(nil)                    ; => ""
+ycString::StrJoin(list("a" 1))
+; *Error* ycString::StrJoin: item #2 is not a string (1)
 ```
 
-### ycString::startsWith <sub>`function`</sub>
+### ycString::StartsWith <sub>`function`</sub>
 
 ```text
-ycString::startsWith(
+ycString::StartsWith(
     t_s
     t_prefix
 )
@@ -319,16 +319,16 @@ ycString::startsWith(
 **例程**
 
 ```lisp
-ycString::startsWith("abc" "ab")       ; => t
-ycString::startsWith("abc" "")         ; => t
-ycString::startsWith("中文abc" "中文") ; => t
-ycString::startsWith("abc" "abcd")     ; => nil
+ycString::StartsWith("abc" "ab")       ; => t
+ycString::StartsWith("abc" "")         ; => t
+ycString::StartsWith("中文abc" "中文") ; => t
+ycString::StartsWith("abc" "abcd")     ; => nil
 ```
 
-### ycString::endsWith <sub>`function`</sub>
+### ycString::EndsWith <sub>`function`</sub>
 
 ```text
-ycString::endsWith(
+ycString::EndsWith(
     t_s
     t_suffix
 )
@@ -353,16 +353,16 @@ ycString::endsWith(
 **例程**
 
 ```lisp
-ycString::endsWith("abc" "bc")      ; => t
-ycString::endsWith("abc" "")        ; => t
-ycString::endsWith("中文abc" "abc") ; => t
-ycString::endsWith("abc" "abcd")    ; => nil
+ycString::EndsWith("abc" "bc")      ; => t
+ycString::EndsWith("abc" "")        ; => t
+ycString::EndsWith("中文abc" "abc") ; => t
+ycString::EndsWith("abc" "abcd")    ; => nil
 ```
 
-### ycString::replace <sub>`function`</sub>
+### ycString::Replace <sub>`function`</sub>
 
 ```text
-ycString::replace(
+ycString::Replace(
     t_s
     t_old
     t_new
@@ -391,20 +391,20 @@ ycString::replace(
 **例程**
 
 ```lisp
-ycString::replace("aaa" "a" "b")                  ; => "bbb"
-ycString::replace("aaa" "aa" "b")                 ; => "ba"
-ycString::replace("abc" "x" "y")                  ; => "abc"
-ycString::replace("a1b22c" "[0-9]+" "N" ?regex t) ; => "aNbNc"
-ycString::replace("a" "" "b")
-; *Error* ycString::replace: search string must not be empty
-ycString::replace("a" "" "b" ?regex t)
-; *Error* ycString::replace: pattern must not be empty
+ycString::Replace("aaa" "a" "b")                  ; => "bbb"
+ycString::Replace("aaa" "aa" "b")                 ; => "ba"
+ycString::Replace("abc" "x" "y")                  ; => "abc"
+ycString::Replace("a1b22c" "[0-9]+" "N" ?regex t) ; => "aNbNc"
+ycString::Replace("a" "" "b")
+; *Error* ycString::Replace: search string must not be empty
+ycString::Replace("a" "" "b" ?regex t)
+; *Error* ycString::Replace: pattern must not be empty
 ```
 
-### ycString::count <sub>`function`</sub>
+### ycString::Count <sub>`function`</sub>
 
 ```text
-ycString::count(
+ycString::Count(
     t_s
     t_sub
     [ ?regex ]
@@ -431,18 +431,18 @@ ycString::count(
 **例程**
 
 ```lisp
-ycString::count("banana" "a")           ; => 3
-ycString::count("aaaa" "aa")            ; => 2
-ycString::count("abc" "x")              ; => 0
-ycString::count("banana" "a+" ?regex t) ; => 3
-ycString::count("a" "")
-; *Error* ycString::count: search string must not be empty
+ycString::Count("banana" "a")           ; => 3
+ycString::Count("aaaa" "aa")            ; => 2
+ycString::Count("abc" "x")              ; => 0
+ycString::Count("banana" "a+" ?regex t) ; => 3
+ycString::Count("a" "")
+; *Error* ycString::Count: search string must not be empty
 ```
 
-### ycString::escape <sub>`function`</sub>
+### ycString::Escape <sub>`function`</sub>
 
 ```text
-ycString::escape(
+ycString::Escape(
     t_s
     [ ?quote ]
 )
@@ -467,17 +467,17 @@ ycString::escape(
 **例程**
 
 ```lisp
-ycString::escape("a\\b")        ; => "a\\\\b"
-ycString::escape("a\"b")        ; => "a\\\"b"
-ycString::escape("a\nb")        ; => "a\\nb"
-ycString::escape("a\tb")        ; => "a\\tb"
-ycString::escape("ab" ?quote t) ; => "\"ab\""
+ycString::Escape("a\\b")        ; => "a\\\\b"
+ycString::Escape("a\"b")        ; => "a\\\"b"
+ycString::Escape("a\nb")        ; => "a\\nb"
+ycString::Escape("a\tb")        ; => "a\\tb"
+ycString::Escape("ab" ?quote t) ; => "\"ab\""
 ```
 
-### ycString::unescape <sub>`function`</sub>
+### ycString::Unescape <sub>`function`</sub>
 
 ```text
-ycString::unescape(
+ycString::Unescape(
     t_s
     [ ?strict ]
 )
@@ -486,7 +486,7 @@ ycString::unescape(
 
 **描述**
 
-还原 `ycString::escape` 的转义序列。默认未知转义与悬尾反斜杠原样保留；`?strict` 非 nil 时两者均以 `error()` 中断。
+还原 `ycString::Escape` 的转义序列。默认未知转义与悬尾反斜杠原样保留；`?strict` 非 nil 时两者均以 `error()` 中断。
 
 **参数**
 
@@ -502,20 +502,20 @@ ycString::unescape(
 **例程**
 
 ```lisp
-ycString::unescape("a\\nb") ; => "a\nb"
-ycString::unescape("a\\tb") ; => "a\tb"
-ycString::unescape("a\\qb") ; => "a\\qb"
-ycString::unescape("a\\")   ; => "a\\"
-ycString::unescape("a\\qb" ?strict t)
-; *Error* ycString::unescape: unknown escape \q
-ycString::unescape("a\\" ?strict t)
-; *Error* ycString::unescape: trailing backslash
+ycString::Unescape("a\\nb") ; => "a\nb"
+ycString::Unescape("a\\tb") ; => "a\tb"
+ycString::Unescape("a\\qb") ; => "a\\qb"
+ycString::Unescape("a\\")   ; => "a\\"
+ycString::Unescape("a\\qb" ?strict t)
+; *Error* ycString::Unescape: unknown escape \q
+ycString::Unescape("a\\" ?strict t)
+; *Error* ycString::Unescape: trailing backslash
 ```
 
-### ycString::words <sub>`function`</sub>
+### ycString::Words <sub>`function`</sub>
 
 ```text
-ycString::words(t_s)
+ycString::Words(t_s)
 => list[str] | nil
 ```
 
@@ -536,18 +536,18 @@ ycString::words(t_s)
 **例程**
 
 ```lisp
-ycString::words("HTMLParser")  ; => ("HTML" "Parser")
-ycString::words("camelCase")   ; => ("camel" "Case")
-ycString::words("foo_bar-baz") ; => ("foo" "bar" "baz")
-ycString::words("foo2Bar")     ; => ("foo2" "Bar")
-ycString::words("中文 abc")    ; => ("中文" "abc")
-ycString::words("  ")          ; => nil
+ycString::Words("HTMLParser")  ; => ("HTML" "Parser")
+ycString::Words("camelCase")   ; => ("camel" "Case")
+ycString::Words("foo_bar-baz") ; => ("foo" "bar" "baz")
+ycString::Words("foo2Bar")     ; => ("foo2" "Bar")
+ycString::Words("中文 abc")    ; => ("中文" "abc")
+ycString::Words("  ")          ; => nil
 ```
 
-### ycString::joinWords <sub>`function`</sub>
+### ycString::JoinWords <sub>`function`</sub>
 
 ```text
-ycString::joinWords(
+ycString::JoinWords(
     l_words
     [ ?style ]
 )
@@ -572,18 +572,18 @@ ycString::joinWords(
 **例程**
 
 ```lisp
-ycString::joinWords(list("a" "b"))                         ; => "a_b"
-ycString::joinWords(list("a" "b") ?style "kebab")          ; => "a-b"
-ycString::joinWords(list("HTML" "Parser") ?style "camel")  ; => "htmlParser"
-ycString::joinWords(list("HTML" "Parser") ?style "pascal") ; => "HtmlParser"
-ycString::joinWords(list("a") ?style "dot")
-; *Error* ycString::joinWords: unknown style "dot"
+ycString::JoinWords(list("a" "b"))                         ; => "a_b"
+ycString::JoinWords(list("a" "b") ?style "kebab")          ; => "a-b"
+ycString::JoinWords(list("HTML" "Parser") ?style "camel")  ; => "htmlParser"
+ycString::JoinWords(list("HTML" "Parser") ?style "pascal") ; => "HtmlParser"
+ycString::JoinWords(list("a") ?style "dot")
+; *Error* ycString::JoinWords: unknown style "dot"
 ```
 
-### ycString::sanitize <sub>`function`</sub>
+### ycString::Sanitize <sub>`function`</sub>
 
 ```text
-ycString::sanitize(
+ycString::Sanitize(
     t_s
     [ ?style ]
 )
@@ -592,14 +592,14 @@ ycString::sanitize(
 
 **描述**
 
-把任意字符串清洗为指定风格的标识符：等价 `ycString::words` 切词后 `ycString::joinWords` 拼接；结果以数字开头时前置下划线。无有效字符时以 `error()` 中断。
+把任意字符串清洗为指定风格的标识符：等价 `ycString::Words` 切词后 `ycString::JoinWords` 拼接；结果以数字开头时前置下划线。无有效字符时以 `error()` 中断。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_s | str |  | 输入串 |
-| ?style | str | `"snake"` | 目标风格（同 `ycString::joinWords`） |
+| ?style | str | `"snake"` | 目标风格（同 `ycString::JoinWords`） |
 
 **返回值**
 
@@ -608,22 +608,22 @@ ycString::sanitize(
 **例程**
 
 ```lisp
-ycString::sanitize("1st place")                 ; => "_1st_place"
-ycString::sanitize("HTMLParser" ?style "kebab") ; => "html-parser"
-ycString::sanitize("!!!")
-; *Error* ycString::sanitize: no valid characters ("!!!")
+ycString::Sanitize("1st place")                 ; => "_1st_place"
+ycString::Sanitize("HTMLParser" ?style "kebab") ; => "html-parser"
+ycString::Sanitize("!!!")
+; *Error* ycString::Sanitize: no valid characters ("!!!")
 ```
 
-### ycString::toSnake <sub>`function`</sub>
+### ycString::ToSnake <sub>`function`</sub>
 
 ```text
-ycString::toSnake(t_s)
+ycString::ToSnake(t_s)
 => str
 ```
 
 **描述**
 
-`ycString::sanitize` 的 snake 风格便捷形式。
+`ycString::Sanitize` 的 snake 风格便捷形式。
 
 **参数**
 
@@ -638,19 +638,19 @@ ycString::toSnake(t_s)
 **例程**
 
 ```lisp
-ycString::toSnake("HTMLParser") ; => "html_parser"
+ycString::ToSnake("HTMLParser") ; => "html_parser"
 ```
 
-### ycString::toKebab <sub>`function`</sub>
+### ycString::ToKebab <sub>`function`</sub>
 
 ```text
-ycString::toKebab(t_s)
+ycString::ToKebab(t_s)
 => str
 ```
 
 **描述**
 
-`ycString::sanitize` 的 kebab 风格便捷形式。
+`ycString::Sanitize` 的 kebab 风格便捷形式。
 
 **参数**
 
@@ -665,19 +665,19 @@ ycString::toKebab(t_s)
 **例程**
 
 ```lisp
-ycString::toKebab("HTMLParser") ; => "html-parser"
+ycString::ToKebab("HTMLParser") ; => "html-parser"
 ```
 
-### ycString::toCamel <sub>`function`</sub>
+### ycString::ToCamel <sub>`function`</sub>
 
 ```text
-ycString::toCamel(t_s)
+ycString::ToCamel(t_s)
 => str
 ```
 
 **描述**
 
-`ycString::sanitize` 的 camel 风格便捷形式。
+`ycString::Sanitize` 的 camel 风格便捷形式。
 
 **参数**
 
@@ -692,19 +692,19 @@ ycString::toCamel(t_s)
 **例程**
 
 ```lisp
-ycString::toCamel("html_parser") ; => "htmlParser"
+ycString::ToCamel("html_parser") ; => "htmlParser"
 ```
 
-### ycString::toPascal <sub>`function`</sub>
+### ycString::ToPascal <sub>`function`</sub>
 
 ```text
-ycString::toPascal(t_s)
+ycString::ToPascal(t_s)
 => str
 ```
 
 **描述**
 
-`ycString::sanitize` 的 pascal 风格便捷形式。
+`ycString::Sanitize` 的 pascal 风格便捷形式。
 
 **参数**
 
@@ -719,9 +719,9 @@ ycString::toPascal(t_s)
 **例程**
 
 ```lisp
-ycString::toPascal("html_parser") ; => "HtmlParser"
+ycString::ToPascal("html_parser") ; => "HtmlParser"
 ```
 
 ## 显示宽度
 
-`?unit "display"` 与 `ycUtf8::width` 一致：控制字符为 0、East Asian Wide/Fullwidth 为 2、Ambiguous 由 `?ambiguous` 决定（默认 1）。宽度按码点求和，不合并字素簇；需要按字符数对齐时用 `?unit "char"`。
+`?unit "display"` 与 `ycUtf8::Width` 一致：控制字符为 0、East Asian Wide/Fullwidth 为 2、Ambiguous 由 `?ambiguous` 决定（默认 1）。宽度按码点求和，不合并字素簇；需要按字符数对齐时用 `?unit "char"`。

@@ -3,11 +3,11 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-ycNamespace:::require("ycRegEx" "ycUtf8")
+ycNamespace:::Require("ycRegEx" "ycUtf8")
 
 useNamespace("ycString")
 
-procedure(_trimSide(t_s t_chars g_left g_right "ttgg")  ; -> str
+procedure(_TrimSide(t_s t_chars g_left g_right "ttgg")  ; -> str
     ; 按字面字符集剥离单端或双端字符（内部实现）。
     ;
     ; **参数**
@@ -19,27 +19,27 @@ procedure(_trimSide(t_s t_chars g_left g_right "ttgg")  ; -> str
     ; **返回**
     ;   (str) - 剥离后的串；全部剥离时为空串
     let((n_len n_start n_end)
-        n_len = ycUtf8:::charCount(t_s)
+        n_len = ycUtf8:::CharCount(t_s)
         n_start = 1
         n_end = n_len
         when(g_left
-            while(n_start <= n_end && index(t_chars ycUtf8:::slice(t_s n_start 1))
+            while(n_start <= n_end && index(t_chars ycUtf8:::Slice(t_s n_start 1))
                 n_start = n_start + 1
             )
         )
         when(g_right
-            while(n_end >= n_start && index(t_chars ycUtf8:::slice(t_s n_end 1))
+            while(n_end >= n_start && index(t_chars ycUtf8:::Slice(t_s n_end 1))
                 n_end = n_end - 1
             )
         )
         if(n_start > n_end
             ""
-            ycUtf8:::slice(t_s n_start n_end - n_start + 1)
+            ycUtf8:::Slice(t_s n_start n_end - n_start + 1)
         )
     )
 )
 
-procedure(trim(t_s \@key (chars " \t\r\n") "tt")  ; -> str
+procedure(Trim(t_s \@key (chars " \t\r\n") "tt")  ; -> str
     ; 去除两端字符集中的字符。
     ;
     ; **参数**
@@ -48,10 +48,10 @@ procedure(trim(t_s \@key (chars " \t\r\n") "tt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 剥离后的串；全剥离时为空串
-    _trimSide(t_s chars t t)
+    _TrimSide(t_s chars t t)
 )
 
-procedure(trimStart(t_s \@key (chars " \t\r\n") "tt")  ; -> str
+procedure(TrimStart(t_s \@key (chars " \t\r\n") "tt")  ; -> str
     ; 同 trim，仅去除前端字符。
     ;
     ; **参数**
@@ -60,10 +60,10 @@ procedure(trimStart(t_s \@key (chars " \t\r\n") "tt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 剥离后的串
-    _trimSide(t_s chars t nil)
+    _TrimSide(t_s chars t nil)
 )
 
-procedure(trimEnd(t_s \@key (chars " \t\r\n") "tt")  ; -> str
+procedure(TrimEnd(t_s \@key (chars " \t\r\n") "tt")  ; -> str
     ; 同 trim，仅去除尾端字符。
     ;
     ; **参数**
@@ -72,10 +72,10 @@ procedure(trimEnd(t_s \@key (chars " \t\r\n") "tt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 剥离后的串
-    _trimSide(t_s chars nil t)
+    _TrimSide(t_s chars nil t)
 )
 
-procedure(width(t_s \@key (unit "display") (ambiguous 1) "ttx")  ; -> int
+procedure(Width(t_s \@key (unit "display") (ambiguous 1) "ttx")  ; -> int
     ; 计算字符串的显示列宽或码点数。
     ;
     ; **参数**
@@ -86,13 +86,13 @@ procedure(width(t_s \@key (unit "display") (ambiguous 1) "ttx")  ; -> int
     ; **返回**
     ;   (int) - 显示列宽或码点数
     cond(
-        (unit == "display" ycUtf8:::width(t_s ?ambiguous ambiguous))
-        (unit == "char" ycUtf8:::charCount(t_s))
-        (t error("ycString::width: unknown unit %A" unit))
+        (unit == "display" ycUtf8:::Width(t_s ?ambiguous ambiguous))
+        (unit == "char" ycUtf8:::CharCount(t_s))
+        (t error("ycString::Width: unknown unit %A" unit))
     )
 )
 
-procedure(_repeat(t_fill n_times "tx")  ; -> str
+procedure(_Repeat(t_fill n_times "tx")  ; -> str
     ; 重复单字符若干次（内部实现）。
     ;
     ; **参数**
@@ -112,7 +112,7 @@ procedure(_repeat(t_fill n_times "tx")  ; -> str
     )
 )
 
-procedure(pad(t_s n_width \@key (fill " ") (side "end") (unit "display") (ambiguous 1) "txtttx")  ; -> str
+procedure(Pad(t_s n_width \@key (fill " ") (side "end") (unit "display") (ambiguous 1) "txtttx")  ; -> str
     ; 将字符串补足到目标宽度（永不截断）。
     ;
     ; **参数**
@@ -126,29 +126,29 @@ procedure(pad(t_s n_width \@key (fill " ") (side "end") (unit "display") (ambigu
     ; **返回**
     ;   (str) - 补足后的串；已足宽原样返回
     unless(fixp(n_width) && n_width >= 0
-        error("ycString::pad: width must be a non-negative integer (%A)" n_width)
+        error("ycString::Pad: width must be a non-negative integer (%A)" n_width)
     )
-    unless(stringp(fill) && ycUtf8:::charCount(fill) == 1
-        error("ycString::pad: fill must be a single character (%A)" fill)
+    unless(stringp(fill) && ycUtf8:::CharCount(fill) == 1
+        error("ycString::Pad: fill must be a single character (%A)" fill)
     )
     unless(side == "end" || side == "start"
-        error("ycString::pad: unknown side %A" side)
+        error("ycString::Pad: unknown side %A" side)
     )
     unless(unit == "display" || unit == "char"
-        error("ycString::pad: unknown unit %A" unit)
+        error("ycString::Pad: unknown unit %A" unit)
     )
-    when(unit == "display" && ycUtf8:::width(fill ?ambiguous ambiguous) != 1
-        error("ycString::pad: fill must be single width in display mode (%A)" fill)
+    when(unit == "display" && ycUtf8:::Width(fill ?ambiguous ambiguous) != 1
+        error("ycString::Pad: fill must be single width in display mode (%A)" fill)
     )
     let((n_have)
         n_have = if(unit == "char"
-            ycUtf8:::charCount(t_s)
-            ycUtf8:::width(t_s ?ambiguous ambiguous)
+            ycUtf8:::CharCount(t_s)
+            ycUtf8:::Width(t_s ?ambiguous ambiguous)
         )
         if(n_width <= n_have
             t_s
             let((t_pad)
-                t_pad = _repeat(fill n_width - n_have)
+                t_pad = _Repeat(fill n_width - n_have)
                 if(side == "start"
                     strcat(t_pad t_s)
                     strcat(t_s t_pad)
@@ -158,7 +158,7 @@ procedure(pad(t_s n_width \@key (fill " ") (side "end") (unit "display") (ambigu
     )
 )
 
-procedure(_isWhitespace(t_ch "t")  ; -> t | nil
+procedure(_IsWhitespace(t_ch "t")  ; -> t | nil
     ; 判断单字符是否为默认空白字符（空格/制表/回车/换行）。
     ;
     ; **参数**
@@ -169,7 +169,7 @@ procedure(_isWhitespace(t_ch "t")  ; -> t | nil
     index(" \t\r\n" t_ch)
 )
 
-procedure(_splitWhitespace(t_s "t")  ; -> list[str]
+procedure(_SplitWhitespace(t_s "t")  ; -> list[str]
     ; 按空白字符连续段切分并丢弃空段（内部实现）。
     ;
     ; **参数**
@@ -181,11 +181,11 @@ procedure(_splitWhitespace(t_s "t")  ; -> list[str]
         n_len = length(t_s)
         n_i = 1
         while(n_i <= n_len
-            while(n_i <= n_len && _isWhitespace(substring(t_s n_i 1))
+            while(n_i <= n_len && _IsWhitespace(substring(t_s n_i 1))
                 n_i = n_i + 1
             )
             n_j = n_i
-            while(n_j <= n_len && !_isWhitespace(substring(t_s n_j 1))
+            while(n_j <= n_len && !_IsWhitespace(substring(t_s n_j 1))
                 n_j = n_j + 1
             )
             when(n_j > n_i
@@ -197,7 +197,7 @@ procedure(_splitWhitespace(t_s "t")  ; -> list[str]
     )
 )
 
-procedure(_splitLiteral(t_s t_sep "tt")  ; -> list[str]
+procedure(_SplitLiteral(t_s t_sep "tt")  ; -> list[str]
     ; 按字面分隔符切分并保留空段（内部实现）。
     ;
     ; **参数**
@@ -231,7 +231,7 @@ procedure(_splitLiteral(t_s t_sep "tt")  ; -> list[str]
     )
 )
 
-procedure(_keepNonEmpty(l_items "l")  ; -> list[str]
+procedure(_KeepNonEmpty(l_items "l")  ; -> list[str]
     ; 过滤列表中的空串（内部实现）。
     ;
     ; **参数**
@@ -249,7 +249,7 @@ procedure(_keepNonEmpty(l_items "l")  ; -> list[str]
     )
 )
 
-procedure(strSplit(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> list[str]
+procedure(StrSplit(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> list[str]
     ; 切分字符串：默认按空白符；字面分隔保留空段；?regex 委托正则切分。
     ;
     ; **参数**
@@ -264,31 +264,31 @@ procedure(strSplit(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> l
         cond(
             (regex
                 unless(stringp(sep) && sep != ""
-                    error("ycString::strSplit: regex mode needs a non-empty pattern (%A)" sep)
+                    error("ycString::StrSplit: regex mode needs a non-empty pattern (%A)" sep)
                 )
-                l_parts = ycRegEx:::reSplit(sep t_s ?all t)
+                l_parts = ycRegEx:::ReSplit(sep t_s ?all t)
             )
             (sep
                 unless(stringp(sep)
-                    error("ycString::strSplit: separator must be a string (%A)" sep)
+                    error("ycString::StrSplit: separator must be a string (%A)" sep)
                 )
                 unless(sep != ""
-                    error("ycString::strSplit: separator must not be empty")
+                    error("ycString::StrSplit: separator must not be empty")
                 )
-                l_parts = _splitLiteral(t_s sep)
+                l_parts = _SplitLiteral(t_s sep)
             )
             (t
-                l_parts = _splitWhitespace(t_s)
+                l_parts = _SplitWhitespace(t_s)
             )
         )
         if(keepEmpty
             l_parts
-            _keepNonEmpty(l_parts)
+            _KeepNonEmpty(l_parts)
         )
     )
 )
 
-procedure(strJoin(l_items \@key (sep "") "lt")  ; -> str
+procedure(StrJoin(l_items \@key (sep "") "lt")  ; -> str
     ; 以分隔符连接字符串列表。
     ;
     ; **参数**
@@ -298,14 +298,14 @@ procedure(strJoin(l_items \@key (sep "") "lt")  ; -> str
     ; **返回**
     ;   (str) - 连接结果；空列表为空串
     unless(stringp(sep)
-        error("ycString::strJoin: separator must be a string (%A)" sep)
+        error("ycString::StrJoin: separator must be a string (%A)" sep)
     )
     let((l_p n_i)
         n_i = 0
         foreach(g_item l_items
             n_i = n_i + 1
             unless(stringp(g_item)
-                error("ycString::strJoin: item #%d is not a string (%A)" n_i g_item)
+                error("ycString::StrJoin: item #%d is not a string (%A)" n_i g_item)
             )
             unless(n_i == 1
                 l_p = tconc(l_p sep)
@@ -319,7 +319,7 @@ procedure(strJoin(l_items \@key (sep "") "lt")  ; -> str
     )
 )
 
-procedure(startsWith(t_s t_prefix "tt")  ; -> t | nil
+procedure(StartsWith(t_s t_prefix "tt")  ; -> t | nil
     ; 判断字符串是否以指定前缀开始。
     ;
     ; **参数**
@@ -338,7 +338,7 @@ procedure(startsWith(t_s t_prefix "tt")  ; -> t | nil
     )
 )
 
-procedure(endsWith(t_s t_suffix "tt")  ; -> t | nil
+procedure(EndsWith(t_s t_suffix "tt")  ; -> t | nil
     ; 判断字符串是否以指定后缀结束。
     ;
     ; **参数**
@@ -358,7 +358,7 @@ procedure(endsWith(t_s t_suffix "tt")  ; -> t | nil
     )
 )
 
-procedure(replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
+procedure(Replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
     ; 替换全部出现（字面量或正则；非重叠）。
     ;
     ; **参数**
@@ -372,13 +372,13 @@ procedure(replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
     cond(
         (regex
             when(t_old == ""
-                error("ycString::replace: pattern must not be empty")
+                error("ycString::Replace: pattern must not be empty")
             )
-            ycRegEx:::reSub(t_old t_new t_s ?all t)
+            ycRegEx:::ReSub(t_old t_new t_s ?all t)
         )
         (t
             when(t_old == ""
-                error("ycString::replace: search string must not be empty")
+                error("ycString::Replace: search string must not be empty")
             )
             let((l_p t_rest n_cut n_pos n_len n_old g_done)
                 t_rest = t_s
@@ -408,7 +408,7 @@ procedure(replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
     )
 )
 
-procedure(count(t_s t_sub \@key (regex nil) "ttg")  ; -> int
+procedure(Count(t_s t_sub \@key (regex nil) "ttg")  ; -> int
     ; 统计非重叠出现次数（字面量或正则）。
     ;
     ; **参数**
@@ -421,13 +421,13 @@ procedure(count(t_s t_sub \@key (regex nil) "ttg")  ; -> int
     cond(
         (regex
             when(t_sub == ""
-                error("ycString::count: pattern must not be empty")
+                error("ycString::Count: pattern must not be empty")
             )
-            length(ycRegEx:::reFindall(t_sub t_s))
+            length(ycRegEx:::ReFindall(t_sub t_s))
         )
         (t
             when(t_sub == ""
-                error("ycString::count: search string must not be empty")
+                error("ycString::Count: search string must not be empty")
             )
             let((n_n t_rest n_cut n_pos n_len n_sub g_done)
                 n_n = 0

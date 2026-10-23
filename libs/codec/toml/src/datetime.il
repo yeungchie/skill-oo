@@ -3,11 +3,11 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-ycNamespace:::require("ycCodec")
+ycNamespace:::Require("ycCodec")
 
 useNamespace("ycToml")
 
-procedure(_readDigits(t_s n_i n_count "txx")  ; -> int
+procedure(_ReadDigits(t_s n_i n_count "txx")  ; -> int
     ; 读取固定长度的十进制数字。
     ;
     ; **参数**
@@ -20,10 +20,10 @@ procedure(_readDigits(t_s n_i n_count "txx")  ; -> int
     let((n_v)
         n_v = 0
         for(n_k 1 n_count
-            unless(_digitp(_code(t_s n_i + n_k - 1))
-                _error(t_s n_i + n_k - 1 "expected a digit")
+            unless(_Digitp(_Code(t_s n_i + n_k - 1))
+                _Error(t_s n_i + n_k - 1 "expected a digit")
             )
-            n_v = n_v * 10 + _code(t_s n_i + n_k - 1) - 48
+            n_v = n_v * 10 + _Code(t_s n_i + n_k - 1) - 48
         )
         n_v
     )
@@ -32,7 +32,7 @@ procedure(_readDigits(t_s n_i n_count "txx")  ; -> int
 
 ; ---------- 日期时间 ----------
 
-procedure(_looksDate(t_s n_i "tx")  ; -> t | nil
+procedure(_LooksDate(t_s n_i "tx")  ; -> t | nil
     ; 判断当前位置是否形如 YYYY-MM-DD。
     ;
     ; **参数**
@@ -41,19 +41,19 @@ procedure(_looksDate(t_s n_i "tx")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 形如日期时为 t
-    _digitp(_code(t_s n_i))
-        && _digitp(_code(t_s n_i + 1))
-        && _digitp(_code(t_s n_i + 2))
-        && _digitp(_code(t_s n_i + 3))
-        && _code(t_s n_i + 4) == 45
-        && _digitp(_code(t_s n_i + 5))
-        && _digitp(_code(t_s n_i + 6))
-        && _code(t_s n_i + 7) == 45
-        && _digitp(_code(t_s n_i + 8))
-        && _digitp(_code(t_s n_i + 9))
+    _Digitp(_Code(t_s n_i))
+        && _Digitp(_Code(t_s n_i + 1))
+        && _Digitp(_Code(t_s n_i + 2))
+        && _Digitp(_Code(t_s n_i + 3))
+        && _Code(t_s n_i + 4) == 45
+        && _Digitp(_Code(t_s n_i + 5))
+        && _Digitp(_Code(t_s n_i + 6))
+        && _Code(t_s n_i + 7) == 45
+        && _Digitp(_Code(t_s n_i + 8))
+        && _Digitp(_Code(t_s n_i + 9))
 )
 
-procedure(_looksTime(t_s n_i "tx")  ; -> t | nil
+procedure(_LooksTime(t_s n_i "tx")  ; -> t | nil
     ; 判断当前位置是否形如 HH:MM:SS。
     ;
     ; **参数**
@@ -62,18 +62,18 @@ procedure(_looksTime(t_s n_i "tx")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 形如时间时为 t
-    _digitp(_code(t_s n_i))
-        && _digitp(_code(t_s n_i + 1))
-        && _code(t_s n_i + 2) == 58
-        && _digitp(_code(t_s n_i + 3))
-        && _digitp(_code(t_s n_i + 4))
-        && _code(t_s n_i + 5) == 58
-        && _digitp(_code(t_s n_i + 6))
-        && _digitp(_code(t_s n_i + 7))
+    _Digitp(_Code(t_s n_i))
+        && _Digitp(_Code(t_s n_i + 1))
+        && _Code(t_s n_i + 2) == 58
+        && _Digitp(_Code(t_s n_i + 3))
+        && _Digitp(_Code(t_s n_i + 4))
+        && _Code(t_s n_i + 5) == 58
+        && _Digitp(_Code(t_s n_i + 6))
+        && _Digitp(_Code(t_s n_i + 7))
 )
 
 
-procedure(_daysInMonth(n_year n_month "xx")  ; -> int
+procedure(_DaysInMonth(n_year n_month "xx")  ; -> int
     ; 返回公历某年某月的天数。
     ;
     ; **参数**
@@ -97,7 +97,7 @@ procedure(_daysInMonth(n_year n_month "xx")  ; -> int
     )
 )
 
-procedure(_parseTimeAt(t_s n_i g_offset "txg")  ; -> int
+procedure(_ParseTimeAt(t_s n_i g_offset "txg")  ; -> int
     ; 解析 HH:MM:SS[.frac] 与可选偏移，返回结束位置。
     ;
     ; **参数**
@@ -108,36 +108,36 @@ procedure(_parseTimeAt(t_s n_i g_offset "txg")  ; -> int
     ; **返回**
     ;   (int) - 时间部分结束后一位置
     let((n_hour n_minute n_second n_k n_c)
-        unless(_code(t_s n_i + 2) == 58 && _code(t_s n_i + 5) == 58
-            _error(t_s n_i "invalid time")
+        unless(_Code(t_s n_i + 2) == 58 && _Code(t_s n_i + 5) == 58
+            _Error(t_s n_i "invalid time")
         )
-        n_hour = _readDigits(t_s n_i 2)
-        n_minute = _readDigits(t_s n_i + 3 2)
-        n_second = _readDigits(t_s n_i + 6 2)
+        n_hour = _ReadDigits(t_s n_i 2)
+        n_minute = _ReadDigits(t_s n_i + 3 2)
+        n_second = _ReadDigits(t_s n_i + 6 2)
         unless(n_hour <= 23 && n_minute <= 59 && n_second <= 60
-            _error(t_s n_i "invalid time")
+            _Error(t_s n_i "invalid time")
         )
         n_k = n_i + 8
-        when(_code(t_s n_k) == 46
+        when(_Code(t_s n_k) == 46
             n_k = n_k + 1
-            unless(_digitp(_code(t_s n_k))
-                _error(t_s n_k "invalid fractional seconds")
+            unless(_Digitp(_Code(t_s n_k))
+                _Error(t_s n_k "invalid fractional seconds")
             )
-            while(_digitp(_code(t_s n_k))
+            while(_Digitp(_Code(t_s n_k))
                 n_k = n_k + 1
             )
         )
         when(g_offset
             cond(
-                ((_code(t_s n_k) == 90 || _code(t_s n_k) == 122)
+                ((_Code(t_s n_k) == 90 || _Code(t_s n_k) == 122)
                     n_k = n_k + 1
                 )
-                ((_code(t_s n_k) == 43 || _code(t_s n_k) == 45)
+                ((_Code(t_s n_k) == 43 || _Code(t_s n_k) == 45)
                     {
-                    n_hour = _readDigits(t_s n_k + 1 2)
-                    n_minute = _readDigits(t_s n_k + 4 2)
-                    unless(n_hour <= 23 && n_minute <= 59 && _code(t_s n_k + 3) == 58
-                        _error(t_s n_k "invalid timezone offset")
+                    n_hour = _ReadDigits(t_s n_k + 1 2)
+                    n_minute = _ReadDigits(t_s n_k + 4 2)
+                    unless(n_hour <= 23 && n_minute <= 59 && _Code(t_s n_k + 3) == 58
+                        _Error(t_s n_k "invalid timezone offset")
                     )
                     n_k = n_k + 6
                     }
@@ -148,7 +148,7 @@ procedure(_parseTimeAt(t_s n_i g_offset "txg")  ; -> int
     )
 )
 
-procedure(_parseDateTime(t_s n_i "tx")  ; -> list
+procedure(_ParseDateTime(t_s n_i "tx")  ; -> list
     ; 解析 TOML 日期、时间或日期时间，保留原文作为字符串。
     ;
     ; **参数**
@@ -158,28 +158,28 @@ procedure(_parseDateTime(t_s n_i "tx")  ; -> list
     ; **返回**
     ;   (list) - (原文字符串 下一位置)
     let((n_year n_month n_day n_k n_days)
-        if(_looksTime(t_s n_i)
+        if(_LooksTime(t_s n_i)
             {
-            n_k = _parseTimeAt(t_s n_i nil)
+            n_k = _ParseTimeAt(t_s n_i nil)
             }
             {
-            n_year = _readDigits(t_s n_i 4)
-            n_month = _readDigits(t_s n_i + 5 2)
-            n_day = _readDigits(t_s n_i + 8 2)
-            unless(_code(t_s n_i + 4) == 45 && _code(t_s n_i + 7) == 45
-                _error(t_s n_i "invalid date")
+            n_year = _ReadDigits(t_s n_i 4)
+            n_month = _ReadDigits(t_s n_i + 5 2)
+            n_day = _ReadDigits(t_s n_i + 8 2)
+            unless(_Code(t_s n_i + 4) == 45 && _Code(t_s n_i + 7) == 45
+                _Error(t_s n_i "invalid date")
             )
-            n_days = _daysInMonth(n_year n_month)
+            n_days = _DaysInMonth(n_year n_month)
             unless(n_month >= 1 && n_month <= 12 && n_day >= 1 && n_day <= n_days
-                _error(t_s n_i "invalid date")
+                _Error(t_s n_i "invalid date")
             )
             n_k = n_i + 10
             cond(
-                ((_code(t_s n_k) == 84 || _code(t_s n_k) == 116)
-                    n_k = _parseTimeAt(t_s n_k + 1 t)
+                ((_Code(t_s n_k) == 84 || _Code(t_s n_k) == 116)
+                    n_k = _ParseTimeAt(t_s n_k + 1 t)
                 )
-                ((_code(t_s n_k) == 32 && _looksTime(t_s n_k + 1))
-                    n_k = _parseTimeAt(t_s n_k + 1 t)
+                ((_Code(t_s n_k) == 32 && _LooksTime(t_s n_k + 1))
+                    n_k = _ParseTimeAt(t_s n_k + 1 t)
                 )
             )
             }

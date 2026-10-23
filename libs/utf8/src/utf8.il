@@ -2,7 +2,7 @@ useNamespace("ycUtf8")
 
 ; ---------- 共享扫描器 ----------
 
-procedure(_next(t_s n_i "tx")  ; -> list
+procedure(_Next(t_s n_i "tx")  ; -> list
     ; 从 1-based 字节位置读取一个 UTF-8 码点。
     ;
     ; **参数**
@@ -72,19 +72,19 @@ procedure(_next(t_s n_i "tx")  ; -> list
     )
 )
 
-procedure(_read(t_s n_i g_strict t_ctx "txgt")  ; -> list
+procedure(_Read(t_s n_i g_strict t_ctx "txgt")  ; -> list
     ; 读取一个码点；严格模式非法即报错，宽松模式以 U+FFFD 替换并前进一字节。
     ;
     ; **参数**
     ;   t_s      (str) - 输入串
     ;   n_i      (int) - 1-based 字节位置
     ;   g_strict (any) - 非 nil 为严格模式
-    ;   t_ctx    (str) - 错误消息上下文（如 "ycUtf8::decode"）
+    ;   t_ctx    (str) - 错误消息上下文（如 "ycUtf8::Decode"）
     ;
     ; **返回**
     ;   (list) - (码点 下一位置)
     let((l_res)
-        l_res = _next(t_s n_i)
+        l_res = _Next(t_s n_i)
         if(car(l_res)
             l_res
             if(g_strict
@@ -95,7 +95,7 @@ procedure(_read(t_s n_i g_strict t_ctx "txgt")  ; -> list
     )
 )
 
-procedure(_encCp(n_cp "x")  ; -> str
+procedure(_EncCp(n_cp "x")  ; -> str
     ; 将码点编码为 UTF-8 字节串（1..4 字节）。
     ;
     ; **参数**
@@ -128,7 +128,7 @@ procedure(_encCp(n_cp "x")  ; -> str
     )
 )
 
-procedure(_build(l_p "l")  ; -> str
+procedure(_Build(l_p "l")  ; -> str
     ; 将 tconc 容器拼接为字符串。
     ;
     ; **参数**
@@ -141,7 +141,7 @@ procedure(_build(l_p "l")  ; -> str
 
 ; ---------- 公开接口 ----------
 
-procedure(decode(t_str \@key (strict t) "tg")  ; -> list | nil
+procedure(Decode(t_str \@key (strict t) "tg")  ; -> list | nil
     ; 将 UTF-8 字节串解码为码点列表。
     ;
     ; **参数**
@@ -151,12 +151,12 @@ procedure(decode(t_str \@key (strict t) "tg")  ; -> list | nil
     ; **返回**
     ;   (list|nil) - 码点列表；空串为 nil
     unless(stringp(t_str)
-        error("ycUtf8::decode: expects a string")
+        error("ycUtf8::Decode: expects a string")
     )
     let((l_res l_p n_i)
         n_i = 1
         while(n_i <= length(t_str)
-            l_res = _read(t_str n_i strict "ycUtf8::decode")
+            l_res = _Read(t_str n_i strict "ycUtf8::Decode")
             l_p = tconc(l_p car(l_res))
             n_i = cadr(l_res)
         )
@@ -164,7 +164,7 @@ procedure(decode(t_str \@key (strict t) "tg")  ; -> list | nil
     )
 )
 
-procedure(encode(l_cps "l")  ; -> str
+procedure(Encode(l_cps "l")  ; -> str
     ; 将码点列表编码为 UTF-8 字节串。
     ;
     ; **参数**
@@ -173,28 +173,28 @@ procedure(encode(l_cps "l")  ; -> str
     ; **返回**
     ;   (str) - UTF-8 字节串；nil 回 ""
     unless(listp(l_cps)
-        error("ycUtf8::encode: expects a list")
+        error("ycUtf8::Encode: expects a list")
     )
     let((l_p n_idx g_cp)
         n_idx = 0
         foreach(g_cp l_cps
             n_idx = n_idx + 1
             unless(fixp(g_cp) && g_cp >= 0 && g_cp <= 1114111
-                error("ycUtf8::encode: invalid codepoint at index %d (%A)" n_idx g_cp)
+                error("ycUtf8::Encode: invalid codepoint at index %d (%A)" n_idx g_cp)
             )
             when(g_cp >= 55296 && g_cp <= 57343
-                error("ycUtf8::encode: invalid codepoint at index %d (%A)" n_idx g_cp)
+                error("ycUtf8::Encode: invalid codepoint at index %d (%A)" n_idx g_cp)
             )
             when(g_cp == 0
-                error("ycUtf8::encode: codepoint at index %d (%A) cannot be represented in a SKILL string" n_idx g_cp)
+                error("ycUtf8::Encode: codepoint at index %d (%A) cannot be represented in a SKILL string" n_idx g_cp)
             )
-            l_p = tconc(l_p _encCp(g_cp))
+            l_p = tconc(l_p _EncCp(g_cp))
         )
-        _build(l_p)
+        _Build(l_p)
     )
 )
 
-procedure(charCount(t_str \@key (strict t) "tg")  ; -> int
+procedure(CharCount(t_str \@key (strict t) "tg")  ; -> int
     ; 统计 UTF-8 字节串的码点个数。
     ;
     ; **参数**
@@ -204,13 +204,13 @@ procedure(charCount(t_str \@key (strict t) "tg")  ; -> int
     ; **返回**
     ;   (int) - 码点个数；空串为 0
     unless(stringp(t_str)
-        error("ycUtf8::charCount: expects a string")
+        error("ycUtf8::CharCount: expects a string")
     )
     let((l_res n_i n_n)
         n_i = 1
         n_n = 0
         while(n_i <= length(t_str)
-            l_res = _read(t_str n_i strict "ycUtf8::charCount")
+            l_res = _Read(t_str n_i strict "ycUtf8::CharCount")
             n_i = cadr(l_res)
             n_n = n_n + 1
         )
@@ -218,7 +218,7 @@ procedure(charCount(t_str \@key (strict t) "tg")  ; -> int
     )
 )
 
-procedure(slice(t_str n_start n_len \@key (strict t) "txxg")  ; -> str | nil
+procedure(Slice(t_str n_start n_len \@key (strict t) "txxg")  ; -> str | nil
     ; 按码点切片（1-based 起点）。
     ;
     ; **参数**
@@ -230,37 +230,37 @@ procedure(slice(t_str n_start n_len \@key (strict t) "txxg")  ; -> str | nil
     ; **返回**
     ;   (str|nil) - 切片结果；起点超过码点总数时为 nil
     unless(stringp(t_str)
-        error("ycUtf8::slice: expects a string")
+        error("ycUtf8::Slice: expects a string")
     )
     unless(fixp(n_start) && n_start >= 1
-        error("ycUtf8::slice: start must be an integer >= 1")
+        error("ycUtf8::Slice: start must be an integer >= 1")
     )
     unless(fixp(n_len) && n_len >= 0
-        error("ycUtf8::slice: length must be an integer >= 0")
+        error("ycUtf8::Slice: length must be an integer >= 0")
     )
     let((l_res l_p n_i n_total n_seen n_take)
         n_total = length(t_str)
         n_i = 1
         n_seen = 0
         while(n_i <= n_total && n_seen < n_start - 1
-            l_res = _read(t_str n_i strict "ycUtf8::slice")
+            l_res = _Read(t_str n_i strict "ycUtf8::Slice")
             n_i = cadr(l_res)
             n_seen = n_seen + 1
         )
         unless(n_i > n_total
             n_take = 0
             while(n_i <= n_total && n_take < n_len
-                l_res = _read(t_str n_i strict "ycUtf8::slice")
-                l_p = tconc(l_p _encCp(car(l_res)))
+                l_res = _Read(t_str n_i strict "ycUtf8::Slice")
+                l_p = tconc(l_p _EncCp(car(l_res)))
                 n_i = cadr(l_res)
                 n_take = n_take + 1
             )
-            _build(l_p)
+            _Build(l_p)
         )
     )
 )
 
-procedure(isValid(t_str "t")  ; -> t | nil
+procedure(IsValid(t_str "t")  ; -> t | nil
     ; 判断字节串是否为合法 UTF-8。
     ;
     ; **参数**
@@ -269,13 +269,13 @@ procedure(isValid(t_str "t")  ; -> t | nil
     ; **返回**
     ;   (t|nil) - 合法回 t；非法回 nil
     unless(stringp(t_str)
-        error("ycUtf8::isValid: expects a string")
+        error("ycUtf8::IsValid: expects a string")
     )
     let((l_res n_i g_ok)
         n_i = 1
         g_ok = t
         while(g_ok && n_i <= length(t_str)
-            l_res = _next(t_str n_i)
+            l_res = _Next(t_str n_i)
             if(car(l_res)
                 n_i = cadr(l_res)
                 g_ok = nil

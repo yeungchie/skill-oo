@@ -5,7 +5,7 @@
 
 useNamespace("ycString")
 
-procedure(escape(t_s \@key (quote nil) "tg")  ; -> str
+procedure(Escape(t_s \@key (quote nil) "tg")  ; -> str
     ; 转义字符串（反斜杠、双引号、换行、制表、回车）。
     ;
     ; **参数**
@@ -41,7 +41,7 @@ procedure(escape(t_s \@key (quote nil) "tg")  ; -> str
     )
 )
 
-procedure(unescape(t_s \@key (strict nil) "tg")  ; -> str
+procedure(Unescape(t_s \@key (strict nil) "tg")  ; -> str
     ; 还原 escape 的转义序列。
     ;
     ; **参数**
@@ -64,7 +64,7 @@ procedure(unescape(t_s \@key (strict nil) "tg")  ; -> str
                     (t_nx == "n" l_p = tconc(l_p "\n"))
                     (t_nx == "t" l_p = tconc(l_p "\t"))
                     (t_nx == "r" l_p = tconc(l_p "\r"))
-                    (strict error("ycString::unescape: unknown escape \\%s" t_nx))
+                    (strict error("ycString::Unescape: unknown escape \\%s" t_nx))
                     (t l_p = tconc(l_p strcat("\\" t_nx)))
                 )
                 n_i = n_i + 2
@@ -72,7 +72,7 @@ procedure(unescape(t_s \@key (strict nil) "tg")  ; -> str
                 {
                 when(t_ch == "\\"
                     if(strict
-                        error("ycString::unescape: trailing backslash")
+                        error("ycString::Unescape: trailing backslash")
                         l_p = tconc(l_p "\\")
                     )
                 )

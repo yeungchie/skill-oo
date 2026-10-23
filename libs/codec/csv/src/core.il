@@ -2,7 +2,7 @@ useNamespace("ycCsv")
 
 ; ---------- 基础工具 ----------
 
-procedure(_code(t_s n_i "tx")  ; -> int | nil
+procedure(_Code(t_s n_i "tx")  ; -> int | nil
     ; 取字节索引处的字符码（1-based）；索引越界返回 nil。
     ;
     ; **参数**
@@ -19,7 +19,7 @@ procedure(_code(t_s n_i "tx")  ; -> int | nil
     )
 )
 
-procedure(_lineCol(t_s n_i "tx")  ; -> list
+procedure(_LineCol(t_s n_i "tx")  ; -> list
     ; 按字节索引计算行列：LF、CR、CRLF 均计为一次换行，列按行内字节偏移。
     ;
     ; **参数**
@@ -33,7 +33,7 @@ procedure(_lineCol(t_s n_i "tx")  ; -> list
         n_last = 0
         when(1 < n_i
             for(n_k 1 n_i - 1
-                n_c = _code(t_s n_k)
+                n_c = _Code(t_s n_k)
                 cond(
                     (n_c == 13
                         n_line = n_line + 1
@@ -53,8 +53,8 @@ procedure(_lineCol(t_s n_i "tx")  ; -> list
     )
 )
 
-procedure(_error(t_s n_i t_msg "txt")  ; -> never
-    ; 按统一格式 error() 中断：ycCsv::decode: <说明> at line <行>, column <列>。
+procedure(_Error(t_s n_i t_msg "txt")  ; -> never
+    ; 按统一格式 error() 中断：ycCsv::Decode: <说明> at line <行>, column <列>。
     ;
     ; **参数**
     ;   t_s    (str) - 输入串
@@ -64,12 +64,12 @@ procedure(_error(t_s n_i t_msg "txt")  ; -> never
     ; **返回**
     ;   (never) - 总是调用 error()，不返回
     let((l_pos)
-        l_pos = _lineCol(t_s n_i)
-        error("ycCsv::decode: %s at line %d, column %d" t_msg car(l_pos) cadr(l_pos))
+        l_pos = _LineCol(t_s n_i)
+        error("ycCsv::Decode: %s at line %d, column %d" t_msg car(l_pos) cadr(l_pos))
     )
 )
 
-procedure(_build(l_p "l")  ; -> str
+procedure(_Build(l_p "l")  ; -> str
     ; 将 tconc 头容器（或 nil）拼接为字符串。
     ;
     ; **参数**
@@ -80,7 +80,7 @@ procedure(_build(l_p "l")  ; -> str
     buildString(car(l_p) "")
 )
 
-procedure(_copyRows(l_rows "l")  ; -> list
+procedure(_CopyRows(l_rows "l")  ; -> list
     ; 浅拷贝外层行列表与每行，隔离调用方的后续修改。
     ;
     ; **参数**
@@ -98,12 +98,12 @@ procedure(_copyRows(l_rows "l")  ; -> list
 
 ; ---------- 选项与校验 ----------
 
-procedure(_formatDelim(t_format t_ctx "tt")  ; -> int
+procedure(_FormatDelim(t_format t_ctx "tt")  ; -> int
     ; 校验格式名并返回默认分隔符字节码。
     ;
     ; **参数**
     ;   t_format  (str) - "csv" 或 "tsv"
-    ;   t_ctx     (str) - 错误前缀（ycCsv::decode / ycCsv::encode）
+    ;   t_ctx     (str) - 错误前缀（ycCsv::Decode / ycCsv::Encode）
     ;
     ; **返回**
     ;   (int) - 逗号（44）或制表符（9）；其他格式名报错
@@ -116,7 +116,7 @@ procedure(_formatDelim(t_format t_ctx "tt")  ; -> int
     )
 )
 
-procedure(_delimCode(g_delim n_default t_ctx "gnt")  ; -> int
+procedure(_DelimCode(g_delim n_default t_ctx "gnt")  ; -> int
     ; 解析 ?delimiter：默认值或单字节字符串，拒绝引号与换行。
     ;
     ; **参数**
@@ -133,7 +133,7 @@ procedure(_delimCode(g_delim n_default t_ctx "gnt")  ; -> int
                 error("%s: delimiter must be a single-byte string" t_ctx)
             )
             let((n_c)
-                n_c = _code(g_delim 1)
+                n_c = _Code(g_delim 1)
                 when(n_c == 34 || n_c == 10 || n_c == 13
                     error("%s: delimiter cannot be a quote or line break" t_ctx)
                 )
@@ -143,7 +143,7 @@ procedure(_delimCode(g_delim n_default t_ctx "gnt")  ; -> int
     )
 )
 
-procedure(_eolText(t_eol "t")  ; -> str
+procedure(_EolText(t_eol "t")  ; -> str
     ; 校验编码行尾：只接受 LF 或 CRLF。
     ;
     ; **参数**
@@ -152,12 +152,12 @@ procedure(_eolText(t_eol "t")  ; -> str
     ; **返回**
     ;   (str) - 原样返回 "\n" 或 "\r\n"；其他值报错
     unless(t_eol == "\n" || t_eol == "\r\n"
-        error("ycCsv::encode: ?eol must be \"\\n\" or \"\\r\\n\"")
+        error("ycCsv::Encode: ?eol must be \"\\n\" or \"\\r\\n\"")
     )
     t_eol
 )
 
-procedure(_checkHeader(l_header t_ctx "lt")  ; -> list[str] | nil
+procedure(_CheckHeader(l_header t_ctx "lt")  ; -> list[str] | nil
     ; 校验表头列表：nil 或非空字符串列表，列名唯一。
     ;
     ; **参数**
@@ -186,7 +186,7 @@ procedure(_checkHeader(l_header t_ctx "lt")  ; -> list[str] | nil
     )
 )
 
-procedure(_checkRows(l_rows t_ctx "lt")  ; -> list
+procedure(_CheckRows(l_rows t_ctx "lt")  ; -> list
     ; 校验行列表：每行非空且字段全为字符串。
     ;
     ; **参数**

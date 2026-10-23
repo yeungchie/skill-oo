@@ -3,7 +3,7 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-; Known namespaces accepted by ycNamespace:::require. This is a plain name
+; Known namespaces accepted by ycNamespace:::Require. This is a plain name
 ; list: loading order and file lists stay in libs/load.il and each package
 ; load.il; shells created by require hold no code - they only make
 ; cross-library references (ycOther:::name) readable before that library is
@@ -13,7 +13,7 @@ unless(findNamespace("ycNamespace")
     makeNamespace("ycNamespace")
 )
 
-ycNamespace:::_validNames = list(
+ycNamespace:::_ValidNames = list(
     "ycPathLib"
     "ycRegEx"
     "ycSubProcess"
@@ -30,7 +30,7 @@ ycNamespace:::_validNames = list(
     "ycTabulate"
 )
 
-procedure(ycNamespace:::require(@rest l_names "t")  ; -> t
+procedure(ycNamespace:::Require(@rest l_names "t")  ; -> t
     ; 确保给定命名空间均可用：不存在者建立空壳命名空间，不加载任何代码；
     ; 名单外的名字报错。
     ;
@@ -41,8 +41,8 @@ procedure(ycNamespace:::require(@rest l_names "t")  ; -> t
     ;   (t) - 全部已存在或已建立；名单外名字 error
     foreach(t_name l_names
         when(findNamespace(t_name) == nil
-            unless(member(t_name ycNamespace:::_validNames)
-                error("ycNamespace::require: unknown namespace %A" t_name)
+            unless(member(t_name ycNamespace:::_ValidNames)
+                error("ycNamespace::Require: unknown namespace %A" t_name)
             )
             makeNamespace(t_name)
             unuseNamespace(t_name)

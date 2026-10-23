@@ -6,7 +6,7 @@ Cadence SKILL++ 编解码库共享的哨兵类型库：统一表示 `true`、`fa
 
 + `ycJson`、`ycYaml` 等编解码库共用同一组哨兵对象：解码得到的布尔与空值即 `ycCodec::True`、`ycCodec::False`、`ycCodec::Null`，缺键标记为 `ycCodec::Missing`。
 + 每个哨兵都是 `ycCodec::Type` 的唯一实例，相同规范名总是同一对象，可直接用 `==` 比较。
-+ 哨兵可跨编解码库直接使用：`ycJson::decode` 的结果可直接交给 `ycYaml::encode`，反之亦然。
++ 哨兵可跨编解码库直接使用：`ycJson::Decode` 的结果可直接交给 `ycYaml::Encode`，反之亦然。
 + `->toSkill()` 转为 SKILL 原生值，转换有损：`False` 与空容器同域，`Null` 与 `Missing` 同域。
 + 构造器接受大小写不敏感的四名：`"true"`、`"false"`、`"null"`、`"missing"`。
 + 例程中 `; =>` 表示返回值。
@@ -23,9 +23,9 @@ ycCodec::Null->toSkill()                             ; => unbound
 ycCodec::Type("TRUE") == ycCodec::True               ; => t
 
 ; 各编解码库共用同一组对象
-ycJson::decode("true") == ycCodec::True              ; => t
-ycYaml::decode("null")                               ; => ycCodec::Type("Null")
-ycJson::encode(ycCodec::Null)                        ; => "null"
+ycJson::Decode("true") == ycCodec::True              ; => t
+ycYaml::Decode("null")                               ; => ycCodec::Type("Null")
+ycJson::Encode(ycCodec::Null)                        ; => "null"
 ```
 
 ## API 参考

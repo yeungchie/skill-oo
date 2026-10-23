@@ -3,32 +3,32 @@ unless(findNamespace("ycTabulate")
 )
 addToNamespace("ycTabulate"
     mapcar('symbolToString '(
-        renderTable
-        _checkUnit
-        _widthText
-        _repeatChar
-        _rstrip
-        _cellText
-        _splitCellLines
-        _cellLines
-        _escapePipe
-        _pipeCell
-        _splitDecimal
-        _normalizeAlign
-        _columnBlocks
-        _decInfo
-        _colWidth
-        _padText
-        _padCell
-        _rowLines
-        _boxLines
-        _border
-        _simpleSep
-        _pipeSep
-        _formatPlain
-        _formatSimple
-        _formatGrid
-        _formatPipe
+        Render
+        _CheckUnit
+        _WidthText
+        _RepeatChar
+        _Rstrip
+        _CellText
+        _SplitCellLines
+        _CellLines
+        _EscapePipe
+        _PipeCell
+        _SplitDecimal
+        _NormalizeAlign
+        _ColumnBlocks
+        _DecInfo
+        _ColWidth
+        _PadText
+        _PadCell
+        _RowLines
+        _BoxLines
+        _Border
+        _SimpleSep
+        _PipeSep
+        _FormatPlain
+        _FormatSimple
+        _FormatGrid
+        _FormatPipe
     ))
 )
 unuseNamespace("ycTabulate")

@@ -230,7 +230,7 @@ let((p_hf p_hd p_sub p_f)
 
 ; --- module entry ---
 let((p_wd)
-    p_wd = ycPathLib::cwd()
+    p_wd = ycPathLib::Cwd()
     _assert(p_wd->isAbsolute()  "cwd: absolute")
     _assert(p_wd->exists()  "cwd: exists")
     _assert(p_wd->str() == _s(getWorkingDir())  "cwd: matches getWorkingDir")
@@ -238,7 +238,7 @@ let((p_wd)
 let((t_home)
     t_home = getShellEnvVar("HOME")
     when(stringp(t_home) && t_home != ""
-        _assert(ycPathLib::home()->str() == _s(t_home)  "home: matches HOME env")
+        _assert(ycPathLib::Home()->str() == _s(t_home)  "home: matches HOME env")
     )
 )
 

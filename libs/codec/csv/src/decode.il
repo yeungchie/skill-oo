@@ -1,10 +1,10 @@
-ycNamespace:::require("ycCodec")
+ycNamespace:::Require("ycCodec")
 
 useNamespace("ycCsv")
 
 ; ---------- 记录扫描 ----------
 
-procedure(_parseQuoted(t_s n_i n_delim "txn")  ; -> list
+procedure(_ParseQuoted(t_s n_i n_delim "txn")  ; -> list
     ; 解析从引号开始的字段，返回字段值与下一位置（未消费分隔符/行尾）。
     ;
     ; **参数**
@@ -20,13 +20,13 @@ procedure(_parseQuoted(t_s n_i n_delim "txn")  ; -> list
         n_i = n_i + 1
         n_run = n_i
         while(n_i <= n_len && !g_closed
-            n_c = _code(t_s n_i)
+            n_c = _Code(t_s n_i)
             if(n_c == 34
                 progn(
                     when(n_run < n_i
                         l_p = tconc(l_p substring(t_s n_run n_i - n_run))
                     )
-                    if(_code(t_s n_i + 1) == 34
+                    if(_Code(t_s n_i + 1) == 34
                         progn(
                             l_p = tconc(l_p "\"")
                             n_i = n_i + 2
@@ -42,17 +42,17 @@ procedure(_parseQuoted(t_s n_i n_delim "txn")  ; -> list
             )
         )
         unless(g_closed
-            _error(t_s n_open "unterminated quoted field")
+            _Error(t_s n_open "unterminated quoted field")
         )
-        n_c = _code(t_s n_i)
+        n_c = _Code(t_s n_i)
         unless(!n_c || n_c == n_delim || n_c == 10 || n_c == 13
-            _error(t_s n_i "unexpected character after closing quote")
+            _Error(t_s n_i "unexpected character after closing quote")
         )
-        list(_build(l_p) n_i)
+        list(_Build(l_p) n_i)
     )
 )
 
-procedure(_parseField(t_s n_i n_delim "txn")  ; -> list
+procedure(_ParseField(t_s n_i n_delim "txn")  ; -> list
     ; 解析一个字段（引号或裸文本），返回字段值与下一位置。
     ;
     ; **参数**
@@ -64,18 +64,18 @@ procedure(_parseField(t_s n_i n_delim "txn")  ; -> list
     ;   (list) - (字段字符串 下一位置)；裸字段内出现引号时报错
     let((n_len n_start n_c g_stop)
         n_len = length(t_s)
-        if(n_i <= n_len && _code(t_s n_i) == 34
-            _parseQuoted(t_s n_i n_delim)
+        if(n_i <= n_len && _Code(t_s n_i) == 34
+            _ParseQuoted(t_s n_i n_delim)
             progn(
                 n_start = n_i
                 while(n_i <= n_len && !g_stop
-                    n_c = _code(t_s n_i)
+                    n_c = _Code(t_s n_i)
                     cond(
                         (n_c == n_delim || n_c == 10 || n_c == 13
                             g_stop = t
                         )
                         (n_c == 34
-                            _error(t_s n_i "unexpected quote in unquoted field")
+                            _Error(t_s n_i "unexpected quote in unquoted field")
                         )
                         (t
                             n_i = n_i + 1
@@ -88,7 +88,7 @@ procedure(_parseField(t_s n_i n_delim "txn")  ; -> list
     )
 )
 
-procedure(_parseRecord(t_s n_i n_delim "txn")  ; -> list
+procedure(_ParseRecord(t_s n_i n_delim "txn")  ; -> list
     ; 解析一条记录（字段列表），返回记录与下一位置（行尾之后）。
     ;
     ; **参数**
@@ -100,10 +100,10 @@ procedure(_parseRecord(t_s n_i n_delim "txn")  ; -> list
     ;   (list) - (字段列表 下一位置)
     let((l_fields l_field n_c g_done)
         while(!g_done
-            l_field = _parseField(t_s n_i n_delim)
+            l_field = _ParseField(t_s n_i n_delim)
             l_fields = tconc(l_fields car(l_field))
             n_i = cadr(l_field)
-            n_c = _code(t_s n_i)
+            n_c = _Code(t_s n_i)
             cond(
                 (!n_c
                     g_done = t
@@ -112,7 +112,7 @@ procedure(_parseRecord(t_s n_i n_delim "txn")  ; -> list
                     n_i = n_i + 1
                 )
                 (t
-                    if(n_c == 13 && _code(t_s n_i + 1) == 10
+                    if(n_c == 13 && _Code(t_s n_i + 1) == 10
                         n_i = n_i + 2
                         n_i = n_i + 1
                     )
@@ -124,7 +124,7 @@ procedure(_parseRecord(t_s n_i n_delim "txn")  ; -> list
     )
 )
 
-procedure(_scanRows(t_s n_delim g_skipEmpty "tng")  ; -> list
+procedure(_ScanRows(t_s n_delim g_skipEmpty "tng")  ; -> list
     ; 扫描全部记录，可选跳过单空字段记录；同时保留每条记录起点。
     ;
     ; **参数**
@@ -139,7 +139,7 @@ procedure(_scanRows(t_s n_delim g_skipEmpty "tng")  ; -> list
         n_i = 1
         while(n_i <= n_len
             n_start = n_i
-            l_rec = _parseRecord(t_s n_i n_delim)
+            l_rec = _ParseRecord(t_s n_i n_delim)
             l_row = car(l_rec)
             n_i = cadr(l_rec)
             unless(g_skipEmpty && length(l_row) == 1 && car(l_row) == ""
@@ -151,7 +151,7 @@ procedure(_scanRows(t_s n_delim g_skipEmpty "tng")  ; -> list
     )
 )
 
-procedure(_checkWidths(l_rows l_starts n_width t_s "llnt")  ; -> t
+procedure(_CheckWidths(l_rows l_starts n_width t_s "llnt")  ; -> t
     ; 校验有表头时每条记录宽度不超过列名数。
     ;
     ; **参数**
@@ -164,7 +164,7 @@ procedure(_checkWidths(l_rows l_starts n_width t_s "llnt")  ; -> t
     ;   (t) - 全部合法时返回 t；超宽行以 error() 中断
     for(n_i 1 length(l_rows)
         when(n_width < length(nth(n_i - 1 l_rows))
-            _error(t_s nth(n_i - 1 l_starts)
+            _Error(t_s nth(n_i - 1 l_starts)
                 lsprintf("row %d has %d fields but header has %d"
                     n_i length(nth(n_i - 1 l_rows)) n_width)
             )
@@ -175,7 +175,7 @@ procedure(_checkWidths(l_rows l_starts n_width t_s "llnt")  ; -> t
 
 ; ---------- 解码入口 ----------
 
-procedure(decode(t_str \@key (format "csv") (header nil) (delimiter nil) (skipEmpty nil) (stripBom t) "ttgggg")  ; -> Table
+procedure(Decode(t_str \@key (format "csv") (header nil) (delimiter nil) (skipEmpty nil) (stripBom t) "ttgggg")  ; -> Table
     ; 解码 CSV/TSV 文本为 Table。
     ;
     ; **参数**
@@ -189,44 +189,44 @@ procedure(decode(t_str \@key (format "csv") (header nil) (delimiter nil) (skipEm
     ; **返回**
     ;   (Table) - 解码结果；格式/选项/引号/表头宽度非法时报错
     unless(stringp(t_str)
-        error("ycCsv::decode: expects a string")
+        error("ycCsv::Decode: expects a string")
     )
     let((n_delim g_header n_len t_body l_scan l_rows l_starts l_names)
-        n_delim = _delimCode(delimiter _formatDelim(format "ycCsv::decode") "ycCsv::decode")
+        n_delim = _DelimCode(delimiter _FormatDelim(format "ycCsv::Decode") "ycCsv::Decode")
         g_header = cond(
             (header == nil nil)
             (header == t t)
             (t
                 unless(listp(header)
-                    error("ycCsv::decode: ?header expects t, nil, or a list of strings")
+                    error("ycCsv::Decode: ?header expects t, nil, or a list of strings")
                 )
-                _checkHeader(header "ycCsv::decode")
+                _CheckHeader(header "ycCsv::Decode")
             )
         )
         n_len = length(t_str)
         t_body = t_str
         when(stripBom && 3 <= n_len
-                && _code(t_str 1) == 239
-                && _code(t_str 2) == 187
-                && _code(t_str 3) == 191
+                && _Code(t_str 1) == 239
+                && _Code(t_str 2) == 187
+                && _Code(t_str 3) == 191
             t_body = if(3 < n_len substring(t_str 4) "")
         )
-        l_scan = _scanRows(t_body n_delim skipEmpty)
+        l_scan = _ScanRows(t_body n_delim skipEmpty)
         l_rows = car(l_scan)
         l_starts = cadr(l_scan)
         cond(
             (g_header == t
                 if(l_rows
                     progn(
-                        l_names = _checkHeader(car(l_rows) "ycCsv::decode")
-                        _checkWidths(cdr(l_rows) cdr(l_starts) length(l_names) t_body)
+                        l_names = _CheckHeader(car(l_rows) "ycCsv::Decode")
+                        _CheckWidths(cdr(l_rows) cdr(l_starts) length(l_names) t_body)
                         Table(cdr(l_rows) ?header l_names)
                     )
                     Table(nil)
                 )
             )
             (g_header
-                _checkWidths(l_rows l_starts length(g_header) t_body)
+                _CheckWidths(l_rows l_starts length(g_header) t_body)
                 Table(l_rows ?header g_header)
             )
             (t

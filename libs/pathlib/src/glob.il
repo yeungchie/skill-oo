@@ -1,7 +1,7 @@
 useNamespace("ycPathLib")
 
 
-procedure(_collapseStars(l_segs "l")  ; -> list[str] | nil
+procedure(_CollapseStars(l_segs "l")  ; -> list[str] | nil
     ; 折叠路径 pattern 段列表中连续重复的 "**"，每段连续游程只保留第一个。
     ;
     ; **参数**
@@ -20,7 +20,7 @@ procedure(_collapseStars(l_segs "l")  ; -> list[str] | nil
     )
 )
 
-procedure(_globDirs(g_dir "g")  ; -> list[Path]
+procedure(_GlobDirs(g_dir "g")  ; -> list[Path]
     ; 递归收集目录树的真实目录：起点自身加全部真实子目录。
     ;
     ; **参数**
@@ -30,11 +30,11 @@ procedure(_globDirs(g_dir "g")  ; -> list[Path]
     ;   (list[Path]) - g_dir 自身及全部真实子目录（深度递归）；符号链接目录不进入也不列出
     let((l_res)
         l_res = list(g_dir)
-        foreach(t_s _dirNames(g_dir->str())
+        foreach(t_s _DirNames(g_dir->str())
             let((p_sub)
                 p_sub = g_dir->join(t_s)
                 when(p_sub->isDir() && !p_sub->isSymlink()
-                    l_res = append(l_res _globDirs(p_sub))
+                    l_res = append(l_res _GlobDirs(p_sub))
                 )
             )
         )
@@ -42,7 +42,7 @@ procedure(_globDirs(g_dir "g")  ; -> list[Path]
     )
 )
 
-procedure(_globTree(g_dir "g")  ; -> list[Path]
+procedure(_GlobTree(g_dir "g")  ; -> list[Path]
     ; 递归收集目录树的全部条目：起点自身加每个子项。
     ;
     ; **参数**
@@ -52,11 +52,11 @@ procedure(_globTree(g_dir "g")  ; -> list[Path]
     ;   (list[Path]) - g_dir 自身与全部条目；真实目录递归进入，符号链接目录只产出条目不进入
     let((l_res)
         l_res = list(g_dir)
-        foreach(t_s _dirNames(g_dir->str())
+        foreach(t_s _DirNames(g_dir->str())
             let((p_sub)
                 p_sub = g_dir->join(t_s)
                 if(p_sub->isDir() && !p_sub->isSymlink()
-                    l_res = append(l_res _globTree(p_sub))
+                    l_res = append(l_res _GlobTree(p_sub))
                     l_res = append(l_res list(p_sub))
                 )
             )
@@ -65,7 +65,7 @@ procedure(_globTree(g_dir "g")  ; -> list[Path]
     )
 )
 
-procedure(_globChain(g_dir l_segs "gl")  ; -> list[Path] | nil
+procedure(_GlobChain(g_dir l_segs "gl")  ; -> list[Path] | nil
     ; 按 pattern 段逐级递归匹配，返回符合剩余 pattern 段的路径列表。
     ;
     ; **参数**
@@ -83,25 +83,25 @@ procedure(_globChain(g_dir l_segs "gl")  ; -> list[Path] | nil
                 l_res = list(g_dir)
             )
             (".."
-                l_res = _globChain(g_dir->join("..") l_rest)
+                l_res = _GlobChain(g_dir->join("..") l_rest)
             )
             ("**"
                 if(l_rest == nil
-                    l_res = _globTree(g_dir)
-                    foreach(p_sp _globDirs(g_dir)
-                        l_res = append(l_res _globChain(p_sp l_rest))
+                    l_res = _GlobTree(g_dir)
+                    foreach(p_sp _GlobDirs(g_dir)
+                        l_res = append(l_res _GlobChain(p_sp l_rest))
                     )
                 )
             )
             (t
-                foreach(t_s _dirNames(g_dir->str())
-                    when(_fnmatch1(t_s t_first)
+                foreach(t_s _DirNames(g_dir->str())
+                    when(_Fnmatch1(t_s t_first)
                         let((p_child)
                             p_child = g_dir->join(t_s)
                             if(l_rest == nil
                                 l_res = cons(p_child l_res)
                                 when(p_child->isDir()
-                                    l_res = append(l_res _globChain(p_child l_rest))
+                                    l_res = append(l_res _GlobChain(p_child l_rest))
                                 )
                             )
                         )
@@ -113,7 +113,7 @@ procedure(_globChain(g_dir l_segs "gl")  ; -> list[Path] | nil
     )
 )
 
-procedure(_globPattern(g_base t_pattern "gt")  ; -> list[Path] | nil
+procedure(_GlobPattern(g_base t_pattern "gt")  ; -> list[Path] | nil
     ; 以 g_base 为起点执行 glob pattern：校验、解析、遍历并去重。
     ;
     ; **参数**
@@ -127,19 +127,19 @@ procedure(_globPattern(g_base t_pattern "gt")  ; -> list[Path] | nil
         when(pcreMatchp("^/" t_pattern)
             error("Non-relative patterns are unsupported")
         )
-        l_parse = _parsePath(t_pattern)
+        l_parse = _ParsePath(t_pattern)
         l_segs = cdr(l_parse)
         when(l_segs == nil
             error("Unacceptable pattern: '%s'" t_pattern)
         )
-        when(_endsWith(t_pattern "/")
+        when(_EndsWith(t_pattern "/")
             l_segs = append(l_segs list(""))
         )
-        l_segs = _collapseStars(l_segs)
+        l_segs = _CollapseStars(l_segs)
         when(g_base->isDir()
             let((l_res g_seen)
                 g_seen = makeTable("globSeen" nil)
-                foreach(p _globChain(g_base l_segs)
+                foreach(p _GlobChain(g_base l_segs)
                     unless(g_seen[p->str()]
                         g_seen[p->str()] = t
                         l_res = tconc(l_res p)
@@ -152,13 +152,13 @@ procedure(_globPattern(g_base t_pattern "gt")  ; -> list[Path] | nil
 )
 
 inScheme(
-procedure(_installGlob(self "g")  ; -> any
+procedure(_InstallGlob(self "g")  ; -> any
     ; 把 glob 方法安装到 Path 类（由 initializeInstance 调用）。
     ;
     ; **返回**
     ;   (any) - 返回最后一条安装赋值的结果，调用方忽略
 
-procedure(_error(t_method t_formatString \@rest g_args "ttg")  ; -> never
+procedure(_Error(t_method t_formatString \@rest g_args "ttg")  ; -> never
     ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
     ;
     ; **参数**
@@ -175,14 +175,14 @@ self->iterdir = lambda(()  ; -> list[Path] | nil
     ; 列出直接子项的 Path 列表（不含 "."/".."）。
     ;
     ; **返回**
-    ;   (list[Path]|nil) - 空目录返回 nil；非目录走 _error() 中断；含点开头名与子目录，顺序未定义
+    ;   (list[Path]|nil) - 空目录返回 nil；非目录走 _Error() 中断；含点开头名与子目录，顺序未定义
     let((t_str)
         t_str = self->str()
         unless(self->isDir()
-            _error("iterdir" "not a directory: '%s'" t_str)
+            _Error("iterdir" "not a directory: '%s'" t_str)
         )
         mapcar(lambda((t_s "t") self->join(t_s))
-            _dirNames(t_str)
+            _DirNames(t_str)
         )
     )
 )
@@ -195,7 +195,7 @@ self->glob = lambda((t_pattern "t")  ; -> list[Path] | nil
     ;
     ; **返回**
     ;   (list[Path]|nil) - 去重后的匹配列表（顺序未定义）；起点非目录或无匹配返回 nil；绝对 pattern 或无有效段 pattern error() 中断
-    _globPattern(self t_pattern)
+    _GlobPattern(self t_pattern)
 )
 
 self->rglob = lambda((t_pattern "t")  ; -> list[Path] | nil
@@ -209,7 +209,7 @@ self->rglob = lambda((t_pattern "t")  ; -> list[Path] | nil
     when(pcreMatchp("^/" t_pattern)
         error("Non-relative patterns are unsupported")
     )
-    _globPattern(self strcat("**/" t_pattern))
+    _GlobPattern(self strcat("**/" t_pattern))
 )
 
 ))

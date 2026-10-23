@@ -15,28 +15,28 @@ Cadence SKILL++ 的文本折行与块缩进库：定宽折行、公共缩进处�
 
 ```lisp
 ; 定宽折行
-ycTextwrap::wrap("one two three" ?width 7)                  ; => ("one two" "three")
-ycTextwrap::wrap("中文测试" ?width 4)                       ; => ("中文" "测试")
-ycTextwrap::wrap("one two three" ?width 9 ?initialIndent "> " ?subsequentIndent "  ")
+ycTextwrap::Wrap("one two three" ?width 7)                  ; => ("one two" "three")
+ycTextwrap::Wrap("中文测试" ?width 4)                       ; => ("中文" "测试")
+ycTextwrap::Wrap("one two three" ?width 9 ?initialIndent "> " ?subsequentIndent "  ")
 ; => ("> one two" "  three")
 
 ; 长词与截断
-ycTextwrap::wrap("abcdefgh" ?width 4)                       ; => ("abcd" "efgh")
-ycTextwrap::wrap("one two three four" ?width 7 ?maxLines 2) ; => ("one two" "thre...")
+ycTextwrap::Wrap("abcdefgh" ?width 4)                       ; => ("abcd" "efgh")
+ycTextwrap::Wrap("one two three four" ?width 7 ?maxLines 2) ; => ("one two" "thre...")
 
 ; 拼回、缩进与截断
-ycTextwrap::fill("one two three" ?width 7)                  ; => "one two\nthree"
-ycTextwrap::dedent("  a\n    b\n  c")                       ; => "a\n  b\nc"
-ycTextwrap::indent("a\n b" ?prefix "- ")                    ; => "- a\n-  b"
-ycTextwrap::shorten("hello world" 8)                        ; => "hello..."
+ycTextwrap::Fill("one two three" ?width 7)                  ; => "one two\nthree"
+ycTextwrap::Dedent("  a\n    b\n  c")                       ; => "a\n  b\nc"
+ycTextwrap::Indent("a\n b" ?prefix "- ")                    ; => "- a\n-  b"
+ycTextwrap::Shorten("hello world" 8)                        ; => "hello..."
 ```
 
 ## API 参考
 
-### ycTextwrap::wrap <sub>`function`</sub>
+### ycTextwrap::Wrap <sub>`function`</sub>
 
 ```text
-ycTextwrap::wrap(
+ycTextwrap::Wrap(
     t_text
     [ ?width 70 ]
     [ ?initialIndent "" ]
@@ -79,22 +79,22 @@ ycTextwrap::wrap(
 **例程**
 
 ```lisp
-ycTextwrap::wrap("hello world" ?width 11)  ; => ("hello world")
-ycTextwrap::wrap("hello world" ?width 7)   ; => ("hello" "world")
-ycTextwrap::wrap("a\n\nb" ?width 10)       ; => ("a" "" "b")
-ycTextwrap::wrap("中文" ?width 2 ?unit "char") ; => ("中文")
-ycTextwrap::wrap("ab-cdefgh" ?width 4)     ; => ("ab-" "cdef" "gh")
-ycTextwrap::wrap("abcdefgh" ?width 4 ?breakLongWords nil) ; => ("abcdefgh")
-ycTextwrap::wrap("one two three four" ?width 7 ?maxLines 2 ?placeholder "…")
+ycTextwrap::Wrap("hello world" ?width 11)  ; => ("hello world")
+ycTextwrap::Wrap("hello world" ?width 7)   ; => ("hello" "world")
+ycTextwrap::Wrap("a\n\nb" ?width 10)       ; => ("a" "" "b")
+ycTextwrap::Wrap("中文" ?width 2 ?unit "char") ; => ("中文")
+ycTextwrap::Wrap("ab-cdefgh" ?width 4)     ; => ("ab-" "cdef" "gh")
+ycTextwrap::Wrap("abcdefgh" ?width 4 ?breakLongWords nil) ; => ("abcdefgh")
+ycTextwrap::Wrap("one two three four" ?width 7 ?maxLines 2 ?placeholder "…")
 ; => ("one two" "three…")
-ycTextwrap::wrap("a" ?width 0)
+ycTextwrap::Wrap("a" ?width 0)
 ; => 以 error() 中断（宽度须为正整数）
 ```
 
-### ycTextwrap::fill <sub>`function`</sub>
+### ycTextwrap::Fill <sub>`function`</sub>
 
 ```text
-ycTextwrap::fill(
+ycTextwrap::Fill(
     t_text
     [ ?width 70 ]
     [ ?initialIndent "" ]
@@ -112,7 +112,7 @@ ycTextwrap::fill(
 
 **描述**
 
-折行后以 `?sep` 拼回。折行选项与 `ycTextwrap::wrap` 相同；`ycTextwrap::wrap` 返回 `nil` 时结果为空串。
+折行后以 `?sep` 拼回。折行选项与 `ycTextwrap::Wrap` 相同；`ycTextwrap::Wrap` 返回 `nil` 时结果为空串。
 
 **参数**
 
@@ -137,15 +137,15 @@ ycTextwrap::fill(
 **例程**
 
 ```lisp
-ycTextwrap::fill("one two three" ?width 7)       ; => "one two\nthree"
-ycTextwrap::fill("one two three" ?width 7 ?sep "|") ; => "one two|three"
-ycTextwrap::fill("" ?width 7)                    ; => ""
+ycTextwrap::Fill("one two three" ?width 7)       ; => "one two\nthree"
+ycTextwrap::Fill("one two three" ?width 7 ?sep "|") ; => "one two|three"
+ycTextwrap::Fill("" ?width 7)                    ; => ""
 ```
 
-### ycTextwrap::dedent <sub>`function`</sub>
+### ycTextwrap::Dedent <sub>`function`</sub>
 
 ```text
-ycTextwrap::dedent(t_text)
+ycTextwrap::Dedent(t_text)
 => str
 ```
 
@@ -166,15 +166,15 @@ ycTextwrap::dedent(t_text)
 **例程**
 
 ```lisp
-ycTextwrap::dedent("  a\n    b\n  c")  ; => "a\n  b\nc"
-ycTextwrap::dedent(" a\n  b")           ; => "a\n b"
-ycTextwrap::dedent("  a\n\n  b")        ; => "a\n\nb"
+ycTextwrap::Dedent("  a\n    b\n  c")  ; => "a\n  b\nc"
+ycTextwrap::Dedent(" a\n  b")           ; => "a\n b"
+ycTextwrap::Dedent("  a\n\n  b")        ; => "a\n\nb"
 ```
 
-### ycTextwrap::indent <sub>`function`</sub>
+### ycTextwrap::Indent <sub>`function`</sub>
 
 ```text
-ycTextwrap::indent(
+ycTextwrap::Indent(
     t_text
     [ ?prefix "  " ]
 )
@@ -199,14 +199,14 @@ ycTextwrap::indent(
 **例程**
 
 ```lisp
-ycTextwrap::indent("a\n b")             ; => "  a\n   b"
-ycTextwrap::indent("a\n\n b" ?prefix "- ") ; => "- a\n\n-  b"
+ycTextwrap::Indent("a\n b")             ; => "  a\n   b"
+ycTextwrap::Indent("a\n\n b" ?prefix "- ") ; => "- a\n\n-  b"
 ```
 
-### ycTextwrap::shorten <sub>`function`</sub>
+### ycTextwrap::Shorten <sub>`function`</sub>
 
 ```text
-ycTextwrap::shorten(
+ycTextwrap::Shorten(
     t_text
     n_width
     [ ?placeholder "..." ]
@@ -237,11 +237,11 @@ ycTextwrap::shorten(
 **例程**
 
 ```lisp
-ycTextwrap::shorten("hello world" 12)  ; => "hello world"
-ycTextwrap::shorten("hello world" 8)   ; => "hello..."
-ycTextwrap::shorten("abcdefghij" 5)    ; => "ab..."
-ycTextwrap::shorten("中文测试" 4)       ; => "..."
-ycTextwrap::shorten("abcdefgh" 5 ?placeholder "…") ; => "abcd…"
-ycTextwrap::shorten("a" 0)
+ycTextwrap::Shorten("hello world" 12)  ; => "hello world"
+ycTextwrap::Shorten("hello world" 8)   ; => "hello..."
+ycTextwrap::Shorten("abcdefghij" 5)    ; => "ab..."
+ycTextwrap::Shorten("中文测试" 4)       ; => "..."
+ycTextwrap::Shorten("abcdefgh" 5 ?placeholder "…") ; => "abcd…"
+ycTextwrap::Shorten("a" 0)
 ; => 以 error() 中断（宽度须为正整数）
 ```

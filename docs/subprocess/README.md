@@ -4,7 +4,7 @@ Cadence SKILL++ 的子进程封装库：启动进程、实时读写输出、按�
 
 ## 概要
 
-+ 同步接口 `runJob()` 执行并等待；异步接口 `createJob()` 返回 `AsyncJob` 对象，控制进程生命周期。
++ 同步接口 `RunJob()` 执行并等待；异步接口 `CreateJob()` 返回 `AsyncJob` 对象，控制进程生命周期。
 + 进程状态以符号表示：`'None`（未启动）/ `'Active`（运行中）/ `'Dead`（已结束）/ `'Stopped`（已暂停）。
 + 输出按条收进 `Stream` 对象：`text()` 全量拼接、`last()`/`shift()` 取单条；耗时由 `Elapsed` 记录。
 + 回调函数按事件符号触发：`'stdout`/`'stderr`/`'post`/`'beforeBegin`/`'afterBegin`。
@@ -15,14 +15,14 @@ Cadence SKILL++ 的子进程封装库：启动进程、实时读写输出、按�
 
 ```lisp
 ; 同步执行：执行并等待，输出实时打印
-ycSubProcess::runJob("whoami")                              ; => t
+ycSubProcess::RunJob("whoami")                              ; => t
 
 ; 异步执行：启动后取标准输出
-aj = ycSubProcess::createJob("date")
+aj = ycSubProcess::CreateJob("date")
 aj->await()                                                 ; => "Tue Sep 15 22:50:10 CST 2026\n"
 
 ; 链式调用：向子进程标准输入写入
-aj = ycSubProcess::createJob("cat")\
+aj = ycSubProcess::CreateJob("cat")\
     ->start()\
     ->print("hello")\
     ->print("world")\
@@ -32,10 +32,10 @@ aj->await()                                                 ; => "hello\nworld\n
 
 ## API 参考
 
-### ycSubProcess::runJob <sub>`function`</sub>
+### ycSubProcess::RunJob <sub>`function`</sub>
 
 ```text
-ycSubProcess::runJob(
+ycSubProcess::RunJob(
     g_arg
     [ g_args ... ]
 )
@@ -60,27 +60,27 @@ ycSubProcess::runJob(
 **例程**
 
 ```lisp
-ycSubProcess::runJob("whoami")
+ycSubProcess::RunJob("whoami")
 ; yeung
 ; => t
 ```
 
 ```lisp
-ycSubProcess::runJob("date")
+ycSubProcess::RunJob("date")
 ; Tue Sep 15 22:50:10 CST 2026
 ; => t
 ```
 
 ```lisp
-ycSubProcess::runJob("bad cmd")
+ycSubProcess::RunJob("bad cmd")
 ; sh: bad: command not found
 ; => nil
 ```
 
-### ycSubProcess::createJob <sub>`function`</sub>
+### ycSubProcess::CreateJob <sub>`function`</sub>
 
 ```text
-ycSubProcess::createJob(
+ycSubProcess::CreateJob(
     g_arg
     [ g_args ... ]
     [ ?callback g_funcobj ]
@@ -127,7 +127,7 @@ ycSubProcess::createJob(
 **例程**
 
 ```lisp
-aj = ycSubProcess::createJob("free -h")
+aj = ycSubProcess::CreateJob("free -h")
 ; => <ycSubProcess::AsyncJob status=None, returncode=nil>
 
 printf("%s" aj->await())
@@ -150,14 +150,14 @@ ycSubProcess::AsyncJob(
 
 **描述**
 
-异步任务对象，用于控制和获取任务及进程信息。命令串为已拼接好的完整命令；一般经 `createJob()`（先拼接命令段）创建。
+异步任务对象，用于控制和获取任务及进程信息。命令串为已拼接好的完整命令；一般经 `CreateJob()`（先拼接命令段）创建。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_cmd | str | | 完整命令串 |
-| ?callback g_funcobj | nil / symbol / funobj | nil | 可选，回调函数（签名见 `createJob`） |
+| ?callback g_funcobj | nil / symbol / funobj | nil | 可选，回调函数（签名见 `CreateJob`） |
 | ?userData g_data | Any | nil | 可选，可用于携带任意数据 |
 | ?verbose g_enable | nil / t | nil | 可选，控制是否实时打印子进程输出 |
 
@@ -193,7 +193,7 @@ aj->start()
 运行任务，启动进程。若已启动则报错。
 
 ```lisp
-aj = ycSubProcess::createJob("whoami")
+aj = ycSubProcess::CreateJob("whoami")
 aj->start()
 ; => <ycSubProcess::AsyncJob status=Active, returncode=nil>
 ```
@@ -233,14 +233,14 @@ aj->await(
 | ?check g_enable | bool | nil | 是否检查返回码，非零时抛出错误 |
 
 ```lisp
-ycSubProcess::createJob("whoami")->await()
+ycSubProcess::CreateJob("whoami")->await()
 ; => "yeung\n"
 ```
 
 设置 `?check t` 时，进程返回码非零会抛出错误。
 
 ```lisp
-ycSubProcess::createJob("whoamii")->await(?check t)
+ycSubProcess::CreateJob("whoamii")->await(?check t)
 ; sh: whoamii: command not found
 ; *Error* funcall: job failed, returncode is 127
 ```
@@ -308,7 +308,7 @@ aj->print(
 | ?end t_string | str | `"\n"` | 结尾字符 |
 
 ```lisp
-aj = ycSubProcess::createJob("cat")
+aj = ycSubProcess::CreateJob("cat")
 aj->start()
 ; => t
 
@@ -379,7 +379,7 @@ aj->sleep(
 + `sleep`
 
 ```lisp
-ycSubProcess::createJob("cat")\
+ycSubProcess::CreateJob("cat")\
     ->start()\
     ->print("hello")\
     ->print("world")\
@@ -388,7 +388,7 @@ ycSubProcess::createJob("cat")\
 ```
 
 ```lisp
-ycSubProcess::createJob("sleep 1")\
+ycSubProcess::CreateJob("sleep 1")\
     ->start()\
     ->wait()\
     ->elapsed->humanReadable()

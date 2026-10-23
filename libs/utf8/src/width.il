@@ -2,7 +2,7 @@ useNamespace("ycUtf8")
 
 ; ---------- 宽度规则 ----------
 
-procedure(_inRanges(l_ranges n_cp "lx")  ; -> t | nil
+procedure(_InRanges(l_ranges n_cp "lx")  ; -> t | nil
     ; 在升序闭区间表中二分查找码点。
     ;
     ; **参数**
@@ -27,7 +27,7 @@ procedure(_inRanges(l_ranges n_cp "lx")  ; -> t | nil
     )
 )
 
-procedure(_widthOf(n_cp n_ambiguous "xx")  ; -> int
+procedure(_WidthOf(n_cp n_ambiguous "xx")  ; -> int
     ; 按规则计算单码点显示宽度。
     ;
     ; **参数**
@@ -39,14 +39,14 @@ procedure(_widthOf(n_cp n_ambiguous "xx")  ; -> int
     cond(
         ((n_cp >= 0 && n_cp <= 31) || (n_cp >= 127 && n_cp <= 159) 0)
         (n_cp == 173 1)
-        (_inRanges(_zeroRanges n_cp) 0)
-        (_inRanges(_wfRanges n_cp) 2)
-        (_inRanges(_aRanges n_cp) n_ambiguous)
+        (_InRanges(_ZeroRanges n_cp) 0)
+        (_InRanges(_WfRanges n_cp) 2)
+        (_InRanges(_ARanges n_cp) n_ambiguous)
         (t 1)
     )
 )
 
-procedure(width(t_str \@key (strict t) (ambiguous 1) "tgx")  ; -> int
+procedure(Width(t_str \@key (strict t) (ambiguous 1) "tgx")  ; -> int
     ; 计算 UTF-8 字节串的显示列宽。
     ;
     ; **参数**
@@ -57,24 +57,24 @@ procedure(width(t_str \@key (strict t) (ambiguous 1) "tgx")  ; -> int
     ; **返回**
     ;   (int) - 显示列宽；空串为 0
     unless(ambiguous == 1 || ambiguous == 2
-        error("ycUtf8::width: ambiguous must be 1 or 2")
+        error("ycUtf8::Width: ambiguous must be 1 or 2")
     )
     unless(stringp(t_str)
-        error("ycUtf8::width: expects a string")
+        error("ycUtf8::Width: expects a string")
     )
     let((l_res n_i n_sum)
         n_i = 1
         n_sum = 0
         while(n_i <= length(t_str)
-            l_res = _read(t_str n_i strict "ycUtf8::width")
-            n_sum = n_sum + _widthOf(car(l_res) ambiguous)
+            l_res = _Read(t_str n_i strict "ycUtf8::Width")
+            n_sum = n_sum + _WidthOf(car(l_res) ambiguous)
             n_i = cadr(l_res)
         )
         n_sum
     )
 )
 
-procedure(charWidth(n_cp \@key (ambiguous 1) "xx")  ; -> int
+procedure(CharWidth(n_cp \@key (ambiguous 1) "xx")  ; -> int
     ; 计算单个码点的显示宽度。
     ;
     ; **参数**
@@ -84,15 +84,15 @@ procedure(charWidth(n_cp \@key (ambiguous 1) "xx")  ; -> int
     ; **返回**
     ;   (int) - 0 / 1 / 2
     unless(ambiguous == 1 || ambiguous == 2
-        error("ycUtf8::charWidth: ambiguous must be 1 or 2")
+        error("ycUtf8::CharWidth: ambiguous must be 1 or 2")
     )
     unless(fixp(n_cp) && n_cp >= 0 && n_cp <= 1114111
-        error("ycUtf8::charWidth: invalid codepoint (%A)" n_cp)
+        error("ycUtf8::CharWidth: invalid codepoint (%A)" n_cp)
     )
     when(n_cp >= 55296 && n_cp <= 57343
-        error("ycUtf8::charWidth: invalid codepoint (%A)" n_cp)
+        error("ycUtf8::CharWidth: invalid codepoint (%A)" n_cp)
     )
-    _widthOf(n_cp ambiguous)
+    _WidthOf(n_cp ambiguous)
 )
 
 unuseNamespace("ycUtf8")

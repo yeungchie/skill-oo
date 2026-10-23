@@ -1,14 +1,14 @@
-ycNamespace:::require("ycCodec")
+ycNamespace:::Require("ycCodec")
 
 useNamespace("ycJson")
 
 ; 编码默认嵌套深度上限：实测约 1150 层触语言栈上界，取 800 留安全余量；可用 ?maxDepth 调整。
-_maxEncodeDepth = 800
+_MaxEncodeDepth = 800
 
 
 ; ---------- 输出 ----------
 
-procedure(_keyStr(g_key g_opt "gg")  ; -> str
+procedure(_KeyStr(g_key g_opt "gg")  ; -> str
     ; 将 table 键转为输出用字符串：字符串原样、符号取名、fixnum 转十进制。
     ;
     ; **参数**
@@ -18,19 +18,19 @@ procedure(_keyStr(g_key g_opt "gg")  ; -> str
     ; **返回**
     ;   (str) - 键的字符串形式；其他键型报错
     when(g_opt["strict"] && !stringp(g_key)
-        error("ycJson::encode: strict mode requires string keys, got %A" g_key)
+        error("ycJson::Encode: strict mode requires string keys, got %A" g_key)
     )
     cond(
         (stringp(g_key) g_key)
         (symbolp(g_key) symbolToString(g_key))
         (fixp(g_key) sprintf(nil "%d" g_key))
         (t
-            error("ycJson::encode: unsupported table key of type %s" symbolToString(type(g_key)))
+            error("ycJson::Encode: unsupported table key of type %s" symbolToString(type(g_key)))
         )
     )
 )
 
-procedure(_indentStr(n_level n_indent "xx")  ; -> str
+procedure(_IndentStr(n_level n_indent "xx")  ; -> str
     ; 生成 n_level 层、每层 n_indent 个空格的缩进串。
     ;
     ; **参数**
@@ -50,7 +50,7 @@ procedure(_indentStr(n_level n_indent "xx")  ; -> str
     )
 )
 
-procedure(_encodeString(t_s "t")  ; -> str
+procedure(_EncodeString(t_s "t")  ; -> str
     ; 输出字符串：引号/反斜杠/控制字节转义，其余字节（含 UTF-8）原样透传。
     ;
     ; **参数**
@@ -64,7 +64,7 @@ procedure(_encodeString(t_s "t")  ; -> str
         l_p = nil
         when(0 < n_len
             for(n_k 1 n_len
-                n_c = _code(t_s n_k)
+                n_c = _Code(t_s n_k)
                 cond(
                     (n_c == 34 || n_c == 92 || n_c < 32
                         {
@@ -92,11 +92,11 @@ procedure(_encodeString(t_s "t")  ; -> str
                 l_p = tconc(l_p substring(t_s n_run n_len - n_run + 1))
             )
         )
-        lsprintf("\"%s\"" _build(l_p))
+        lsprintf("\"%s\"" _Build(l_p))
     )
 )
 
-procedure(_encodeNumber(g_n "n")  ; -> str
+procedure(_EncodeNumber(g_n "n")  ; -> str
     ; 数字输出：fixnum 直出；flonum 用 %.15g、不可回环时回退 %.17g，缺小数点/指数时补 .0。
     ;
     ; **参数**
@@ -108,7 +108,7 @@ procedure(_encodeNumber(g_n "n")  ; -> str
         sprintf(nil "%d" g_n)
         let((t_s)
             when(isNaN(g_n) || isInfinity(g_n)
-                error("ycJson::encode: cannot dump non-finite float")
+                error("ycJson::Encode: cannot dump non-finite float")
             )
             t_s = sprintf(nil "%.15g" g_n)
             unless(atof(t_s) == g_n
@@ -122,7 +122,7 @@ procedure(_encodeNumber(g_n "n")  ; -> str
     )
 )
 
-procedure(_encodeValue(g_val n_depth g_opt "gxg")  ; -> str
+procedure(_EncodeValue(g_val n_depth g_opt "gxg")  ; -> str
     ; 单值输出分发：nil 即空数组、t/哨兵出字面量，其余按类型派发；超深或不可表示类型报错。
     ;
     ; **参数**
@@ -133,7 +133,7 @@ procedure(_encodeValue(g_val n_depth g_opt "gxg")  ; -> str
     ; **返回**
     ;   (str) - 该值的 JSON 文本
     when(n_depth > g_opt["maxDepth"]
-        error("ycJson::encode: nesting too deep (limit %d)" g_opt["maxDepth"])
+        error("ycJson::Encode: nesting too deep (limit %d)" g_opt["maxDepth"])
     )
     cond(
         (g_val == nil
@@ -143,19 +143,19 @@ procedure(_encodeValue(g_val n_depth g_opt "gxg")  ; -> str
         (g_val == ycCodec:::False "false")
         (g_val == ycCodec:::Null "null")
         (g_val == ycCodec:::Missing
-            error("ycJson::encode: cannot dump the Missing marker")
+            error("ycJson::Encode: cannot dump the Missing marker")
         )
-        (stringp(g_val) _encodeString(g_val))
-        (numberp(g_val) _encodeNumber(g_val))
-        (tablep(g_val) _encodeTable(g_val n_depth g_opt))
-        (listp(g_val) _encodeList(g_val n_depth g_opt))
+        (stringp(g_val) _EncodeString(g_val))
+        (numberp(g_val) _EncodeNumber(g_val))
+        (tablep(g_val) _EncodeTable(g_val n_depth g_opt))
+        (listp(g_val) _EncodeList(g_val n_depth g_opt))
         (t
-            error("ycJson::encode: cannot dump value of type %s" symbolToString(type(g_val)))
+            error("ycJson::Encode: cannot dump value of type %s" symbolToString(type(g_val)))
         )
     )
 )
 
-procedure(_encodeList(l_arr n_depth g_opt "lxg")  ; -> str
+procedure(_EncodeList(l_arr n_depth g_opt "lxg")  ; -> str
     ; 输出列表为 JSON 数组；缩进为正时逐元素换行缩进。
     ;
     ; **参数**
@@ -168,12 +168,12 @@ procedure(_encodeList(l_arr n_depth g_opt "lxg")  ; -> str
     let((n_indent l_items l_q t_pad t_padIn)
         n_indent = g_opt["indent"]
         when(n_indent > 0
-            t_pad = _indentStr(n_depth n_indent)
-            t_padIn = _indentStr(n_depth + 1 n_indent)
+            t_pad = _IndentStr(n_depth n_indent)
+            t_padIn = _IndentStr(n_depth + 1 n_indent)
         )
         l_items = nil
         foreach(g_item l_arr
-            l_items = tconc(l_items _encodeValue(g_item n_depth + 1 g_opt))
+            l_items = tconc(l_items _EncodeValue(g_item n_depth + 1 g_opt))
         )
         l_items = car(l_items)
         if(n_indent > 0
@@ -196,7 +196,7 @@ procedure(_encodeList(l_arr n_depth g_opt "lxg")  ; -> str
     )
 )
 
-procedure(_encodeTable(t_obj n_depth g_opt "gxg")  ; -> str
+procedure(_EncodeTable(t_obj n_depth g_opt "gxg")  ; -> str
     ; 输出 table 为 JSON 对象；键限字符串/符号/fixnum，sortKeys 非 nil 时按 alphalessp 排序。
     ;
     ; **参数**
@@ -218,9 +218,9 @@ procedure(_encodeTable(t_obj n_depth g_opt "gxg")  ; -> str
             t_orig = makeTable("ycJsonKeys" ycCodec:::Missing)
             l_strs = nil
             foreach(g_k l_keys
-                t_ks = _keyStr(g_k g_opt)
+                t_ks = _KeyStr(g_k g_opt)
                 when(t_orig[t_ks] != ycCodec:::Missing
-                    error("ycJson::encode: duplicate object key %A after string conversion" t_ks)
+                    error("ycJson::Encode: duplicate object key %A after string conversion" t_ks)
                 )
                 l_strs = tconc(l_strs t_ks)
                 t_orig[t_ks] = g_k
@@ -230,8 +230,8 @@ procedure(_encodeTable(t_obj n_depth g_opt "gxg")  ; -> str
                 l_strs = sort(l_strs 'alphalessp)
             )
             when(n_indent > 0
-                t_pad = _indentStr(n_depth n_indent)
-                t_padIn = _indentStr(n_depth + 1 n_indent)
+                t_pad = _IndentStr(n_depth n_indent)
+                t_padIn = _IndentStr(n_depth + 1 n_indent)
             )
             l_p = nil
             foreach(t_ks l_strs
@@ -239,12 +239,12 @@ procedure(_encodeTable(t_obj n_depth g_opt "gxg")  ; -> str
                     if(n_indent > 0
                         lsprintf("%s%s: %s"
                             t_padIn
-                            _encodeString(t_ks)
-                            _encodeValue(t_obj[t_orig[t_ks]] n_depth + 1 g_opt)
+                            _EncodeString(t_ks)
+                            _EncodeValue(t_obj[t_orig[t_ks]] n_depth + 1 g_opt)
                         )
                         lsprintf("%s:%s"
-                            _encodeString(t_ks)
-                            _encodeValue(t_obj[t_orig[t_ks]] n_depth + 1 g_opt)
+                            _EncodeString(t_ks)
+                            _EncodeValue(t_obj[t_orig[t_ks]] n_depth + 1 g_opt)
                         )
                     )
                 )
@@ -257,7 +257,7 @@ procedure(_encodeTable(t_obj n_depth g_opt "gxg")  ; -> str
     )
 )
 
-procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys nil) (strict nil) (nilAs "array") (finalNewline t) (maxDepth nil) "gtgggtgg")  ; -> str
+procedure(Encode(g_val \@key (format "json") (indent nil) (sortKeys nil) (strict nil) (nilAs "array") (finalNewline t) (maxDepth nil) "gtgggtgg")  ; -> str
     ; 编码值为文本：?format 选 "json"/"jsonc"（单值）或 "jsonl"（值列表逐行）。
     ;
     ; **参数**
@@ -273,19 +273,19 @@ procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys nil) (strict
     ; **返回**
     ;   (str) - 文本；无法表示时以 error() 中断
     unless(nilAs == "array" || nilAs == "false"
-        error("ycJson::encode: unknown ?nilAs value %A" nilAs)
+        error("ycJson::Encode: unknown ?nilAs value %A" nilAs)
     )
     when(maxDepth == nil
-        maxDepth = _maxEncodeDepth
+        maxDepth = _MaxEncodeDepth
     )
     unless(fixp(maxDepth) && maxDepth >= 1
-        error("ycJson::encode: ?maxDepth must be a positive fixnum")
+        error("ycJson::Encode: ?maxDepth must be a positive fixnum")
     )
     let((n_indent g_opt)
         n_indent = 0
         when(indent
             unless(fixp(indent)
-                error("ycJson::encode: ?indent must be a fixnum")
+                error("ycJson::Encode: ?indent must be a fixnum")
             )
             when(indent > 0
                 n_indent = indent
@@ -299,16 +299,16 @@ procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys nil) (strict
         g_opt["maxDepth"] = maxDepth
         case(format
             (("json" "jsonc")
-                _encodeValue(g_val 0 g_opt)
+                _EncodeValue(g_val 0 g_opt)
             )
             ("jsonl"
                 unless(listp(g_val)
-                    error("ycJson::encode: format \"jsonl\" expects a list")
+                    error("ycJson::Encode: format \"jsonl\" expects a list")
                 )
                 let((l_p t_s)
                     l_p = nil
                     foreach(g_item g_val
-                        l_p = tconc(l_p _encodeValue(g_item 0 g_opt))
+                        l_p = tconc(l_p _EncodeValue(g_item 0 g_opt))
                     )
                     t_s = buildString(car(l_p) "\n")
                     if(t_s == ""
@@ -321,7 +321,7 @@ procedure(encode(g_val \@key (format "json") (indent nil) (sortKeys nil) (strict
                 )
             )
             (t
-                error("ycJson::encode: unknown format %A" format)
+                error("ycJson::Encode: unknown format %A" format)
             )
         )
     )

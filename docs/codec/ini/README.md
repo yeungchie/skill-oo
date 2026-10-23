@@ -14,29 +14,29 @@ Cadence SKILL++ 的 INI 配置编解码库：把行式配置文本读成 table�
 ## 快速上手
 
 ```lisp
-t_cfg = ycIni::decode("root = value\n[server]\nhost = localhost\nport = 8080\n")
+t_cfg = ycIni::Decode("root = value\n[server]\nhost = localhost\nport = 8080\n")
 t_cfg["root"]              ; => "value"
 t_cfg["server"]["host"]    ; => "localhost"
 t_cfg["server"]["port"]    ; => "8080"
 
-ycIni::encode(t_cfg ?sortKeys t)
+ycIni::Encode(t_cfg ?sortKeys t)
 ; => root = value
 ;
 ;    [server]
 ;    host = localhost
 ;    port = 8080
 
-t_cfg = ycIni::decode("a: 1\n[s]\nb: 2\n" ?delimiter ":")
+t_cfg = ycIni::Decode("a: 1\n[s]\nb: 2\n" ?delimiter ":")
 t_cfg["a"]                 ; => "1"
 t_cfg["s"]["b"]            ; => "2"
 ```
 
 ## API 参考
 
-### ycIni::decode <sub>`function`</sub>
+### ycIni::Decode <sub>`function`</sub>
 
 ```text
-ycIni::decode(t_str [ ?delimiter ] [ ?duplicates ])
+ycIni::Decode(t_str [ ?delimiter ] [ ?duplicates ])
 => table
 ```
 
@@ -69,29 +69,29 @@ ycIni::decode(t_str [ ?delimiter ] [ ?duplicates ])
 **例程**
 
 ```lisp
-ycIni::decode("")
+ycIni::Decode("")
 ; => 空 table
 
-ycIni::decode("a = 1\nb = text\n")
+ycIni::Decode("a = 1\nb = text\n")
 ; => table，a 为 "1"，b 为 "text"
 
-ycIni::decode("[server]\nhost = localhost\n")
+ycIni::Decode("[server]\nhost = localhost\n")
 ; => table，server 为子 table，host 为 "localhost"
 
-ycIni::decode("a = 1\na = 2\n" ?duplicates "last")
+ycIni::Decode("a = 1\na = 2\n" ?duplicates "last")
 ; => table，a 为 "2"
 
-ycIni::decode("[a]\n[a]\n")
-; *Error* ycIni::decode: duplicate section at line 2, column 1
+ycIni::Decode("[a]\n[a]\n")
+; *Error* ycIni::Decode: duplicate section at line 2, column 1
 
-ycIni::decode("a = 1\n" ?delimiter " ")
-; *Error* ycIni::decode: ?delimiter must be a printable character other than '#' ';' '[' ']'
+ycIni::Decode("a = 1\n" ?delimiter " ")
+; *Error* ycIni::Decode: ?delimiter must be a printable character other than '#' ';' '[' ']'
 ```
 
-### ycIni::encode <sub>`function`</sub>
+### ycIni::Encode <sub>`function`</sub>
 
 ```text
-ycIni::encode(g_val [ ?sortKeys ] [ ?strict ] [ ?delimiter ] [ ?finalNewline ])
+ycIni::Encode(g_val [ ?sortKeys ] [ ?strict ] [ ?delimiter ] [ ?finalNewline ])
 => str
 ```
 
@@ -127,28 +127,28 @@ t_cfg["title"] = "demo"
 t_cfg["server"] = makeTable("demo" ycCodec:::Missing)
 t_cfg["server"]["host"] = "localhost"
 
-ycIni::encode(t_cfg ?sortKeys t)
+ycIni::Encode(t_cfg ?sortKeys t)
 ; => title = demo
 ;
 ;    [server]
 ;    host = localhost
 
-ycIni::encode(t_cfg ?delimiter ":")
+ycIni::Encode(t_cfg ?delimiter ":")
 ; => title : demo
 ;
 ;    [server]
 ;    host : localhost
 
-ycIni::encode(t_cfg ?finalNewline nil)
+ycIni::Encode(t_cfg ?finalNewline nil)
 ; => title = demo
 ;
 ;    [server]
 ;    host = localhost
 
 t_cfg["items"] = list(1 2)
-ycIni::encode(t_cfg)
-; *Error* ycIni::encode: list values are not supported
+ycIni::Encode(t_cfg)
+; *Error* ycIni::Encode: list values are not supported
 
-ycIni::encode("not a table")
-; *Error* ycIni::encode: root value must be a table
+ycIni::Encode("not a table")
+; *Error* ycIni::Encode: root value must be a table
 ```

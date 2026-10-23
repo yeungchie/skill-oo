@@ -3,7 +3,7 @@ useNamespace("ycPathLib")
 
 ; ---------- fnmatch 匹配翻译（不导出） ----------
 
-procedure(_fnmatchBracket(t_pattern n_open n_len)  ; -> (str, int)
+procedure(_FnmatchBracket(t_pattern n_open n_len)  ; -> (str, int)
     ; 把 pattern 中单个 "[" 字符类段编译为 pcre 字符类（fnmatch._translate 的 "[" 分支）。
     ;
     ; **参数**
@@ -72,7 +72,7 @@ procedure(_fnmatchBracket(t_pattern n_open n_len)  ; -> (str, int)
     )
 )
 
-procedure(_fnmatchToPcre(t_pattern "t")  ; -> str
+procedure(_FnmatchToPcre(t_pattern "t")  ; -> str
     ; 把 fnmatch 风格 pattern 编译为 pcre 正则串（"*" "?" 不跨 /）。
     ;
     ; **参数**
@@ -96,7 +96,7 @@ procedure(_fnmatchToPcre(t_pattern "t")  ; -> str
                 )
                 ("["
                     let((t_br)
-                        t_br = _fnmatchBracket(t_pattern n_i - 1 n_len)
+                        t_br = _FnmatchBracket(t_pattern n_i - 1 n_len)
                         t_res = strcat(t_res car(t_br))
                         n_i = car(cdr(t_br))
                     )
@@ -115,7 +115,7 @@ procedure(_fnmatchToPcre(t_pattern "t")  ; -> str
     )
 )
 
-procedure(_fnmatch1(t_name t_comp "tt")  ; -> t | nil
+procedure(_Fnmatch1(t_name t_comp "tt")  ; -> t | nil
     ; 按 fnmatch 语义判断单个名字是否匹配单段 pattern。
     ;
     ; **参数**
@@ -126,11 +126,11 @@ procedure(_fnmatch1(t_name t_comp "tt")  ; -> t | nil
     ;   (t|nil) - 匹配返回 t，否则返回 nil；pattern 为 "*" 时要求 t_name 非空
     if(t_comp == "*"
         t_name != ""
-        pcreMatchp(lsprintf("^%s\\z" _fnmatchToPcre(t_comp)) t_name)
+        pcreMatchp(lsprintf("^%s\\z" _FnmatchToPcre(t_comp)) t_name)
     )
 )
 
-procedure(_canMatchEmpty(t_comp "t")  ; -> t | nil
+procedure(_CanMatchEmpty(t_comp "t")  ; -> t | nil
     ; 判断 pattern 段能否匹配空名（""）。
     ;
     ; **参数**
@@ -138,10 +138,10 @@ procedure(_canMatchEmpty(t_comp "t")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 能匹配 "" 返回 t；"*"（以及匹配不了 "" 的段）返回 nil
-    t_comp != "*" && _fnmatch1("" t_comp)
+    t_comp != "*" && _Fnmatch1("" t_comp)
 )
 
-procedure(_allMatchp(l_names l_comps "ll")  ; -> t | nil
+procedure(_AllMatchp(l_names l_comps "ll")  ; -> t | nil
     ; 按顺序逐段判断两个串列表是否等长且每段都匹配。
     ;
     ; **参数**
@@ -156,7 +156,7 @@ procedure(_allMatchp(l_names l_comps "ll")  ; -> t | nil
         when(g_ok
             foreach(t_c l_comps
                 when(g_ok
-                    g_ok = l_rest != nil && _fnmatch1(car(l_rest) t_c)
+                    g_ok = l_rest != nil && _Fnmatch1(car(l_rest) t_c)
                     l_rest = cdr(l_rest)
                 )
             )
@@ -165,7 +165,7 @@ procedure(_allMatchp(l_names l_comps "ll")  ; -> t | nil
     )
 )
 
-procedure(_suffixMatchp(l_names l_comps "ll")  ; -> t | nil
+procedure(_SuffixMatchp(l_names l_comps "ll")  ; -> t | nil
     ; 判断名字列表的末段是否与 pattern 段右对齐全部匹配。
     ;
     ; **参数**
@@ -178,7 +178,7 @@ procedure(_suffixMatchp(l_names l_comps "ll")  ; -> t | nil
         n_len = length(l_names)
         n_comp = length(l_comps)
         unless(n_comp > n_len
-            _allMatchp(_dropFirstN(l_names n_len - n_comp) l_comps)
+            _AllMatchp(_DropFirstN(l_names n_len - n_comp) l_comps)
         )
     )
 )

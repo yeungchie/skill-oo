@@ -10,7 +10,7 @@ _TestCallbackHook = lambda((s_event g_job "sg")
 let((aj l_events)
     _TestCallbackEvents = nil
     _TestCallbackUserData = nil
-    aj = ycSubProcess::createJob("cat" ?callback _TestCallbackHook ?userData "UD-1")
+    aj = ycSubProcess::CreateJob("cat" ?callback _TestCallbackHook ?userData "UD-1")
     aj->start()
     aj->print("a")
     aj->wait(1)
@@ -28,7 +28,7 @@ let((aj l_events)
 
 let((aj l_events)
     _TestCallbackEvents = nil
-    aj = ycSubProcess::createJob("ls /nonexistent-ycprobe" ?callback _TestCallbackHook)
+    aj = ycSubProcess::CreateJob("ls /nonexistent-ycprobe" ?callback _TestCallbackHook)
     aj->await()
     l_events = car(_TestCallbackEvents)
     _assert(member('stderr l_events) "stderr is fired on child error output")
@@ -45,7 +45,7 @@ _TestCallbackThrow = lambda((s_event g_job "sg")
 )
 
 let((aj)
-    aj = ycSubProcess::createJob("echo hi" ?callback _TestCallbackThrow)
+    aj = ycSubProcess::CreateJob("echo hi" ?callback _TestCallbackThrow)
     _assert(aj->await() == "hi\n" "a failing stdout callback does not interrupt the job")
     _assert(aj->returncode == 0 "the job finishes with returncode 0 despite the callback error")
 )

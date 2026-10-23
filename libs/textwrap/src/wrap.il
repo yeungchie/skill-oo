@@ -3,13 +3,13 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-ycNamespace:::require("ycUtf8")
+ycNamespace:::Require("ycUtf8")
 
 useNamespace("ycTextwrap")
 
 ; ---------- 折行 ----------
 
-procedure(_packCps(l_words n_first n_rest g_breakLong g_hyphen t_unit n_amb "lxxggtx")  ; -> list
+procedure(_PackCps(l_words n_first n_rest g_breakLong g_hyphen t_unit n_amb "lxxggtx")  ; -> list
     ; 按逐行可用宽度贪心装词（内部实现）。
     ;
     ; **参数**
@@ -28,7 +28,7 @@ procedure(_packCps(l_words n_first n_rest g_breakLong g_hyphen t_unit n_amb "lxx
         n_limit = n_first
         foreach(l_word l_words
             let((n_ww g_place)
-                n_ww = _widthCps(l_word t_unit n_amb)
+                n_ww = _WidthCps(l_word t_unit n_amb)
                 if(l_cur
                     if(n_curw + 1 + n_ww <= n_limit
                         progn(
@@ -55,15 +55,15 @@ procedure(_packCps(l_words n_first n_rest g_breakLong g_hyphen t_unit n_amb "lxx
                         if(g_breakLong
                             let((l_rest l_chunk)
                                 l_rest = l_word
-                                while(l_rest && _widthCps(l_rest t_unit n_amb) > n_limit
-                                    l_chunk = _firstChunk(l_rest n_limit g_hyphen t_unit n_amb)
+                                while(l_rest && _WidthCps(l_rest t_unit n_amb) > n_limit
+                                    l_chunk = _FirstChunk(l_rest n_limit g_hyphen t_unit n_amb)
                                     tconc(l_lines l_chunk)
-                                    l_rest = _dropCps(l_rest length(l_chunk))
+                                    l_rest = _DropCps(l_rest length(l_chunk))
                                     n_limit = n_rest
                                 )
                                 when(l_rest
                                     l_cur = l_rest
-                                    n_curw = _widthCps(l_rest t_unit n_amb)
+                                    n_curw = _WidthCps(l_rest t_unit n_amb)
                                 )
                             )
                             progn(
@@ -80,7 +80,7 @@ procedure(_packCps(l_words n_first n_rest g_breakLong g_hyphen t_unit n_amb "lxx
     )
 )
 
-procedure(_wrapCps(l_cps n_first n_rest g_breakLong g_hyphen t_unit n_amb "lxxggtx")  ; -> list | nil
+procedure(_WrapCps(l_cps n_first n_rest g_breakLong g_hyphen t_unit n_amb "lxxggtx")  ; -> list | nil
     ; 折行单个逻辑行（内部实现）。
     ;
     ; **参数**
@@ -95,16 +95,16 @@ procedure(_wrapCps(l_cps n_first n_rest g_breakLong g_hyphen t_unit n_amb "lxxgg
     ; **返回**
     ;   (list[list[int]]|nil) - 行码点列表；全空白为 nil
     let((l_words)
-        l_words = _wordsFromCps(l_cps)
+        l_words = _WordsFromCps(l_cps)
         when(l_words
-            _packCps(l_words n_first n_rest g_breakLong g_hyphen t_unit n_amb)
+            _PackCps(l_words n_first n_rest g_breakLong g_hyphen t_unit n_amb)
         )
     )
 )
 
 ; ---------- 截断 ----------
 
-procedure(_trimTrailingSpaces(l_cps "l")  ; -> list[int]
+procedure(_TrimTrailingSpaces(l_cps "l")  ; -> list[int]
     ; 去掉尾部空格码点（内部实现）。
     ;
     ; **参数**
@@ -121,7 +121,7 @@ procedure(_trimTrailingSpaces(l_cps "l")  ; -> list[int]
     )
 )
 
-procedure(_cutAtSpace(l_cps n_max t_unit n_amb "lxtx")  ; -> list[int]
+procedure(_CutAtSpace(l_cps n_max t_unit n_amb "lxtx")  ; -> list[int]
     ; 在宽度上限内按最后一个空格断词（内部实现）。
     ;
     ; **参数**
@@ -133,21 +133,21 @@ procedure(_cutAtSpace(l_cps n_max t_unit n_amb "lxtx")  ; -> list[int]
     ; **返回**
     ;   (list[int]) - 断词后的前缀
     let((l_pre n_i n_last)
-        l_pre = _takeCps(l_cps _fitCount(l_cps n_max t_unit n_amb))
-        l_pre = _trimTrailingSpaces(l_pre)
+        l_pre = _TakeCps(l_cps _FitCount(l_cps n_max t_unit n_amb))
+        l_pre = _TrimTrailingSpaces(l_pre)
         n_i = 1
         foreach(n_cp l_pre
             when(n_cp == 32 n_last = n_i)
             n_i = n_i + 1
         )
         when(n_last
-            l_pre = _trimTrailingSpaces(_takeCps(l_pre n_last - 1))
+            l_pre = _TrimTrailingSpaces(_TakeCps(l_pre n_last - 1))
         )
         l_pre
     )
 )
 
-procedure(_fitPlaceholder(l_cps t_ph n_max t_unit n_amb "ltxtx")  ; -> list[int]
+procedure(_FitPlaceholder(l_cps t_ph n_max t_unit n_amb "ltxtx")  ; -> list[int]
     ; 为被截断的末行保留占位符宽度并去除余下内容（内部实现）。
     ;
     ; **参数**
@@ -160,20 +160,20 @@ procedure(_fitPlaceholder(l_cps t_ph n_max t_unit n_amb "ltxtx")  ; -> list[int]
     ; **返回**
     ;   (list[int]) - 截断后的码点
     let((l_ph n_ph n_room l_pre)
-        l_ph = ycUtf8:::decode(t_ph)
-        n_ph = _widthCps(l_ph t_unit n_amb)
+        l_ph = ycUtf8:::Decode(t_ph)
+        n_ph = _WidthCps(l_ph t_unit n_amb)
         if(n_ph >= n_max
-            _takeCps(l_ph _fitCount(l_ph n_max t_unit n_amb))
+            _TakeCps(l_ph _FitCount(l_ph n_max t_unit n_amb))
             progn(
                 n_room = n_max - n_ph
-                l_pre = _cutAtSpace(l_cps n_room t_unit n_amb)
+                l_pre = _CutAtSpace(l_cps n_room t_unit n_amb)
                 append(l_pre l_ph)
             )
         )
     )
 )
 
-procedure(_shortenCps(l_cps n_max t_ph t_unit n_amb "lxttx")  ; -> list[int]
+procedure(_ShortenCps(l_cps n_max t_ph t_unit n_amb "lxttx")  ; -> list[int]
     ; 内容超宽时断词并追加占位符（内部实现）。
     ;
     ; **参数**
@@ -185,15 +185,15 @@ procedure(_shortenCps(l_cps n_max t_ph t_unit n_amb "lxttx")  ; -> list[int]
     ;
     ; **返回**
     ;   (list[int]) - 截断后的码点
-    if(_widthCps(l_cps t_unit n_amb) <= n_max
+    if(_WidthCps(l_cps t_unit n_amb) <= n_max
         l_cps
-        _fitPlaceholder(l_cps t_ph n_max t_unit n_amb)
+        _FitPlaceholder(l_cps t_ph n_max t_unit n_amb)
     )
 )
 
 ; ---------- 公开入口 ----------
 
-procedure(wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") (breakLongWords t) (breakOnHyphens t) (maxLines nil) (placeholder "...") (unit "display") (ambiguous 1) "txttgggttx")  ; -> list[str] | nil
+procedure(Wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") (breakLongWords t) (breakOnHyphens t) (maxLines nil) (placeholder "...") (unit "display") (ambiguous 1) "txttgggttx")  ; -> list[str] | nil
     ; 按宽度折行文本，返回行列表。
     ;
     ; **参数**
@@ -211,47 +211,47 @@ procedure(wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") 
     ; **返回**
     ;   (list[str]|nil) - 行列表；空文本或全空白单行为 nil
     unless(stringp(t_text)
-        error("ycTextwrap::wrap: text must be a string (%A)" t_text)
+        error("ycTextwrap::Wrap: text must be a string (%A)" t_text)
     )
     unless(fixp(width) && width >= 1
-        error("ycTextwrap::wrap: width must be a positive integer (%A)" width)
+        error("ycTextwrap::Wrap: width must be a positive integer (%A)" width)
     )
     unless(stringp(initialIndent)
-        error("ycTextwrap::wrap: initialIndent must be a string (%A)" initialIndent)
+        error("ycTextwrap::Wrap: initialIndent must be a string (%A)" initialIndent)
     )
     unless(stringp(subsequentIndent)
-        error("ycTextwrap::wrap: subsequentIndent must be a string (%A)" subsequentIndent)
+        error("ycTextwrap::Wrap: subsequentIndent must be a string (%A)" subsequentIndent)
     )
     unless(maxLines == nil || (fixp(maxLines) && maxLines >= 1)
-        error("ycTextwrap::wrap: maxLines must be nil or a positive integer (%A)" maxLines)
+        error("ycTextwrap::Wrap: maxLines must be nil or a positive integer (%A)" maxLines)
     )
     unless(stringp(placeholder)
-        error("ycTextwrap::wrap: placeholder must be a string (%A)" placeholder)
+        error("ycTextwrap::Wrap: placeholder must be a string (%A)" placeholder)
     )
-    _checkUnit("ycTextwrap::wrap" unit ambiguous)
+    _CheckUnit("ycTextwrap::Wrap" unit ambiguous)
     let((n_availInit n_availSub)
-        n_availInit = width - _widthText(initialIndent unit ambiguous)
-        n_availSub = width - _widthText(subsequentIndent unit ambiguous)
+        n_availInit = width - _WidthText(initialIndent unit ambiguous)
+        n_availSub = width - _WidthText(subsequentIndent unit ambiguous)
         unless(n_availInit >= 1
-            error("ycTextwrap::wrap: initialIndent leaves no room within width %d" width)
+            error("ycTextwrap::Wrap: initialIndent leaves no room within width %d" width)
         )
         unless(n_availSub >= 1
-            error("ycTextwrap::wrap: subsequentIndent leaves no room within width %d" width)
+            error("ycTextwrap::Wrap: subsequentIndent leaves no room within width %d" width)
         )
         if(t_text == ""
             nil
             let((l_lines l_out l_meta g_first g_any)
                 l_out = cons(nil nil)
                 l_meta = cons(nil nil)
-                l_lines = _logicalLines(_normalizeNewlines(t_text))
+                l_lines = _LogicalLines(_NormalizeNewlines(t_text))
                 g_first = t
                 foreach(t_line l_lines
                     let((l_words l_packs t_indent n_avail)
-                        l_words = _wordsFromCps(ycUtf8:::decode(t_line))
+                        l_words = _WordsFromCps(ycUtf8:::Decode(t_line))
                         if(l_words
                             progn(
                                 n_avail = if(g_first n_availInit n_availSub)
-                                l_packs = _packCps(
+                                l_packs = _PackCps(
                                     l_words
                                     n_avail
                                     n_availSub
@@ -262,7 +262,7 @@ procedure(wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") 
                                 )
                                 foreach(l_pack l_packs
                                     t_indent = if(g_first initialIndent subsequentIndent)
-                                    tconc(l_out strcat(t_indent ycUtf8:::encode(l_pack)))
+                                    tconc(l_out strcat(t_indent ycUtf8:::Encode(l_pack)))
                                     tconc(l_meta list(t_indent n_avail))
                                     g_first = nil
                                     g_any = t
@@ -294,7 +294,7 @@ procedure(wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") 
                         t_indent = car(g_meta)
                         n_avail = cadr(g_meta)
                         when(t_last != ""
-                            l_cps = ycUtf8:::decode(substring(
+                            l_cps = ycUtf8:::Decode(substring(
                                 t_last
                                 length(t_indent) + 1
                                 length(t_last) - length(t_indent)
@@ -302,7 +302,7 @@ procedure(wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") 
                             when(l_cps
                                 t_last = strcat(
                                     t_indent
-                                    ycUtf8:::encode(_fitPlaceholder(
+                                    ycUtf8:::Encode(_FitPlaceholder(
                                         l_cps
                                         placeholder
                                         n_avail
@@ -325,7 +325,7 @@ procedure(wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") 
     )
 )
 
-procedure(fill(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") (breakLongWords t) (breakOnHyphens t) (maxLines nil) (placeholder "...") (unit "display") (ambiguous 1) (sep "\n") "txttgggttxt")  ; -> str
+procedure(Fill(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") (breakLongWords t) (breakOnHyphens t) (maxLines nil) (placeholder "...") (unit "display") (ambiguous 1) (sep "\n") "txttgggttxt")  ; -> str
     ; 折行文本并以分隔符拼回。
     ;
     ; **参数**
@@ -344,10 +344,10 @@ procedure(fill(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") 
     ; **返回**
     ;   (str) - 拼回后的文本；空输入为 ""
     unless(stringp(sep)
-        error("ycTextwrap::fill: sep must be a string (%A)" sep)
+        error("ycTextwrap::Fill: sep must be a string (%A)" sep)
     )
     let((l_lines)
-        l_lines = wrap(
+        l_lines = Wrap(
             t_text
             ?width width
             ?initialIndent initialIndent

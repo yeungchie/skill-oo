@@ -4,8 +4,8 @@ Cadence SKILL++ 的 JSON 家族编解码库：JSON、放宽 JSON（jsonc）与 J
 
 ## 概要
 
-+ 解码入口：`decode()`；`?format` 选 `"json"`（严格单文档）、`"jsonc"`（允许注释与尾逗号）或 `"jsonl"`（逐行文档）。
-+ 编码入口：`encode()`；`?format` 选 `"json"`/`"jsonc"`（单值）或 `"jsonl"`（值列表逐行）。
++ 解码入口：`Decode()`；`?format` 选 `"json"`（严格单文档）、`"jsonc"`（允许注释与尾逗号）或 `"jsonl"`（逐行文档）。
++ 编码入口：`Encode()`；`?format` 选 `"json"`/`"jsonc"`（单值）或 `"jsonl"`（值列表逐行）。
 + 函数均在 `ycJson` 命名空间下，以 `ycJson::` 前缀调用。
 + `true`、`false` 与 `null` 不坍缩为 `t`/`nil`，分别解码为哨兵对象 `ycCodec::True`、`ycCodec::False` 与 `ycCodec::Null`（均为 `ycCodec::Type` 唯一实例，所有编解码库共用同一组对象，可用 `->toSkill()` 显式转为 SKILL 原生值）；`nil` 仅表示空数组；哨兵类型见 [ycCodec](../core/README.md)。
 + 例程中 `; =>` 表示返回值；`(...)` 为省略的输出或示意值。
@@ -37,28 +37,28 @@ Cadence SKILL++ 的 JSON 家族编解码库：JSON、放宽 JSON（jsonc）与 J
 
 ```lisp
 ; 解码
-t_v = ycJson::decode(t_json)
+t_v = ycJson::Decode(t_json)
 t_v["a"]                                            ; => (1 2.5 ycCodec::Type("True") ycCodec::Type("Null"))
 
 ; 编码（默认紧凑、键序随表；?sortKeys t 可排序）
-ycJson::encode(t_v)                                 ; => "{\"a\":[1,2.5,true,null]}"
+ycJson::Encode(t_v)                                 ; => "{\"a\":[1,2.5,true,null]}"
 
 ; 缩进美化
-ycJson::encode(t_v ?indent 2)
+ycJson::Encode(t_v ?indent 2)
 ; => "{\n  \"a\": [\n    1,\n    2.5,\n    true,\n    null\n  ]\n}"
 
 ; 放宽文本与逐行格式
-ycJson::decode(t_jsonc ?format "jsonc")             ; => <table: a = 1>
-ycJson::decode(t_jsonl ?format "jsonl")             ; => (1 <table: a = 2>)
-ycJson::encode(list(1 "x") ?format "jsonl")          ; => "1\n\"x\"\n"
+ycJson::Decode(t_jsonc ?format "jsonc")             ; => <table: a = 1>
+ycJson::Decode(t_jsonl ?format "jsonl")             ; => (1 <table: a = 2>)
+ycJson::Encode(list(1 "x") ?format "jsonl")          ; => "1\n\"x\"\n"
 ```
 
 ## API 参考
 
-### ycJson::decode <sub>`function`</sub>
+### ycJson::Decode <sub>`function`</sub>
 
 ```text
-ycJson::decode(
+ycJson::Decode(
     t_str
     [ ?format t_format ]
     [ ?maxDepth n_max ]
@@ -106,27 +106,27 @@ bad
 ```
 
 ```lisp
-ycJson::decode("42")                        ; => 42
-ycJson::decode("1e3")                       ; => 1000.0
-ycJson::decode("2147483648")                ; => 2147483648.0
-ycJson::decode("\"a\\u4e2d\"")              ; => "a中"
-ycJson::decode("[1, 2,]")
-; *Error* ycJson::decode: unexpected character at line 1, column 7
+ycJson::Decode("42")                        ; => 42
+ycJson::Decode("1e3")                       ; => 1000.0
+ycJson::Decode("2147483648")                ; => 2147483648.0
+ycJson::Decode("\"a\\u4e2d\"")              ; => "a中"
+ycJson::Decode("[1, 2,]")
+; *Error* ycJson::Decode: unexpected character at line 1, column 7
 
-ycJson::decode(t_jsonc ?format "jsonc")             ; => <table: a = 1>
-ycJson::decode(t_jsonc_array ?format "jsonc")       ; => (1 2)
-ycJson::decode(t_jsonl_values ?format "jsonl")      ; => (1 2)
-ycJson::decode(t_jsonl_bad ?format "jsonl")
-; *Error* ycJson::decode: invalid literal at line 3, column 1
+ycJson::Decode(t_jsonc ?format "jsonc")             ; => <table: a = 1>
+ycJson::Decode(t_jsonc_array ?format "jsonc")       ; => (1 2)
+ycJson::Decode(t_jsonl_values ?format "jsonl")      ; => (1 2)
+ycJson::Decode(t_jsonl_bad ?format "jsonl")
+; *Error* ycJson::Decode: invalid literal at line 3, column 1
 
-ycJson::decode("1" ?format "xml")
-; *Error* ycJson::decode: unknown format "xml"
+ycJson::Decode("1" ?format "xml")
+; *Error* ycJson::Decode: unknown format "xml"
 ```
 
-### ycJson::encode <sub>`function`</sub>
+### ycJson::Encode <sub>`function`</sub>
 
 ```text
-ycJson::encode(
+ycJson::Encode(
     g_val
     [ ?format t_format ]
     [ ?indent n_indent ]
@@ -163,15 +163,15 @@ ycJson::encode(
 **例程**
 
 ```lisp
-ycJson::encode(nil)                         ; => "[]"
-ycJson::encode(1.0)                         ; => "1.0"
-ycJson::encode("a\"b")                      ; => "\"a\\\"b\""
-ycJson::encode(list(nil))                   ; => "[[]]"
-ycJson::encode('foo)
-; *Error* ycJson::encode: cannot dump value of type symbol
+ycJson::Encode(nil)                         ; => "[]"
+ycJson::Encode(1.0)                         ; => "1.0"
+ycJson::Encode("a\"b")                      ; => "\"a\\\"b\""
+ycJson::Encode(list(nil))                   ; => "[[]]"
+ycJson::Encode('foo)
+; *Error* ycJson::Encode: cannot dump value of type symbol
 
-ycJson::encode(list(1 2) ?format "jsonl")           ; => "1\n2\n"
-ycJson::encode(list(ycCodec::Null) ?format "jsonl")  ; => "null\n"
+ycJson::Encode(list(1 2) ?format "jsonl")           ; => "1\n2\n"
+ycJson::Encode(list(ycCodec::Null) ?format "jsonl")  ; => "null\n"
 ```
 
 ## 类型映射
@@ -204,4 +204,4 @@ t_v["nope"] == ycCodec::Missing  ; 键不存在
 + 整数字面量在 32 位范围内解码为 fixnum，超出为 flonum；编码 fixnum 为精确十进制，编码 flonum 为最短可回环形式（整数值保留一位小数，如 `1.0`）。
 + 非有限浮点（无穷、NaN）不可编码，以 `error()` 中断。
 + `\u0000`（NUL）无法保存在字符串中，解码时被丢弃。
-+ 错误消息以当前上下文前缀标识来源：解码为 `ycJson::decode: <说明> at line <行>, column <列>`（均从 1 起，列按字节计），编码为 `ycJson::encode:`，类型对象为 `ycCodec::Type:` / `ycCodec::Type->toSkill:`。
++ 错误消息以当前上下文前缀标识来源：解码为 `ycJson::Decode: <说明> at line <行>, column <列>`（均从 1 起，列按字节计），编码为 `ycJson::Encode:`，类型对象为 `ycCodec::Type:` / `ycCodec::Type->toSkill:`。

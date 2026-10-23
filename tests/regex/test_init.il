@@ -123,7 +123,7 @@ procedure(_assertSameSpan(g_m n_start n_end t_msg "gnnt")  ; -> t | nil (nil mat
 
 let((l_res t_dir)
     ; tests/regex/load.il bootstraps the libs first, so ycPathLib is here.
-    t_dir = ycPathLib::currentFile()->parent()
+    t_dir = ycPathLib::CurrentFile()->parent()
 
     _TestCoreDone = nil
     l_res = errset(t_dir->join("test_core.il")->load() t)

@@ -3,21 +3,21 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-ycNamespace:::require("ycJson")
-ycNamespace:::require("ycYaml")
-ycNamespace:::require("ycCsv")
-ycNamespace:::require("ycToml")
+ycNamespace:::Require("ycJson")
+ycNamespace:::Require("ycYaml")
+ycNamespace:::Require("ycCsv")
+ycNamespace:::Require("ycToml")
 
 useNamespace("ycPathLib")
 
 inScheme(
-procedure(_installCodec(self "g")  ; -> any
+procedure(_InstallCodec(self "g")  ; -> any
     ; 把 codec 方法安装到 Path 类（由 initializeInstance 调用）。
     ;
     ; **返回**
     ;   (any) - 返回最后一条安装赋值的结果，调用方忽略
 
-procedure(_error(t_method t_formatString \@rest g_args "ttg")  ; -> never
+procedure(_Error(t_method t_formatString \@rest g_args "ttg")  ; -> never
     ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
     ;
     ; **参数**
@@ -31,59 +31,59 @@ procedure(_error(t_method t_formatString \@rest g_args "ttg")  ; -> never
 )
 
 self->readJson = lambda((\@rest l_args "g")  ; -> any | list
-    ; 读取整个文件内容并解码为 JSON 值；实参原样透传给 ycJson::decode。
+    ; 读取整个文件内容并解码为 JSON 值；实参原样透传给 ycJson::Decode。
     ;
     ; **参数**
-    ;   l_args  (list) - 原样透传给 ycJson::decode 的实参（?format、?maxDepth 等；可全部省略）
+    ;   l_args  (list) - 原样透传给 ycJson::Decode 的实参（?format、?maxDepth 等；可全部省略）
     ;
     ; **返回**
-    ;   (any|list) - ycJson::decode 的返回值（jsonl 为 list）；ycJson 未加载、文件错误、解码失败均以 error() 中断
-    unless(fboundp('ycJson:::decode)
-        _error("readJson" "ycJson is not loaded - load it first")
+    ;   (any|list) - ycJson::Decode 的返回值（jsonl 为 list）；ycJson 未加载、文件错误、解码失败均以 error() 中断
+    unless(fboundp('ycJson:::Decode)
+        _Error("readJson" "ycJson is not loaded - load it first")
     )
-    apply('ycJson:::decode self->readText() l_args)
+    apply('ycJson:::Decode self->readText() l_args)
 )
 
 self->readYaml = lambda((\@rest l_args "g")  ; -> any | list
-    ; 读取整个文件内容并解码为 YAML 值；实参原样透传给 ycYaml::decode。
+    ; 读取整个文件内容并解码为 YAML 值；实参原样透传给 ycYaml::Decode。
     ;
     ; **参数**
-    ;   l_args  (list) - 原样透传给 ycYaml::decode 的实参（?format、?maxDepth 等；可全部省略）
+    ;   l_args  (list) - 原样透传给 ycYaml::Decode 的实参（?format、?maxDepth 等；可全部省略）
     ;
     ; **返回**
-    ;   (any|list) - ycYaml::decode 的返回值（yaml-stream 为 list）；ycYaml 未加载、文件错误、解码失败均以 error() 中断
-    unless(fboundp('ycYaml:::decode)
-        _error("readYaml" "ycYaml is not loaded - load it first")
+    ;   (any|list) - ycYaml::Decode 的返回值（yaml-stream 为 list）；ycYaml 未加载、文件错误、解码失败均以 error() 中断
+    unless(fboundp('ycYaml:::Decode)
+        _Error("readYaml" "ycYaml is not loaded - load it first")
     )
-    apply('ycYaml:::decode self->readText() l_args)
+    apply('ycYaml:::Decode self->readText() l_args)
 )
 
 self->readCsv = lambda((\@rest l_args "g")  ; -> Table
-    ; 读取整个文件内容并解码为 CSV/TSV Table；实参原样透传给 ycCsv::decode。
+    ; 读取整个文件内容并解码为 CSV/TSV Table；实参原样透传给 ycCsv::Decode。
     ;
     ; **参数**
-    ;   l_args  (list) - 原样透传给 ycCsv::decode 的实参（?format、?header、?delimiter 等；可全部省略）
+    ;   l_args  (list) - 原样透传给 ycCsv::Decode 的实参（?format、?header、?delimiter 等；可全部省略）
     ;
     ; **返回**
     ;   (Table) - ycCsv::Table；ycCsv 未加载、文件错误、解码失败均以 error() 中断
-    unless(fboundp('ycCsv:::decode)
-        _error("readCsv" "ycCsv is not loaded - load it first")
+    unless(fboundp('ycCsv:::Decode)
+        _Error("readCsv" "ycCsv is not loaded - load it first")
     )
-    apply('ycCsv:::decode self->readText() l_args)
+    apply('ycCsv:::Decode self->readText() l_args)
 )
 
 self->readToml = lambda((\@rest l_args "g")  ; -> table
-    ; 读取整个文件内容并解码为 TOML 根 table；实参原样透传给 ycToml::decode。
+    ; 读取整个文件内容并解码为 TOML 根 table；实参原样透传给 ycToml::Decode。
     ;
     ; **参数**
-    ;   l_args  (list) - 原样透传给 ycToml::decode 的实参（?maxDepth 等；可全部省略）
+    ;   l_args  (list) - 原样透传给 ycToml::Decode 的实参（?maxDepth 等；可全部省略）
     ;
     ; **返回**
-    ;   (table) - ycToml::decode 的根 table；ycToml 未加载、文件错误、解码失败均以 error() 中断
-    unless(fboundp('ycToml:::decode)
-        _error("readToml" "ycToml is not loaded - load it first")
+    ;   (table) - ycToml::Decode 的根 table；ycToml 未加载、文件错误、解码失败均以 error() 中断
+    unless(fboundp('ycToml:::Decode)
+        _Error("readToml" "ycToml is not loaded - load it first")
     )
-    apply('ycToml:::decode self->readText() l_args)
+    apply('ycToml:::Decode self->readText() l_args)
 )
 )
 )

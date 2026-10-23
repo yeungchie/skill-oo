@@ -14,28 +14,28 @@ Cadence SKILL++ 的 UTF-8 工具库：字节串与码点互转、按码点计数
 
 ```lisp
 ; 码点互转
-ycUtf8::decode("中")                        ; => (20013)
-ycUtf8::encode(list(20013))                 ; => "中"
+ycUtf8::Decode("中")                        ; => (20013)
+ycUtf8::Encode(list(20013))                 ; => "中"
 
 ; 计数与切片（1-based、按码点）
-ycUtf8::charCount("a中b")                   ; => 3
-ycUtf8::slice("a中b" 2 1)                   ; => "中"
+ycUtf8::CharCount("a中b")                   ; => 3
+ycUtf8::Slice("a中b" 2 1)                   ; => "中"
 
 ; 显示宽度
-ycUtf8::width("中文")                       ; => 4
-ycUtf8::charWidth(20013)                    ; => 2
+ycUtf8::Width("中文")                       ; => 4
+ycUtf8::CharWidth(20013)                    ; => 2
 
 ; 合法性检查
-ycUtf8::isValid("abc")                      ; => t
-ycUtf8::isValid(strcat(intToChar(128)))     ; => nil
+ycUtf8::IsValid("abc")                      ; => t
+ycUtf8::IsValid(strcat(intToChar(128)))     ; => nil
 ```
 
 ## API 参考
 
-### ycUtf8::decode <sub>`function`</sub>
+### ycUtf8::Decode <sub>`function`</sub>
 
 ```text
-ycUtf8::decode(
+ycUtf8::Decode(
     t_str
     [ ?strict ]
 )
@@ -60,19 +60,19 @@ ycUtf8::decode(
 **例程**
 
 ```lisp
-ycUtf8::decode("中")                               ; => (20013)
-ycUtf8::decode("")                                 ; => nil
-ycUtf8::decode(strcat(intToChar(226) intToChar(130) intToChar(172)))  ; => (8364)
-ycUtf8::decode(strcat(intToChar(128)) ?strict nil) ; => (65533)
-ycUtf8::decode(strcat(intToChar(192) intToChar(128)) ?strict nil)     ; => (65533 65533)
-ycUtf8::decode(strcat("a" intToChar(128)))
-; *Error* ycUtf8::decode: invalid UTF-8 at byte 2
+ycUtf8::Decode("中")                               ; => (20013)
+ycUtf8::Decode("")                                 ; => nil
+ycUtf8::Decode(strcat(intToChar(226) intToChar(130) intToChar(172)))  ; => (8364)
+ycUtf8::Decode(strcat(intToChar(128)) ?strict nil) ; => (65533)
+ycUtf8::Decode(strcat(intToChar(192) intToChar(128)) ?strict nil)     ; => (65533 65533)
+ycUtf8::Decode(strcat("a" intToChar(128)))
+; *Error* ycUtf8::Decode: invalid UTF-8 at byte 2
 ```
 
-### ycUtf8::encode <sub>`function`</sub>
+### ycUtf8::Encode <sub>`function`</sub>
 
 ```text
-ycUtf8::encode(l_cps)
+ycUtf8::Encode(l_cps)
 => str
 ```
 
@@ -93,19 +93,19 @@ ycUtf8::encode(l_cps)
 **例程**
 
 ```lisp
-ycUtf8::encode(list(97 98 99)) ; => "abc"
-ycUtf8::encode(list(20013))    ; => "中"
-ycUtf8::encode(nil)            ; => ""
-ycUtf8::encode(list(0))
-; *Error* ycUtf8::encode: codepoint at index 1 (0) cannot be represented in a SKILL string
-ycUtf8::encode(list(97 55296))
-; *Error* ycUtf8::encode: invalid codepoint at index 2 (55296)
+ycUtf8::Encode(list(97 98 99)) ; => "abc"
+ycUtf8::Encode(list(20013))    ; => "中"
+ycUtf8::Encode(nil)            ; => ""
+ycUtf8::Encode(list(0))
+; *Error* ycUtf8::Encode: codepoint at index 1 (0) cannot be represented in a SKILL string
+ycUtf8::Encode(list(97 55296))
+; *Error* ycUtf8::Encode: invalid codepoint at index 2 (55296)
 ```
 
-### ycUtf8::charCount <sub>`function`</sub>
+### ycUtf8::CharCount <sub>`function`</sub>
 
 ```text
-ycUtf8::charCount(
+ycUtf8::CharCount(
     t_str
     [ ?strict ]
 )
@@ -114,7 +114,7 @@ ycUtf8::charCount(
 
 **描述**
 
-统计码点个数（非字节数）。校验语义与 `ycUtf8::decode` 相同。
+统计码点个数（非字节数）。校验语义与 `ycUtf8::Decode` 相同。
 
 **参数**
 
@@ -130,15 +130,15 @@ ycUtf8::charCount(
 **例程**
 
 ```lisp
-ycUtf8::charCount("a中b")   ; => 3
-ycUtf8::charCount("")       ; => 0
-ycUtf8::charCount(strcat("a" intToChar(128)) ?strict nil) ; => 2
+ycUtf8::CharCount("a中b")   ; => 3
+ycUtf8::CharCount("")       ; => 0
+ycUtf8::CharCount(strcat("a" intToChar(128)) ?strict nil) ; => 2
 ```
 
-### ycUtf8::slice <sub>`function`</sub>
+### ycUtf8::Slice <sub>`function`</sub>
 
 ```text
-ycUtf8::slice(
+ycUtf8::Slice(
     t_str
     n_start
     n_len
@@ -149,7 +149,7 @@ ycUtf8::slice(
 
 **描述**
 
-按码点切片：跳过前 `n_start - 1` 个码点后，取至多 `n_len` 个码点并重新编码。起点超过码点总数（空串亦然）返回 `nil`；`n_len` 超过剩余码点数时截到串尾；起点合法且 `n_len` 为 0 时返回 `""`。严格模式只校验扫描经过的字节（前导段与窗口本身），窗口之后的非法字节不影响结果；需要整串校验时用 `ycUtf8::isValid`。
+按码点切片：跳过前 `n_start - 1` 个码点后，取至多 `n_len` 个码点并重新编码。起点超过码点总数（空串亦然）返回 `nil`；`n_len` 超过剩余码点数时截到串尾；起点合法且 `n_len` 为 0 时返回 `""`。严格模式只校验扫描经过的字节（前导段与窗口本身），窗口之后的非法字节不影响结果；需要整串校验时用 `ycUtf8::IsValid`。
 
 **参数**
 
@@ -167,24 +167,24 @@ ycUtf8::slice(
 **例程**
 
 ```lisp
-ycUtf8::slice("a中b" 2 1)   ; => "中"
-ycUtf8::slice("a中b" 3 9)   ; => "b"
-ycUtf8::slice("a中b" 1 0)   ; => ""
-ycUtf8::slice("a中b" 4 1)   ; => nil
-ycUtf8::slice(strcat("a" intToChar(128)) 1 1)                 ; => "a"
-ycUtf8::slice(strcat("a" intToChar(128) "b") 2 1 ?strict nil) ; => "�"（U+FFFD）
-ycUtf8::slice("a" 0 1)
-; *Error* ycUtf8::slice: start must be an integer >= 1
-ycUtf8::slice("a" 1 -1)
-; *Error* ycUtf8::slice: length must be an integer >= 0
-ycUtf8::slice(strcat("a" intToChar(128)) 4 1)
-; *Error* ycUtf8::slice: invalid UTF-8 at byte 2
+ycUtf8::Slice("a中b" 2 1)   ; => "中"
+ycUtf8::Slice("a中b" 3 9)   ; => "b"
+ycUtf8::Slice("a中b" 1 0)   ; => ""
+ycUtf8::Slice("a中b" 4 1)   ; => nil
+ycUtf8::Slice(strcat("a" intToChar(128)) 1 1)                 ; => "a"
+ycUtf8::Slice(strcat("a" intToChar(128) "b") 2 1 ?strict nil) ; => "�"（U+FFFD）
+ycUtf8::Slice("a" 0 1)
+; *Error* ycUtf8::Slice: start must be an integer >= 1
+ycUtf8::Slice("a" 1 -1)
+; *Error* ycUtf8::Slice: length must be an integer >= 0
+ycUtf8::Slice(strcat("a" intToChar(128)) 4 1)
+; *Error* ycUtf8::Slice: invalid UTF-8 at byte 2
 ```
 
-### ycUtf8::width <sub>`function`</sub>
+### ycUtf8::Width <sub>`function`</sub>
 
 ```text
-ycUtf8::width(
+ycUtf8::Width(
     t_str
     [ ?strict ]
     [ ?ambiguous ]
@@ -211,19 +211,19 @@ ycUtf8::width(
 **例程**
 
 ```lisp
-ycUtf8::width("中文")           ; => 4
-ycUtf8::width("§")              ; => 1
-ycUtf8::width("§" ?ambiguous 2) ; => 2
-ycUtf8::width(strcat(intToChar(9) intToChar(10))) ; => 0
-ycUtf8::width(strcat("a" intToChar(128)) ?strict nil) ; => 2
-ycUtf8::width("a" ?ambiguous 0)
-; *Error* ycUtf8::width: ambiguous must be 1 or 2
+ycUtf8::Width("中文")           ; => 4
+ycUtf8::Width("§")              ; => 1
+ycUtf8::Width("§" ?ambiguous 2) ; => 2
+ycUtf8::Width(strcat(intToChar(9) intToChar(10))) ; => 0
+ycUtf8::Width(strcat("a" intToChar(128)) ?strict nil) ; => 2
+ycUtf8::Width("a" ?ambiguous 0)
+; *Error* ycUtf8::Width: ambiguous must be 1 or 2
 ```
 
-### ycUtf8::charWidth <sub>`function`</sub>
+### ycUtf8::CharWidth <sub>`function`</sub>
 
 ```text
-ycUtf8::charWidth(
+ycUtf8::CharWidth(
     n_cp
     [ ?ambiguous ]
 )
@@ -248,19 +248,19 @@ ycUtf8::charWidth(
 **例程**
 
 ```lisp
-ycUtf8::charWidth(97)               ; => 1
-ycUtf8::charWidth(20013)            ; => 2
-ycUtf8::charWidth(167)              ; => 1
-ycUtf8::charWidth(167 ?ambiguous 2) ; => 2
-ycUtf8::charWidth(769)              ; => 0
-ycUtf8::charWidth(55296)
-; *Error* ycUtf8::charWidth: invalid codepoint (55296)
+ycUtf8::CharWidth(97)               ; => 1
+ycUtf8::CharWidth(20013)            ; => 2
+ycUtf8::CharWidth(167)              ; => 1
+ycUtf8::CharWidth(167 ?ambiguous 2) ; => 2
+ycUtf8::CharWidth(769)              ; => 0
+ycUtf8::CharWidth(55296)
+; *Error* ycUtf8::CharWidth: invalid codepoint (55296)
 ```
 
-### ycUtf8::isValid <sub>`function`</sub>
+### ycUtf8::IsValid <sub>`function`</sub>
 
 ```text
-ycUtf8::isValid(t_str)
+ycUtf8::IsValid(t_str)
 => t | nil
 ```
 
@@ -281,15 +281,15 @@ ycUtf8::isValid(t_str)
 **例程**
 
 ```lisp
-ycUtf8::isValid("")                                             ; => t
-ycUtf8::isValid("abc")                                          ; => t
-ycUtf8::isValid(strcat(intToChar(128)))                         ; => nil
-ycUtf8::isValid(strcat(intToChar(228) intToChar(184)))          ; => nil
+ycUtf8::IsValid("")                                             ; => t
+ycUtf8::IsValid("abc")                                          ; => t
+ycUtf8::IsValid(strcat(intToChar(128)))                         ; => nil
+ycUtf8::IsValid(strcat(intToChar(228) intToChar(184)))          ; => nil
 ```
 
 ## 严格与宽松
 
-宽松模式每遇到一个非法字节产出一个 U+FFFD 并前进一字节；`ycUtf8::slice` 返回重新编码后的替换字符，不保留原始非法字节。严格模式下 `ycUtf8::slice` 只校验扫描经过的字节（窗口及其前导段）；窗口之后的非法字节不影响切片结果，需要整串校验时用 `ycUtf8::isValid`。
+宽松模式每遇到一个非法字节产出一个 U+FFFD 并前进一字节；`ycUtf8::Slice` 返回重新编码后的替换字符，不保留原始非法字节。严格模式下 `ycUtf8::Slice` 只校验扫描经过的字节（窗口及其前导段）；窗口之后的非法字节不影响切片结果，需要整串校验时用 `ycUtf8::IsValid`。
 
 ## 宽度规则
 

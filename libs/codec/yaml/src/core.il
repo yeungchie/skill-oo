@@ -2,12 +2,12 @@ useNamespace("ycYaml")
 
 ; ---------- 基础工具 ----------
 
-_maxDecodeDepth = 800
-_maxEncodeDepth = 800
-_anchors = makeTable("yamlAnchors" nil)
-_activeAnchors = makeTable("yamlActiveAnchors" nil)
+_MaxDecodeDepth = 800
+_MaxEncodeDepth = 800
+_Anchors = makeTable("yamlAnchors" nil)
+_ActiveAnchors = makeTable("yamlActiveAnchors" nil)
 
-procedure(_nth1(n_i l_list "xl")  ; -> any
+procedure(_Nth1(n_i l_list "xl")  ; -> any
     ; 以 1-based 索引读取列表元素。
     ;
     ; **参数**
@@ -19,7 +19,7 @@ procedure(_nth1(n_i l_list "xl")  ; -> any
     nth(n_i - 1 l_list)
 )
 
-procedure(_build(l_p "l")  ; -> str
+procedure(_Build(l_p "l")  ; -> str
     ; 将 tconc 头容器（或 nil）拼接为字符串。
     ;
     ; **参数**
@@ -33,7 +33,7 @@ procedure(_build(l_p "l")  ; -> str
     )
 )
 
-procedure(_joinBuild(l_p t_sep "lt")  ; -> str
+procedure(_JoinBuild(l_p t_sep "lt")  ; -> str
     ; 将片段列表按分隔符拼接；兼容 tconc 头容器与普通列表。
     ;
     ; **参数**
@@ -48,7 +48,7 @@ procedure(_joinBuild(l_p t_sep "lt")  ; -> str
     )
 )
 
-procedure(_ltrim(t_s "t")  ; -> str
+procedure(_Ltrim(t_s "t")  ; -> str
     ; 去除字符串左侧空白。
     ;
     ; **参数**
@@ -59,14 +59,14 @@ procedure(_ltrim(t_s "t")  ; -> str
     let((n_len n_i)
         n_len = length(t_s)
         n_i = 1
-        while(n_i <= n_len && (_code(t_s n_i) == 32 || _code(t_s n_i) == 9)
+        while(n_i <= n_len && (_Code(t_s n_i) == 32 || _Code(t_s n_i) == 9)
             n_i = n_i + 1
         )
-        _tail(t_s n_i)
+        _Tail(t_s n_i)
     )
 )
 
-procedure(_code(t_s n_i "tx")  ; -> int | nil
+procedure(_Code(t_s n_i "tx")  ; -> int | nil
     ; 取字节索引处的字符码（1-based）；索引越界返回 nil。
     ;
     ; **参数**
@@ -83,7 +83,7 @@ procedure(_code(t_s n_i "tx")  ; -> int | nil
     )
 )
 
-procedure(_utf8Str(n_cp "x")  ; -> str
+procedure(_Utf8Str(n_cp "x")  ; -> str
     ; 将 Unicode 码点编码为 UTF-8 字节串。
     ;
     ; **参数**
@@ -116,7 +116,7 @@ procedure(_utf8Str(n_cp "x")  ; -> str
     )
 )
 
-procedure(_tail(t_s n_i "tx")  ; -> str
+procedure(_Tail(t_s n_i "tx")  ; -> str
     ; 取从位置 n_i 起的剩余文本；越界返回空串。
     ;
     ; **参数**
@@ -128,7 +128,7 @@ procedure(_tail(t_s n_i "tx")  ; -> str
     if(n_i > length(t_s) "" substring(t_s n_i length(t_s) - n_i + 1))
 )
 
-procedure(_lineCol(t_s n_i "tx")  ; -> list
+procedure(_LineCol(t_s n_i "tx")  ; -> list
     ; 按字节索引计算行列：行/列均 1-based。
     ;
     ; **参数**
@@ -142,7 +142,7 @@ procedure(_lineCol(t_s n_i "tx")  ; -> list
         n_last = 0
         when(1 < n_i
             for(n_k 1 n_i - 1
-                when(_code(t_s n_k) == 10
+                when(_Code(t_s n_k) == 10
                     n_line = n_line + 1
                     n_last = n_k
                 )
@@ -152,8 +152,8 @@ procedure(_lineCol(t_s n_i "tx")  ; -> list
     )
 )
 
-procedure(_errorLine(t_msg n_line n_col "txx")  ; -> never
-    ; 按统一格式报错：ycYaml::decode: <说明> at line <行>, column <列>。
+procedure(_ErrorLine(t_msg n_line n_col "txx")  ; -> never
+    ; 按统一格式报错：ycYaml::Decode: <说明> at line <行>, column <列>。
     ;
     ; **参数**
     ;   t_msg   (str) - 错误说明（英文短语）
@@ -162,10 +162,10 @@ procedure(_errorLine(t_msg n_line n_col "txx")  ; -> never
     ;
     ; **返回**
     ;   (never) - 总是 error()
-    error("ycYaml::decode: %s at line %d, column %d" t_msg n_line n_col)
+    error("ycYaml::Decode: %s at line %d, column %d" t_msg n_line n_col)
 )
 
-procedure(_rtrim(t_s "t")  ; -> str
+procedure(_Rtrim(t_s "t")  ; -> str
     ; 删除行尾空格与制表符。
     ;
     ; **参数**
@@ -176,7 +176,7 @@ procedure(_rtrim(t_s "t")  ; -> str
     let((n_end n_c)
         n_end = length(t_s)
         n_c = 0
-        while(n_end > 0 && (n_c = _code(t_s n_end)) && (n_c == 32 || n_c == 9)
+        while(n_end > 0 && (n_c = _Code(t_s n_end)) && (n_c == 32 || n_c == 9)
             n_end = n_end - 1
         )
         if(n_end == 0
@@ -186,7 +186,7 @@ procedure(_rtrim(t_s "t")  ; -> str
     )
 )
 
-procedure(_chompCr(t_line "t")  ; -> str
+procedure(_ChompCr(t_line "t")  ; -> str
     ; 删除行尾单个 CR（CRLF 输入）。
     ;
     ; **参数**
@@ -196,14 +196,14 @@ procedure(_chompCr(t_line "t")  ; -> str
     ;   (str) - 去 CR 后的行
     let((n_len)
         n_len = length(t_line)
-        if(n_len > 0 && _code(t_line n_len) == 13
+        if(n_len > 0 && _Code(t_line n_len) == 13
             substring(t_line 1 n_len - 1)
             t_line
         )
     )
 )
 
-procedure(_splitLines(t_s "t")  ; -> list
+procedure(_SplitLines(t_s "t")  ; -> list
     ; 按 LF 拆行并去掉行尾 CR。
     ;
     ; **参数**
@@ -215,19 +215,19 @@ procedure(_splitLines(t_s "t")  ; -> list
         n_len = length(t_s)
         n_start = 1
         for(n_k 1 n_len
-            when(_code(t_s n_k) == 10
-                l_res = tconc(l_res _chompCr(substring(t_s n_start n_k - n_start)))
+            when(_Code(t_s n_k) == 10
+                l_res = tconc(l_res _ChompCr(substring(t_s n_start n_k - n_start)))
                 n_start = n_k + 1
             )
         )
         when(n_start <= n_len
-            l_res = tconc(l_res _chompCr(substring(t_s n_start n_len - n_start + 1)))
+            l_res = tconc(l_res _ChompCr(substring(t_s n_start n_len - n_start + 1)))
         )
         car(l_res)
     )
 )
 
-procedure(_lineIndent(t_line n_line "tx")  ; -> int
+procedure(_LineIndent(t_line n_line "tx")  ; -> int
     ; 计算行首空格数；缩进内的制表符报错。
     ;
     ; **参数**
@@ -240,10 +240,10 @@ procedure(_lineIndent(t_line n_line "tx")  ; -> int
         n_i = 0
         g_stop = nil
         while(!g_stop && n_i < length(t_line)
-            n_c = _code(t_line n_i + 1)
+            n_c = _Code(t_line n_i + 1)
             cond(
                 (n_c == 32 n_i = n_i + 1)
-                (n_c == 9 _errorLine("tab character in indentation" n_line n_i + 1))
+                (n_c == 9 _ErrorLine("tab character in indentation" n_line n_i + 1))
                 (t g_stop = t)
             )
         )
@@ -251,7 +251,7 @@ procedure(_lineIndent(t_line n_line "tx")  ; -> int
     )
 )
 
-procedure(_stripComment(t_line "t")  ; -> str
+procedure(_StripComment(t_line "t")  ; -> str
     ; 删除引号外的注释：`#` 位于行首或前一字符为空白时生效。
     ;
     ; **参数**
@@ -267,8 +267,8 @@ procedure(_stripComment(t_line "t")  ; -> str
         g_dq = nil
         g_esc = nil
         while(n_i <= n_len && !n_cut
-            n_c = _code(t_line n_i)
-            n_prev = if(n_i > 1 _code(t_line n_i - 1) 0)
+            n_c = _Code(t_line n_i)
+            n_prev = if(n_i > 1 _Code(t_line n_i - 1) 0)
             cond(
                 (g_dq
                     when(g_esc
@@ -284,7 +284,7 @@ procedure(_stripComment(t_line "t")  ; -> str
                 )
                 (g_sq
                     when(n_c == 39
-                        if(_code(t_line n_i + 1) == 39
+                        if(_Code(t_line n_i + 1) == 39
                             n_i = n_i + 1
                             g_sq = nil
                         )
@@ -310,14 +310,14 @@ procedure(_stripComment(t_line "t")  ; -> str
         if(n_cut
             if(n_cut == 1
                 ""
-                _rtrim(substring(t_line 1 n_cut - 1))
+                _Rtrim(substring(t_line 1 n_cut - 1))
             )
             t_line
         )
     )
 )
 
-procedure(_blankp(t_line "t")  ; -> t | nil
+procedure(_Blankp(t_line "t")  ; -> t | nil
     ; 判断行是否为空白或注释行。
     ;
     ; **参数**
@@ -325,7 +325,7 @@ procedure(_blankp(t_line "t")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 空白/注释为 t
-    _rtrim(_stripComment(t_line)) == ""
+    _Rtrim(_StripComment(t_line)) == ""
 )
 
 unuseNamespace("ycYaml")

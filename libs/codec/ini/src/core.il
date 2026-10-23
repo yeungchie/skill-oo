@@ -3,13 +3,13 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-ycNamespace:::require("ycCodec")
+ycNamespace:::Require("ycCodec")
 
 useNamespace("ycIni")
 
 ; ---------- 基础工具 ----------
 
-procedure(_build(l_p "l")  ; -> str
+procedure(_Build(l_p "l")  ; -> str
     ; 将 tconc 头容器（或 nil）拼接为字符串。
     ;
     ; **参数**
@@ -20,7 +20,7 @@ procedure(_build(l_p "l")  ; -> str
     buildString(car(l_p) "")
 )
 
-procedure(_code(t_s n_i "tx")  ; -> int | nil
+procedure(_Code(t_s n_i "tx")  ; -> int | nil
     ; 取字节索引处的字符码（1-based）；索引越界返回 nil。
     ;
     ; **参数**
@@ -37,7 +37,7 @@ procedure(_code(t_s n_i "tx")  ; -> int | nil
     )
 )
 
-procedure(_find(t_s t_sub "tt")  ; -> int | nil
+procedure(_Find(t_s t_sub "tt")  ; -> int | nil
     ; 查找单字节子串首次出现的位置。
     ;
     ; **参数**
@@ -48,9 +48,9 @@ procedure(_find(t_s t_sub "tt")  ; -> int | nil
     ;   (int|nil) - 1-based 位置；未找到为 nil
     let((n_len n_i n_c)
         n_len = length(t_s)
-        n_c = _code(t_sub 1)
+        n_c = _Code(t_sub 1)
         n_i = 1
-        while(n_i <= n_len && _code(t_s n_i) != n_c
+        while(n_i <= n_len && _Code(t_s n_i) != n_c
             n_i = n_i + 1
         )
         when(n_i <= n_len
@@ -59,7 +59,7 @@ procedure(_find(t_s t_sub "tt")  ; -> int | nil
     )
 )
 
-procedure(_ltrim(t_s "t")  ; -> str
+procedure(_Ltrim(t_s "t")  ; -> str
     ; 去除字符串左侧的空格与制表符。
     ;
     ; **参数**
@@ -70,7 +70,7 @@ procedure(_ltrim(t_s "t")  ; -> str
     let((n_len n_i)
         n_len = length(t_s)
         n_i = 1
-        while(n_i <= n_len && (_code(t_s n_i) == 32 || _code(t_s n_i) == 9)
+        while(n_i <= n_len && (_Code(t_s n_i) == 32 || _Code(t_s n_i) == 9)
             n_i = n_i + 1
         )
         if(n_i > n_len
@@ -80,7 +80,7 @@ procedure(_ltrim(t_s "t")  ; -> str
     )
 )
 
-procedure(_rtrim(t_s "t")  ; -> str
+procedure(_Rtrim(t_s "t")  ; -> str
     ; 去除字符串右侧的空格与制表符。
     ;
     ; **参数**
@@ -90,7 +90,7 @@ procedure(_rtrim(t_s "t")  ; -> str
     ;   (str) - 去右侧空白后的串
     let((n_end)
         n_end = length(t_s)
-        while(n_end > 0 && (_code(t_s n_end) == 32 || _code(t_s n_end) == 9)
+        while(n_end > 0 && (_Code(t_s n_end) == 32 || _Code(t_s n_end) == 9)
             n_end = n_end - 1
         )
         if(n_end == 0
@@ -100,7 +100,7 @@ procedure(_rtrim(t_s "t")  ; -> str
     )
 )
 
-procedure(_trim(t_s "t")  ; -> str
+procedure(_Trim(t_s "t")  ; -> str
     ; 去除字符串两侧的空格与制表符。
     ;
     ; **参数**
@@ -108,10 +108,10 @@ procedure(_trim(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 去两侧空白后的串
-    _rtrim(_ltrim(t_s))
+    _Rtrim(_Ltrim(t_s))
 )
 
-procedure(_hasControl(t_s "t")  ; -> t | nil
+procedure(_HasControl(t_s "t")  ; -> t | nil
     ; 判断字符串是否含换行、回车、NUL、DEL 等控制字节；制表符例外。
     ;
     ; **参数**
@@ -123,7 +123,7 @@ procedure(_hasControl(t_s "t")  ; -> t | nil
         n_len = length(t_s)
         n_i = 1
         while(!g_hit && n_i <= n_len
-            n_c = _code(t_s n_i)
+            n_c = _Code(t_s n_i)
             when((n_c < 32 && n_c != 9) || n_c == 127
                 g_hit = t
             )
@@ -133,7 +133,7 @@ procedure(_hasControl(t_s "t")  ; -> t | nil
     )
 )
 
-procedure(_lineIndent(t_line "t")  ; -> int
+procedure(_LineIndent(t_line "t")  ; -> int
     ; 计算行首空格与制表符的数量。
     ;
     ; **参数**
@@ -144,7 +144,7 @@ procedure(_lineIndent(t_line "t")  ; -> int
     let((n_len n_i)
         n_len = length(t_line)
         n_i = 1
-        while(n_i <= n_len && (_code(t_line n_i) == 32 || _code(t_line n_i) == 9)
+        while(n_i <= n_len && (_Code(t_line n_i) == 32 || _Code(t_line n_i) == 9)
             n_i = n_i + 1
         )
         n_i - 1
@@ -153,7 +153,7 @@ procedure(_lineIndent(t_line "t")  ; -> int
 
 ; ---------- 文本预处理 ----------
 
-procedure(_normalize(t_s "t")  ; -> str
+procedure(_Normalize(t_s "t")  ; -> str
     ; 去掉 UTF-8 BOM，并把 CRLF / CR 行尾统一为 LF。
     ;
     ; **参数**
@@ -162,17 +162,17 @@ procedure(_normalize(t_s "t")  ; -> str
     ; **返回**
     ;   (str) - 归一化文本
     let((n_i n_len l_p)
-        when(length(t_s) >= 3 && _code(t_s 1) == 239 && _code(t_s 2) == 187 && _code(t_s 3) == 191
+        when(length(t_s) >= 3 && _Code(t_s 1) == 239 && _Code(t_s 2) == 187 && _Code(t_s 3) == 191
             t_s = substring(t_s 4)
         )
         n_i = 1
         n_len = length(t_s)
         while(n_i <= n_len
-            if(_code(t_s n_i) == 13
+            if(_Code(t_s n_i) == 13
                 {
                 l_p = tconc(l_p "\n")
                 n_i = n_i + 1
-                when(_code(t_s n_i) == 10
+                when(_Code(t_s n_i) == 10
                     n_i = n_i + 1
                 )
                 }
@@ -182,11 +182,11 @@ procedure(_normalize(t_s "t")  ; -> str
                 }
             )
         )
-        _build(l_p)
+        _Build(l_p)
     )
 )
 
-procedure(_splitLines(t_s "t")  ; -> list
+procedure(_SplitLines(t_s "t")  ; -> list
     ; 按 LF 拆行；输入须已归一化。
     ;
     ; **参数**
@@ -198,7 +198,7 @@ procedure(_splitLines(t_s "t")  ; -> list
         n_len = length(t_s)
         n_start = 1
         for(n_k 1 n_len
-            when(_code(t_s n_k) == 10
+            when(_Code(t_s n_k) == 10
                 l_res = tconc(l_res substring(t_s n_start n_k - n_start))
                 n_start = n_k + 1
             )
@@ -212,7 +212,7 @@ procedure(_splitLines(t_s "t")  ; -> list
 
 ; ---------- 选项与名字 ----------
 
-procedure(_delim(g_delim t_ctx "gt")  ; -> str
+procedure(_Delim(g_delim t_ctx "gt")  ; -> str
     ; 校验分隔符：nil 取 "="，否则为单字节可打印字符，排除注释与括号字符。
     ;
     ; **参数**
@@ -228,7 +228,7 @@ procedure(_delim(g_delim t_ctx "gt")  ; -> str
         error("%s: ?delimiter must be a single-byte string" t_ctx)
     )
     let((n_c)
-        n_c = _code(g_delim 1)
+        n_c = _Code(g_delim 1)
         when(n_c < 33 || n_c == 127 || n_c == 35 || n_c == 59 || n_c == 91 || n_c == 93
             error("%s: ?delimiter must be a printable character other than '#' ';' '[' ']'" t_ctx)
         )
@@ -236,7 +236,7 @@ procedure(_delim(g_delim t_ctx "gt")  ; -> str
     )
 )
 
-procedure(_policy(g_dup t_ctx "gt")  ; -> str
+procedure(_Policy(g_dup t_ctx "gt")  ; -> str
     ; 校验重复键策略：nil 取 "error"，允许 "error" / "first" / "last"。
     ;
     ; **参数**
@@ -254,8 +254,8 @@ procedure(_policy(g_dup t_ctx "gt")  ; -> str
     g_dup
 )
 
-procedure(_error(n_line n_col t_msg "xxt")  ; -> never
-    ; 按统一格式 error() 中断：ycIni::decode: <说明> at line <行>, column <列>。
+procedure(_Error(n_line n_col t_msg "xxt")  ; -> never
+    ; 按统一格式 error() 中断：ycIni::Decode: <说明> at line <行>, column <列>。
     ;
     ; **参数**
     ;   n_line  (int) - 行号（1-based）
@@ -264,10 +264,10 @@ procedure(_error(n_line n_col t_msg "xxt")  ; -> never
     ;
     ; **返回**
     ;   (never) - 总是调用 error()，不返回
-    error("ycIni::decode: %s at line %d, column %d" t_msg n_line n_col)
+    error("ycIni::Decode: %s at line %d, column %d" t_msg n_line n_col)
 )
 
-procedure(_newTable()  ; -> table
+procedure(_NewTable()  ; -> table
     ; 创建使用 ycCodec::Missing 作为缺省值的 INI 表。
     ;
     ; **返回**
@@ -275,7 +275,7 @@ procedure(_newTable()  ; -> table
     makeTable("ycIniTable" ycCodec:::Missing)
 )
 
-procedure(_hasKey(t_obj t_key "gt")  ; -> t | nil
+procedure(_HasKey(t_obj t_key "gt")  ; -> t | nil
     ; 判断表是否已有该键；缺省哨兵不算存在。
     ;
     ; **参数**
@@ -287,7 +287,7 @@ procedure(_hasKey(t_obj t_key "gt")  ; -> t | nil
     t_obj[t_key] != ycCodec:::Missing
 )
 
-procedure(_keyText(g_key g_opt "gg")  ; -> str
+procedure(_KeyText(g_key g_opt "gg")  ; -> str
     ; 把 table 键转为可写回 INI 的键文本。
     ;
     ; **参数**
@@ -297,7 +297,7 @@ procedure(_keyText(g_key g_opt "gg")  ; -> str
     ; **返回**
     ;   (str) - 键文本；严格模式或不可回写内容报错
     when(g_opt["strict"] && !stringp(g_key)
-        error("ycIni::encode: strict mode requires string keys, got %A" g_key)
+        error("ycIni::Encode: strict mode requires string keys, got %A" g_key)
     )
     let((t_key n_c)
         t_key = cond(
@@ -305,30 +305,30 @@ procedure(_keyText(g_key g_opt "gg")  ; -> str
             (symbolp(g_key) symbolToString(g_key))
             (fixp(g_key) sprintf(nil "%d" g_key))
             (t
-                error("ycIni::encode: unsupported table key of type %s" symbolToString(type(g_key)))
+                error("ycIni::Encode: unsupported table key of type %s" symbolToString(type(g_key)))
             )
         )
         when(t_key == ""
-            error("ycIni::encode: key must not be empty")
+            error("ycIni::Encode: key must not be empty")
         )
-        unless(_trim(t_key) == t_key
-            error("ycIni::encode: key must not have leading or trailing whitespace")
+        unless(_Trim(t_key) == t_key
+            error("ycIni::Encode: key must not have leading or trailing whitespace")
         )
-        when(_hasControl(t_key)
-            error("ycIni::encode: control character in key %A" t_key)
+        when(_HasControl(t_key)
+            error("ycIni::Encode: control character in key %A" t_key)
         )
-        n_c = _code(t_key 1)
+        n_c = _Code(t_key 1)
         when(n_c == 91 || n_c == 35 || n_c == 59
-            error("ycIni::encode: key cannot start with '[' '#' or ';'")
+            error("ycIni::Encode: key cannot start with '[' '#' or ';'")
         )
-        when(_find(t_key g_opt["delimiter"])
-            error("ycIni::encode: key must not contain the delimiter %A" g_opt["delimiter"])
+        when(_Find(t_key g_opt["delimiter"])
+            error("ycIni::Encode: key must not contain the delimiter %A" g_opt["delimiter"])
         )
         t_key
     )
 )
 
-procedure(_sectionText(g_key g_opt "gg")  ; -> str
+procedure(_SectionText(g_key g_opt "gg")  ; -> str
     ; 把 table 键转为可写回 INI 的段名。
     ;
     ; **参数**
@@ -338,7 +338,7 @@ procedure(_sectionText(g_key g_opt "gg")  ; -> str
     ; **返回**
     ;   (str) - 段名；严格模式或不可回写内容报错
     when(g_opt["strict"] && !stringp(g_key)
-        error("ycIni::encode: strict mode requires string keys, got %A" g_key)
+        error("ycIni::Encode: strict mode requires string keys, got %A" g_key)
     )
     let((t_name)
         t_name = cond(
@@ -346,26 +346,26 @@ procedure(_sectionText(g_key g_opt "gg")  ; -> str
             (symbolp(g_key) symbolToString(g_key))
             (fixp(g_key) sprintf(nil "%d" g_key))
             (t
-                error("ycIni::encode: unsupported table key of type %s" symbolToString(type(g_key)))
+                error("ycIni::Encode: unsupported table key of type %s" symbolToString(type(g_key)))
             )
         )
         when(t_name == ""
-            error("ycIni::encode: section name must not be empty")
+            error("ycIni::Encode: section name must not be empty")
         )
-        unless(_trim(t_name) == t_name
-            error("ycIni::encode: section name must not have leading or trailing whitespace")
+        unless(_Trim(t_name) == t_name
+            error("ycIni::Encode: section name must not have leading or trailing whitespace")
         )
-        when(_hasControl(t_name)
-            error("ycIni::encode: control character in section name %A" t_name)
+        when(_HasControl(t_name)
+            error("ycIni::Encode: control character in section name %A" t_name)
         )
-        when(_find(t_name "[") || _find(t_name "]")
-            error("ycIni::encode: section name must not contain '[' or ']'")
+        when(_Find(t_name "[") || _Find(t_name "]")
+            error("ycIni::Encode: section name must not contain '[' or ']'")
         )
         t_name
     )
 )
 
-procedure(_nameText(g_key g_val g_opt t_mode "gggt")  ; -> str
+procedure(_NameText(g_key g_val g_opt t_mode "gggt")  ; -> str
     ; 按使用位置把键转为键文本或段名。
     ;
     ; **参数**
@@ -377,12 +377,12 @@ procedure(_nameText(g_key g_val g_opt t_mode "gggt")  ; -> str
     ; **返回**
     ;   (str) - 键文本或段名
     if(t_mode == "root" && tablep(g_val)
-        _sectionText(g_key g_opt)
-        _keyText(g_key g_opt)
+        _SectionText(g_key g_opt)
+        _KeyText(g_key g_opt)
     )
 )
 
-procedure(_numText(g_n t_ctx "nt")  ; -> str
+procedure(_NumText(g_n t_ctx "nt")  ; -> str
     ; 把有限数值转为最短可回读文本。
     ;
     ; **参数**
@@ -406,7 +406,7 @@ procedure(_numText(g_n t_ctx "nt")  ; -> str
     )
 )
 
-procedure(_valueText(g_val t_ctx "gt")  ; -> str
+procedure(_ValueText(g_val t_ctx "gt")  ; -> str
     ; 把值转为可写回 INI 的文本。
     ;
     ; **参数**
@@ -427,7 +427,7 @@ procedure(_valueText(g_val t_ctx "gt")  ; -> str
                 error("%s: cannot dump the Missing marker" t_ctx)
             )
             (stringp(g_val) g_val)
-            (numberp(g_val) _numText(g_val t_ctx))
+            (numberp(g_val) _NumText(g_val t_ctx))
             (symbolp(g_val) symbolToString(g_val))
             (tablep(g_val)
                 error("%s: nested tables are not supported" t_ctx)
@@ -439,17 +439,17 @@ procedure(_valueText(g_val t_ctx "gt")  ; -> str
                 error("%s: unsupported value of type %s" t_ctx symbolToString(type(g_val)))
             )
         )
-        unless(_trim(t_text) == t_text
+        unless(_Trim(t_text) == t_text
             error("%s: value must not have leading or trailing whitespace" t_ctx)
         )
-        when(_hasControl(t_text)
+        when(_HasControl(t_text)
             error("%s: control character in value %A" t_ctx t_text)
         )
         t_text
     )
 )
 
-procedure(_tableKeys(t_obj g_opt t_mode "ggt")  ; -> list
+procedure(_TableKeys(t_obj g_opt t_mode "ggt")  ; -> list
     ; 校验并取出表键；检测字符串化碰撞，并按选项排序。
     ;
     ; **参数**
@@ -462,9 +462,9 @@ procedure(_tableKeys(t_obj g_opt t_mode "ggt")  ; -> list
     let((t_byText l_texts t_text g_key)
         t_byText = makeTable("ycIniKeys" ycCodec:::Missing)
         foreach(g_key t_obj
-            t_text = _nameText(g_key t_obj[g_key] g_opt t_mode)
+            t_text = _NameText(g_key t_obj[g_key] g_opt t_mode)
             when(t_byText[t_text] != ycCodec:::Missing
-                error("ycIni::encode: duplicate key %A after string conversion" t_text)
+                error("ycIni::Encode: duplicate key %A after string conversion" t_text)
             )
             t_byText[t_text] = g_key
             l_texts = tconc(l_texts t_text)

@@ -5,13 +5,13 @@ useNamespace("ycPathLib")
 
 ; 实例驻留表：规范串 → Path（同串共享同一实例，== 为真）。构造后禁止再写
 ; self->_data 及其字段（别名污染——纪律非语言强制）；绕过本函数直接
-; makeInstance 的实例不共享，请走 Path()/_asPath()/_mkPath()。
+; makeInstance 的实例不共享，请走 Path()/_AsPath()/_MkPath()。
 ; 驻留表有界：超过 _PathCacheCap 条整体清空重计（丢共享只弱化 == 快路径，不改正确性）。
 _PathCache = makeTable("pathCache" nil)
 _PathCacheCap = 8192
 _PathCacheN = 0
 
-procedure(_asPath(g_x "g")  ; -> Path | nil
+procedure(_AsPath(g_x "g")  ; -> Path | nil
     ; 把任意可字符串化值转换为驻留的 Path 实例。
     ;
     ; **参数**
@@ -26,13 +26,13 @@ procedure(_asPath(g_x "g")  ; -> Path | nil
             t_s = car(errset(g_x->str() nil))
         )
         when(stringp(t_s)
-            l_parse = _parsePath(t_s)
-            _mkPath(car(l_parse) cdr(l_parse))
+            l_parse = _ParsePath(t_s)
+            _MkPath(car(l_parse) cdr(l_parse))
         )
     )
 )
 
-procedure(_parsePath(t_path "t")  ; -> (str . list[str])
+procedure(_ParsePath(t_path "t")  ; -> (str . list[str])
     ; 词法解析路径串为 (锚 . 部件列表)，不访问磁盘。
     ;
     ; **参数**
@@ -47,7 +47,7 @@ procedure(_parsePath(t_path "t")  ; -> (str . list[str])
     )
 )
 
-procedure(_pathKey(t_anchor l_parts "tl")  ; -> str
+procedure(_PathKey(t_anchor l_parts "tl")  ; -> str
     ; 由锚与部件列表生成路径规范串，用作驻留表键。
     ;
     ; **参数**
@@ -64,7 +64,7 @@ procedure(_pathKey(t_anchor l_parts "tl")  ; -> str
     )
 )
 
-procedure(_mkPath(t_anchor l_parts "tl")  ; -> Path
+procedure(_MkPath(t_anchor l_parts "tl")  ; -> Path
     ; 按锚与部件从驻留表取（或新建）Path 实例，同规范串共享同一实例。
     ;
     ; **参数**
@@ -75,7 +75,7 @@ procedure(_mkPath(t_anchor l_parts "tl")  ; -> Path
     ;   (Path) - 按规范串查 _PathCache：命中即复用，未命中新建登记；
     ;            超过 _PathCacheCap 条整表清空重计（丢共享只弱化 == 快路径，不改正确性）
     let((t_key hit)
-        t_key = _pathKey(t_anchor l_parts)
+        t_key = _PathKey(t_anchor l_parts)
         hit = _PathCache[t_key]
         when(hit == nil
             hit = makeInstance('Path ?_data
@@ -91,7 +91,7 @@ procedure(_mkPath(t_anchor l_parts "tl")  ; -> Path
     )
 )
 
-procedure(_lastItem(l_parts "l")  ; -> str
+procedure(_LastItem(l_parts "l")  ; -> str
     ; 返回列表的最后一个元素。
     ;
     ; **参数**
@@ -102,11 +102,11 @@ procedure(_lastItem(l_parts "l")  ; -> str
     cond(
         (l_parts == nil "")
         (cdr(l_parts) == nil car(l_parts))
-        (t _lastItem(cdr(l_parts)))
+        (t _LastItem(cdr(l_parts)))
     )
 )
 
-procedure(_dropLast(l_parts "l")  ; -> list
+procedure(_DropLast(l_parts "l")  ; -> list
     ; 返回去掉最后一个元素的列表。
     ;
     ; **参数**
@@ -116,12 +116,12 @@ procedure(_dropLast(l_parts "l")  ; -> list
     ;   (list|nil) - 元素数 >= 2 时返回去掉末元素的新列表；空或单元素列表返回 nil
     unless(l_parts == nil
         unless(cdr(l_parts) == nil
-            cons(car(l_parts) _dropLast(cdr(l_parts)))
+            cons(car(l_parts) _DropLast(cdr(l_parts)))
         )
     )
 )
 
-procedure(_dropFirstN(l_parts n_count "lx")  ; -> list
+procedure(_DropFirstN(l_parts n_count "lx")  ; -> list
     ; 返回去掉前 n_count 个元素后的列表。
     ;
     ; **参数**
@@ -132,11 +132,11 @@ procedure(_dropFirstN(l_parts n_count "lx")  ; -> list
     ;   (list|nil) - n_count <= 0 返回原列表；去掉数 >= 列表长度时返回 nil
     if(n_count <= 0
         l_parts
-        _dropFirstN(cdr(l_parts) n_count - 1)
+        _DropFirstN(cdr(l_parts) n_count - 1)
     )
 )
 
-procedure(_dotIndex(t_name "t")  ; -> int | nil
+procedure(_DotIndex(t_name "t")  ; -> int | nil
     ; 找出串中最后一个 "." 的位置（1-based）。
     ;
     ; **参数**
@@ -156,7 +156,7 @@ procedure(_dotIndex(t_name "t")  ; -> int | nil
     )
 )
 
-procedure(_lstripDots(t_str "t")  ; -> str
+procedure(_LstripDots(t_str "t")  ; -> str
     ; 去掉串首连续的 "."。
     ;
     ; **参数**
@@ -176,7 +176,7 @@ procedure(_lstripDots(t_str "t")  ; -> str
     )
 )
 
-procedure(_splitKeep(t_str t_sep "tt")  ; -> list[str]
+procedure(_SplitKeep(t_str t_sep "tt")  ; -> list[str]
     ; 按单字符分隔符拆分串，保留空字段（顺序不变）。
     ;
     ; **参数**
@@ -203,7 +203,7 @@ procedure(_splitKeep(t_str t_sep "tt")  ; -> list[str]
     )
 )
 
-procedure(_endsWith(t_str t_suf "tt")  ; -> t | nil
+procedure(_EndsWith(t_str t_suf "tt")  ; -> t | nil
     ; 判断 t_str 是否以 t_suf 结尾。
     ;
     ; **参数**
@@ -222,7 +222,7 @@ procedure(_endsWith(t_str t_suf "tt")  ; -> t | nil
     )
 )
 
-procedure(_strMember(t_str l_list "tl")  ; -> t | nil
+procedure(_StrMember(t_str l_list "tl")  ; -> t | nil
     ; 判断字符串是否出现在列表中（按 == 比较）。
     ;
     ; **参数**
@@ -241,7 +241,7 @@ procedure(_strMember(t_str l_list "tl")  ; -> t | nil
     )
 )
 
-procedure(_shellQuote(t_str "t")  ; -> str
+procedure(_ShellQuote(t_str "t")  ; -> str
     ; 用单引号包裹串，转义为 shell 安全形式。
     ;
     ; **参数**
@@ -280,14 +280,14 @@ procedure(Path(\@rest g_args "g")  ; -> Path
     ; **返回**
     ;   (Path) - 驻留后的路径实例；解析为词法规则（丢弃空/ "." 部件、".." 保留），不访问磁盘
     let((p_res)
-        p_res = _asPath("")
+        p_res = _AsPath("")
         when(g_args
             foreach(g g_args
-                unless(_asPath(g)
+                unless(_AsPath(g)
                     error("%A: expected string or Path, got %A" 'ycPathLib::Path g)
                 )
             )
-            p_res = _asPath(car(g_args))
+            p_res = _AsPath(car(g_args))
             foreach(g cdr(g_args)
                 p_res = p_res->join(g)
             )
@@ -296,7 +296,7 @@ procedure(Path(\@rest g_args "g")  ; -> Path
     )
 )
 
-procedure(cwd()  ; -> Path
+procedure(Cwd()  ; -> Path
     ; 返回当前工作目录的 Path。
     ;
     ; **返回**
@@ -304,7 +304,7 @@ procedure(cwd()  ; -> Path
     Path(getWorkingDir())
 )
 
-procedure(home()  ; -> Path
+procedure(Home()  ; -> Path
     ; 返回 HOME 环境变量对应的 Path。
     ;
     ; **返回**
@@ -312,13 +312,13 @@ procedure(home()  ; -> Path
     let((t_home)
         t_home = getShellEnvVar("HOME")
         when(t_home == nil || t_home == ""
-            error("%A: home directory is not known" 'ycPathLib::home)
+            error("%A: home directory is not known" 'ycPathLib::Home)
         )
         Path(t_home)
     )
 )
 
-procedure(currentFile()  ; -> Path
+procedure(CurrentFile()  ; -> Path
     ; 返回当前正在加载的文件路径（表达式所在文件在加载时求值）。
     ;
     ; **返回**
@@ -331,7 +331,7 @@ procedure(currentFile()  ; -> Path
         )
         unless(t_file && isFile(t_file)
             error("%A: no current file - call it at the top level of a file while it is being loaded (not from the CIW)"
-                'ycPathLib::currentFile)
+                'ycPathLib::CurrentFile)
         )
         Path(t_file)
     )
@@ -434,10 +434,10 @@ defmethod(initializeInstance (self(Path) \@rest _args)
     ;
     ; **返回**
     ;   (t) - 依次调用 _installPure、_installFs、_installGlob、_installCodec 后返回 t
-    _installPure(self)
-    _installFs(self)
-    _installGlob(self)
-    _installCodec(self)
+    _InstallPure(self)
+    _InstallFs(self)
+    _InstallGlob(self)
+    _InstallCodec(self)
     t
 )
 )

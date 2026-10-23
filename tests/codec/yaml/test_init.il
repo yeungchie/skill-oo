@@ -55,7 +55,7 @@ procedure(_assertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil
 )
 
 procedure(_dump(g_v "g")  ; -> str
-    ycYaml::encode(g_v ?flow t ?sortKeys t ?finalNewline nil)
+    ycYaml::Encode(g_v ?flow t ?sortKeys t ?finalNewline nil)
 )
 
 procedure(_assertDumpEq(g_a g_b t_msg "ggt")  ; -> t | nil

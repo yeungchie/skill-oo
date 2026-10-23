@@ -4,8 +4,8 @@ Cadence SKILL++ 的 SI 工程计数与单位库：工程计数解析、格式化
 
 ## 概要
 
-+ `parse` 解析带 SI 前缀的数值串（`"1k"`、`"2.5uF"`、`"4.7meg"`），返回 `(数值 单位)`。
-+ `format` 把数值写成工程计数（指数取 3 的倍数），可拼接单位。
++ `Parse` 解析带 SI 前缀的数值串（`"1k"`、`"2.5uF"`、`"4.7meg"`），返回 `(数值 单位)`。
++ `Format` 把数值写成工程计数（指数取 3 的倍数），可拼接单位。
 + 前缀区分大小写：`m` 为 milli、`M` 为 mega；femto 为小写 `f`，大写 `F` 是法拉单位。解析还接受 `K`（kilo 别名）与 `%`（0.01）。
 + 数值与后缀之间有空白时，后缀整体作为单位、不识别前缀：`"1m"` → 0.001，`"1 m"` → 1 米；`"1T"` → 1e12，`"1 T"` → 1 特斯拉。
 + 单位后缀按字符串保留，不做物理量纲或复合单位换算。
@@ -15,28 +15,28 @@ Cadence SKILL++ 的 SI 工程计数与单位库：工程计数解析、格式化
 
 ```lisp
 ; 解析
-ycUnits::parse("1k")       ; => (1000.0 "")
-ycUnits::parse("2.5uF")    ; => (2.5e-06 "F")
-ycUnits::parse("4.7meg")   ; => (4700000.0 "")
-ycUnits::parse("1 F")      ; => (1.0 "F")
+ycUnits::Parse("1k")       ; => (1000.0 "")
+ycUnits::Parse("2.5uF")    ; => (2.5e-06 "F")
+ycUnits::Parse("4.7meg")   ; => (4700000.0 "")
+ycUnits::Parse("1 F")      ; => (1.0 "F")
 
 ; 格式化
-ycUnits::format(1234)                       ; => "1.234k"
-ycUnits::format(2.5e-6 ?unit "F")           ; => "2.5uF"
-ycUnits::format(999.9 ?precision 3)         ; => "1k"
-ycUnits::format(1e-4)                       ; => "100u"
+ycUnits::Format(1234)                       ; => "1.234k"
+ycUnits::Format(2.5e-6 ?unit "F")           ; => "2.5uF"
+ycUnits::Format(999.9 ?precision 3)         ; => "1k"
+ycUnits::Format(1e-4)                       ; => "100u"
 
 ; 拆分
-ycUnits::toNumber("2.5uF") ; => 2.5e-06
-ycUnits::toUnit("2.5uF")   ; => "F"
+ycUnits::ToNumber("2.5uF") ; => 2.5e-06
+ycUnits::ToUnit("2.5uF")   ; => "F"
 ```
 
 ## API 参考
 
-### ycUnits::parse <sub>`function`</sub>
+### ycUnits::Parse <sub>`function`</sub>
 
 ```text
-ycUnits::parse(t_text)
+ycUnits::Parse(t_text)
 => list
 ```
 
@@ -57,24 +57,24 @@ ycUnits::parse(t_text)
 **例程**
 
 ```lisp
-ycUnits::parse("1k")       ; => (1000.0 "")
-ycUnits::parse("2.5u")     ; => (2.5e-06 "")
-ycUnits::parse("1kHz")     ; => (1000.0 "Hz")
-ycUnits::parse("1.5mF")    ; => (0.0015 "F")
-ycUnits::parse("1F")       ; => (1.0 "F")
-ycUnits::parse("1f")       ; => (1e-15 "")
-ycUnits::parse("1e3")      ; => (1000.0 "")
-ycUnits::parse("-2.5u")    ; => (-2.5e-06 "")
-ycUnits::parse("abc")
+ycUnits::Parse("1k")       ; => (1000.0 "")
+ycUnits::Parse("2.5u")     ; => (2.5e-06 "")
+ycUnits::Parse("1kHz")     ; => (1000.0 "Hz")
+ycUnits::Parse("1.5mF")    ; => (0.0015 "F")
+ycUnits::Parse("1F")       ; => (1.0 "F")
+ycUnits::Parse("1f")       ; => (1e-15 "")
+ycUnits::Parse("1e3")      ; => (1000.0 "")
+ycUnits::Parse("-2.5u")    ; => (-2.5e-06 "")
+ycUnits::Parse("abc")
 ; => 以 error() 中断（缺少数值）
-ycUnits::parse("1e")
+ycUnits::Parse("1e")
 ; => 以 error() 中断（指数缺少数字）
 ```
 
-### ycUnits::format <sub>`function`</sub>
+### ycUnits::Format <sub>`function`</sub>
 
 ```text
-ycUnits::format(
+ycUnits::Format(
     n_value
     [ ?unit "" ]
     [ ?precision 6 ]
@@ -101,30 +101,30 @@ ycUnits::format(
 **例程**
 
 ```lisp
-ycUnits::format(1234)                         ; => "1.234k"
-ycUnits::format(0)                            ; => "0"
-ycUnits::format(-2.5e-6)                      ; => "-2.5u"
-ycUnits::format(1e-4)                         ; => "100u"
-ycUnits::format(1.23456789)                   ; => "1.23457"
-ycUnits::format(12345 ?precision 3)           ; => "12.3k"
-ycUnits::format(999.9 ?precision 3)           ; => "1k"
-ycUnits::format(2.5e-6 ?unit "F")             ; => "2.5uF"
-ycUnits::format(0 ?unit "F")                  ; => "0F"
-ycUnits::format(1e30)                         ; => "1e+30"
-ycUnits::format(1 ?precision 0)
+ycUnits::Format(1234)                         ; => "1.234k"
+ycUnits::Format(0)                            ; => "0"
+ycUnits::Format(-2.5e-6)                      ; => "-2.5u"
+ycUnits::Format(1e-4)                         ; => "100u"
+ycUnits::Format(1.23456789)                   ; => "1.23457"
+ycUnits::Format(12345 ?precision 3)           ; => "12.3k"
+ycUnits::Format(999.9 ?precision 3)           ; => "1k"
+ycUnits::Format(2.5e-6 ?unit "F")             ; => "2.5uF"
+ycUnits::Format(0 ?unit "F")                  ; => "0F"
+ycUnits::Format(1e30)                         ; => "1e+30"
+ycUnits::Format(1 ?precision 0)
 ; => 以 error() 中断（精度须为 1–15）
 ```
 
-### ycUnits::toNumber <sub>`function`</sub>
+### ycUnits::ToNumber <sub>`function`</sub>
 
 ```text
-ycUnits::toNumber(t_text)
+ycUnits::ToNumber(t_text)
 => num
 ```
 
 **描述**
 
-解析工程计数串并只返回数值；等价于 `car(ycUnits::parse(t_text))`。解析错误消息上下文为 `ycUnits::toNumber:`。
+解析工程计数串并只返回数值；等价于 `car(ycUnits::Parse(t_text))`。解析错误消息上下文为 `ycUnits::ToNumber:`。
 
 **参数**
 
@@ -139,20 +139,20 @@ ycUnits::toNumber(t_text)
 **例程**
 
 ```lisp
-ycUnits::toNumber("2.5uF") ; => 2.5e-06
-ycUnits::toNumber("-1k")   ; => -1000.0
+ycUnits::ToNumber("2.5uF") ; => 2.5e-06
+ycUnits::ToNumber("-1k")   ; => -1000.0
 ```
 
-### ycUnits::toUnit <sub>`function`</sub>
+### ycUnits::ToUnit <sub>`function`</sub>
 
 ```text
-ycUnits::toUnit(t_text)
+ycUnits::ToUnit(t_text)
 => str
 ```
 
 **描述**
 
-解析工程计数串并只返回单位；等价于 `cadr(ycUnits::parse(t_text))`。解析错误消息上下文为 `ycUnits::toUnit:`。
+解析工程计数串并只返回单位；等价于 `cadr(ycUnits::Parse(t_text))`。解析错误消息上下文为 `ycUnits::ToUnit:`。
 
 **参数**
 
@@ -167,8 +167,8 @@ ycUnits::toUnit(t_text)
 **例程**
 
 ```lisp
-ycUnits::toUnit("2.5uF") ; => "F"
-ycUnits::toUnit("1k")    ; => ""
+ycUnits::ToUnit("2.5uF") ; => "F"
+ycUnits::ToUnit("1k")    ; => ""
 ```
 
 ## 前缀与单位规则
@@ -203,4 +203,4 @@ ycUnits::toUnit("1k")    ; => ""
 
 SKILL 数字字面量自带比例因子（`1u`、`10k`、`2.5M` 等，含 `K`、`%`）：紧贴数字、只取数字后的首个非数字字符，后续字符忽略（`1kHz` 得 1000、`1uF` 得 1e-6、`1meg` 得 0.001），且只作用于源码字面量。
 
-`ycUnits` 面向运行期字符串：保留完整单位后缀，并扩展 `meg`/`mega` 等长别名（因此 `ycUnits::parse("1meg")` 是 1e6 而非 0.001）。源码字面量直接用原生比例因子；需要解析字符串或保留单位时用 `ycUnits`。
+`ycUnits` 面向运行期字符串：保留完整单位后缀，并扩展 `meg`/`mega` 等长别名（因此 `ycUnits::Parse("1meg")` 是 1e6 而非 0.001）。源码字面量直接用原生比例因子；需要解析字符串或保留单位时用 `ycUnits`。

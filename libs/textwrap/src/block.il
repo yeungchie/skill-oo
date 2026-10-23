@@ -7,7 +7,7 @@ useNamespace("ycTextwrap")
 
 ; ---------- 行与前导空白 ----------
 
-procedure(_splitAll(t_s "t")  ; -> list[str]
+procedure(_SplitAll(t_s "t")  ; -> list[str]
     ; 按 LF 切行并保留末尾空行（内部实现）。
     ;
     ; **参数**
@@ -34,7 +34,7 @@ procedure(_splitAll(t_s "t")  ; -> list[str]
     )
 )
 
-procedure(_wsPrefix(t_s "t")  ; -> list
+procedure(_WsPrefix(t_s "t")  ; -> list
     ; 返回行的前导空白前缀与是否空白行（内部实现）。
     ;
     ; **参数**
@@ -59,7 +59,7 @@ procedure(_wsPrefix(t_s "t")  ; -> list
     )
 )
 
-procedure(_commonPrefix(t_a t_b "tt")  ; -> str
+procedure(_CommonPrefix(t_a t_b "tt")  ; -> str
     ; 计算两个字符串的公共字节前缀（内部实现）。
     ;
     ; **参数**
@@ -79,7 +79,7 @@ procedure(_commonPrefix(t_a t_b "tt")  ; -> str
 
 ; ---------- 公开入口 ----------
 
-procedure(dedent(t_text "t")  ; -> str
+procedure(Dedent(t_text "t")  ; -> str
     ; 去除所有非空白行的公共前导空白。
     ;
     ; **参数**
@@ -88,16 +88,16 @@ procedure(dedent(t_text "t")  ; -> str
     ; **返回**
     ;   (str) - 去除公共缩进后的文本；空白行归一为空串
     unless(stringp(t_text)
-        error("ycTextwrap::dedent: text must be a string (%A)" t_text)
+        error("ycTextwrap::Dedent: text must be a string (%A)" t_text)
     )
     let((l_lines t_common g_have l_out)
-        l_lines = _splitAll(_normalizeNewlines(t_text))
+        l_lines = _SplitAll(_NormalizeNewlines(t_text))
         foreach(t_line l_lines
             let((l_wp)
-                l_wp = _wsPrefix(t_line)
+                l_wp = _WsPrefix(t_line)
                 unless(cadr(l_wp)
                     if(g_have
-                        t_common = _commonPrefix(t_common car(l_wp))
+                        t_common = _CommonPrefix(t_common car(l_wp))
                         progn(
                             t_common = car(l_wp)
                             g_have = t
@@ -110,7 +110,7 @@ procedure(dedent(t_text "t")  ; -> str
         l_out = cons(nil nil)
         foreach(t_line l_lines
             let((l_wp)
-                l_wp = _wsPrefix(t_line)
+                l_wp = _WsPrefix(t_line)
                 if(cadr(l_wp)
                     tconc(l_out "")
                     tconc(l_out substring(
@@ -125,7 +125,7 @@ procedure(dedent(t_text "t")  ; -> str
     )
 )
 
-procedure(indent(t_text \@key (prefix "  ") "tt")  ; -> str
+procedure(Indent(t_text \@key (prefix "  ") "tt")  ; -> str
     ; 给每个非空白行加统一前缀。
     ;
     ; **参数**
@@ -135,16 +135,16 @@ procedure(indent(t_text \@key (prefix "  ") "tt")  ; -> str
     ; **返回**
     ;   (str) - 加前缀后的文本；空白行原样保留
     unless(stringp(t_text)
-        error("ycTextwrap::indent: text must be a string (%A)" t_text)
+        error("ycTextwrap::Indent: text must be a string (%A)" t_text)
     )
     unless(stringp(prefix)
-        error("ycTextwrap::indent: prefix must be a string (%A)" prefix)
+        error("ycTextwrap::Indent: prefix must be a string (%A)" prefix)
     )
     let((l_lines l_out)
-        l_lines = _splitAll(_normalizeNewlines(t_text))
+        l_lines = _SplitAll(_NormalizeNewlines(t_text))
         l_out = cons(nil nil)
         foreach(t_line l_lines
-            if(cadr(_wsPrefix(t_line))
+            if(cadr(_WsPrefix(t_line))
                 tconc(l_out t_line)
                 tconc(l_out strcat(prefix t_line))
             )
@@ -153,7 +153,7 @@ procedure(indent(t_text \@key (prefix "  ") "tt")  ; -> str
     )
 )
 
-procedure(shorten(t_text n_width \@key (placeholder "...") (unit "display") (ambiguous 1) "txttx")  ; -> str
+procedure(Shorten(t_text n_width \@key (placeholder "...") (unit "display") (ambiguous 1) "txttx")  ; -> str
     ; 将文本截断到指定宽度并追加占位符。
     ;
     ; **参数**
@@ -166,18 +166,18 @@ procedure(shorten(t_text n_width \@key (placeholder "...") (unit "display") (amb
     ; **返回**
     ;   (str) - 折叠空白后的截断文本；未超宽时不加占位符
     unless(stringp(t_text)
-        error("ycTextwrap::shorten: text must be a string (%A)" t_text)
+        error("ycTextwrap::Shorten: text must be a string (%A)" t_text)
     )
     unless(fixp(n_width) && n_width >= 1
-        error("ycTextwrap::shorten: width must be a positive integer (%A)" n_width)
+        error("ycTextwrap::Shorten: width must be a positive integer (%A)" n_width)
     )
     unless(stringp(placeholder)
-        error("ycTextwrap::shorten: placeholder must be a string (%A)" placeholder)
+        error("ycTextwrap::Shorten: placeholder must be a string (%A)" placeholder)
     )
-    _checkUnit("ycTextwrap::shorten" unit ambiguous)
+    _CheckUnit("ycTextwrap::Shorten" unit ambiguous)
     let((l_cps)
-        l_cps = _joinWordsCps(_wordsFromCps(ycUtf8:::decode(_normalizeNewlines(t_text))))
-        ycUtf8:::encode(_shortenCps(l_cps n_width placeholder unit ambiguous))
+        l_cps = _JoinWordsCps(_WordsFromCps(ycUtf8:::Decode(_NormalizeNewlines(t_text))))
+        ycUtf8:::Encode(_ShortenCps(l_cps n_width placeholder unit ambiguous))
     )
 )
 

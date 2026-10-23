@@ -3,57 +3,57 @@ unless(findNamespace("ycRegEx")
 )
 addToNamespace("ycRegEx"
     mapcar('symbolToString '(
-        reCompile
-        reMatch
-        reSearch
-        reFullmatch
-        reFindall
-        reFinditer
-        rePartialp
-        reSplit
-        reSub
-        reSubn
-        reGetRecursionLimit
-        reSetRecursionLimit
+        ReCompile
+        ReMatch
+        ReSearch
+        ReFullmatch
+        ReFindall
+        ReFinditer
+        RePartialp
+        ReSplit
+        ReSub
+        ReSubn
+        ReGetRecursionLimit
+        ReSetRecursionLimit
         Pattern
         PatternData
         Match
         MatchData
-        _mkPattern
-        _optsList
-        _compileOptsBits
-        _execOptsBits
-        _compileChecked
-        _asPat
-        _flagsFromValue
-        _suffix
-        _prefix
-        _splitBy
-        _countSub
-        _nth1
-        _backref
-        _foldCat
-        _wholeTemplate
-        _splitTemplate
-        _extractParts
-        _posMarker
-        _exportMarkers
-        _exportTemplate
-        _exportRecords
-        _hasBit
-        _hasNumericGroupRef
-        _zeroAtStart
-        _zeroWidthRecords
-        _walkRecords
-        _matchStart
-        _nextMatch
-        _anchorAt
-        _findAllItem
-        _mkMatch
-        _groupWhole
-        _groupAt
-        _installPattern
-        _installMatch
+        _MkPattern
+        _OptsList
+        _CompileOptsBits
+        _ExecOptsBits
+        _CompileChecked
+        _AsPat
+        _FlagsFromValue
+        _Suffix
+        _Prefix
+        _SplitBy
+        _CountSub
+        _Nth1
+        _Backref
+        _FoldCat
+        _WholeTemplate
+        _SplitTemplate
+        _ExtractParts
+        _PosMarker
+        _ExportMarkers
+        _ExportTemplate
+        _ExportRecords
+        _HasBit
+        _HasNumericGroupRef
+        _ZeroAtStart
+        _ZeroWidthRecords
+        _WalkRecords
+        _MatchStart
+        _NextMatch
+        _AnchorAt
+        _FindAllItem
+        _MkMatch
+        _GroupWhole
+        _GroupAt
+        _InstallPattern
+        _InstallMatch
     ))
 )
 unuseNamespace("ycRegEx")

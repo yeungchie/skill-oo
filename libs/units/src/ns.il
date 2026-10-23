@@ -3,19 +3,19 @@ unless(findNamespace("ycUnits")
 )
 addToNamespace("ycUnits"
     mapcar('symbolToString '(
-        parse
-        format
-        toNumber
-        toUnit
-        _isWs
-        _isDigit
-        _hasWs
-        _prefixAliases
-        _shortFactor
-        _prefixScale
-        _tailAfter
-        _prefixForExp
-        _parse
+        Parse
+        Format
+        ToNumber
+        ToUnit
+        _IsWs
+        _IsDigit
+        _HasWs
+        _PrefixAliases
+        _ShortFactor
+        _PrefixScale
+        _TailAfter
+        _PrefixForExp
+        _Parse
     ))
 )
 unuseNamespace("ycUnits")

@@ -1,11 +1,11 @@
-ycNamespace:::require("ycCodec")
+ycNamespace:::Require("ycCodec")
 
 useNamespace("ycJson")
 
 
 ; ---------- 标量值解析（字符串/数字/字面量） ----------
 
-procedure(_hex4(t_s n_i "tx")  ; -> int
+procedure(_Hex4(t_s n_i "tx")  ; -> int
     ; 解析 \uXXXX 的 4 位十六进制（大小写均可）。
     ;
     ; **参数**
@@ -17,16 +17,16 @@ procedure(_hex4(t_s n_i "tx")  ; -> int
     let((n_len n_v n_c n_d)
         n_len = length(t_s)
         when(n_i + 3 > n_len
-            _error(t_s n_len + 1 "invalid \\u escape")
+            _Error(t_s n_len + 1 "invalid \\u escape")
         )
         n_v = 0
         for(n_k n_i n_i + 3
-            n_c = _code(t_s n_k)
+            n_c = _Code(t_s n_k)
             cond(
                 (n_c >= 48 && n_c <= 57 n_d = n_c - 48)
                 (n_c >= 97 && n_c <= 102 n_d = n_c - 87)
                 (n_c >= 65 && n_c <= 70 n_d = n_c - 55)
-                (t _error(t_s n_k "invalid \\u escape"))
+                (t _Error(t_s n_k "invalid \\u escape"))
             )
             n_v = n_v * 16 + n_d
         )
@@ -34,7 +34,7 @@ procedure(_hex4(t_s n_i "tx")  ; -> int
     )
 )
 
-procedure(_utf8Str(n_cp "x")  ; -> str
+procedure(_Utf8Str(n_cp "x")  ; -> str
     ; 将 Unicode 码点编码为 UTF-8 字节串（1..4 字节，逐字节拼接）。
     ;
     ; **参数**
@@ -67,7 +67,7 @@ procedure(_utf8Str(n_cp "x")  ; -> str
     )
 )
 
-procedure(_string(t_s n_i "tx")  ; -> list
+procedure(_String(t_s n_i "tx")  ; -> list
     ; 扫描字符串：转义解出实际字符，\uXXXX 合成 UTF-8，代理对合并，孤立代理项报错。
     ;
     ; **参数**
@@ -83,9 +83,9 @@ procedure(_string(t_s n_i "tx")  ; -> list
         g_done = nil
         while(!g_done
             when(n_k > n_len
-                _error(t_s n_k "unterminated string")
+                _Error(t_s n_k "unterminated string")
             )
-            n_c = _code(t_s n_k)
+            n_c = _Code(t_s n_k)
             case(n_c
                 (34
                     when(n_run < n_k
@@ -100,9 +100,9 @@ procedure(_string(t_s n_i "tx")  ; -> list
                     )
                     n_esc = n_k
                     n_k = n_k + 1
-                    n_c = _code(t_s n_k)
+                    n_c = _Code(t_s n_k)
                     when(!n_c
-                        _error(t_s n_esc "unterminated string")
+                        _Error(t_s n_esc "unterminated string")
                     )
                     case(n_c
                         (34
@@ -155,27 +155,27 @@ procedure(_string(t_s n_i "tx")  ; -> list
                         )
                         (117
                             {
-                            n_cp = _hex4(t_s n_k + 1)
+                            n_cp = _Hex4(t_s n_k + 1)
                             n_k = n_k + 5
                             when(n_cp >= 55296 && n_cp <= 56319
-                                unless(_code(t_s n_k) == 92 && _code(t_s n_k + 1) == 117
-                                    _error(t_s n_esc "invalid surrogate pair")
+                                unless(_Code(t_s n_k) == 92 && _Code(t_s n_k + 1) == 117
+                                    _Error(t_s n_esc "invalid surrogate pair")
                                 )
-                                n_lo = _hex4(t_s n_k + 2)
+                                n_lo = _Hex4(t_s n_k + 2)
                                 unless(n_lo >= 56320 && n_lo <= 57343
-                                    _error(t_s n_esc "invalid surrogate pair")
+                                    _Error(t_s n_esc "invalid surrogate pair")
                                 )
                                 n_cp = 65536 + (n_cp - 55296) * 1024 + n_lo - 56320
                                 n_k = n_k + 6
                             )
                             when(n_cp >= 56320 && n_cp <= 57343
-                                _error(t_s n_esc "invalid surrogate pair")
+                                _Error(t_s n_esc "invalid surrogate pair")
                             )
-                            l_p = tconc(l_p _utf8Str(n_cp))
+                            l_p = tconc(l_p _Utf8Str(n_cp))
                             }
                         )
                         (t
-                            _error(t_s n_esc "invalid escape")
+                            _Error(t_s n_esc "invalid escape")
                         )
                     )
                     n_run = n_k
@@ -183,17 +183,17 @@ procedure(_string(t_s n_i "tx")  ; -> list
                 )
                 (t
                     if(n_c < 32
-                        _error(t_s n_k "control character in string")
+                        _Error(t_s n_k "control character in string")
                         n_k = n_k + 1
                     )
                 )
             )
         )
-        list(_build(l_p) n_k + 1)
+        list(_Build(l_p) n_k + 1)
     )
 )
 
-procedure(_literal(t_s n_i "tx")  ; -> list
+procedure(_Literal(t_s n_i "tx")  ; -> list
     ; 在位置处匹配 true/false/null 字面量（大小写敏感）。
     ;
     ; **参数**
@@ -213,12 +213,12 @@ procedure(_literal(t_s n_i "tx")  ; -> list
             list(ycCodec:::Null n_i + 4)
         )
         (t
-            _error(t_s n_i "invalid literal")
+            _Error(t_s n_i "invalid literal")
         )
     )
 )
 
-procedure(_number(t_s n_i "tx")  ; -> list
+procedure(_Number(t_s n_i "tx")  ; -> list
     ; 按 JSON 语法扫描数字：严格校验整数/小数/指数写法，超 fixnum 范围回 flonum。
     ;
     ; **参数**
@@ -230,10 +230,10 @@ procedure(_number(t_s n_i "tx")  ; -> list
     let((n_len n_k n_c t_tok n_v g_num)
         n_len = length(t_s)
         n_k = n_i
-        n_c = _code(t_s n_k)
+        n_c = _Code(t_s n_k)
         when(n_c == 45
             n_k = n_k + 1
-            n_c = _code(t_s n_k)
+            n_c = _Code(t_s n_k)
         )
         cond(
             (n_c == 48
@@ -241,37 +241,37 @@ procedure(_number(t_s n_i "tx")  ; -> list
             )
             (n_c >= 49 && n_c <= 57
                 n_k = n_k + 1
-                while(n_k <= n_len && _digitp(_code(t_s n_k))
+                while(n_k <= n_len && _Digitp(_Code(t_s n_k))
                     n_k = n_k + 1
                 )
             )
             (t
-                _error(t_s n_i "invalid number")
+                _Error(t_s n_i "invalid number")
             )
         )
-        when(n_c == 48 && _digitp(_code(t_s n_k))
-            _error(t_s n_k "invalid number")
+        when(n_c == 48 && _Digitp(_Code(t_s n_k))
+            _Error(t_s n_k "invalid number")
         )
-        when(_code(t_s n_k) == 46
+        when(_Code(t_s n_k) == 46
             n_k = n_k + 1
-            unless(_digitp(_code(t_s n_k))
-                _error(t_s n_i "invalid number")
+            unless(_Digitp(_Code(t_s n_k))
+                _Error(t_s n_i "invalid number")
             )
-            while(n_k <= n_len && _digitp(_code(t_s n_k))
+            while(n_k <= n_len && _Digitp(_Code(t_s n_k))
                 n_k = n_k + 1
             )
         )
-        n_c = _code(t_s n_k)
+        n_c = _Code(t_s n_k)
         when(n_c == 101 || n_c == 69
             n_k = n_k + 1
-            n_c = _code(t_s n_k)
+            n_c = _Code(t_s n_k)
             when(n_c == 43 || n_c == 45
                 n_k = n_k + 1
             )
-            unless(_digitp(_code(t_s n_k))
-                _error(t_s n_i "invalid number")
+            unless(_Digitp(_Code(t_s n_k))
+                _Error(t_s n_i "invalid number")
             )
-            while(n_k <= n_len && _digitp(_code(t_s n_k))
+            while(n_k <= n_len && _Digitp(_Code(t_s n_k))
                 n_k = n_k + 1
             )
         )

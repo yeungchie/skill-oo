@@ -4,9 +4,9 @@
 ;--------------------------
 
 ; libs/load.il bootstraps ycPathLib before this file runs, so the loader
-; only needs currentFile() and Path::load to reach every source below.
+; only needs CurrentFile() and Path::load to reach every source below.
 let((t_dir)
-    t_dir = ycPathLib::currentFile()->parent()
+    t_dir = ycPathLib::CurrentFile()->parent()
     foreach(t_file '("ns.il" "core.il" "pattern.il" "match.il")
         t_dir->join("src" t_file)->load()
     )

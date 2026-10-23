@@ -4,7 +4,7 @@ Cadence SKILL++ 的 CSV/TSV 编解码库：RFC 4180 风格字段规则与带可�
 
 ## 概要
 
-+ 解码入口：`decode()`；编码入口：`encode()`；`?format` 选 `"csv"`（默认）或 `"tsv"`。
++ 解码入口：`Decode()`；编码入口：`Encode()`；`?format` 选 `"csv"`（默认）或 `"tsv"`。
 + 解码结果统一为不可变对象 `ycCsv::Table`；编码输入必须是 `ycCsv::Table`。
 + 字段一律为字符串，不做数字/布尔推断；不 trim、不排序、不做 Unicode 规范化。
 + 支持引号内分隔符与换行、双引号转义、LF/CRLF/CR 行尾、可选表头、BOM 剥离与自定义单字节分隔符。
@@ -49,24 +49,24 @@ x;y
 
 ```lisp
 ; 解码为 Table（首行作表头）
-t_v = ycCsv::decode(t_csv_header ?header t)
+t_v = ycCsv::Decode(t_csv_header ?header t)
 t_v->header()                                       ; => ("name" "qty")
 t_v->rowCount()                                     ; => 1
 t_v->value(1 "qty")                                 ; => "3"
 
 ; 无表头：按行/列索引访问
-t_v = ycCsv::decode(t_csv_rows)
+t_v = ycCsv::Decode(t_csv_rows)
 t_v->rows()                                         ; => (("a" "b") ("c" "d"))
 t_v->cell(2 1)                                      ; => "c"
 
 ; 引号、TSV 与自定义分隔符
-ycCsv::decode(t_csv_quoted)->row(1)                 ; => ("a,b" "c")
-ycCsv::decode(t_csv_tsv ?format "tsv")->row(1)      ; => ("a" "b")
-ycCsv::decode(t_csv_semicolon ?delimiter ";")->row(1) ; => ("x" "y")
+ycCsv::Decode(t_csv_quoted)->row(1)                 ; => ("a,b" "c")
+ycCsv::Decode(t_csv_tsv ?format "tsv")->row(1)      ; => ("a" "b")
+ycCsv::Decode(t_csv_semicolon ?delimiter ";")->row(1) ; => ("x" "y")
 
 ; 编码
-ycCsv::encode(ycCsv::Table(list(list("a,b" "c"))))  ; => "\"a,b\",c\n"
-ycCsv::encode(ycCsv::Table(list(list("a" "b"))) ?format "tsv")
+ycCsv::Encode(ycCsv::Table(list(list("a,b" "c"))))  ; => "\"a,b\",c\n"
+ycCsv::Encode(ycCsv::Table(list(list("a" "b"))) ?format "tsv")
 ; => "a\tb\n"
 ```
 
@@ -240,7 +240,7 @@ apple,3
 **例程**
 
 ```lisp
-t_v = ycCsv::decode(t_csv ?header t)
+t_v = ycCsv::Decode(t_csv ?header t)
 t_v->render()
 ; => name   qty
 ;    -----  ---
@@ -286,10 +286,10 @@ t_v->print(?format "grid")
 
 `printself` 输出形如 `<ycCsv::Table rows=2 columns=3>`。
 
-### ycCsv::decode <sub>`function`</sub>
+### ycCsv::Decode <sub>`function`</sub>
 
 ```text
-ycCsv::decode(
+ycCsv::Decode(
     t_str
     [ ?format t_format ]
     [ ?header g_header ]
@@ -344,31 +344,31 @@ a,b
 ```
 
 ```lisp
-t_v = ycCsv::decode(t_csv_rows)
+t_v = ycCsv::Decode(t_csv_rows)
 t_v->rows()                                         ; => (("a" "b") ("c" "d"))
 
-t_v = ycCsv::decode(t_csv_header ?header t)
+t_v = ycCsv::Decode(t_csv_header ?header t)
 t_v->header()                                       ; => ("name" "qty")
 t_v->value(1 "name")                                ; => "apple"
 
-ycCsv::decode(t_csv_values ?header list("x" "y"))->value(1 "y")
+ycCsv::Decode(t_csv_values ?header list("x" "y"))->value(1 "y")
 ; => "b"
 
-ycCsv::decode(t_csv_quoted)->row(1)                 ; => ("a,b" "c")
-ycCsv::decode(t_csv_blank)->rowCount()              ; => 3
-ycCsv::decode(t_csv_blank ?skipEmpty t)->rowCount() ; => 2
-ycCsv::decode(t_csv_tsv ?format "tsv")->row(1)      ; => ("a" "b")
+ycCsv::Decode(t_csv_quoted)->row(1)                 ; => ("a,b" "c")
+ycCsv::Decode(t_csv_blank)->rowCount()              ; => 3
+ycCsv::Decode(t_csv_blank ?skipEmpty t)->rowCount() ; => 2
+ycCsv::Decode(t_csv_tsv ?format "tsv")->row(1)      ; => ("a" "b")
 
-ycCsv::decode("\"a\"x\n")
-; *Error* ycCsv::decode: unexpected character after closing quote at line 1, column 4
-ycCsv::decode(t_csv_overlong ?header t)
-; *Error* ycCsv::decode: row 1 has 3 fields but header has 2 at line 2, column 1
+ycCsv::Decode("\"a\"x\n")
+; *Error* ycCsv::Decode: unexpected character after closing quote at line 1, column 4
+ycCsv::Decode(t_csv_overlong ?header t)
+; *Error* ycCsv::Decode: row 1 has 3 fields but header has 2 at line 2, column 1
 ```
 
-### ycCsv::encode <sub>`function`</sub>
+### ycCsv::Encode <sub>`function`</sub>
 
 ```text
-ycCsv::encode(
+ycCsv::Encode(
     g_table
     [ ?format t_format ]
     [ ?delimiter t_delimiter ]
@@ -401,28 +401,28 @@ ycCsv::encode(
 **例程**
 
 ```lisp
-ycCsv::encode(ycCsv::Table(list(list("a" "b"))))     ; => "a,b\n"
-ycCsv::encode(ycCsv::Table(list(list("a,b" "c"))))   ; => "\"a,b\",c\n"
-ycCsv::encode(ycCsv::Table(list(list("a" "b"))) ?format "tsv")
+ycCsv::Encode(ycCsv::Table(list(list("a" "b"))))     ; => "a,b\n"
+ycCsv::Encode(ycCsv::Table(list(list("a,b" "c"))))   ; => "\"a,b\",c\n"
+ycCsv::Encode(ycCsv::Table(list(list("a" "b"))) ?format "tsv")
 ; => "a\tb\n"
 
-ycCsv::encode(ycCsv::Table(list(list("1" "2")) ?header list("x" "y")))
+ycCsv::Encode(ycCsv::Table(list(list("1" "2")) ?header list("x" "y")))
 ; => "x,y\n1,2\n"
 
-ycCsv::encode(ycCsv::Table(list(list("a" "b"))) ?quoteAll t)
+ycCsv::Encode(ycCsv::Table(list(list("a" "b"))) ?quoteAll t)
 ; => "\"a\",\"b\"\n"
 
-ycCsv::encode(ycCsv::Table(list(list("a" "b"))) ?finalNewline nil)
+ycCsv::Encode(ycCsv::Table(list(list("a" "b"))) ?finalNewline nil)
 ; => "a,b"
 
-ycCsv::encode(ycCsv::Table(list(list(""))) ?finalNewline nil)
+ycCsv::Encode(ycCsv::Table(list(list(""))) ?finalNewline nil)
 ; => "\"\""
 
-ycCsv::encode(nil)
-; *Error* ycCsv::encode: expects a ycCsv::Table
+ycCsv::Encode(nil)
+; *Error* ycCsv::Encode: expects a ycCsv::Table
 
-ycCsv::encode(ycCsv::Table(list(list("a"))) ?eol "\r")
-; *Error* ycCsv::encode: ?eol must be "\n" or "\r\n"
+ycCsv::Encode(ycCsv::Table(list(list("a"))) ?eol "\r")
+; *Error* ycCsv::Encode: ?eol must be "\n" or "\r\n"
 ```
 
 ## 引号与空行规则

@@ -1,10 +1,10 @@
-ycNamespace:::require("ycCodec" "ycTabulate")
+ycNamespace:::Require("ycCodec" "ycTabulate")
 
 useNamespace("ycCsv")
 
 ; ---------- 共享值 ----------
 
-procedure(_missing()  ; -> any
+procedure(_Missing()  ; -> any
     ; 返回 ycCodec 的缺键哨兵；供 Table 方法在 lambda 内使用。
     ;
     ; **返回**
@@ -82,7 +82,7 @@ defmethod(initializeInstance (self(Table) \@rest _args)
         ;   (int) - 列数（空表为 0）
         if(self->_data->header
             length(self->_data->header)
-            _maxWidth(self->_data->rows)
+            _MaxWidth(self->_data->rows)
         )
     )
 
@@ -136,7 +136,7 @@ defmethod(initializeInstance (self(Table) \@rest _args)
             l_row = nth(g_row - 1 self->_data->rows)
             if(g_col <= length(l_row)
                 nth(g_col - 1 l_row)
-                _missing()
+                _Missing()
             )
         )
     )
@@ -157,7 +157,7 @@ defmethod(initializeInstance (self(Table) \@rest _args)
                 l_res = tconc(l_res
                     if(g_col <= length(l_row)
                         nth(g_col - 1 l_row)
-                        _missing()
+                        _Missing()
                     )
                 )
             )
@@ -190,14 +190,14 @@ defmethod(initializeInstance (self(Table) \@rest _args)
         )
     )
 
-    _installRender(self)
+    _InstallRender(self)
 
     t
 )
 )
 
 inScheme(
-procedure(_installRender(self "g")  ; -> t
+procedure(_InstallRender(self "g")  ; -> t
     ; 安装 render/print 方法（内部实现；供 initializeInstance 与 Table 构造器调用）。
     ;
     ; **参数**
@@ -217,13 +217,13 @@ procedure(_installRender(self "g")  ; -> t
         ;   ?ambiguous   (int) - East Asian Ambiguous 宽度；默认 1
         ;
         ; **返回**
-        ;   (str) - ycTabulate::renderTable 生成的文本
-        unless(fboundp('ycTabulate:::renderTable)
+        ;   (str) - ycTabulate::Render 生成的文本
+        unless(fboundp('ycTabulate:::Render)
             error("%A->render: ycTabulate is not loaded - load it first" className(self))
         )
-        apply('ycTabulate:::renderTable
+        apply('ycTabulate:::Render
             list(
-                _renderRows(self missingVal)
+                _RenderRows(self missingVal)
                 '?headers self->header()
                 '?format format
                 '?align align
@@ -256,7 +256,7 @@ procedure(_installRender(self "g")  ; -> t
 )
 )
 
-procedure(_renderRows(g_self t_missing "gt")  ; -> list
+procedure(_RenderRows(g_self t_missing "gt")  ; -> list
     ; 将 CSV 行补齐为等宽单元格，并把 Missing 替换为 t_missing（内部实现）。
     ;
     ; **参数**
@@ -270,8 +270,8 @@ procedure(_renderRows(g_self t_missing "gt")  ; -> list
         foreach(l_row g_self->rows()
             l_cells = nil
             for(n_i 1 n_cols
-                g_cell = if(n_i <= length(l_row) nth(n_i - 1 l_row) _missing())
-                when(g_cell == _missing()
+                g_cell = if(n_i <= length(l_row) nth(n_i - 1 l_row) _Missing())
+                when(g_cell == _Missing()
                     g_cell = t_missing
                 )
                 l_cells = tconc(l_cells g_cell)
@@ -285,7 +285,7 @@ procedure(_renderRows(g_self t_missing "gt")  ; -> list
 ; ---------- 构造 ----------
 
 
-procedure(_maxWidth(l_rows "l")  ; -> int
+procedure(_MaxWidth(l_rows "l")  ; -> int
     ; 返回行列表中的最长行宽。
     ;
     ; **参数**
@@ -314,8 +314,8 @@ procedure(Table(l_rows \@key (header nil) "lg")  ; -> Table
     ; **返回**
     ;   (Table) - 新实例；行/表头类型非法、空行、重复列名或行宽超过表头时报错
     let((l_names l_index n_width t_obj)
-        l_names = _checkHeader(header "ycCsv::Table")
-        l_rows = _copyRows(_checkRows(l_rows "ycCsv::Table"))
+        l_names = _CheckHeader(header "ycCsv::Table")
+        l_rows = _CopyRows(_CheckRows(l_rows "ycCsv::Table"))
         when(l_names
             n_width = length(l_names)
             for(n_i 1 length(l_rows)
@@ -332,7 +332,7 @@ procedure(Table(l_rows \@key (header nil) "lg")  ; -> Table
         t_obj = makeInstance('Table ?_data
             makeInstance('TableData ?header l_names ?rows l_rows ?index l_index)
         )
-        _installRender(t_obj)
+        _InstallRender(t_obj)
         t_obj
     )
 )

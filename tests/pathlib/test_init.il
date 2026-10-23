@@ -124,13 +124,13 @@ procedure(_assertOk(g_r t_msg "gt")  ; -> t | nil（errset 结果：捕获成功
 )
 
 procedure(_sameJson(g_a g_b t_format "ggt")  ; -> t | nil
-    ycJson::encode(g_a ?format t_format ?sortKeys t)
-        == ycJson::encode(g_b ?format t_format ?sortKeys t)
+    ycJson::Encode(g_a ?format t_format ?sortKeys t)
+        == ycJson::Encode(g_b ?format t_format ?sortKeys t)
 )
 
 procedure(_sameYaml(g_a g_b "gg")  ; -> t | nil
-    ycYaml::encode(g_a ?sortKeys t)
-        == ycYaml::encode(g_b ?sortKeys t)
+    ycYaml::Encode(g_a ?sortKeys t)
+        == ycYaml::Encode(g_b ?sortKeys t)
 )
 
 let((l_res t_self t_dir)

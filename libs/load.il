@@ -4,7 +4,7 @@
 ;--------------------------
 
 ; Load the namespace registry first (no dependencies), then bootstrap
-; ycPathLib - this loader needs ycPathLib::currentFile below.
+; ycPathLib - this loader needs ycPathLib::CurrentFile below.
 let((t_self t_dir)
     t_self = get_filename(piport)
     unless(pcreMatchp("/" t_self)
@@ -19,7 +19,7 @@ let((t_self t_dir)
 ; every other package goes through the list below (one dir per entry,
 ; each must contain a load.il).
 let((t_dir t_pkgs)
-    t_dir = ycPathLib::currentFile()->parent()
+    t_dir = ycPathLib::CurrentFile()->parent()
     t_pkgs = list(
         "regex"
         "subprocess"

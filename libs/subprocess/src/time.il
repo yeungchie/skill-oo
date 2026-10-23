@@ -3,7 +3,7 @@ useNamespace("ycSubProcess")
 
 ; ---------- 函数 ----------
 
-procedure(_formatSeconds(n_second "x")  ; -> str
+procedure(_FormatSeconds(n_second "x")  ; -> str
     ; 将秒数换算为人类可读耗时串：0 秒为 ~0s，其余为 1s / 1m1s / 1h1m1s 风格。
     ;
     ; **参数**
@@ -87,7 +87,7 @@ defmethod(initializeInstance (self(Elapsed) \@rest _args)
     ; **返回**
     ;   (t) - 安装完成后返回 t
     let((_start_ts _end_ts _second _humanReadable)
-        procedure(_error(t_method t_formatString \@rest g_args "ttg")  ; -> never
+        procedure(_Error(t_method t_formatString \@rest g_args "ttg")  ; -> never
             ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
             ;
             ; **参数**
@@ -134,10 +134,10 @@ defmethod(initializeInstance (self(Elapsed) \@rest _args)
             ;   (int) - compareTime(_end_ts _start_ts)
             unless(_second
                 unless(_start_ts
-                    _error("getSeconds" "elapsed time has not been started")
+                    _Error("getSeconds" "elapsed time has not been started")
                 )
                 unless(_end_ts
-                    _error("getSeconds" "elapsed time has not been ended")
+                    _Error("getSeconds" "elapsed time has not been ended")
                 )
                 _second = compareTime(_end_ts _start_ts)
             )
@@ -149,7 +149,7 @@ defmethod(initializeInstance (self(Elapsed) \@rest _args)
             ; **返回**
             ;   (str) - 由 getSeconds() 换算，首次计算后缓存
             unless(_humanReadable
-                _humanReadable = _formatSeconds(self->getSeconds())
+                _humanReadable = _FormatSeconds(self->getSeconds())
             )
             _humanReadable
         )

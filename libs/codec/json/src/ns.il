@@ -3,35 +3,35 @@ unless(findNamespace("ycJson")
 )
 addToNamespace("ycJson"
     mapcar('symbolToString '(
-        decode
-        encode
-        _maxDecodeDepth
-        _maxEncodeDepth
-        _code
-        _digitp
-        _lineCol
-        _error
-        _build
-        _skipWs
-        _hex4
-        _utf8Str
-        _literal
-        _number
-        _string
-        _value
-        _object
-        _array
-        _decodeText
-        _lineSplit
-        _lineBlankp
-        _newlines
-        _keyStr
-        _indentStr
-        _encodeString
-        _encodeNumber
-        _encodeValue
-        _encodeList
-        _encodeTable
+        Decode
+        Encode
+        _MaxDecodeDepth
+        _MaxEncodeDepth
+        _Code
+        _Digitp
+        _LineCol
+        _Error
+        _Build
+        _SkipWs
+        _Hex4
+        _Utf8Str
+        _Literal
+        _Number
+        _String
+        _Value
+        _Object
+        _Array
+        _DecodeText
+        _LineSplit
+        _LineBlankp
+        _Newlines
+        _KeyStr
+        _IndentStr
+        _EncodeString
+        _EncodeNumber
+        _EncodeValue
+        _EncodeList
+        _EncodeTable
     ))
 )
 unuseNamespace("ycJson")

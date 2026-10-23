@@ -3,7 +3,7 @@ useNamespace("ycRegEx")
 
 ; ---------- string/list helper ----------
 
-procedure(_suffix(t_str n_pos "tx")  ; -> str
+procedure(_Suffix(t_str n_pos "tx")  ; -> str
     ; 返回从 n_pos 到串尾的子串（1-based）。
     ;
     ; **参数**
@@ -19,7 +19,7 @@ procedure(_suffix(t_str n_pos "tx")  ; -> str
     )
 )
 
-procedure(_prefix(t_str n_len "tx")  ; -> str
+procedure(_Prefix(t_str n_len "tx")  ; -> str
     ; 返回串的前 n_len 个字符（1-based，越界收敛到串边界）。
     ;
     ; **参数**
@@ -35,7 +35,7 @@ procedure(_prefix(t_str n_len "tx")  ; -> str
     )
 )
 
-procedure(_splitBy(t_str t_delim "tt")  ; -> list[str]
+procedure(_SplitBy(t_str t_delim "tt")  ; -> list[str]
     ; 按字面分隔串拆分源串，保留空段与原有顺序。
     ;
     ; **参数**
@@ -67,7 +67,7 @@ procedure(_splitBy(t_str t_delim "tt")  ; -> list[str]
     )
 )
 
-procedure(_countSub(t_str t_sub "tt")  ; -> int
+procedure(_CountSub(t_str t_sub "tt")  ; -> int
     ; 统计子串在源串中的非重叠出现次数。
     ;
     ; **参数**
@@ -95,7 +95,7 @@ procedure(_countSub(t_str t_sub "tt")  ; -> int
     )
 )
 
-procedure(_nth1(l_list n_i "lx")  ; -> any | nil
+procedure(_Nth1(l_list n_i "lx")  ; -> any | nil
     ; 取列表的第 n_i 个元素（1-based）。
     ;
     ; **参数**
@@ -107,12 +107,12 @@ procedure(_nth1(l_list n_i "lx")  ; -> any | nil
     unless(l_list == nil || n_i < 1
         if(n_i == 1
             car(l_list)
-            _nth1(cdr(l_list) n_i - 1)
+            _Nth1(cdr(l_list) n_i - 1)
         )
     )
 )
 
-procedure(_backref(n_k "x")  ; -> str
+procedure(_Backref(n_k "x")  ; -> str
     ; 返回引擎两参模板的组反向引用 `\{n}`。
     ;
     ; **参数**
@@ -123,7 +123,7 @@ procedure(_backref(n_k "x")  ; -> str
     lsprintf("\\{%d}" n_k)
 )
 
-procedure(_foldCat(l_list "l")  ; -> str
+procedure(_FoldCat(l_list "l")  ; -> str
     ; 依次拼接字符串列表为单个串。
     ;
     ; **参数**
@@ -143,7 +143,7 @@ procedure(_foldCat(l_list "l")  ; -> str
 
 ; ---------- flags / compile ----------
 
-procedure(_flagsFromValue(g_flags t_ctx "gt")  ; -> str
+procedure(_FlagsFromValue(g_flags t_ctx "gt")  ; -> str
     ; 把 ?flags 入参归一为 "(?imsx)" 式内联修饰串（仅含出现的标志）。
     ;
     ; **参数**
@@ -215,7 +215,7 @@ procedure(_flagsFromValue(g_flags t_ctx "gt")  ; -> str
     )
 )
 
-procedure(_optsList(g_opts t_ctx "gt")  ; -> list
+procedure(_OptsList(g_opts t_ctx "gt")  ; -> list
     ; 把选项参数归一为符号列表。
     ;
     ; **参数**
@@ -232,7 +232,7 @@ procedure(_optsList(g_opts t_ctx "gt")  ; -> list
     )
 )
 
-procedure(_compileOptsBits(g_opts t_ctx "gt")  ; -> int
+procedure(_CompileOptsBits(g_opts t_ctx "gt")  ; -> int
     ; 把编译选项符号列表转成引擎位值。
     ;
     ; **参数**
@@ -243,7 +243,7 @@ procedure(_compileOptsBits(g_opts t_ctx "gt")  ; -> int
     ; **返回**
     ;   (int) - pcreGenCompileOptBits 的位值；无选项返回 0
     let((l_args)
-        foreach(g_opt _optsList(g_opts t_ctx)
+        foreach(g_opt _OptsList(g_opts t_ctx)
             case(g_opt
                 (caseLess l_args = append(l_args list('?caseLess t)))
                 (multiLine l_args = append(l_args list('?multiLine t)))
@@ -261,7 +261,7 @@ procedure(_compileOptsBits(g_opts t_ctx "gt")  ; -> int
     )
 )
 
-procedure(_execOptsBits(g_opts t_ctx "gt")  ; -> int
+procedure(_ExecOptsBits(g_opts t_ctx "gt")  ; -> int
     ; 把执行选项符号列表转成引擎位值。
     ;
     ; **参数**
@@ -271,7 +271,7 @@ procedure(_execOptsBits(g_opts t_ctx "gt")  ; -> int
     ; **返回**
     ;   (int) - pcreGenExecOptBits 的位值；无选项返回 0
     let((l_args)
-        foreach(g_opt _optsList(g_opts t_ctx)
+        foreach(g_opt _OptsList(g_opts t_ctx)
             case(g_opt
                 (anchored l_args = append(l_args list('?anchored t)))
                 (notbol l_args = append(l_args list('?notbol t)))
@@ -284,7 +284,7 @@ procedure(_execOptsBits(g_opts t_ctx "gt")  ; -> int
     )
 )
 
-procedure(_compileChecked(t_str t_ctx n_opts "ttx")  ; -> compiled
+procedure(_CompileChecked(t_str t_ctx n_opts "ttx")  ; -> compiled
     ; 编译 PCRE 串；原生诊断照常打印，失败统一转成带上下文的 error()。
     ;
     ; **参数**
@@ -302,7 +302,7 @@ procedure(_compileChecked(t_str t_ctx n_opts "ttx")  ; -> compiled
     )
 )
 
-procedure(_mkPattern(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
+procedure(_MkPattern(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
     ; 按模式串构造 Pattern：一次生成忠实（不加锚）、span（\A(?:…)）、full（\A(?:…)\z）三个编译对象。
     ;
     ; **参数**
@@ -317,9 +317,9 @@ procedure(_mkPattern(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
         unless(stringp(g_pat)
             error("%A: pattern must be a string, got %A" t_ctx g_pat)
         )
-        g_faithful = _compileChecked(strcat(t_flags g_pat) t_ctx n_opts)
-        g_span = _compileChecked(lsprintf("%s\\A(?:%s)" t_flags g_pat) t_ctx n_opts)
-        g_full = _compileChecked(lsprintf("%s\\A(?:%s)\\z" t_flags g_pat) t_ctx n_opts)
+        g_faithful = _CompileChecked(strcat(t_flags g_pat) t_ctx n_opts)
+        g_span = _CompileChecked(lsprintf("%s\\A(?:%s)" t_flags g_pat) t_ctx n_opts)
+        g_full = _CompileChecked(lsprintf("%s\\A(?:%s)\\z" t_flags g_pat) t_ctx n_opts)
         n_g = pcreSubpatCount(g_faithful)
         makeInstance('Pattern ?_data makeInstance('PatternData
             ?pattern g_pat ?flags t_flags ?compileOpts n_opts ?pcre g_faithful
@@ -327,7 +327,7 @@ procedure(_mkPattern(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
     )
 )
 
-procedure(_asPat(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
+procedure(_AsPat(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
     ; 双表皮入口：模式串现编译，已编译 Pattern 直接复用。
     ;
     ; **参数**
@@ -338,7 +338,7 @@ procedure(_asPat(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
     ; **返回**
     ;   (Pattern) - 字符串走 _mkPattern；Pattern 经 ->pattern() 校验为串后原样返回
     if(stringp(g_pat)
-        _mkPattern(g_pat t_flags t_ctx n_opts)
+        _MkPattern(g_pat t_flags t_ctx n_opts)
         let((l_pat)
             when(n_opts != 0
                 error("%A: cannot pass compile options with a compiled pattern" t_ctx)
@@ -358,7 +358,7 @@ procedure(_asPat(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
 
 ; ---------- module-level free functions (Python re skin) ----------
 
-procedure(reCompile(g_pat \@key flags compileOpts "ggg")  ; -> Pattern
+procedure(ReCompile(g_pat \@key flags compileOpts "ggg")  ; -> Pattern
     ; 编译模式串并返回可复用的 Pattern（双表皮 API 的编译入口）。
     ;
     ; **参数**
@@ -369,11 +369,11 @@ procedure(reCompile(g_pat \@key flags compileOpts "ggg")  ; -> Pattern
     ;
     ; **返回**
     ;   (Pattern) - 编译失败、非法 pattern、类型非法，或 Pattern 与 flags/compileOpts 同用时 error() 中断
-    _asPat(g_pat _flagsFromValue(flags "ycRegEx::reCompile") "ycRegEx::reCompile"
-        _compileOptsBits(compileOpts "ycRegEx::reCompile"))
+    _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::ReCompile") "ycRegEx::ReCompile"
+        _CompileOptsBits(compileOpts "ycRegEx::ReCompile"))
 )
 
-procedure(reMatch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Match | nil
+procedure(ReMatch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Match | nil
     ; 在主题串开头做锚定匹配（语义同 Python re.match，前锚 \A）。
     ;
     ; **参数**
@@ -384,12 +384,12 @@ procedure(reMatch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Match | nil
     ; **返回**
     ;   (Match|nil) - 主题串起始处命中返回 Match，未命中返回 nil
     let((p)
-        p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reMatch") "ycRegEx::reMatch" 0)
+        p = _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::ReMatch") "ycRegEx::ReMatch" 0)
         p->match(t_subj ?execOpts execOpts)
     )
 )
 
-procedure(reSearch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Match | nil
+procedure(ReSearch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Match | nil
     ; 在主题串中搜索首个匹配（语义同 Python re.search）。
     ;
     ; **参数**
@@ -400,12 +400,12 @@ procedure(reSearch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Match | nil
     ; **返回**
     ;   (Match|nil) - 命中返回 Match（span 惰性），未命中返回 nil
     let((p)
-        p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reSearch") "ycRegEx::reSearch" 0)
+        p = _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::ReSearch") "ycRegEx::ReSearch" 0)
         p->search(t_subj ?execOpts execOpts)
     )
 )
 
-procedure(reFullmatch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Match | nil
+procedure(ReFullmatch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Match | nil
     ; 整串匹配（语义同 Python re.fullmatch，经 \A(?:…)\z 第三编译对象）。
     ;
     ; **参数**
@@ -416,12 +416,12 @@ procedure(reFullmatch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Match | ni
     ; **返回**
     ;   (Match|nil) - 匹配覆盖整个主题串返回 Match，否则返回 nil
     let((p)
-        p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reFullmatch") "ycRegEx::reFullmatch" 0)
+        p = _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::ReFullmatch") "ycRegEx::ReFullmatch" 0)
         p->fullmatch(t_subj ?execOpts execOpts)
     )
 )
 
-procedure(reFindall(g_pat t_subj \@key flags execOpts "gtgg")  ; -> list
+procedure(ReFindall(g_pat t_subj \@key flags execOpts "gtgg")  ; -> list
     ; 返回主题串中全部匹配的结果列表（语义同 Python re.findall）。
     ;
     ; **参数**
@@ -432,12 +432,12 @@ procedure(reFindall(g_pat t_subj \@key flags execOpts "gtgg")  ; -> list
     ; **返回**
     ;   (list) - 0 组整体串列表 / 1 组扁平组值列表 / ≥2 组每匹配一个子列表
     let((p)
-        p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reFindall") "ycRegEx::reFindall" 0)
+        p = _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::ReFindall") "ycRegEx::ReFindall" 0)
         p->findall(t_subj ?execOpts execOpts)
     )
 )
 
-procedure(reFinditer(g_pat t_subj \@key flags execOpts "gtgg")  ; -> list[Match]
+procedure(ReFinditer(g_pat t_subj \@key flags execOpts "gtgg")  ; -> list[Match]
     ; 返回全部匹配的 Match 列表（语义同 Python re.finditer，全量返回）。
     ;
     ; **参数**
@@ -448,12 +448,12 @@ procedure(reFinditer(g_pat t_subj \@key flags execOpts "gtgg")  ; -> list[Match]
     ; **返回**
     ;   (list[Match]) - 全量 Match 列表；慢路径逐位置扫描
     let((p)
-        p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reFinditer") "ycRegEx::reFinditer" 0)
+        p = _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::ReFinditer") "ycRegEx::ReFinditer" 0)
         p->finditer(t_subj ?execOpts execOpts)
     )
 )
 
-procedure(rePartialp(g_pat t_subj \@key flags execOpts "gtgg")  ; -> t | nil
+procedure(RePartialp(g_pat t_subj \@key flags execOpts "gtgg")  ; -> t | nil
     ; 判断主题串是否为部分匹配或完整匹配。
     ;
     ; **参数**
@@ -465,12 +465,12 @@ procedure(rePartialp(g_pat t_subj \@key flags execOpts "gtgg")  ; -> t | nil
     ; **返回**
     ;   (t|nil) - 主题串可完成该模式（含完整匹配）时为 t，否则为 nil
     let((p)
-        p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::rePartialp") "ycRegEx::rePartialp" 0)
+        p = _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::RePartialp") "ycRegEx::RePartialp" 0)
         p->partialp(t_subj ?execOpts execOpts)
     )
 )
 
-procedure(reSplit(g_pat t_subj \@key flags all execOpts "gtggg")  ; -> list[str]
+procedure(ReSplit(g_pat t_subj \@key flags all execOpts "gtggg")  ; -> list[str]
     ; 按模式切分主题串（语义同 Python re.split）。
     ;
     ; **参数**
@@ -482,12 +482,12 @@ procedure(reSplit(g_pat t_subj \@key flags all execOpts "gtggg")  ; -> list[str]
     ; **返回**
     ;   (list[str]) - 切分段列表（保留捕获组段）
     let((p)
-        p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reSplit") "ycRegEx::reSplit" 0)
+        p = _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::ReSplit") "ycRegEx::ReSplit" 0)
         p->split(t_subj ?all all ?execOpts execOpts)
     )
 )
 
-procedure(reSub(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> str
+procedure(ReSub(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> str
     ; 替换主题串中的匹配（语义同 Python re.sub，参数序为 pattern repl subj）。
     ;
     ; **参数**
@@ -500,12 +500,12 @@ procedure(reSub(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> str
     ; **返回**
     ;   (str) - 替换后的串
     let((p)
-        p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reSub") "ycRegEx::reSub" 0)
+        p = _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::ReSub") "ycRegEx::ReSub" 0)
         p->sub(t_repl t_subj ?all all ?execOpts execOpts)
     )
 )
 
-procedure(reSubn(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> (str, int)
+procedure(ReSubn(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> (str, int)
     ; 同 reSub，另返回实际替换次数（语义同 Python re.subn）。
     ;
     ; **参数**
@@ -518,12 +518,12 @@ procedure(reSubn(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> (s
     ; **返回**
     ;   (str, int) - (替换后的串, 实际替换次数)
     let((p)
-        p = _asPat(g_pat _flagsFromValue(flags "ycRegEx::reSubn") "ycRegEx::reSubn" 0)
+        p = _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::ReSubn") "ycRegEx::ReSubn" 0)
         p->subn(t_repl t_subj ?all all ?execOpts execOpts)
     )
 )
 
-procedure(reGetRecursionLimit()  ; -> int
+procedure(ReGetRecursionLimit()  ; -> int
     ; 返回 PCRE 匹配算法的当前最大递归深度（进程级设置）。
     ;
     ; **参数**
@@ -534,7 +534,7 @@ procedure(reGetRecursionLimit()  ; -> int
     pcreGetRecursionLimit()
 )
 
-procedure(reSetRecursionLimit(n_limit "x")  ; -> t
+procedure(ReSetRecursionLimit(n_limit "x")  ; -> t
     ; 设置 PCRE 匹配算法的最大递归深度（进程级设置）。
     ;
     ; **参数**

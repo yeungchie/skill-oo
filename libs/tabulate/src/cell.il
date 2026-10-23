@@ -3,13 +3,13 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-ycNamespace:::require("ycTextwrap" "ycUtf8")
+ycNamespace:::Require("ycTextwrap" "ycUtf8")
 
 useNamespace("ycTabulate")
 
 ; ---------- 宽度与对齐 ----------
 
-procedure(_checkUnit(t_ctx t_unit n_amb "ttx")  ; -> nil
+procedure(_CheckUnit(t_ctx t_unit n_amb "ttx")  ; -> nil
     ; 校验宽度单位与 ambiguous 选项（内部实现）。
     ;
     ; **参数**
@@ -27,7 +27,7 @@ procedure(_checkUnit(t_ctx t_unit n_amb "ttx")  ; -> nil
     )
 )
 
-procedure(_widthText(t_s t_unit n_amb "ttx")  ; -> int
+procedure(_WidthText(t_s t_unit n_amb "ttx")  ; -> int
     ; 计算字符串在指定单位下的宽度（内部实现）。
     ;
     ; **参数**
@@ -38,12 +38,12 @@ procedure(_widthText(t_s t_unit n_amb "ttx")  ; -> int
     ; **返回**
     ;   (int) - 显示列宽或码点数
     if(t_unit == "char"
-        ycUtf8:::charCount(t_s)
-        ycUtf8:::width(t_s ?ambiguous n_amb)
+        ycUtf8:::CharCount(t_s)
+        ycUtf8:::Width(t_s ?ambiguous n_amb)
     )
 )
 
-procedure(_repeatChar(t_ch n_times "tx")  ; -> str
+procedure(_RepeatChar(t_ch n_times "tx")  ; -> str
     ; 重复单字符（内部实现）。
     ;
     ; **参数**
@@ -63,7 +63,7 @@ procedure(_repeatChar(t_ch n_times "tx")  ; -> str
     )
 )
 
-procedure(_rstrip(t_s "t")  ; -> str
+procedure(_Rstrip(t_s "t")  ; -> str
     ; 去除尾部空格（内部实现）。
     ;
     ; **参数**
@@ -82,7 +82,7 @@ procedure(_rstrip(t_s "t")  ; -> str
 
 ; ---------- 单元格转换 ----------
 
-procedure(_cellText(g_cell t_floatFmt t_missing "gtt")  ; -> str
+procedure(_CellText(g_cell t_floatFmt t_missing "gtt")  ; -> str
     ; 将任意单元格值转为文本（内部实现）。
     ;
     ; **参数**
@@ -101,7 +101,7 @@ procedure(_cellText(g_cell t_floatFmt t_missing "gtt")  ; -> str
     )
 )
 
-procedure(_splitCellLines(t_s "t")  ; -> list[str]
+procedure(_SplitCellLines(t_s "t")  ; -> list[str]
     ; 按物理换行切分单元格文本；CRLF/CR 归一为 LF（内部实现）。
     ;
     ; **参数**
@@ -142,7 +142,7 @@ procedure(_splitCellLines(t_s "t")  ; -> list[str]
     )
 )
 
-procedure(_cellLines(g_cell t_floatFmt t_missing g_max t_unit n_amb "gttgtx")  ; -> list[str]
+procedure(_CellLines(g_cell t_floatFmt t_missing g_max t_unit n_amb "gttgtx")  ; -> list[str]
     ; 转换单元格并按需折行（内部实现）。
     ;
     ; **参数**
@@ -156,16 +156,16 @@ procedure(_cellLines(g_cell t_floatFmt t_missing g_max t_unit n_amb "gttgtx")  ;
     ; **返回**
     ;   (list[str]) - 单元格物理行
     let((t_text l_lines)
-        t_text = _cellText(g_cell t_floatFmt t_missing)
+        t_text = _CellText(g_cell t_floatFmt t_missing)
         l_lines = if(g_max
-            ycTextwrap::wrap(t_text ?width g_max ?unit t_unit ?ambiguous n_amb)
-            _splitCellLines(t_text)
+            ycTextwrap::Wrap(t_text ?width g_max ?unit t_unit ?ambiguous n_amb)
+            _SplitCellLines(t_text)
         )
         if(l_lines l_lines list(""))
     )
 )
 
-procedure(_escapePipe(t_s "t")  ; -> str
+procedure(_EscapePipe(t_s "t")  ; -> str
     ; 转义 Markdown 表格中的竖线（内部实现）。
     ;
     ; **参数**
@@ -189,7 +189,7 @@ procedure(_escapePipe(t_s "t")  ; -> str
     )
 )
 
-procedure(_pipeCell(l_lines "l")  ; -> list[str]
+procedure(_PipeCell(l_lines "l")  ; -> list[str]
     ; 把多行单元格拼成单行 Markdown 文本（内部实现）。
     ;
     ; **参数**
@@ -197,10 +197,10 @@ procedure(_pipeCell(l_lines "l")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]) - 单元素列表
-    list(buildString(mapcar(lambda((t_line) _escapePipe(t_line)) l_lines) "<br>"))
+    list(buildString(mapcar(lambda((t_line) _EscapePipe(t_line)) l_lines) "<br>"))
 )
 
-procedure(_splitDecimal(t_s "t")  ; -> list[str]
+procedure(_SplitDecimal(t_s "t")  ; -> list[str]
     ; 在首个句点处拆分（内部实现）。
     ;
     ; **参数**
@@ -230,7 +230,7 @@ procedure(_splitDecimal(t_s "t")  ; -> list[str]
 
 ; ---------- 对齐与矩阵 ----------
 
-procedure(_normalizeAlign(g_align n_cols "gx")  ; -> list[str]
+procedure(_NormalizeAlign(g_align n_cols "gx")  ; -> list[str]
     ; 校验并展开对齐选项（内部实现）。
     ;
     ; **参数**
@@ -244,7 +244,7 @@ procedure(_normalizeAlign(g_align n_cols "gx")  ; -> list[str]
         if(stringp(g_align)
             progn(
                 unless(member(g_align '("left" "right" "center" "decimal"))
-                    error("ycTabulate::renderTable: unknown align %A" g_align)
+                    error("ycTabulate::Render: unknown align %A" g_align)
                 )
                 for(n_i 1 n_cols
                     tconc(l_res g_align)
@@ -253,23 +253,23 @@ procedure(_normalizeAlign(g_align n_cols "gx")  ; -> list[str]
             if(listp(g_align)
                 progn(
                     unless(length(g_align) == n_cols
-                        error("ycTabulate::renderTable: align list has %d entries for %d columns" length(g_align) n_cols)
+                        error("ycTabulate::Render: align list has %d entries for %d columns" length(g_align) n_cols)
                     )
                     foreach(g_item g_align
                         unless(stringp(g_item) && member(g_item '("left" "right" "center" "decimal"))
-                            error("ycTabulate::renderTable: unknown align %A" g_item)
+                            error("ycTabulate::Render: unknown align %A" g_item)
                         )
                         tconc(l_res g_item)
                     )
                 )
-                error("ycTabulate::renderTable: align must be a string or a list (%A)" g_align)
+                error("ycTabulate::Render: align must be a string or a list (%A)" g_align)
             )
         )
         car(l_res)
     )
 )
 
-procedure(_columnBlocks(l_head l_rows n_col "llx")  ; -> list
+procedure(_ColumnBlocks(l_head l_rows n_col "llx")  ; -> list
     ; 收集某列的全部单元格块（内部实现）。
     ;
     ; **参数**
@@ -291,7 +291,7 @@ procedure(_columnBlocks(l_head l_rows n_col "llx")  ; -> list
     )
 )
 
-procedure(_decInfo(l_blocks t_unit n_amb "ltx")  ; -> list[int]
+procedure(_DecInfo(l_blocks t_unit n_amb "ltx")  ; -> list[int]
     ; 计算小数点对齐的左右最大宽度（内部实现）。
     ;
     ; **参数**
@@ -307,12 +307,12 @@ procedure(_decInfo(l_blocks t_unit n_amb "ltx")  ; -> list[int]
         foreach(l_block l_blocks
             foreach(t_line l_block
                 let((l_parts)
-                    l_parts = _splitDecimal(t_line)
-                    when(_widthText(car(l_parts) t_unit n_amb) > n_left
-                        n_left = _widthText(car(l_parts) t_unit n_amb)
+                    l_parts = _SplitDecimal(t_line)
+                    when(_WidthText(car(l_parts) t_unit n_amb) > n_left
+                        n_left = _WidthText(car(l_parts) t_unit n_amb)
                     )
-                    when(_widthText(cadr(l_parts) t_unit n_amb) > n_right
-                        n_right = _widthText(cadr(l_parts) t_unit n_amb)
+                    when(_WidthText(cadr(l_parts) t_unit n_amb) > n_right
+                        n_right = _WidthText(cadr(l_parts) t_unit n_amb)
                     )
                 )
             )
@@ -321,7 +321,7 @@ procedure(_decInfo(l_blocks t_unit n_amb "ltx")  ; -> list[int]
     )
 )
 
-procedure(_colWidth(l_blocks l_dec t_unit n_amb "lltx")  ; -> int
+procedure(_ColWidth(l_blocks l_dec t_unit n_amb "lltx")  ; -> int
     ; 计算某列宽度（内部实现）。
     ;
     ; **参数**
@@ -338,8 +338,8 @@ procedure(_colWidth(l_blocks l_dec t_unit n_amb "lltx")  ; -> int
             n_max = 0
             foreach(l_block l_blocks
                 foreach(t_line l_block
-                    when(_widthText(t_line t_unit n_amb) > n_max
-                        n_max = _widthText(t_line t_unit n_amb)
+                    when(_WidthText(t_line t_unit n_amb) > n_max
+                        n_max = _WidthText(t_line t_unit n_amb)
                     )
                 )
             )
@@ -348,7 +348,7 @@ procedure(_colWidth(l_blocks l_dec t_unit n_amb "lltx")  ; -> int
     )
 )
 
-procedure(_padText(t_s n_width t_align t_unit n_amb "txttx")  ; -> str
+procedure(_PadText(t_s n_width t_align t_unit n_amb "txttx")  ; -> str
     ; 按左/右/中对齐补宽（内部实现）。
     ;
     ; **参数**
@@ -361,29 +361,29 @@ procedure(_padText(t_s n_width t_align t_unit n_amb "txttx")  ; -> str
     ; **返回**
     ;   (str) - 补宽后的文本
     let((n_diff n_left n_right)
-        n_diff = n_width - _widthText(t_s t_unit n_amb)
+        n_diff = n_width - _WidthText(t_s t_unit n_amb)
         if(n_diff <= 0
             t_s
             cond(
                 (t_align == "right"
-                    strcat(_repeatChar(" " n_diff) t_s)
+                    strcat(_RepeatChar(" " n_diff) t_s)
                 )
                 (t_align == "center"
                     progn(
                         n_left = n_diff / 2
                         n_right = n_diff - n_left
-                        strcat(_repeatChar(" " n_left) t_s _repeatChar(" " n_right))
+                        strcat(_RepeatChar(" " n_left) t_s _RepeatChar(" " n_right))
                     )
                 )
                 (t
-                    strcat(t_s _repeatChar(" " n_diff))
+                    strcat(t_s _RepeatChar(" " n_diff))
                 )
             )
         )
     )
 )
 
-procedure(_padCell(t_line n_width t_align l_dec t_unit n_amb "txtltx")  ; -> str
+procedure(_PadCell(t_line n_width t_align l_dec t_unit n_amb "txtltx")  ; -> str
     ; 按列对齐方式补宽（含小数点对齐；内部实现）。
     ;
     ; **参数**
@@ -398,17 +398,17 @@ procedure(_padCell(t_line n_width t_align l_dec t_unit n_amb "txtltx")  ; -> str
     ;   (str) - 补宽后的文本
     if(t_align == "decimal" && l_dec
         let((l_parts n_extra t_out)
-            l_parts = _splitDecimal(t_line)
+            l_parts = _SplitDecimal(t_line)
             t_out = strcat(
-                _repeatChar(" " car(l_dec) - _widthText(car(l_parts) t_unit n_amb))
+                _RepeatChar(" " car(l_dec) - _WidthText(car(l_parts) t_unit n_amb))
                 car(l_parts)
                 cadr(l_parts)
-                _repeatChar(" " cadr(l_dec) - _widthText(cadr(l_parts) t_unit n_amb))
+                _RepeatChar(" " cadr(l_dec) - _WidthText(cadr(l_parts) t_unit n_amb))
             )
-            n_extra = n_width - _widthText(t_out t_unit n_amb)
-            if(n_extra > 0 strcat(t_out _repeatChar(" " n_extra)) t_out)
+            n_extra = n_width - _WidthText(t_out t_unit n_amb)
+            if(n_extra > 0 strcat(t_out _RepeatChar(" " n_extra)) t_out)
         )
-        _padText(t_line n_width t_align t_unit n_amb)
+        _PadText(t_line n_width t_align t_unit n_amb)
     )
 )
 

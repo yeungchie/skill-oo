@@ -2,7 +2,7 @@ useNamespace("ycCsv")
 
 ; ---------- 字段与记录输出 ----------
 
-procedure(_quoteField(t_s n_delim g_quoteAll "tng")  ; -> str
+procedure(_QuoteField(t_s n_delim g_quoteAll "tng")  ; -> str
     ; 按需给字段加引号：含分隔符、引号、CR、LF 或 quoteAll 时双写内部引号。
     ;
     ; **参数**
@@ -17,7 +17,7 @@ procedure(_quoteField(t_s n_delim g_quoteAll "tng")  ; -> str
         g_need = g_quoteAll
         unless(g_need
             for(n_i 1 n_len
-                n_c = _code(t_s n_i)
+                n_c = _Code(t_s n_i)
                 when(n_c == n_delim || n_c == 34 || n_c == 10 || n_c == 13
                     g_need = t
                 )
@@ -28,7 +28,7 @@ procedure(_quoteField(t_s n_delim g_quoteAll "tng")  ; -> str
             progn(
                 n_run = 1
                 for(n_i 1 n_len
-                    n_c = _code(t_s n_i)
+                    n_c = _Code(t_s n_i)
                     when(n_c == 34
                         when(n_run < n_i
                             l_p = tconc(l_p substring(t_s n_run n_i - n_run))
@@ -40,13 +40,13 @@ procedure(_quoteField(t_s n_delim g_quoteAll "tng")  ; -> str
                 when(n_run <= n_len
                     l_p = tconc(l_p substring(t_s n_run n_len - n_run + 1))
                 )
-                strcat("\"" _build(l_p) "\"")
+                strcat("\"" _Build(l_p) "\"")
             )
         )
     )
 )
 
-procedure(_recordText(l_cells n_delim g_quoteAll "lng")  ; -> str
+procedure(_RecordText(l_cells n_delim g_quoteAll "lng")  ; -> str
     ; 把一行字段拼成分隔符分隔的记录文本。
     ;
     ; **参数**
@@ -58,7 +58,7 @@ procedure(_recordText(l_cells n_delim g_quoteAll "lng")  ; -> str
     ;   (str) - 不含行尾的记录文本
     let((l_p)
         foreach(t_cell l_cells
-            l_p = tconc(l_p _quoteField(t_cell n_delim g_quoteAll))
+            l_p = tconc(l_p _QuoteField(t_cell n_delim g_quoteAll))
         )
         buildString(car(l_p) intToChar(n_delim))
     )
@@ -66,7 +66,7 @@ procedure(_recordText(l_cells n_delim g_quoteAll "lng")  ; -> str
 
 ; ---------- 编码入口 ----------
 
-procedure(encode(g_table \@key (format "csv") (delimiter nil) (eol "\n") (quoteAll nil) (finalNewline t) "gtgtgg")  ; -> str
+procedure(Encode(g_table \@key (format "csv") (delimiter nil) (eol "\n") (quoteAll nil) (finalNewline t) "gtgtgg")  ; -> str
     ; 把 Table 编码为 CSV/TSV 文本。
     ;
     ; **参数**
@@ -80,35 +80,35 @@ procedure(encode(g_table \@key (format "csv") (delimiter nil) (eol "\n") (quoteA
     ; **返回**
     ;   (str) - 编码文本；非 Table、选项非法或行宽超过表头时报错
     when(g_table == nil
-        error("ycCsv::encode: expects a ycCsv::Table")
+        error("ycCsv::Encode: expects a ycCsv::Table")
     )
     unless(classOf(g_table) == findClass('Table)
-        error("ycCsv::encode: expects a ycCsv::Table, got %s"
+        error("ycCsv::Encode: expects a ycCsv::Table, got %s"
             symbolToString(type(g_table)))
     )
     let((l_header l_rows n_delim t_eol l_lines t_line)
         l_header = g_table->header()
         l_rows = g_table->rows()
-        _checkRows(l_rows "ycCsv::encode")
+        _CheckRows(l_rows "ycCsv::Encode")
         when(l_header
             for(n_i 1 length(l_rows)
                 when(length(l_header) < length(nth(n_i - 1 l_rows))
-                    error("ycCsv::encode: row %d has %d fields but header has %d"
+                    error("ycCsv::Encode: row %d has %d fields but header has %d"
                         n_i length(nth(n_i - 1 l_rows)) length(l_header))
                 )
             )
         )
-        n_delim = _delimCode(delimiter _formatDelim(format "ycCsv::encode") "ycCsv::encode")
-        t_eol = _eolText(eol)
+        n_delim = _DelimCode(delimiter _FormatDelim(format "ycCsv::Encode") "ycCsv::Encode")
+        t_eol = _EolText(eol)
         when(l_header
-            t_line = _recordText(l_header n_delim quoteAll)
+            t_line = _RecordText(l_header n_delim quoteAll)
             when(!finalNewline && l_rows == nil && t_line == ""
                 t_line = "\"\""
             )
             l_lines = tconc(l_lines t_line)
         )
         for(n_i 1 length(l_rows)
-            t_line = _recordText(nth(n_i - 1 l_rows) n_delim quoteAll)
+            t_line = _RecordText(nth(n_i - 1 l_rows) n_delim quoteAll)
             when(!finalNewline && n_i == length(l_rows) && t_line == ""
                 t_line = "\"\""
             )

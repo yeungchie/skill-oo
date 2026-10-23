@@ -3,17 +3,17 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-ycNamespace:::require("ycCodec")
+ycNamespace:::Require("ycCodec")
 
 useNamespace("ycToml")
 
 ; 编码默认嵌套深度上限；与其它 codec 保持一致。
-_maxEncodeDepth = 800
+_MaxEncodeDepth = 800
 
 
 ; ---------- 键与字符串 ----------
 
-procedure(_keyStr(g_key g_opt "gg")  ; -> str
+procedure(_KeyStr(g_key g_opt "gg")  ; -> str
     ; 将 table 键转为文本：字符串原样、符号取名、fixnum 转十进制。
     ;
     ; **参数**
@@ -23,19 +23,19 @@ procedure(_keyStr(g_key g_opt "gg")  ; -> str
     ; **返回**
     ;   (str) - 键文本；其他键型报错
     when(g_opt["strict"] && !stringp(g_key)
-        error("ycToml::encode: strict mode requires string keys, got %A" g_key)
+        error("ycToml::Encode: strict mode requires string keys, got %A" g_key)
     )
     cond(
         (stringp(g_key) g_key)
         (symbolp(g_key) symbolToString(g_key))
         (fixp(g_key) sprintf(nil "%d" g_key))
         (t
-            error("ycToml::encode: unsupported table key of type %s" symbolToString(type(g_key)))
+            error("ycToml::Encode: unsupported table key of type %s" symbolToString(type(g_key)))
         )
     )
 )
 
-procedure(_keyRender(t_key "t")  ; -> str
+procedure(_KeyRender(t_key "t")  ; -> str
     ; 将单个键渲染为裸键或双引号键。
     ;
     ; **参数**
@@ -45,11 +45,11 @@ procedure(_keyRender(t_key "t")  ; -> str
     ;   (str) - TOML 键文本
     if(pcreMatchp("^[A-Za-z0-9_-]+\\z" t_key)
         t_key
-        _encodeString(t_key)
+        _EncodeString(t_key)
     )
 )
 
-procedure(_pathRender(l_path "l")  ; -> str
+procedure(_PathRender(l_path "l")  ; -> str
     ; 将键路径渲染为点分表头路径。
     ;
     ; **参数**
@@ -59,13 +59,13 @@ procedure(_pathRender(l_path "l")  ; -> str
     ;   (str) - 点分路径
     let((l_p)
         foreach(t_key l_path
-            l_p = tconc(l_p _keyRender(t_key))
+            l_p = tconc(l_p _KeyRender(t_key))
         )
         buildString(car(l_p) ".")
     )
 )
 
-procedure(_encodeString(t_s "t")  ; -> str
+procedure(_EncodeString(t_s "t")  ; -> str
     ; 输出基本字符串：引号/反斜杠/控制字节转义，其余 UTF-8 字节原样透传。
     ;
     ; **参数**
@@ -73,8 +73,8 @@ procedure(_encodeString(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 带双引号的 TOML 基本字符串
-    unless(_validUtf8(t_s)
-        error("ycToml::encode: invalid UTF-8 string")
+    unless(_ValidUtf8(t_s)
+        error("ycToml::Encode: invalid UTF-8 string")
     )
     let((n_len n_run l_p n_c)
         n_len = length(t_s)
@@ -82,7 +82,7 @@ procedure(_encodeString(t_s "t")  ; -> str
         l_p = nil
         when(0 < n_len
             for(n_k 1 n_len
-                n_c = _code(t_s n_k)
+                n_c = _Code(t_s n_k)
                 cond(
                     (n_c == 34 || n_c == 92 || n_c < 32 || n_c == 127
                         {
@@ -110,11 +110,11 @@ procedure(_encodeString(t_s "t")  ; -> str
                 l_p = tconc(l_p substring(t_s n_run n_len - n_run + 1))
             )
         )
-        lsprintf("\"%s\"" _build(l_p))
+        lsprintf("\"%s\"" _Build(l_p))
     )
 )
 
-procedure(_encodeNumber(g_n "n")  ; -> str
+procedure(_EncodeNumber(g_n "n")  ; -> str
     ; 数字输出：fixnum 十进制；flonum 最短可回环，inf/nan 按 TOML 字面量输出。
     ;
     ; **参数**
@@ -145,7 +145,7 @@ procedure(_encodeNumber(g_n "n")  ; -> str
 
 ; ---------- 值输出 ----------
 
-procedure(_encodeValue(g_val n_depth g_opt "gxg")  ; -> str
+procedure(_EncodeValue(g_val n_depth g_opt "gxg")  ; -> str
     ; 输出内联值：nil 为空数组、布尔哨兵、字符串、数字、数组或内联表。
     ;
     ; **参数**
@@ -156,7 +156,7 @@ procedure(_encodeValue(g_val n_depth g_opt "gxg")  ; -> str
     ; **返回**
     ;   (str) - TOML 值文本；不可表示时以 error() 中断
     when(n_depth > g_opt["maxDepth"]
-        error("ycToml::encode: nesting too deep (limit %d)" g_opt["maxDepth"])
+        error("ycToml::Encode: nesting too deep (limit %d)" g_opt["maxDepth"])
     )
     cond(
         (g_val == nil
@@ -169,30 +169,30 @@ procedure(_encodeValue(g_val n_depth g_opt "gxg")  ; -> str
             "false"
         )
         (g_val == ycCodec:::Null
-            error("ycToml::encode: TOML has no null value")
+            error("ycToml::Encode: TOML has no null value")
         )
         (g_val == ycCodec:::Missing
-            error("ycToml::encode: cannot dump the Missing marker")
+            error("ycToml::Encode: cannot dump the Missing marker")
         )
         (stringp(g_val)
-            _encodeString(g_val)
+            _EncodeString(g_val)
         )
         (numberp(g_val)
-            _encodeNumber(g_val)
+            _EncodeNumber(g_val)
         )
         (tablep(g_val)
-            _encodeTable(g_val n_depth g_opt)
+            _EncodeTable(g_val n_depth g_opt)
         )
         (listp(g_val)
-            _encodeArray(g_val n_depth g_opt)
+            _EncodeArray(g_val n_depth g_opt)
         )
         (t
-            error("ycToml::encode: cannot dump value of type %s" symbolToString(type(g_val)))
+            error("ycToml::Encode: cannot dump value of type %s" symbolToString(type(g_val)))
         )
     )
 )
 
-procedure(_encodeArray(l_arr n_depth g_opt "lxg")  ; -> str
+procedure(_EncodeArray(l_arr n_depth g_opt "lxg")  ; -> str
     ; 输出数组为方括号形式；元素递归输出为内联值。
     ;
     ; **参数**
@@ -204,13 +204,13 @@ procedure(_encodeArray(l_arr n_depth g_opt "lxg")  ; -> str
     ;   (str) - 数组文本
     let((l_p)
         foreach(g_item l_arr
-            l_p = tconc(l_p _encodeValue(g_item n_depth + 1 g_opt))
+            l_p = tconc(l_p _EncodeValue(g_item n_depth + 1 g_opt))
         )
         lsprintf("[%s]" buildString(car(l_p) ", "))
     )
 )
 
-procedure(_encodeTable(t_obj n_depth g_opt "gxg")  ; -> str
+procedure(_EncodeTable(t_obj n_depth g_opt "gxg")  ; -> str
     ; 输出内联表；键按选项排序并递归输出值。
     ;
     ; **参数**
@@ -221,12 +221,12 @@ procedure(_encodeTable(t_obj n_depth g_opt "gxg")  ; -> str
     ; **返回**
     ;   (str) - 内联表文本
     let((l_keys l_p)
-        l_keys = _tableKeys(t_obj g_opt)
+        l_keys = _TableKeys(t_obj g_opt)
         foreach(t_key l_keys
             l_p = tconc(l_p
                 lsprintf("%s = %s"
-                    _keyRender(t_key)
-                    _encodeValue(t_obj[t_key] n_depth + 1 g_opt)
+                    _KeyRender(t_key)
+                    _EncodeValue(t_obj[t_key] n_depth + 1 g_opt)
                 )
             )
         )
@@ -239,7 +239,7 @@ procedure(_encodeTable(t_obj n_depth g_opt "gxg")  ; -> str
 
 ; ---------- 文档输出 ----------
 
-procedure(_tableKeys(t_obj g_opt "gg")  ; -> list
+procedure(_TableKeys(t_obj g_opt "gg")  ; -> list
     ; 取出 table 的原始键，检测字符串化碰撞，并按选项排序。
     ;
     ; **参数**
@@ -252,9 +252,9 @@ procedure(_tableKeys(t_obj g_opt "gg")  ; -> list
         t_byText = makeTable("ycTomlKeys" ycCodec:::Missing)
         l_texts = nil
         foreach(g_key t_obj
-            t_text = _keyStr(g_key g_opt)
+            t_text = _KeyStr(g_key g_opt)
             when(t_byText[t_text] != ycCodec:::Missing
-                error("ycToml::encode: duplicate key %A after string conversion" t_text)
+                error("ycToml::Encode: duplicate key %A after string conversion" t_text)
             )
             t_byText[t_text] = g_key
             l_texts = tconc(l_texts t_text)
@@ -277,7 +277,7 @@ procedure(_tableKeys(t_obj g_opt "gg")  ; -> list
     )
 )
 
-procedure(_emitHeader(l_p l_path g_array "llg")  ; -> list
+procedure(_EmitHeader(l_p l_path g_array "llg")  ; -> list
     ; 在行列表前追加空行与表头。
     ;
     ; **参数**
@@ -292,13 +292,13 @@ procedure(_emitHeader(l_p l_path g_array "llg")  ; -> list
     )
     tconc(l_p
         if(g_array
-            lsprintf("[[%s]]" _pathRender(l_path))
-            lsprintf("[%s]" _pathRender(l_path))
+            lsprintf("[[%s]]" _PathRender(l_path))
+            lsprintf("[%s]" _PathRender(l_path))
         )
     )
 )
 
-procedure(_emitElement(l_p t_obj l_path n_depth g_opt "lglxg")  ; -> list
+procedure(_EmitElement(l_p t_obj l_path n_depth g_opt "lglxg")  ; -> list
     ; 输出一个表数组元素：[[path]] 后接该元素的键值。
     ;
     ; **参数**
@@ -310,11 +310,11 @@ procedure(_emitElement(l_p t_obj l_path n_depth g_opt "lglxg")  ; -> list
     ;
     ; **返回**
     ;   (list) - 更新后的行容器
-    l_p = _emitHeader(l_p l_path t)
-    _emitBody(l_p t_obj l_path n_depth g_opt)
+    l_p = _EmitHeader(l_p l_path t)
+    _EmitBody(l_p t_obj l_path n_depth g_opt)
 )
 
-procedure(_emitTable(l_p t_obj l_path n_depth g_opt "lglxg")  ; -> list
+procedure(_EmitTable(l_p t_obj l_path n_depth g_opt "lglxg")  ; -> list
     ; 输出普通子表：表头后接该表的键值。
     ;
     ; **参数**
@@ -327,13 +327,13 @@ procedure(_emitTable(l_p t_obj l_path n_depth g_opt "lglxg")  ; -> list
     ; **返回**
     ;   (list) - 更新后的行容器
     when(n_depth > g_opt["maxDepth"]
-        error("ycToml::encode: nesting too deep (limit %d)" g_opt["maxDepth"])
+        error("ycToml::Encode: nesting too deep (limit %d)" g_opt["maxDepth"])
     )
-    l_p = _emitHeader(l_p l_path nil)
-    _emitBody(l_p t_obj l_path n_depth g_opt)
+    l_p = _EmitHeader(l_p l_path nil)
+    _EmitBody(l_p t_obj l_path n_depth g_opt)
 )
 
-procedure(_emitBody(l_p t_obj l_path n_depth g_opt "lglxg")  ; -> list
+procedure(_EmitBody(l_p t_obj l_path n_depth g_opt "lglxg")  ; -> list
     ; 输出表体的标量键值，再递归输出子表与表数组。
     ;
     ; **参数**
@@ -346,17 +346,17 @@ procedure(_emitBody(l_p t_obj l_path n_depth g_opt "lglxg")  ; -> list
     ; **返回**
     ;   (list) - 更新后的行容器
     when(n_depth > g_opt["maxDepth"]
-        error("ycToml::encode: nesting too deep (limit %d)" g_opt["maxDepth"])
+        error("ycToml::Encode: nesting too deep (limit %d)" g_opt["maxDepth"])
     )
     let((l_keys g_val l_child)
-        l_keys = _tableKeys(t_obj g_opt)
+        l_keys = _TableKeys(t_obj g_opt)
         foreach(t_key l_keys
             g_val = t_obj[t_key]
-            unless(tablep(g_val) || _isTableList(g_val)
+            unless(tablep(g_val) || _IsTableList(g_val)
                 l_p = tconc(l_p
                     lsprintf("%s = %s"
-                        _keyRender(_keyStr(t_key g_opt))
-                        _encodeValue(g_val n_depth g_opt)
+                        _KeyRender(_KeyStr(t_key g_opt))
+                        _EncodeValue(g_val n_depth g_opt)
                     )
                 )
             )
@@ -364,11 +364,11 @@ procedure(_emitBody(l_p t_obj l_path n_depth g_opt "lglxg")  ; -> list
         foreach(t_key l_keys
             g_val = t_obj[t_key]
             when(tablep(g_val)
-                l_p = _emitTable(l_p g_val append1(l_path _keyStr(t_key g_opt)) n_depth + 1 g_opt)
+                l_p = _EmitTable(l_p g_val append1(l_path _KeyStr(t_key g_opt)) n_depth + 1 g_opt)
             )
-            when(_isTableList(g_val)
+            when(_IsTableList(g_val)
                 foreach(l_child g_val
-                    l_p = _emitElement(l_p l_child append1(l_path _keyStr(t_key g_opt)) n_depth + 1 g_opt)
+                    l_p = _EmitElement(l_p l_child append1(l_path _KeyStr(t_key g_opt)) n_depth + 1 g_opt)
                 )
             )
         )
@@ -376,7 +376,7 @@ procedure(_emitBody(l_p t_obj l_path n_depth g_opt "lglxg")  ; -> list
     )
 )
 
-procedure(encode(g_val \@key (sortKeys nil) (strict nil) (finalNewline t) (maxDepth nil) "ggggg")  ; -> str
+procedure(Encode(g_val \@key (sortKeys nil) (strict nil) (finalNewline t) (maxDepth nil) "ggggg")  ; -> str
     ; 编码根 table 为 TOML 文本。
     ;
     ; **参数**
@@ -389,20 +389,20 @@ procedure(encode(g_val \@key (sortKeys nil) (strict nil) (finalNewline t) (maxDe
     ; **返回**
     ;   (str) - TOML 文本；不可表示时以 error() 中断
     when(maxDepth == nil
-        maxDepth = _maxEncodeDepth
+        maxDepth = _MaxEncodeDepth
     )
     unless(fixp(maxDepth) && maxDepth >= 1
-        error("ycToml::encode: ?maxDepth must be a positive fixnum")
+        error("ycToml::Encode: ?maxDepth must be a positive fixnum")
     )
     unless(tablep(g_val)
-        error("ycToml::encode: root value must be a table")
+        error("ycToml::Encode: root value must be a table")
     )
     let((g_opt l_p t_out)
         g_opt = makeTable("ycTomlOpt")
         g_opt["sortKeys"] = sortKeys
         g_opt["strict"] = strict
         g_opt["maxDepth"] = maxDepth
-        l_p = _emitBody(nil g_val nil 0 g_opt)
+        l_p = _EmitBody(nil g_val nil 0 g_opt)
         t_out = buildString(car(l_p) "\n")
         if(t_out == ""
             ""

@@ -2,7 +2,7 @@ useNamespace("ycJson")
 
 ; ---------- 基础工具 ----------
 
-procedure(_code(t_s n_i "tx")  ; -> int | nil
+procedure(_Code(t_s n_i "tx")  ; -> int | nil
     ; 取字节索引处的字符码（1-based）；索引越界返回 nil。
     ;
     ; **参数**
@@ -19,7 +19,7 @@ procedure(_code(t_s n_i "tx")  ; -> int | nil
     )
 )
 
-procedure(_digitp(g_c "g")  ; -> t | nil
+procedure(_Digitp(g_c "g")  ; -> t | nil
     ; 判断字符码是否为 ASCII 数字（nil 安全）。
     ;
     ; **参数**
@@ -30,7 +30,7 @@ procedure(_digitp(g_c "g")  ; -> t | nil
     g_c && g_c >= 48 && g_c <= 57
 )
 
-procedure(_lineCol(t_s n_i "tx")  ; -> list
+procedure(_LineCol(t_s n_i "tx")  ; -> list
     ; 按字节索引计算行列：行/列均 1-based，列按行内字节偏移。
     ;
     ; **参数**
@@ -44,7 +44,7 @@ procedure(_lineCol(t_s n_i "tx")  ; -> list
         n_last = 0
         when(1 < n_i
             for(n_k 1 n_i - 1
-                when(_code(t_s n_k) == 10
+                when(_Code(t_s n_k) == 10
                     n_line = n_line + 1
                     n_last = n_k
                 )
@@ -54,8 +54,8 @@ procedure(_lineCol(t_s n_i "tx")  ; -> list
     )
 )
 
-procedure(_error(t_s n_i t_msg "txt")  ; -> never
-    ; 按统一格式 error() 中断：ycJson::decode: <说明> at line <行>, column <列>。
+procedure(_Error(t_s n_i t_msg "txt")  ; -> never
+    ; 按统一格式 error() 中断：ycJson::Decode: <说明> at line <行>, column <列>。
     ;
     ; **参数**
     ;   t_s    (str) - 输入串
@@ -65,12 +65,12 @@ procedure(_error(t_s n_i t_msg "txt")  ; -> never
     ; **返回**
     ;   (never) - 总是调用 error()，不返回
     let((l_pos)
-        l_pos = _lineCol(t_s n_i)
-        error("ycJson::decode: %s at line %d, column %d" t_msg car(l_pos) cadr(l_pos))
+        l_pos = _LineCol(t_s n_i)
+        error("ycJson::Decode: %s at line %d, column %d" t_msg car(l_pos) cadr(l_pos))
     )
 )
 
-procedure(_build(l_p "l")  ; -> str
+procedure(_Build(l_p "l")  ; -> str
     ; 将 tconc 头容器（或 nil）拼接为字符串。
     ;
     ; **参数**

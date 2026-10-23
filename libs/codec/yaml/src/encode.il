@@ -1,10 +1,10 @@
-ycNamespace:::require("ycCodec")
+ycNamespace:::Require("ycCodec")
 
 useNamespace("ycYaml")
 
 ; ---------- 编码 ----------
 
-procedure(_indentStr(n_level n_indent "xx")  ; -> str
+procedure(_IndentStr(n_level n_indent "xx")  ; -> str
     ; 生成 n_level 层、每层 n_indent 个空格的缩进串。
     ;
     ; **参数**
@@ -24,7 +24,7 @@ procedure(_indentStr(n_level n_indent "xx")  ; -> str
     )
 )
 
-procedure(_plainSafe(t_s "t")  ; -> t | nil
+procedure(_PlainSafe(t_s "t")  ; -> t | nil
     ; 判断字符串能否安全地作为普通标量输出（不改变类型）。
     ;
     ; **参数**
@@ -37,23 +37,23 @@ procedure(_plainSafe(t_s "t")  ; -> t | nil
         when(n_len == 0 || t_s == "..."
             return(nil)
         )
-        n_c = _code(t_s 1)
+        n_c = _Code(t_s 1)
         when(n_c == 32 || n_c == 9 || n_c == 10 || n_c == 13
             return(nil)
         )
-        n_c = _code(t_s n_len)
+        n_c = _Code(t_s n_len)
         when(n_c == 32 || n_c == 9 || n_c == 10 || n_c == 13
             return(nil)
         )
-        when(_specialStart(_code(t_s 1))
+        when(_SpecialStart(_Code(t_s 1))
             return(nil)
         )
-        when(_code(t_s 1) == 45 || _code(t_s 1) == 63 || _code(t_s 1) == 58
+        when(_Code(t_s 1) == 45 || _Code(t_s 1) == 63 || _Code(t_s 1) == 58
             return(nil)
         )
         g_bad = nil
         for(n_i 1 n_len
-            n_c = _code(t_s n_i)
+            n_c = _Code(t_s n_i)
             cond(
                 (n_c == 10 || n_c == 13 || n_c == 9
                     g_bad = t
@@ -61,10 +61,10 @@ procedure(_plainSafe(t_s "t")  ; -> t | nil
                 (n_c < 32
                     g_bad = t
                 )
-                (n_c == 35 && n_i > 1 && (_code(t_s n_i - 1) == 32 || _code(t_s n_i - 1) == 9)
+                (n_c == 35 && n_i > 1 && (_Code(t_s n_i - 1) == 32 || _Code(t_s n_i - 1) == 9)
                     g_bad = t
                 )
-                (n_c == 58 && n_i < n_len && (_code(t_s n_i + 1) == 32 || _code(t_s n_i + 1) == 9)
+                (n_c == 58 && n_i < n_len && (_Code(t_s n_i + 1) == 32 || _Code(t_s n_i + 1) == 9)
                     g_bad = t
                 )
             )
@@ -72,11 +72,11 @@ procedure(_plainSafe(t_s "t")  ; -> t | nil
         when(g_bad
             return(nil)
         )
-        return(_resolvePlain(t_s) == t_s)
+        return(_ResolvePlain(t_s) == t_s)
     )
 )
 
-procedure(_specialStart(n_c "x")  ; -> t | nil
+procedure(_SpecialStart(n_c "x")  ; -> t | nil
     ; 判断字符码是否为普通标量禁用起始字符。
     ;
     ; **参数**
@@ -87,7 +87,7 @@ procedure(_specialStart(n_c "x")  ; -> t | nil
     member(n_c '(91 93 123 125 35 38 42 33 124 62 39 34 37 64 96 44)) && t
 )
 
-procedure(_encodeString(t_s "t")  ; -> str
+procedure(_EncodeString(t_s "t")  ; -> str
     ; 输出带双引号的 YAML 字符串，转义控制字符与引号/反斜杠。
     ;
     ; **参数**
@@ -99,7 +99,7 @@ procedure(_encodeString(t_s "t")  ; -> str
         n_len = length(t_s)
         n_run = 1
         for(n_i 1 n_len
-            n_c = _code(t_s n_i)
+            n_c = _Code(t_s n_i)
             when(n_c == 34 || n_c == 92 || n_c < 32
                 when(n_run < n_i
                     l_p = tconc(l_p substring(t_s n_run n_i - n_run))
@@ -122,11 +122,11 @@ procedure(_encodeString(t_s "t")  ; -> str
         when(n_run <= n_len
             l_p = tconc(l_p substring(t_s n_run n_len - n_run + 1))
         )
-        lsprintf("\"%s\"" _build(l_p))
+        lsprintf("\"%s\"" _Build(l_p))
     )
 )
 
-procedure(_encodeKey(g_key g_opt "gg")  ; -> str
+procedure(_EncodeKey(g_key g_opt "gg")  ; -> str
     ; 将 table 键转为 YAML 映射键文本。
     ;
     ; **参数**
@@ -137,7 +137,7 @@ procedure(_encodeKey(g_key g_opt "gg")  ; -> str
     ;   (str) - 键文本
     let((t_s)
         when(g_opt["strict"] && !stringp(g_key)
-            error("ycYaml::encode: strict mode requires string keys, got %A" g_key)
+            error("ycYaml::Encode: strict mode requires string keys, got %A" g_key)
         )
         t_s = cond(
             (stringp(g_key) g_key)
@@ -145,19 +145,19 @@ procedure(_encodeKey(g_key g_opt "gg")  ; -> str
             (fixp(g_key) sprintf(nil "%d" g_key))
         )
         unless(t_s
-            error("ycYaml::encode: unsupported table key of type %s" symbolToString(type(g_key)))
+            error("ycYaml::Encode: unsupported table key of type %s" symbolToString(type(g_key)))
         )
         if(fixp(g_key)
             t_s
-            if(_plainSafe(t_s) && !pcreMatchp("[ 	]" t_s)
+            if(_PlainSafe(t_s) && !pcreMatchp("[ 	]" t_s)
                 t_s
-                _encodeString(t_s)
+                _EncodeString(t_s)
             )
         )
     )
 )
 
-procedure(_numText(g_n "n")  ; -> str
+procedure(_NumText(g_n "n")  ; -> str
     ; 输出 YAML 数字文本；非有限浮点输出 .inf/-.inf/.nan。
     ;
     ; **参数**
@@ -186,7 +186,7 @@ procedure(_numText(g_n "n")  ; -> str
     )
 )
 
-procedure(_encodeScalar(g_val g_opt "gg")  ; -> str
+procedure(_EncodeScalar(g_val g_opt "gg")  ; -> str
     ; 输出标量值。
     ;
     ; **参数**
@@ -201,22 +201,22 @@ procedure(_encodeScalar(g_val g_opt "gg")  ; -> str
         (g_val == ycCodec:::False "false")
         (g_val == ycCodec:::Null "null")
         (g_val == ycCodec:::Missing
-            error("ycYaml::encode: cannot dump the Missing marker")
+            error("ycYaml::Encode: cannot dump the Missing marker")
         )
         (stringp(g_val)
-            if(_plainSafe(g_val)
+            if(_PlainSafe(g_val)
                 g_val
-                _encodeString(g_val)
+                _EncodeString(g_val)
             )
         )
-        (numberp(g_val) _numText(g_val))
+        (numberp(g_val) _NumText(g_val))
         (t
-            error("ycYaml::encode: cannot dump value of type %s" symbolToString(type(g_val)))
+            error("ycYaml::Encode: cannot dump value of type %s" symbolToString(type(g_val)))
         )
     )
 )
 
-procedure(_encodeFlow(g_val n_level g_opt "gxg")  ; -> str
+procedure(_EncodeFlow(g_val n_level g_opt "gxg")  ; -> str
     ; 以流式风格输出值。
     ;
     ; **参数**
@@ -227,7 +227,7 @@ procedure(_encodeFlow(g_val n_level g_opt "gxg")  ; -> str
     ; **返回**
     ;   (str) - 流式文本
     when(n_level > g_opt["maxDepth"]
-        error("ycYaml::encode: nesting too deep (limit %d)" g_opt["maxDepth"])
+        error("ycYaml::Encode: nesting too deep (limit %d)" g_opt["maxDepth"])
     )
     cond(
         (g_val == nil "[]")
@@ -244,37 +244,37 @@ procedure(_encodeFlow(g_val n_level g_opt "gxg")  ; -> str
                 t_orig = makeTable("ycYamlKeys" ycCodec:::Missing)
                 l_p = nil
                 foreach(g_k l_keys
-                    t_ks = _encodeKey(g_k g_opt)
+                    t_ks = _EncodeKey(g_k g_opt)
                     when(t_orig[t_ks] != ycCodec:::Missing
-                        error("ycYaml::encode: duplicate mapping key %A after encoding" t_ks)
+                        error("ycYaml::Encode: duplicate mapping key %A after encoding" t_ks)
                     )
                     t_orig[t_ks] = g_k
                     l_p = tconc(l_p lsprintf("%s: %s"
                         t_ks
-                        _encodeFlow(g_val[g_k] n_level + 1 g_opt)
+                        _EncodeFlow(g_val[g_k] n_level + 1 g_opt)
                     ))
                 )
                 when(g_opt["sortKeys"]
                     l_p = sort(car(l_p) 'alphalessp)
                 )
-                return(lsprintf("{%s}" _joinBuild(l_p ", ")))
+                return(lsprintf("{%s}" _JoinBuild(l_p ", ")))
             )
         )
         (listp(g_val)
             let((l_p)
                 foreach(g_item g_val
-                    l_p = tconc(l_p _encodeFlow(g_item n_level + 1 g_opt))
+                    l_p = tconc(l_p _EncodeFlow(g_item n_level + 1 g_opt))
                 )
-                lsprintf("[%s]" _joinBuild(l_p ", "))
+                lsprintf("[%s]" _JoinBuild(l_p ", "))
             )
         )
         (t
-            _encodeScalar(g_val g_opt)
+            _EncodeScalar(g_val g_opt)
         )
     )
 )
 
-procedure(_blockLines(g_val n_level g_opt "gxg")  ; -> list[str]
+procedure(_BlockLines(g_val n_level g_opt "gxg")  ; -> list[str]
     ; 输出块风格值的行列表（不含末尾换行）。
     ;
     ; **参数**
@@ -286,10 +286,10 @@ procedure(_blockLines(g_val n_level g_opt "gxg")  ; -> list[str]
     ;   (list[str]) - 行列表
     prog(nil
     when(n_level > g_opt["maxDepth"]
-        error("ycYaml::encode: nesting too deep (limit %d)" g_opt["maxDepth"])
+        error("ycYaml::Encode: nesting too deep (limit %d)" g_opt["maxDepth"])
     )
     when(g_opt["flow"]
-        return(list(_encodeFlow(g_val n_level g_opt)))
+        return(list(_EncodeFlow(g_val n_level g_opt)))
     )
     return(cond(
         (g_val == nil
@@ -303,9 +303,9 @@ procedure(_blockLines(g_val n_level g_opt "gxg")  ; -> list[str]
                 l_keys = nil
                 t_orig = makeTable("ycYamlKeys" ycCodec:::Missing)
                 foreach(g_k g_val
-                    t_ks = _encodeKey(g_k g_opt)
+                    t_ks = _EncodeKey(g_k g_opt)
                     when(t_orig[t_ks] != ycCodec:::Missing
-                        error("ycYaml::encode: duplicate mapping key %A after encoding" t_ks)
+                        error("ycYaml::Encode: duplicate mapping key %A after encoding" t_ks)
                     )
                     t_orig[t_ks] = g_k
                     l_keys = tconc(l_keys t_ks)
@@ -315,7 +315,7 @@ procedure(_blockLines(g_val n_level g_opt "gxg")  ; -> list[str]
                     l_keys = sort(copy(l_keys) 'alphalessp)
                 )
                 l_res = nil
-                t_pad = _indentStr(n_level g_opt["indent"])
+                t_pad = _IndentStr(n_level g_opt["indent"])
                 foreach(t_ks l_keys
                     g_k = t_orig[t_ks]
                     cond(
@@ -327,14 +327,14 @@ procedure(_blockLines(g_val n_level g_opt "gxg")  ; -> list[str]
                         )
                         ((tablep(g_val[g_k]) || listp(g_val[g_k]))
                             l_res = tconc(l_res lsprintf("%s%s:" t_pad t_ks))
-                            l_child = _blockLines(g_val[g_k] n_level + 1 g_opt)
+                            l_child = _BlockLines(g_val[g_k] n_level + 1 g_opt)
                             foreach(t_first l_child
                                 l_res = tconc(l_res t_first)
                             )
                         )
                         (t
                             l_res = tconc(l_res lsprintf("%s%s: %s"
-                                t_pad t_ks _encodeScalar(g_val[g_k] g_opt)))
+                                t_pad t_ks _EncodeScalar(g_val[g_k] g_opt)))
                         )
                     )
                 )
@@ -344,17 +344,17 @@ procedure(_blockLines(g_val n_level g_opt "gxg")  ; -> list[str]
         (listp(g_val)
             let((l_res t_pad l_child t_first l_item)
                 l_res = nil
-                t_pad = _indentStr(n_level g_opt["indent"])
+                t_pad = _IndentStr(n_level g_opt["indent"])
                 foreach(l_item g_val
                     cond(
                         ((tablep(l_item) && length(l_item) == 0)
                             l_res = tconc(l_res lsprintf("%s- {}" t_pad))
                         )
                         ((tablep(l_item) && length(l_item) > 0)
-                            l_child = _blockLines(l_item n_level + 1 g_opt)
+                            l_child = _BlockLines(l_item n_level + 1 g_opt)
                             l_res = tconc(l_res lsprintf("%s- %s"
                                 t_pad
-                                _ltrim(car(l_child))
+                                _Ltrim(car(l_child))
                             ))
                             foreach(t_first cdr(l_child)
                                 l_res = tconc(l_res t_first)
@@ -362,14 +362,14 @@ procedure(_blockLines(g_val n_level g_opt "gxg")  ; -> list[str]
                         )
                         ((listp(l_item) && l_item != nil)
                             l_res = tconc(l_res strcat(t_pad "-"))
-                            l_child = _blockLines(l_item n_level + 1 g_opt)
+                            l_child = _BlockLines(l_item n_level + 1 g_opt)
                             foreach(t_first l_child
                                 l_res = tconc(l_res t_first)
                             )
                         )
                         (t
                             l_res = tconc(l_res lsprintf("%s- %s"
-                                t_pad _encodeScalar(l_item g_opt)))
+                                t_pad _EncodeScalar(l_item g_opt)))
                         )
                     )
                 )
@@ -377,13 +377,13 @@ procedure(_blockLines(g_val n_level g_opt "gxg")  ; -> list[str]
             )
         )
         (t
-            list(_encodeScalar(g_val g_opt))
+            list(_EncodeScalar(g_val g_opt))
         )
     )
     )
 ))
 
-procedure(encode(g_val \@key (format "yaml") (indent nil) (sortKeys nil) (strict nil) (flow nil) (explicitStart nil) (explicitEnd nil) (finalNewline t) (maxDepth nil) "gtgggggggg")  ; -> str
+procedure(Encode(g_val \@key (format "yaml") (indent nil) (sortKeys nil) (strict nil) (flow nil) (explicitStart nil) (explicitEnd nil) (finalNewline t) (maxDepth nil) "gtgggggggg")  ; -> str
     ; 编码值为 YAML 文本。
     ;
     ; **参数**
@@ -402,16 +402,16 @@ procedure(encode(g_val \@key (format "yaml") (indent nil) (sortKeys nil) (strict
     ;   (str) - YAML 文本
     let((n_indent g_opt l_lines t_s l_docs)
         when(maxDepth == nil
-            maxDepth = _maxEncodeDepth
+            maxDepth = _MaxEncodeDepth
         )
         unless(fixp(maxDepth) && maxDepth >= 1
-            error("ycYaml::encode: ?maxDepth must be a positive fixnum")
+            error("ycYaml::Encode: ?maxDepth must be a positive fixnum")
         )
         when(indent == nil
             indent = 2
         )
         unless(fixp(indent) && indent >= 1
-            error("ycYaml::encode: ?indent must be a positive fixnum")
+            error("ycYaml::Encode: ?indent must be a positive fixnum")
         )
         g_opt = makeTable("ycYamlOpt")
         g_opt["indent"] = indent
@@ -421,7 +421,7 @@ procedure(encode(g_val \@key (format "yaml") (indent nil) (sortKeys nil) (strict
         g_opt["maxDepth"] = maxDepth
         case(format
             ("yaml"
-                l_lines = _blockLines(g_val 0 g_opt)
+                l_lines = _BlockLines(g_val 0 g_opt)
                 t_s = buildString(l_lines "\n")
                 when(explicitStart
                     t_s = strcat("---\n" t_s)
@@ -433,12 +433,12 @@ procedure(encode(g_val \@key (format "yaml") (indent nil) (sortKeys nil) (strict
             )
             ("yaml-stream"
                 unless(listp(g_val)
-                    error("ycYaml::encode: format \"yaml-stream\" expects a list")
+                    error("ycYaml::Encode: format \"yaml-stream\" expects a list")
                 )
                 l_docs = nil
                 foreach(g_item g_val
                     l_docs = tconc(l_docs
-                        strcat("---\n" buildString(_blockLines(g_item 0 g_opt) "\n"))
+                        strcat("---\n" buildString(_BlockLines(g_item 0 g_opt) "\n"))
                     )
                 )
                 t_s = buildString(car(l_docs) "\n")
@@ -448,7 +448,7 @@ procedure(encode(g_val \@key (format "yaml") (indent nil) (sortKeys nil) (strict
                 )
             )
             (t
-                error("ycYaml::encode: unknown format %A" format)
+                error("ycYaml::Encode: unknown format %A" format)
             )
         )
     )

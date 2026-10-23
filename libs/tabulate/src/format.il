@@ -5,7 +5,7 @@
 
 useNamespace("ycTabulate")
 
-procedure(_rowLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; -> list[str]
+procedure(_RowLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; -> list[str]
     ; 渲染一行单元格的物理行（plain / simple；内部实现）。
     ;
     ; **参数**
@@ -34,7 +34,7 @@ procedure(_rowLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; 
                 t_cell = if(nth(n_i l_block) nth(n_i l_block) "")
                 t_line = strcat(
                     t_line
-                    _padCell(
+                    _PadCell(
                         t_cell
                         nth(n_c l_widths)
                         nth(n_c l_aligns)
@@ -44,13 +44,13 @@ procedure(_rowLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; 
                     )
                 )
             )
-            tconc(l_res _rstrip(t_line))
+            tconc(l_res _Rstrip(t_line))
         )
         car(l_res)
     )
 )
 
-procedure(_boxLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; -> list[str]
+procedure(_BoxLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; -> list[str]
     ; 渲染带竖线边框的物理行（grid / pipe；内部实现）。
     ;
     ; **参数**
@@ -79,7 +79,7 @@ procedure(_boxLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; 
                 t_cell = if(nth(n_i l_block) nth(n_i l_block) "")
                 t_line = strcat(
                     t_line
-                    _padCell(
+                    _PadCell(
                         t_cell
                         nth(n_c l_widths)
                         nth(n_c l_aligns)
@@ -95,7 +95,7 @@ procedure(_boxLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; 
     )
 )
 
-procedure(_border(l_widths t_ch "lt")  ; -> str
+procedure(_Border(l_widths t_ch "lt")  ; -> str
     ; 生成 grid 边框线（内部实现）。
     ;
     ; **参数**
@@ -107,13 +107,13 @@ procedure(_border(l_widths t_ch "lt")  ; -> str
     let((t_res)
         t_res = "+"
         foreach(n_w l_widths
-            t_res = strcat(t_res _repeatChar(t_ch n_w + 2) "+")
+            t_res = strcat(t_res _RepeatChar(t_ch n_w + 2) "+")
         )
         t_res
     )
 )
 
-procedure(_simpleSep(l_widths "l")  ; -> str
+procedure(_SimpleSep(l_widths "l")  ; -> str
     ; 生成 simple 格式的表头分隔线（内部实现）。
     ;
     ; **参数**
@@ -125,13 +125,13 @@ procedure(_simpleSep(l_widths "l")  ; -> str
         t_res = ""
         for(n_i 0 length(l_widths) - 1
             when(n_i > 0 t_res = strcat(t_res "  "))
-            t_res = strcat(t_res _repeatChar("-" nth(n_i l_widths)))
+            t_res = strcat(t_res _RepeatChar("-" nth(n_i l_widths)))
         )
-        _rstrip(t_res)
+        _Rstrip(t_res)
     )
 )
 
-procedure(_pipeSep(l_widths l_aligns "ll")  ; -> str
+procedure(_PipeSep(l_widths l_aligns "ll")  ; -> str
     ; 生成 pipe 格式的对齐分隔行（内部实现）。
     ;
     ; **参数**
@@ -147,11 +147,11 @@ procedure(_pipeSep(l_widths l_aligns "ll")  ; -> str
             n_w = nth(n_i l_widths)
             t_align = nth(n_i l_aligns)
             t_mark = cond(
-                (t_align == "left" strcat(":" _repeatChar("-" n_w - 1)))
+                (t_align == "left" strcat(":" _RepeatChar("-" n_w - 1)))
                 ((t_align == "right" || t_align == "decimal")
-                    strcat(_repeatChar("-" n_w - 1) ":")
+                    strcat(_RepeatChar("-" n_w - 1) ":")
                 )
-                (t strcat(":" _repeatChar("-" n_w - 2) ":"))
+                (t strcat(":" _RepeatChar("-" n_w - 2) ":"))
             )
             t_res = strcat(t_res t_mark)
         )
@@ -159,7 +159,7 @@ procedure(_pipeSep(l_widths l_aligns "ll")  ; -> str
     )
 )
 
-procedure(_formatPlain(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltx")  ; -> str
+procedure(_FormatPlain(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltx")  ; -> str
     ; 渲染 plain 格式（内部实现）。
     ;
     ; **参数**
@@ -176,12 +176,12 @@ procedure(_formatPlain(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llll
     let((l_out)
         l_out = cons(nil nil)
         when(l_head
-            foreach(t_line _rowLines(l_head l_widths l_aligns l_decs t_unit n_amb)
+            foreach(t_line _RowLines(l_head l_widths l_aligns l_decs t_unit n_amb)
                 tconc(l_out t_line)
             )
         )
         foreach(l_row l_rows
-            foreach(t_line _rowLines(l_row l_widths l_aligns l_decs t_unit n_amb)
+            foreach(t_line _RowLines(l_row l_widths l_aligns l_decs t_unit n_amb)
                 tconc(l_out t_line)
             )
         )
@@ -189,7 +189,7 @@ procedure(_formatPlain(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llll
     )
 )
 
-procedure(_formatSimple(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltx")  ; -> str
+procedure(_FormatSimple(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltx")  ; -> str
     ; 渲染 simple 格式（内部实现）。
     ;
     ; **参数**
@@ -206,13 +206,13 @@ procedure(_formatSimple(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "lll
     let((l_out)
         l_out = cons(nil nil)
         when(l_head
-            foreach(t_line _rowLines(l_head l_widths l_aligns l_decs t_unit n_amb)
+            foreach(t_line _RowLines(l_head l_widths l_aligns l_decs t_unit n_amb)
                 tconc(l_out t_line)
             )
-            tconc(l_out _simpleSep(l_widths))
+            tconc(l_out _SimpleSep(l_widths))
         )
         foreach(l_row l_rows
-            foreach(t_line _rowLines(l_row l_widths l_aligns l_decs t_unit n_amb)
+            foreach(t_line _RowLines(l_row l_widths l_aligns l_decs t_unit n_amb)
                 tconc(l_out t_line)
             )
         )
@@ -220,7 +220,7 @@ procedure(_formatSimple(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "lll
     )
 )
 
-procedure(_formatGrid(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltx")  ; -> str
+procedure(_FormatGrid(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltx")  ; -> str
     ; 渲染 grid 格式（内部实现）。
     ;
     ; **参数**
@@ -236,24 +236,24 @@ procedure(_formatGrid(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "lllll
     ;   (str) - 表格文本
     let((l_out)
         l_out = cons(nil nil)
-        tconc(l_out _border(l_widths "-"))
+        tconc(l_out _Border(l_widths "-"))
         when(l_head
-            foreach(t_line _boxLines(l_head l_widths l_aligns l_decs t_unit n_amb)
+            foreach(t_line _BoxLines(l_head l_widths l_aligns l_decs t_unit n_amb)
                 tconc(l_out t_line)
             )
-            tconc(l_out _border(l_widths "="))
+            tconc(l_out _Border(l_widths "="))
         )
         foreach(l_row l_rows
-            foreach(t_line _boxLines(l_row l_widths l_aligns l_decs t_unit n_amb)
+            foreach(t_line _BoxLines(l_row l_widths l_aligns l_decs t_unit n_amb)
                 tconc(l_out t_line)
             )
-            tconc(l_out _border(l_widths "-"))
+            tconc(l_out _Border(l_widths "-"))
         )
         buildString(car(l_out) "\n")
     )
 )
 
-procedure(_formatPipe(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltx")  ; -> str
+procedure(_FormatPipe(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llllltx")  ; -> str
     ; 渲染 pipe 格式（内部实现）。
     ;
     ; **参数**
@@ -270,13 +270,13 @@ procedure(_formatPipe(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "lllll
     let((l_out)
         l_out = cons(nil nil)
         when(l_head
-            foreach(t_line _boxLines(l_head l_widths l_aligns l_decs t_unit n_amb)
+            foreach(t_line _BoxLines(l_head l_widths l_aligns l_decs t_unit n_amb)
                 tconc(l_out t_line)
             )
-            tconc(l_out _pipeSep(l_widths l_aligns))
+            tconc(l_out _PipeSep(l_widths l_aligns))
         )
         foreach(l_row l_rows
-            foreach(t_line _boxLines(l_row l_widths l_aligns l_decs t_unit n_amb)
+            foreach(t_line _BoxLines(l_row l_widths l_aligns l_decs t_unit n_amb)
                 tconc(l_out t_line)
             )
         )

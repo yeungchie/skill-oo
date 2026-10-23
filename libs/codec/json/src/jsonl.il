@@ -3,7 +3,7 @@ useNamespace("ycJson")
 
 ; ---------- jsonl 切分与辅助 ----------
 
-procedure(_lineSplit(t_s "t")  ; -> list
+procedure(_LineSplit(t_s "t")  ; -> list
     ; 按 \n 切分文本为行列表（保留空行，供行号对应）。
     ;
     ; **参数**
@@ -17,7 +17,7 @@ procedure(_lineSplit(t_s "t")  ; -> list
         when(0 < n_len
             n_start = 1
             for(n_k 1 n_len
-                when(_code(t_s n_k) == 10
+                when(_Code(t_s n_k) == 10
                     l_res = tconc(l_res substring(t_s n_start n_k - n_start))
                     n_start = n_k + 1
                 )
@@ -30,7 +30,7 @@ procedure(_lineSplit(t_s "t")  ; -> list
     )
 )
 
-procedure(_lineBlankp(t_line "t")  ; -> t | nil
+procedure(_LineBlankp(t_line "t")  ; -> t | nil
     ; 判断一行是否全为空（空格/制表/回车）。
     ;
     ; **参数**
@@ -43,7 +43,7 @@ procedure(_lineBlankp(t_line "t")  ; -> t | nil
         n_len = length(t_line)
         when(0 < n_len
             for(n_k 1 n_len
-                unless(_code(t_line n_k) == 32 || _code(t_line n_k) == 9 || _code(t_line n_k) == 13
+                unless(_Code(t_line n_k) == 32 || _Code(t_line n_k) == 9 || _Code(t_line n_k) == 13
                     g_blank = nil
                 )
             )
@@ -52,7 +52,7 @@ procedure(_lineBlankp(t_line "t")  ; -> t | nil
     )
 )
 
-procedure(_newlines(n_n "x")  ; -> str
+procedure(_Newlines(n_n "x")  ; -> str
     ; 生成 n_n 个换行符组成的串（jsonl 错误路径的行号前缀）。
     ;
     ; **参数**
@@ -71,7 +71,7 @@ procedure(_newlines(n_n "x")  ; -> str
     )
 )
 
-procedure(_decodeLines(t_str n_max "tx")  ; -> list
+procedure(_DecodeLines(t_str n_max "tx")  ; -> list
     ; 逐行解码 JSON Lines：空行/全空白行跳过，各非空行须为完整文档，错误带原始行号。
     ;
     ; **参数**
@@ -81,18 +81,18 @@ procedure(_decodeLines(t_str n_max "tx")  ; -> list
     ; **返回**
     ;   (list) - 按行序的解码产物列表；无有效行时为 nil
     let((l_lines l_res l_r t_line n_idx)
-        l_lines = _lineSplit(t_str)
+        l_lines = _LineSplit(t_str)
         l_res = nil
         n_idx = 0
         while(l_lines
             t_line = car(l_lines)
             n_idx = n_idx + 1
-            unless(_lineBlankp(t_line)
-                l_r = errset(_decodeText(t_line nil n_max) nil)
+            unless(_LineBlankp(t_line)
+                l_r = errset(_DecodeText(t_line nil n_max) nil)
                 if(l_r
                     l_res = tconc(l_res car(l_r))
                     ; 行内报错：以等长换行前缀重跑，令错误行列指向原始行号
-                    _decodeText(strcat(_newlines(n_idx - 1) t_line) nil n_max)
+                    _DecodeText(strcat(_Newlines(n_idx - 1) t_line) nil n_max)
                 )
             )
             l_lines = cdr(l_lines)

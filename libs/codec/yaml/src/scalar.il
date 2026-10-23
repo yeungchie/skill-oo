@@ -1,10 +1,10 @@
-ycNamespace:::require("ycCodec")
+ycNamespace:::Require("ycCodec")
 
 useNamespace("ycYaml")
 
 ; ---------- 标量解析 ----------
 
-procedure(_hexVal(n_c "x")  ; -> int | nil
+procedure(_HexVal(n_c "x")  ; -> int | nil
     ; 将单个十六进制字符码转为数值。
     ;
     ; **参数**
@@ -20,7 +20,7 @@ procedure(_hexVal(n_c "x")  ; -> int | nil
     )
 )
 
-procedure(_parseQuoted(t_s n_i n_line "txn")  ; -> list
+procedure(_ParseQuoted(t_s n_i n_line "txn")  ; -> list
     ; 解析单引号或双引号标量，返回 (值 下一位置)。
     ;
     ; **参数**
@@ -32,21 +32,21 @@ procedure(_parseQuoted(t_s n_i n_line "txn")  ; -> list
     ;   (list) - (字符串值 闭引号后一位置)
     let((n_len n_q n_pos n_seg n_c n_esc n_d n_k n_cp l_p g_done)
         n_len = length(t_s)
-        n_q = _code(t_s n_i)
+        n_q = _Code(t_s n_i)
         n_pos = n_i + 1
         n_seg = n_pos
         g_done = nil
         while(!g_done
             when(n_pos > n_len
-                _errorLine("unterminated quoted scalar" n_line n_i)
+                _ErrorLine("unterminated quoted scalar" n_line n_i)
             )
-            n_c = _code(t_s n_pos)
+            n_c = _Code(t_s n_pos)
             cond(
                 (n_q == 39
                     cond(
                         (n_c == 39
                             cond(
-                                (_code(t_s n_pos + 1) == 39
+                                (_Code(t_s n_pos + 1) == 39
                                     l_p = tconc(l_p substring(t_s n_seg n_pos - n_seg))
                                     l_p = tconc(l_p "'")
                                     n_pos = n_pos + 2
@@ -76,65 +76,65 @@ procedure(_parseQuoted(t_s n_i n_line "txn")  ; -> list
                             n_esc = n_pos
                             n_pos = n_pos + 1
                             when(n_pos > n_len
-                                _errorLine("unterminated escape" n_line n_esc)
+                                _ErrorLine("unterminated escape" n_line n_esc)
                             )
-                            n_cp = _code(t_s n_pos)
+                            n_cp = _Code(t_s n_pos)
                             case(n_cp
-                                (48 l_p = tconc(l_p _utf8Str(0)))
-                                (97 l_p = tconc(l_p _utf8Str(7)))
-                                (98 l_p = tconc(l_p _utf8Str(8)))
-                                (116 l_p = tconc(l_p _utf8Str(9)))
-                                (110 l_p = tconc(l_p _utf8Str(10)))
-                                (118 l_p = tconc(l_p _utf8Str(11)))
-                                (102 l_p = tconc(l_p _utf8Str(12)))
-                                (114 l_p = tconc(l_p _utf8Str(13)))
-                                (101 l_p = tconc(l_p _utf8Str(27)))
+                                (48 l_p = tconc(l_p _Utf8Str(0)))
+                                (97 l_p = tconc(l_p _Utf8Str(7)))
+                                (98 l_p = tconc(l_p _Utf8Str(8)))
+                                (116 l_p = tconc(l_p _Utf8Str(9)))
+                                (110 l_p = tconc(l_p _Utf8Str(10)))
+                                (118 l_p = tconc(l_p _Utf8Str(11)))
+                                (102 l_p = tconc(l_p _Utf8Str(12)))
+                                (114 l_p = tconc(l_p _Utf8Str(13)))
+                                (101 l_p = tconc(l_p _Utf8Str(27)))
                                 (32 l_p = tconc(l_p " "))
                                 (34 l_p = tconc(l_p "\""))
                                 (47 l_p = tconc(l_p "/"))
                                 (92 l_p = tconc(l_p "\\"))
-                                (78 l_p = tconc(l_p _utf8Str(133)))
-                                (95 l_p = tconc(l_p _utf8Str(160)))
-                                (76 l_p = tconc(l_p _utf8Str(8232)))
-                                (80 l_p = tconc(l_p _utf8Str(8233)))
+                                (78 l_p = tconc(l_p _Utf8Str(133)))
+                                (95 l_p = tconc(l_p _Utf8Str(160)))
+                                (76 l_p = tconc(l_p _Utf8Str(8232)))
+                                (80 l_p = tconc(l_p _Utf8Str(8233)))
                                 (120
                                     n_d = 0
                                     for(n_k 1 2
-                                        n_cp = _hexVal(_code(t_s n_pos + n_k))
+                                        n_cp = _HexVal(_Code(t_s n_pos + n_k))
                                         unless(n_cp
-                                            _errorLine("invalid hex escape" n_line n_esc)
+                                            _ErrorLine("invalid hex escape" n_line n_esc)
                                         )
                                         n_d = n_d * 16 + n_cp
                                     )
-                                    l_p = tconc(l_p _utf8Str(n_d))
+                                    l_p = tconc(l_p _Utf8Str(n_d))
                                     n_pos = n_pos + 2
                                 )
                                 (117
                                     n_d = 0
                                     for(n_k 1 4
-                                        n_cp = _hexVal(_code(t_s n_pos + n_k))
+                                        n_cp = _HexVal(_Code(t_s n_pos + n_k))
                                         unless(n_cp
-                                            _errorLine("invalid unicode escape" n_line n_esc)
+                                            _ErrorLine("invalid unicode escape" n_line n_esc)
                                         )
                                         n_d = n_d * 16 + n_cp
                                     )
-                                    l_p = tconc(l_p _utf8Str(n_d))
+                                    l_p = tconc(l_p _Utf8Str(n_d))
                                     n_pos = n_pos + 4
                                 )
                                 (85
                                     n_d = 0
                                     for(n_k 1 8
-                                        n_cp = _hexVal(_code(t_s n_pos + n_k))
+                                        n_cp = _HexVal(_Code(t_s n_pos + n_k))
                                         unless(n_cp
-                                            _errorLine("invalid unicode escape" n_line n_esc)
+                                            _ErrorLine("invalid unicode escape" n_line n_esc)
                                         )
                                         n_d = n_d * 16 + n_cp
                                     )
-                                    l_p = tconc(l_p _utf8Str(n_d))
+                                    l_p = tconc(l_p _Utf8Str(n_d))
                                     n_pos = n_pos + 8
                                 )
                                 (t
-                                    _errorLine("invalid escape" n_line n_esc)
+                                    _ErrorLine("invalid escape" n_line n_esc)
                                 )
                             )
                             n_pos = n_pos + 1
@@ -147,11 +147,11 @@ procedure(_parseQuoted(t_s n_i n_line "txn")  ; -> list
                 )
             )
         )
-        list(_build(l_p) n_pos)
+        list(_Build(l_p) n_pos)
     )
 )
 
-procedure(_parseIntText(t_s "t")  ; -> any
+procedure(_ParseIntText(t_s "t")  ; -> any
     ; 解析 YAML 整数文本；超出 fixnum 范围回 flonum。
     ;
     ; **参数**
@@ -164,15 +164,15 @@ procedure(_parseIntText(t_s "t")  ; -> any
         n_sign = 1
         n_i = 1
         n_len = length(t_clean)
-        when(n_i <= n_len && (_code(t_clean n_i) == 43 || _code(t_clean n_i) == 45)
-            when(_code(t_clean n_i) == 45
+        when(n_i <= n_len && (_Code(t_clean n_i) == 43 || _Code(t_clean n_i) == 45)
+            when(_Code(t_clean n_i) == 45
                 n_sign = -1
             )
             n_i = n_i + 1
         )
         n_base = 10
-        when(n_i + 1 <= n_len && _code(t_clean n_i) == 48
-            case(_code(t_clean n_i + 1)
+        when(n_i + 1 <= n_len && _Code(t_clean n_i) == 48
+            case(_Code(t_clean n_i + 1)
                 (120 n_base = 16 n_i = n_i + 2)
                 (111 n_base = 8 n_i = n_i + 2)
                 (98 n_base = 2 n_i = n_i + 2)
@@ -181,7 +181,7 @@ procedure(_parseIntText(t_s "t")  ; -> any
         n_v = 0
         g_bad = nil
         while(n_i <= n_len && !g_bad
-            n_c = _code(t_clean n_i)
+            n_c = _Code(t_clean n_i)
             n_digit = cond(
                 (n_c >= 48 && n_c <= 57 n_c - 48)
                 (n_c >= 97 && n_c <= 102 n_c - 87)
@@ -200,7 +200,7 @@ procedure(_parseIntText(t_s "t")  ; -> any
     )
 )
 
-procedure(_resolvePlain(t_s "t")  ; -> any
+procedure(_ResolvePlain(t_s "t")  ; -> any
     ; 按 YAML 1.2 core 规则解析未加引号的标量。
     ;
     ; **参数**
@@ -219,14 +219,14 @@ procedure(_resolvePlain(t_s "t")  ; -> any
             return(ycCodec:::False)
         )
         when(pcreMatchp("(?i)^[+-]?\\.inf\\z" t_s)
-            return(if(_code(t_s 1) == 45 -atof("1e999") atof("1e999")))
+            return(if(_Code(t_s 1) == 45 -atof("1e999") atof("1e999")))
         )
         when(pcreMatchp("(?i)^\\.nan\\z" t_s)
             return(atof("nan"))
         )
         t_clean = pcreReplace(pcreCompile("_") t_s "" 0)
         when(pcreMatchp("^[+-]?(0[xX][0-9a-fA-F]+|0[oO][0-7]+|0[bB][01]+|[0-9]+)\\z" t_clean)
-            n_v = _parseIntText(t_clean)
+            n_v = _ParseIntText(t_clean)
             when(n_v != nil
                 return(n_v)
             )
@@ -238,7 +238,7 @@ procedure(_resolvePlain(t_s "t")  ; -> any
     )
 )
 
-procedure(_parseScalarText(t_text "t")  ; -> any
+procedure(_ParseScalarText(t_text "t")  ; -> any
     ; 解析已去注释的单行标量文本。
     ;
     ; **参数**
@@ -247,29 +247,29 @@ procedure(_parseScalarText(t_text "t")  ; -> any
     ; **返回**
     ;   (any) - 标量值；引号未闭合或非法转义报错
     prog((n_len n_i l_q)
-        t_text = _rtrim(t_text)
+        t_text = _Rtrim(t_text)
         n_len = length(t_text)
         n_i = 1
-        while(n_i <= n_len && _code(t_text n_i) == 32
+        while(n_i <= n_len && _Code(t_text n_i) == 32
             n_i = n_i + 1
         )
         when(n_i > n_len
             return(ycCodec:::Null)
         )
-        if(_code(t_text n_i) == 34 || _code(t_text n_i) == 39
+        if(_Code(t_text n_i) == 34 || _Code(t_text n_i) == 39
             progn(
-                l_q = _parseQuoted(t_text n_i 1)
-                when(_rtrim(_tail(t_text cadr(l_q))) != ""
-                    _errorLine("unexpected characters after quoted scalar" 1 cadr(l_q))
+                l_q = _ParseQuoted(t_text n_i 1)
+                when(_Rtrim(_Tail(t_text cadr(l_q))) != ""
+                    _ErrorLine("unexpected characters after quoted scalar" 1 cadr(l_q))
                 )
                 return(car(l_q))
             )
-            return(_resolvePlain(_rtrim(substring(t_text n_i n_len - n_i + 1))))
+            return(_ResolvePlain(_Rtrim(substring(t_text n_i n_len - n_i + 1))))
         )
     )
 )
 
-procedure(_scalarText(g_val "g")  ; -> str
+procedure(_ScalarText(g_val "g")  ; -> str
     ; 将标量转为标签强制转换用的文本形式。
     ;
     ; **参数**
@@ -286,12 +286,12 @@ procedure(_scalarText(g_val "g")  ; -> str
         (g_val == ycCodec:::False "false")
         (g_val == ycCodec:::Null "null")
         (t
-            error("ycYaml::decode: cannot convert value to string")
+            error("ycYaml::Decode: cannot convert value to string")
         )
     )
 )
 
-procedure(_tagValue(g_val t_tag "gt")  ; -> any
+procedure(_TagValue(g_val t_tag "gt")  ; -> any
     ; 应用 YAML 核心标签（!!str/!!int/!!float/!!bool/!!null/!!seq/!!map）。
     ;
     ; **参数**
@@ -306,16 +306,16 @@ procedure(_tagValue(g_val t_tag "gt")  ; -> any
             t_name = strcat("!!" pcreReplace(pcreCompile("^tag:yaml\\.org,2002:") t_tag "" 0))
         )
         case(t_name
-            ("!!str" _scalarText(g_val))
+            ("!!str" _ScalarText(g_val))
             ("!!int"
                 if(fixp(g_val)
                     g_val
                     progn(
-                        t_s = _scalarText(g_val)
+                        t_s = _ScalarText(g_val)
                         unless(pcreMatchp("^[+-]?(0[xX][0-9a-fA-F_]+|0[oO][0-7_]+|0[bB][01_]+|[0-9_]+)\\z" t_s)
-                            error("ycYaml::decode: !!int value is not an integer")
+                            error("ycYaml::Decode: !!int value is not an integer")
                         )
-                        _parseIntText(t_s)
+                        _ParseIntText(t_s)
                     )
                 )
             )
@@ -323,9 +323,9 @@ procedure(_tagValue(g_val t_tag "gt")  ; -> any
                 if(floatp(g_val)
                     g_val
                     progn(
-                        t_s = _scalarText(g_val)
+                        t_s = _ScalarText(g_val)
                         unless(pcreMatchp("^[+-]?([0-9_]+(\\.[0-9_]*)?|\\.[0-9_]+)([eE][+-]?[0-9]+)?\\z" t_s)
-                            error("ycYaml::decode: !!float value is not a number")
+                            error("ycYaml::Decode: !!float value is not a number")
                         )
                         atof(pcreReplace(pcreCompile("_") t_s "" 0))
                     )
@@ -334,10 +334,10 @@ procedure(_tagValue(g_val t_tag "gt")  ; -> any
             ("!!bool"
                 if(g_val == ycCodec:::True || g_val == ycCodec:::False
                     g_val
-                    case(pcreReplace(pcreCompile("(?i)^\\s+|\\s+\\z") _scalarText(g_val) "" 0)
+                    case(pcreReplace(pcreCompile("(?i)^\\s+|\\s+\\z") _ScalarText(g_val) "" 0)
                         (("yes" "on" "true") ycCodec:::True)
                         (("no" "off" "false") ycCodec:::False)
-                        (t error("ycYaml::decode: !!bool value is not a boolean"))
+                        (t error("ycYaml::Decode: !!bool value is not a boolean"))
                     )
                 )
             )
@@ -345,23 +345,23 @@ procedure(_tagValue(g_val t_tag "gt")  ; -> any
             ("!!seq"
                 if(listp(g_val) || g_val == nil
                     g_val
-                    error("ycYaml::decode: !!seq value is not a sequence")
+                    error("ycYaml::Decode: !!seq value is not a sequence")
                 )
             )
             ("!!map"
                 if(tablep(g_val)
                     g_val
-                    error("ycYaml::decode: !!map value is not a mapping")
+                    error("ycYaml::Decode: !!map value is not a mapping")
                 )
             )
             (t
-                error("ycYaml::decode: unsupported tag %A" t_tag)
+                error("ycYaml::Decode: unsupported tag %A" t_tag)
             )
         )
     )
 )
 
-procedure(_parseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "lxntnn")  ; -> list
+procedure(_ParseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "lxntnn")  ; -> list
     ; 解析 `|`/`>` 块标量及其后续缩进行。
     ;
     ; **参数**
@@ -376,18 +376,18 @@ procedure(_parseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
     ;   (list) - (字符串 下一行号)
     prog((n_len n_i n_c n_style n_chomp n_hint n_indent n_last l_raw t_line n_ind n_content n_count n_tail t_body l_p g_stop g_prevBlank g_prevMore)
         n_len = length(t_header)
-        n_style = _code(t_header 1)
+        n_style = _Code(t_header 1)
         n_chomp = 0
         n_hint = 0
         n_i = 2
         while(n_i <= n_len
-            n_c = _code(t_header n_i)
+            n_c = _Code(t_header n_i)
             cond(
                 (n_c == 43 n_chomp = 1)
                 (n_c == 45 n_chomp = -1)
                 (n_c >= 49 && n_c <= 57 n_hint = n_c - 48)
                 (n_c == 32 || n_c == 9 n_i = n_len + 1)
-                (t _errorLine("invalid block scalar header" n_line n_col))
+                (t _ErrorLine("invalid block scalar header" n_line n_col))
             )
             n_i = n_i + 1
         )
@@ -396,13 +396,13 @@ procedure(_parseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
         n_content = nil
         g_stop = nil
         while(!g_stop && n_last <= length(l_lines)
-            t_line = _nth1(n_last l_lines)
-            n_ind = _lineIndent(t_line n_last)
-            when(_rtrim(t_line) == ""
+            t_line = _Nth1(n_last l_lines)
+            n_ind = _LineIndent(t_line n_last)
+            when(_Rtrim(t_line) == ""
                 l_raw = tconc(l_raw "")
                 n_last = n_last + 1
             )
-            unless(g_stop || _rtrim(t_line) == ""
+            unless(g_stop || _Rtrim(t_line) == ""
                 when(n_content == nil
                     n_content = if(n_hint > 0 n_parentIndent + n_hint n_ind)
                 )
@@ -419,7 +419,7 @@ procedure(_parseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
         )
         l_raw = car(l_raw)
         n_count = length(l_raw)
-        while(n_count > 0 && _nth1(n_count l_raw) == ""
+        while(n_count > 0 && _Nth1(n_count l_raw) == ""
             n_count = n_count - 1
         )
         cond(
@@ -427,9 +427,9 @@ procedure(_parseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
                 t_body = ""
                 g_prevBlank = t
                 for(n_i 1 length(l_raw)
-                    t_line = _nth1(n_i l_raw)
+                    t_line = _Nth1(n_i l_raw)
                     let((g_more t_sep)
-                        g_more = length(t_line) > 0 && (_code(t_line 1) == 32 || _code(t_line 1) == 9)
+                        g_more = length(t_line) > 0 && (_Code(t_line 1) == 32 || _Code(t_line 1) == 9)
                         if(n_i == 1
                             t_body = t_line
                             progn(
@@ -452,17 +452,17 @@ procedure(_parseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
                 foreach(t_line l_raw
                     l_p = tconc(l_p t_line)
                 )
-                t_body = strcat(_joinBuild(l_p "\n") "\n")
+                t_body = strcat(_JoinBuild(l_p "\n") "\n")
             )
         )
         cond(
             (n_chomp == -1
-                while(length(t_body) > 0 && _code(t_body length(t_body)) == 10
+                while(length(t_body) > 0 && _Code(t_body length(t_body)) == 10
                     t_body = substring(t_body 1 length(t_body) - 1)
                 )
             )
             (n_chomp == 0
-                while(length(t_body) > 0 && _code(t_body length(t_body)) == 10
+                while(length(t_body) > 0 && _Code(t_body length(t_body)) == 10
                     t_body = substring(t_body 1 length(t_body) - 1)
                 )
                 when(length(t_body) > 0

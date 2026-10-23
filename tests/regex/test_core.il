@@ -3,49 +3,49 @@
 ; value for a pinned divergence.
 
 ; --- 1. first-run smoke (errset-wrapped: capability failure fails the test, not the file) ---
-_assertOk(errset(ycRegEx::reMatch("\\Aabc" "abc") != nil nil)  "smoke: \\A anchor compiles and gates")
-_assertOk(errset(length(ycRegEx::reFindall("\\d+" "a1b22")) == 2 nil)  "smoke: source backslashes 2-write")
-_assertOk(errset(length(ycRegEx::reFindall("a*" "")) == 1 nil)  "smoke: empty subject engine call")
-_assertOk(errset(ycRegEx::reSearch("(?P<y>\\d{4})" "y2026") != nil nil)  "smoke: named group syntax")
-_assertOk(errset(ycRegEx::reSearch("(a)\\1" "aa") != nil nil)  "smoke: user backref across non-capturing wrap")
-_assertOk(errset(ycRegEx::reSearch("a++b" "aaab") != nil nil)  "smoke: possessive quantifier")
-_assertOk(errset(ycRegEx::reSearch("foo(?=bar)" "foobar") != nil nil)  "smoke: lookahead")
-_assertOk(errset(ycRegEx::reSearch("(?i)abc" "xABC") != nil nil)  "smoke: inline flag")
-_assertOk(errset(ycRegEx::reSearch("(\\d+)-(\\d+)" "a10-20b") != nil nil)  "smoke: & whole-text extraction")
-_assertOk(errset(length(ycRegEx::reFindall("" "ab")) == 3 nil)  "smoke: empty pattern")
-_assertOk(errset(ycRegEx::reSearch("(?:ab)+" "xxabab") != nil nil)  "smoke: non-capturing span wrap")
-_assertOk(errset(ycRegEx::reFullmatch("a|ab" "ab") != nil nil)  "smoke: third object \\A(?:)\\z")
+_assertOk(errset(ycRegEx::ReMatch("\\Aabc" "abc") != nil nil)  "smoke: \\A anchor compiles and gates")
+_assertOk(errset(length(ycRegEx::ReFindall("\\d+" "a1b22")) == 2 nil)  "smoke: source backslashes 2-write")
+_assertOk(errset(length(ycRegEx::ReFindall("a*" "")) == 1 nil)  "smoke: empty subject engine call")
+_assertOk(errset(ycRegEx::ReSearch("(?P<y>\\d{4})" "y2026") != nil nil)  "smoke: named group syntax")
+_assertOk(errset(ycRegEx::ReSearch("(a)\\1" "aa") != nil nil)  "smoke: user backref across non-capturing wrap")
+_assertOk(errset(ycRegEx::ReSearch("a++b" "aaab") != nil nil)  "smoke: possessive quantifier")
+_assertOk(errset(ycRegEx::ReSearch("foo(?=bar)" "foobar") != nil nil)  "smoke: lookahead")
+_assertOk(errset(ycRegEx::ReSearch("(?i)abc" "xABC") != nil nil)  "smoke: inline flag")
+_assertOk(errset(ycRegEx::ReSearch("(\\d+)-(\\d+)" "a10-20b") != nil nil)  "smoke: & whole-text extraction")
+_assertOk(errset(length(ycRegEx::ReFindall("" "ab")) == 3 nil)  "smoke: empty pattern")
+_assertOk(errset(ycRegEx::ReSearch("(?:ab)+" "xxabab") != nil nil)  "smoke: non-capturing span wrap")
+_assertOk(errset(ycRegEx::ReFullmatch("a|ab" "ab") != nil nil)  "smoke: third object \\A(?:)\\z")
 
 ; --- 2. anchors / match spans ---
 let((m)
-    m = ycRegEx::reMatch("\\Aabc" "abc")
+    m = ycRegEx::ReMatch("\\Aabc" "abc")
     _assert(m && m->start() == 0 && m->end() == 3  "match: \\A span (0,3)")
-    _assert(ycRegEx::reMatch("\\Aabc" "xabc") == nil  "match: \\A rejects offset subject")
-    m = ycRegEx::reMatch("\\d+" "123abc")
+    _assert(ycRegEx::ReMatch("\\Aabc" "xabc") == nil  "match: \\A rejects offset subject")
+    m = ycRegEx::ReMatch("\\d+" "123abc")
     _assert(m && m->start() == 0 && m->end() == 3  "match: digits span (0,3)")
-    _assert(ycRegEx::reMatch("\\d+" "a123") == nil  "match: no match at 0 -> nil")
-    m = ycRegEx::reMatch("(?m)^a" "ab")
+    _assert(ycRegEx::ReMatch("\\d+" "a123") == nil  "match: no match at 0 -> nil")
+    m = ycRegEx::ReMatch("(?m)^a" "ab")
     _assert(m && m->start() == 0 && m->end() == 1  "match: (?m)^a span (0,1)")
-    _assert(ycRegEx::reMatch("^b" "a\nb") == nil  "match: ^ without M is string start")
-    m = ycRegEx::reMatch("foo(?=bar)" "foobar")
+    _assert(ycRegEx::ReMatch("^b" "a\nb") == nil  "match: ^ without M is string start")
+    m = ycRegEx::ReMatch("foo(?=bar)" "foobar")
     _assert(m && m->start() == 0 && m->end() == 3  "match: lookahead span (0,3)")
 )
 
 ; --- 3. fullmatch third object ---
 let((m)
-    m = ycRegEx::reFullmatch("a|ab" "ab")
+    m = ycRegEx::ReFullmatch("a|ab" "ab")
     _assert(m && m->start() == 0 && m->end() == 2  "fullmatch: a|ab consumes whole subject")
-    m = ycRegEx::reFullmatch("a+" "aaa")
+    m = ycRegEx::ReFullmatch("a+" "aaa")
     _assert(m && m->start() == 0 && m->end() == 3  "fullmatch: greedy span (0,3)")
-    m = ycRegEx::reFullmatch("a+?" "aaa")
+    m = ycRegEx::ReFullmatch("a+?" "aaa")
     _assert(m && m->start() == 0 && m->end() == 3  "fullmatch: lazy still whole (0,3)")
-    _assert(ycRegEx::reFullmatch("foo(?=bar)" "foobar") == nil  "fullmatch: lookahead fails without trailing context")
-    _assert(ycRegEx::reFullmatch("\\d+" "123a") == nil  "fullmatch: trailing junk -> nil")
+    _assert(ycRegEx::ReFullmatch("foo(?=bar)" "foobar") == nil  "fullmatch: lookahead fails without trailing context")
+    _assert(ycRegEx::ReFullmatch("\\d+" "123a") == nil  "fullmatch: trailing junk -> nil")
 )
 
 ; --- 4. search path: lazy span + lookahead position + expand ---
 let((m)
-    m = ycRegEx::reSearch("(\\d+)-(\\d+)" "a10-20b")
+    m = ycRegEx::ReSearch("(\\d+)-(\\d+)" "a10-20b")
     _assert(m && m->start() == 1 && m->end() == 6  "search: lazy span (1,6)")
     _assert(m->group() == "10-20"  "search: group() whole")
     _assertSameSeq(m->groups() '("10" "20")  "search: groups()")
@@ -53,39 +53,39 @@ let((m)
     _assert(m->expand("\\2-\\1") == "20-10"  "search: expand reverse refs")
     _assert(m->expand("\\1") == "10"  "search: expand single ref")
     _assert(m->expand("literal-abc") == "literal-abc"  "search: expand literal passthrough")
-    m = ycRegEx::reSearch("foo(?=bar)" "foobar")
+    m = ycRegEx::ReSearch("foo(?=bar)" "foobar")
     _assert(m && m->start() == 0 && m->end() == 3  "search: lookahead span (0,3)")
     _assert(m->group() == "foo"  "search: lookahead group() 'foo'")
-    _assert(ycRegEx::reSearch("foo(?=bar)" "foobaz") == nil  "search: failed lookahead -> nil")
-    m = ycRegEx::reFullmatch("a+" "aaa")
+    _assert(ycRegEx::ReSearch("foo(?=bar)" "foobaz") == nil  "search: failed lookahead -> nil")
+    m = ycRegEx::ReFullmatch("a+" "aaa")
     _assert(m && m->expand("x") == "x"  "fullmatch: expand re-establishes on _full anchor")
 )
 
 ; --- 4b. search beyond the old 64KB anchor limit ---
 let((t_subj m)
     t_subj = strcat(sprintf(nil "%70000s" "") "x")
-    m = ycRegEx::reSearch("x" t_subj)
+    m = ycRegEx::ReSearch("x" t_subj)
     _assert(m && m->start() == 70000  "search: >64KB start")
     _assert(m && m->end() == 70001    "search: >64KB end")
-    _assertSameSeq(ycRegEx::reFindall("x" t_subj) '("x")  "findall: >64KB")
-    m = car(ycRegEx::reFinditer("x" t_subj))
+    _assertSameSeq(ycRegEx::ReFindall("x" t_subj) '("x")  "findall: >64KB")
+    m = car(ycRegEx::ReFinditer("x" t_subj))
     _assert(m && m->start() == 70000  "finditer: >64KB start")
-    _assertSameSeq(ycRegEx::reFindall("(?=x)" t_subj) '("")  "findall: >64KB zero-width")
-    m = car(ycRegEx::reFinditer("(?=x)" t_subj))
+    _assertSameSeq(ycRegEx::ReFindall("(?=x)" t_subj) '("")  "findall: >64KB zero-width")
+    m = car(ycRegEx::ReFinditer("(?=x)" t_subj))
     _assert(m && m->start() == 70000  "finditer: >64KB zero-width start")
-    m = car(ycRegEx::reFinditer("(?<=x)" t_subj))
+    m = car(ycRegEx::ReFinditer("(?<=x)" t_subj))
     _assert(m && m->start() == 70001  "finditer: >64KB lookbehind zero-width")
-    _assertSameSeq(ycRegEx::reCompile("(?=x)" ?compileOpts 'caseLess)->findall(t_subj)
+    _assertSameSeq(ycRegEx::ReCompile("(?=x)" ?compileOpts 'caseLess)->findall(t_subj)
         '("")  "findall: >64KB zero-width with compileOpts"
     )
-    _assertSameSeq(ycRegEx::reFindall("(?= )" t_subj ?execOpts 'anchored)
+    _assertSameSeq(ycRegEx::ReFindall("(?= )" t_subj ?execOpts 'anchored)
         '("")  "findall: >64KB anchored zero-width"
     ))
-_assertSameSeq(ycRegEx::reFindall("(?=(a))" "aa") '("a" "a")  "findall: zero-width capture")
+_assertSameSeq(ycRegEx::ReFindall("(?=(a))" "aa") '("a" "a")  "findall: zero-width capture")
 
 ; --- 5. group family ---
 let((m)
-    m = ycRegEx::reSearch("(\\d+)-(\\d+)" "a10-20b")
+    m = ycRegEx::ReSearch("(\\d+)-(\\d+)" "a10-20b")
     _assert(m->group(0) == "10-20"  "group: 0 = whole")
     _assert(m->group(1) == "10"  "group: 1")
     _assert(m->group() == "10-20"  "group: no args = whole")
@@ -103,7 +103,7 @@ let((m)
 ; --- 5b. >9 capture groups ---
 let((l_pat m p)
     l_pat = "(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)"
-    m = ycRegEx::reSearch(l_pat "abcdefghijkl")
+    m = ycRegEx::ReSearch(l_pat "abcdefghijkl")
     _assert(m != nil  "groups>9: search")
     _assert(m->group(10) == "j"  "groups>9: group(10)")
     _assert(m->group(12) == "l"  "groups>9: group(12)")
@@ -112,7 +112,7 @@ let((l_pat m p)
         "groups>9: groups()"
     )
     _assert(m->expand("\\{10}\\{12}") == "jl"  "groups>9: expand")
-    p = ycRegEx::reCompile(l_pat)
+    p = ycRegEx::ReCompile(l_pat)
     _assert(p->groups() == 12  "groups>9: Pattern->groups")
     _assertSameSeq(car(p->findall("abcdefghijkl"))
         '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l")
@@ -122,15 +122,15 @@ let((l_pat m p)
 )
 
 ; --- 5b2. zero-width numeric references ---
-_assertSameSeq(ycRegEx::reFindall("(a)?\1?" "b") '("" "")  "zero-width: numeric backref")
-_assertSameSeq(ycRegEx::reFindall("(a)?(?(1)b|)" "b") '("" "")  "zero-width: numeric conditional")
-_assertSameSeq(ycRegEx::reCompile("(?P<n>a)?" ?compileOpts 'no_auto_capture)->findall("b")
+_assertSameSeq(ycRegEx::ReFindall("(a)?\1?" "b") '("" "")  "zero-width: numeric backref")
+_assertSameSeq(ycRegEx::ReFindall("(a)?(?(1)b|)" "b") '("" "")  "zero-width: numeric conditional")
+_assertSameSeq(ycRegEx::ReCompile("(?P<n>a)?" ?compileOpts 'no_auto_capture)->findall("b")
     '("" "")  "zero-width: no_auto_capture"
 )
 
 ; --- 5c. group type contract / groups isolation ---
 let((m l_g)
-    m = ycRegEx::reSearch("(\\d+)-(\\d+)" "a10-20b")
+    m = ycRegEx::ReSearch("(\\d+)-(\\d+)" "a10-20b")
     _assertError(lambda(() m->group(1.0) t)  "group: float 1.0 raises")
     _assertError(lambda(() m->group(1.5) t)  "group: float 1.5 raises")
     _assertError(lambda(() m->group(0.0) t)  "group: float 0.0 raises")
@@ -149,14 +149,14 @@ let((m l_g)
 
 ; --- 5d. anchor offset hard limit ---
 let((p l_r t_msg)
-    p = ycRegEx::reCompile("x")
-    _assert(pcreObjectp(ycRegEx:::_anchorAt(p 65535))  "anchor: 65535 allowed")
-    l_r = errset(ycRegEx:::_anchorAt(p 65536) nil)
+    p = ycRegEx::ReCompile("x")
+    _assert(pcreObjectp(ycRegEx:::_AnchorAt(p 65535))  "anchor: 65535 allowed")
+    l_r = errset(ycRegEx:::_AnchorAt(p 65536) nil)
     t_msg = car(car(cdr(cdr(cdr(cdr(errset.errset))))))
     _assert(!l_r && pcreMatchp("65535-byte limit" t_msg)
         "anchor: 65536 has explicit limit message"
     )
-    l_r = errset(ycRegEx:::_anchorAt(p 70000) nil)
+    l_r = errset(ycRegEx:::_AnchorAt(p 70000) nil)
     t_msg = car(car(cdr(cdr(cdr(cdr(errset.errset))))))
     _assert(!l_r && pcreMatchp("65535-byte limit" t_msg)
         "anchor: 70000 has explicit limit message"
@@ -165,57 +165,57 @@ let((p l_r t_msg)
 
 ; --- 5e. groups empty replacement ---
 let((m)
-    m = ycRegEx::reSearch("(a)|(b)" "a")
+    m = ycRegEx::ReSearch("(a)|(b)" "a")
     _assertSameSeq(m->groups() '("a" "")  "groups: default keeps empty")
     _assertSameSeq(m->groups(?empty "NA") '("a" "NA")  "groups: replaces empty")
     _assert(car(cdr(m->groups(?empty 0))) == 0  "groups: replacement accepts any type")
     _assert(car(cdr(m->groups(?empty nil))) == nil  "groups: nil replacement")
-    m = ycRegEx::reSearch("(a)()" "a")
+    m = ycRegEx::ReSearch("(a)()" "a")
     _assertSameSeq(m->groups(?empty "NA") '("a" "NA")  "groups: matched empty also replaced")
 )
-_assert(ycRegEx::reSearch("a" "a")->groups(?empty "NA") == nil  "groups: no groups stays nil")
+_assert(ycRegEx::ReSearch("a" "a")->groups(?empty "NA") == nil  "groups: no groups stays nil")
 
 ; --- 6. non-participating groups (pinned: CPython None -> "") ---
 let((m)
-    m = ycRegEx::reFullmatch("(a)|(ab)" "ab")
+    m = ycRegEx::ReFullmatch("(a)|(ab)" "ab")
     _assert(m && m->group() == "ab"  "fullmatch: whole 'ab'")
     _assert(m->group(1) == ""  "fullmatch: group(1) '' (CPython None)")
     _assert(m->group(2) == "ab"  "fullmatch: group(2) 'ab'")
     _assertSameSeq(m->groups() '("" "ab")  "groups: CPython (None,'ab') -> ('','ab')")
-    m = ycRegEx::reSearch("(a)|(b)" "ab")
+    m = ycRegEx::ReSearch("(a)|(b)" "ab")
     _assertSameSeq(m->groups() '("a" "")  "groups: CPython ('a',None) -> ('a','')")
     _assert(m->group(2) == ""  "group(2): CPython None -> ''")
 )
 
 ; --- 7. error contracts (free functions) ---
-_assertError(lambda(() ycRegEx::reCompile("(") t)  "compile: unbalanced paren raises")
-_assertError(lambda(() ycRegEx::reCompile("*") t)  "compile: nothing to repeat raises")
-_assertError(lambda(() ycRegEx::reCompile(42) t)  "compile: non-string pattern raises")
-_assertError(lambda(() ycRegEx::reSearch(42 "a") t)  "search: non-string pattern raises")
-_assertError(lambda(() ycRegEx::reSearch("a" 42) t)  "search: non-string subject raises")
-_assertError(lambda(() ycRegEx::reSearch("a" nil) t)  "search: nil subject raises")
-_assertError(lambda(() ycRegEx::reMatch("a" "b" ?flags 'Z) t)  "match: unknown flag raises")
-_assertError(lambda(() ycRegEx::reMatch("a" "b" ?flags 2) t)  "match: numeric flag raises")
-_assert(ycRegEx::reMatch("a" "A" ?flags "I") != nil  "match: string flags accepted")
-_assertError(lambda(() ycRegEx::reSearch(ycRegEx::reCompile("\\d+") "1" ?flags 'I) t)  "search: flags + compiled pattern raise")
-_assertError(lambda(() ycRegEx::reSub("\\d" "#" "a1b2" ?flags 'g) t)  "flags: 'g rejected -> use ?all")
-_assert(ycRegEx::reMatch("a" "A" ?flags 'i) != nil  "flags: symbol 'i caseless")
-_assert(ycRegEx::reMatch("ab" "AB" ?flags "iI") != nil  "flags: mixed-case duplicate ok")
-_assert(ycRegEx::reMatch("a" "a" ?flags "") != nil  "flags: empty string = no flags")
-_assertError(lambda(() ycRegEx::reFindall("\\d" "a1b2" ?all t) t)  "findall: ?all is not a key -> raises")
+_assertError(lambda(() ycRegEx::ReCompile("(") t)  "compile: unbalanced paren raises")
+_assertError(lambda(() ycRegEx::ReCompile("*") t)  "compile: nothing to repeat raises")
+_assertError(lambda(() ycRegEx::ReCompile(42) t)  "compile: non-string pattern raises")
+_assertError(lambda(() ycRegEx::ReSearch(42 "a") t)  "search: non-string pattern raises")
+_assertError(lambda(() ycRegEx::ReSearch("a" 42) t)  "search: non-string subject raises")
+_assertError(lambda(() ycRegEx::ReSearch("a" nil) t)  "search: nil subject raises")
+_assertError(lambda(() ycRegEx::ReMatch("a" "b" ?flags 'Z) t)  "match: unknown flag raises")
+_assertError(lambda(() ycRegEx::ReMatch("a" "b" ?flags 2) t)  "match: numeric flag raises")
+_assert(ycRegEx::ReMatch("a" "A" ?flags "I") != nil  "match: string flags accepted")
+_assertError(lambda(() ycRegEx::ReSearch(ycRegEx::ReCompile("\\d+") "1" ?flags 'I) t)  "search: flags + compiled pattern raise")
+_assertError(lambda(() ycRegEx::ReSub("\\d" "#" "a1b2" ?flags 'g) t)  "flags: 'g rejected -> use ?all")
+_assert(ycRegEx::ReMatch("a" "A" ?flags 'i) != nil  "flags: symbol 'i caseless")
+_assert(ycRegEx::ReMatch("ab" "AB" ?flags "iI") != nil  "flags: mixed-case duplicate ok")
+_assert(ycRegEx::ReMatch("a" "a" ?flags "") != nil  "flags: empty string = no flags")
+_assertError(lambda(() ycRegEx::ReFindall("\\d" "a1b2" ?all t) t)  "findall: ?all is not a key -> raises")
 
 ; --- 8. marker conflict pins (readme limitation fixtures) ---
 let((l_r)
-    l_r = ycRegEx::reSubn("x" "y" "<YC-N>x")
+    l_r = ycRegEx::ReSubn("x" "y" "<YC-N>x")
     _assert(car(l_r) == "y"  "subn: marker-in-subject stripped (CPython '<YC-N>y')")
     _assert(car(cdr(l_r)) == 2  "subn: marker double counted (CPython 1)")
 )
-_assertSameSeq(ycRegEx::reFindall("(<YC-B>)" "<YC-B>") '("<YC-B>")  "findall: marker inside group preserved")
+_assertSameSeq(ycRegEx::ReFindall("(<YC-B>)" "<YC-B>") '("<YC-B>")  "findall: marker inside group preserved")
 
 ; --- 9. byte engine facts ---
 _assert(length("中文") == 6  "byte engine: length counts bytes")
 let((l_l)
-    l_l = ycRegEx::reFinditer("中文" "前中文后")
+    l_l = ycRegEx::ReFinditer("中文" "前中文后")
     _assert(length(l_l) == 1  "byte engine: one CJK match")
     _assertSameInts(_startsOf(l_l) '(3)  "byte engine: CJK start byte 3 (CPython char 1)")
     _assertSameInts(_endsOf(l_l) '(9)  "byte engine: CJK end byte 9 (CPython char 3)")
@@ -223,12 +223,12 @@ let((l_l)
 
 ; --- 10. Pattern object ---
 let((m p p2 l_r)
-    p = ycRegEx::reCompile("\\d+")
+    p = ycRegEx::ReCompile("\\d+")
     _assert(p->groups() == 0  "Pattern: groups count 0")
     _assert(p->pattern() == "\\d+"  "Pattern: pattern roundtrip")
-    _assert(ycRegEx::reCompile(p) == p  "Pattern: reCompile reuses instance")
-    _assert(ycRegEx::reSearch(p "a123") != nil  "Pattern: free fn accepts compiled instance")
-    _assertError(lambda(() ycRegEx::reCompile(p ?flags 'I) t)  "Pattern: reCompile + flags raise")
+    _assert(ycRegEx::ReCompile(p) == p  "Pattern: reCompile reuses instance")
+    _assert(ycRegEx::ReSearch(p "a123") != nil  "Pattern: free fn accepts compiled instance")
+    _assertError(lambda(() ycRegEx::ReCompile(p ?flags 'I) t)  "Pattern: reCompile + flags raise")
     _assert(printself(p) == "<ycRegEx::Pattern \"\\\\d+\">"  "Pattern: printself literal format")
     _assert(p->match("123") != nil  "Pattern: match method")
     m = p->search("a123")
@@ -242,7 +242,7 @@ let((m p p2 l_r)
     _assert(car(l_r) == "a#b2" && car(cdr(l_r)) == 1  "Pattern: subn default single")
     l_r = p->subn("#" "a1b2" ?all t)
     _assert(car(l_r) == "a#b#" && car(cdr(l_r)) == 2  "Pattern: subn ?all")
-    p2 = ycRegEx::reCompile(",")
+    p2 = ycRegEx::ReCompile(",")
     _assertSameSeq(p2->split("a,b,c") '("a" "b,c")  "Pattern: split default single")
     _assertSameSeq(p2->split("a,b,c" ?all t) '("a" "b" "c")  "Pattern: split ?all")
     _assert(p2->groups() == 0  "Pattern: groups count 0 (comma)")
@@ -252,100 +252,100 @@ let((m p p2 l_r)
     _assertError(lambda(() p->sub(42 "1") t)  "Pattern: non-string repl raises")
 )
 let((p2)
-    p2 = ycRegEx::reCompile("(\\d)(\\w)")
+    p2 = ycRegEx::ReCompile("(\\d)(\\w)")
     _assert(p2->groups() == 2  "Pattern: groups count 2")
 )
 
 ; --- 9b. compile options ---
 let((p)
-    _assert(ycRegEx::reCompile("ABC" ?compileOpts 'caseLess)->match("abc") != nil
+    _assert(ycRegEx::ReCompile("ABC" ?compileOpts 'caseLess)->match("abc") != nil
         "compileOpts: caseLess")
-    _assert(ycRegEx::reCompile("b" ?compileOpts 'anchored)->search("ab") == nil
+    _assert(ycRegEx::ReCompile("b" ?compileOpts 'anchored)->search("ab") == nil
         "compileOpts: anchored")
-    _assert(ycRegEx::reCompile("(a)" ?compileOpts 'no_auto_capture)->groups() == 0
+    _assert(ycRegEx::ReCompile("(a)" ?compileOpts 'no_auto_capture)->groups() == 0
         "compileOpts: no_auto_capture")
-    _assert(ycRegEx::reCompile("a$" ?compileOpts 'dollar_endonly)->search(strcat("a" "\n")) == nil
+    _assert(ycRegEx::ReCompile("a$" ?compileOpts 'dollar_endonly)->search(strcat("a" "\n")) == nil
         "compileOpts: dollar_endonly")
-    _assert(ycRegEx::reCompile("a+" ?compileOpts 'ungreedy)->match("aaa")->group() == "a"
+    _assert(ycRegEx::ReCompile("a+" ?compileOpts 'ungreedy)->match("aaa")->group() == "a"
         "compileOpts: ungreedy")
-    _assert(ycRegEx::reCompile("b" ?compileOpts 'firstline)->search(strcat("a" "\n" "b")) == nil
+    _assert(ycRegEx::ReCompile("b" ?compileOpts 'firstline)->search(strcat("a" "\n" "b")) == nil
         "compileOpts: firstline")
-    _assert(ycRegEx::reCompile("a b" ?compileOpts 'extended)->match("ab") != nil
+    _assert(ycRegEx::ReCompile("a b" ?compileOpts 'extended)->match("ab") != nil
         "compileOpts: extended")
-    _assert(ycRegEx::reCompile("ABC" ?compileOpts list('caseLess 'anchored))->match("abc") != nil
+    _assert(ycRegEx::ReCompile("ABC" ?compileOpts list('caseLess 'anchored))->match("abc") != nil
         "compileOpts: list form")
-    p = ycRegEx::reCompile("a")
-    _assertError(lambda(() ycRegEx::reCompile(p ?compileOpts 'caseLess) t)
+    p = ycRegEx::ReCompile("a")
+    _assertError(lambda(() ycRegEx::ReCompile(p ?compileOpts 'caseLess) t)
         "compileOpts: compiled Pattern rejects options")
-    _assertError(lambda(() ycRegEx::reCompile("a" ?compileOpts 'bogus) t)
+    _assertError(lambda(() ycRegEx::ReCompile("a" ?compileOpts 'bogus) t)
         "compileOpts: unknown option raises")
-    _assertError(lambda(() ycRegEx::reCompile("a" ?compileOpts 42) t)
+    _assertError(lambda(() ycRegEx::ReCompile("a" ?compileOpts 42) t)
         "compileOpts: non-symbol option raises")
 )
 
 ; --- 9c. execution options ---
 let((p)
-    _assert(ycRegEx::reSearch("^a" "a" ?execOpts 'notbol) == nil
+    _assert(ycRegEx::ReSearch("^a" "a" ?execOpts 'notbol) == nil
         "execOpts: notbol"
     )
-    _assert(ycRegEx::reSearch("a$" "a" ?execOpts 'noteol) == nil
+    _assert(ycRegEx::ReSearch("a$" "a" ?execOpts 'noteol) == nil
         "execOpts: noteol"
     )
-    _assert(ycRegEx::reSearch("a?" "b" ?execOpts 'notempty) == nil
+    _assert(ycRegEx::ReSearch("a?" "b" ?execOpts 'notempty) == nil
         "execOpts: notempty"
     )
-    _assert(ycRegEx::reSearch("b" "ab" ?execOpts 'anchored) == nil
+    _assert(ycRegEx::ReSearch("b" "ab" ?execOpts 'anchored) == nil
         "execOpts: anchored"
     )
-    _assert(ycRegEx::reSearch("^a" "a" ?execOpts list('notbol 'notempty)) == nil
+    _assert(ycRegEx::ReSearch("^a" "a" ?execOpts list('notbol 'notempty)) == nil
         "execOpts: list form"
     )
-    p = ycRegEx::reCompile("^a")
+    p = ycRegEx::ReCompile("^a")
     _assert(p->search("a" ?execOpts 'notbol) == nil
         "execOpts: Pattern method"
     )
-    _assertError(lambda(() ycRegEx::reSearch("a" "a" ?execOpts 'bogus) t)
+    _assertError(lambda(() ycRegEx::ReSearch("a" "a" ?execOpts 'bogus) t)
         "execOpts: unknown option raises"
     )
-    _assertError(lambda(() ycRegEx::reSearch("a" "a" ?execOpts 42) t)
+    _assertError(lambda(() ycRegEx::ReSearch("a" "a" ?execOpts 42) t)
         "execOpts: non-symbol option raises"
     )
     let((m)
-        m = ycRegEx::reSearch("a?" "b a" ?execOpts 'notempty)
+        m = ycRegEx::ReSearch("a?" "b a" ?execOpts 'notempty)
         _assertSameSpan(m 2 3  "execOpts: lazy span keeps option")
         _assert(m->expand("&") == "a"  "execOpts: expand keeps option")
     )
-    _assertSameSeq(ycRegEx::reFindall("x*" "abc" ?execOpts 'anchored) '("")
+    _assertSameSeq(ycRegEx::ReFindall("x*" "abc" ?execOpts 'anchored) '("")
         "execOpts: anchored zero-width findall"
     )
-    _assertSameSeq(ycRegEx::reFindall("a*" "aaa" ?execOpts 'notempty) '("aaa")
+    _assertSameSeq(ycRegEx::ReFindall("a*" "aaa" ?execOpts 'notempty) '("aaa")
         "execOpts: notempty zero-width/mixed"
     )
-    _assert(ycRegEx::reFindall("x*" "abc" ?execOpts 'notempty) == nil
+    _assert(ycRegEx::ReFindall("x*" "abc" ?execOpts 'notempty) == nil
         "execOpts: notempty rejects all empty"
     )
-    _assertSameSeq(ycRegEx::reFindall("a?" "b a" ?execOpts 'notempty) '("a")
+    _assertSameSeq(ycRegEx::ReFindall("a?" "b a" ?execOpts 'notempty) '("a")
         "execOpts: notempty advances to nonempty"
     )
 )
 
 ; --- 9d. partial probe ---
-_assert(ycRegEx::rePartialp("ab" "a")  "partialp: incomplete prefix")
-_assert(ycRegEx::rePartialp("ab" "ab")  "partialp: complete match")
-_assert(ycRegEx::rePartialp("ab" "ac") == nil  "partialp: impossible prefix")
-_assert(ycRegEx::reCompile("ab")->partialp("a")  "partialp: Pattern method")
-_assertError(lambda(() ycRegEx::rePartialp("ab" "a" ?execOpts 'bogus) t)
+_assert(ycRegEx::RePartialp("ab" "a")  "partialp: incomplete prefix")
+_assert(ycRegEx::RePartialp("ab" "ab")  "partialp: complete match")
+_assert(ycRegEx::RePartialp("ab" "ac") == nil  "partialp: impossible prefix")
+_assert(ycRegEx::ReCompile("ab")->partialp("a")  "partialp: Pattern method")
+_assertError(lambda(() ycRegEx::RePartialp("ab" "a" ?execOpts 'bogus) t)
     "partialp: unknown exec option raises"
 )
 
 ; --- 10. recursion limit wrappers ---
 let((n_orig)
-    n_orig = ycRegEx::reGetRecursionLimit()
+    n_orig = ycRegEx::ReGetRecursionLimit()
     _assert(n_orig == 10000000  "recursion: default 10000000")
-    _assert(ycRegEx::reSetRecursionLimit(1000)  "recursion: set 1000")
-    _assert(ycRegEx::reGetRecursionLimit() == 1000  "recursion: get 1000")
-    _assert(ycRegEx::reSetRecursionLimit(n_orig)  "recursion: restore")
-    _assertError(lambda(() ycRegEx::reSetRecursionLimit(1.5) t)  "recursion: float rejected")
+    _assert(ycRegEx::ReSetRecursionLimit(1000)  "recursion: set 1000")
+    _assert(ycRegEx::ReGetRecursionLimit() == 1000  "recursion: get 1000")
+    _assert(ycRegEx::ReSetRecursionLimit(n_orig)  "recursion: restore")
+    _assertError(lambda(() ycRegEx::ReSetRecursionLimit(1.5) t)  "recursion: float rejected")
 )
 
 _TestCoreDone = t

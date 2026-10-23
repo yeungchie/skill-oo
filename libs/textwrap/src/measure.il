@@ -3,13 +3,13 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-ycNamespace:::require("ycUtf8")
+ycNamespace:::Require("ycUtf8")
 
 useNamespace("ycTextwrap")
 
 ; ---------- 基础度量 ----------
 
-procedure(_isSpaceCp(n_cp "x")  ; -> t | nil
+procedure(_IsSpaceCp(n_cp "x")  ; -> t | nil
     ; 判断码点是否为折行语义中的空白。
     ;
     ; **参数**
@@ -20,7 +20,7 @@ procedure(_isSpaceCp(n_cp "x")  ; -> t | nil
     n_cp == 32 || n_cp == 9 || n_cp == 10 || n_cp == 13 || n_cp == 12 || n_cp == 11
 )
 
-procedure(_checkUnit(t_ctx t_unit n_amb "ttx")  ; -> nil
+procedure(_CheckUnit(t_ctx t_unit n_amb "ttx")  ; -> nil
     ; 校验宽度单位与 ambiguous 选项（内部实现）。
     ;
     ; **参数**
@@ -38,7 +38,7 @@ procedure(_checkUnit(t_ctx t_unit n_amb "ttx")  ; -> nil
     )
 )
 
-procedure(_cpWidth(n_cp t_unit n_amb "xtx")  ; -> int
+procedure(_CpWidth(n_cp t_unit n_amb "xtx")  ; -> int
     ; 单个码点在指定单位下的宽度（内部实现）。
     ;
     ; **参数**
@@ -50,11 +50,11 @@ procedure(_cpWidth(n_cp t_unit n_amb "xtx")  ; -> int
     ;   (int) - 显示列宽或 1
     if(t_unit == "char"
         1
-        ycUtf8:::charWidth(n_cp ?ambiguous n_amb)
+        ycUtf8:::CharWidth(n_cp ?ambiguous n_amb)
     )
 )
 
-procedure(_widthText(t_s t_unit n_amb "ttx")  ; -> int
+procedure(_WidthText(t_s t_unit n_amb "ttx")  ; -> int
     ; 字符串在指定单位下的宽度（内部实现）。
     ;
     ; **参数**
@@ -65,12 +65,12 @@ procedure(_widthText(t_s t_unit n_amb "ttx")  ; -> int
     ; **返回**
     ;   (int) - 显示列宽或码点数
     if(t_unit == "char"
-        ycUtf8:::charCount(t_s)
-        ycUtf8:::width(t_s ?ambiguous n_amb)
+        ycUtf8:::CharCount(t_s)
+        ycUtf8:::Width(t_s ?ambiguous n_amb)
     )
 )
 
-procedure(_widthCps(l_cps t_unit n_amb "ltx")  ; -> int
+procedure(_WidthCps(l_cps t_unit n_amb "ltx")  ; -> int
     ; 码点列表在指定单位下的宽度（内部实现）。
     ;
     ; **参数**
@@ -83,7 +83,7 @@ procedure(_widthCps(l_cps t_unit n_amb "ltx")  ; -> int
     let((n_sum)
         n_sum = 0
         foreach(n_cp l_cps
-            n_sum = n_sum + _cpWidth(n_cp t_unit n_amb)
+            n_sum = n_sum + _CpWidth(n_cp t_unit n_amb)
         )
         n_sum
     )
@@ -91,7 +91,7 @@ procedure(_widthCps(l_cps t_unit n_amb "ltx")  ; -> int
 
 ; ---------- 列表与换行 ----------
 
-procedure(_takeCps(l_cps n_count "lx")  ; -> list[int]
+procedure(_TakeCps(l_cps n_count "lx")  ; -> list[int]
     ; 取码点列表前 n 项（内部实现）。
     ;
     ; **参数**
@@ -111,7 +111,7 @@ procedure(_takeCps(l_cps n_count "lx")  ; -> list[int]
     )
 )
 
-procedure(_dropCps(l_cps n_count "lx")  ; -> list[int]
+procedure(_DropCps(l_cps n_count "lx")  ; -> list[int]
     ; 丢弃码点列表前 n 项（内部实现）。
     ;
     ; **参数**
@@ -127,7 +127,7 @@ procedure(_dropCps(l_cps n_count "lx")  ; -> list[int]
     l_cps
 )
 
-procedure(_fitCount(l_cps n_max t_unit n_amb "lxtx")  ; -> int
+procedure(_FitCount(l_cps n_max t_unit n_amb "lxtx")  ; -> int
     ; 计算在宽度上限内可完整容纳的码点数（内部实现）。
     ;
     ; **参数**
@@ -141,8 +141,8 @@ procedure(_fitCount(l_cps n_max t_unit n_amb "lxtx")  ; -> int
     let((n_sum n_have)
         n_sum = 0
         n_have = 0
-        while(l_cps && n_sum + _cpWidth(car(l_cps) t_unit n_amb) <= n_max
-            n_sum = n_sum + _cpWidth(car(l_cps) t_unit n_amb)
+        while(l_cps && n_sum + _CpWidth(car(l_cps) t_unit n_amb) <= n_max
+            n_sum = n_sum + _CpWidth(car(l_cps) t_unit n_amb)
             n_have = n_have + 1
             l_cps = cdr(l_cps)
         )
@@ -150,7 +150,7 @@ procedure(_fitCount(l_cps n_max t_unit n_amb "lxtx")  ; -> int
     )
 )
 
-procedure(_cutCount(l_cps n_max t_unit n_amb "lxtx")  ; -> int
+procedure(_CutCount(l_cps n_max t_unit n_amb "lxtx")  ; -> int
     ; 计算硬切码点数，至少前进一个码点（内部实现）。
     ;
     ; **参数**
@@ -162,12 +162,12 @@ procedure(_cutCount(l_cps n_max t_unit n_amb "lxtx")  ; -> int
     ; **返回**
     ;   (int) - 至少为 1
     let((n_have)
-        n_have = _fitCount(l_cps n_max t_unit n_amb)
+        n_have = _FitCount(l_cps n_max t_unit n_amb)
         if(n_have == 0 && l_cps 1 n_have)
     )
 )
 
-procedure(_firstChunk(l_word n_max g_hyphen t_unit n_amb "lxgtx")  ; -> list[int]
+procedure(_FirstChunk(l_word n_max g_hyphen t_unit n_amb "lxgtx")  ; -> list[int]
     ; 从超宽词中切出首个可容纳片段（内部实现）。
     ;
     ; **参数**
@@ -180,20 +180,20 @@ procedure(_firstChunk(l_word n_max g_hyphen t_unit n_amb "lxgtx")  ; -> list[int
     ; **返回**
     ;   (list[int]) - 片段码点
     let((n_count n_i n_hy)
-        n_count = _cutCount(l_word n_max t_unit n_amb)
+        n_count = _CutCount(l_word n_max t_unit n_amb)
         when(g_hyphen && n_count > 1
             n_i = 1
-            foreach(n_cp _takeCps(l_word n_count)
+            foreach(n_cp _TakeCps(l_word n_count)
                 when(n_cp == 45 n_hy = n_i)
                 n_i = n_i + 1
             )
             when(n_hy n_count = n_hy)
         )
-        _takeCps(l_word n_count)
+        _TakeCps(l_word n_count)
     )
 )
 
-procedure(_wordsFromCps(l_cps "l")  ; -> list | nil
+procedure(_WordsFromCps(l_cps "l")  ; -> list | nil
     ; 按空白切词并折叠连续空白（内部实现）。
     ;
     ; **参数**
@@ -204,7 +204,7 @@ procedure(_wordsFromCps(l_cps "l")  ; -> list | nil
     let((l_res l_acc)
         l_res = cons(nil nil)
         foreach(n_cp l_cps
-            if(_isSpaceCp(n_cp)
+            if(_IsSpaceCp(n_cp)
                 when(l_acc
                     tconc(l_res car(l_acc))
                     l_acc = nil
@@ -217,7 +217,7 @@ procedure(_wordsFromCps(l_cps "l")  ; -> list | nil
     )
 )
 
-procedure(_joinWordsCps(l_words "l")  ; -> list[int]
+procedure(_JoinWordsCps(l_words "l")  ; -> list[int]
     ; 用单空格连接词码点（内部实现）。
     ;
     ; **参数**
@@ -235,7 +235,7 @@ procedure(_joinWordsCps(l_words "l")  ; -> list[int]
     )
 )
 
-procedure(_normalizeNewlines(t_s "t")  ; -> str
+procedure(_NormalizeNewlines(t_s "t")  ; -> str
     ; 把 CRLF / CR 统一为 LF（内部实现）。
     ;
     ; **参数**
@@ -264,7 +264,7 @@ procedure(_normalizeNewlines(t_s "t")  ; -> str
     )
 )
 
-procedure(_logicalLines(t_s "t")  ; -> list[str]
+procedure(_LogicalLines(t_s "t")  ; -> list[str]
     ; 按 LF 切行；末尾 LF 不产生额外空行（内部实现）。
     ;
     ; **参数**

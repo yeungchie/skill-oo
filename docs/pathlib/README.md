@@ -1044,17 +1044,17 @@ p->readJson(
 
 **描述**
 
-读取整个文件内容并解码为 JSON 值。需要先加载 `ycJson`；未加载时以 `error()` 中断（`ycPathLib::Path->readJson: ycJson is not loaded - load it first`）。解码选项与错误契约由 `ycJson::decode` 提供，本方法原样透传实参，不复制其校验逻辑。
+读取整个文件内容并解码为 JSON 值。需要先加载 `ycJson`；未加载时以 `error()` 中断（`ycPathLib::Path->readJson: ycJson is not loaded - load it first`）。解码选项与错误契约由 `ycJson::Decode` 提供，本方法原样透传实参，不复制其校验逻辑。
 
 **参数**
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| l_args ... | any | 原样透传给 `ycJson::decode` 的实参（`?format`、`?maxDepth` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycJson 手册](../codec/json/README.md) 的 `decode` 条目。 |
+| l_args ... | any | 原样透传给 `ycJson::Decode` 的实参（`?format`、`?maxDepth` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycJson 手册](../codec/json/README.md) 的 `Decode` 条目。 |
 
 **返回值**
 
-`any | list` — `ycJson::decode` 的返回值（`jsonl` 为 list）。
+`any | list` — `ycJson::Decode` 的返回值（`jsonl` 为 list）。
 
 **例程**
 
@@ -1089,7 +1089,7 @@ p->writeText(t_jsonl)
 p->readJson(?format "jsonl")     ; => list of 2 tables
 
 p->readJson(?format "xml")
-; *Error* ycJson::decode: unknown format "xml"
+; *Error* ycJson::Decode: unknown format "xml"
 ```
 
 ##### readYaml <sub>`method`</sub>
@@ -1103,17 +1103,17 @@ p->readYaml(
 
 **描述**
 
-读取整个文件内容并解码为 YAML 值。需要先加载 `ycYaml`；未加载时以 `error()` 中断（`ycPathLib::Path->readYaml: ycYaml is not loaded - load it first`）。解码选项与错误契约由 `ycYaml::decode` 提供，本方法原样透传实参，不复制其校验逻辑。
+读取整个文件内容并解码为 YAML 值。需要先加载 `ycYaml`；未加载时以 `error()` 中断（`ycPathLib::Path->readYaml: ycYaml is not loaded - load it first`）。解码选项与错误契约由 `ycYaml::Decode` 提供，本方法原样透传实参，不复制其校验逻辑。
 
 **参数**
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| l_args ... | any | 原样透传给 `ycYaml::decode` 的实参（`?format`、`?maxDepth` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycYaml 手册](../codec/yaml/README.md) 的 `decode` 条目。 |
+| l_args ... | any | 原样透传给 `ycYaml::Decode` 的实参（`?format`、`?maxDepth` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycYaml 手册](../codec/yaml/README.md) 的 `Decode` 条目。 |
 
 **返回值**
 
-`any | list` — `ycYaml::decode` 的返回值（`yaml-stream` 为 list）。
+`any | list` — `ycYaml::Decode` 的返回值（`yaml-stream` 为 list）。
 
 **例程**
 
@@ -1143,7 +1143,7 @@ p->writeText(t_yaml_stream)
 p->readYaml(?format "yaml-stream")  ; => (1 2)
 
 p->readYaml(?format "xml")
-; *Error* ycYaml::decode: unknown format "xml"
+; *Error* ycYaml::Decode: unknown format "xml"
 ```
 
 ##### readCsv <sub>`method`</sub>
@@ -1157,13 +1157,13 @@ p->readCsv(
 
 **描述**
 
-读取整个文件内容并解码为 CSV/TSV `Table`。需要先加载 `ycCsv`；未加载时以 `error()` 中断（`ycPathLib::Path->readCsv: ycCsv is not loaded - load it first`）。解码选项与错误契约由 `ycCsv::decode` 提供，本方法原样透传实参，不复制其校验逻辑。
+读取整个文件内容并解码为 CSV/TSV `Table`。需要先加载 `ycCsv`；未加载时以 `error()` 中断（`ycPathLib::Path->readCsv: ycCsv is not loaded - load it first`）。解码选项与错误契约由 `ycCsv::Decode` 提供，本方法原样透传实参，不复制其校验逻辑。
 
 **参数**
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| l_args ... | any | 原样透传给 `ycCsv::decode` 的实参（`?format`、`?header`、`?delimiter` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycCsv 手册](../codec/csv/README.md) 的 `decode` 条目。 |
+| l_args ... | any | 原样透传给 `ycCsv::Decode` 的实参（`?format`、`?header`、`?delimiter` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycCsv 手册](../codec/csv/README.md) 的 `Decode` 条目。 |
 
 **返回值**
 
@@ -1194,7 +1194,7 @@ p->writeText(t_tsv)
 p->readCsv(?format "tsv")->row(1)  ; => ("a" "b")
 
 p->readCsv(?format "xml")
-; *Error* ycCsv::decode: unknown format "xml"
+; *Error* ycCsv::Decode: unknown format "xml"
 ```
 
 ##### readToml <sub>`method`</sub>
@@ -1208,17 +1208,17 @@ p->readToml(
 
 **描述**
 
-读取整个文件内容并解码为 TOML 根 `table`。需要先加载 `ycToml`；未加载时以 `error()` 中断（`ycPathLib::Path->readToml: ycToml is not loaded - load it first`）。解码选项与错误契约由 `ycToml::decode` 提供，本方法原样透传实参，不复制其校验逻辑。
+读取整个文件内容并解码为 TOML 根 `table`。需要先加载 `ycToml`；未加载时以 `error()` 中断（`ycPathLib::Path->readToml: ycToml is not loaded - load it first`）。解码选项与错误契约由 `ycToml::Decode` 提供，本方法原样透传实参，不复制其校验逻辑。
 
 **参数**
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| l_args ... | any | 原样透传给 `ycToml::decode` 的实参（`?maxDepth` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycToml 手册](../codec/toml/README.md) 的 `decode` 条目。 |
+| l_args ... | any | 原样透传给 `ycToml::Decode` 的实参（`?maxDepth` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycToml 手册](../codec/toml/README.md) 的 `Decode` 条目。 |
 
 **返回值**
 
-`table` — `ycToml::decode` 的根表；文件读取或解码失败以 `error()` 中断。
+`table` — `ycToml::Decode` 的根表；文件读取或解码失败以 `error()` 中断。
 
 **例程**
 
@@ -1436,10 +1436,10 @@ ycPathLib::Path("src")->rglob("*.il")  ; => (...)
 ycPathLib::Path("a")->join("b")->withSuffix(".md")->str()  ; => "a/b.md"
 ```
 
-### ycPathLib::cwd <sub>`function`</sub>
+### ycPathLib::Cwd <sub>`function`</sub>
 
 ```text
-ycPathLib::cwd()
+ycPathLib::Cwd()
 => Path
 ```
 
@@ -1458,13 +1458,13 @@ ycPathLib::cwd()
 **例程**
 
 ```lisp
-ycPathLib::cwd()->str()  ; => $PWD
+ycPathLib::Cwd()->str()  ; => $PWD
 ```
 
-### ycPathLib::home <sub>`function`</sub>
+### ycPathLib::Home <sub>`function`</sub>
 
 ```text
-ycPathLib::home()
+ycPathLib::Home()
 => Path
 ```
 
@@ -1483,13 +1483,13 @@ ycPathLib::home()
 **例程**
 
 ```lisp
-ycPathLib::home()->str()  ; => $HOME
+ycPathLib::Home()->str()  ; => $HOME
 ```
 
-### ycPathLib::currentFile <sub>`function`</sub>
+### ycPathLib::CurrentFile <sub>`function`</sub>
 
 ```text
-ycPathLib::currentFile()
+ycPathLib::CurrentFile()
 => Path
 ```
 
@@ -1508,7 +1508,7 @@ ycPathLib::currentFile()
 **例程**
 
 ```lisp
-here = ycPathLib::currentFile()->parent()
+here = ycPathLib::CurrentFile()->parent()
 ```
 
 > 注：`get_filename` 在文件最后一个表达式处取值存在已知异常，避免在文件末行调用本函数。

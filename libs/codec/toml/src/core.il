@@ -3,13 +3,13 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-ycNamespace:::require("ycCodec")
+ycNamespace:::Require("ycCodec")
 
 useNamespace("ycToml")
 
 ; ---------- 基础工具 ----------
 
-procedure(_code(t_s n_i "tx")  ; -> int | nil
+procedure(_Code(t_s n_i "tx")  ; -> int | nil
     ; 取字节索引处的字符码（1-based）；索引越界返回 nil。
     ;
     ; **参数**
@@ -26,7 +26,7 @@ procedure(_code(t_s n_i "tx")  ; -> int | nil
     )
 )
 
-procedure(_digitp(g_c "g")  ; -> t | nil
+procedure(_Digitp(g_c "g")  ; -> t | nil
     ; 判断字符码是否为 ASCII 数字（nil 安全）。
     ;
     ; **参数**
@@ -37,7 +37,7 @@ procedure(_digitp(g_c "g")  ; -> t | nil
     g_c && g_c >= 48 && g_c <= 57
 )
 
-procedure(_lineCol(t_s n_i "tx")  ; -> list
+procedure(_LineCol(t_s n_i "tx")  ; -> list
     ; 按字节索引计算行列：行/列均 1-based，列按行内字节偏移。
     ;
     ; **参数**
@@ -51,7 +51,7 @@ procedure(_lineCol(t_s n_i "tx")  ; -> list
         n_last = 0
         when(1 < n_i
             for(n_k 1 n_i - 1
-                when(_code(t_s n_k) == 10
+                when(_Code(t_s n_k) == 10
                     n_line = n_line + 1
                     n_last = n_k
                 )
@@ -61,8 +61,8 @@ procedure(_lineCol(t_s n_i "tx")  ; -> list
     )
 )
 
-procedure(_error(t_s n_i t_msg "txt")  ; -> never
-    ; 按统一格式 error() 中断：ycToml::decode: <说明> at line <行>, column <列>。
+procedure(_Error(t_s n_i t_msg "txt")  ; -> never
+    ; 按统一格式 error() 中断：ycToml::Decode: <说明> at line <行>, column <列>。
     ;
     ; **参数**
     ;   t_s    (str) - 输入串
@@ -72,12 +72,12 @@ procedure(_error(t_s n_i t_msg "txt")  ; -> never
     ; **返回**
     ;   (never) - 总是调用 error()，不返回
     let((l_pos)
-        l_pos = _lineCol(t_s n_i)
-        error("ycToml::decode: %s at line %d, column %d" t_msg car(l_pos) cadr(l_pos))
+        l_pos = _LineCol(t_s n_i)
+        error("ycToml::Decode: %s at line %d, column %d" t_msg car(l_pos) cadr(l_pos))
     )
 )
 
-procedure(_build(l_p "l")  ; -> str
+procedure(_Build(l_p "l")  ; -> str
     ; 将 tconc 头容器（或 nil）拼接为字符串。
     ;
     ; **参数**
@@ -88,7 +88,7 @@ procedure(_build(l_p "l")  ; -> str
     buildString(car(l_p) "")
 )
 
-procedure(_normalize(t_s "t")  ; -> str
+procedure(_Normalize(t_s "t")  ; -> str
     ; 去掉 UTF-8 BOM，并把 CRLF/CR 行尾统一为 LF。
     ;
     ; **参数**
@@ -97,17 +97,17 @@ procedure(_normalize(t_s "t")  ; -> str
     ; **返回**
     ;   (str) - 归一化文本
     let((n_i n_len l_p)
-        when(length(t_s) >= 3 && _code(t_s 1) == 239 && _code(t_s 2) == 187 && _code(t_s 3) == 191
+        when(length(t_s) >= 3 && _Code(t_s 1) == 239 && _Code(t_s 2) == 187 && _Code(t_s 3) == 191
             t_s = substring(t_s 4)
         )
         n_i = 1
         n_len = length(t_s)
         while(n_i <= n_len
-            if(_code(t_s n_i) == 13
+            if(_Code(t_s n_i) == 13
                 {
                 l_p = tconc(l_p "\n")
                 n_i = n_i + 1
-                when(_code(t_s n_i) == 10
+                when(_Code(t_s n_i) == 10
                     n_i = n_i + 1
                 )
                 }
@@ -117,11 +117,11 @@ procedure(_normalize(t_s "t")  ; -> str
                 }
             )
         )
-        _build(l_p)
+        _Build(l_p)
     )
 )
 
-procedure(_skipWs(t_s n_i g_newlines g_comments "txgg")  ; -> int
+procedure(_SkipWs(t_s n_i g_newlines g_comments "txgg")  ; -> int
     ; 跳过空白；可选跨行与注释。
     ;
     ; **参数**
@@ -136,7 +136,7 @@ procedure(_skipWs(t_s n_i g_newlines g_comments "txgg")  ; -> int
         n_len = length(t_s)
         g_stop = nil
         while(!g_stop && n_i <= n_len
-            case(_code(t_s n_i)
+            case(_Code(t_s n_i)
                 ((32 9)
                     n_i = n_i + 1
                 )
@@ -149,10 +149,10 @@ procedure(_skipWs(t_s n_i g_newlines g_comments "txgg")  ; -> int
                 (35
                     if(g_comments
                         progn(
-                            while(n_i <= n_len && _code(t_s n_i) != 10
-                                n_c = _code(t_s n_i)
+                            while(n_i <= n_len && _Code(t_s n_i) != 10
+                                n_c = _Code(t_s n_i)
                                 when((n_c < 32 && n_c != 9) || n_c == 127
-                                    _error(t_s n_i "control character in comment")
+                                    _Error(t_s n_i "control character in comment")
                                 )
                                 n_i = n_i + 1
                             )
@@ -172,7 +172,7 @@ procedure(_skipWs(t_s n_i g_newlines g_comments "txgg")  ; -> int
     )
 )
 
-procedure(_lineEnd(t_s n_i "tx")  ; -> int
+procedure(_LineEnd(t_s n_i "tx")  ; -> int
     ; 校验当前语句后只余空白/注释/换行，并返回下一行起点。
     ;
     ; **参数**
@@ -183,18 +183,18 @@ procedure(_lineEnd(t_s n_i "tx")  ; -> int
     ;   (int) - 换行后的位置；到串尾时为 length+1
     let((n_len)
         n_len = length(t_s)
-        n_i = _skipWs(t_s n_i nil t)
-        case(_code(t_s n_i)
+        n_i = _SkipWs(t_s n_i nil t)
+        case(_Code(t_s n_i)
             (10 n_i + 1)
             (nil n_i)
-            (t _error(t_s n_i "unexpected trailing characters"))
+            (t _Error(t_s n_i "unexpected trailing characters"))
         )
     )
 )
 
 ; ---------- 路径与元数据 ----------
 
-procedure(_pathKey(l_path "l")  ; -> str
+procedure(_PathKey(l_path "l")  ; -> str
     ; 将路径段序列化为元数据表键；字符串段带长度前缀、数组索引带 i 前缀。
     ;
     ; **参数**
@@ -215,7 +215,7 @@ procedure(_pathKey(l_path "l")  ; -> str
     )
 )
 
-procedure(_metaNew()  ; -> table
+procedure(_MetaNew()  ; -> table
     ; 创建路径元数据表。
     ;
     ; **返回**
@@ -223,7 +223,7 @@ procedure(_metaNew()  ; -> table
     makeTable("ycTomlMeta" nil)
 )
 
-procedure(_metaSet(t_meta l_path t_kind "glt")  ; -> t
+procedure(_MetaSet(t_meta l_path t_kind "glt")  ; -> t
     ; 写入路径的元数据种类。
     ;
     ; **参数**
@@ -233,11 +233,11 @@ procedure(_metaSet(t_meta l_path t_kind "glt")  ; -> t
     ;
     ; **返回**
     ;   (t) - 写入成功
-    t_meta[_pathKey(l_path)] = t_kind
+    t_meta[_PathKey(l_path)] = t_kind
     t
 )
 
-procedure(_metaGet(t_meta l_path "gl")  ; -> str | nil
+procedure(_MetaGet(t_meta l_path "gl")  ; -> str | nil
     ; 读取路径的元数据种类。
     ;
     ; **参数**
@@ -246,10 +246,10 @@ procedure(_metaGet(t_meta l_path "gl")  ; -> str | nil
     ;
     ; **返回**
     ;   (str|nil) - 种类；未登记时为 nil
-    t_meta[_pathKey(l_path)]
+    t_meta[_PathKey(l_path)]
 )
 
-procedure(_newTable()  ; -> table
+procedure(_NewTable()  ; -> table
     ; 创建使用 ycCodec::Missing 作为缺省值的 TOML 表。
     ;
     ; **返回**
@@ -257,7 +257,7 @@ procedure(_newTable()  ; -> table
     makeTable("ycTomlTable" ycCodec:::Missing)
 )
 
-procedure(_hasKey(t_obj t_key "gt")  ; -> t | nil
+procedure(_HasKey(t_obj t_key "gt")  ; -> t | nil
     ; 判断表是否已有该键；缺省哨兵不算存在。
     ;
     ; **参数**
@@ -269,7 +269,7 @@ procedure(_hasKey(t_obj t_key "gt")  ; -> t | nil
     t_obj[t_key] != ycCodec:::Missing
 )
 
-procedure(_isTableList(g_val "g")  ; -> t | nil
+procedure(_IsTableList(g_val "g")  ; -> t | nil
     ; 判断值是否为非空且全部由 table 组成的列表。
     ;
     ; **参数**
@@ -290,7 +290,7 @@ procedure(_isTableList(g_val "g")  ; -> t | nil
     )
 )
 
-procedure(_markInline(t_meta l_path g_val "glg")  ; -> t
+procedure(_MarkInline(t_meta l_path g_val "glg")  ; -> t
     ; 把内联表及其嵌套表递归标记为 inline，禁止后续继续扩展。
     ;
     ; **参数**
@@ -302,9 +302,9 @@ procedure(_markInline(t_meta l_path g_val "glg")  ; -> t
     ;   (t) - 标记完成
     cond(
         (tablep(g_val)
-            _metaSet(t_meta l_path "inline")
+            _MetaSet(t_meta l_path "inline")
             foreach(t_key g_val
-                _markInline(t_meta append1(l_path t_key) g_val[t_key])
+                _MarkInline(t_meta append1(l_path t_key) g_val[t_key])
             )
         )
         (listp(g_val)
@@ -312,7 +312,7 @@ procedure(_markInline(t_meta l_path g_val "glg")  ; -> t
                 n_i = 0
                 foreach(g_item g_val
                     n_i = n_i + 1
-                    _markInline(t_meta append1(l_path n_i) g_item)
+                    _MarkInline(t_meta append1(l_path n_i) g_item)
                 )
             )
         )
@@ -322,7 +322,7 @@ procedure(_markInline(t_meta l_path g_val "glg")  ; -> t
 
 ; ---------- UTF-8 ----------
 
-procedure(_utf8Str(n_cp "x")  ; -> str
+procedure(_Utf8Str(n_cp "x")  ; -> str
     ; 将 Unicode 码点编码为 UTF-8；NUL 无法存入 SKILL 字符串，返回空串。
     ;
     ; **参数**
@@ -333,10 +333,10 @@ procedure(_utf8Str(n_cp "x")  ; -> str
     cond(
         (n_cp == 0 "")
         (n_cp < 0 || n_cp > 1114111
-            error("ycToml::decode: invalid Unicode codepoint %d" n_cp)
+            error("ycToml::Decode: invalid Unicode codepoint %d" n_cp)
         )
         (n_cp >= 55296 && n_cp <= 57343
-            error("ycToml::decode: invalid Unicode codepoint %d" n_cp)
+            error("ycToml::Decode: invalid Unicode codepoint %d" n_cp)
         )
         (n_cp < 128
             strcat(intToChar(n_cp))
@@ -362,7 +362,7 @@ procedure(_utf8Str(n_cp "x")  ; -> str
     )
 )
 
-procedure(_hexVal(n_c "x")  ; -> int | nil
+procedure(_HexVal(n_c "x")  ; -> int | nil
     ; 单个十六进制字符码转数值。
     ;
     ; **参数**
@@ -378,7 +378,7 @@ procedure(_hexVal(n_c "x")  ; -> int | nil
     )
 )
 
-procedure(_contByte(g_c "g")  ; -> t | nil
+procedure(_ContByte(g_c "g")  ; -> t | nil
     ; 判断字符码是否为 UTF-8 连续字节（0x80..0xBF）。
     ;
     ; **参数**
@@ -389,7 +389,7 @@ procedure(_contByte(g_c "g")  ; -> t | nil
     g_c && g_c >= 128 && g_c <= 191
 )
 
-procedure(_validUtf8(t_s "t")  ; -> t | nil
+procedure(_ValidUtf8(t_s "t")  ; -> t | nil
     ; 校验文本是否为合法 UTF-8：拒绝无效首字节、过长编码、代理区与超范围码点。
     ;
     ; **参数**
@@ -402,65 +402,65 @@ procedure(_validUtf8(t_s "t")  ; -> t | nil
         n_i = 1
         g_ok = t
         while(g_ok && n_i <= n_len
-            n_b = _code(t_s n_i)
+            n_b = _Code(t_s n_i)
             cond(
                 (n_b <= 127
                     n_i = n_i + 1
                 )
                 ((n_b >= 194 && n_b <= 223)
-                    n_b1 = _code(t_s n_i + 1)
-                    if(_contByte(n_b1)
+                    n_b1 = _Code(t_s n_i + 1)
+                    if(_ContByte(n_b1)
                         n_i = n_i + 2
                         g_ok = nil
                     )
                 )
                 (n_b == 224
-                    n_b1 = _code(t_s n_i + 1)
-                    n_b2 = _code(t_s n_i + 2)
-                    if(n_b1 && n_b1 >= 160 && n_b1 <= 191 && _contByte(n_b2)
+                    n_b1 = _Code(t_s n_i + 1)
+                    n_b2 = _Code(t_s n_i + 2)
+                    if(n_b1 && n_b1 >= 160 && n_b1 <= 191 && _ContByte(n_b2)
                         n_i = n_i + 3
                         g_ok = nil
                     )
                 )
                 ((n_b >= 225 && n_b <= 236) || (n_b >= 238 && n_b <= 239)
-                    n_b1 = _code(t_s n_i + 1)
-                    n_b2 = _code(t_s n_i + 2)
-                    if(_contByte(n_b1) && _contByte(n_b2)
+                    n_b1 = _Code(t_s n_i + 1)
+                    n_b2 = _Code(t_s n_i + 2)
+                    if(_ContByte(n_b1) && _ContByte(n_b2)
                         n_i = n_i + 3
                         g_ok = nil
                     )
                 )
                 (n_b == 237
-                    n_b1 = _code(t_s n_i + 1)
-                    n_b2 = _code(t_s n_i + 2)
-                    if(n_b1 && n_b1 >= 128 && n_b1 <= 159 && _contByte(n_b2)
+                    n_b1 = _Code(t_s n_i + 1)
+                    n_b2 = _Code(t_s n_i + 2)
+                    if(n_b1 && n_b1 >= 128 && n_b1 <= 159 && _ContByte(n_b2)
                         n_i = n_i + 3
                         g_ok = nil
                     )
                 )
                 (n_b == 240
-                    n_b1 = _code(t_s n_i + 1)
-                    n_b2 = _code(t_s n_i + 2)
-                    n_b3 = _code(t_s n_i + 3)
-                    if(n_b1 && n_b1 >= 144 && n_b1 <= 191 && _contByte(n_b2) && _contByte(n_b3)
+                    n_b1 = _Code(t_s n_i + 1)
+                    n_b2 = _Code(t_s n_i + 2)
+                    n_b3 = _Code(t_s n_i + 3)
+                    if(n_b1 && n_b1 >= 144 && n_b1 <= 191 && _ContByte(n_b2) && _ContByte(n_b3)
                         n_i = n_i + 4
                         g_ok = nil
                     )
                 )
                 ((n_b >= 241 && n_b <= 243)
-                    n_b1 = _code(t_s n_i + 1)
-                    n_b2 = _code(t_s n_i + 2)
-                    n_b3 = _code(t_s n_i + 3)
-                    if(_contByte(n_b1) && _contByte(n_b2) && _contByte(n_b3)
+                    n_b1 = _Code(t_s n_i + 1)
+                    n_b2 = _Code(t_s n_i + 2)
+                    n_b3 = _Code(t_s n_i + 3)
+                    if(_ContByte(n_b1) && _ContByte(n_b2) && _ContByte(n_b3)
                         n_i = n_i + 4
                         g_ok = nil
                     )
                 )
                 (n_b == 244
-                    n_b1 = _code(t_s n_i + 1)
-                    n_b2 = _code(t_s n_i + 2)
-                    n_b3 = _code(t_s n_i + 3)
-                    if(n_b1 && n_b1 >= 128 && n_b1 <= 143 && _contByte(n_b2) && _contByte(n_b3)
+                    n_b1 = _Code(t_s n_i + 1)
+                    n_b2 = _Code(t_s n_i + 2)
+                    n_b3 = _Code(t_s n_i + 3)
+                    if(n_b1 && n_b1 >= 128 && n_b1 <= 143 && _ContByte(n_b2) && _ContByte(n_b3)
                         n_i = n_i + 4
                         g_ok = nil
                     )

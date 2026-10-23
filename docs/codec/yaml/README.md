@@ -4,8 +4,8 @@ Cadence SKILL++ 的 YAML 1.2 编解码库：块式与流式集合、块标量、
 
 ## 概要
 
-+ 解码入口：`decode()`；`?format` 选 `"yaml"`（单文档，默认）或 `"yaml-stream"`（多文档流）。
-+ 编码入口：`encode()`；默认块式输出，`?flow t` 切换流式风格；`?format "yaml-stream"` 逐文档输出。
++ 解码入口：`Decode()`；`?format` 选 `"yaml"`（单文档，默认）或 `"yaml-stream"`（多文档流）。
++ 编码入口：`Encode()`；默认块式输出，`?flow t` 切换流式风格；`?format "yaml-stream"` 逐文档输出。
 + `null`、`true`、`false` 解码为哨兵对象 `ycCodec::Null`、`ycCodec::True`、`ycCodec::False`；`nil` 表示空序列，不表示 `null`。
 + 解码得到的 table 以 `ycCodec::Missing` 为缺键默认值；空映射是长度为 0 的 table，空序列是 `nil`。
 + 哨兵对象由 `ycCodec` 命名空间统一提供，各编解码库共用同一组实例；类型与转换规则见 [ycCodec](../core/README.md)。
@@ -42,35 +42,35 @@ copy: *b
 
 ```lisp
 ; 块式文档
-t_v = ycYaml::decode(t_yaml)
+t_v = ycYaml::Decode(t_yaml)
 t_v["name"]                                         ; => "demo"
 t_v["items"]                                        ; => (1 2)
 
 ; 标量类型与哨兵
-ycYaml::decode("null")                              ; => ycCodec::Type("Null")
-ycYaml::decode("true")                              ; => ycCodec::Type("True")
-ycYaml::decode("0x10")                              ; => 16
-ycYaml::decode("[]")                                ; => nil
+ycYaml::Decode("null")                              ; => ycCodec::Type("Null")
+ycYaml::Decode("true")                              ; => ycCodec::Type("True")
+ycYaml::Decode("0x10")                              ; => 16
+ycYaml::Decode("[]")                                ; => nil
 
 ; 锚点、别名与合并
-t_v = ycYaml::decode(t_yaml_anchor)
+t_v = ycYaml::Decode(t_yaml_anchor)
 t_v["copy"]["a"]                                    ; => 1
 
 ; 多文档流
-ycYaml::decode(t_yaml_stream ?format "yaml-stream")
+ycYaml::Decode(t_yaml_stream ?format "yaml-stream")
 ; => (1 2)
 
 ; 编码
-ycYaml::encode(list(1 2))                           ; => "- 1\n- 2\n"
-ycYaml::encode(t_v ?flow t ?sortKeys t)             ; => "{base: {a: 1}, copy: {a: 1}}\n"
+ycYaml::Encode(list(1 2))                           ; => "- 1\n- 2\n"
+ycYaml::Encode(t_v ?flow t ?sortKeys t)             ; => "{base: {a: 1}, copy: {a: 1}}\n"
 ```
 
 ## API 参考
 
-### ycYaml::decode <sub>`function`</sub>
+### ycYaml::Decode <sub>`function`</sub>
 
 ```text
-ycYaml::decode(
+ycYaml::Decode(
     t_str
     [ ?format t_format ]
     [ ?maxDepth n_max ]
@@ -126,24 +126,24 @@ s: >
 ```
 
 ```lisp
-ycYaml::decode(t_yaml_map)                        ; => <table: a = 1, b = 2>
-ycYaml::decode("[1, 2.5, true, null]")
+ycYaml::Decode(t_yaml_map)                        ; => <table: a = 1, b = 2>
+ycYaml::Decode("[1, 2.5, true, null]")
 ; => (1 2.5 ycCodec::Type("True") ycCodec::Type("Null"))
-ycYaml::decode(t_yaml_literal)["s"]                ; => "a\nb\n"
-ycYaml::decode(t_yaml_folded)["s"]                 ; => "a b\n"
-ycYaml::decode("a: 1\r\nb: 2\r\n")["b"]            ; => 2
+ycYaml::Decode(t_yaml_literal)["s"]                ; => "a\nb\n"
+ycYaml::Decode(t_yaml_folded)["s"]                 ; => "a b\n"
+ycYaml::Decode("a: 1\r\nb: 2\r\n")["b"]            ; => 2
 
-ycYaml::decode("a: [1, 2\n")
-; *Error* ycYaml::decode: unterminated or invalid flow value at line 1, column 3
+ycYaml::Decode("a: [1, 2\n")
+; *Error* ycYaml::Decode: unterminated or invalid flow value at line 1, column 3
 
-ycYaml::decode("a: 1\n b: 2\n")
-; *Error* ycYaml::decode: unexpected indentation at line 2, column 1
+ycYaml::Decode("a: 1\n b: 2\n")
+; *Error* ycYaml::Decode: unexpected indentation at line 2, column 1
 ```
 
-### ycYaml::encode <sub>`function`</sub>
+### ycYaml::Encode <sub>`function`</sub>
 
 ```text
-ycYaml::encode(
+ycYaml::Encode(
     g_val
     [ ?format t_format ]
     [ ?indent n_indent ]
@@ -190,16 +190,16 @@ ycYaml::encode(
 **例程**
 
 ```lisp
-ycYaml::encode(nil)                                ; => "[]\n"
-ycYaml::encode(list(1 2))                          ; => "- 1\n- 2\n"
-ycYaml::encode(list(nil))                          ; => "- []\n"
-ycYaml::encode("a\nb")                             ; => "\"a\\nb\"\n"
-ycYaml::encode(list(1 2) ?flow t)                  ; => "[1, 2]\n"
-ycYaml::encode(1 ?explicitStart t)                 ; => "---\n1\n"
-ycYaml::encode(list(1 2) ?format "yaml-stream")    ; => "---\n1\n---\n2\n"
+ycYaml::Encode(nil)                                ; => "[]\n"
+ycYaml::Encode(list(1 2))                          ; => "- 1\n- 2\n"
+ycYaml::Encode(list(nil))                          ; => "- []\n"
+ycYaml::Encode("a\nb")                             ; => "\"a\\nb\"\n"
+ycYaml::Encode(list(1 2) ?flow t)                  ; => "[1, 2]\n"
+ycYaml::Encode(1 ?explicitStart t)                 ; => "---\n1\n"
+ycYaml::Encode(list(1 2) ?format "yaml-stream")    ; => "---\n1\n---\n2\n"
 
-ycYaml::encode('foo)
-; *Error* ycYaml::encode: cannot dump value of type symbol
-ycYaml::encode(ycCodec::Missing)
-; *Error* ycYaml::encode: cannot dump the Missing marker
+ycYaml::Encode('foo)
+; *Error* ycYaml::Encode: cannot dump value of type symbol
+ycYaml::Encode(ycCodec::Missing)
+; *Error* ycYaml::Encode: cannot dump the Missing marker
 ```

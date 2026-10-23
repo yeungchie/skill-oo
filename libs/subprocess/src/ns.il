@@ -5,11 +5,11 @@ addToNamespace("ycSubProcess"
     mapcar('symbolToString '(
         Stream
         AsyncJob
-        runJob
-        createJob
+        RunJob
+        CreateJob
         Elapsed
-        _rstring
-        _formatSeconds
+        _Rstring
+        _FormatSeconds
     ))
 )
 unuseNamespace("ycSubProcess")

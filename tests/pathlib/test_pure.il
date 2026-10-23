@@ -239,8 +239,8 @@ _assertError(lambda(() _p(".")->match(".") t)  "match: empty pattern errors")
 _assertError(lambda(() _p("a")->match("") t)  "match: empty string errors")
 
 ; --- currentFile ---
-_assert(ycPathLib::currentFile()->name() == "test_pure.il"  "currentFile: name is loading file")
-_assert(ycPathLib::currentFile()->parent()->name() == "pathlib"  "currentFile: parent dir name")
+_assert(ycPathLib::CurrentFile()->name() == "test_pure.il"  "currentFile: name is loading file")
+_assert(ycPathLib::CurrentFile()->parent()->name() == "pathlib"  "currentFile: parent dir name")
 
 ; --- expandUser / absolute ---
 let((t_home)
