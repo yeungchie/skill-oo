@@ -1,7 +1,7 @@
 _TestCount = 0
 _TestFail = 0
 
-procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
+procedure(_Assert(g_cond t_msg "gt")  ; -> t | nil
     _TestCount = _TestCount + 1
     unless(g_cond
         _TestFail = _TestFail + 1
@@ -13,7 +13,7 @@ procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
     g_cond
 )
 
-procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
+procedure(_AssertError(g_funobj t_msg "gt")  ; -> t | nil
     let((g_ok)
         _TestCount = _TestCount + 1
         g_ok = errset(funcall(g_funobj) nil)
@@ -28,7 +28,7 @@ procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
     )
 )
 
-procedure(_assertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil（错误消息须包含 t_sub）
+procedure(_AssertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil（错误消息须包含 t_sub）
     let((g_ok t_text t_tail g_pass)
         _TestCount = _TestCount + 1
         g_ok = errset(funcall(g_funobj) nil)
@@ -55,7 +55,7 @@ procedure(_assertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil（错误消�
     )
 )
 
-procedure(_assertDumpEq(g_actual g_expected t_msg "ggt")  ; -> t | nil（经 encode 规范化串比较结构）
+procedure(_AssertDumpEq(g_actual g_expected t_msg "ggt")  ; -> t | nil（经 encode 规范化串比较结构）
     let((t_a t_b g_ok)
         t_a = ycJson::Encode(g_actual ?sortKeys t)
         t_b = ycJson::Encode(g_expected ?sortKeys t)
@@ -64,11 +64,11 @@ procedure(_assertDumpEq(g_actual g_expected t_msg "ggt")  ; -> t | nil（经 enc
             printf("  expected: %s\n" t_b)
             printf("  actual: %s\n" t_a)
         )
-        _assert(g_ok t_msg)
+        _Assert(g_ok t_msg)
     )
 )
 
-procedure(_nestArrays(n_n "n")  ; -> str（n 层嵌套数组包裹 1）
+procedure(_NestArrays(n_n "n")  ; -> str（n 层嵌套数组包裹 1）
     let((t_s n_i)
         t_s = "1"
         when(0 < n_n
@@ -80,7 +80,7 @@ procedure(_nestArrays(n_n "n")  ; -> str（n 层嵌套数组包裹 1）
     )
 )
 
-procedure(_nestArrayValue(n_n "n")  ; -> any（n 层嵌套 list 包裹 1）
+procedure(_NestArrayValue(n_n "n")  ; -> any（n 层嵌套 list 包裹 1）
     let((g_v n_i)
         g_v = 1
         when(0 < n_n

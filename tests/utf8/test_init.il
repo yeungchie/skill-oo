@@ -1,7 +1,7 @@
 _TestCount = 0
 _TestFail = 0
 
-procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
+procedure(_Assert(g_cond t_msg "gt")  ; -> t | nil
     ; 断言真值并计数。
     ;
     ; **参数**
@@ -21,7 +21,7 @@ procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
     g_cond
 )
 
-procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
+procedure(_AssertError(g_funobj t_msg "gt")  ; -> t | nil
     ; 断言调用报错（静默捕获）。
     ;
     ; **参数**
@@ -44,7 +44,7 @@ procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
     )
 )
 
-procedure(_assertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil
+procedure(_AssertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil
     ; 断言调用报错且消息包含指定片段。
     ;
     ; **参数**

@@ -1,7 +1,7 @@
 _TestCount = 0
 _TestFail = 0
 
-procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
+procedure(_Assert(g_cond t_msg "gt")  ; -> t | nil
     _TestCount = _TestCount + 1
     unless(g_cond
         _TestFail = _TestFail + 1
@@ -13,7 +13,7 @@ procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
     g_cond
 )
 
-procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
+procedure(_AssertError(g_funobj t_msg "gt")  ; -> t | nil
     let((g_ok)
         _TestCount = _TestCount + 1
         g_ok = errset(funcall(g_funobj) nil)

@@ -1,7 +1,7 @@
 _TestCount = 0
 _TestFail = 0
 
-procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
+procedure(_Assert(g_cond t_msg "gt")  ; -> t | nil
     _TestCount = _TestCount + 1
     unless(g_cond
         _TestFail = _TestFail + 1
@@ -13,7 +13,7 @@ procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
     g_cond
 )
 
-procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
+procedure(_AssertError(g_funobj t_msg "gt")  ; -> t | nil
     let((g_ok)
         _TestCount = _TestCount + 1
         g_ok = errset(funcall(g_funobj) nil)
@@ -28,24 +28,24 @@ procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
     )
 )
 
-procedure(_assertOk(g_r t_msg "gt")  ; -> t | nil (errset list, value t means pass)
+procedure(_AssertOk(g_r t_msg "gt")  ; -> t | nil (errset list, value t means pass)
     let((g_ok)
         when(g_r
             g_ok = car(g_r)
         )
-        _assert(g_ok t_msg)
+        _Assert(g_ok t_msg)
     )
 )
 
-procedure(_tupKey(l_list "l")  ; -> str ("a,b,c"; nil -> "")
+procedure(_TupKey(l_list "l")  ; -> str ("a,b,c"; nil -> "")
     cond(
         (l_list == nil "")
         (cdr(l_list) == nil car(l_list))
-        (t lsprintf("%s,%s" car(l_list) _tupKey(cdr(l_list))))
+        (t lsprintf("%s,%s" car(l_list) _TupKey(cdr(l_list))))
     )
 )
 
-procedure(_assertSameSeq(l_actual l_expected t_msg "llt")  ; -> t | nil (ordered strings)
+procedure(_AssertSameSeq(l_actual l_expected t_msg "llt")  ; -> t | nil (ordered strings)
     let((g_ok l_a l_b)
         g_ok = length(l_actual) == length(l_expected)
         when(g_ok
@@ -58,26 +58,26 @@ procedure(_assertSameSeq(l_actual l_expected t_msg "llt")  ; -> t | nil (ordered
             )
         )
         unless(g_ok
-            printf("  expected (%d): [%s]\n" length(l_expected) _tupKey(l_expected))
-            printf("  actual (%d): [%s]\n" length(l_actual) _tupKey(l_actual))
+            printf("  expected (%d): [%s]\n" length(l_expected) _TupKey(l_expected))
+            printf("  actual (%d): [%s]\n" length(l_actual) _TupKey(l_actual))
         )
-        _assert(g_ok t_msg)
+        _Assert(g_ok t_msg)
     )
 )
 
-procedure(_assertSameTuples(l_actual l_expected t_msg "llt")  ; -> t | nil (list of lists)
-    _assertSameSeq(mapcar('_tupKey l_actual) mapcar('_tupKey l_expected) t_msg)
+procedure(_AssertSameTuples(l_actual l_expected t_msg "llt")  ; -> t | nil (list of lists)
+    _AssertSameSeq(mapcar('_TupKey l_actual) mapcar('_TupKey l_expected) t_msg)
 )
 
-procedure(_intKey(l_list "l")  ; -> str ("1 2 3"; nil -> "")
+procedure(_IntKey(l_list "l")  ; -> str ("1 2 3"; nil -> "")
     cond(
         (l_list == nil "")
         (cdr(l_list) == nil lsprintf("%d" car(l_list)))
-        (t lsprintf("%d %s" car(l_list) _intKey(cdr(l_list))))
+        (t lsprintf("%d %s" car(l_list) _IntKey(cdr(l_list))))
     )
 )
 
-procedure(_assertSameInts(l_actual l_expected t_msg "llt")  ; -> t | nil (ordered ints)
+procedure(_AssertSameInts(l_actual l_expected t_msg "llt")  ; -> t | nil (ordered ints)
     let((g_ok l_a l_b)
         g_ok = length(l_actual) == length(l_expected)
         when(g_ok
@@ -90,22 +90,22 @@ procedure(_assertSameInts(l_actual l_expected t_msg "llt")  ; -> t | nil (ordere
             )
         )
         unless(g_ok
-            printf("  expected ints (%d): %s\n" length(l_expected) _intKey(l_expected))
-            printf("  actual ints (%d): %s\n" length(l_actual) _intKey(l_actual))
+            printf("  expected ints (%d): %s\n" length(l_expected) _IntKey(l_expected))
+            printf("  actual ints (%d): %s\n" length(l_actual) _IntKey(l_actual))
         )
-        _assert(g_ok t_msg)
+        _Assert(g_ok t_msg)
     )
 )
 
-procedure(_startsOf(l_l "l")  ; -> list of int
+procedure(_StartsOf(l_l "l")  ; -> list of int
     mapcar(lambda((m "g") m->start()) l_l)
 )
 
-procedure(_endsOf(l_l "l")  ; -> list of int
+procedure(_EndsOf(l_l "l")  ; -> list of int
     mapcar(lambda((m "g") m->end()) l_l)
 )
 
-procedure(_assertSameSpan(g_m n_start n_end t_msg "gnnt")  ; -> t | nil (nil match fails safely)
+procedure(_AssertSameSpan(g_m n_start n_end t_msg "gnnt")  ; -> t | nil (nil match fails safely)
     let((g_ok l_sp)
         when(g_m
             l_sp = g_m->span()
@@ -117,7 +117,7 @@ procedure(_assertSameSpan(g_m n_start n_end t_msg "gnnt")  ; -> t | nil (nil mat
                 printf("  actual span (%d, %d)\n" car(l_sp) car(cdr(l_sp)))
             )
         )
-        _assert(g_ok t_msg)
+        _Assert(g_ok t_msg)
     )
 )
 

@@ -18,7 +18,7 @@ let((t_res t_self t_dir)
     unless(pcreMatchp("/$" t_dir)
         t_dir = strcat(t_dir "/")
     )
-    if(findNamespace("ycJson") == nil
+    if(findNamespace("ycJson") == nil || findSymbol("Decode" ?namespace "ycJson") == nil || !fboundp(findSymbol("Decode" ?namespace "ycJson"))
         ; libs/codec/json/load.il relies on ycPathLib; when ycPathLib is absent,
         ; enter through libs/load.il so the bootstrap order is respected.
         if(findNamespace("ycPathLib")

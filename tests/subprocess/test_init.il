@@ -1,7 +1,7 @@
 _TestCount = 0
 _TestFail = 0
 
-procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
+procedure(_Assert(g_cond t_msg "gt")  ; -> t | nil
     _TestCount = _TestCount + 1
     unless(g_cond
         _TestFail = _TestFail + 1

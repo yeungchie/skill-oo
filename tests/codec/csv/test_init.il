@@ -1,7 +1,7 @@
 _TestCount = 0
 _TestFail = 0
 
-procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
+procedure(_Assert(g_cond t_msg "gt")  ; -> t | nil
     _TestCount = _TestCount + 1
     unless(g_cond
         _TestFail = _TestFail + 1
@@ -13,7 +13,7 @@ procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
     g_cond
 )
 
-procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
+procedure(_AssertError(g_funobj t_msg "gt")  ; -> t | nil
     let((g_ok)
         _TestCount = _TestCount + 1
         g_ok = errset(funcall(g_funobj) nil)
@@ -28,7 +28,7 @@ procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
     )
 )
 
-procedure(_assertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil
+procedure(_AssertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil
     let((g_ok t_text t_tail g_pass)
         _TestCount = _TestCount + 1
         g_ok = errset(funcall(g_funobj) nil)
@@ -54,16 +54,16 @@ procedure(_assertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil
     )
 )
 
-procedure(_sameRows(l_a l_b "ll")  ; -> t | nil
+procedure(_SameRows(l_a l_b "ll")  ; -> t | nil
     cond(
         ((l_a == nil && l_b == nil) t)
         ((l_a == nil || l_b == nil) nil)
-        (t (car(l_a) == car(l_b) && _sameRows(cdr(l_a) cdr(l_b))))
+        (t (car(l_a) == car(l_b) && _SameRows(cdr(l_a) cdr(l_b))))
     )
 )
 
-procedure(_assertRows(l_a l_b t_msg "llt")  ; -> t | nil
-    _assert(_sameRows(l_a l_b) t_msg)
+procedure(_AssertRows(l_a l_b t_msg "llt")  ; -> t | nil
+    _Assert(_SameRows(l_a l_b) t_msg)
 )
 
 let((l_res t_self t_dir)

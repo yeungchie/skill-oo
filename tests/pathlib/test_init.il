@@ -1,7 +1,7 @@
 _TestCount = 0
 _TestFail = 0
 
-procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
+procedure(_Assert(g_cond t_msg "gt")  ; -> t | nil
     _TestCount = _TestCount + 1
     unless(g_cond
         _TestFail = _TestFail + 1
@@ -13,7 +13,7 @@ procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
     g_cond
 )
 
-procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
+procedure(_AssertError(g_funobj t_msg "gt")  ; -> t | nil
     let((g_ok)
         _TestCount = _TestCount + 1
         g_ok = errset(funcall(g_funobj) nil)
@@ -28,19 +28,19 @@ procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
     )
 )
 
-procedure(_p(g_path "g")  ; -> Path
+procedure(_P(g_path "g")  ; -> Path
     ycPathLib::Path(g_path)
 )
 
-procedure(_s(g_path "g")  ; -> str
+procedure(_S(g_path "g")  ; -> str
     ycPathLib::Path(g_path)->str()
 )
 
-procedure(_sl(g_list "g")  ; -> list of str
+procedure(_Sl(g_list "g")  ; -> list of str
     mapcar(lambda((g "g") g->str()) g_list)
 )
 
-procedure(_hasStr(l_list t_str "lt")  ; -> t | nil
+procedure(_HasStr(l_list t_str "lt")  ; -> t | nil
     let((g_found)
         foreach(t_s l_list
             when(t_s == t_str
@@ -51,7 +51,7 @@ procedure(_hasStr(l_list t_str "lt")  ; -> t | nil
     )
 )
 
-procedure(_countStr(l_list t_str "lt")  ; -> n
+procedure(_CountStr(l_list t_str "lt")  ; -> n
     let((n_c)
         n_c = 0
         foreach(t_s l_list
@@ -63,19 +63,19 @@ procedure(_countStr(l_list t_str "lt")  ; -> n
     )
 )
 
-procedure(_assertSameStrs(l_actual l_expected t_msg "llt")  ; -> t | nil
+procedure(_AssertSameStrs(l_actual l_expected t_msg "llt")  ; -> t | nil
     let((g_ok)
         g_ok = length(l_actual) == length(l_expected)
         when(g_ok
             foreach(t_s l_actual
-                when(_countStr(l_actual t_s) != _countStr(l_expected t_s)
+                when(_CountStr(l_actual t_s) != _CountStr(l_expected t_s)
                     g_ok = nil
                 )
             )
         )
         when(g_ok
             foreach(t_s l_expected
-                when(_countStr(l_expected t_s) != _countStr(l_actual t_s)
+                when(_CountStr(l_expected t_s) != _CountStr(l_actual t_s)
                     g_ok = nil
                 )
             )
@@ -90,11 +90,11 @@ procedure(_assertSameStrs(l_actual l_expected t_msg "llt")  ; -> t | nil
                 printf("    %s\n" t_s)
             )
         )
-        _assert(g_ok t_msg)
+        _Assert(g_ok t_msg)
     )
 )
 
-procedure(_assertSameSeq(l_actual l_expected t_msg "llt")  ; -> t | nil
+procedure(_AssertSameSeq(l_actual l_expected t_msg "llt")  ; -> t | nil
     let((g_ok l_a l_b)
         g_ok = length(l_actual) == length(l_expected)
         when(g_ok
@@ -110,25 +110,25 @@ procedure(_assertSameSeq(l_actual l_expected t_msg "llt")  ; -> t | nil
             printf("  expected (%d): %s\n" length(l_expected) buildString(l_expected " "))
             printf("  actual (%d): %s\n" length(l_actual) buildString(l_actual " "))
         )
-        _assert(g_ok t_msg)
+        _Assert(g_ok t_msg)
     )
 )
 
-procedure(_assertOk(g_r t_msg "gt")  ; -> t | nil（errset 结果：捕获成功且值为 t 才过）
+procedure(_AssertOk(g_r t_msg "gt")  ; -> t | nil（errset 结果：捕获成功且值为 t 才过）
     let((g_ok)
         when(g_r
             g_ok = car(g_r)
         )
-        _assert(g_ok t_msg)
+        _Assert(g_ok t_msg)
     )
 )
 
-procedure(_sameJson(g_a g_b t_format "ggt")  ; -> t | nil
+procedure(_SameJson(g_a g_b t_format "ggt")  ; -> t | nil
     ycJson::Encode(g_a ?format t_format ?sortKeys t)
         == ycJson::Encode(g_b ?format t_format ?sortKeys t)
 )
 
-procedure(_sameYaml(g_a g_b "gg")  ; -> t | nil
+procedure(_SameYaml(g_a g_b "gg")  ; -> t | nil
     ycYaml::Encode(g_a ?sortKeys t)
         == ycYaml::Encode(g_b ?sortKeys t)
 )

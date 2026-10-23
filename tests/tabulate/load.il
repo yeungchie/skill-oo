@@ -30,7 +30,7 @@ let((t_res t_self t_dir)
     unless(findNamespace("ycTextwrap")
         loadi(strcat(t_dir "../../libs/textwrap/load.il"))
     )
-    when(findNamespace("ycTabulate") == nil
+    when(findNamespace("ycTabulate") == nil || findSymbol("Render" ?namespace "ycTabulate") == nil || !fboundp(findSymbol("Render" ?namespace "ycTabulate"))
         loadi(strcat(t_dir "../../libs/tabulate/load.il"))
     )
     loadi(strcat(t_dir "test_init.il"))

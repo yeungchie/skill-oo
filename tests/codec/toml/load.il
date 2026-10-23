@@ -18,7 +18,7 @@ let((t_res t_self t_dir)
     unless(pcreMatchp("/$" t_dir)
         t_dir = strcat(t_dir "/")
     )
-    if(findNamespace("ycToml") == nil
+    if(findNamespace("ycToml") == nil || findSymbol("Decode" ?namespace "ycToml") == nil || !fboundp(findSymbol("Decode" ?namespace "ycToml"))
         ; libs/codec/toml/load.il relies on ycPathLib; when ycPathLib is absent,
         ; enter through libs/load.il so the bootstrap order is respected.
         if(findNamespace("ycPathLib")

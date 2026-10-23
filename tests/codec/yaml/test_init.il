@@ -1,7 +1,7 @@
 _TestCount = 0
 _TestFail = 0
 
-procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
+procedure(_Assert(g_cond t_msg "gt")  ; -> t | nil
     _TestCount = _TestCount + 1
     unless(g_cond
         _TestFail = _TestFail + 1
@@ -13,7 +13,7 @@ procedure(_assert(g_cond t_msg "gt")  ; -> t | nil
     g_cond
 )
 
-procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
+procedure(_AssertError(g_funobj t_msg "gt")  ; -> t | nil
     let((g_ok)
         _TestCount = _TestCount + 1
         g_ok = errset(funcall(g_funobj) nil)
@@ -28,7 +28,7 @@ procedure(_assertError(g_funobj t_msg "gt")  ; -> t | nil
     )
 )
 
-procedure(_assertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil
+procedure(_AssertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil
     let((g_ok t_text t_tail g_pass)
         _TestCount = _TestCount + 1
         g_ok = errset(funcall(g_funobj) nil)
@@ -54,20 +54,20 @@ procedure(_assertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil
     )
 )
 
-procedure(_dump(g_v "g")  ; -> str
+procedure(_Dump(g_v "g")  ; -> str
     ycYaml::Encode(g_v ?flow t ?sortKeys t ?finalNewline nil)
 )
 
-procedure(_assertDumpEq(g_a g_b t_msg "ggt")  ; -> t | nil
+procedure(_AssertDumpEq(g_a g_b t_msg "ggt")  ; -> t | nil
     let((t_a t_b g_ok)
-        t_a = _dump(g_a)
-        t_b = _dump(g_b)
+        t_a = _Dump(g_a)
+        t_b = _Dump(g_b)
         g_ok = t_a == t_b
         unless(g_ok
             printf("  expected: %s\n" t_b)
             printf("  actual: %s\n" t_a)
         )
-        _assert(g_ok t_msg)
+        _Assert(g_ok t_msg)
     )
 )
 

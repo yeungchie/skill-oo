@@ -1,5 +1,5 @@
 ;--------------------------
-; Program  : ycJson tests(load.il)
+; Program  : ycCodec tests(load.il)
 ; Language : Cadence Skill
 ;--------------------------
 
@@ -9,7 +9,7 @@ let((t_res t_self t_dir)
         car(t_res)
     )
     unless(t_self
-        error("ycJson: can't determine the current file - load this file with an explicit path")
+        error("ycCodec: can't determine the current file - load this file with an explicit path")
     )
     unless(pcreMatchp("^[~/]|^\\.{1,2}/" t_self)
         t_self = strcat("./" t_self)
