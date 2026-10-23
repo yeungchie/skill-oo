@@ -52,6 +52,19 @@ let((t_v)
 
 _Assert(ycCsv::Decode("")->render() == ""  "render: empty table")
 _Assert(ycCsv::Decode("")->print() == t  "print: empty table returns t")
+let((t_v t_p t_old t_out t_ret)
+    t_v = ycCsv::Decode("a,b\n1,2\n" ?header t)
+    t_p = outstring()
+    t_old = poport
+    poport = t_p
+    t_ret = t_v->print()
+    poport = t_old
+    t_out = getOutstring(t_p)
+    close(t_p)
+    _Assert(t_ret == t  "print: returns t")
+    _Assert(t_out == strcat(t_v->render() "\n")  "print: writes rendered text and newline")
+)
+
 _AssertError(lambda(() ycCsv::Decode("a\n1\n" ?header t)->render(?format "xml"))
     "render: invalid format forwards")
 _AssertError(lambda(() ycCsv::Decode("a\n1\n" ?header t)->print(?format "xml"))

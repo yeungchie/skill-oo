@@ -18,6 +18,14 @@ load("<path-to-dir>/skill-oo/tests/textwrap/load.il")
 load("<path-to-dir>/skill-oo/tests/tabulate/load.il")
 ```
 
+跨套件加载顺序回归（先 tabulate 创建空壳，再加载 codec，最后重跑 tabulate）：
+
+```lisp
+load("<path-to-dir>/skill-oo/tests/codec/load_order.il")
+```
+
+成功时输出 `LOAD ORDER REGRESSION PASSED`。
+
 > 修改某个 `libs/<模块>/src/` 后必须**重启 CIW** 再跑对应 `load.il`：同一会话内已加载过对应库时，`load.il` 会打印提示并复用内存中的旧代码，改动静默无效。
 
 pathlib 与 regex 套件会在 cwd 下创建并清理各自的临时夹具；subprocess 套件直接运行短命令，codec、utf8、string、units、textwrap 与 tabulate 套件仅做内存运算，均无夹具。期望输出：
