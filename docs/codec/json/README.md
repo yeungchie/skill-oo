@@ -1,5 +1,7 @@
 # ycJson
 
+[返回首页](../../../README.md)
+
 Cadence SKILL++ 的 JSON 家族编解码库：JSON、放宽 JSON（jsonc）与 JSON Lines（jsonl）的解码与编码。
 
 ## 概要
@@ -205,3 +207,5 @@ t_v["nope"] == ycCodec::Missing  ; 键不存在
 + 非有限浮点（无穷、NaN）不可编码，以 `error()` 中断。
 + `\u0000`（NUL）无法保存在字符串中，解码时被丢弃。
 + 错误消息以当前上下文前缀标识来源：解码为 `ycJson::Decode: <说明> at line <行>, column <列>`（均从 1 起，列按字节计），编码为 `ycJson::Encode:`，类型对象为 `ycCodec::Type:` / `ycCodec::Type->toSkill:`。
+
+[返回首页](../../../README.md)

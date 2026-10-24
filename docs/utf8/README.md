@@ -1,5 +1,7 @@
 # ycUtf8
 
+[返回首页](../../README.md)
+
 Cadence SKILL++ 的 UTF-8 工具库：字节串与码点互转、按码点计数与切片、显示宽度测量。
 
 ## 概要
@@ -301,3 +303,5 @@ ycUtf8::IsValid(strcat(intToChar(228) intToChar(184)))          ; => nil
 6. 其余 → 1
 
 宽度按码点求和，不合并字素簇；emoji ZWJ 序列、旗帜、肤色修饰符、VS16 表情呈现等可能与终端实际显示不同。换行与制表符计 0，折行前请自行展开制表符。
+
+[返回首页](../../README.md)

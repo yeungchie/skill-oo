@@ -1,5 +1,7 @@
 # ycString
 
+[返回首页](../../README.md)
+
 Cadence SKILL++ 的字符串工具库：常用操作、转义与标识符转换。
 
 ## 概要
@@ -725,3 +727,5 @@ ycString::ToPascal("html_parser") ; => "HtmlParser"
 ## 显示宽度
 
 `?unit "display"` 与 `ycUtf8::Width` 一致：控制字符为 0、East Asian Wide/Fullwidth 为 2、Ambiguous 由 `?ambiguous` 决定（默认 1）。宽度按码点求和，不合并字素簇；需要按字符数对齐时用 `?unit "char"`。
+
+[返回首页](../../README.md)

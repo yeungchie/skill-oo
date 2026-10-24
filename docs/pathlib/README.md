@@ -1,5 +1,7 @@
 # ycPathLib
 
+[返回首页](../../README.md)
+
 Cadence SKILL++ 的路径处理库：纯路径操作与文件系统操作。
 
 ## 概要
@@ -1512,3 +1514,5 @@ here = ycPathLib::CurrentFile()->parent()
 ```
 
 > 注：`get_filename` 在文件最后一个表达式处取值存在已知异常，避免在文件末行调用本函数。
+
+[返回首页](../../README.md)

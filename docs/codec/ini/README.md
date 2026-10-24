@@ -1,5 +1,7 @@
 # ycIni
 
+[返回首页](../../../README.md)
+
 Cadence SKILL++ 的 INI 配置编解码库：把行式配置文本读成 table，或把 table 写成 INI 文本。
 
 ## 概要
@@ -152,3 +154,5 @@ ycIni::Encode(t_cfg)
 ycIni::Encode("not a table")
 ; *Error* ycIni::Encode: root value must be a table
 ```
+
+[返回首页](../../../README.md)

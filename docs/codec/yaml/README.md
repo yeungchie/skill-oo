@@ -1,5 +1,7 @@
 # ycYaml
 
+[返回首页](../../../README.md)
+
 Cadence SKILL++ 的 YAML 1.2 编解码库：块式与流式集合、块标量、锚点别名、核心标签与多文档流。
 
 ## 概要
@@ -203,3 +205,5 @@ ycYaml::Encode('foo)
 ycYaml::Encode(ycCodec::Missing)
 ; *Error* ycYaml::Encode: cannot dump the Missing marker
 ```
+
+[返回首页](../../../README.md)

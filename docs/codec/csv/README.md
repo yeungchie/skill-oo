@@ -1,5 +1,7 @@
 # ycCsv
 
+[返回首页](../../../README.md)
+
 Cadence SKILL++ 的 CSV/TSV 编解码库：RFC 4180 风格字段规则与带可选表头的 Table 模型。
 
 ## 概要
@@ -449,3 +451,5 @@ ycCsv::Encode(ycCsv::Table(list(list("a"))) ?eol "\r")
 + 不 trim、不排序、不做 Unicode 规范化；字段按字节透传。
 + `?quoteAll t` 只影响输出，解码端仍按标准引号规则读取。
 + 编码不做字段换行归一化；字段内的 CR/LF 原样保留在引号中。
+
+[返回首页](../../../README.md)

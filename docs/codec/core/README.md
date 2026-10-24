@@ -1,5 +1,7 @@
 # ycCodec
 
+[返回首页](../../../README.md)
+
 Cadence SKILL++ 编解码库共享的哨兵类型库：统一表示 `true`、`false`、`null` 与缺键标记。
 
 ## 概要
@@ -110,3 +112,5 @@ ycCodec::Null->toSkill()                       ; => unbound
 ### ycCodec::Missing <sub>`constant`</sub>
 
 容器缺键的缺省标记（`Type` 唯一实例）：解码出的 table 以它为缺省值；编码时作为值出现即以 `error()` 中断。
+
+[返回首页](../../../README.md)

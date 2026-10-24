@@ -1,5 +1,7 @@
 # ycTextwrap
 
+[返回首页](../../README.md)
+
 Cadence SKILL++ 的文本折行与块缩进库：定宽折行、公共缩进处理与超长截断。
 
 ## 概要
@@ -245,3 +247,5 @@ ycTextwrap::Shorten("abcdefgh" 5 ?placeholder "…") ; => "abcd…"
 ycTextwrap::Shorten("a" 0)
 ; => 以 error() 中断（宽度须为正整数）
 ```
+
+[返回首页](../../README.md)

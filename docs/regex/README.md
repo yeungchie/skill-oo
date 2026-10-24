@@ -1,5 +1,7 @@
 # ycRegEx
 
+[返回首页](../../README.md)
+
 Cadence SKILL++ 的正则表达式库：模块级自由函数与 `ReCompile()` 编译对象双套 API，提供 `Pattern`/`Match` 两类对象，零第三方依赖。
 
 ## 概要
@@ -1008,3 +1010,5 @@ ycRegEx::ReSearch("^a" "a" ?execOpts list('notbol 'notempty))  ; => nil
 ```
 
 未知选项或非符号/列表参数以 `error()` 中断。`partial` 不放入 `?execOpts`，需要用 `RePartialp` / `Pattern->partialp` 做布尔探测，因为它只表示主题串可完成匹配，不产生完整 `Match`。
+
+[返回首页](../../README.md)
