@@ -27,6 +27,7 @@ let((t_dir t_pkgs)
         "utf8"
         "string"
         "units"
+        "radix"
         "textwrap"
         "tabulate"
     )

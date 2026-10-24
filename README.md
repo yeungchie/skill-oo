@@ -28,6 +28,7 @@
   + [ycToml](docs/codec/toml/README.md) —— TOML 1.0 编解码。
   + [ycIni](docs/codec/ini/README.md) —— INI 配置读写。
 + [ycUnits](docs/units/README.md) —— SI 工程计数与单位解析/格式化。
++ [ycRadix](docs/radix/README.md) —— 任意进制整数解析、格式化与掩码。
 + [ycTabulate](docs/tabulate/README.md) —— 文本表格渲染。
 
 ## 调用约定
