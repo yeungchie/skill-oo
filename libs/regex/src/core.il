@@ -470,20 +470,20 @@ procedure(Partialp(g_pat t_subj \@key flags execOpts "gtgg")  ; -> t | nil
     )
 )
 
-procedure(Split(g_pat t_subj \@key flags all execOpts "gtggg")  ; -> list[str]
+procedure(Split(g_pat t_subj \@key flags first execOpts "gtggg")  ; -> list[str]
     ; 按模式切分主题串（语义同 Python re.split）。
     ;
     ; **参数**
     ;   g_pat   (any)         - 模式串或已编译 Pattern（双表皮）
     ;   t_subj  (str)         - 主题串
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
-    ;   ?all    (t|nil)       - t 时切分全部匹配，nil（默认）只切首处
+    ;   ?first  (t|nil)       - t 时只切首处，nil（默认）切分全部
     ;
     ; **返回**
     ;   (list[str]) - 切分段列表（保留捕获组段）
     let((p)
         p = _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::Split") "ycRegEx::Split" 0)
-        p->split(t_subj ?all all ?execOpts execOpts)
+        p->split(t_subj ?first first ?execOpts execOpts)
     )
 )
 

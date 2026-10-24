@@ -266,7 +266,7 @@ procedure(Split(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> list
                 unless(stringp(sep) && sep != ""
                     error("ycString::Split: regex mode needs a non-empty pattern (%A)" sep)
                 )
-                l_parts = ycRegEx::Split(sep t_s ?all t)
+                l_parts = ycRegEx::Split(sep t_s)
             )
             (sep
                 unless(stringp(sep)

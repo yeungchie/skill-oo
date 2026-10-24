@@ -212,19 +212,19 @@ self->partialp = lambda((t_subj \@key execOpts "tg")  ; -> t | nil
     )
 )
 
-self->split = lambda((t_subj \@key all execOpts "tgg")  ; -> list[str]
+self->split = lambda((t_subj \@key first execOpts "tgg")  ; -> list[str]
     ; 按模式切分主题串（同函数 ycRegEx::Split）。
     ;
     ; **参数**
     ;   t_subj     (str)         - 主题串
-    ;   ?all       (t|nil)       - t 时切分全部匹配，nil（默认）只切首处（默认 nil）
+    ;   ?first     (t|nil)       - t 时只切首处，nil（默认）切分全部
     ;   ?execOpts  (sym|list|nil) - 执行选项符号或列表（默认 nil）
     ;
     ; **返回**
     ;   (list[str]) - 切分段列表（保留捕获组段）
     let((t_buf n_count n_exec)
         n_exec = _ExecOptsBits(execOpts "ycRegEx::Pattern->split")
-        n_count = if(all 0 1)
+        n_count = if(first 1 0)
         t_buf = pcreReplace(self->_data->pcre t_subj _SplitTemplate(self->_data->nGroups) n_count n_exec)
         _SplitBy(t_buf "<YC-S>")
     )

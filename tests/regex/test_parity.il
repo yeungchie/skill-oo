@@ -36,20 +36,19 @@ _AssertSameInts(_EndsOf(ycRegEx::Finditer("a" "aaa")) '(1 2 3)  "finditer: liter
 _Assert(length(ycRegEx::Finditer("\\d+" "")) == 0  "finditer: no match -> empty list")
 
 ; ---------- split ----------
-_AssertSameSeq(ycRegEx::Split("\\s+" "a b  c" ?all t) '("a" "b" "c")  "split ?all: whitespace runs")
-_AssertSameSeq(ycRegEx::Split("\\s+" "a b  c") '("a" "b  c")  "split default single: whitespace")
-_AssertSameSeq(ycRegEx::Split("(\\d)" "a1b2c" ?all t) '("a" "1" "b" "2" "c")  "split ?all: group value in result")
-_AssertSameSeq(ycRegEx::Split("(\\d)" "a1b2c") '("a" "1" "b2c")  "split default single: group value")
-_AssertSameSeq(ycRegEx::Split("(a)|(b)" "ab" ?all t) '("" "a" "" "" "" "b" "")  "split ?all: alt groups (CPython None -> '')")
-_AssertSameSeq(ycRegEx::Split("," "a,b,c" ?all t) '("a" "b" "c")  "split ?all: plain")
-_AssertSameSeq(ycRegEx::Split("," "a,b,c") '("a" "b,c")  "split default single: plain")
+_AssertSameSeq(ycRegEx::Split("\\s+" "a b  c") '("a" "b" "c")  "split default all: whitespace runs")
+_AssertSameSeq(ycRegEx::Split("\\s+" "a b  c" ?first t) '("a" "b  c")  "split ?first: whitespace")
+_AssertSameSeq(ycRegEx::Split("(\\d)" "a1b2c") '("a" "1" "b" "2" "c")  "split default all: group value in result")
+_AssertSameSeq(ycRegEx::Split("(\\d)" "a1b2c" ?first t) '("a" "1" "b2c")  "split ?first: group value")
+_AssertSameSeq(ycRegEx::Split("(a)|(b)" "ab") '("" "a" "" "" "" "b" "")  "split default all: alt groups (CPython None -> '')")
+_AssertSameSeq(ycRegEx::Split("," "a,b,c") '("a" "b" "c")  "split default all: plain")
+_AssertSameSeq(ycRegEx::Split("," "a,b,c" ?first t) '("a" "b,c")  "split ?first: plain")
 _AssertSameSeq(ycRegEx::Split("," "") '("")  "split: empty subject")
-_AssertSameSeq(ycRegEx::Split("x*" "axbxc") '("" "axbxc")  "split: zero-width first-only pin (CPython 7 items)")
-_AssertSameSeq(ycRegEx::Split("(?m)^" "a\nb") '("" "a\nb")  "split: zero-width caret pin (CPython ['', 'a\\n', 'b'])")
-_AssertSameSeq(ycRegEx::Split("" "ab") '("" "ab")  "split: empty pattern pin (CPython ['' 'a' 'b' ''])")
-_AssertSameSeq(ycRegEx::Split("x*" "") '("" "")  "split: zero-width empty subject")
-_AssertSameSeq(ycRegEx::Split("," "a<YC-S>b") '("a" "b")  "split: marker-in-subject swallowed (CPython ['a<YC-S>b'])")
-
+_AssertSameSeq(ycRegEx::Split("x*" "axbxc") '("" "axbxc")  "split default all: zero-width engine first-only (CPython 7 items)")
+_AssertSameSeq(ycRegEx::Split("(?m)^" "a\nb") '("" "a\nb")  "split default all: zero-width caret engine first-only (CPython ['', 'a\\n', 'b'])")
+_AssertSameSeq(ycRegEx::Split("" "ab") '("" "ab")  "split default all: empty pattern engine first-only (CPython ['' 'a' 'b' ''])")
+_AssertSameSeq(ycRegEx::Split("x*" "") '("" "")  "split default all: zero-width empty subject")
+_AssertSameSeq(ycRegEx::Split("," "a<YC-S>b") '("a" "b")  "split default all: marker-in-subject swallowed (CPython ['a<YC-S>b'])")
 ; ---------- sub / subn ----------
 _Assert(ycRegEx::Sub("(x)" "<\\1>" "xa x" ?all t) == "<x>a <x>"  "sub ?all: backref expansion")
 _Assert(ycRegEx::Sub("(x)" "<\\1>" "xa x") == "<x>a x"  "sub default single: backref")
@@ -121,7 +120,7 @@ _Assert(ycRegEx::Search("(?<=a)b" "ab")->expand("x") == "x"  "A1 search: lookbeh
 _Assert(ycRegEx::Sub("^a" "X" "ba") == "ba"  "A1 sub: ^ default, no substitution (CPython 'ba')")
 _AssertSameSeq(ycRegEx::Split("^a" "ba") '("ba")  "A1 split: ^ default, no split (CPython ['ba'])")
 
-; (A2 block removed: count>=2 kernel _replaceN retired in favor of ?all)
+; (A2 block removed: count>=2 kernel _replaceN retired in favor of all-matches default)
 
 ; ---------- A3: fullmatch anchor gate (PCRE \z vs Python \Z) ----------
 _Assert(ycRegEx::Fullmatch("a$" "a\n") == nil  "A3 fullmatch: $ + trailing newline -> nil (CPython None)")
@@ -131,7 +130,7 @@ _AssertSameSpan(ycRegEx::Fullmatch("a$\n" "a\n") 0 2  "A3 fullmatch: pattern new
 _Assert(ycRegEx::Sub("(?<=a)b" "X" "ab" ?all t) == "aX"  "A4 sub ?all: lookbehind (CPython 'aX')")
 _Assert(ycRegEx::Sub("(?<=a)(b)" "<\\1>" "ab" ?all t) == "a<b>"  "A4 sub ?all: lookbehind group ref (CPython 'a<b>')")
 _Assert(ycRegEx::Sub("b" "[&]" "abc" ?all t) == "a[b]c"  "A4 sub ?all: & (engine)")
-_AssertSameSeq(ycRegEx::Split("(?<=,)" "a,b" ?all t) '("a," "b")  "A4 split ?all: lookbehind (CPython ['a,', 'b'])")
+_AssertSameSeq(ycRegEx::Split("(?<=,)" "a,b") '("a," "b")  "A4 split default all: lookbehind (CPython ['a,', 'b'])")
 _AssertSameInts(_StartsOf(ycRegEx::Finditer("(?<=a)b" "ab ab")) '(1 4)  "A4 finditer: lookbehind starts (CPython [1, 4])")
 _AssertSameInts(_EndsOf(ycRegEx::Finditer("(?<=a)b" "ab ab")) '(2 5)  "A4 finditer: lookbehind ends (CPython [2, 5])")
 
