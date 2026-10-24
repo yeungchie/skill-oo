@@ -73,8 +73,8 @@ procedure(Parse(t_text \@key (base nil) (prefix t) (wrap nil) "tggg")  ; -> int
     ;
     ; **参数**
     ;   t_text    (str)    - 输入文本：可选正负号 + 数字；前缀 0b/0o/0x 大小写皆可
-    ;   ?base     (int)    - 2–36；nil 时按前缀推断，否则十进制；默认 nil
-    ;   ?prefix   (t|nil)  - 是否识别 0b/0o/0x 前缀；默认 t
+    ;   ?base     (int)    - 2–36；nil 时按前缀或前导 0 推断，否则十进制；默认 nil
+    ;   ?prefix   (t|nil)  - 是否识别 0b/0o/0x 与前导 0 八进制；默认 t
     ;   ?wrap     (t|nil)  - t 时允许 32 位无符号位型（最高位为 1 返回负数）；默认 nil
     ;
     ; **返回**
@@ -111,6 +111,11 @@ procedure(Parse(t_text \@key (base nil) (prefix t) (wrap nil) "tggg")  ; -> int
                 )
                 n_base = car(l_pf)
                 n_i = n_i + cadr(l_pf)
+            )
+            unless(l_pf
+                when(base == nil && n_i <= n_len && charToInt(getchar(t_text n_i)) == 48
+                    n_base = 8
+                )
             )
         )
         unless(n_base

@@ -10,13 +10,15 @@ Cadence SKILL++ 的任意进制转换库：2–36 进制整数解析、格式化
 - `Parse` 支持 `0b`/`0o`/`0x` 前缀并据此推断进制，也支持显式 `?base`；数字大小写不敏感。
 - `Format` 支持任意 2–36 进制、规范或自定义前缀、大小写、数字宽度与单字符填充。
 - 格式化采用符号加绝对值；`?width` 只约束数字部分，符号与前缀不计入宽度。
-- 解析不接受空白、下划线或浮点数；前导 0 不表示八进制。
+- 未显式指定 `?base` 且启用前缀识别时，`0` 开头与 `0o` 开头都按八进制；显式 `?base` 以指定进制为准，`?prefix nil` 关闭前缀与前导 0 推断。
+- 解析不接受空白、下划线或浮点数。
 - 错误消息以 `ycRadix::<过程>:` 开头。
 
 ## 快速上手
 
 ```lisp
 ; 解析
+ycRadix::Parse("010")                   ; => 8
 ycRadix::Parse("1010" ?base 2)          ; => 10
 ycRadix::Parse("0x1f")                  ; => 31
 ycRadix::Parse("z" ?base 36)            ; => 35
@@ -48,7 +50,7 @@ ycRadix::Parse(
 
 **描述**
 
-按指定或由前缀推断的进制解析整数。文本可带一个前导 `+` 或 `-`，其后至少一位数字；数字 `0–9`、`a–z` 不区分大小写。`?base` 为 `nil` 时，若识别到 `0b`/`0o`/`0x` 前缀则据此推断，否则按十进制；显式 base 与前缀冲突时以 `error()` 中断。文本含空白、下划线、非法数字或超出范围时以 `error()` 中断。
+按指定或由前缀推断的进制解析整数。文本可带一个前导 `+` 或 `-`，其后至少一位数字；数字 `0–9`、`a–z` 不区分大小写。`?base` 为 `nil` 时，若识别到 `0b`/`0o`/`0x` 前缀则据此推断；否则若以 `0` 开头则按八进制，其余按十进制。显式 `?base` 以指定进制为准；规范前缀与显式 base 冲突时以 `error()` 中断。文本含空白、下划线、非法数字或超出范围时以 `error()` 中断。
 
 `?wrap t` 允许 0 到 0xFFFFFFFF 的 32 位位型：最高位为 1 时返回等价的负数。超过 32 位仍以 `error()` 中断。
 
@@ -57,8 +59,8 @@ ycRadix::Parse(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_text | str |  | 输入文本 |
-| ?base g_base | int | nil | 2–36；nil 时按前缀推断，否则十进制 |
-| ?prefix g_prefix | t \| nil | t | 是否识别 `0b`/`0o`/`0x` 前缀 |
+| ?base g_base | int | nil | 2–36；nil 时按前缀或前导 `0` 推断，否则十进制 |
+| ?prefix g_prefix | t \| nil | t | 是否识别 `0b`/`0o`/`0x` 与前导 `0` 八进制 |
 | ?wrap g_wrap | t \| nil | nil | t 时允许 32 位无符号位型 |
 
 **返回值**
@@ -72,15 +74,18 @@ ycRadix::Parse("0")                     ; => 0
 ycRadix::Parse("+255")                  ; => 255
 ycRadix::Parse("-0x10")                 ; => -16
 ycRadix::Parse("0b1010")                ; => 10
+ycRadix::Parse("010")                   ; => 8
 ycRadix::Parse("0o17")                  ; => 15
 ycRadix::Parse("0X1F")                  ; => 31
 ycRadix::Parse("z" ?base 36)            ; => 35
 ycRadix::Parse("ff" ?base 16 ?prefix nil) ; => 255
 ycRadix::Parse("0x80000000" ?wrap t)    ; => -2147483648
 ycRadix::Parse("0xffffffff" ?wrap t)    ; => -1
+ycRadix::Parse("010" ?base 10)          ; => 10
 ycRadix::Parse("2147483647")            ; => 2147483647
 ycRadix::Parse("-2147483648")           ; => -2147483648
 ycRadix::Parse("")                      ; => 以 error() 中断（空串）
+ycRadix::Parse("08")                    ; => 以 error() 中断（八进制无数字 8）
 ycRadix::Parse("102" ?base 2)           ; => 以 error() 中断（数字超出进制）
 ycRadix::Parse("0x10" ?base 10)         ; => 以 error() 中断（前缀与显式 base 冲突）
 ycRadix::Parse("2147483648")            ; => 以 error() 中断（超出有符号 32 位）
