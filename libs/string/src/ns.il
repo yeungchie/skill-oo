@@ -8,8 +8,8 @@ addToNamespace("ycString"
         TrimEnd
         Pad
         Width
-        StrSplit
-        StrJoin
+        Split
+        Join
         StartsWith
         EndsWith
         Replace

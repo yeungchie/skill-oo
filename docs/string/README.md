@@ -7,7 +7,7 @@ Cadence SKILL++ 的字符串工具库：常用操作、转义与标识符转换�
 ## 概要
 
 + 字符级操作按 UTF-8 码点处理；显示宽度与 `ycUtf8` 的宽度规则一致。
-+ 字面量接口（`ycString::Replace` / `ycString::Count` / `ycString::StrSplit`）默认区分大小写、按字面量匹配；`?regex t` 时按 `ycRegEx` 的模式与替换模板语义。
++ 字面量接口（`ycString::Replace` / `ycString::Count` / `ycString::Split`）默认区分大小写、按字面量匹配；`?regex t` 时按 `ycRegEx` 的模式与替换模板语义。
 + 命名风格转换（`ycString::Words` / `ycString::JoinWords` / `ycString::Sanitize`）按大小写与数字边界切词；ASCII 字母数字以外的码点算词内字符。
 + 记法约定：例程注释中 `; =>` 标记返回值，`; *Error*` 标记错误消息。
 + 库内校验触发的错误消息以 `ycString::<过程>:` 为前缀，可用 `errset` 捕获。
@@ -21,8 +21,8 @@ ycString::Pad("ab" 5 ?fill "-")                ; => "ab---"
 ycString::Width("中文")                        ; => 4
 
 ; 切分与连接
-ycString::StrSplit("a,,b" ?sep ",")            ; => ("a" "" "b")
-ycString::StrJoin(list("a" "b") ?sep "-")      ; => "a-b"
+ycString::Split("a,,b" ?sep ",")            ; => ("a" "" "b")
+ycString::Join(list("a" "b") ?sep "-")      ; => "a-b"
 
 ; 替换、统计与转义
 ycString::Replace("baaacaa" "a+" "X" ?regex t) ; => "bXcX"
@@ -216,10 +216,10 @@ ycString::Width("a" ?unit "px")
 ; *Error* ycString::Width: unknown unit "px"
 ```
 
-### ycString::StrSplit <sub>`function`</sub>
+### ycString::Split <sub>`function`</sub>
 
 ```text
-ycString::StrSplit(
+ycString::Split(
     t_s
     [ ?sep ]
     [ ?regex ]
@@ -248,20 +248,20 @@ ycString::StrSplit(
 **例程**
 
 ```lisp
-ycString::StrSplit("  a\tb\n c ")                   ; => ("a" "b" "c")
-ycString::StrSplit("")                              ; => nil
-ycString::StrSplit("a,,b" ?sep ",")                 ; => ("a" "" "b")
-ycString::StrSplit(",a," ?sep ",")                  ; => ("" "a" "")
-ycString::StrSplit("a,,b" ?sep "," ?keepEmpty nil)  ; => ("a" "b")
-ycString::StrSplit("a1b22c" ?sep "[0-9]+" ?regex t) ; => ("a" "b" "c")
-ycString::StrSplit("a" ?sep "")
-; *Error* ycString::StrSplit: separator must not be empty
+ycString::Split("  a\tb\n c ")                   ; => ("a" "b" "c")
+ycString::Split("")                              ; => nil
+ycString::Split("a,,b" ?sep ",")                 ; => ("a" "" "b")
+ycString::Split(",a," ?sep ",")                  ; => ("" "a" "")
+ycString::Split("a,,b" ?sep "," ?keepEmpty nil)  ; => ("a" "b")
+ycString::Split("a1b22c" ?sep "[0-9]+" ?regex t) ; => ("a" "b" "c")
+ycString::Split("a" ?sep "")
+; *Error* ycString::Split: separator must not be empty
 ```
 
-### ycString::StrJoin <sub>`function`</sub>
+### ycString::Join <sub>`function`</sub>
 
 ```text
-ycString::StrJoin(
+ycString::Join(
     l_items
     [ ?sep ]
 )
@@ -286,11 +286,11 @@ ycString::StrJoin(
 **例程**
 
 ```lisp
-ycString::StrJoin(list("a" "b" "c"))      ; => "abc"
-ycString::StrJoin(list("a" "b") ?sep "-") ; => "a-b"
-ycString::StrJoin(nil)                    ; => ""
-ycString::StrJoin(list("a" 1))
-; *Error* ycString::StrJoin: item #2 is not a string (1)
+ycString::Join(list("a" "b" "c"))      ; => "abc"
+ycString::Join(list("a" "b") ?sep "-") ; => "a-b"
+ycString::Join(nil)                    ; => ""
+ycString::Join(list("a" 1))
+; *Error* ycString::Join: item #2 is not a string (1)
 ```
 
 ### ycString::StartsWith <sub>`function`</sub>
