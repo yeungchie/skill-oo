@@ -23,6 +23,7 @@ _Assert(ycRadix::Format(-255 ?base 16 ?prefix t ?width 4) == "-0x00ff"  "format:
 _Assert(ycRadix::Format((-1 - 2147483647) ?base 16) == "-80000000"  "format: signed min hex")
 _Assert(ycRadix::Format((-1 - 2147483647) ?base 2) == "-10000000000000000000000000000000"  "format: signed min binary")
 _Assert(ycRadix::Format(2147483647 ?base 16) == "7fffffff"  "format: signed max hex")
+_Assert(ycRadix::Format(ycRadix::Parse("-2147483648") ?base 16 ?prefix t ?width 10) == "-0x0080000000"  "format: signed min prefix width")
 _Assert(ycRadix::Format(0 ?base 2 ?prefix t ?width 8) == "0b00000000"  "format: zero binary pad")
 _Assert(ycRadix::Format(0 ?base 16 ?prefix t ?width 2) == "0x00"  "format: zero hex pad")
 _Assert(ycRadix::Format(1 ?base 2 ?width 0) == "1"  "format: zero width")
