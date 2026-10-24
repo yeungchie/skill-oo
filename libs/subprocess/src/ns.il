@@ -5,7 +5,7 @@ addToNamespace("ycSubProcess"
     mapcar('symbolToString '(
         Stream
         AsyncJob
-        RunJob
+        Run
         CreateJob
         Elapsed
         _Rstring

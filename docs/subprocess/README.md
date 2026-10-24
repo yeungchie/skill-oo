@@ -6,7 +6,7 @@ Cadence SKILL++ 的子进程封装库：启动进程、实时读写输出、按�
 
 ## 概要
 
-+ 同步接口 `RunJob()` 执行并等待；异步接口 `CreateJob()` 返回 `AsyncJob` 对象，控制进程生命周期。
++ 同步接口 `Run()` 执行并等待；异步接口 `CreateJob()` 返回 `AsyncJob` 对象，控制进程生命周期。
 + 进程状态以符号表示：`'None`（未启动）/ `'Active`（运行中）/ `'Dead`（已结束）/ `'Stopped`（已暂停）。
 + 输出按条收进 `Stream` 对象：`text()` 全量拼接、`last()`/`shift()` 取单条；耗时由 `Elapsed` 记录。
 + 回调函数按事件符号触发：`'stdout`/`'stderr`/`'post`/`'beforeBegin`/`'afterBegin`。
@@ -17,7 +17,7 @@ Cadence SKILL++ 的子进程封装库：启动进程、实时读写输出、按�
 
 ```lisp
 ; 同步执行：执行并等待，输出实时打印
-ycSubProcess::RunJob("whoami")                              ; => t
+ycSubProcess::Run("whoami")                              ; => t
 
 ; 异步执行：启动后取标准输出
 aj = ycSubProcess::CreateJob("date")
@@ -34,10 +34,10 @@ aj->await()                                                 ; => "hello\nworld\n
 
 ## API 参考
 
-### ycSubProcess::RunJob <sub>`function`</sub>
+### ycSubProcess::Run <sub>`function`</sub>
 
 ```text
-ycSubProcess::RunJob(
+ycSubProcess::Run(
     g_arg
     [ g_args ... ]
 )
@@ -62,19 +62,19 @@ ycSubProcess::RunJob(
 **例程**
 
 ```lisp
-ycSubProcess::RunJob("whoami")
+ycSubProcess::Run("whoami")
 ; yeung
 ; => t
 ```
 
 ```lisp
-ycSubProcess::RunJob("date")
+ycSubProcess::Run("date")
 ; Tue Sep 15 22:50:10 CST 2026
 ; => t
 ```
 
 ```lisp
-ycSubProcess::RunJob("bad cmd")
+ycSubProcess::Run("bad cmd")
 ; sh: bad: command not found
 ; => nil
 ```

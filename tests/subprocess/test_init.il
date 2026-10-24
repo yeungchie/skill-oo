@@ -29,12 +29,12 @@ let((l_res t_self t_dir)
         t_dir = strcat(t_dir "/")
     )
 
-    _TestRunJobDone = nil
-    l_res = errset(load(strcat(t_dir "test_run_job.il")) t)
-    unless(_TestRunJobDone
+    _TestRunDone = nil
+    l_res = errset(load(strcat(t_dir "test_run.il")) t)
+    unless(_TestRunDone
         _TestCount = _TestCount + 1
         _TestFail = _TestFail + 1
-        printf("TEST FAILED - test_run_job.il did not run to completion%s\n"
+        printf("TEST FAILED - test_run.il did not run to completion%s\n"
             if(l_res "" " (load raised an error)")
         )
     )

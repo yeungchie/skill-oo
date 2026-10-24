@@ -3,7 +3,7 @@ useNamespace("ycSubProcess")
 
 ; ---------- 函数 ----------
 
-procedure(RunJob(g_arg \@rest g_args "gg")  ; -> t | nil
+procedure(Run(g_arg \@rest g_args "gg")  ; -> t | nil
     ; 执行命令并等待任务完成，子进程输出实时打印到终端。
     ;
     ; **参数**
