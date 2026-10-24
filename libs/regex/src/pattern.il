@@ -37,7 +37,7 @@ defclass(PatternData () (
 ))
 
 defclass(Pattern () (
-    ; Pattern 实例：ReCompile() 返回的已编译模式对象，方法语义同对应函数 ycRegEx::ReXxx。
+    ; Pattern 实例：Compile() 返回的已编译模式对象，方法语义同对应自由函数。
     ; 状态桶（PatternData：pattern flags compileOpts pcre span full nGroups），构造后禁写
     _data(
         \@initarg _data
@@ -89,15 +89,15 @@ procedure(_Error(t_method t_formatString \@rest g_args "ttg")  ; -> never
     error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString g_args))
 )
 
-self->match = lambda((t_subj \@key execOpts "tg")  ; -> Match | nil
-    ; 在主题串开头锚定匹配（同函数 ycRegEx::ReMatch，前锚 \A）。
+self->match = lambda((t_subj \@key execOpts "tg")  ; -> Matched | nil
+    ; 在主题串开头锚定匹配（同函数 ycRegEx::Match，前锚 \A）。
     ;
     ; **参数**
     ;   t_subj     (str)         - 主题串
     ;   ?execOpts  (sym|list|nil) - 执行选项符号或列表（默认 nil）
     ;
     ; **返回**
-    ;   (Match|nil) - 起始处命中返回 Match（位置构造即知），未命中返回 nil
+    ;   (Matched|nil) - 起始处命中返回 Matched（位置构造即知），未命中返回 nil
     let((l_parts n_exec)
         n_exec = _ExecOptsBits(execOpts "ycRegEx::Pattern->match")
         when(pcreMatchp(self->_data->span t_subj 0 n_exec)
@@ -107,15 +107,15 @@ self->match = lambda((t_subj \@key execOpts "tg")  ; -> Match | nil
     )
 )
 
-self->search = lambda((t_subj \@key execOpts "tg")  ; -> Match | nil
-    ; 搜索主题串中的首个匹配（同函数 ycRegEx::ReSearch，span 惰性）。
+self->search = lambda((t_subj \@key execOpts "tg")  ; -> Matched | nil
+    ; 搜索主题串中的首个匹配（同函数 ycRegEx::Search，span 惰性）。
     ;
     ; **参数**
     ;   t_subj     (str)         - 主题串
     ;   ?execOpts  (sym|list|nil) - 执行选项符号或列表（默认 nil）
     ;
     ; **返回**
-    ;   (Match|nil) - 命中返回 Match（位置已定位），未命中返回 nil
+    ;   (Matched|nil) - 命中返回 Matched（位置已定位），未命中返回 nil
     let((l_parts n_exec n_start)
         n_exec = _ExecOptsBits(execOpts "ycRegEx::Pattern->search")
         when(pcreMatchp(self->_data->pcre t_subj 0 n_exec)
@@ -127,15 +127,15 @@ self->search = lambda((t_subj \@key execOpts "tg")  ; -> Match | nil
     )
 )
 
-self->fullmatch = lambda((t_subj \@key execOpts "tg")  ; -> Match | nil
-    ; 整串匹配（同函数 ycRegEx::ReFullmatch，经 full 锚 \A(?:…)\z）。
+self->fullmatch = lambda((t_subj \@key execOpts "tg")  ; -> Matched | nil
+    ; 整串匹配（同函数 ycRegEx::Fullmatch，经 full 锚 \A(?:…)\z）。
     ;
     ; **参数**
     ;   t_subj     (str)         - 主题串
     ;   ?execOpts  (sym|list|nil) - 执行选项符号或列表（默认 nil）
     ;
     ; **返回**
-    ;   (Match|nil) - 匹配覆盖整个主题串返回 Match（位置构造即知），否则返回 nil
+    ;   (Matched|nil) - 匹配覆盖整个主题串返回 Matched（位置构造即知），否则返回 nil
     let((l_parts n_exec)
         n_exec = _ExecOptsBits(execOpts "ycRegEx::Pattern->fullmatch")
         when(pcreMatchp(self->_data->full t_subj 0 n_exec)
@@ -145,15 +145,15 @@ self->fullmatch = lambda((t_subj \@key execOpts "tg")  ; -> Match | nil
     )
 )
 
-self->finditer = lambda((t_subj \@key execOpts "tg")  ; -> list[Match]
-    ; 返回全部匹配的 Match 列表（同函数 ycRegEx::ReFinditer，慢路径内核）。
+self->finditer = lambda((t_subj \@key execOpts "tg")  ; -> list[Matched]
+    ; 返回全部匹配的 Matched 列表（同函数 ycRegEx::Finditer，慢路径内核）。
     ;
     ; **参数**
     ;   t_subj     (str)         - 主题串
     ;   ?execOpts  (sym|list|nil) - 执行选项符号或列表（默认 nil）
     ;
     ; **返回**
-    ;   (list[Match]) - 全量 Match 列表；非空匹配批量导出，零宽匹配回退逐位置扫描并按 start + 1 推进
+    ;   (list[Matched]) - 全量 Matched 列表；非空匹配批量导出，零宽匹配回退逐位置扫描并按 start + 1 推进
     let((l_res l_recs n_exec l_m)
         n_exec = _ExecOptsBits(execOpts "ycRegEx::Pattern->finditer")
         l_recs = _ExportRecords(self t_subj n_exec)
@@ -172,7 +172,7 @@ self->finditer = lambda((t_subj \@key execOpts "tg")  ; -> list[Match]
 )
 
 self->findall = lambda((t_subj \@key execOpts "tg")  ; -> list
-    ; 返回全部匹配的结果列表（同函数 ycRegEx::ReFindall，与 finditer 同源内核派生）。
+    ; 返回全部匹配的结果列表（同函数 ycRegEx::Findall，与 finditer 同源内核派生）。
     ;
     ; **参数**
     ;   t_subj     (str)         - 主题串
@@ -197,7 +197,7 @@ self->findall = lambda((t_subj \@key execOpts "tg")  ; -> list
 )
 
 self->partialp = lambda((t_subj \@key execOpts "tg")  ; -> t | nil
-    ; 判断主题串是否为部分匹配或完整匹配（同函数 ycRegEx::RePartialp）。
+    ; 判断主题串是否为部分匹配或完整匹配（同函数 ycRegEx::Partialp）。
     ;
     ; **参数**
     ;   t_subj     (str)         - 主题串
@@ -213,7 +213,7 @@ self->partialp = lambda((t_subj \@key execOpts "tg")  ; -> t | nil
 )
 
 self->split = lambda((t_subj \@key all execOpts "tgg")  ; -> list[str]
-    ; 按模式切分主题串（同函数 ycRegEx::ReSplit）。
+    ; 按模式切分主题串（同函数 ycRegEx::Split）。
     ;
     ; **参数**
     ;   t_subj     (str)         - 主题串
@@ -231,7 +231,7 @@ self->split = lambda((t_subj \@key all execOpts "tgg")  ; -> list[str]
 )
 
 self->sub = lambda((t_repl t_subj \@key all execOpts "ttgg")  ; -> str
-    ; 替换主题串中的匹配（同函数 ycRegEx::ReSub）。
+    ; 替换主题串中的匹配（同函数 ycRegEx::Sub）。
     ;
     ; **参数**
     ;   t_repl     (str)         - 替换模板（引擎方言，展开 \1、&、\0）
@@ -248,7 +248,7 @@ self->sub = lambda((t_repl t_subj \@key all execOpts "ttgg")  ; -> str
     )
 )
 self->subn = lambda((t_repl t_subj \@key all execOpts "ttgg")  ; -> (str, int)
-    ; 同 sub，另返回实际替换次数（同函数 ycRegEx::ReSubn）。
+    ; 同 sub，另返回实际替换次数（同函数 ycRegEx::Subn）。
     ;
     ; **参数**
     ;   t_repl     (str)         - 替换模板（引擎方言）
@@ -268,7 +268,7 @@ self->subn = lambda((t_repl t_subj \@key all execOpts "ttgg")  ; -> (str, int)
 )
 
 self->groups = lambda(()  ; -> int
-    ; 返回编译模式的捕获组数（注意与 Match.groups() 返回组值列表不同）。
+    ; 返回编译模式的捕获组数（注意与 Matched.groups() 返回组值列表不同）。
     ;
     ; **返回**
     ;   (int) - 捕获组数（不设自设上限）

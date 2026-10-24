@@ -1,7 +1,7 @@
 useNamespace("ycRegEx")
 
 
-; ---------- Match helpers ----------
+; ---------- Matched helpers ----------
 
 procedure(_GroupWhole(self "g")  ; -> str
     ; 取整体匹配串（group() / group(0) 路径）：按 span 位置从主题串切片。
@@ -19,7 +19,7 @@ procedure(_GroupAt(self n_i n_g "gxx")  ; -> str
     ;
     ; **参数**
     ;   n_i  (int) - 组序号：0 = 整体，1..n_g = 对应捕获组
-    ;   n_g  (int) - 捕获组总数（Match 组值列表的长度）
+    ;   n_g  (int) - 捕获组总数（Matched 组值列表的长度）
     ;
     ; **返回**
     ;   (str) - 0 返回整体串，其余返回对应组值（非参与组为 ""）；n_i < 1 或 > n_g 时 error() 中断
@@ -28,7 +28,7 @@ procedure(_GroupAt(self n_i n_g "gxx")  ; -> str
             _GroupWhole(self)
         )
         (n_i < 1 || n_i > n_g
-            error("ycRegEx::Match->group: no such group: %d" n_i)
+            error("ycRegEx::Matched->group: no such group: %d" n_i)
         )
         (t
             _Nth1(self->_data->groups n_i)
@@ -593,8 +593,8 @@ procedure(_FindAllItem(g_pat t_subj l_m "gtl")  ; -> str | list[str]
     )
 )
 
-procedure(_MkMatch(g_pat t_subj g_start g_end l_groups g_anchor n_exec "gtgglgx")  ; -> Match
-    ; 构造 Match 实例，收纳整体位置、捕获组值与锚对象。
+procedure(_MkMatch(g_pat t_subj g_start g_end l_groups g_anchor n_exec "gtgglgx")  ; -> Matched
+    ; 构造 Matched 实例，收纳整体位置、捕获组值与锚对象。
     ;
     ; **参数**
     ;   g_pat     (Pattern)  - 归属的 Pattern 实例
@@ -606,8 +606,8 @@ procedure(_MkMatch(g_pat t_subj g_start g_end l_groups g_anchor n_exec "gtgglgx"
     ;   n_exec    (int)      - 执行选项位值（0 表示默认）
     ;
     ; **返回**
-    ;   (Match) - 新 Match 实例
-    makeInstance('Match ?_data makeInstance('MatchData
+    ;   (Matched) - 新 Matched 实例
+    makeInstance('Matched ?_data makeInstance('MatchedData
         ?pattern g_pat ?subject t_subj ?start g_start ?end g_end
         ?groups l_groups ?anchor g_anchor ?execOpts n_exec))
 )
@@ -615,9 +615,9 @@ procedure(_MkMatch(g_pat t_subj g_start g_end l_groups g_anchor n_exec "gtgglgx"
 
 ; ---------- class definition ----------
 
-; 数据桶：Match 状态（pattern subject start end groups anchor execOpts）收敛为单一 _data 槽
-defclass(MatchData () (
-    ; MatchData 数据桶：收纳 Match 的 pattern/subject/start/end/groups/anchor/execOpts 状态，构造后禁写。
+; 数据桶：Matched 状态（pattern subject start end groups anchor execOpts）收敛为单一 _data 槽
+defclass(MatchedData () (
+    ; MatchedData 数据桶：收纳 Matched 的 pattern/subject/start/end/groups/anchor/execOpts 状态，构造后禁写。
     pattern(
         \@initarg pattern
         \@initform nil
@@ -648,9 +648,9 @@ defclass(MatchData () (
     )
 ))
 
-defclass(Match () (
-    ; Match 实例：re 系匹配/查找（ReFinditer、Pattern->match/search/fullmatch 等）返回的匹配对象，提供串值、组值、span 位置与模板展开等查询。
-    ; 状态桶（MatchData：pattern subject start end groups anchor execOpts），构造后禁写
+defclass(Matched () (
+    ; Matched 实例：re 系匹配/查找（Finditer、Pattern->match/search/fullmatch 等）返回的匹配对象，提供串值、组值、span 位置与模板展开等查询。
+    ; 状态桶（MatchedData：pattern subject start end groups anchor execOpts），构造后禁写
     _data(
         \@initarg _data
         \@initform nil
@@ -665,8 +665,8 @@ defclass(Match () (
 ))
 
 
-defmethod(printself (self(Match))  ; -> str
-    ; 返回 Match 的打印描述串，形如 <ycRegEx::Match "10-20">。
+defmethod(printself (self(Matched))  ; -> str
+    ; 返回 Matched 的打印描述串，形如 <ycRegEx::Matched "10-20">。
     ;
     ; **返回**
     ;   (str) - lsprintf 按 <类名 字面量> 模板生成（类名为限定名）
@@ -678,7 +678,7 @@ defmethod(printself (self(Match))  ; -> str
 
 inScheme(
 procedure(_InstallMatch(self "g")  ; -> any
-    ; 把 Match 方法安装到 Match 类（由 initializeInstance 调用）。
+    ; 把 Matched 方法安装到 Matched 类（由 initializeInstance 调用）。
     ;
     ; **返回**
     ;   (any) - 返回最后一条安装赋值的结果，调用方忽略
@@ -752,7 +752,7 @@ self->end = lambda((\@rest g_args "g")  ; -> int
 )
 
 self->group = lambda((\@rest g_args "g")  ; -> str | list[str]
-    ; 按组序号取组值（语义同 Python re.Match.group；按名取组预留，调用即 error() 中断）。
+    ; 按组序号取组值（语义同 Python re.Matched.group；按名取组预留，调用即 error() 中断）。
     ;
     ; **参数**
     ;   g_args  (list) - 变参：组选择器——无参取整体；单参 0 = 整体、1..n_g = 对应捕获组；
@@ -817,7 +817,7 @@ self->groupdict = lambda(()  ; -> never
 )
 
 self->expand = lambda((t_tpl "t")  ; -> str
-    ; 按模板展开整体匹配（语义同 Python re.Match.expand：先重挂状态再按引擎方言展开）。
+    ; 按模板展开整体匹配（语义同 Python re.Matched.expand：先重挂状态再按引擎方言展开）。
     ;
     ; **参数**
     ;   t_tpl  (str) - 替换模板：引擎方言展开 \1~\9、&（整体）、\0、\n；& 在 Python 是字面量
@@ -849,8 +849,8 @@ self->expand = lambda((t_tpl "t")  ; -> str
 ))
 
 inScheme(
-defmethod(initializeInstance (self(Match) \@rest _args)
-    ; 构造 Match 实例时调用 _InstallMatch 安装全部方法集。
+defmethod(initializeInstance (self(Matched) \@rest _args)
+    ; 构造 Matched 实例时调用 _InstallMatch 安装全部方法集。
     ;
     ; **参数**
     ;   _args  (list) - 变参：附加初始化参数，本实现忽略

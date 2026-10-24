@@ -2,7 +2,7 @@
 
 [返回首页](../../README.md)
 
-Cadence SKILL++ 的正则表达式库：模块级自由函数与 `ReCompile()` 编译对象双套 API，提供 `Pattern`/`Match` 两类对象，零第三方依赖。
+Cadence SKILL++ 的正则表达式库：模块级自由函数与 `Compile()` 编译对象双套 API，提供 `Pattern`/`Matched` 两类对象，零第三方依赖。
 
 ## 概要
 
@@ -19,7 +19,7 @@ Cadence SKILL++ 的正则表达式库：模块级自由函数与 `ReCompile()` �
 ```lisp
 ; 搜索 + 提取
 let((m)
-    m = ycRegEx::ReSearch("(\\d+)-(\\d+)" "inv 10-20 ok")
+    m = ycRegEx::Search("(\\d+)-(\\d+)" "inv 10-20 ok")
     when(m
         printf("%s span=%L groups=%L\n" m->group() m->span() m->groups())
         ; => "10-20" span=(4 9) groups=("10" "20")
@@ -28,7 +28,7 @@ let((m)
 
 ; 编译复用：一次编译、多次调用
 let((p)
-    p = ycRegEx::ReCompile("\\d+")
+    p = ycRegEx::Compile("\\d+")
     printf("%L\n" p->findall("a1b22"))        ; => ("1" "22")
     printf("%s\n" p->sub("#" "a1b2" ?all t))  ; => "a#b#"
 )
@@ -36,10 +36,10 @@ let((p)
 
 ## API 参考
 
-### ycRegEx::ReCompile <sub>`function`</sub>
+### ycRegEx::Compile <sub>`function`</sub>
 
 ```text
-ycRegEx::ReCompile(g_pat [ ?flags g_flags ] [ ?compileOpts g_compileOpts ])
+ycRegEx::Compile(g_pat [ ?flags g_flags ] [ ?compileOpts g_compileOpts ])
 => Pattern
 ```
 
@@ -62,16 +62,16 @@ ycRegEx::ReCompile(g_pat [ ?flags g_flags ] [ ?compileOpts g_compileOpts ])
 **例程**
 
 ```lisp
-p = ycRegEx::ReCompile("\\d+")  ; => Pattern
-ycRegEx::ReCompile("ABC" ?compileOpts 'caseLess)->match("abc")  ; => Match
-ycRegEx::ReCompile("(")         ; => 以 error() 中断（语法错误）
+p = ycRegEx::Compile("\\d+")  ; => Pattern
+ycRegEx::Compile("ABC" ?compileOpts 'caseLess)->match("abc")  ; => Matched
+ycRegEx::Compile("(")         ; => 以 error() 中断（语法错误）
 ```
 
-### ycRegEx::ReMatch <sub>`function`</sub>
+### ycRegEx::Match <sub>`function`</sub>
 
 ```text
-ycRegEx::ReMatch(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
-=> Match | nil
+ycRegEx::Match(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+=> Matched | nil
 ```
 
 **描述**
@@ -89,20 +89,20 @@ ycRegEx::ReMatch(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 
 **返回值**
 
-`Match | nil` — 命中为 `Match`，未命中为 `nil`。
+`Matched | nil` — 命中为 `Matched`，未命中为 `nil`。
 
 **例程**
 
 ```lisp
-ycRegEx::ReMatch("\\d+" "123a")  ; => Match，span (0 3)
-ycRegEx::ReMatch("\\d+" "a123")  ; => nil
+ycRegEx::Match("\\d+" "123a")  ; => Matched，span (0 3)
+ycRegEx::Match("\\d+" "a123")  ; => nil
 ```
 
-### ycRegEx::ReSearch <sub>`function`</sub>
+### ycRegEx::Search <sub>`function`</sub>
 
 ```text
-ycRegEx::ReSearch(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
-=> Match | nil
+ycRegEx::Search(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+=> Matched | nil
 ```
 
 **描述**
@@ -120,22 +120,22 @@ ycRegEx::ReSearch(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 
 **返回值**
 
-`Match | nil` — 命中为 `Match`，未命中为 `nil`。
+`Matched | nil` — 命中为 `Matched`，未命中为 `nil`。
 
 **例程**
 
 ```lisp
-m = ycRegEx::ReSearch("(\\d+)-(\\d+)" "a10-20b")
+m = ycRegEx::Search("(\\d+)-(\\d+)" "a10-20b")
 m->span()              ; => (1 6)，字节位
 m->group()             ; => "10-20"
 m->groups()            ; => ("10" "20")
 ```
 
-### ycRegEx::ReFullmatch <sub>`function`</sub>
+### ycRegEx::Fullmatch <sub>`function`</sub>
 
 ```text
-ycRegEx::ReFullmatch(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
-=> Match | nil
+ycRegEx::Fullmatch(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+=> Matched | nil
 ```
 
 **描述**
@@ -153,19 +153,19 @@ ycRegEx::ReFullmatch(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 
 **返回值**
 
-`Match | nil` — 命中为 `Match`，未命中为 `nil`。
+`Matched | nil` — 命中为 `Matched`，未命中为 `nil`。
 
 **例程**
 
 ```lisp
-ycRegEx::ReFullmatch("a|ab" "ab")   ; => Match，span (0 2)
-ycRegEx::ReFullmatch("\\d+" "123a") ; => nil
+ycRegEx::Fullmatch("a|ab" "ab")   ; => Matched，span (0 2)
+ycRegEx::Fullmatch("\\d+" "123a") ; => nil
 ```
 
-### ycRegEx::ReFindall <sub>`function`</sub>
+### ycRegEx::Findall <sub>`function`</sub>
 
 ```text
-ycRegEx::ReFindall(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+ycRegEx::Findall(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 => list
 ```
 
@@ -189,15 +189,15 @@ ycRegEx::ReFindall(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 **例程**
 
 ```lisp
-ycRegEx::ReFindall("\\d+" "a1b22")  ; => ("1" "22")
-ycRegEx::ReFindall("(a)|(b)" "ab")  ; => (("a" "") ("" "b"))
+ycRegEx::Findall("\\d+" "a1b22")  ; => ("1" "22")
+ycRegEx::Findall("(a)|(b)" "ab")  ; => (("a" "") ("" "b"))
 ```
 
-### ycRegEx::ReFinditer <sub>`function`</sub>
+### ycRegEx::Finditer <sub>`function`</sub>
 
 ```text
-ycRegEx::ReFinditer(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
-=> list[Match]
+ycRegEx::Finditer(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+=> list[Matched]
 ```
 
 **描述**
@@ -215,24 +215,24 @@ ycRegEx::ReFinditer(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 
 **返回值**
 
-`list[Match]` — 全部匹配的 `Match` 列表；未命中为空列表。
+`list[Matched]` — 全部匹配的 `Matched` 列表；未命中为空列表。
 
 **例程**
 
 ```lisp
-length(ycRegEx::ReFinditer("\\d+" "a1b22"))  ; => 2
+length(ycRegEx::Finditer("\\d+" "a1b22"))  ; => 2
 ```
 
-### ycRegEx::RePartialp <sub>`function`</sub>
+### ycRegEx::Partialp <sub>`function`</sub>
 
 ```text
-ycRegEx::RePartialp(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+ycRegEx::Partialp(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 => t | nil
 ```
 
 **描述**
 
-判断主题串是否为该模式的部分匹配或完整匹配：主题串是模式前缀时可完成匹配，或已完整匹配，均返回 `t`。用于流式输入/截断文本的探测，不返回 `Match`。
+判断主题串是否为该模式的部分匹配或完整匹配：主题串是模式前缀时可完成匹配，或已完整匹配，均返回 `t`。用于流式输入/截断文本的探测，不返回 `Matched`。
 
 **参数**
 
@@ -250,15 +250,15 @@ ycRegEx::RePartialp(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
 **例程**
 
 ```lisp
-ycRegEx::RePartialp("ab" "a")   ; => t
-ycRegEx::RePartialp("ab" "ab")  ; => t
-ycRegEx::RePartialp("ab" "ac")  ; => nil
+ycRegEx::Partialp("ab" "a")   ; => t
+ycRegEx::Partialp("ab" "ab")  ; => t
+ycRegEx::Partialp("ab" "ac")  ; => nil
 ```
 
-### ycRegEx::ReSplit <sub>`function`</sub>
+### ycRegEx::Split <sub>`function`</sub>
 
 ```text
-ycRegEx::ReSplit(g_pat t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_execOpts ])
+ycRegEx::Split(g_pat t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_execOpts ])
 => list[str]
 ```
 
@@ -283,15 +283,15 @@ ycRegEx::ReSplit(g_pat t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_ex
 **例程**
 
 ```lisp
-ycRegEx::ReSplit("," "a,b,c")            ; => ("a" "b,c")（默认单次）
-ycRegEx::ReSplit("," "a,b,c" ?all t)     ; => ("a" "b" "c")
-ycRegEx::ReSplit("(\\d)" "a1b2c" ?all t) ; => ("a" "1" "b" "2" "c")
+ycRegEx::Split("," "a,b,c")            ; => ("a" "b,c")（默认单次）
+ycRegEx::Split("," "a,b,c" ?all t)     ; => ("a" "b" "c")
+ycRegEx::Split("(\\d)" "a1b2c" ?all t) ; => ("a" "1" "b" "2" "c")
 ```
 
-### ycRegEx::ReSub <sub>`function`</sub>
+### ycRegEx::Sub <sub>`function`</sub>
 
 ```text
-ycRegEx::ReSub(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_execOpts ])
+ycRegEx::Sub(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_execOpts ])
 => str
 ```
 
@@ -317,21 +317,21 @@ ycRegEx::ReSub(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts
 **例程**
 
 ```lisp
-ycRegEx::ReSub("\\d+" "#" "a1b22" ?all t) ; => "a#b#"
-ycRegEx::ReSub("\\d" "#" "a1b2")          ; => "a#b2"（默认单次）
-ycRegEx::ReSub("x*" "-" "abc")            ; => "-abc"（零宽仅首处）
+ycRegEx::Sub("\\d+" "#" "a1b22" ?all t) ; => "a#b#"
+ycRegEx::Sub("\\d" "#" "a1b2")          ; => "a#b2"（默认单次）
+ycRegEx::Sub("x*" "-" "abc")            ; => "-abc"（零宽仅首处）
 ```
 
-### ycRegEx::ReSubn <sub>`function`</sub>
+### ycRegEx::Subn <sub>`function`</sub>
 
 ```text
-ycRegEx::ReSubn(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_execOpts ])
+ycRegEx::Subn(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_execOpts ])
 => (str, int)
 ```
 
 **描述**
 
-语义同 `ReSub`。内部计数经 `<YC-N>` 标记实现；`t_subj`/`t_repl` 或组值中若含 `<YC-N>` 会被误剥离或误切。`ReSplit` 的 `<YC-S>`、`ReSearch`/`ReMatch` 组提取的 `<YC-B>` 同理会与输入冲突。pattern 语法错误或参数类型不符时以 `error()` 中断。
+语义同 `Sub`。内部计数经 `<YC-N>` 标记实现；`t_subj`/`t_repl` 或组值中若含 `<YC-N>` 会被误剥离或误切。`Split` 的 `<YC-S>`、`Search`/`Match` 组提取的 `<YC-B>` 同理会与输入冲突。pattern 语法错误或参数类型不符时以 `error()` 中断。
 
 **参数**
 
@@ -351,13 +351,13 @@ ycRegEx::ReSubn(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpt
 **例程**
 
 ```lisp
-ycRegEx::ReSubn("\\d" "#" "a1b2" ?all t)  ; => ("a#b#" 2)
+ycRegEx::Subn("\\d" "#" "a1b2" ?all t)  ; => ("a#b#" 2)
 ```
 
-### ycRegEx::ReGetRecursionLimit <sub>`function`</sub>
+### ycRegEx::GetRecursionLimit <sub>`function`</sub>
 
 ```text
-ycRegEx::ReGetRecursionLimit()
+ycRegEx::GetRecursionLimit()
 => int
 ```
 
@@ -376,13 +376,13 @@ ycRegEx::ReGetRecursionLimit()
 **例程**
 
 ```lisp
-ycRegEx::ReGetRecursionLimit()  ; => 10000000
+ycRegEx::GetRecursionLimit()  ; => 10000000
 ```
 
-### ycRegEx::ReSetRecursionLimit <sub>`function`</sub>
+### ycRegEx::SetRecursionLimit <sub>`function`</sub>
 
 ```text
-ycRegEx::ReSetRecursionLimit(n_limit)
+ycRegEx::SetRecursionLimit(n_limit)
 => t
 ```
 
@@ -403,16 +403,16 @@ ycRegEx::ReSetRecursionLimit(n_limit)
 **例程**
 
 ```lisp
-ycRegEx::ReSetRecursionLimit(1000)  ; => t
-ycRegEx::ReGetRecursionLimit()      ; => 1000
-ycRegEx::ReSetRecursionLimit(10000000)  ; => t（恢复默认）
+ycRegEx::SetRecursionLimit(1000)  ; => t
+ycRegEx::GetRecursionLimit()      ; => 1000
+ycRegEx::SetRecursionLimit(10000000)  ; => t（恢复默认）
 ```
 
 ### ycRegEx::Pattern <sub>`class`</sub>
 
 **描述**
 
-`ReCompile()` 的返回类型。方法与其对应的自由函数（如 `ycRegEx::ReMatch` 与 `Pattern->match`）语义相同；已是编译对象，免重复编译；编译期修饰（`i/m/s/x`）在 `ReCompile` 时定死，方法不再提供 `?flags`；`split`/`sub`/`subn` 提供 `?all`。方法一律经 `->` 调用；`sub`/`subn` 首参为 `t_repl`，其余方法首参为 `t_subj`。
+`Compile()` 的返回类型。方法与其对应的自由函数（如 `ycRegEx::Match` 与 `Pattern->match`）语义相同；已是编译对象，免重复编译；编译期修饰（`i/m/s/x`）在 `Compile` 时定死，方法不再提供 `?flags`；`split`/`sub`/`subn` 提供 `?all`。方法一律经 `->` 调用；`sub`/`subn` 首参为 `t_repl`，其余方法首参为 `t_subj`。
 
 #### 搜索与匹配
 
@@ -420,7 +420,7 @@ ycRegEx::ReSetRecursionLimit(10000000)  ; => t（恢复默认）
 
 ```text
 p->match(t_subj [ ?execOpts g_execOpts ])
-=> Match | nil
+=> Matched | nil
 ```
 
 **描述**
@@ -436,13 +436,13 @@ p->match(t_subj [ ?execOpts g_execOpts ])
 
 **返回值**
 
-`Match | nil` — 命中为 `Match`，未命中为 `nil`。
+`Matched | nil` — 命中为 `Matched`，未命中为 `nil`。
 
 **例程**
 
 ```lisp
-p = ycRegEx::ReCompile("\\d+")
-p->match("123a")  ; => Match
+p = ycRegEx::Compile("\\d+")
+p->match("123a")  ; => Matched
 p->match("a123")  ; => nil
 ```
 
@@ -450,7 +450,7 @@ p->match("a123")  ; => nil
 
 ```text
 p->search(t_subj [ ?execOpts g_execOpts ])
-=> Match | nil
+=> Matched | nil
 ```
 
 **描述**
@@ -466,20 +466,20 @@ p->search(t_subj [ ?execOpts g_execOpts ])
 
 **返回值**
 
-`Match | nil` — 命中为 `Match`，未命中为 `nil`。
+`Matched | nil` — 命中为 `Matched`，未命中为 `nil`。
 
 **例程**
 
 ```lisp
-p = ycRegEx::ReCompile("\\d+")
-p->search("a123")  ; => Match
+p = ycRegEx::Compile("\\d+")
+p->search("a123")  ; => Matched
 ```
 
 ##### fullmatch <sub>`method`</sub>
 
 ```text
 p->fullmatch(t_subj [ ?execOpts g_execOpts ])
-=> Match | nil
+=> Matched | nil
 ```
 
 **描述**
@@ -495,13 +495,13 @@ p->fullmatch(t_subj [ ?execOpts g_execOpts ])
 
 **返回值**
 
-`Match | nil` — 命中为 `Match`，未命中为 `nil`。
+`Matched | nil` — 命中为 `Matched`，未命中为 `nil`。
 
 **例程**
 
 ```lisp
-p = ycRegEx::ReCompile("\\d+")
-p->fullmatch("123")   ; => Match
+p = ycRegEx::Compile("\\d+")
+p->fullmatch("123")   ; => Matched
 p->fullmatch("123a")  ; => nil
 ```
 
@@ -516,7 +516,7 @@ p->findall(t_subj [ ?execOpts g_execOpts ])
 
 **描述**
 
-语义与返回形态同自由函数 `ReFindall`；已编译。
+语义与返回形态同自由函数 `Findall`；已编译。
 
 **参数**
 
@@ -527,12 +527,12 @@ p->findall(t_subj [ ?execOpts g_execOpts ])
 
 **返回值**
 
-`list` — 同自由函数 `ReFindall`。
+`list` — 同自由函数 `Findall`。
 
 **例程**
 
 ```lisp
-p = ycRegEx::ReCompile("\\d+")
+p = ycRegEx::Compile("\\d+")
 p->findall("a1b22")  ; => ("1" "22")
 ```
 
@@ -540,12 +540,12 @@ p->findall("a1b22")  ; => ("1" "22")
 
 ```text
 p->finditer(t_subj [ ?execOpts g_execOpts ])
-=> list[Match]
+=> list[Matched]
 ```
 
 **描述**
 
-语义同自由函数 `ReFinditer`；已编译。零宽命中按 `start + 1` 推进。
+语义同自由函数 `Finditer`；已编译。零宽命中按 `start + 1` 推进。
 
 **参数**
 
@@ -556,12 +556,12 @@ p->finditer(t_subj [ ?execOpts g_execOpts ])
 
 **返回值**
 
-`list[Match]` — 同自由函数 `ReFinditer`。
+`list[Matched]` — 同自由函数 `Finditer`。
 
 **例程**
 
 ```lisp
-p = ycRegEx::ReCompile("\\d+")
+p = ycRegEx::Compile("\\d+")
 length(p->finditer("a1b22"))  ; => 2
 ```
 
@@ -576,7 +576,7 @@ p->partialp(t_subj [ ?execOpts g_execOpts ])
 
 **描述**
 
-判断 `t_subj` 是否为该模式的部分匹配或完整匹配；语义同 `RePartialp`，不产生 `Match`。
+判断 `t_subj` 是否为该模式的部分匹配或完整匹配；语义同 `Partialp`，不产生 `Matched`。
 
 **参数**
 
@@ -588,8 +588,8 @@ p->partialp(t_subj [ ?execOpts g_execOpts ])
 **例程**
 
 ```lisp
-ycRegEx::ReCompile("ab")->partialp("a")   ; => t
-ycRegEx::ReCompile("ab")->partialp("ac")  ; => nil
+ycRegEx::Compile("ab")->partialp("a")   ; => t
+ycRegEx::Compile("ab")->partialp("ac")  ; => nil
 ```
 
 ##### split <sub>`method`</sub>
@@ -618,7 +618,7 @@ p->split(t_subj [ ?all g_all ] [ ?execOpts g_execOpts ])
 **例程**
 
 ```lisp
-p = ycRegEx::ReCompile(",")
+p = ycRegEx::Compile(",")
 p->split("a,b,c")         ; => ("a" "b,c")（默认单次）
 p->split("a,b,c" ?all t)  ; => ("a" "b" "c")
 ```
@@ -634,7 +634,7 @@ p->sub(t_repl t_subj [ ?all g_all ] [ ?execOpts g_execOpts ])
 
 **描述**
 
-将匹配替换为 `t_repl` 展开串；模板方言、零宽替换行为与 `?all` 语义同 `ReSub`。
+将匹配替换为 `t_repl` 展开串；模板方言、零宽替换行为与 `?all` 语义同 `Sub`。
 
 **参数**
 
@@ -652,7 +652,7 @@ p->sub(t_repl t_subj [ ?all g_all ] [ ?execOpts g_execOpts ])
 **例程**
 
 ```lisp
-p = ycRegEx::ReCompile("\\d+")
+p = ycRegEx::Compile("\\d+")
 p->sub("#" "a1b2")        ; => "a#b2"（默认单次）
 p->sub("#" "a1b2" ?all t) ; => "a#b#"
 ```
@@ -666,7 +666,7 @@ p->subn(t_repl t_subj [ ?all g_all ] [ ?execOpts g_execOpts ])
 
 **描述**
 
-语义同 `sub`；定界标记限制同 `ReSubn`。
+语义同 `sub`；定界标记限制同 `Subn`。
 
 **参数**
 
@@ -684,7 +684,7 @@ p->subn(t_repl t_subj [ ?all g_all ] [ ?execOpts g_execOpts ])
 **例程**
 
 ```lisp
-p = ycRegEx::ReCompile("\\d")
+p = ycRegEx::Compile("\\d")
 p->subn("#" "a1b2")        ; => ("a#b2" 1)（默认单次）
 p->subn("#" "a1b2" ?all t) ; => ("a#b#" 2)
 ```
@@ -713,7 +713,7 @@ p->groups()
 **例程**
 
 ```lisp
-ycRegEx::ReCompile("(\\d+)-(\\d+)")->groups()  ; => 2
+ycRegEx::Compile("(\\d+)-(\\d+)")->groups()  ; => 2
 ```
 
 ##### pattern <sub>`method`</sub>
@@ -733,15 +733,15 @@ p->pattern()
 
 **返回值**
 
-`str` — 原 pattern 串，与 `ReCompile` 入参一致。
+`str` — 原 pattern 串，与 `Compile` 入参一致。
 
 **例程**
 
 ```lisp
-ycRegEx::ReCompile("\\d+")->pattern()  ; => "\\d+"
+ycRegEx::Compile("\\d+")->pattern()  ; => "\\d+"
 ```
 
-### ycRegEx::Match <sub>`class`</sub>
+### ycRegEx::Matched <sub>`class`</sub>
 
 **描述**
 
@@ -774,7 +774,7 @@ m->group(n_index ...)
 **例程**
 
 ```lisp
-m = ycRegEx::ReSearch("(\\d+)-(\\d+)" "a10-20b")
+m = ycRegEx::Search("(\\d+)-(\\d+)" "a10-20b")
 m->group()       ; => "10-20"
 m->group(1)      ; => "10"
 m->group(1 2)    ; => ("10" "20")
@@ -801,12 +801,12 @@ m->groups([ ?empty g_empty ])
 
 **返回值**
 
-`list` — 组值列表，空字符串替换为 `?empty`；零捕获组时为 `nil`；返回副本，修改不影响 `Match`。
+`list` — 组值列表，空字符串替换为 `?empty`；零捕获组时为 `nil`；返回副本，修改不影响 `Matched`。
 
 **例程**
 
 ```lisp
-m = ycRegEx::ReSearch("(a)|(b)" "b")
+m = ycRegEx::Search("(a)|(b)" "b")
 m->groups()              ; => ("" "b")
 m->groups(?empty "NA")   ; => ("NA" "b")
 m->groups(?empty nil)    ; => (nil "b")
@@ -823,7 +823,7 @@ m->span()
 
 **描述**
 
-取匹配的起止位置（字节位）。`search` 路径在返回 `Match` 时即完成位置定位，`span`/`start`/`end` 直接读取。组号参数不提供，以 `error()` 中断。
+取匹配的起止位置（字节位）。`search` 路径在返回 `Matched` 时即完成位置定位，`span`/`start`/`end` 直接读取。组号参数不提供，以 `error()` 中断。
 
 **参数**
 
@@ -836,7 +836,7 @@ m->span()
 **例程**
 
 ```lisp
-m = ycRegEx::ReSearch("(\\d+)-(\\d+)" "a10-20b")
+m = ycRegEx::Search("(\\d+)-(\\d+)" "a10-20b")
 m->span()        ; => (1 6)
 ```
 
@@ -862,7 +862,7 @@ m->start()
 **例程**
 
 ```lisp
-m = ycRegEx::ReSearch("(\\d+)-(\\d+)" "a10-20b")
+m = ycRegEx::Search("(\\d+)-(\\d+)" "a10-20b")
 m->start()       ; => 1
 ```
 
@@ -888,7 +888,7 @@ m->end()
 **例程**
 
 ```lisp
-m = ycRegEx::ReSearch("(\\d+)-(\\d+)" "a10-20b")
+m = ycRegEx::Search("(\\d+)-(\\d+)" "a10-20b")
 m->end()         ; => 6
 ```
 
@@ -918,7 +918,7 @@ m->expand(t_tpl)
 **例程**
 
 ```lisp
-m = ycRegEx::ReSearch("(\\d+)-(\\d+)" "a10-20b")
+m = ycRegEx::Search("(\\d+)-(\\d+)" "a10-20b")
 m->expand("\\2-\\1")  ; => "20-10"
 ```
 
@@ -939,34 +939,34 @@ m->expand("\\2-\\1")  ; => "20-10"
 - `g` 不再是标志；全局匹配用 `?all t`（`?flags` 中出现 `g` 会 `error()` 并提示）。
 - 非法输入（数字、未知字母）以 `error()` 中断。
 
-`?all` 控制「单次/全部」，仅 `ReSplit`/`ReSub`/`ReSubn` 及其 `Pattern` 同名方法提供：默认 `nil` 只处理首处匹配，`?all t` 处理全部。注意：零宽 pattern（能匹配空串者，如 `x*`）在本引擎下 `?all` 也只处理首个空匹配（`pcreReplace` 限制）。
+`?all` 控制「单次/全部」，仅 `Split`/`Sub`/`Subn` 及其 `Pattern` 同名方法提供：默认 `nil` 只处理首处匹配，`?all t` 处理全部。注意：零宽 pattern（能匹配空串者，如 `x*`）在本引擎下 `?all` 也只处理首个空匹配（`pcreReplace` 限制）。
 
 ```lisp
 ; ?all — 全局（对照默认单次）
-ycRegEx::ReSub("\\d" "a1b2c" "#" ?all t)  ; => "a#b#c"
-ycRegEx::ReSub("\\d" "a1b2c" "#")         ; => "a#b2c"
+ycRegEx::Sub("\\d" "a1b2c" "#" ?all t)  ; => "a#b#c"
+ycRegEx::Sub("\\d" "a1b2c" "#")         ; => "a#b2c"
 
 ; i — 大小写不敏感
-ycRegEx::ReSearch("hello" "Say HELLO")            ; => nil
-ycRegEx::ReSearch("hello" "Say HELLO" ?flags 'I)  ; => Match，span (4 9)
+ycRegEx::Search("hello" "Say HELLO")            ; => nil
+ycRegEx::Search("hello" "Say HELLO" ?flags 'I)  ; => Matched，span (4 9)
 
 ; m — 多行：^ / $ 匹配每行首尾
-ycRegEx::ReSearch("^b" "a\nb")            ; => nil（默认 ^ 仅匹配串首）
-ycRegEx::ReSearch("^b" "a\nb" ?flags 'M)  ; => Match，span (2 3)
-ycRegEx::ReSearch("^hello" "Say\nHELLO" ?flags 'IM)  ; => Match，span (4 9)（与 i 组合）
+ycRegEx::Search("^b" "a\nb")            ; => nil（默认 ^ 仅匹配串首）
+ycRegEx::Search("^b" "a\nb" ?flags 'M)  ; => Matched，span (2 3)
+ycRegEx::Search("^hello" "Say\nHELLO" ?flags 'IM)  ; => Matched，span (4 9)（与 i 组合）
 
 ; s — 点号通配换行
-ycRegEx::ReSearch("a.b" "a\nb")            ; => nil
-ycRegEx::ReSearch("a.b" "a\nb" ?flags 'S)  ; => Match，span (0 3)
+ycRegEx::Search("a.b" "a\nb")            ; => nil
+ycRegEx::Search("a.b" "a\nb" ?flags 'S)  ; => Matched，span (0 3)
 
 ; x — 详式：pattern 内空白不参与匹配
-ycRegEx::ReSearch("a b" "a b")            ; => Match，span (0 3)
-ycRegEx::ReSearch("a b" "xab" ?flags 'X)  ; => Match，span (1 3)
+ycRegEx::Search("a b" "a b")            ; => Matched，span (0 3)
+ycRegEx::Search("a b" "xab" ?flags 'X)  ; => Matched，span (1 3)
 ```
 
 ## 编译选项
 
-`ReCompile` 的 `?compileOpts` 接受单个选项符号或符号列表（默认 `nil`）。编译选项作用于返回的 `Pattern`，可与 `?flags` 同时使用；传已编译 `Pattern` 时不能带 `?compileOpts`。
+`Compile` 的 `?compileOpts` 接受单个选项符号或符号列表（默认 `nil`）。编译选项作用于返回的 `Pattern`，可与 `?flags` 同时使用；传已编译 `Pattern` 时不能带 `?compileOpts`。
 
 | 符号 | 语义 |
 | --- | --- |
@@ -981,11 +981,11 @@ ycRegEx::ReSearch("a b" "xab" ?flags 'X)  ; => Match，span (1 3)
 | `firstline` | 命中不得晚于首个换行 |
 
 ```lisp
-ycRegEx::ReCompile("ABC" ?compileOpts 'caseLess)->match("abc")       ; => Match
-ycRegEx::ReCompile("b" ?compileOpts 'anchored)->search("ab")         ; => nil
-ycRegEx::ReCompile("(a)" ?compileOpts 'no_auto_capture)->groups()    ; => 0
-ycRegEx::ReCompile("a+" ?compileOpts 'ungreedy)->match("aaa")->group()  ; => "a"
-ycRegEx::ReCompile("b" ?compileOpts '(anchored firstline))->search("ab")  ; => nil
+ycRegEx::Compile("ABC" ?compileOpts 'caseLess)->match("abc")       ; => Matched
+ycRegEx::Compile("b" ?compileOpts 'anchored)->search("ab")         ; => nil
+ycRegEx::Compile("(a)" ?compileOpts 'no_auto_capture)->groups()    ; => 0
+ycRegEx::Compile("a+" ?compileOpts 'ungreedy)->match("aaa")->group()  ; => "a"
+ycRegEx::Compile("b" ?compileOpts '(anchored firstline))->search("ab")  ; => nil
 ```
 
 未知选项或非符号/列表参数以 `error()` 中断。
@@ -1002,13 +1002,13 @@ ycRegEx::ReCompile("b" ?compileOpts '(anchored firstline))->search("ab")  ; => n
 | `notempty` | 空匹配不算有效命中 |
 
 ```lisp
-ycRegEx::ReSearch("^a" "a" ?execOpts 'notbol)                  ; => nil
-ycRegEx::ReSearch("a$" "a" ?execOpts 'noteol)                  ; => nil
-ycRegEx::ReSearch("a?" "b" ?execOpts 'notempty)                ; => nil
-ycRegEx::ReSearch("b" "ab" ?execOpts 'anchored)                ; => nil
-ycRegEx::ReSearch("^a" "a" ?execOpts list('notbol 'notempty))  ; => nil
+ycRegEx::Search("^a" "a" ?execOpts 'notbol)                  ; => nil
+ycRegEx::Search("a$" "a" ?execOpts 'noteol)                  ; => nil
+ycRegEx::Search("a?" "b" ?execOpts 'notempty)                ; => nil
+ycRegEx::Search("b" "ab" ?execOpts 'anchored)                ; => nil
+ycRegEx::Search("^a" "a" ?execOpts list('notbol 'notempty))  ; => nil
 ```
 
-未知选项或非符号/列表参数以 `error()` 中断。`partial` 不放入 `?execOpts`，需要用 `RePartialp` / `Pattern->partialp` 做布尔探测，因为它只表示主题串可完成匹配，不产生完整 `Match`。
+未知选项或非符号/列表参数以 `error()` 中断。`partial` 不放入 `?execOpts`，需要用 `Partialp` / `Pattern->partialp` 做布尔探测，因为它只表示主题串可完成匹配，不产生完整 `Matched`。
 
 [返回首页](../../README.md)

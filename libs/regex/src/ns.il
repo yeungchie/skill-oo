@@ -3,22 +3,22 @@ unless(findNamespace("ycRegEx")
 )
 addToNamespace("ycRegEx"
     mapcar('symbolToString '(
-        ReCompile
-        ReMatch
-        ReSearch
-        ReFullmatch
-        ReFindall
-        ReFinditer
-        RePartialp
-        ReSplit
-        ReSub
-        ReSubn
-        ReGetRecursionLimit
-        ReSetRecursionLimit
+        Compile
+        Match
+        Search
+        Fullmatch
+        Findall
+        Finditer
+        Partialp
+        Split
+        Sub
+        Subn
+        GetRecursionLimit
+        SetRecursionLimit
         Pattern
         PatternData
-        Match
-        MatchData
+        Matched
+        MatchedData
         _MkPattern
         _OptsList
         _CompileOptsBits
