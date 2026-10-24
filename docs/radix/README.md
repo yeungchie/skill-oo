@@ -37,7 +37,12 @@ ycRadix::ApplyMask(4660 8)    ; => 52
 ### ycRadix::Parse <sub>`function`</sub>
 
 ```text
-ycRadix::Parse(t_text [ ?base g_base ] [ ?prefix g_prefix ] [ ?wrap g_wrap ])
+ycRadix::Parse(
+    t_text
+    [ ?base g_base ]
+    [ ?prefix g_prefix ]
+    [ ?wrap g_wrap ]
+)
 => int
 ```
 
@@ -84,7 +89,14 @@ ycRadix::Parse("2147483648")            ; => 以 error() 中断（超出有符�
 ### ycRadix::Format <sub>`function`</sub>
 
 ```text
-ycRadix::Format(n_value [ ?base g_base ] [ ?prefix g_prefix ] [ ?upper g_upper ] [ ?width g_width ] [ ?pad t_pad ])
+ycRadix::Format(
+    n_value
+    [ ?base g_base ]
+    [ ?prefix g_prefix ]
+    [ ?upper g_upper ]
+    [ ?width g_width ]
+    [ ?pad t_pad ]
+)
 => str
 ```
 
@@ -168,7 +180,10 @@ ycRadix::Mask(33)   ; => 以 error() 中断（位宽超范围）
 ### ycRadix::ApplyMask <sub>`function`</sub>
 
 ```text
-ycRadix::ApplyMask(n_value n_bits)
+ycRadix::ApplyMask(
+    n_value
+    n_bits
+)
 => int
 ```
 
