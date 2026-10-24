@@ -39,7 +39,11 @@ let((p)
 ### ycRegEx::Compile <sub>`function`</sub>
 
 ```text
-ycRegEx::Compile(g_pat [ ?flags g_flags ] [ ?compileOpts g_compileOpts ])
+ycRegEx::Compile(
+    g_pat
+    [ ?flags g_flags ]
+    [ ?compileOpts g_compileOpts ]
+)
 => Pattern
 ```
 
@@ -70,7 +74,12 @@ ycRegEx::Compile("(")         ; => 以 error() 中断（语法错误）
 ### ycRegEx::Match <sub>`function`</sub>
 
 ```text
-ycRegEx::Match(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+ycRegEx::Match(
+    g_pat
+    t_subj
+    [ ?flags g_flags ]
+    [ ?execOpts g_execOpts ]
+)
 => Matched | nil
 ```
 
@@ -101,7 +110,12 @@ ycRegEx::Match("\\d+" "a123")  ; => nil
 ### ycRegEx::Search <sub>`function`</sub>
 
 ```text
-ycRegEx::Search(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+ycRegEx::Search(
+    g_pat
+    t_subj
+    [ ?flags g_flags ]
+    [ ?execOpts g_execOpts ]
+)
 => Matched | nil
 ```
 
@@ -134,7 +148,12 @@ m->groups()            ; => ("10" "20")
 ### ycRegEx::Fullmatch <sub>`function`</sub>
 
 ```text
-ycRegEx::Fullmatch(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+ycRegEx::Fullmatch(
+    g_pat
+    t_subj
+    [ ?flags g_flags ]
+    [ ?execOpts g_execOpts ]
+)
 => Matched | nil
 ```
 
@@ -165,7 +184,12 @@ ycRegEx::Fullmatch("\\d+" "123a") ; => nil
 ### ycRegEx::Findall <sub>`function`</sub>
 
 ```text
-ycRegEx::Findall(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+ycRegEx::Findall(
+    g_pat
+    t_subj
+    [ ?flags g_flags ]
+    [ ?execOpts g_execOpts ]
+)
 => list
 ```
 
@@ -196,7 +220,12 @@ ycRegEx::Findall("(a)|(b)" "ab")  ; => (("a" "") ("" "b"))
 ### ycRegEx::Finditer <sub>`function`</sub>
 
 ```text
-ycRegEx::Finditer(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+ycRegEx::Finditer(
+    g_pat
+    t_subj
+    [ ?flags g_flags ]
+    [ ?execOpts g_execOpts ]
+)
 => list[Matched]
 ```
 
@@ -226,7 +255,12 @@ length(ycRegEx::Finditer("\\d+" "a1b22"))  ; => 2
 ### ycRegEx::Partialp <sub>`function`</sub>
 
 ```text
-ycRegEx::Partialp(g_pat t_subj [ ?flags g_flags ] [ ?execOpts g_execOpts ])
+ycRegEx::Partialp(
+    g_pat
+    t_subj
+    [ ?flags g_flags ]
+    [ ?execOpts g_execOpts ]
+)
 => t | nil
 ```
 
@@ -258,7 +292,13 @@ ycRegEx::Partialp("ab" "ac")  ; => nil
 ### ycRegEx::Split <sub>`function`</sub>
 
 ```text
-ycRegEx::Split(g_pat t_subj [ ?flags g_flags ] [ ?first g_first ] [ ?execOpts g_execOpts ])
+ycRegEx::Split(
+    g_pat
+    t_subj
+    [ ?flags g_flags ]
+    [ ?first g_first ]
+    [ ?execOpts g_execOpts ]
+)
 => list[str]
 ```
 
@@ -291,7 +331,14 @@ ycRegEx::Split("(\\d)" "a1b2c")        ; => ("a" "1" "b" "2" "c")
 ### ycRegEx::Sub <sub>`function`</sub>
 
 ```text
-ycRegEx::Sub(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_execOpts ])
+ycRegEx::Sub(
+    g_pat
+    t_repl
+    t_subj
+    [ ?flags g_flags ]
+    [ ?all g_all ]
+    [ ?execOpts g_execOpts ]
+)
 => str
 ```
 
@@ -325,7 +372,14 @@ ycRegEx::Sub("x*" "-" "abc")            ; => "-abc"（零宽仅首处）
 ### ycRegEx::Subn <sub>`function`</sub>
 
 ```text
-ycRegEx::Subn(g_pat t_repl t_subj [ ?flags g_flags ] [ ?all g_all ] [ ?execOpts g_execOpts ])
+ycRegEx::Subn(
+    g_pat
+    t_repl
+    t_subj
+    [ ?flags g_flags ]
+    [ ?all g_all ]
+    [ ?execOpts g_execOpts ]
+)
 => (str, int)
 ```
 
@@ -419,7 +473,10 @@ ycRegEx::SetRecursionLimit(10000000)  ; => t（恢复默认）
 ##### match <sub>`method`</sub>
 
 ```text
-p->match(t_subj [ ?execOpts g_execOpts ])
+p->match(
+    t_subj
+    [ ?execOpts g_execOpts ]
+)
 => Matched | nil
 ```
 
@@ -449,7 +506,10 @@ p->match("a123")  ; => nil
 ##### search <sub>`method`</sub>
 
 ```text
-p->search(t_subj [ ?execOpts g_execOpts ])
+p->search(
+    t_subj
+    [ ?execOpts g_execOpts ]
+)
 => Matched | nil
 ```
 
@@ -478,7 +538,10 @@ p->search("a123")  ; => Matched
 ##### fullmatch <sub>`method`</sub>
 
 ```text
-p->fullmatch(t_subj [ ?execOpts g_execOpts ])
+p->fullmatch(
+    t_subj
+    [ ?execOpts g_execOpts ]
+)
 => Matched | nil
 ```
 
@@ -510,7 +573,10 @@ p->fullmatch("123a")  ; => nil
 ##### findall <sub>`method`</sub>
 
 ```text
-p->findall(t_subj [ ?execOpts g_execOpts ])
+p->findall(
+    t_subj
+    [ ?execOpts g_execOpts ]
+)
 => list
 ```
 
@@ -539,7 +605,10 @@ p->findall("a1b22")  ; => ("1" "22")
 ##### finditer <sub>`method`</sub>
 
 ```text
-p->finditer(t_subj [ ?execOpts g_execOpts ])
+p->finditer(
+    t_subj
+    [ ?execOpts g_execOpts ]
+)
 => list[Matched]
 ```
 
@@ -570,7 +639,10 @@ length(p->finditer("a1b22"))  ; => 2
 ##### partialp <sub>`method`</sub>
 
 ```text
-p->partialp(t_subj [ ?execOpts g_execOpts ])
+p->partialp(
+    t_subj
+    [ ?execOpts g_execOpts ]
+)
 => t | nil
 ```
 
@@ -595,7 +667,11 @@ ycRegEx::Compile("ab")->partialp("ac")  ; => nil
 ##### split <sub>`method`</sub>
 
 ```text
-p->split(t_subj [ ?first g_first ] [ ?execOpts g_execOpts ])
+p->split(
+    t_subj
+    [ ?first g_first ]
+    [ ?execOpts g_execOpts ]
+)
 => list[str]
 ```
 
@@ -628,7 +704,12 @@ p->split("a,b,c" ?first t) ; => ("a" "b,c")
 ##### sub <sub>`method`</sub>
 
 ```text
-p->sub(t_repl t_subj [ ?all g_all ] [ ?execOpts g_execOpts ])
+p->sub(
+    t_repl
+    t_subj
+    [ ?all g_all ]
+    [ ?execOpts g_execOpts ]
+)
 => str
 ```
 
@@ -660,7 +741,12 @@ p->sub("#" "a1b2" ?all t) ; => "a#b#"
 ##### subn <sub>`method`</sub>
 
 ```text
-p->subn(t_repl t_subj [ ?all g_all ] [ ?execOpts g_execOpts ])
+p->subn(
+    t_repl
+    t_subj
+    [ ?all g_all ]
+    [ ?execOpts g_execOpts ]
+)
 => (str, int)
 ```
 

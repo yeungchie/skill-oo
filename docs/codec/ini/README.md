@@ -38,7 +38,11 @@ t_cfg["s"]["b"]            ; => "2"
 ### ycIni::Decode <sub>`function`</sub>
 
 ```text
-ycIni::Decode(t_str [ ?delimiter ] [ ?duplicates ])
+ycIni::Decode(
+    t_str
+    [ ?delimiter ]
+    [ ?duplicates ]
+)
 => table
 ```
 
@@ -93,7 +97,13 @@ ycIni::Decode("a = 1\n" ?delimiter " ")
 ### ycIni::Encode <sub>`function`</sub>
 
 ```text
-ycIni::Encode(g_val [ ?sortKeys ] [ ?strict ] [ ?delimiter ] [ ?finalNewline ])
+ycIni::Encode(
+    g_val
+    [ ?sortKeys ]
+    [ ?strict ]
+    [ ?delimiter ]
+    [ ?finalNewline ]
+)
 => str
 ```
 

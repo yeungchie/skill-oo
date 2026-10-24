@@ -169,7 +169,10 @@ row(g_row)
 #### cell <sub>`method`</sub>
 
 ```text
-cell(g_row g_col)
+cell(
+    g_row
+    g_col
+)
 => str | any
 ```
 
@@ -196,7 +199,10 @@ columnAt(g_col)
 #### value <sub>`method`</sub>
 
 ```text
-value(g_row g_name)
+value(
+    g_row
+    g_name
+)
 => str | any
 ```
 
