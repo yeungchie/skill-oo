@@ -78,6 +78,23 @@ addToNamespace("ycGeom"
         _Flag
         _InResult
         _Boolean
+        _SizeRegion
+        _SizePolygon
+        _SizeExtendCap
+        _SizeCapSelected
+        _SizeRoundCap
+        _SizeStrip
+        _SizeLinePoint
+        _SizeEdgeDistance
+        _SizeEdgeSelected
+        _SizeRingEdges
+        _SizeOrientRings
+        _SizeCheck
+        _SizeRoundSegments
+        _SizeMiterLimit
+        _SizeCorner
+        _SizeDirs
+        _SizeDirP
         _UnionAll
         _InstallPoint
         _InstallSegment

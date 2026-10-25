@@ -24,6 +24,7 @@ defclass(Region () (
     onBoundary()
     bbox()
     isEmpty()
+    size()
     or()
     and()
     not()
@@ -203,6 +204,22 @@ procedure(_InstallRegion(self "g")  ; -> any
         ; **返回**
         ;   (t|nil) - 无 Polygon 为 t
         self->_data->polygons == nil
+    )
+    self->size = lambda((n_value \@key (dir 'all) (ratio nil) (corner 'miter) (miterLimit nil) (roundSegments nil) "nggggg")  ; -> Region
+        ; 返回方向 offset 后的 Region。
+        ;
+        ; **参数**
+        ;   n_value         (num)      - 距离或倍率
+        ;   ?dir            (sym|list) - 方向
+        ;   ?ratio          (t|nil)    - 倍率模式
+        ;   ?corner         (sym)      - 拐角风格
+        ;   ?miterLimit     (num|nil)  - miter 限制
+        ;   ?roundSegments  (int|nil)  - 圆角段数
+        ;
+        ; **返回**
+        ;   (Region) - 结果区域
+        _SizeRegion(self->_data->polygons n_value dir ratio corner
+            miterLimit roundSegments)
     )
     self->or = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
         ; 返回并集。

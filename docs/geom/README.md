@@ -678,6 +678,37 @@ Polygon->reverse()
 
 返回反向绕行的新多边形。
 
+#### size <sub>`method`</sub>
+
+```text
+Polygon->size(n_value [ ?dir 'all ] [ ?ratio nil ] [ ?corner 'miter ]
+                     [ ?miterLimit 4 ] [ ?roundSegments 8 ])
+=> Region
+```
+
+按真实边界做方向涨缩，返回 Region。正值外涨、负值内缩；`?ratio t` 时把 `n_value` 当作正倍率。
+
+| 参数 | 说明 |
+| --- | --- |
+| `n_value` | 距离或倍率 |
+| `?dir` | `'all`、`'left`、`'right`、`'up`、`'down` 或方向列表；默认 `'all` |
+| `?ratio` | t 时启用倍率模式；默认 nil |
+| `?corner` | `'miter`、`'round`、`'bevel`、`'none`；默认 `'miter` |
+| `?miterLimit` | miter 长度限制；默认 4 |
+| `?roundSegments` | 每 90 度圆角线段数；默认 8 |
+
+`?corner 'none` 只保留边带、不补拐角，可能产生十字/缺口轮廓。offset 可能拆分或合并图形，因此统一返回 Region。
+
+```lisp
+g_sq = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
+g_sq->size(1 ?corner 'miter)->bbox()
+; => (-1.0 -1.0 11.0 11.0)
+g_sq->size(1 ?dir 'right ?corner 'miter)->bbox()
+; => (0.0 0.0 11.0 10.0)
+g_sq->size(1.2 ?ratio t ?dir 'right)->bbox()
+; => (0.0 0.0 12.0 10.0)
+```
+
 #### or <sub>`method`</sub>
 
 ```text
@@ -878,6 +909,32 @@ Region->isEmpty()
 ```
 
 空区域返回 t。
+
+#### size <sub>`method`</sub>
+
+```text
+Region->size(n_value [ ?dir 'all ] [ ?ratio nil ] [ ?corner 'miter ]
+                    [ ?miterLimit 4 ] [ ?roundSegments 8 ])
+=> Region
+```
+
+对 Region 中的每个 Polygon 独立做真实边界涨缩，再归一化合并。参数语义与 `Polygon->size` 相同。
+
+| 参数 | 说明 |
+| --- | --- |
+| `n_value` | 距离或倍率 |
+| `?dir` | 方向或方向列表；默认 `'all` |
+| `?ratio` | t 时启用倍率模式；默认 nil |
+| `?corner` | 拐角风格；默认 `'miter` |
+| `?miterLimit` | miter 长度限制；默认 4 |
+| `?roundSegments` | 每 90 度圆角线段数；默认 8 |
+
+```lisp
+g_a = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
+g_r = ycGeom::Region(list(g_a))
+g_r->size(1)->area()
+; => 144.0
+```
 
 #### or <sub>`method`</sub>
 

@@ -135,6 +135,17 @@ let((l_res t_self t_dir)
         )
     )
 
+    _TestSizeDone = nil
+    l_res = errset(load(strcat(t_dir "test_size.il")) t)
+    unless(_TestSizeDone
+        _TestCount = _TestCount + 1
+        _TestFail = _TestFail + 1
+        printf("TEST FAILED - test_size.il did not run to completion%s
+"
+            if(l_res "" " (load raised an error)")
+        )
+    )
+
     _TestBooleanDone = nil
     l_res = errset(load(strcat(t_dir "test_boolean.il")) t)
     unless(_TestBooleanDone
