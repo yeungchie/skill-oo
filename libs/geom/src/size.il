@@ -1,5 +1,16 @@
 useNamespace("ycGeom")
 
+; Directional offset model:
+;
+;   unselected edge (stays)
+;   +------------------+
+;   |                  |
+;   |     original     |======> selected edge strip
+;   |                  |
+;   +------------------+
+;
+; Edge strips are unioned; corner caps fill the gaps between them.
+
 procedure(_SizeDirP(g_dir "g")  ; -> t | nil
     ; 判断方向符号是否合法（内部实现）。
     ;

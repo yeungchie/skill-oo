@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 240" role="img" aria-labelledby="title desc">
+  <title id="title">ycGeom object overview</title>
+  <desc id="desc">Five panels showing a point, a segment, an infinite line, a closed polygon, and a region made of two overlapping polygons.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#2563eb"/>
+    </marker>
+    <style>
+      .panel { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.2; }
+      .title { font: 600 14px sans-serif; fill: #0f172a; text-anchor: middle; }
+      .caption { font: 12px sans-serif; fill: #64748b; text-anchor: middle; }
+      .axis { stroke: #cbd5e1; stroke-width: 1.5; }
+      .guide { stroke: #94a3b8; stroke-width: 1; stroke-dasharray: 3 3; }
+      .shape { fill: none; stroke: #2563eb; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+      .area { fill: #dbeafe; stroke: #2563eb; stroke-width: 2.5; stroke-linejoin: round; }
+      .area2 { fill: #ccfbf1; stroke: #0f766e; stroke-width: 2.5; fill-opacity: .65; }
+      .point { fill: #dc2626; stroke: #fff; stroke-width: 1.5; }
+      .tiny { font: 12px sans-serif; fill: #475569; }
+    </style>
+  </defs>
+
+  <g>
+    <rect class="panel" x="20" y="20" width="160" height="200" rx="10"/>
+    <text class="title" x="100" y="45">Point</text>
+    <line class="axis" x1="50" y1="120" x2="150" y2="120"/>
+    <line class="axis" x1="100" y1="70" x2="100" y2="170"/>
+    <line class="guide" x1="125" y1="95" x2="125" y2="120"/>
+    <line class="guide" x1="125" y1="95" x2="100" y2="95"/>
+    <circle class="point" cx="125" cy="95" r="5"/>
+    <text class="tiny" x="132" y="90">(3, 4)</text>
+    <text class="caption" x="100" y="195">position</text>
+  </g>
+
+  <g>
+    <rect class="panel" x="196" y="20" width="160" height="200" rx="10"/>
+    <text class="title" x="276" y="45">Segment</text>
+    <line class="shape" x1="226" y1="155" x2="326" y2="75"/>
+    <circle class="point" cx="226" cy="155" r="5"/>
+    <circle class="point" cx="326" cy="75" r="5"/>
+    <text class="caption" x="276" y="195">two endpoints</text>
+  </g>
+
+  <g>
+    <rect class="panel" x="372" y="20" width="160" height="200" rx="10"/>
+    <text class="title" x="452" y="45">Line</text>
+    <line class="shape" x1="387" y1="170" x2="517" y2="55" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+    <circle class="point" cx="452" cy="112" r="5"/>
+    <text class="caption" x="452" y="195">infinite</text>
+  </g>
+
+  <g>
+    <rect class="panel" x="548" y="20" width="160" height="200" rx="10"/>
+    <text class="title" x="628" y="45">Polygon</text>
+    <polygon class="area" points="578,155 608,80 678,70 688,140 638,165"/>
+    <text class="caption" x="628" y="195">closed ring</text>
+  </g>
+
+  <g>
+    <rect class="panel" x="724" y="20" width="160" height="200" rx="10"/>
+    <text class="title" x="804" y="45">Region</text>
+    <rect class="area" x="754" y="90" width="70" height="70" rx="2"/>
+    <rect class="area2" x="789" y="115" width="70" height="70" rx="2"/>
+    <text class="caption" x="804" y="195">0..n polygons</text>
+  </g>
+</svg>

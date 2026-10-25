@@ -1,5 +1,17 @@
 useNamespace("ycGeom")
 
+; Keyhole ring layout:
+;
+;   +------------------+
+;   |   +----------+   |
+;   |   |   hole   |   |
+;   |   +----------+   |
+;   +--------+---------+
+;            |
+;      seam traversed twice
+;
+; The seam is an internal bridge, not part of the polygon boundary.
+
 defclass(PolygonData () (
     ; PolygonData 数据桶：只收纳 keyhole 点列，构造后禁写。
     points(

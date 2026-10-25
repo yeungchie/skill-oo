@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 300" role="img" aria-labelledby="title desc">
+  <title id="title">Keyhole polygon</title>
+  <desc id="desc">An outer square joined to a rectangular hole by a dashed seam that is traversed in both directions.</desc>
+  <defs>
+    <marker id="seam-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#dc2626"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.2; }
+      .outer { fill: #dbeafe; stroke: #2563eb; stroke-width: 3; stroke-linejoin: round; }
+      .hole { fill: #f8fafc; stroke: #0f766e; stroke-width: 2.5; }
+      .seam { fill: none; stroke: #dc2626; stroke-width: 2; stroke-dasharray: 6 4; }
+      .title { font: 600 15px sans-serif; fill: #0f172a; }
+      .label { font: 12px sans-serif; fill: #475569; }
+      .note { font: 12px sans-serif; fill: #64748b; }
+      .dot { fill: #dc2626; stroke: #fff; stroke-width: 1.5; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="20" y="20" width="420" height="260" rx="10"/>
+  <text class="title" x="40" y="48">Keyhole polygon</text>
+
+  <polygon class="outer" points="60,240 360,240 360,60 60,60"/>
+  <rect class="hole" x="160" y="100" width="120" height="90"/>
+  <line class="seam" x1="360" y1="240" x2="160" y2="190" marker-end="url(#seam-arrow)"/>
+  <circle class="dot" cx="360" cy="240" r="4"/>
+  <circle class="dot" cx="160" cy="190" r="4"/>
+
+  <text class="label" x="80" y="82">outer ring</text>
+  <text class="label" x="190" y="132">hole</text>
+  <text class="note" x="210" y="232">seam (traversed twice)</text>
+  <text class="note" x="40" y="270">The dashed seam joins the outer ring to the hole and is not a polygon edge.</text>
+</svg>

@@ -14,6 +14,10 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、keyhole 多边形�
 - 对象按不可变值使用；运算返回新对象，不修改输入。
 - 例程中 `; =>` 表示返回值；五类对象都提供 `toSkill()`，输出只含 list 与 float 的原生数据。
 
+![ycGeom 五类对象概览](img/overview.svg)
+
+*点、线段、直线、多边形与区域。*
+
 ## 快速上手
 
 ```lisp
@@ -748,6 +752,10 @@ Polygon->size(
 | ?miterLimit | num / nil | 4 | miter 长度限制；默认 4 |
 | ?roundSegments | int / nil | 8 | 每 90 度圆角线段数；默认 8 |
 
+![?dir 方向涨缩示意](img/size.svg)
+
+*图：`?dir` 选择边，虚线为偏移后的边界。*
+
 `?corner 'none` 只保留边带、不补拐角，可能产生十字/缺口轮廓。offset 可能拆分或合并图形，因此统一返回 Region。
 
 ```lisp
@@ -1152,6 +1160,10 @@ Region->toSkill()
 
 切割边通过同一无向边出现两次识别，不写入对象状态。外环与洞环应反向绕行；布尔运算输出保证这一点。
 
+![keyhole 多边形的外环、洞与切割线](img/keyhole.svg)
+
+*图：外环通过切割线连接内洞。*
+
 ```lisp
 g_hole = ycGeom::Polygon(list(
     ycGeom::Point(0 0)
@@ -1176,6 +1188,10 @@ g_hole->perimeter()
 - 默认 `?normalize t` 会把输入合并、裁剪为互不重叠的多边形集合。
 - `?normalize nil` 信任输入已互不重叠，跳过归一化；此时面积按各块面积求和。
 - `?grid` 把输入和输出顶点吸附到网格；吸附导致拓扑塌缩时以 `error()` 中断。
+
+![区域布尔运算：并、交、差、对称差](img/boolean.svg)
+
+*图：两个区域 A、B 的四种布尔结果。*
 
 ```lisp
 g_a = ycGeom::Polygon(list(
