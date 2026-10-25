@@ -22,6 +22,27 @@ let((g_sq)
     )  "polygon: toSkill")
 )
 
+let((g_p g_c)
+    g_p = ycGeom::Polygon('((0 0) (2 0) (4 0) (4 4) (0 4)))
+    g_c = g_p->removeCollinear()
+    _Assert(length(g_p->points()) == 5  "polygon: collinear original unchanged")
+    _Assert(length(g_c->points()) == 4  "polygon: removeCollinear count")
+    _Assert(g_c->toSkill() == list(
+        list(0.0 0.0) list(4.0 0.0) list(4.0 4.0) list(0.0 4.0)
+    )  "polygon: removeCollinear points")
+)
+_AssertError(lambda(() ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->removeCollinear(?eps "x") t)  "polygon: bad removeCollinear eps")
+
+let((g_hole g_clean)
+    g_hole = ycGeom::Polygon('((0 0) (5 0) (10 0) (3 3) (3 7) (7 7) (7 3)
+                              (3 3) (10 0) (10 10) (0 10)))
+    g_clean = g_hole->removeCollinear()
+    _Assert(length(g_hole->points()) == 11  "polygon: keyhole collinear original unchanged")
+    _Assert(length(g_clean->points()) == 10  "polygon: keyhole removeCollinear count")
+    _Assert(g_clean->area() == 84.0  "polygon: keyhole removeCollinear area")
+    _Assert(g_clean->perimeter() == 56.0  "polygon: keyhole removeCollinear perimeter")
+)
+
 let((g_hole)
     g_hole = ycGeom::Polygon(list(
         ycGeom::Point(0 0)

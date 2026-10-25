@@ -250,7 +250,7 @@ procedure(_InstallRegion(self "g")  ; -> t
             g_o = _AsRegion(g_other "ycGeom::Region->or")
             l_res = _Boolean(self->_data->polygons g_o->polygons()
                 'union _Grid(grid) _Eps(eps))
-            Region(l_res ?normalize nil)
+            Region(_CleanPolygons(l_res _Eps(eps)) ?normalize nil)
         )
     )
     self->and = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
@@ -267,7 +267,7 @@ procedure(_InstallRegion(self "g")  ; -> t
             g_o = _AsRegion(g_other "ycGeom::Region->and")
             l_res = _Boolean(self->_data->polygons g_o->polygons()
                 'intersection _Grid(grid) _Eps(eps))
-            Region(l_res ?normalize nil)
+            Region(_CleanPolygons(l_res _Eps(eps)) ?normalize nil)
         )
     )
     self->not = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
@@ -284,7 +284,7 @@ procedure(_InstallRegion(self "g")  ; -> t
             g_o = _AsRegion(g_other "ycGeom::Region->not")
             l_res = _Boolean(self->_data->polygons g_o->polygons()
                 'difference _Grid(grid) _Eps(eps))
-            Region(l_res ?normalize nil)
+            Region(_CleanPolygons(l_res _Eps(eps)) ?normalize nil)
         )
     )
     self->xor = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
@@ -301,7 +301,7 @@ procedure(_InstallRegion(self "g")  ; -> t
             g_o = _AsRegion(g_other "ycGeom::Region->xor")
             l_res = _Boolean(self->_data->polygons g_o->polygons()
                 'xor _Grid(grid) _Eps(eps))
-            Region(l_res ?normalize nil)
+            Region(_CleanPolygons(l_res _Eps(eps)) ?normalize nil)
         )
     )
     self->toSkill = lambda(()  ; -> list | nil
@@ -352,6 +352,7 @@ procedure(Region(l_polygons \@key (normalize t) (grid nil) (eps nil) "lggg")  ; 
         t_polys = _AsPolygonList(l_polygons "ycGeom::Region")
         when(normalize && t_polys
             t_polys = _UnionAll(t_polys n_grid n_eps)
+            t_polys = _CleanPolygons(t_polys n_eps)
         )
         makeInstance('Region ?_data
             makeInstance('RegionData ?polygons t_polys))

@@ -36,6 +36,14 @@ let((l_a l_b l_r)
     _Assert(_BoolArea(l_r) == 24.0  "boolean: xor area")
 )
 
+let((g_a g_b g_r)
+    g_a = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
+    g_b = ycGeom::Polygon('((2 0) (6 0) (6 4) (2 4)))
+    g_r = g_a->or(g_b)
+    _Assert(length(g_r->polygons()) == 1  "boolean: clean union one polygon")
+    _Assert(length(car(g_r->polygons())->points()) == 4  "boolean: clean collinear union")
+)
+
 let((l_a l_b l_r)
     l_a = list(ycGeom::Polygon(list(
         ycGeom::Point(0 0) ycGeom::Point(2 0)

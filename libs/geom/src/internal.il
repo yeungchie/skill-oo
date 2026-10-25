@@ -581,6 +581,51 @@ procedure(_SeamKeys(l_pts "l")  ; -> table
     )
 )
 
+procedure(_CollinearClean(l_pts n_eps "lg")  ; -> list[Point]
+    ; 删除非切割边上的共线中间点（内部实现）。
+    ;
+    ; **参数**
+    ;   l_pts  (list[Point]) - 闭合点列
+    ;   n_eps  (float)       - 容差
+    ;
+    ; **返回**
+    ;   (list[Point]) - 去除共线点后的点列；切割边端点保留
+    let((n_len n_changed t_seams l_res n_i g_prev g_cur g_next n_dot)
+        n_len = length(l_pts)
+        n_changed = t
+        while(n_changed && n_len > 3
+            n_changed = nil
+            t_seams = _SeamKeys(l_pts)
+            l_res = nil
+            for(n_i 1 n_len
+                g_prev = _Nth1(if(n_i == 1 n_len (n_i - 1)) l_pts)
+                g_cur = _Nth1(n_i l_pts)
+                g_next = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
+                n_dot = (g_cur->x() - g_prev->x())
+                        * (g_next->x() - g_cur->x())
+                    + (g_cur->y() - g_prev->y())
+                        * (g_next->y() - g_cur->y())
+                cond(
+                    (t_seams[_EdgeKey(g_prev g_cur)] == 2
+                        || t_seams[_EdgeKey(g_cur g_next)] == 2
+                        l_res = tconc(l_res g_cur)
+                    )
+                    ((abs(_Cross(g_prev g_cur g_next)) <= n_eps
+                        && n_dot >= 0.0)
+                        n_changed = t
+                    )
+                    (t
+                        l_res = tconc(l_res g_cur)
+                    )
+                )
+            )
+            l_pts = car(l_res)
+            n_len = length(l_pts)
+        )
+        l_pts
+    )
+)
+
 procedure(_RemovePoint(l_list g_p "lg")  ; -> list
     ; 从点列表中删除坐标键相同的点（内部实现）。
     ;

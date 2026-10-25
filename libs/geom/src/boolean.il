@@ -405,6 +405,23 @@ procedure(_InResult(g_op g_inA g_inB "ggg")  ; -> t | nil
     )
 )
 
+procedure(_CleanPolygons(l_polys n_eps "lg")  ; -> list[Polygon]
+    ; 去除结果多边形的共线点（内部实现）。
+    ;
+    ; **参数**
+    ;   l_polys  (list[Polygon]) - 多边形列表
+    ;   n_eps    (float)         - 容差
+    ;
+    ; **返回**
+    ;   (list[Polygon]) - 清理后的列表；空结果 nil
+    let((l_res)
+        foreach(g_p l_polys
+            l_res = tconc(l_res g_p->removeCollinear(?eps n_eps))
+        )
+        car(l_res)
+    )
+)
+
 procedure(_Boolean(l_a l_b g_op n_grid n_eps "llggg")  ; -> list[Polygon]
     ; 计算两个多边形集合的布尔结果。
     ;
@@ -430,12 +447,13 @@ procedure(_Boolean(l_a l_b g_op n_grid n_eps "llggg")  ; -> list[Polygon]
         n_gridv = _Grid(n_grid)
         n_epsv = _Eps(n_eps)
         cond(
-            (l_a == nil && l_b == nil nil)
-            (l_a == nil && (g_op == 'union || g_op == 'xor) l_b)
-            (l_a == nil nil)
-            (l_b == nil && g_op == 'union l_a)
-            (l_b == nil && (g_op == 'difference || g_op == 'xor) l_a)
-            (l_b == nil nil)
+            (l_a == nil && l_b == nil l_res = nil)
+            (l_a == nil && (g_op == 'union || g_op == 'xor) l_res = l_b)
+            (l_a == nil l_res = nil)
+            (l_b == nil && g_op == 'union l_res = l_a)
+            (l_b == nil && (g_op == 'difference || g_op == 'xor)
+                l_res = l_a)
+            (l_b == nil l_res = nil)
             (t
                 l_ra = _CollectRings(l_a n_gridv n_epsv)
                 l_rb = _CollectRings(l_b n_gridv n_epsv)
@@ -446,9 +464,9 @@ procedure(_Boolean(l_a l_b g_op n_grid n_eps "llggg")  ; -> list[Polygon]
                     l_res = _BuildPolygons(
                         _NestLoops(l_loops n_epsv) n_gridv n_epsv)
                 )
-                l_res
             )
         )
+        l_res
     )
 )
 

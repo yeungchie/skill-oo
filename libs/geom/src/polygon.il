@@ -39,6 +39,7 @@ defclass(Polygon () (
     toRect()
     isClockwise()
     reverse()
+    removeCollinear()
     size()
     or()
     and()
@@ -131,7 +132,7 @@ procedure(_ShapeOp(g_left g_other g_op n_grid n_eps t_ctx "gggggt")  ; -> Region
         g_r = _AsRegion(g_other t_ctx)
         l_res = _Boolean(g_l->polygons() g_r->polygons()
             g_op n_grid n_eps)
-        Region(l_res ?normalize nil)
+        Region(_CleanPolygons(l_res _Eps(n_eps)) ?normalize nil)
     )
 )
 
@@ -329,6 +330,16 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ; **返回**
         ;   (Polygon) - 新对象
         Polygon(reverse(copy(self->_data->points)))
+    )
+    self->removeCollinear = lambda((\@key (eps nil) "g")  ; -> Polygon
+        ; 返回去除共线中间点后的新多边形。
+        ;
+        ; **参数**
+        ;   ?eps  (num|nil) - 容差；默认 nil（1e-9）
+        ;
+        ; **返回**
+        ;   (Polygon) - 新对象；切割边端点保留
+        Polygon(_CollinearClean(self->_data->points _Eps(eps)))
     )
     self->size = lambda((n_value \@key (dir 'all) (ratio nil) (corner 'miter) (miterLimit nil) (roundSegments nil) "nggggg")  ; -> Region
         ; 返回方向 offset 后的 Region。

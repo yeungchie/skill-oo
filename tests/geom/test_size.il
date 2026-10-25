@@ -63,6 +63,13 @@ let((g_sq)
     _Assert(_SizeBoxNear(g_sq->size(1.2 ?ratio t ?dir '(left right))->bBox() list(list(-1.0 0.0) list(11.0 10.0)))  "size: ratio both x bBox")
 )
 
+let((g_p g_r)
+    g_p = ycGeom::Polygon('((0 0) (2 0) (4 0) (4 4) (0 4)))
+    g_r = g_p->size(0)
+    _Assert(length(car(g_r->polygons())->points()) == 4  "size: zero cleans collinear")
+    _Assert(length(car(g_p->size(1)->polygons())->points()) == 4  "size: offset cleans collinear")
+)
+
 let((g_hole g_r g_multi)
     g_hole = ycGeom::Polygon('((0 0) (10 0) (3 3) (3 7) (7 7) (7 3)
                               (3 3) (10 0) (10 10) (0 10)))

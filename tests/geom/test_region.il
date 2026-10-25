@@ -53,6 +53,14 @@ let((g_a g_b g_r)
     _Assert(!ycGeom::Region(list(g_a))->onBoundary(ycGeom::Point(1 1))  "region: not on boundary")
 )
 
+let((g_r)
+    g_r = ycGeom::Region(list(ycGeom::Polygon(list(
+        ycGeom::Point(0 0) ycGeom::Point(2 0) ycGeom::Point(4 0)
+        ycGeom::Point(4 4) ycGeom::Point(0 4)
+    ))))
+    _Assert(length(car(g_r->polygons())->points()) == 4  "region: normalize cleans collinear")
+)
+
 _AssertError(lambda(() ycGeom::Region("bad") t)  "region: non-list rejected")
 _AssertError(lambda(() ycGeom::Region(list(1)) t)  "region: non-Polygon rejected")
 _AssertError(lambda(() ycGeom::Region(nil ?normalize "bad") t)  "region: bad normalize")

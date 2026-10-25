@@ -458,21 +458,22 @@ procedure(_SizePolygon(self n_value g_dir g_ratio g_corner g_miterLimit g_roundS
     ; **返回**
     ;   (Region) - 涨缩结果
     let((l_check l_dirs g_ratioMode l_box n_width n_height n_limit n_segments
-         l_ops l_region l_rings l_enh)
+         l_ops l_region l_rings l_enh g_src)
         l_check = _SizeCheck(n_value g_dir g_ratio g_corner g_miterLimit
             g_roundSegments t_ctx)
         l_dirs = car(l_check)
         g_ratioMode = cadr(l_check)
-        l_box = self->bBox()
+        g_src = self->removeCollinear()
+        l_box = g_src->bBox()
         n_width = car(cadr(l_box)) - car(car(l_box))
         n_height = cadr(cadr(l_box)) - cadr(car(l_box))
         n_limit = _SizeMiterLimit(g_miterLimit)
         n_segments = _SizeRoundSegments(g_roundSegments)
-        l_region = Region(list(self) ?normalize nil)
+        l_region = Region(list(g_src) ?normalize nil)
         unless((_Near(n_value 0.0 1e-12)
                 || (g_ratioMode && _Near(n_value 1.0 1e-12)))
             progn(
-            l_rings = _SizeOrientRings(_Rings(self->points()))
+            l_rings = _SizeOrientRings(_Rings(g_src->points()))
             foreach(l_ring l_rings
                 let((l_recs n_len n_i l_e n_sel n_d g_a g_b n_nx n_ny)
                     l_recs = _SizeRingEdges(l_ring)
@@ -523,15 +524,17 @@ procedure(_SizePolygon(self n_value g_dir g_ratio g_corner g_miterLimit g_roundS
             )
             foreach(l_op car(l_ops)
                 when(l_op
-                    l_region = if(if(g_ratioMode n_value > 1.0 n_value > 0.0)
-                        l_region->or(Region(list(l_op) ?normalize nil))
-                        l_region->not(Region(list(l_op) ?normalize nil))
-                    )
+                    l_region = Region(_Boolean(
+                        l_region->polygons() list(l_op)
+                        if(if(g_ratioMode n_value > 1.0 n_value > 0.0)
+                            'union 'difference)
+                        nil 1e-9)
+                        ?normalize nil)
                 )
             )
             )
         )
-        l_region
+        Region(_CleanPolygons(l_region->polygons() 1e-9) ?normalize nil)
     )
 )
 

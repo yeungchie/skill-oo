@@ -14,6 +14,7 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole �
 - 对象按不可变值使用；运算返回新对象，不修改输入。
 - `Polygon`、`Rect`、`Region` 可互相作为布尔运算的右操作数；结果统一为 `Region`。
 - 非退化 `Rect` 与 `Polygon` 可通过 `toPolygon()`/`toRect()` 互转；退化 `Rect` 无对应 `Polygon`。
+- `Polygon->removeCollinear()` 可显式获取去除共线点后的多边形。
 - 例程中 `; =>` 表示返回值；六类对象都提供 `toSkill()`，输出只含 list 与 float 的原生数据。
 
 ![ycGeom 六类对象概览](img/overview.svg)
@@ -861,7 +862,7 @@ Rect->size(
 => Region
 ```
 
-按真实边界做方向涨缩，返回 Region；参数语义与 `Polygon->size` 相同。退化矩形返回空 Region。
+按真实边界做方向涨缩，返回 Region；参数语义与 `Polygon->size` 相同。退化矩形返回空 Region，结果多边形已去除共线点。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -1307,6 +1308,24 @@ ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->reverse()->toSkill()
 ; => ((0.0 4.0) (4.0 4.0) (4.0 0.0) (0.0 0.0))
 ```
 
+#### removeCollinear <sub>`method`</sub>
+
+```text
+Polygon->removeCollinear([ ?eps n_eps ])
+=> Polygon
+```
+
+返回去除共线中间点后的新 Polygon；切割边端点保留。`?eps` 默认 `1e-9`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?eps n_eps | num / nil | 1e-9 | 共线判断容差；默认 `1e-9` |
+
+```lisp
+ycGeom::Polygon('((0 0) (2 0) (4 0) (4 4) (0 4)))->removeCollinear()->toSkill()
+; => ((0.0 0.0) (4.0 0.0) (4.0 4.0) (0.0 4.0))
+```
+
 #### size <sub>`method`</sub>
 
 ```text
@@ -1321,7 +1340,7 @@ Polygon->size(
 => Region
 ```
 
-按真实边界做方向涨缩，返回 Region。正值外涨、负值内缩；`?ratio t` 时把 `n_value` 当作正倍率。
+按真实边界做方向涨缩，返回 Region。正值外涨、负值内缩；`?ratio t` 时把 `n_value` 当作正倍率。结果多边形已去除共线点。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -1703,7 +1722,7 @@ Region->size(
 => Region
 ```
 
-对 Region 中的每个 Polygon 独立做真实边界涨缩，再归一化合并。参数语义与 `Polygon->size` 相同。
+对 Region 中的每个 Polygon 独立做真实边界涨缩，再归一化合并。参数语义与 `Polygon->size` 相同；结果多边形已去除共线点。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -1903,6 +1922,7 @@ g_hole->perimeter()
 - `?normalize nil` 信任输入已互不重叠，跳过归一化；此时面积按各块面积求和。
 - `?grid` 把输入和输出顶点吸附到网格；吸附导致拓扑塌缩时以 `error()` 中断。
 - `Polygon`、`Rect`、`Region` 可互相参与 `or`/`and`/`not`/`xor`；右操作数也接受点列，结果统一为 `Region`。退化 `Rect`（宽/高为 0 或面积不超过 `1e-9`）与空 `Region` 按空集处理。
+- 默认归一化、布尔与 `size` 输出的多边形均已去除共线中间点；切割边端点保留。
 
 ![区域布尔运算：并、交、差、对称差](img/boolean.svg)
 

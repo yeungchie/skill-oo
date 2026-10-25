@@ -48,6 +48,7 @@ addToNamespace("ycGeom"
         _Rings
         _RemovePoint
         _FirstAdjPoint
+        _CollinearClean
         _RingPointsClean
         _CheckPolygon
         _ShapeOp
@@ -82,6 +83,7 @@ addToNamespace("ycGeom"
         _Flag
         _InResult
         _Boolean
+        _CleanPolygons
         _SizeRegion
         _SizePolygon
         _SizeExtendCap
