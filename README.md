@@ -31,6 +31,10 @@
 + [ycRadix](docs/radix/README.md) —— 任意进制整数解析、格式化与掩码。
 + [ycTabulate](docs/tabulate/README.md) —— 文本表格渲染。
 
+### 几何
+
++ [ycGeom](docs/geom/README.md) —— 平面点、线段、直线、keyhole 多边形与区域布尔运算。
+
 ## 调用约定
 
 + 类名、函数名与命名空间全局变量使用大驼峰；前导 `_` 的私有名使用 `_XXX`。方法使用小驼峰。

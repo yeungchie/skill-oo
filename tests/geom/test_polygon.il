@@ -68,6 +68,8 @@ let((g_sq g_hole)
     _Assert(g_hole->centroid()->toSkill() == list(5.0 5.0)  "polygon: keyhole centroid")
     _Assert(!g_hole->contains(ycGeom::Point(5 5))  "polygon: hole excluded")
     _Assert(g_hole->onBoundary(ycGeom::Point(3 7))  "polygon: hole boundary")
+    _Assert(!g_hole->onBoundary(ycGeom::Point(6.5 1.5))  "polygon: seam not boundary")
+    _Assert(g_hole->onBoundary(ycGeom::Point(6.5 1.5) ?includeSeams t)  "polygon: seam included")
 )
 _AssertError(lambda(() ycGeom::Polygon(list(
     ycGeom::Point(0 0) ycGeom::Point(1 0) ycGeom::Point(0 1)

@@ -1,6 +1,6 @@
 # skill-oo 测试
 
-本文件描述测试套件的运行方式。使用 API 见 [ycPathLib](../docs/pathlib/README.md)、[ycRegEx](../docs/regex/README.md)、[ycSubProcess](../docs/subprocess/README.md)、[ycCodec](../docs/codec/core/README.md)、[ycJson](../docs/codec/json/README.md)、[ycYaml](../docs/codec/yaml/README.md)、[ycCsv](../docs/codec/csv/README.md)、[ycToml](../docs/codec/toml/README.md)、[ycIni](../docs/codec/ini/README.md)、[ycUtf8](../docs/utf8/README.md)、[ycString](../docs/string/README.md)、[ycUnits](../docs/units/README.md)、[ycRadix](../docs/radix/README.md)、[ycTextwrap](../docs/textwrap/README.md)与 [ycTabulate](../docs/tabulate/README.md)。
+本文件描述测试套件的运行方式。使用 API 见 [ycPathLib](../docs/pathlib/README.md)、[ycRegEx](../docs/regex/README.md)、[ycSubProcess](../docs/subprocess/README.md)、[ycCodec](../docs/codec/core/README.md)、[ycJson](../docs/codec/json/README.md)、[ycYaml](../docs/codec/yaml/README.md)、[ycCsv](../docs/codec/csv/README.md)、[ycToml](../docs/codec/toml/README.md)、[ycIni](../docs/codec/ini/README.md)、[ycUtf8](../docs/utf8/README.md)、[ycString](../docs/string/README.md)、[ycUnits](../docs/units/README.md)、[ycRadix](../docs/radix/README.md)、[ycTextwrap](../docs/textwrap/README.md)、[ycTabulate](../docs/tabulate/README.md)与 [ycGeom](../docs/geom/README.md)。
 
 ## 运行测试
 
@@ -17,6 +17,7 @@ load("<path-to-dir>/skill-oo/tests/units/load.il")
 load("<path-to-dir>/skill-oo/tests/radix/load.il")
 load("<path-to-dir>/skill-oo/tests/textwrap/load.il")
 load("<path-to-dir>/skill-oo/tests/tabulate/load.il")
+load("<path-to-dir>/skill-oo/tests/geom/load.il")
 ```
 
 跨套件加载顺序回归（先 tabulate 创建空壳，再加载 codec，最后重跑 tabulate）：
@@ -37,4 +38,4 @@ pathlib 与 regex 套件会在 cwd 下创建并清理各自的临时夹具；sub
 PASS: <n> / FAIL: 0
 ```
 
-有失败时以 `*Error* <模块名>: <m> test(s) failed` 终止（`ycPathLib` / `ycRegEx` / `ycSubProcess` / `ycCodec` / `ycJson` / `ycYaml` / `ycCsv` / `ycToml` / `ycIni` / `ycUtf8` / `ycString` / `ycUnits` / `ycRadix` / `ycTextwrap` / `ycTabulate`）。"预期报错"的用例经 `errset(expr nil)` 静默捕获，不打印红色 `*Error*`；`errset(expr t)` 仅用于加载与守卫包装，只在意料之外出错时打印诊断信息。subprocess 的回调错误收敛用例有意触发库内守卫，输出中一行红色 `*Error*` 属预期。
+有失败时以 `*Error* <模块名>: <m> test(s) failed` 终止（`ycPathLib` / `ycRegEx` / `ycSubProcess` / `ycCodec` / `ycJson` / `ycYaml` / `ycCsv` / `ycToml` / `ycIni` / `ycUtf8` / `ycString` / `ycUnits` / `ycRadix` / `ycTextwrap` / `ycTabulate` / `ycGeom`）。"预期报错"的用例经 `errset(expr nil)` 静默捕获，不打印红色 `*Error*`；`errset(expr t)` 仅用于加载与守卫包装，只在意料之外出错时打印诊断信息。subprocess 的回调错误收敛用例有意触发库内守卫，输出中一行红色 `*Error*` 属预期。
