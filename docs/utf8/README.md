@@ -39,7 +39,7 @@ ycUtf8::IsValid(strcat(intToChar(128)))     ; => nil
 ```text
 ycUtf8::Decode(
     t_str
-    [ ?strict ]
+    [ ?strict g_strict ]
 )
 => list | nil
 ```
@@ -53,7 +53,7 @@ ycUtf8::Decode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_str | str |  | UTF-8 字节串 |
-| ?strict | any | t | 非 nil 时非法序列以 `error()` 中断；`nil` 时逐字节替换为 U+FFFD |
+| ?strict g_strict | any | t | 非 nil 时非法序列以 `error()` 中断；`nil` 时逐字节替换为 U+FFFD |
 
 **返回值**
 
@@ -109,7 +109,7 @@ ycUtf8::Encode(list(97 55296))
 ```text
 ycUtf8::CharCount(
     t_str
-    [ ?strict ]
+    [ ?strict g_strict ]
 )
 => int
 ```
@@ -123,7 +123,7 @@ ycUtf8::CharCount(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_str | str |  | UTF-8 字节串 |
-| ?strict | any | t | 非 nil 时非法序列以 `error()` 中断；`nil` 时逐字节替换为 U+FFFD |
+| ?strict g_strict | any | t | 非 nil 时非法序列以 `error()` 中断；`nil` 时逐字节替换为 U+FFFD |
 
 **返回值**
 
@@ -144,7 +144,7 @@ ycUtf8::Slice(
     t_str
     n_start
     n_len
-    [ ?strict ]
+    [ ?strict g_strict ]
 )
 => str | nil
 ```
@@ -160,7 +160,7 @@ ycUtf8::Slice(
 | t_str | str |  | UTF-8 字节串 |
 | n_start | int |  | 1-based 码点起点（>= 1） |
 | n_len | int |  | 切取的码点长度（>= 0） |
-| ?strict | any | t | 非 nil 时非法序列以 `error()` 中断；`nil` 时以 U+FFFD 替换 |
+| ?strict g_strict | any | t | 非 nil 时非法序列以 `error()` 中断；`nil` 时以 U+FFFD 替换 |
 
 **返回值**
 
@@ -188,8 +188,8 @@ ycUtf8::Slice(strcat("a" intToChar(128)) 4 1)
 ```text
 ycUtf8::Width(
     t_str
-    [ ?strict ]
-    [ ?ambiguous ]
+    [ ?strict g_strict ]
+    [ ?ambiguous n_ambiguous ]
 )
 => int
 ```
@@ -203,8 +203,18 @@ ycUtf8::Width(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_str | str |  | UTF-8 字节串 |
-| ?strict | any | t | 非 nil 时非法序列以 `error()` 中断；`nil` 时以 U+FFFD 替换 |
-| ?ambiguous | int | 1 | East Asian Ambiguous 的宽度（1 或 2） |
+| ?strict g_strict | any | t | 非 nil 时非法序列以 `error()` 中断；`nil` 时以 U+FFFD 替换 |
+| ?ambiguous n_ambiguous | int | 1 | East Asian Ambiguous 的宽度（1 或 2） |
+
+
+`?ambiguous` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| 1 | East Asian Ambiguous 字符按 1 列计 |
+| 2 | East Asian Ambiguous 字符按 2 列计 |
+
+其他值以 `error()` 中断。
 
 **返回值**
 
@@ -227,7 +237,7 @@ ycUtf8::Width("a" ?ambiguous 0)
 ```text
 ycUtf8::CharWidth(
     n_cp
-    [ ?ambiguous ]
+    [ ?ambiguous n_ambiguous ]
 )
 => int
 ```
@@ -241,7 +251,17 @@ ycUtf8::CharWidth(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | n_cp | int |  | 码点（0..0x10FFFF，非代理区） |
-| ?ambiguous | int | 1 | East Asian Ambiguous 的宽度（1 或 2） |
+| ?ambiguous n_ambiguous | int | 1 | East Asian Ambiguous 的宽度（1 或 2） |
+
+
+`?ambiguous` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| 1 | East Asian Ambiguous 字符按 1 列计 |
+| 2 | East Asian Ambiguous 字符按 2 列计 |
+
+其他值以 `error()` 中断。
 
 **返回值**
 

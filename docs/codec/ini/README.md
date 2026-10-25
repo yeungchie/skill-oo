@@ -9,26 +9,44 @@ Cadence SKILL++ 的 INI 配置编解码库：把行式配置文本读成 table�
 - 行式格式：每行一个 `键 = 值`；`[段名]` 开始一个段，段内键值归入该段的子 table。
 - 只有整行注释：行首（可带空格或制表符）的 `;` 或 `#` 后整行忽略；值和段名中的 `;`、`#` 是普通字符，不支持行内注释。
 - 根表的键值位于第一个段之前；段名是字面量，不做点分嵌套；段内键值只保存在对应子 table 中。
-- 解码得到的值一律是字符串，包括空值；引号、反斜杠、空格都按原样保留，不做转义或类型推断。
+- 解码得到的值一律是字符串，包括空值；键和值两侧空白会被去掉，值内部空白、引号与反斜杠原样保留，不做转义或类型推断。
 - 支持 UTF-8 BOM 与 LF、CRLF、CR 行尾；按字节处理，非 ASCII 字符原样保留。
 - 编码时根标量键先输出，段按需在其后输出，段与段之间空一行；不可表示的值、非法键名以 `error()` 中断。
 
 ## 快速上手
 
+`t_cfg_text` 的值如下所示：
+
+```text
+root = value
+[server]
+host = localhost
+port = 8080
+```
+
+`t_cfg_colon` 的值如下所示：
+
+```text
+a: 1
+[s]
+b: 2
+```
+
 ```lisp
-t_cfg = ycIni::Decode("root = value\n[server]\nhost = localhost\nport = 8080\n")
+t_cfg = ycIni::Decode(t_cfg_text)
 t_cfg["root"]              ; => "value"
 t_cfg["server"]["host"]    ; => "localhost"
 t_cfg["server"]["port"]    ; => "8080"
 
 ycIni::Encode(t_cfg ?sortKeys t)
-; => root = value
+; => 编码展示（实际返回为字符串）：
+;    root = value
 ;
 ;    [server]
 ;    host = localhost
 ;    port = 8080
 
-t_cfg = ycIni::Decode("a: 1\n[s]\nb: 2\n" ?delimiter ":")
+t_cfg = ycIni::Decode(t_cfg_colon ?delimiter ":")
 t_cfg["a"]                 ; => "1"
 t_cfg["s"]["b"]            ; => "2"
 ```
@@ -40,8 +58,8 @@ t_cfg["s"]["b"]            ; => "2"
 ```text
 ycIni::Decode(
     t_str
-    [ ?delimiter ]
-    [ ?duplicates ]
+    [ ?delimiter t_delimiter ]
+    [ ?duplicates t_duplicates ]
 )
 => table
 ```
@@ -65,8 +83,18 @@ ycIni::Decode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `t_str` | `str` | | INI 文本 |
-| `?delimiter` | `str / nil` | `"="` | 单字节键值分隔符 |
-| `?duplicates` | `str / nil` | `"error"` | 重复项策略：`"error"`、`"first"`、`"last"` |
+| `?delimiter t_delimiter` | `str / nil` | `"="` | 单字节键值分隔符 |
+| `?duplicates t_duplicates` | `str / nil` | `"error"` | 重复项策略：`"error"`、`"first"`、`"last"` |
+
+`?duplicates` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"error"` | 重复键或重复段以 `error()` 中断 |
+| `"first"` | 保留第一次出现的值；重复段继续合并新键 |
+| `"last"` | 后出现的值覆盖先前值；重复段继续合并新键 |
+
+其他值以 `error()` 中断。
 
 **返回值**
 
@@ -75,17 +103,18 @@ ycIni::Decode(
 **例程**
 
 ```lisp
-ycIni::Decode("")
-; => 空 table
+t_v = ycIni::Decode("")
+t_v["missing"] ; => ycCodec::Missing
 
-ycIni::Decode("a = 1\nb = text\n")
-; => table，a 为 "1"，b 为 "text"
+t_v = ycIni::Decode("a = 1\nb = text\n")
+t_v["a"] ; => "1"
+t_v["b"] ; => "text"
 
-ycIni::Decode("[server]\nhost = localhost\n")
-; => table，server 为子 table，host 为 "localhost"
+t_v = ycIni::Decode("[server]\nhost = localhost\n")
+t_v["server"]["host"] ; => "localhost"
 
-ycIni::Decode("a = 1\na = 2\n" ?duplicates "last")
-; => table，a 为 "2"
+t_v = ycIni::Decode("a = 1\na = 2\n" ?duplicates "last")
+t_v["a"] ; => "2"
 
 ycIni::Decode("[a]\n[a]\n")
 ; *Error* ycIni::Decode: duplicate section at line 2, column 1
@@ -99,10 +128,10 @@ ycIni::Decode("a = 1\n" ?delimiter " ")
 ```text
 ycIni::Encode(
     g_val
-    [ ?sortKeys ]
-    [ ?strict ]
-    [ ?delimiter ]
-    [ ?finalNewline ]
+    [ ?sortKeys g_sort ]
+    [ ?strict g_strict ]
+    [ ?delimiter t_delimiter ]
+    [ ?finalNewline g_finalNewline ]
 )
 => str
 ```
@@ -122,10 +151,10 @@ ycIni::Encode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `g_val` | `table` | | 根 table |
-| `?sortKeys` | `t / nil` | `nil` | 分别排序根键、段名和段内键 |
-| `?strict` | `t / nil` | `nil` | 键必须为字符串 |
-| `?delimiter` | `str / nil` | `"="` | 单字节键值分隔符 |
-| `?finalNewline` | `t / nil` | `t` | 非空输出末尾补换行 |
+| `?sortKeys g_sort` | `t / nil` | `nil` | 分别排序根键、段名和段内键 |
+| `?strict g_strict` | `t / nil` | `nil` | 键必须为字符串 |
+| `?delimiter t_delimiter` | `str / nil` | `"="` | 单字节键值分隔符 |
+| `?finalNewline g_finalNewline` | `t / nil` | `t` | 非空输出末尾补换行 |
 
 **返回值**
 

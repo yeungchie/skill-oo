@@ -12,8 +12,7 @@ Cadence SKILL++ 的 TOML 1.0 编解码库。
 + 布尔值使用 `ycCodec::True` / `ycCodec::False`；缺键返回 `ycCodec::Missing`；TOML 无 null。
 + 整数按 32 位 fixnum 范围校验，越界以 `error()` 中断；浮点支持 `inf` / `nan`。
 + 解码 `nil` 表示空数组；编码 `nil` 输出 `[]`。表数组解码为 table 列表。
-+ 输入与输出字符串必须是合法 UTF-8；解码剥离开头 BOM，并接受 LF / CRLF / CR 行尾。
-+ 解码语法错误消息带行列号；非法 UTF-8 以 `error()` 中断。
++ 输入与输出字符串必须是合法 UTF-8；解码剥离开头 BOM，接受 LF / CRLF / CR 行尾；语法错误通常带行列号。
 
 ## 快速上手
 
@@ -91,11 +90,11 @@ ycToml::Decode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_str | str | | 输入文本 |
-| ?maxDepth | int | 800 | 最大嵌套深度（≥1；超限以 `error()` 中断） |
+| ?maxDepth n_max | int | 800 | 最大嵌套深度（≥1；超限以 `error()` 中断） |
 
 **返回值**
 
-`table` — 文档根表；空文档返回空表。语法或语义错误以 `error()` 中断，消息带 `line` / `column`。
+`table` — 文档根表；空文档返回空表。语法或语义错误以 `error()` 中断；多数消息带 `line` / `column`，超范围 Unicode 码点错误除外。
 
 **例程**
 
@@ -188,10 +187,10 @@ ycToml::Encode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_val | table | | 根表 |
-| ?sortKeys | t / nil | nil | 每层键是否按字符串升序输出；默认随表序 |
-| ?strict | t / nil | nil | t 时键必须为字符串，符号/整数键以 `error()` 中断 |
-| ?finalNewline | t / nil | t | 非空输出末尾是否补换行 |
-| ?maxDepth | int | 800 | 最大嵌套深度（≥1；超限以 `error()` 中断） |
+| ?sortKeys g_sort | t / nil | nil | 每层键是否按字符串升序输出；默认随表序 |
+| ?strict g_strict | t / nil | nil | t 时键必须为字符串，符号/整数键以 `error()` 中断 |
+| ?finalNewline g_finalNewline | t / nil | t | 非空输出末尾是否补换行 |
+| ?maxDepth n_max | int | 800 | 最大嵌套深度（≥1；超限以 `error()` 中断） |
 
 **返回值**
 
@@ -220,7 +219,9 @@ t_v = makeTable("demo")
 t_v["a"] = list(1 2)
 t_v["s"] = "a\"b"
 ycToml::Encode(t_v ?sortKeys t)
-; => "a = [1, 2]\ns = \"a\\\"b\"\n"
+; => 格式化展示（实际返回为字符串）：
+;    a = [1, 2]
+;    s = "a\"b"
 
 ycToml::Encode(makeTable("demo") ?finalNewline nil)  ; => ""
 

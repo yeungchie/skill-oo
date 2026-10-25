@@ -39,7 +39,7 @@ aj->await()                                                 ; => "hello\nworld\n
 ```text
 ycSubProcess::Run(
     g_arg
-    [ g_args ... ]
+    [ l_args ... ]
 )
 => t | nil
 ```
@@ -52,8 +52,8 @@ ycSubProcess::Run(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_arg | Any | | 命令，非字符串会自动转换 |
-| g_args | Any | | 命令的其余部分 |
+| g_arg | any | | 命令，非字符串会自动转换 |
+| l_args | any | | 命令的其余部分；多个参数以空格拼接 |
 
 **返回值**
 
@@ -84,7 +84,7 @@ ycSubProcess::Run("bad cmd")
 ```text
 ycSubProcess::CreateJob(
     g_arg
-    [ g_args ... ]
+    [ l_args ... ]
     [ ?callback g_funcobj ]
     [ ?userData g_data ]
     [ ?verbose g_enable ]
@@ -100,9 +100,9 @@ ycSubProcess::CreateJob(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_arg | Any | | 命令，非字符串会自动转换 |
-| g_args | Any | | 命令的其余部分 |
-| ?callback g_funcobj | nil / symbol / funobj | nil | 可选，回调函数 |
+| g_arg | any | | 命令，非字符串会自动转换 |
+| l_args | any | | 命令的其余部分；多个参数以空格拼接 |
+| ?callback g_funcobj | nil / sym / funcobj | nil | 可选，回调函数 |
 | ?userData g_data | any | nil | 可选，随任务对象携带的数据 |
 | ?verbose g_enable | nil / t | nil | 可选，控制是否实时打印子进程输出 |
 
@@ -161,21 +161,30 @@ ycSubProcess::AsyncJob(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_cmd | str | | 完整命令串 |
-| ?callback g_funcobj | nil / symbol / funobj | nil | 可选，回调函数（签名见 `CreateJob`） |
-| ?userData g_data | Any | nil | 可选，可用于携带任意数据 |
+| ?callback g_funcobj | nil / sym / funcobj | nil | 可选，回调函数（签名见 `CreateJob`） |
+| ?userData g_data | any | nil | 可选，可用于携带任意数据 |
 | ?verbose g_enable | nil / t | nil | 可选，控制是否实时打印子进程输出 |
 
 **返回值**
 
 `ycSubProcess::AsyncJob` — 未启动的任务对象，需调用 `start()` 启动。
 
+**例程**
+
+```lisp
+aj = ycSubProcess::AsyncJob("cat")
+; => <ycSubProcess::AsyncJob status=None, returncode=nil>
+aj->start()
+; => <ycSubProcess::AsyncJob status=Active, returncode=nil>
+```
+
 **属性**
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
 | cmd | str | 执行的命令 |
-| userData | Any | 可用于携带任意数据 |
-| callback | nil / symbol / funcobj | 特定事件触发的回调函数 |
+| userData | any | 可用于携带任意数据 |
+| callback | nil / sym / funcobj | 特定事件触发的回调函数 |
 | verbose | nil / t | 控制是否实时打印子进程输出 |
 | ipcId | nil / ipcId | 进程间通信 ID，任务还未启动时的值为 `nil` |
 | returncode | nil / int | 进程退出状态码，任务还未启动时的值为 `nil` |
@@ -194,10 +203,10 @@ aj->start()
 => ycSubProcess::AsyncJob
 ```
 
-运行任务，启动进程。若已启动则报错。
+运行任务，启动进程；已启动或参数非法时以 `error()` 中断。
 
 ```lisp
-aj = ycSubProcess::CreateJob("whoami")
+aj = ycSubProcess::CreateJob("cat")
 aj->start()
 ; => <ycSubProcess::AsyncJob status=Active, returncode=nil>
 ```
@@ -212,7 +221,7 @@ aj->wait(
 => ycSubProcess::AsyncJob
 ```
 
-等待任务完成。
+等待任务完成；任务未启动时以 `error()` 中断。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -230,23 +239,23 @@ aj->await(
 
 自动启动并等待完成，返回标准输出内容。
 
-任务处于 `'Stopped` 时无法等到结束，会抛出错误，需先 `continue()` 继续或 `kill()` 终止。
+任务处于 `'Stopped` 时无法等到结束，会以 `error()` 中断，需先 `continue()` 继续或 `kill()` 终止。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?check g_enable | bool | nil | 是否检查返回码，非零时抛出错误 |
+| ?check g_enable | t / nil | nil | t 时检查返回码，非零以 `error()` 中断；nil 不检查 |
 
 ```lisp
 ycSubProcess::CreateJob("whoami")->await()
 ; => "yeung\n"
 ```
 
-设置 `?check t` 时，进程返回码非零会抛出错误。
+设置 `?check t` 时，进程返回码非零会以 `error()` 中断。
 
 ```lisp
 ycSubProcess::CreateJob("whoamii")->await(?check t)
 ; sh: whoamii: command not found
-; *Error* funcall: job failed, returncode is 127
+; *Error* ycSubProcess::AsyncJob->await: job failed, returncode is 127
 ```
 
 #### kill <sub>`method`</sub>
@@ -256,7 +265,7 @@ aj->kill()
 => t | nil
 ```
 
-强制终止任务。
+强制终止任务；任务未启动时以 `error()` 中断。
 
 #### state <sub>`method`</sub>
 
@@ -281,7 +290,7 @@ aj->stop()
 => t | nil
 ```
 
-暂停任务，类似 Ctrl+Z。
+暂停任务，类似 Ctrl+Z；任务未启动时以 `error()` 中断。
 
 #### continue <sub>`method`</sub>
 
@@ -290,33 +299,34 @@ aj->continue()
 => t | nil
 ```
 
-继续执行已暂停的任务。
+继续执行已暂停的任务；任务未启动时以 `error()` 中断。
 
 #### print <sub>`method`</sub>
 
 ```text
 aj->print(
     t_formatString
-    [ g_args ... ]
+    [ l_args ... ]
     [ ?end t_string ]
 )
 => ycSubProcess::AsyncJob
 ```
 
-向标准输入写入内容。
+向标准输入写入内容；任务未启动或进程已退出时以 `error()` 中断。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_formatString | str | | 格式化字符串 |
-| g_args | Any | | 格式化参数 |
+| l_args | any | | 格式化参数 |
 | ?end t_string | str | `"\n"` | 结尾字符 |
 
 ```lisp
 aj = ycSubProcess::CreateJob("cat")
 aj->start()
-; => t
+; => <ycSubProcess::AsyncJob status=Active, returncode=nil>
 
 aj->print("123")
+aj->wait(1)
 aj->stdout->text()
 ; => "123\n"
 
@@ -334,7 +344,7 @@ aj->close()
 => t | nil
 ```
 
-关闭标准输入通道，类似 `Ctrl + D`。
+关闭标准输入通道，类似 `Ctrl + D`；任务未启动时以 `error()` 中断。
 
 #### signal <sub>`method`</sub>
 
@@ -345,11 +355,11 @@ aj->signal(
 => t | nil
 ```
 
-发送信号。
+发送信号；任务未启动时以 `error()` 中断。
 
 | 参数 | 类型 | 说明 |
 | --- | --- | --- |
-| s_signal | symbol | 向任务进程发送信号 |
+| s_signal | sym | 向任务进程发送信号 |
 
 | 有效值 | 说明 |
 | --- | --- |
@@ -396,7 +406,7 @@ ycSubProcess::CreateJob("sleep 1")\
     ->start()\
     ->wait()\
     ->elapsed->humanReadable()
-; => "1s"
+; => "1s"（示例值）
 ```
 
 ### ycSubProcess::Stream <sub>`class`</sub>
@@ -441,11 +451,11 @@ aj->stdout->text(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?clear g_enable | bool | nil | 获取后是否清空数据流 |
+| ?clear g_enable | t / nil | nil | t 时获取后清空数据流；nil 保留 |
 
 ```lisp
 aj->stdout->text()
-; => "hello world\n"
+; => "hello\n"
 ```
 
 #### size <sub>`method`</sub>
@@ -557,7 +567,7 @@ aj->elapsed->getSeconds()
 
 获取流逝时间，单位 **秒**。
 
-当开始和结束时间未标记时会抛出错误。
+当开始和结束时间未标记时会以 `error()` 中断。
 
 ```lisp
 aj->elapsed->getSeconds()
@@ -571,7 +581,7 @@ aj->elapsed->humanReadable()
 => str
 ```
 
-以人类可读格式返回耗时信息。
+以人类可读格式返回耗时信息；起止时间未标记时经 `getSeconds()` 以 `error()` 中断。
 
 返回的格式有如下几种情况：
 
@@ -588,7 +598,7 @@ aj->elapsed->humanReadable()
 
 ```lisp
 aj->elapsed->humanReadable()
-; => "1s"
+; => "1s"（示例值）
 ```
 
 [返回首页](../../README.md)

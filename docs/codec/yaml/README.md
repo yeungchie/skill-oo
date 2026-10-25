@@ -63,8 +63,13 @@ ycYaml::Decode(t_yaml_stream ?format "yaml-stream")
 ; => (1 2)
 
 ; 编码
-ycYaml::Encode(list(1 2))                           ; => "- 1\n- 2\n"
-ycYaml::Encode(t_v ?flow t ?sortKeys t)             ; => "{base: {a: 1}, copy: {a: 1}}\n"
+ycYaml::Encode(list(1 2))
+; => 块式展示（实际返回为字符串）：
+;    - 1
+;    - 2
+ycYaml::Encode(t_v ?flow t ?sortKeys t)
+; => 流式展示（实际返回为字符串）：
+;    {base: {a: 1}, copy: {a: 1}}
 ```
 
 ## API 参考
@@ -95,8 +100,17 @@ ycYaml::Decode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_str | str | | 输入文本 |
-| ?format | str | "yaml" | `"yaml"` 或 `"yaml-stream"`；其他值以 `error()` 中断 |
-| ?maxDepth | int | 800 | 最大容器嵌套深度（≥1；超限以 `error()` 中断） |
+| ?format t_format | str | "yaml" | `"yaml"` 或 `"yaml-stream"`；其他值以 `error()` 中断 |
+| ?maxDepth n_max | int | 800 | 最大容器嵌套深度（≥1；超限以 `error()` 中断） |
+
+`?format` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"yaml"` | 单个文档 |
+| `"yaml-stream"` | 多文档流；结果是文档列表 |
+
+其他值以 `error()` 中断。
 
 **返回值**
 
@@ -175,15 +189,24 @@ ycYaml::Encode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_val | any | | 待编码值；`"yaml-stream"` 时为文档列表 |
-| ?format | str | "yaml" | `"yaml"` 或 `"yaml-stream"`；其他值以 `error()` 中断 |
-| ?indent | int | 2 | 每层缩进空格数（须为正整数） |
-| ?sortKeys | t / nil | nil | t 时映射键按编码后的文本升序输出 |
-| ?strict | t / nil | nil | t 时映射键必须为字符串 |
-| ?flow | t / nil | nil | t 时全部使用流式风格 |
-| ?explicitStart | t / nil | nil | 单文档格式是否在开头添加 `---` |
-| ?explicitEnd | t / nil | nil | 单文档格式是否在末尾添加 `...` |
-| ?finalNewline | t / nil | t | 输出末尾是否补换行 |
-| ?maxDepth | int | 800 | 最大容器嵌套深度（≥1；超限以 `error()` 中断） |
+| ?format t_format | str | "yaml" | `"yaml"` 或 `"yaml-stream"`；其他值以 `error()` 中断 |
+| ?indent n_indent | int | 2 | 每层缩进空格数（须为正整数） |
+| ?sortKeys g_sort | t / nil | nil | t 时映射键按编码后的文本升序输出 |
+| ?strict g_strict | t / nil | nil | t 时映射键必须为字符串 |
+| ?flow g_flow | t / nil | nil | t 时全部使用流式风格 |
+| ?explicitStart g_start | t / nil | nil | 单文档格式是否在开头添加 `---` |
+| ?explicitEnd g_end | t / nil | nil | 单文档格式是否在末尾添加 `...` |
+| ?finalNewline g_newline | t / nil | t | 输出末尾是否补换行 |
+| ?maxDepth n_max | int | 800 | 最大容器嵌套深度（≥1；超限以 `error()` 中断） |
+
+`?format` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"yaml"` | 单个文档 |
+| `"yaml-stream"` | 多文档流；结果是文档列表 |
+
+其他值以 `error()` 中断。
 
 **返回值**
 
@@ -192,13 +215,38 @@ ycYaml::Encode(
 **例程**
 
 ```lisp
-ycYaml::Encode(nil)                                ; => "[]\n"
-ycYaml::Encode(list(1 2))                          ; => "- 1\n- 2\n"
-ycYaml::Encode(list(nil))                          ; => "- []\n"
-ycYaml::Encode("a\nb")                             ; => "\"a\\nb\"\n"
-ycYaml::Encode(list(1 2) ?flow t)                  ; => "[1, 2]\n"
-ycYaml::Encode(1 ?explicitStart t)                 ; => "---\n1\n"
-ycYaml::Encode(list(1 2) ?format "yaml-stream")    ; => "---\n1\n---\n2\n"
+ycYaml::Encode(nil)
+; => 实际返回为字符串：
+;    []
+
+ycYaml::Encode(list(1 2))
+; => 块式展示（实际返回为字符串）：
+;    - 1
+;    - 2
+
+ycYaml::Encode(list(nil))
+; => 块式展示（实际返回为字符串）：
+;    - []
+
+ycYaml::Encode("a\nb")
+; => 实际返回为字符串：
+;    "a\nb"
+
+ycYaml::Encode(list(1 2) ?flow t)
+; => 流式展示（实际返回为字符串）：
+;    [1, 2]
+
+ycYaml::Encode(1 ?explicitStart t)
+; => 实际返回为字符串：
+;    ---
+;    1
+
+ycYaml::Encode(list(1 2) ?format "yaml-stream")
+; => 多文档展示（实际返回为字符串）：
+;    ---
+;    1
+;    ---
+;    2
 
 ycYaml::Encode('foo)
 ; *Error* ycYaml::Encode: cannot dump value of type symbol

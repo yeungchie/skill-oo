@@ -60,8 +60,8 @@ ycCodec::Type("true") == ycCodec::True         ; => t
 ycCodec::Type("TRUE") == ycCodec::True         ; => t
 ycCodec::Type("xml")
 ; *Error* ycCodec::Type: unknown type name "xml"
-ycCodec::Type(42)
-; *Error* ycCodec::Type: unknown type name 42
+ycCodec::Type("bogus")
+; *Error* ycCodec::Type: unknown type name "bogus"
 ```
 
 实例显示为命名空间限定的构造调用形式（如 `ycCodec::Type("True")`）；顶层用 `evalstring` 执行该串可得同一驻留实例。
@@ -99,15 +99,15 @@ ycCodec::Null->toSkill()                       ; => unbound
 
 ### ycCodec::True <sub>`constant`</sub>
 
-布尔 `true` 的哨兵对象（`Type` 唯一实例）：各编解码库解码 `true` 得到该对象；编码该对象（或 `t`）得 `true`。
+布尔 `true` 的哨兵对象（`Type` 唯一实例）：支持布尔值的编解码格式解码 `true` 时得到该对象；编码该对象（或 `t`）得 `true`。
 
 ### ycCodec::False <sub>`constant`</sub>
 
-布尔 `false` 的哨兵对象（`Type` 唯一实例）：解码 `false` 得到该对象；编码该对象得 `false`。
+布尔 `false` 的哨兵对象（`Type` 唯一实例）：支持布尔值的编解码格式解码 `false` 时得到该对象；编码该对象得 `false`。
 
 ### ycCodec::Null <sub>`constant`</sub>
 
-空值 `null` 的哨兵对象（`Type` 唯一实例）：解码 `null` 得到该对象；编码该对象得 `null`。
+空值 `null` 的哨兵对象（`Type` 唯一实例）：支持空值的编解码格式解码 `null` 时得到该对象；编码该对象得 `null`。
 
 ### ycCodec::Missing <sub>`constant`</sub>
 

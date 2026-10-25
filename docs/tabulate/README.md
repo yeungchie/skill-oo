@@ -64,14 +64,14 @@ ycTabulate::Render(list(list("a\nb" "c|d")) ?headers list("h1" "h2") ?format "pi
 ```text
 ycTabulate::Render(
     l_rows
-    [ ?headers nil ]
-    [ ?format "simple" ]
-    [ ?align "left" ]
-    [ ?floatFmt "%g" ]
-    [ ?missingVal "" ]
-    [ ?maxColWidth nil ]
-    [ ?unit "display" ]
-    [ ?ambiguous 1 ]
+    [ ?headers l_headers ]
+    [ ?format t_format ]
+    [ ?align g_align ]
+    [ ?floatFmt t_floatFmt ]
+    [ ?missingVal t_missingVal ]
+    [ ?maxColWidth n_maxColWidth ]
+    [ ?unit t_unit ]
+    [ ?ambiguous n_ambiguous ]
 )
 => str
 ```
@@ -87,14 +87,50 @@ ycTabulate::Render(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | l_rows | list[list[any]] / nil |  | 行数据 |
-| ?headers | list[any] / nil | nil | 表头单元格；nil 无表头 |
-| ?format | str | `"simple"` | `"plain"` / `"simple"` / `"grid"` / `"pipe"` |
-| ?align | str / list[str] | `"left"` | 单值或逐列对齐 |
-| ?floatFmt | str | `"%g"` | 浮点单元格格式 |
-| ?missingVal | str | `""` | nil 单元格的替代文本 |
-| ?maxColWidth | int / nil | nil | 单元格折行宽度；nil 不折行 |
-| ?unit | str | `"display"` | `"display"` 显示列宽或 `"char"` 码点数 |
-| ?ambiguous | int | 1 | East Asian Ambiguous 宽度（1 或 2） |
+| ?headers l_headers | list[any] / nil | nil | 表头单元格；nil 无表头 |
+| ?format t_format | str | `"simple"` | `"plain"` / `"simple"` / `"grid"` / `"pipe"` |
+| ?align g_align | str / list[str] | `"left"` | 单值或逐列对齐 |
+| ?floatFmt t_floatFmt | str | `"%g"` | 浮点单元格格式 |
+| ?missingVal t_missingVal | str | `""` | nil 单元格的替代文本 |
+| ?maxColWidth n_maxColWidth | int / nil | nil | 单元格折行宽度；nil 不折行 |
+| ?unit t_unit | str | `"display"` | `"display"` 显示列宽或 `"char"` 码点数 |
+| ?ambiguous n_ambiguous | int | 1 | East Asian Ambiguous 宽度（1 或 2） |
+
+`?format` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"plain"` | 无边框、无表头分隔线 |
+| `"simple"` | 无边框、表头下加分隔线 |
+| `"grid"` | 完整网格边框 |
+| `"pipe"` | 竖线表格 |
+
+`?align` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"left"` | 左对齐 |
+| `"right"` | 右对齐 |
+| `"center"` | 居中 |
+| `"decimal"` | 按小数点对齐 |
+
+`?unit` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"display"` | 按显示列宽计算 |
+| `"char"` | 按 UTF-8 码点数计算 |
+
+`?ambiguous` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| 1 | East Asian Ambiguous 字符按 1 列计 |
+| 2 | East Asian Ambiguous 字符按 2 列计 |
+
+其他值以 `error()` 中断。
+
+其他 `?format`、`?align`、`?unit` 值以 `error()` 中断；`?align` 为列表时长度须等于列数，否则以 `error()` 中断。
 
 **返回值**
 

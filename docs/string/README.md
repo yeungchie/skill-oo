@@ -42,7 +42,7 @@ ycString::ToPascal("html_parser")              ; => "HtmlParser"
 ```text
 ycString::Trim(
     t_s
-    [ ?chars ]
+    [ ?chars t_chars ]
 )
 => str
 ```
@@ -56,7 +56,7 @@ ycString::Trim(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_s | str |  | 输入串 |
-| ?chars | str | `" \t\r\n"` | 待剥离的字面字符集 |
+| ?chars t_chars | str | `" \t\r\n"` | 待剥离的字面字符集 |
 
 **返回值**
 
@@ -75,7 +75,7 @@ ycString::Trim("中中a中中" ?chars "中") ; => "a"
 ```text
 ycString::TrimStart(
     t_s
-    [ ?chars ]
+    [ ?chars t_chars ]
 )
 => str
 ```
@@ -89,7 +89,7 @@ ycString::TrimStart(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_s | str |  | 输入串 |
-| ?chars | str | `" \t\r\n"` | 待剥离的字面字符集 |
+| ?chars t_chars | str | `" \t\r\n"` | 待剥离的字面字符集 |
 
 **返回值**
 
@@ -106,7 +106,7 @@ ycString::TrimStart("  ab  ") ; => "ab  "
 ```text
 ycString::TrimEnd(
     t_s
-    [ ?chars ]
+    [ ?chars t_chars ]
 )
 => str
 ```
@@ -120,7 +120,7 @@ ycString::TrimEnd(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_s | str |  | 输入串 |
-| ?chars | str | `" \t\r\n"` | 待剥离的字面字符集 |
+| ?chars t_chars | str | `" \t\r\n"` | 待剥离的字面字符集 |
 
 **返回值**
 
@@ -138,10 +138,10 @@ ycString::TrimEnd("  ab  ") ; => "  ab"
 ycString::Pad(
     t_s
     n_width
-    [ ?fill ]
-    [ ?side ]
-    [ ?unit ]
-    [ ?ambiguous ]
+    [ ?fill t_fill ]
+    [ ?side t_side ]
+    [ ?unit t_unit ]
+    [ ?ambiguous n_ambiguous ]
 )
 => str
 ```
@@ -156,10 +156,33 @@ ycString::Pad(
 | --- | --- | --- | --- |
 | t_s | str |  | 输入串 |
 | n_width | int |  | 目标宽度（≥0） |
-| ?fill | str | `" "` | 填充字符（单字符） |
-| ?side | str | `"end"` | `"end"` 尾补或 `"start"` 首补 |
-| ?unit | str | `"display"` | `"display"` 显示列宽或 `"char"` 码点数 |
-| ?ambiguous | int | 1 | East Asian Ambiguous 的宽度（1 或 2） |
+| ?fill t_fill | str | `" "` | 填充字符（单字符） |
+| ?side t_side | str | `"end"` | `"end"` 尾补或 `"start"` 首补 |
+| ?unit t_unit | str | `"display"` | `"display"` 显示列宽或 `"char"` 码点数 |
+| ?ambiguous n_ambiguous | int | 1 | East Asian Ambiguous 的宽度（1 或 2） |
+
+`?side` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"end"` | 在字符串尾部补足 |
+| `"start"` | 在字符串首部补足 |
+
+`?unit` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"display"` | 按显示列宽计数 |
+| `"char"` | 按 UTF-8 码点数计数 |
+
+`?ambiguous` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| 1 | East Asian Ambiguous 字符按 1 列计 |
+| 2 | East Asian Ambiguous 字符按 2 列计 |
+
+其他 `?side`、`?unit`、`?ambiguous` 值以 `error()` 中断。
 
 **返回值**
 
@@ -184,8 +207,8 @@ ycString::Pad("a" 2 ?fill "中")
 ```text
 ycString::Width(
     t_s
-    [ ?unit ]
-    [ ?ambiguous ]
+    [ ?unit t_unit ]
+    [ ?ambiguous n_ambiguous ]
 )
 => int
 ```
@@ -199,8 +222,24 @@ ycString::Width(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_s | str |  | 输入串 |
-| ?unit | str | `"display"` | `"display"` 显示列宽或 `"char"` 码点数 |
-| ?ambiguous | int | 1 | East Asian Ambiguous 的宽度（1 或 2） |
+| ?unit t_unit | str | `"display"` | `"display"` 显示列宽或 `"char"` 码点数 |
+| ?ambiguous n_ambiguous | int | 1 | East Asian Ambiguous 的宽度（1 或 2） |
+
+`?unit` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"display"` | 按显示列宽逐码点求和 |
+| `"char"` | 按 UTF-8 码点数计数 |
+
+`?ambiguous` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| 1 | East Asian Ambiguous 字符按 1 列计 |
+| 2 | East Asian Ambiguous 字符按 2 列计 |
+
+其他 `?unit`、`?ambiguous` 值以 `error()` 中断。
 
 **返回值**
 
@@ -221,9 +260,9 @@ ycString::Width("a" ?unit "px")
 ```text
 ycString::Split(
     t_s
-    [ ?sep ]
-    [ ?regex ]
-    [ ?keepEmpty ]
+    [ ?sep t_sep ]
+    [ ?regex g_regex ]
+    [ ?keepEmpty g_keepEmpty ]
 )
 => list[str] | nil
 ```
@@ -237,9 +276,9 @@ ycString::Split(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_s | str |  | 输入串 |
-| ?sep | str | nil | 分隔符或正则模式；缺省时按空白符切分 |
-| ?regex | any | nil | 非 nil 时 `?sep` 按正则模式解释 |
-| ?keepEmpty | any | t | 非 nil 时保留空段 |
+| ?sep t_sep | str | nil | 分隔符或正则模式；缺省时按空白符切分 |
+| ?regex g_regex | any | nil | 非 nil 时 `?sep` 按正则模式解释 |
+| ?keepEmpty g_keepEmpty | any | t | 非 nil 时保留空段 |
 
 **返回值**
 
@@ -263,7 +302,7 @@ ycString::Split("a" ?sep "")
 ```text
 ycString::Join(
     l_items
-    [ ?sep ]
+    [ ?sep t_sep ]
 )
 => str
 ```
@@ -277,7 +316,7 @@ ycString::Join(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | l_items | list[str] |  | 待连接的字符串列表 |
-| ?sep | str | `""` | 分隔符 |
+| ?sep t_sep | str | `""` | 分隔符 |
 
 **返回值**
 
@@ -368,7 +407,7 @@ ycString::Replace(
     t_s
     t_old
     t_new
-    [ ?regex ]
+    [ ?regex g_regex ]
 )
 => str
 ```
@@ -384,7 +423,7 @@ ycString::Replace(
 | t_s | str |  | 输入串 |
 | t_old | str |  | 待替换文字或正则模式 |
 | t_new | str |  | 替换文字或替换模板 |
-| ?regex | any | nil | 非 nil 时 `t_old` 按正则模式解释 |
+| ?regex g_regex | any | nil | 非 nil 时 `t_old` 按正则模式解释 |
 
 **返回值**
 
@@ -409,7 +448,7 @@ ycString::Replace("a" "" "b" ?regex t)
 ycString::Count(
     t_s
     t_sub
-    [ ?regex ]
+    [ ?regex g_regex ]
 )
 => int
 ```
@@ -424,7 +463,7 @@ ycString::Count(
 | --- | --- | --- | --- |
 | t_s | str |  | 输入串 |
 | t_sub | str |  | 待计数文字或正则模式 |
-| ?regex | any | nil | 非 nil 时 `t_sub` 按正则模式解释 |
+| ?regex g_regex | any | nil | 非 nil 时 `t_sub` 按正则模式解释 |
 
 **返回值**
 
@@ -446,7 +485,7 @@ ycString::Count("a" "")
 ```text
 ycString::Escape(
     t_s
-    [ ?quote ]
+    [ ?quote g_quote ]
 )
 => str
 ```
@@ -460,7 +499,7 @@ ycString::Escape(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_s | str |  | 输入串 |
-| ?quote | any | nil | 非 nil 时以双引号包裹结果 |
+| ?quote g_quote | any | nil | 非 nil 时以双引号包裹结果 |
 
 **返回值**
 
@@ -481,7 +520,7 @@ ycString::Escape("ab" ?quote t) ; => "\"ab\""
 ```text
 ycString::Unescape(
     t_s
-    [ ?strict ]
+    [ ?strict g_strict ]
 )
 => str
 ```
@@ -495,7 +534,7 @@ ycString::Unescape(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_s | str |  | 输入串 |
-| ?strict | any | nil | 非 nil 时未知转义与悬尾反斜杠以 `error()` 中断 |
+| ?strict g_strict | any | nil | 非 nil 时未知转义与悬尾反斜杠以 `error()` 中断 |
 
 **返回值**
 
@@ -551,7 +590,7 @@ ycString::Words("  ")          ; => nil
 ```text
 ycString::JoinWords(
     l_words
-    [ ?style ]
+    [ ?style t_style ]
 )
 => str
 ```
@@ -565,7 +604,18 @@ ycString::JoinWords(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | l_words | list[str] |  | 词列表 |
-| ?style | str | `"snake"` | `"snake"`、`"kebab"`、`"camel"` 或 `"pascal"` |
+| ?style t_style | str | `"snake"` | `"snake"`、`"kebab"`、`"camel"` 或 `"pascal"` |
+
+`?style` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"snake"` | 小写下划线连接 |
+| `"kebab"` | 小写连字符连接 |
+| `"camel"` | 首词小写，后续词首字母大写 |
+| `"pascal"` | 各词首字母大写 |
+
+其他值以 `error()` 中断。
 
 **返回值**
 
@@ -587,7 +637,7 @@ ycString::JoinWords(list("a") ?style "dot")
 ```text
 ycString::Sanitize(
     t_s
-    [ ?style ]
+    [ ?style t_style ]
 )
 => str
 ```
@@ -601,7 +651,18 @@ ycString::Sanitize(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_s | str |  | 输入串 |
-| ?style | str | `"snake"` | 目标风格（同 `ycString::JoinWords`） |
+| ?style t_style | str | `"snake"` | 目标风格（同 `ycString::JoinWords`） |
+
+`?style` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"snake"` | 小写下划线连接 |
+| `"kebab"` | 小写连字符连接 |
+| `"camel"` | 首词小写，后续词首字母大写 |
+| `"pascal"` | 各词首字母大写 |
+
+其他值以 `error()` 中断。
 
 **返回值**
 

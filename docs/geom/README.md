@@ -67,11 +67,7 @@ g_a->or(g_b)->area()
 ### ycGeom::Point <sub>`function`</sub> <sub>`class`</sub>
 
 ```text
-ycGeom::Point(
-    n_x
-    n_y
-)
-ycGeom::Point(l_xy)
+ycGeom::Point(g_args ...)
 => Point
 ```
 
@@ -83,9 +79,7 @@ ycGeom::Point(l_xy)
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| n_x | num | | x 坐标 |
-| n_y | num | | y 坐标 |
-| l_xy | list[num] | | `(x y)` 坐标对 |
+| g_args | any | | 两个数值坐标，或一个 `(x y)` 坐标对 |
 
 **返回值**
 
@@ -168,7 +162,7 @@ Point->translate(
 ```text
 Point->equals(
     g_other
-    [ ?eps ]
+    [ ?eps n_eps ]
 )
 => t | nil
 ```
@@ -178,7 +172,7 @@ Point->equals(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Point | | 另一个 `Point` |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 ycGeom::Point(0 0)->equals(ycGeom::Point(1e-10 0) ?eps 1e-9)
@@ -197,17 +191,7 @@ Point->toSkill()
 ### ycGeom::Segment <sub>`function`</sub> <sub>`class`</sub>
 
 ```text
-ycGeom::Segment(
-    g_start
-    g_end
-)
-ycGeom::Segment(l_points)
-ycGeom::Segment(
-    n_x1
-    n_y1
-    n_x2
-    n_y2
-)
+ycGeom::Segment(g_args ...)
 => Segment
 ```
 
@@ -219,10 +203,7 @@ ycGeom::Segment(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_start | Point / list[num] | | 起点 |
-| g_end | Point / list[num] | | 终点 |
-| l_points | list | | 两点列表、两点坐标列表或扁平坐标 |
-| n_x1 ... n_y2 | num | | 四个端点坐标 |
+| g_args | any | | 两个 `Point`、两点坐标列表或四个端点坐标 |
 
 **返回值**
 
@@ -328,7 +309,7 @@ Segment->distanceTo(g_point)
 ```text
 Segment->contains(
     g_point
-    [ ?eps ]
+    [ ?eps n_eps ]
 )
 => t | nil
 ```
@@ -338,7 +319,7 @@ Segment->contains(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### bBox <sub>`method`</sub>
 
@@ -354,7 +335,7 @@ Segment->bBox()
 ```text
 Segment->intersection(
     g_other
-    [ ?eps ]
+    [ ?eps n_eps ]
 )
 => Point | Segment | nil
 ```
@@ -364,7 +345,7 @@ Segment->intersection(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Line / Segment | | `Line` 或 `Segment` |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### toSkill <sub>`method`</sub>
 
@@ -378,17 +359,7 @@ Segment->toSkill()
 ### ycGeom::Line <sub>`function`</sub> <sub>`class`</sub>
 
 ```text
-ycGeom::Line(
-    g_p1
-    g_p2
-)
-ycGeom::Line(l_points)
-ycGeom::Line(
-    n_x1
-    n_y1
-    n_x2
-    n_y2
-)
+ycGeom::Line(g_args ...)
 => Line
 ```
 
@@ -400,10 +371,7 @@ ycGeom::Line(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_p1 | Point / list[num] | | 点一 |
-| g_p2 | Point / list[num] | | 点二，必须与点一不同 |
-| l_points | list | | 两点列表、两点坐标列表或扁平坐标 |
-| n_x1 ... n_y2 | num | | 四个坐标 |
+| g_args | any | | 两个 `Point`、两点坐标列表或四个坐标；两点重合时以 `error()` 中断 |
 
 **返回值**
 
@@ -506,7 +474,7 @@ Line->distanceTo(g_point)
 ```text
 Line->contains(
     g_point
-    [ ?eps ]
+    [ ?eps n_eps ]
 )
 => t | nil
 ```
@@ -516,14 +484,14 @@ Line->contains(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### isParallel <sub>`method`</sub>
 
 ```text
 Line->isParallel(
     g_line
-    [ ?eps ]
+    [ ?eps n_eps ]
 )
 => t | nil
 ```
@@ -533,14 +501,14 @@ Line->isParallel(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_line | Line | | 另一条 `Line` |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### intersection <sub>`method`</sub>
 
 ```text
 Line->intersection(
     g_other
-    [ ?eps ]
+    [ ?eps n_eps ]
 )
 => Point | Segment | nil
 ```
@@ -550,7 +518,7 @@ Line->intersection(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Line / Segment | | `Line` 或 `Segment` |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### toSkill <sub>`method`</sub>
 
@@ -628,8 +596,8 @@ Polygon->area()
 
 ```text
 Polygon->perimeter(
-    [ ?includeSeams ]
-    [ ?eps ]
+    [ ?includeSeams g_includeSeams ]
+    [ ?eps n_eps ]
 )
 => float
 ```
@@ -638,8 +606,8 @@ Polygon->perimeter(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?includeSeams | t / nil | nil | t 时计入切割线；默认 nil |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?includeSeams g_includeSeams | t / nil | nil | t 时计入切割线；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### centroid <sub>`method`</sub>
 
@@ -655,8 +623,8 @@ Polygon->centroid()
 ```text
 Polygon->contains(
     g_point
-    [ ?boundary ]
-    [ ?eps ]
+    [ ?boundary t_boundary ]
+    [ ?eps n_eps ]
 )
 => t | nil
 ```
@@ -666,8 +634,17 @@ Polygon->contains(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
-| ?boundary | str | "inside" | `"inside"` 或 `"outside"`；默认 `"inside"` |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?boundary t_boundary | str | "inside" | `"inside"` 或 `"outside"`；默认 `"inside"` |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+
+`?boundary` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"inside"` | 边界上的点视为在内部 |
+| `"outside"` | 边界上的点视为在外部 |
+
+其他值以 `error()` 中断。
 
 ```lisp
 g_p = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
@@ -682,8 +659,8 @@ g_p->contains(ycGeom::Point(0 0) ?boundary "outside")
 ```text
 Polygon->onBoundary(
     g_point
-    [ ?includeSeams ]
-    [ ?eps ]
+    [ ?includeSeams g_includeSeams ]
+    [ ?eps n_eps ]
 )
 => t | nil
 ```
@@ -693,8 +670,8 @@ Polygon->onBoundary(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
-| ?includeSeams | t / nil | nil | t 时把切割线视为边界；默认 nil |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?includeSeams g_includeSeams | t / nil | nil | t 时把切割线视为边界；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### bBox <sub>`method`</sub>
 
@@ -708,7 +685,7 @@ Polygon->bBox()
 #### isClockwise <sub>`method`</sub>
 
 ```text
-Polygon->isClockwise([ ?eps ])
+Polygon->isClockwise([ ?eps n_eps ])
 => t | nil
 ```
 
@@ -716,7 +693,7 @@ Polygon->isClockwise([ ?eps ])
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### reverse <sub>`method`</sub>
 
@@ -732,11 +709,11 @@ Polygon->reverse()
 ```text
 Polygon->size(
     n_value
-    [ ?dir 'all ]
-    [ ?ratio nil ]
-    [ ?corner 'miter ]
-    [ ?miterLimit 4 ]
-    [ ?roundSegments 8 ]
+    [ ?dir g_dir ]
+    [ ?ratio g_ratio ]
+    [ ?corner g_corner ]
+    [ ?miterLimit n_miterLimit ]
+    [ ?roundSegments n_roundSegments ]
 )
 => Region
 ```
@@ -746,11 +723,34 @@ Polygon->size(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | n_value | num | | 距离或倍率 |
-| ?dir | sym / list[sym] | 'all | `'all`、`'left`、`'right`、`'up`、`'down` 或方向列表；默认 `'all` |
-| ?ratio | t / nil | nil | t 时启用倍率模式；默认 nil |
-| ?corner | sym | 'miter | `'miter`、`'round`、`'bevel`、`'none`；默认 `'miter` |
-| ?miterLimit | num / nil | 4 | miter 长度限制；默认 4 |
-| ?roundSegments | int / nil | 8 | 每 90 度圆角线段数；默认 8 |
+| ?dir g_dir | sym / list[sym] | 'all | `'all`、`'left`、`'right`、`'up`、`'down` 或方向列表；默认 `'all` |
+| ?ratio g_ratio | t / nil | nil | nil 时按绝对距离，t 时按 bBox 范围的倍率；1.0 无变化 |
+| ?corner g_corner | sym | 'miter | `'miter`、`'round`、`'bevel`、`'none`；默认 `'miter` |
+| ?miterLimit n_miterLimit | num / nil | 4 | miter 长度限制；默认 4 |
+| ?roundSegments n_roundSegments | int / nil | 8 | 每 90 度圆角线段数；默认 8 |
+
+`?dir` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'left` | 选择左侧（x 最小）方向的边 |
+| `'right` | 选择右侧（x 最大）方向的边 |
+| `'up` | 选择上方（y 最大）方向的边 |
+| `'down` | 选择下方（y 最小）方向的边 |
+| `'all` | 四个方向全部选择 |
+
+`?dir` 可传方向列表组合选择，但不能与 `'all` 混用；空列表、未知符号或非法类型以 `error()` 中断。
+
+`?corner` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'miter` | 尖角帽；超过 `?miterLimit` 时退回 bevel |
+| `'round` | 圆弧帽，段数由 `?roundSegments` 控制 |
+| `'bevel` | 斜切帽 |
+| `'none` | 不补帽，只保留边带 |
+
+其他值以 `error()` 中断。
 
 ![?dir 方向涨缩示意](img/size.svg)
 
@@ -773,8 +773,8 @@ g_sq->size(1.2 ?ratio t ?dir 'right)->bBox()
 ```text
 Polygon->or(
     g_other
-    [ ?grid ]
-    [ ?eps ]
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
 )
 => Region
 ```
@@ -784,16 +784,16 @@ Polygon->or(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Polygon / list | | 另一 `Polygon` 或点列；非法类型以 `error()` 中断 |
-| ?grid | num / nil | nil | 布尔网格；默认 nil |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### and <sub>`method`</sub>
 
 ```text
 Polygon->and(
     g_other
-    [ ?grid ]
-    [ ?eps ]
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
 )
 => Region
 ```
@@ -802,17 +802,17 @@ Polygon->and(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Polygon / list | | 另一 `Polygon` 或点列 |
-| ?grid | num / nil | nil | 布尔网格；默认 nil |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| g_other | Polygon / list | | 另一 `Polygon` 或点列；其他类型以 `error()` 中断 |
+| ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### not <sub>`method`</sub>
 
 ```text
 Polygon->not(
     g_other
-    [ ?grid ]
-    [ ?eps ]
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
 )
 => Region
 ```
@@ -821,17 +821,17 @@ Polygon->not(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Polygon / list | | 另一 `Polygon` 或点列 |
-| ?grid | num / nil | nil | 布尔网格；默认 nil |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| g_other | Polygon / list | | 另一 `Polygon` 或点列；其他类型以 `error()` 中断 |
+| ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### xor <sub>`method`</sub>
 
 ```text
 Polygon->xor(
     g_other
-    [ ?grid ]
-    [ ?eps ]
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
 )
 => Region
 ```
@@ -840,9 +840,9 @@ Polygon->xor(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Polygon / list | | 另一 `Polygon` 或点列 |
-| ?grid | num / nil | nil | 布尔网格；默认 nil |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| g_other | Polygon / list | | 另一 `Polygon` 或点列；其他类型以 `error()` 中断 |
+| ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 g_a = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
@@ -867,9 +867,9 @@ Polygon->toSkill()
 ```text
 ycGeom::Region(
     l_polygons
-    [ ?normalize ]
-    [ ?grid ]
-    [ ?eps ]
+    [ ?normalize g_normalize ]
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
 )
 => Region
 ```
@@ -883,9 +883,9 @@ ycGeom::Region(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | l_polygons | list | | Polygon 列表或点列列表；nil 表示空区域 |
-| ?normalize | t / nil | t | 是否归一化为互不重叠 |
-| ?grid | num / nil | nil | 布尔网格；只影响归一化 |
-| ?eps | num / nil | 1e-9 | 容差 |
+| ?normalize g_normalize | t / nil | t | 是否归一化为互不重叠 |
+| ?grid n_grid | num / nil | nil | 布尔网格；只影响归一化 |
+| ?eps n_eps | num / nil | 1e-9 | 容差 |
 
 **返回值**
 
@@ -925,8 +925,8 @@ Region->area()
 
 ```text
 Region->perimeter(
-    [ ?includeSeams ]
-    [ ?eps ]
+    [ ?includeSeams g_includeSeams ]
+    [ ?eps n_eps ]
 )
 => float
 ```
@@ -935,8 +935,8 @@ Region->perimeter(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?includeSeams | t / nil | nil | t 时计入切割线；默认 nil |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?includeSeams g_includeSeams | t / nil | nil | t 时计入切割线；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### centroid <sub>`method`</sub>
 
@@ -952,8 +952,8 @@ Region->centroid()
 ```text
 Region->contains(
     g_point
-    [ ?boundary ]
-    [ ?eps ]
+    [ ?boundary t_boundary ]
+    [ ?eps n_eps ]
 )
 => t | nil
 ```
@@ -963,16 +963,25 @@ Region->contains(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
-| ?boundary | str | "inside" | `"inside"` 或 `"outside"`；默认 `"inside"` |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?boundary t_boundary | str | "inside" | `"inside"` 或 `"outside"`；默认 `"inside"` |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+
+`?boundary` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"inside"` | 边界上的点视为在内部 |
+| `"outside"` | 边界上的点视为在外部 |
+
+其他值以 `error()` 中断。
 
 #### onBoundary <sub>`method`</sub>
 
 ```text
 Region->onBoundary(
     g_point
-    [ ?includeSeams ]
-    [ ?eps ]
+    [ ?includeSeams g_includeSeams ]
+    [ ?eps n_eps ]
 )
 => t | nil
 ```
@@ -982,8 +991,8 @@ Region->onBoundary(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
-| ?includeSeams | t / nil | nil | t 时计入切割线；默认 nil |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?includeSeams g_includeSeams | t / nil | nil | t 时计入切割线；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### bBox <sub>`method`</sub>
 
@@ -1008,11 +1017,11 @@ Region->isEmpty()
 ```text
 Region->size(
     n_value
-    [ ?dir 'all ]
-    [ ?ratio nil ]
-    [ ?corner 'miter ]
-    [ ?miterLimit 4 ]
-    [ ?roundSegments 8 ]
+    [ ?dir g_dir ]
+    [ ?ratio g_ratio ]
+    [ ?corner g_corner ]
+    [ ?miterLimit n_miterLimit ]
+    [ ?roundSegments n_roundSegments ]
 )
 => Region
 ```
@@ -1022,11 +1031,34 @@ Region->size(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | n_value | num | | 距离或倍率 |
-| ?dir | sym / list[sym] | 'all | 方向或方向列表；默认 `'all` |
-| ?ratio | t / nil | nil | t 时启用倍率模式；默认 nil |
-| ?corner | sym | 'miter | 拐角风格；默认 `'miter` |
-| ?miterLimit | num / nil | 4 | miter 长度限制；默认 4 |
-| ?roundSegments | int / nil | 8 | 每 90 度圆角线段数；默认 8 |
+| ?dir g_dir | sym / list[sym] | 'all | 方向或方向列表；默认 `'all` |
+| ?ratio g_ratio | t / nil | nil | nil 时按绝对距离，t 时按 bBox 范围的倍率；1.0 无变化 |
+| ?corner g_corner | sym | 'miter | 拐角风格；默认 `'miter` |
+| ?miterLimit n_miterLimit | num / nil | 4 | miter 长度限制；默认 4 |
+| ?roundSegments n_roundSegments | int / nil | 8 | 每 90 度圆角线段数；默认 8 |
+
+`?dir` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'left` | 选择左侧（x 最小）方向的边 |
+| `'right` | 选择右侧（x 最大）方向的边 |
+| `'up` | 选择上方（y 最大）方向的边 |
+| `'down` | 选择下方（y 最小）方向的边 |
+| `'all` | 四个方向全部选择 |
+
+`?dir` 可传方向列表组合选择，但不能与 `'all` 混用；空列表、未知符号或非法类型以 `error()` 中断。
+
+`?corner` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'miter` | 尖角帽；超过 `?miterLimit` 时退回 bevel |
+| `'round` | 圆弧帽，段数由 `?roundSegments` 控制 |
+| `'bevel` | 斜切帽 |
+| `'none` | 不补帽，只保留边带 |
+
+其他值以 `error()` 中断。
 
 ```lisp
 g_a = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
@@ -1040,8 +1072,8 @@ g_r->size(1)->area()
 ```text
 Region->or(
     g_other
-    [ ?grid ]
-    [ ?eps ]
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
 )
 => Region
 ```
@@ -1051,8 +1083,8 @@ Region->or(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Region | | 另一 `Region`；其他类型以 `error()` 中断 |
-| ?grid | num / nil | nil | 布尔网格；默认 nil |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
@@ -1066,8 +1098,8 @@ g_a->or(g_b)->area()
 ```text
 Region->and(
     g_other
-    [ ?grid ]
-    [ ?eps ]
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
 )
 => Region
 ```
@@ -1077,8 +1109,8 @@ Region->and(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Region | | 另一 `Region`；其他类型以 `error()` 中断 |
-| ?grid | num / nil | nil | 布尔网格；默认 nil |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
@@ -1092,8 +1124,8 @@ g_a->and(g_b)->area()
 ```text
 Region->not(
     g_other
-    [ ?grid ]
-    [ ?eps ]
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
 )
 => Region
 ```
@@ -1103,8 +1135,8 @@ Region->not(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Region | | 另一 `Region`；其他类型以 `error()` 中断 |
-| ?grid | num / nil | nil | 布尔网格；默认 nil |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
@@ -1118,8 +1150,8 @@ g_a->not(g_b)->area()
 ```text
 Region->xor(
     g_other
-    [ ?grid ]
-    [ ?eps ]
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
 )
 => Region
 ```
@@ -1129,8 +1161,8 @@ Region->xor(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Region | | 另一 `Region`；其他类型以 `error()` 中断 |
-| ?grid | num / nil | nil | 布尔网格；默认 nil |
-| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))

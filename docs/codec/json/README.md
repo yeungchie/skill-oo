@@ -43,16 +43,29 @@ t_v = ycJson::Decode(t_json)
 t_v["a"]                                            ; => (1 2.5 ycCodec::Type("True") ycCodec::Type("Null"))
 
 ; 编码（默认紧凑、键序随表；?sortKeys t 可排序）
-ycJson::Encode(t_v)                                 ; => "{\"a\":[1,2.5,true,null]}"
+ycJson::Encode(t_v)
+; => 紧凑展示（实际返回为字符串）：
+;    {"a":[1,2.5,true,null]}
 
 ; 缩进美化
 ycJson::Encode(t_v ?indent 2)
-; => "{\n  \"a\": [\n    1,\n    2.5,\n    true,\n    null\n  ]\n}"
+; => 格式化展示（实际返回为字符串）：
+;    {
+;      "a": [
+;        1,
+;        2.5,
+;        true,
+;        null
+;      ]
+;    }
 
 ; 放宽文本与逐行格式
 ycJson::Decode(t_jsonc ?format "jsonc")             ; => <table: a = 1>
 ycJson::Decode(t_jsonl ?format "jsonl")             ; => (1 <table: a = 2>)
-ycJson::Encode(list(1 "x") ?format "jsonl")          ; => "1\n\"x\"\n"
+ycJson::Encode(list(1 "x") ?format "jsonl")
+; => 逐行展示（实际返回为字符串）：
+;    1
+;    "x"
 ```
 
 ## API 参考
@@ -77,8 +90,18 @@ ycJson::Decode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_str | str | | 输入文本 |
-| ?format | str | "json" | `"json"`、`"jsonc"` 或 `"jsonl"`；其他值以 `error()` 中断 |
-| ?maxDepth | int | 800 | 最大嵌套深度（≥1；超限以 `error()` 中断） |
+| ?format t_format | str | "json" | `"json"`、`"jsonc"` 或 `"jsonl"`；其他值以 `error()` 中断 |
+| ?maxDepth n_max | int | 800 | 最大嵌套深度（≥1；超限以 `error()` 中断） |
+
+`?format` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"json"` | 严格单文档 JSON |
+| `"jsonc"` | 允许注释与数组/对象尾逗号 |
+| `"jsonl"` | 每个非空行是一个严格 JSON 文档 |
+
+其他值以 `error()` 中断。
 
 **返回值**
 
@@ -150,13 +173,30 @@ ycJson::Encode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_val | any | | 待编码值；`"jsonl"` 时为列表 |
-| ?format | str | "json" | `"json"`/`"jsonc"` 或 `"jsonl"`；其他值以 `error()` 中断 |
-| ?indent | int | nil | 缩进空格数；正整数启用多行美化，其余等价紧凑输出 |
-| ?sortKeys | t / nil | nil | 对象键是否按字符串升序输出；默认随表序 |
-| ?strict | t / nil | nil | t 时对象键必须为字符串，符号/整数键以 `error()` 中断 |
-| ?nilAs | str | "array" | `nil` 的输出形式：`"array"`（`[]`）或 `"false"` |
-| ?finalNewline | t / nil | t | `"jsonl"` 非空输出末尾是否补换行 |
-| ?maxDepth | int | 800 | 最大嵌套深度（≥1；超限以 `error()` 中断） |
+| ?format t_format | str | "json" | `"json"`/`"jsonc"` 或 `"jsonl"`；其他值以 `error()` 中断 |
+| ?indent n_indent | int | nil | 缩进空格数；正整数启用多行美化，其余等价紧凑输出 |
+| ?sortKeys g_sort | t / nil | nil | 对象键是否按字符串升序输出；默认随表序 |
+| ?strict g_strict | t / nil | nil | t 时对象键必须为字符串，符号/整数键以 `error()` 中断 |
+| ?nilAs t_nilAs | str | "array" | `nil` 的输出形式：`"array"`（`[]`）或 `"false"` |
+| ?finalNewline g_finalNewline | t / nil | t | `"jsonl"` 非空输出末尾是否补换行 |
+| ?maxDepth n_max | int | 800 | 最大嵌套深度（≥1；超限以 `error()` 中断） |
+
+`?format` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"json"` | 单值紧凑或缩进输出 |
+| `"jsonc"` | 与 `"json"` 相同的单值输出 |
+| `"jsonl"` | 输入按列表逐行输出 |
+
+`?nilAs` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"array"` | `nil` 输出 `[]` |
+| `"false"` | `nil` 输出 `false` |
+
+其他 `?format`/`?nilAs` 值以 `error()` 中断。
 
 **返回值**
 
@@ -172,8 +212,14 @@ ycJson::Encode(list(nil))                   ; => "[[]]"
 ycJson::Encode('foo)
 ; *Error* ycJson::Encode: cannot dump value of type symbol
 
-ycJson::Encode(list(1 2) ?format "jsonl")           ; => "1\n2\n"
-ycJson::Encode(list(ycCodec::Null) ?format "jsonl")  ; => "null\n"
+ycJson::Encode(list(1 2) ?format "jsonl")
+; => 逐行展示（实际返回为字符串）：
+;    1
+;    2
+
+ycJson::Encode(list(ycCodec::Null) ?format "jsonl")
+; => 逐行展示（实际返回为字符串）：
+;    null
 ```
 
 ## 类型映射
@@ -202,7 +248,7 @@ t_v["nope"] == ycCodec::Missing  ; 键不存在
 ## 边界与限制
 
 + 嵌套深度默认上限 800，可用 `?maxDepth` 调整（≥1）；超限以 `error()` 中断（消息含 `nesting too deep`）。解码约 900 层、编码约 1150 层触语言递归栈上界（简单递归语言栈约 8000–9000 帧；编解码每层耗多帧），默认值留安全余量；超过语言栈能力时由运行环境以栈溢出错误中断（可捕获）。
-+ `?nilAs "false"` 有损：`nil` 编码为 `false` 后解码得 `ycCodec::False`；默认模式同一表内 `"1"` 与 `1` 会坍缩为同一输出键（`?strict t` 可规避）。
++ `?nilAs "false"` 有损：`nil` 编码为 `false` 后解码得 `ycCodec::False`。不同键（如字符串 `"1"` 与整数 `1`）转为同一文本时不会合并，而是以 `error()` 中断；`?strict t` 直接拒绝非字符串键。
 + 整数字面量在 32 位范围内解码为 fixnum，超出为 flonum；编码 fixnum 为精确十进制，编码 flonum 为最短可回环形式（整数值保留一位小数，如 `1.0`）。
 + 非有限浮点（无穷、NaN）不可编码，以 `error()` 中断。
 + `\u0000`（NUL）无法保存在字符串中，解码时被丢弃。

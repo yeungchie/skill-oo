@@ -6,8 +6,7 @@ Cadence SKILL++ 的 CSV/TSV 编解码库：RFC 4180 风格字段规则与带可�
 
 ## 概要
 
-+ 解码入口：`Decode()`；编码入口：`Encode()`；`?format` 选 `"csv"`（默认）或 `"tsv"`。
-+ 解码结果统一为不可变对象 `ycCsv::Table`；编码输入必须是 `ycCsv::Table`。
++ 解码入口 `Decode()` 与编码入口 `Encode()` 使用 `?format` 选择 `"csv"`（默认）或 `"tsv"`；解码结果为不可变 `ycCsv::Table`，编码输入必须是 `ycCsv::Table`。
 + 字段一律为字符串，不做数字/布尔推断；不 trim、不排序、不做 Unicode 规范化。
 + 支持引号内分隔符与换行、双引号转义、LF/CRLF/CR 行尾、可选表头、BOM 剥离与自定义单字节分隔符。
 + 表格行列均 1-based；无表头时可按索引访问，有表头时另可按列名取值。
@@ -67,9 +66,13 @@ ycCsv::Decode(t_csv_tsv ?format "tsv")->row(1)      ; => ("a" "b")
 ycCsv::Decode(t_csv_semicolon ?delimiter ";")->row(1) ; => ("x" "y")
 
 ; 编码
-ycCsv::Encode(ycCsv::Table(list(list("a,b" "c"))))  ; => "\"a,b\",c\n"
+ycCsv::Encode(ycCsv::Table(list(list("a,b" "c"))))
+; => 编码展示（实际返回为字符串）：
+;    "a,b",c
+
 ycCsv::Encode(ycCsv::Table(list(list("a" "b"))) ?format "tsv")
-; => "a\tb\n"
+; => 编码展示（实际返回为字符串，字段间为制表符）：
+;    a	b
 ```
 
 ## API 参考
@@ -93,7 +96,7 @@ ycCsv::Table(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | l_rows | list[list[str]] | | 数据行 |
-| ?header | list[str] / nil | nil | 可选列名列表；`nil` 表示无表头 |
+| ?header l_header | list[str] / nil | nil | 可选列名列表；`nil` 表示无表头 |
 
 **返回值**
 
@@ -162,9 +165,9 @@ row(g_row)
 
 返回第 `g_row` 行（1-based）。行号非整数或越界时以 `error()` 中断。
 
-| 参数 | 说明 |
-| --- | --- |
-| g_row | 行号（1-based） |
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_row | int | | 行号（1-based） |
 
 #### cell <sub>`method`</sub>
 
@@ -178,10 +181,10 @@ cell(
 
 返回第 `g_row` 行第 `g_col` 列的值（1-based）。短行缺位返回 `ycCodec::Missing`；行/列非整数或越界时以 `error()` 中断。
 
-| 参数 | 说明 |
-| --- | --- |
-| g_row | 行号（1-based） |
-| g_col | 列号（1-based） |
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_row | int | | 行号（1-based） |
+| g_col | int | | 列号（1-based） |
 
 #### columnAt <sub>`method`</sub>
 
@@ -192,9 +195,9 @@ columnAt(g_col)
 
 按列号返回整列值（1-based）；短行缺位为 `ycCodec::Missing`。列号非整数或越界时以 `error()` 中断。
 
-| 参数 | 说明 |
-| --- | --- |
-| g_col | 列号（1-based） |
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_col | int | | 列号（1-based） |
 
 #### value <sub>`method`</sub>
 
@@ -208,10 +211,10 @@ value(
 
 按列名取第 `g_row` 行的值（1-based）。无表头、列名未知、行号非整数或越界时以 `error()` 中断；短行缺位返回 `ycCodec::Missing`。
 
-| 参数 | 说明 |
-| --- | --- |
-| g_row | 行号（1-based） |
-| g_name | 列名（字符串） |
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_row | int | | 行号（1-based） |
+| g_name | str | | 列名 |
 
 #### render <sub>`method`</sub>
 
@@ -231,12 +234,47 @@ render(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?format | str | "simple" | `plain` / `simple` / `grid` / `pipe` |
-| ?align | str / list | "left" | 单列或逐列对齐 |
-| ?missingVal | str | "" | 缺失单元格替代文本 |
-| ?maxColWidth | int / nil | nil | 单元格折行宽度 |
-| ?unit | str | "display" | `display` 或 `char` |
-| ?ambiguous | int | 1 | East Asian Ambiguous 宽度 |
+| ?format t_format | str | "simple" | `plain` / `simple` / `grid` / `pipe` |
+| ?align g_align | str / list | "left" | 单列或逐列对齐 |
+| ?missingVal t_missingVal | str | "" | 缺失单元格替代文本 |
+| ?maxColWidth n_max | int / nil | nil | 单元格折行宽度 |
+| ?unit t_unit | str | "display" | `display` 或 `char` |
+| ?ambiguous n_amb | int | 1 | East Asian Ambiguous 宽度 |
+
+`?format` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"plain"` | 无边框、无分隔线的纯文本 |
+| `"simple"` | 表头下划线分隔 |
+| `"grid"` | 完整网格边框 |
+| `"pipe"` | Markdown 管道表格 |
+
+`?align` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"left"` | 左对齐 |
+| `"right"` | 右对齐 |
+| `"center"` | 居中 |
+| `"decimal"` | 按小数点对齐 |
+
+`?unit` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"display"` | 按显示列宽计算 |
+| `"char"` | 按 UTF-8 码点数计算 |
+
+`?ambiguous` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| 1 | East Asian Ambiguous 字符按 1 列计 |
+| 2 | East Asian Ambiguous 字符按 2 列计 |
+
+其他值以 `error()` 中断。
+
 
 `t_csv` 的值如下所示：
 
@@ -273,9 +311,9 @@ print(
 
 `print` 使用与 `render` 相同的选项渲染表格并输出到 stdout，末尾补一个换行；空表不输出。需要先加载 `ycTabulate`，否则以 `error()` 中断。
 
-| 参数 | 类型 | 说明 |
-| --- | --- | --- |
-| l_args ... | any | 原样透传给 `render` 的实参（`?format`、`?align`、`?missingVal`、`?maxColWidth`、`?unit`、`?ambiguous`，可全部省略）；详见上面的 `render` 条目。 |
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| l_args ... | any | | 原样透传给 `render` 的实参（`?format`、`?align`、`?missingVal`、`?maxColWidth`、`?unit`、`?ambiguous`，可全部省略）；详见上面的 `render` 条目。 |
 
 **例程**
 
@@ -317,11 +355,20 @@ ycCsv::Decode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_str | str | | 输入文本 |
-| ?format | str | "csv" | `"csv"` 或 `"tsv"`；其他值以 `error()` 中断 |
-| ?header | t / list[str] / nil | nil | `t` 首行作表头（`?skipEmpty t` 时为首个非空行）；列表使用给定列名；`nil` 无表头 |
-| ?delimiter | str / nil | nil | 单字节分隔符覆盖；默认逗号或制表符 |
-| ?skipEmpty | t / nil | nil | t 时跳过单空字段记录 |
-| ?stripBom | t / nil | t | t 时剥离开头 UTF-8 BOM |
+| ?format t_format | str | "csv" | `"csv"` 或 `"tsv"`；其他值以 `error()` 中断 |
+| ?header l_header | t / list[str] / nil | nil | `t` 首行作表头（`?skipEmpty t` 时为首个非空行）；列表使用给定列名；`nil` 无表头 |
+| ?delimiter t_delimiter | str / nil | nil | 单字节分隔符覆盖；默认逗号或制表符 |
+| ?skipEmpty g_skipEmpty | t / nil | nil | t 时跳过单空字段记录 |
+| ?stripBom g_stripBom | t / nil | t | t 时剥离开头 UTF-8 BOM |
+
+`?format` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"csv"` | 逗号分隔 |
+| `"tsv"` | 制表符分隔 |
+
+其他值以 `error()` 中断。
 
 **返回值**
 
@@ -396,11 +443,28 @@ ycCsv::Encode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_table | Table | | 待编码表格 |
-| ?format | str | "csv" | `"csv"` 或 `"tsv"`；其他值以 `error()` 中断 |
-| ?delimiter | str / nil | nil | 单字节分隔符覆盖；默认逗号或制表符 |
-| ?eol | str | "\n" | 行尾 `"\n"` 或 `"\r\n"` |
-| ?quoteAll | t / nil | nil | t 时所有字段加引号 |
-| ?finalNewline | t / nil | t | 非空输出末尾是否补行尾 |
+| ?format t_format | str | "csv" | `"csv"` 或 `"tsv"`；其他值以 `error()` 中断 |
+| ?delimiter t_delimiter | str / nil | nil | 单字节分隔符覆盖；默认逗号或制表符 |
+| ?eol t_eol | str | "\n" | 行尾 `"\n"` 或 `"\r\n"` |
+| ?quoteAll g_quoteAll | t / nil | nil | t 时所有字段加引号 |
+| ?finalNewline g_finalNewline | t / nil | t | 非空输出末尾是否补行尾 |
+
+`?format` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"csv"` | 逗号分隔 |
+| `"tsv"` | 制表符分隔 |
+
+其他值以 `error()` 中断。
+`?eol` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"\n"` | 以 LF 结束每行 |
+| `"\r\n"` | 以 CRLF 结束每行 |
+
+其他值以 `error()` 中断。
 
 **返回值**
 
@@ -409,22 +473,34 @@ ycCsv::Encode(
 **例程**
 
 ```lisp
-ycCsv::Encode(ycCsv::Table(list(list("a" "b"))))     ; => "a,b\n"
-ycCsv::Encode(ycCsv::Table(list(list("a,b" "c"))))   ; => "\"a,b\",c\n"
+ycCsv::Encode(ycCsv::Table(list(list("a" "b"))))
+; => 编码展示（实际返回为字符串）：
+;    a,b
+
+ycCsv::Encode(ycCsv::Table(list(list("a,b" "c"))))
+; => 编码展示（实际返回为字符串）：
+;    "a,b",c
+
 ycCsv::Encode(ycCsv::Table(list(list("a" "b"))) ?format "tsv")
-; => "a\tb\n"
+; => 编码展示（实际返回为字符串，字段间为制表符）：
+;    a	b
 
 ycCsv::Encode(ycCsv::Table(list(list("1" "2")) ?header list("x" "y")))
-; => "x,y\n1,2\n"
+; => 编码展示（实际返回为字符串）：
+;    x,y
+;    1,2
 
 ycCsv::Encode(ycCsv::Table(list(list("a" "b"))) ?quoteAll t)
-; => "\"a\",\"b\"\n"
+; => 编码展示（实际返回为字符串）：
+;    "a","b"
 
 ycCsv::Encode(ycCsv::Table(list(list("a" "b"))) ?finalNewline nil)
-; => "a,b"
+; => 编码展示（实际返回为字符串，结尾无换行）：
+;    a,b
 
 ycCsv::Encode(ycCsv::Table(list(list(""))) ?finalNewline nil)
-; => "\"\""
+; => 编码展示（实际返回为字符串）：
+;    ""
 
 ycCsv::Encode(nil)
 ; *Error* ycCsv::Encode: expects a ycCsv::Table

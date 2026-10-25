@@ -11,7 +11,7 @@ Cadence SKILL++ 的正则表达式库：模块级自由函数与 `Compile()` 编
 - 捕获组数不设上限。普通匹配、非空 `finditer`/`findall` 与可批量导出的零宽匹配不受 65535 字节偏移限制；复杂数字组引用（含字符类/`\g`/`\k`）或混合非空零宽模式无法安全批量，回退扫描仍以 65535 字节为上限。
 - 模板（`t_repl`/`expand`）按引擎方言展开：`\1`~`\9` 反向引用；`&`/`\0` 整体匹配；带编译对象时 `\{n}` 引用任意组，第 10 组以上必须用此形式；`\n` 是字面 `n`，换行请写真实换行字符；其他形式按字面处理。
 - flags 以关键字 `?flags` 传入（符号或字符串，如 `'I` 或 `"imsx"`）；`Split` 默认切分全部、`?first t` 只切首处；`Sub`/`Subn` 默认替换首处、`?all t` 替换全部。详见「flags 参数」。
-- 各自由函数的 `g_pat` 可传模式串或已编译 `Pattern`；传 `Pattern` 时直接复用、不重编译（与 `?flags` 同用会报错）。
+- 各自由函数的 `g_pat` 可传模式串或已编译 `Pattern`；传 `Pattern` 时直接复用、不重编译（与 `?flags` 同用会以 `error()` 中断）。
 - pattern 与模板中的反斜杠在 SKILL 源字符串中写作两字符（如 `"\\d+"`、`"\\1"`）。
 
 ## 快速上手
@@ -417,7 +417,7 @@ ycRegEx::GetRecursionLimit()
 
 **描述**
 
-返回 PCRE 匹配算法当前的最大递归深度（进程级设置），默认 `10000000`。修改后影响后续所有匹配。
+返回正则匹配引擎当前的最大递归深度（进程级设置），默认 `10000000`。修改后影响后续所有匹配。
 
 **参数**
 
@@ -442,7 +442,7 @@ ycRegEx::SetRecursionLimit(n_limit)
 
 **描述**
 
-设置 PCRE 匹配算法的最大递归深度（进程级设置）。非整数参数以 `error()` 中断。
+设置正则匹配引擎的最大递归深度（进程级设置）。非整数参数以 `error()` 中断。
 
 **参数**
 
@@ -568,6 +568,38 @@ p->fullmatch("123")   ; => Matched
 p->fullmatch("123a")  ; => nil
 ```
 
+##### partialp <sub>`method`</sub>
+
+```text
+p->partialp(
+    t_subj
+    [ ?execOpts g_execOpts ]
+)
+=> t | nil
+```
+
+**描述**
+
+判断 `t_subj` 是否为该模式的部分匹配或完整匹配；语义同 `Partialp`，不产生 `Matched`。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| t_subj | str | 被处理字符串 |
+| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+
+**返回值**
+
+`t | nil` — 主题串可完成该模式（含完整匹配）为 `t`，否则为 `nil`。
+
+**例程**
+
+```lisp
+ycRegEx::Compile("ab")->partialp("a")   ; => t
+ycRegEx::Compile("ab")->partialp("ac")  ; => nil
+```
+
 #### 查找全部
 
 ##### findall <sub>`method`</sub>
@@ -634,36 +666,6 @@ p = ycRegEx::Compile("\\d+")
 length(p->finditer("a1b22"))  ; => 2
 ```
 
-#### 拆分
-
-##### partialp <sub>`method`</sub>
-
-```text
-p->partialp(
-    t_subj
-    [ ?execOpts g_execOpts ]
-)
-=> t | nil
-```
-
-**描述**
-
-判断 `t_subj` 是否为该模式的部分匹配或完整匹配；语义同 `Partialp`，不产生 `Matched`。
-
-**参数**
-
-| 名称 | 类型 | 说明 |
-| --- | --- | --- |
-| t_subj | str | 被处理字符串 |
-| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
-
-**例程**
-
-```lisp
-ycRegEx::Compile("ab")->partialp("a")   ; => t
-ycRegEx::Compile("ab")->partialp("ac")  ; => nil
-```
-
 ##### split <sub>`method`</sub>
 
 ```text
@@ -685,7 +687,7 @@ p->split(
 | --- | --- | --- | --- |
 | t_subj | str |  | 被处理字符串 |
 | ?first g_first | t / nil | nil | t 时只切首处，否则切分全部 |
-| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -724,7 +726,7 @@ p->sub(
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
 | ?all g_all | t / nil | nil | t 时处理全部匹配，否则只处理首处 |
-| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -761,7 +763,7 @@ p->subn(
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
 | ?all g_all | t / nil | nil | t 时处理全部匹配，否则只处理首处 |
-| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -786,7 +788,7 @@ p->groups()
 
 **描述**
 
-捕获组数；不设自设上限。
+捕获组数；不设上限。
 
 **参数**
 
@@ -831,7 +833,7 @@ ycRegEx::Compile("\\d+")->pattern()  ; => "\\d+"
 
 **描述**
 
-匹配命中后返回的对象；`span`/`start`/`end` 返回字节位。
+匹配命中后返回的对象；`span`/`start`/`end` 返回字节位。方法一律经 `->` 调用。
 
 #### 取组
 
@@ -839,7 +841,7 @@ ycRegEx::Compile("\\d+")->pattern()  ; => "\\d+"
 
 ```text
 m->group()
-m->group(n_index ...)
+m->group([ n_index ... ])
 => str | list[str]
 ```
 
@@ -866,6 +868,32 @@ m->group(1)      ; => "10"
 m->group(1 2)    ; => ("10" "20")
 m->group("x")    ; => 以 error() 中断（按名取组不提供）
 m->groupdict()   ; => 以 error() 中断（预留不提供）
+```
+
+##### groupdict <sub>`method`</sub>
+
+```text
+m->groupdict()
+=> never
+```
+
+**描述**
+
+预留的命名组字典接口，当前不提供；调用即以 `error()` 中断。
+
+**参数**
+
+无
+
+**返回值**
+
+`never` — 不会正常返回，始终以 `error()` 中断。
+
+**例程**
+
+```lisp
+ycRegEx::Search("(?<year>\\d+)", "2026")->groupdict()
+; *Error* ycRegEx::Matched->groupdict: not supported yet (reserved)
 ```
 
 ##### groups <sub>`method`</sub>

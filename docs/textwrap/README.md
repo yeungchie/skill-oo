@@ -27,9 +27,20 @@ ycTextwrap::Wrap("abcdefgh" ?width 4)                       ; => ("abcd" "efgh")
 ycTextwrap::Wrap("one two three four" ?width 7 ?maxLines 2) ; => ("one two" "thre...")
 
 ; 拼回、缩进与截断
-ycTextwrap::Fill("one two three" ?width 7)                  ; => "one two\nthree"
-ycTextwrap::Dedent("  a\n    b\n  c")                       ; => "a\n  b\nc"
-ycTextwrap::Indent("a\n b" ?prefix "- ")                    ; => "- a\n-  b"
+ycTextwrap::Fill("one two three" ?width 7)
+; => 实际返回为字符串：
+;    one two
+;    three
+ycTextwrap::Dedent("  a\n    b\n  c")
+; => 实际返回为字符串：
+;    a
+;      b
+;    c
+ycTextwrap::Indent("a\n b" ?prefix "- ")
+; => 实际返回为字符串：
+;    - a
+;
+;    -  b
 ycTextwrap::Shorten("hello world" 8)                        ; => "hello..."
 ```
 
@@ -40,15 +51,15 @@ ycTextwrap::Shorten("hello world" 8)                        ; => "hello..."
 ```text
 ycTextwrap::Wrap(
     t_text
-    [ ?width 70 ]
-    [ ?initialIndent "" ]
-    [ ?subsequentIndent "" ]
-    [ ?breakLongWords t ]
-    [ ?breakOnHyphens t ]
-    [ ?maxLines nil ]
-    [ ?placeholder "..." ]
-    [ ?unit "display" ]
-    [ ?ambiguous 1 ]
+    [ ?width n_width ]
+    [ ?initialIndent t_initialIndent ]
+    [ ?subsequentIndent t_subsequentIndent ]
+    [ ?breakLongWords g_breakLongWords ]
+    [ ?breakOnHyphens g_breakOnHyphens ]
+    [ ?maxLines n_maxLines ]
+    [ ?placeholder t_placeholder ]
+    [ ?unit t_unit ]
+    [ ?ambiguous n_ambiguous ]
 )
 => list[str] | nil
 ```
@@ -57,22 +68,38 @@ ycTextwrap::Wrap(
 
 按目标宽度把文本折成行列表。物理换行（`\n`、`\r\n`、`\r`）是硬边界，每个逻辑行独立折行；行内空白连续段折叠为单空格并去两端。首行内容加 `?initialIndent`，其余内容行加 `?subsequentIndent`；显式空行输出为 `""`，不加缩进。
 
-超宽词在 `?breakLongWords` 非 nil 时按码点边界硬切，不拆多字节字符；`?breakOnHyphens` 非 nil 时优先在可用宽度内最后一个连字符后断开。`?maxLines` 非 nil 且输出超限时只保留前 N 行，末行按占位符宽度截断并追加 `?placeholder`；占位符本身宽于行宽时按宽度截断。空文本或仅空白的单行输入返回 `nil`。
+超宽词在 `?breakLongWords` 非 nil 时按码点边界硬切，不拆多字节字符；`?breakOnHyphens` 非 nil 时优先在可用宽度内最后一个连字符后断开。`?maxLines` 非 nil 且输出超限时只保留前 N 行，末行按占位符宽度截断并追加 `?placeholder`；占位符本身宽于行宽时按宽度截断。空文本或仅空白的单行输入返回 `nil`；宽度、行数、占位符等选项非法时以 `error()` 中断。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_text | str |  | 输入文本 |
-| ?width | int | 70 | 目标行宽（含缩进，≥ 1） |
-| ?initialIndent | str | `""` | 首行缩进 |
-| ?subsequentIndent | str | `""` | 其余内容行缩进 |
-| ?breakLongWords | t / nil | t | 非 nil 时硬切超宽词 |
-| ?breakOnHyphens | t / nil | t | 非 nil 时优先在连字符后断 |
-| ?maxLines | int / nil | nil | 最大输出行数；nil 不限 |
-| ?placeholder | str | `"..."` | 截断占位符 |
-| ?unit | str | `"display"` | `"display"` 显示列宽或 `"char"` 码点数 |
-| ?ambiguous | int | 1 | East Asian Ambiguous 宽度（1 或 2） |
+| ?width n_width | int | 70 | 目标行宽（含缩进，≥ 1） |
+| ?initialIndent t_initialIndent | str | `""` | 首行缩进 |
+| ?subsequentIndent t_subsequentIndent | str | `""` | 其余内容行缩进 |
+| ?breakLongWords g_breakLongWords | t / nil | t | 非 nil 时硬切超宽词 |
+| ?breakOnHyphens g_breakOnHyphens | t / nil | t | 非 nil 时优先在连字符后断 |
+| ?maxLines n_maxLines | int / nil | nil | 最大输出行数；nil 不限 |
+| ?placeholder t_placeholder | str | `"..."` | 截断占位符 |
+| ?unit t_unit | str | `"display"` | `"display"` 显示列宽或 `"char"` 码点数 |
+| ?ambiguous n_ambiguous | int | 1 | East Asian Ambiguous 宽度（1 或 2） |
+
+`?unit` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"display"` | 按显示列宽计算 |
+| `"char"` | 按 UTF-8 码点数计算 |
+
+`?ambiguous` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| 1 | East Asian Ambiguous 字符按 1 列计 |
+| 2 | East Asian Ambiguous 字符按 2 列计 |
+
+其他 `?unit`、`?ambiguous` 值以 `error()` 中断。
 
 **返回值**
 
@@ -98,16 +125,16 @@ ycTextwrap::Wrap("a" ?width 0)
 ```text
 ycTextwrap::Fill(
     t_text
-    [ ?width 70 ]
-    [ ?initialIndent "" ]
-    [ ?subsequentIndent "" ]
-    [ ?breakLongWords t ]
-    [ ?breakOnHyphens t ]
-    [ ?maxLines nil ]
-    [ ?placeholder "..." ]
-    [ ?unit "display" ]
-    [ ?ambiguous 1 ]
-    [ ?sep "\n" ]
+    [ ?width n_width ]
+    [ ?initialIndent t_initialIndent ]
+    [ ?subsequentIndent t_subsequentIndent ]
+    [ ?breakLongWords g_breakLongWords ]
+    [ ?breakOnHyphens g_breakOnHyphens ]
+    [ ?maxLines n_maxLines ]
+    [ ?placeholder t_placeholder ]
+    [ ?unit t_unit ]
+    [ ?ambiguous n_ambiguous ]
+    [ ?sep t_sep ]
 )
 => str
 ```
@@ -121,16 +148,32 @@ ycTextwrap::Fill(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_text | str |  | 输入文本 |
-| ?width | int | 70 | 目标行宽 |
-| ?initialIndent | str | `""` | 首行缩进 |
-| ?subsequentIndent | str | `""` | 其余内容行缩进 |
-| ?breakLongWords | t / nil | t | 非 nil 时硬切超宽词 |
-| ?breakOnHyphens | t / nil | t | 非 nil 时优先在连字符后断 |
-| ?maxLines | int / nil | nil | 最大输出行数 |
-| ?placeholder | str | `"..."` | 截断占位符 |
-| ?unit | str | `"display"` | 宽度单位 |
-| ?ambiguous | int | 1 | East Asian Ambiguous 宽度 |
-| ?sep | str | `"\n"` | 行分隔符 |
+| ?width n_width | int | 70 | 目标行宽 |
+| ?initialIndent t_initialIndent | str | `""` | 首行缩进 |
+| ?subsequentIndent t_subsequentIndent | str | `""` | 其余内容行缩进 |
+| ?breakLongWords g_breakLongWords | t / nil | t | 非 nil 时硬切超宽词 |
+| ?breakOnHyphens g_breakOnHyphens | t / nil | t | 非 nil 时优先在连字符后断 |
+| ?maxLines n_maxLines | int / nil | nil | 最大输出行数 |
+| ?placeholder t_placeholder | str | `"..."` | 截断占位符 |
+| ?unit t_unit | str | `"display"` | 宽度单位 |
+| ?ambiguous n_ambiguous | int | 1 | East Asian Ambiguous 宽度 |
+| ?sep t_sep | str | `"\n"` | 行分隔符 |
+
+`?unit` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"display"` | 按显示列宽计算 |
+| `"char"` | 按 UTF-8 码点数计算 |
+
+`?ambiguous` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| 1 | East Asian Ambiguous 字符按 1 列计 |
+| 2 | East Asian Ambiguous 字符按 2 列计 |
+
+其他 `?unit`、`?ambiguous` 值以 `error()` 中断。
 
 **返回值**
 
@@ -139,8 +182,13 @@ ycTextwrap::Fill(
 **例程**
 
 ```lisp
-ycTextwrap::Fill("one two three" ?width 7)       ; => "one two\nthree"
-ycTextwrap::Fill("one two three" ?width 7 ?sep "|") ; => "one two|three"
+ycTextwrap::Fill("one two three" ?width 7)
+; => 实际返回为字符串：
+;    one two
+;    three
+ycTextwrap::Fill("one two three" ?width 7 ?sep "|")
+; => 实际返回为字符串：
+;    one two|three
 ycTextwrap::Fill("" ?width 7)                    ; => ""
 ```
 
@@ -168,9 +216,20 @@ ycTextwrap::Dedent(t_text)
 **例程**
 
 ```lisp
-ycTextwrap::Dedent("  a\n    b\n  c")  ; => "a\n  b\nc"
-ycTextwrap::Dedent(" a\n  b")           ; => "a\n b"
-ycTextwrap::Dedent("  a\n\n  b")        ; => "a\n\nb"
+ycTextwrap::Dedent("  a\n    b\n  c")
+; => 实际返回为字符串：
+;    a
+;      b
+;    c
+ycTextwrap::Dedent(" a\n  b")
+; => 实际返回为字符串：
+;    a
+;     b
+ycTextwrap::Dedent("  a\n\n  b")
+; => 实际返回为字符串：
+;    a
+;
+;    b
 ```
 
 ### ycTextwrap::Indent <sub>`function`</sub>
@@ -178,7 +237,7 @@ ycTextwrap::Dedent("  a\n\n  b")        ; => "a\n\nb"
 ```text
 ycTextwrap::Indent(
     t_text
-    [ ?prefix "  " ]
+    [ ?prefix t_prefix ]
 )
 => str
 ```
@@ -192,7 +251,7 @@ ycTextwrap::Indent(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_text | str |  | 输入文本 |
-| ?prefix | str | `"  "` | 行前缀 |
+| ?prefix t_prefix | str | `"  "` | 行前缀 |
 
 **返回值**
 
@@ -201,8 +260,15 @@ ycTextwrap::Indent(
 **例程**
 
 ```lisp
-ycTextwrap::Indent("a\n b")             ; => "  a\n   b"
-ycTextwrap::Indent("a\n\n b" ?prefix "- ") ; => "- a\n\n-  b"
+ycTextwrap::Indent("a\n b")
+; => 实际返回为字符串：
+;      a
+;       b
+ycTextwrap::Indent("a\n\n b" ?prefix "- ")
+; => 实际返回为字符串：
+;    - a
+;
+;    -  b
 ```
 
 ### ycTextwrap::Shorten <sub>`function`</sub>
@@ -211,9 +277,9 @@ ycTextwrap::Indent("a\n\n b" ?prefix "- ") ; => "- a\n\n-  b"
 ycTextwrap::Shorten(
     t_text
     n_width
-    [ ?placeholder "..." ]
-    [ ?unit "display" ]
-    [ ?ambiguous 1 ]
+    [ ?placeholder t_placeholder ]
+    [ ?unit t_unit ]
+    [ ?ambiguous n_ambiguous ]
 )
 => str
 ```
@@ -228,9 +294,25 @@ ycTextwrap::Shorten(
 | --- | --- | --- | --- |
 | t_text | str |  | 输入文本 |
 | n_width | int |  | 目标宽度（≥ 1） |
-| ?placeholder | str | `"..."` | 占位符 |
-| ?unit | str | `"display"` | `"display"` 显示列宽或 `"char"` 码点数 |
-| ?ambiguous | int | 1 | East Asian Ambiguous 宽度（1 或 2） |
+| ?placeholder t_placeholder | str | `"..."` | 占位符 |
+| ?unit t_unit | str | `"display"` | `"display"` 显示列宽或 `"char"` 码点数 |
+| ?ambiguous n_ambiguous | int | 1 | East Asian Ambiguous 宽度（1 或 2） |
+
+`?unit` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"display"` | 按显示列宽计算 |
+| `"char"` | 按 UTF-8 码点数计算 |
+
+`?ambiguous` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| 1 | East Asian Ambiguous 字符按 1 列计 |
+| 2 | East Asian Ambiguous 字符按 2 列计 |
+
+其他 `?unit`、`?ambiguous` 值以 `error()` 中断。
 
 **返回值**
 

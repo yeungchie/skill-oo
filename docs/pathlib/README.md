@@ -6,9 +6,9 @@ Cadence SKILL++ 的路径处理库：纯路径操作与文件系统操作。
 
 ## 概要
 
-+ 方法名采用 lowerCamelCase 命名（如 `withSuffix`、`relativeTo`、`expandUser`）。
++ 方法名采用小驼峰命名（如 `withSuffix`、`relativeTo`、`expandUser`）。
 + 纯路径操作按词法解析，不访问磁盘；`..` 部件保留不折叠，仅 `resolve()` 规范化。
-+ 例程中 `; =>` 表示返回值，`(...)` 为省略的输出、括注「示例值」「本地时间字符串」者为示意；`Path` 返回值常缩写为字符串形式，`$PWD` 与 `$HOME` 分别表示当前工作目录与 HOME 环境变量。类型标记沿用 docstring 轻量伪代码词表（`str`/`int`/`list[T]`/`A | nil` 等）。
++ 例程中 `; =>` 表示返回值，`(...)` 为省略的输出、括注「示例值」「本地时间字符串」者为示意；`Path` 返回值常缩写为字符串形式，`$PWD` 与 `$HOME` 分别表示当前工作目录与 HOME 环境变量。类型标记沿用源码中的轻量类型词表（`str`/`int`/`list[T]`/`A | nil` 等）。
 
 ## 快速上手
 
@@ -46,7 +46,7 @@ ycPathLib::Path(g_args ...)
 + 按 `/` 拆分，丢弃空部件与 `.` 部件；首字符为 `/` 则为绝对路径。
 + `..` 部件保留不折叠（仅 `resolve()` 规范化）。
 
-比较：`==` 与 `equal()` 对 `Path` 实例均为身份比较；相同规范化字符串驻留同一实例，因此 `Path("a") == Path("a")` → `t`（不同规范化串的独立实例比较 → `nil`）。值比较用 `p1->str() == p2->str()`。
+比较：`==` 与 `equal()` 对 `Path` 实例均为身份比较；相同规范化字符串在缓存容量内驻留同一实例，因此 `Path("a") == Path("a")` → `t`。驻留缓存容量为 8192；耗尽后缓存清空，之后同串可能得到不同实例，值比较请用 `p1->str() == p2->str()`。
 
 **参数**
 
@@ -71,7 +71,7 @@ ycPathLib::Path("a" 5)
 ; *Error* ycPathLib::Path: expected string or Path, got 5
 ```
 
-实例显示为命名空间限定的构造调用形式（如 `ycPathLib::Path("a/b")`）；顶层用 `evalstring` 执行该串可得同一驻留实例。
+实例显示为命名空间限定的构造调用形式（如 `ycPathLib::Path("a/b")`）；缓存容量内，顶层用 `evalstring` 执行该串可得同一驻留实例。
 
 **方法**
 
@@ -380,7 +380,7 @@ ycPathLib::Path("/")->resolve()->str()          ; => "/"
 
 ```text
 p->join(
-    g_args ...
+    [ l_args ... ]
 )
 => Path
 ```
@@ -393,7 +393,7 @@ p->join(
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| g_args ... | str / Path | 每段 |
+| l_args ... | str / Path | 每段 |
 
 **返回值**
 
@@ -539,7 +539,7 @@ p->match(t_pattern)
 
 **描述**
 
-按部件匹配：以 `/` 开头的 pattern 要求锚相等并按整路径部件比较（root-only 路径例外，`/` 可与 `**` 对齐）；否则右对齐到部件边界比较；支持 `*`、`?` 与字符类 `[seq]` / `[!seq]`（不跨部件）；大小写敏感；解析后无部件（如 `"."`、`""`）以 `error()` 中断，消息 `empty pattern`。
+按部件匹配：以 `/` 开头的 pattern 要求锚相等并按整路径部件比较（仅根路径例外，`/` 可与 `**` 对齐）；否则右对齐到部件边界比较；支持 `*`、`?` 与字符类 `[seq]` / `[!seq]`（不跨部件）；大小写敏感；解析后无部件（如 `"."`、`""`）以 `error()` 中断，消息 `empty pattern`。
 
 **参数**
 
@@ -601,7 +601,7 @@ p->exists()
 
 **描述**
 
-目标是否存在（`isDir || isFile`，跟随符号链接）。
+路径条目是否存在（跟随符号链接；断链符号链接视为不存在）。
 
 **参数**
 
@@ -614,8 +614,8 @@ p->exists()
 **例程**
 
 ```lisp
-p = ycPathLib::Path(".")
-p->mkdir(?parents t)
+p = ycPathLib::Path("./probe")
+p->mkdir(?parents t ?existOk t)
 p->exists()  ; => t
 ```
 
@@ -666,7 +666,9 @@ p->isFile()
 **例程**
 
 ```lisp
-ycPathLib::Path("./hello.txt")->isFile()  ; => t
+p = ycPathLib::Path("./hello.txt")
+p->writeText("x")
+p->isFile()  ; => t
 ```
 
 ##### isSymlink <sub>`method`</sub>
@@ -678,7 +680,7 @@ p->isSymlink()
 
 **描述**
 
-lstat 视角：判断符号链接本身（不跟随目标）。
+不跟随符号链接：判断符号链接本身。
 
 **参数**
 
@@ -691,6 +693,7 @@ lstat 视角：判断符号链接本身（不跟随目标）。
 **例程**
 
 ```lisp
+; 若 ./link.txt 是指向任意目标的符号链接：
 ycPathLib::Path("./link.txt")->isSymlink()  ; => t
 ```
 
@@ -703,7 +706,7 @@ p->readable()
 
 **描述**
 
-判断当前用户是否可读该路径（跟随符号链接）。访问失败即返 `nil`（不预检、不报错），与 `os.access` 同构。
+判断当前用户是否可读该路径（跟随符号链接）。访问失败即返回 `nil`（不预检、直接返回 `nil`），与直接访问判断一致。
 
 **参数**
 
@@ -711,14 +714,15 @@ p->readable()
 
 **返回值**
 
-`t | nil` — 可读为 `t`；路径不存在或不可读为 `nil`（不报错）。
+`t | nil` — 可读为 `t`；路径不存在或不可读为 `nil`（直接返回 `nil`）。
 
 **例程**
 
 ```lisp
 p = ycPathLib::Path("./hello.txt")
+p->writeText("x")
 p->readable()                               ; => t
-ycPathLib::Path("no-such-entry")->readable() ; => nil（不报错，直接 nil）
+ycPathLib::Path("no-such-entry")->readable() ; => nil（直接返回 nil）
 ```
 
 ##### writable <sub>`method`</sub>
@@ -738,12 +742,14 @@ p->writable()
 
 **返回值**
 
-`t | nil` — 可写为 `t`；路径不存在或不可写为 `nil`（不报错）。
+`t | nil` — 可写为 `t`；路径不存在或不可写为 `nil`（直接返回 `nil`）。
 
 **例程**
 
 ```lisp
-ycPathLib::Path("./hello.txt")->writable()  ; => t
+p = ycPathLib::Path("./hello.txt")
+p->writeText("x")
+p->writable()  ; => t
 ```
 
 ##### executable <sub>`method`</sub>
@@ -763,16 +769,18 @@ p->executable()
 
 **返回值**
 
-`t | nil` — 可执行为 `t`；路径不存在或不可执行为 `nil`（不报错）。
+`t | nil` — 可执行为 `t`；路径不存在或不可执行为 `nil`（直接返回 `nil`）。
 
 **例程**
 
 ```lisp
 ycPathLib::Path(".")->executable()               ; => t（目录）
-ycPathLib::Path("./hello.txt")->executable()     ; => nil（文本文件无 x 位）
+p = ycPathLib::Path("./hello.txt")
+p->writeText("x")
+p->executable()                                   ; => nil（文本文件无 x 位）
 ```
 
-> 注意：三个谓词对不存在的路径**不报错**、直接返回 `nil`。
+> 注意：三个谓词对不存在的路径**直接返回 `nil`**，不中断调用方。
 
 ##### size <sub>`method`</sub>
 
@@ -832,8 +840,8 @@ timeToString(p->mtime()) ; => 本地时间字符串
 
 ```text
 p->mkdir(
-    [ ?parents ]
-    [ ?existOk ]
+    [ ?parents g_parents ]
+    [ ?existOk g_existOk ]
 )
 => t
 ```
@@ -846,8 +854,8 @@ p->mkdir(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?parents | t / nil | nil | 逐级创建父目录 |
-| ?existOk | t / nil | nil | 目录已存在时不以 `error()` 中断 |
+| ?parents g_parents | t / nil | nil | 逐级创建父目录 |
+| ?existOk g_existOk | t / nil | nil | 目录已存在时不以 `error()` 中断 |
 
 **返回值**
 
@@ -856,11 +864,10 @@ p->mkdir(
 **例程**
 
 ```lisp
-p = ycPathLib::Path("./a/b/c")
-p->mkdir(?parents t)  ; => t
+p = ycPathLib::Path("./probe")
+p->mkdir(?parents t ?existOk t)  ; => t
 p->mkdir()
-; *Error* ycPathLib::Path->mkdir: file exists: ./a/b/c
-p->mkdir(?existOk t)  ; => t
+; *Error* ycPathLib::Path->mkdir: file exists: probe
 ```
 
 ##### rmdir <sub>`method`</sub>
@@ -894,7 +901,7 @@ p->rmdir()            ; => t
 
 ```text
 p->unlink(
-    [ ?missingOk ]
+    [ ?missingOk g_missingOk ]
 )
 => t
 ```
@@ -907,7 +914,7 @@ p->unlink(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?missingOk | t / nil | nil | 目标不存在时不以 `error()` 中断 |
+| ?missingOk g_missingOk | t / nil | nil | 目标不存在时不以 `error()` 中断 |
 
 **返回值**
 
@@ -928,7 +935,7 @@ p->rename(g_target)
 
 **描述**
 
-重命名/移动（POSIX `mv` 覆盖语义）。以 `error()` 中断的情形：`g_target` 非 `str`/`Path`、源不存在、目标为已存在目录、`mv` 后源仍存在或目标缺失。源与目标解析后相同则不做操作。
+重命名/移动（覆盖已有目标的移动语义）。以 `error()` 中断的情形：`g_target` 非 `str`/`Path`、源不存在、目标为已存在目录、移动后源仍存在或目标缺失。源与目标解析后相同则不做操作。
 
 **参数**
 
@@ -945,7 +952,7 @@ p->rename(g_target)
 ```lisp
 p = ycPathLib::Path("./src.txt")
 p->writeText("x")
-p->rename("./dst.txt")  ; => "./dst.txt"
+p->rename("./dst.txt")  ; => "dst.txt"
 ```
 
 ##### touch <sub>`method`</sub>
@@ -978,7 +985,7 @@ p->touch()  ; => t
 
 ```text
 p->open(
-    [ ?mode ]
+    [ ?mode t_mode ]
 )
 => port
 ```
@@ -991,11 +998,21 @@ p->open(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?mode | str | `"r"` | `"r"` / `"w"` / `"a"` |
+| ?mode t_mode | str | `"r"` | `"r"` / `"w"` / `"a"` |
+
+`?mode` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"r"` | 只读打开；目标必须是已存在文件 |
+| `"w"` | 创建或截断后写入 |
+| `"a"` | 创建或追加写入 |
+
+其他值以 `error()` 中断。
 
 **返回值**
 
-`port` — 打开的 file port。
+`port` — 打开的文件 `port`。
 
 **例程**
 
@@ -1334,7 +1351,7 @@ p->loadi([g_password])
 **例程**
 
 ```lisp
-ycPathLib::Path("./bad.il")->loadi()  ; 示意：文件内报错时打印后照常返回，不中断调用方
+ycPathLib::Path("./bad.il")->loadi()  ; 示意：文件内运行期出错时打印后照常返回，不中断调用方
 ```
 
 ##### iterdir <sub>`method`</sub>
@@ -1375,12 +1392,12 @@ p->glob(t_pattern)
 
 按 pattern 匹配直接/递归后代。
 
-+ 模式按 `/` 分段，每段 fnmatch（`*` `?`、字符类 `[seq]`/`[!seq]`，不跨部件）。
++ 模式按 `/` 分段，每段按通配符匹配（`*` `?`、字符类 `[seq]`/`[!seq]`，不跨部件）。
 + `**` 段匹配零级或多级目录；非整段 `**`（如 `a**b`、`**txt`）按单个 `*` 处理；递归不跟随目录符号链接；终端 `**` 产出自身与全部条目（文件、目录、链接目录条目——链接目录只产出不进入）。
 + 点开头的隐藏名与普通名同等待遇：`*`、`**` 均可匹配、可进入。
 + 尾部 `/` 要求匹配项为目录；`..` 段按字面拼接（`p->glob("..")` 产出 `dir/..`）。
-+ 绝对 pattern → 以 `error()` 中断，消息 `Non-relative patterns are unsupported`；解析后无有效段（如空、`.`、`./`）→ 以 `error()` 中断，消息 `Unacceptable pattern: ...`。
-+ 结果按字符串去重；顺序未定义（确定性但非 readdir 序），比较请按集合。
++ 绝对 pattern → 以 `error()` 中断，消息 `ycPathLib::_GlobPattern: non-relative patterns are unsupported`；解析后无有效段（如空、`.`、`./`）→ 以 `error()` 中断，消息 `ycPathLib::_GlobPattern: unacceptable pattern: ...`。
++ 结果按字符串去重；顺序未定义（确定性但非文件系统返回顺序），比较请按集合。
 
 **参数**
 
