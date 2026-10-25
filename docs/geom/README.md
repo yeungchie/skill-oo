@@ -678,6 +678,75 @@ Polygon->reverse()
 
 返回反向绕行的新多边形。
 
+#### or <sub>`method`</sub>
+
+```text
+Polygon->or(g_other [ ?grid ] [ ?eps ])
+=> Region
+```
+
+返回与另一多边形的并集 Region。
+
+| 参数 | 说明 |
+| --- | --- |
+| `g_other` | 另一 `Polygon` 或点列；非法类型以 `error()` 中断 |
+| `?grid` | 布尔网格；默认 nil |
+| `?eps` | 容差；默认 `1e-9` |
+
+#### and <sub>`method`</sub>
+
+```text
+Polygon->and(g_other [ ?grid ] [ ?eps ])
+=> Region
+```
+
+返回与另一多边形的交集 Region；无公共部分时返回空 Region。
+
+| 参数 | 说明 |
+| --- | --- |
+| `g_other` | 另一 `Polygon` 或点列 |
+| `?grid` | 布尔网格；默认 nil |
+| `?eps` | 容差；默认 `1e-9` |
+
+#### not <sub>`method`</sub>
+
+```text
+Polygon->not(g_other [ ?grid ] [ ?eps ])
+=> Region
+```
+
+返回二元差集 `A - B` 的 Region；`not` 不是一元补集。
+
+| 参数 | 说明 |
+| --- | --- |
+| `g_other` | 另一 `Polygon` 或点列 |
+| `?grid` | 布尔网格；默认 nil |
+| `?eps` | 容差；默认 `1e-9` |
+
+#### xor <sub>`method`</sub>
+
+```text
+Polygon->xor(g_other [ ?grid ] [ ?eps ])
+=> Region
+```
+
+返回与另一多边形的对称差 Region。
+
+| 参数 | 说明 |
+| --- | --- |
+| `g_other` | 另一 `Polygon` 或点列 |
+| `?grid` | 布尔网格；默认 nil |
+| `?eps` | 容差；默认 `1e-9` |
+
+```lisp
+g_a = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
+g_b = ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))
+g_a->or(g_b)->area()
+; => 28.0
+g_a->not(g_b)->area()
+; => 12.0
+```
+
 #### toSkill <sub>`method`</sub>
 
 ```text

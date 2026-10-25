@@ -99,6 +99,20 @@ let((g_sq g_pairs)
 _AssertError(lambda(() ycGeom::Polygon(list(0 0 4 0 4)) t)  "polygon: odd flat list rejected")
 _AssertError(lambda(() ycGeom::Polygon(list(list(0 0) list(4 0))) t)  "polygon: two points rejected")
 
+let((g_a g_b g_r)
+    g_a = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
+    g_b = ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))
+    g_r = g_a->or(g_b)
+    _Assert(classOf(g_r) == findClass('ycGeom::Region)  "polygon: or returns Region")
+    _Assert(g_r->area() == 28.0  "polygon: or area")
+    _Assert(g_a->and(g_b)->area() == 4.0  "polygon: and area")
+    _Assert(g_a->not(g_b)->area() == 12.0  "polygon: not area")
+    _Assert(g_a->xor(g_b)->area() == 24.0  "polygon: xor area")
+    _Assert(g_a->and(ycGeom::Polygon('((10 10) (12 10) (12 12) (10 12))))->isEmpty()  "polygon: disjoint and empty")
+    _Assert(g_a->or('((2 2) (6 2) (6 6) (2 6)))->area() == 28.0  "polygon: raw list operand")
+)
+_AssertError(lambda(() ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->or(1) t)  "polygon: bad boolean operand")
+
 _TestPolygonDone = t
 
 ; END

@@ -322,11 +322,14 @@ procedure(_AsPolygon(g_x t_ctx "gt")  ; -> Polygon
     ;   t_ctx  (str) - 错误上下文
     ;
     ; **返回**
-    ;   (Polygon) - 原对象；非 Polygon 时 error
-    unless(_PolygonP(g_x)
-        error("%s: expected a Polygon, got %A" t_ctx g_x)
+    ;   (Polygon) - 原对象或由点列构造的新对象；非法时 error
+    if(_PolygonP(g_x)
+        g_x
+        if(listp(g_x)
+            Polygon(g_x)
+            error("%s: expected a Polygon or point list, got %A" t_ctx g_x)
+        )
     )
-    g_x
 )
 
 procedure(_AsRegion(g_x t_ctx "gt")  ; -> Region

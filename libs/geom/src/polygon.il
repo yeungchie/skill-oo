@@ -26,6 +26,10 @@ defclass(Polygon () (
     bbox()
     isClockwise()
     reverse()
+    or()
+    and()
+    not()
+    xor()
     toSkill()
 ))
 procedure(_CheckPolygon(l_points n_eps "lg")  ; -> t
@@ -93,6 +97,26 @@ defmethod(printself (self(Polygon))  ; -> str
     ;   (str) - <ycGeom::Polygon points=N area=...>
     lsprintf("<%A points=%d area=%A>" className(self)
         length(self->_data->points) abs(_SignedArea(self->_data->points)))
+)
+
+procedure(_PolygonOp(self g_other t_op n_grid n_eps t_ctx "gggggt")  ; -> Region
+    ; 对两个 Polygon 执行布尔运算并返回 Region（内部实现）。
+    ;
+    ; **参数**
+    ;   self     (Polygon)   - 左操作数
+    ;   g_other  (Polygon)   - 右操作数
+    ;   t_op     (sym)       - union/intersection/difference/xor
+    ;   n_grid   (float|nil) - 网格
+    ;   n_eps    (float|nil) - 容差
+    ;   t_ctx    (str)       - 错误上下文
+    ;
+    ; **返回**
+    ;   (Region) - 结果区域
+    let((g_o l_res)
+        g_o = _AsPolygon(g_other t_ctx)
+        l_res = _Boolean(list(self) list(g_o) t_op n_grid n_eps)
+        Region(l_res ?normalize nil)
+    )
 )
 
 inScheme(
@@ -282,6 +306,54 @@ procedure(_InstallPolygon(self "g")  ; -> any
         ; **返回**
         ;   (Polygon) - 新对象
         Polygon(reverse(copy(self->_data->points)))
+    )
+    self->or = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
+        ; 返回并集。
+        ;
+        ; **参数**
+        ;   g_other  (Polygon)   - 另一多边形
+        ;   ?grid    (num|nil)   - 网格
+        ;   ?eps     (num|nil)   - 容差
+        ;
+        ; **返回**
+        ;   (Region) - 并集区域
+        _PolygonOp(self g_other 'union grid eps "ycGeom::Polygon->or")
+    )
+    self->and = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
+        ; 返回交集。
+        ;
+        ; **参数**
+        ;   g_other  (Polygon)   - 另一多边形
+        ;   ?grid    (num|nil)   - 网格
+        ;   ?eps     (num|nil)   - 容差
+        ;
+        ; **返回**
+        ;   (Region) - 交集区域
+        _PolygonOp(self g_other 'intersection grid eps "ycGeom::Polygon->and")
+    )
+    self->not = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
+        ; 返回二元差集。
+        ;
+        ; **参数**
+        ;   g_other  (Polygon)   - 另一多边形
+        ;   ?grid    (num|nil)   - 网格
+        ;   ?eps     (num|nil)   - 容差
+        ;
+        ; **返回**
+        ;   (Region) - A-B 区域
+        _PolygonOp(self g_other 'difference grid eps "ycGeom::Polygon->not")
+    )
+    self->xor = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
+        ; 返回对称差。
+        ;
+        ; **参数**
+        ;   g_other  (Polygon)   - 另一多边形
+        ;   ?grid    (num|nil)   - 网格
+        ;   ?eps     (num|nil)   - 容差
+        ;
+        ; **返回**
+        ;   (Region) - 对称差区域
+        _PolygonOp(self g_other 'xor grid eps "ycGeom::Polygon->xor")
     )
     self->toSkill = lambda(()  ; -> list[list[float]]
         ; 转换为纯坐标点列。
