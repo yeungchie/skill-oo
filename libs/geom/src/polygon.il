@@ -1,1 +1,330 @@
+useNamespace("ycGeom")
+
+defclass(PolygonData () (
+    ; PolygonData 数据桶：只收纳 keyhole 点列，构造后禁写。
+    points(
+        \@initarg points
+        \@initform nil
+    )
+))
+
+defclass(Polygon () (
+    ; Polygon 实例：不可变 keyhole 多边形。
+    ; 状态桶（PolygonData：points），构造后禁写
+    _data(
+        \@initarg _data
+        \@initform nil
+    )
+
+    points()
+    edges()
+    area()
+    perimeter()
+    centroid()
+    contains()
+    onBoundary()
+    bbox()
+    isClockwise()
+    reverse()
+    toSkill()
+))
+procedure(_CheckPolygon(l_points n_eps "lg")  ; -> t
+    ; 校验点列可构成 keyhole 多边形。
+    ;
+    ; **参数**
+    ;   l_points  (list[Point]) - 候选点列
+    ;   n_eps     (float)       - 容差
+    ;
+    ; **返回**
+    ;   (t) - 合法；否则 error
+    let((n_len n_i n_j g_a g_b g_c g_d t_seams g_prev)
+        unless(listp(l_points)
+            error("ycGeom::Polygon: expected a list of Points, got %A" l_points)
+        )
+        n_len = length(l_points)
+        unless(n_len >= 3
+            error("ycGeom::Polygon: at least 3 points are required")
+        )
+        for(n_i 1 n_len
+            unless(_PointP(_Nth1(n_i l_points))
+                error("ycGeom::Polygon: element %d is not a Point: %A" n_i _Nth1(n_i l_points))
+            )
+            g_prev = _Nth1(if(n_i == 1 n_len (n_i - 1)) l_points)
+            when(_Near(g_prev->x() _Nth1(n_i l_points)->x() n_eps)
+                && _Near(g_prev->y() _Nth1(n_i l_points)->y() n_eps)
+                error("ycGeom::Polygon: consecutive duplicate point at index %d" n_i)
+            )
+        )
+        when(abs(_SignedArea(l_points)) <= n_eps
+            error("ycGeom::Polygon: zero-area point sequence")
+        )
+        t_seams = _SeamKeys(l_points)
+        for(n_i 1 n_len
+            g_a = _Nth1(n_i l_points)
+            g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_points)
+            unless(t_seams[_EdgeKey(g_a g_b)] == 2
+                for(n_j 1 n_len
+                    when(n_j > n_i
+                        let((g_c g_d)
+                            g_c = _Nth1(n_j l_points)
+                            g_d = _Nth1(if(n_j == n_len 1 (n_j + 1)) l_points)
+                            unless(t_seams[_EdgeKey(g_c g_d)] == 2
+                                unless(_PtKey(g_a) == _PtKey(g_c)
+                                    || _PtKey(g_a) == _PtKey(g_d)
+                                    || _PtKey(g_b) == _PtKey(g_c)
+                                    || _PtKey(g_b) == _PtKey(g_d)
+                                    when(_SegmentsCross(g_a g_b g_c g_d n_eps)
+                                        error("ycGeom::Polygon: non-seam edges intersect")
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        t
+    )
+)
+defmethod(printself (self(Polygon))  ; -> str
+    ; 返回 Polygon 的打印描述串。
+    ;
+    ; **返回**
+    ;   (str) - <ycGeom::Polygon points=N area=...>
+    lsprintf("<%A points=%d area=%A>" className(self)
+        length(self->_data->points) abs(_SignedArea(self->_data->points)))
+)
+
+inScheme(
+procedure(_InstallPolygon(self "g")  ; -> any
+    ; 把 Polygon 方法安装到 Polygon 类（由 initializeInstance 调用）。
+    ;
+    ; **返回**
+    ;   (any) - 最后一条安装赋值结果，调用方忽略
+    self->points = lambda(()  ; -> list[Point]
+        ; 返回内部 keyhole 点列。
+        ;
+        ; **返回**
+        ;   (list[Point]) - 内部点列，不得原地修改
+        self->_data->points
+    )
+    self->edges = lambda(()  ; -> list[Segment]
+        ; 返回相邻点形成的全部边，含切割边。
+        ;
+        ; **返回**
+        ;   (list[Segment]) - 边列表
+        let((l_res n_len n_i)
+            n_len = length(self->_data->points)
+            for(n_i 1 n_len
+                l_res = tconc(l_res Segment(
+                    _Nth1(n_i self->_data->points)
+                    _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
+                ))
+            )
+            car(l_res)
+        )
+    )
+    self->area = lambda(()  ; -> float
+        ; 返回面积。
+        ;
+        ; **返回**
+        ;   (float) - 绝对面积
+        abs(_SignedArea(self->_data->points))
+    )
+    self->perimeter = lambda((\@key (includeSeams nil) (eps nil) "gg")  ; -> float
+        ; 返回周长；默认排除切割线。
+        ;
+        ; **参数**
+        ;   ?includeSeams  (t|nil)   - 是否把切割线计入
+        ;   ?eps           (num|nil) - 容差
+        ;
+        ; **返回**
+        ;   (float) - 周长
+        let((n_eps n_len n_i g_a g_b t_seams n_sum n_seam)
+            _Flag(includeSeams "includeSeams")
+            n_eps = _Eps(eps)
+            t_seams = _SeamKeys(self->_data->points)
+            n_len = length(self->_data->points)
+            n_sum = 0.0
+            for(n_i 1 n_len
+                g_a = _Nth1(n_i self->_data->points)
+                g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
+                n_seam = t_seams[_EdgeKey(g_a g_b)] == 2
+                unless(n_seam && !includeSeams
+                    n_sum = n_sum + Segment(g_a g_b)->length()
+                )
+            )
+            n_sum
+        )
+    )
+    self->centroid = lambda(()  ; -> Point
+        ; 返回面积加权质心。
+        ;
+        ; **返回**
+        ;   (Point) - 质心；零面积 error
+        let((n_len n_i g_a g_b n_cross n_a n_cx n_cy)
+            n_len = length(self->_data->points)
+            n_a = 0.0
+            n_cx = 0.0
+            n_cy = 0.0
+            for(n_i 1 n_len
+                g_a = _Nth1(n_i self->_data->points)
+                g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
+                n_cross = g_a->x() * g_b->y() - g_b->x() * g_a->y()
+                n_a = n_a + n_cross
+                n_cx = n_cx + (g_a->x() + g_b->x()) * n_cross
+                n_cy = n_cy + (g_a->y() + g_b->y()) * n_cross
+            )
+            n_a = n_a / 2.0
+            when(abs(n_a) <= 1e-9
+                error("ycGeom::Polygon->centroid: zero-area polygon")
+            )
+            Point(n_cx / (6.0 * n_a) n_cy / (6.0 * n_a))
+        )
+    )
+    self->contains = lambda((g_point \@key (boundary "inside") (eps nil) "ggg")  ; -> t | nil
+        ; 判断点是否在多边形内。
+        ;
+        ; **参数**
+        ;   g_point   (Point)       - 查询点
+        ;   ?boundary (str)         - "inside" 或 "outside"
+        ;   ?eps      (num|nil)     - 容差
+        ;
+        ; **返回**
+        ;   (t|nil) - 在内部或按选项在边界上为 t
+        let((g_p n_eps n_len n_i g_a g_b t_seams g_boundary)
+            g_p = _AsPoint(g_point "ycGeom::Polygon->contains")
+            _BoundaryMode(boundary)
+            n_eps = _Eps(eps)
+            t_seams = _SeamKeys(self->_data->points)
+            n_len = length(self->_data->points)
+            for(n_i 1 n_len
+                g_a = _Nth1(n_i self->_data->points)
+                g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
+                unless(t_seams[_EdgeKey(g_a g_b)] == 2
+                    when(_OnSegment(g_a g_b g_p n_eps)
+                        g_boundary = t
+                    )
+                )
+            )
+            if(g_boundary
+                boundary == "inside"
+                _PointInRing(self->_data->points g_p n_eps)
+            )
+        )
+    )
+    self->onBoundary = lambda((g_point \@key (includeSeams nil) (eps nil) "ggg")  ; -> t | nil
+        ; 判断点是否在边界上。
+        ;
+        ; **参数**
+        ;   g_point        (Point)   - 查询点
+        ;   ?includeSeams  (t|nil)   - 是否把切割线视为边界
+        ;   ?eps           (num|nil) - 容差
+        ;
+        ; **返回**
+        ;   (t|nil) - 在边界上为 t
+        let((g_p n_eps t_seams n_len n_i g_a g_b g_found)
+            g_p = _AsPoint(g_point "ycGeom::Polygon->onBoundary")
+            _Flag(includeSeams "includeSeams")
+            n_eps = _Eps(eps)
+            t_seams = _SeamKeys(self->_data->points)
+            n_len = length(self->_data->points)
+            for(n_i 1 n_len
+                when(!g_found
+                    g_a = _Nth1(n_i self->_data->points)
+                    g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
+                    unless(t_seams[_EdgeKey(g_a g_b)] == 2 && !includeSeams
+                        when(_OnSegment(g_a g_b g_p n_eps)
+                            g_found = t
+                        )
+                    )
+                )
+            )
+            g_found
+        )
+    )
+    self->bbox = lambda(()  ; -> list[float]
+        ; 返回包围盒。
+        ;
+        ; **返回**
+        ;   (list[float]) - (xmin ymin xmax ymax)
+        let((n_xmin n_ymin n_xmax n_ymax n_i g_p)
+            n_xmin = _Nth1(1 self->_data->points)->x()
+            n_ymin = _Nth1(1 self->_data->points)->y()
+            n_xmax = n_xmin
+            n_ymax = n_ymin
+            for(n_i 2 length(self->_data->points)
+                g_p = _Nth1(n_i self->_data->points)
+                n_xmin = min(n_xmin g_p->x())
+                n_ymin = min(n_ymin g_p->y())
+                n_xmax = max(n_xmax g_p->x())
+                n_ymax = max(n_ymax g_p->y())
+            )
+            list(n_xmin n_ymin n_xmax n_ymax)
+        )
+    )
+    self->isClockwise = lambda((\@key (eps nil) "g")  ; -> t | nil
+        ; 判断点列绕行方向。
+        ;
+        ; **参数**
+        ;   ?eps  (num|nil) - 容差
+        ;
+        ; **返回**
+        ;   (t|nil) - 顺时针为 t
+        let((n_eps)
+            n_eps = _Eps(eps)
+            _SignedArea(self->_data->points) < -n_eps
+        )
+    )
+    self->reverse = lambda(()  ; -> Polygon
+        ; 返回反向绕行的新多边形。
+        ;
+        ; **返回**
+        ;   (Polygon) - 新对象
+        Polygon(reverse(copy(self->_data->points)))
+    )
+    self->toSkill = lambda(()  ; -> list[list[float]]
+        ; 转换为纯坐标点列。
+        ;
+        ; **返回**
+        ;   (list[list[float]]) - ((x1 y1) ...)
+        let((l_res)
+            foreach(g_p self->_data->points
+                l_res = tconc(l_res g_p->toSkill())
+            )
+            car(l_res)
+        )
+    )
+    t
+)
+)
+
+inScheme(
+defmethod(initializeInstance (self(Polygon) \@rest _args)
+    ; 构造 Polygon 实例时安装方法集。
+    ;
+    ; **参数**
+    ;   _args  (list) - 附加初始化参数，本实现忽略
+    ;
+    ; **返回**
+    ;   (t) - 安装完成
+    _InstallPolygon(self)
+    t
+)
+)
+procedure(Polygon(l_points "l")  ; -> Polygon
+    ; 构造不可变 keyhole 多边形。
+    ;
+    ; **参数**
+    ;   l_points  (list[Point]) - 闭合点列；切割边以同一无向边往返出现两次表示
+    ;
+    ; **返回**
+    ;   (Polygon) - 复制外层点列的新多边形；非法点列 error
+    _CheckPolygon(l_points 1e-9)
+    makeInstance('Polygon ?_data
+        makeInstance('PolygonData ?points copy(l_points)))
+)
+
+unuseNamespace("ycGeom")
+
 ; END

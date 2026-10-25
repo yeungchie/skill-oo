@@ -45,6 +45,18 @@ procedure(_Snap(n_val n_grid "ng")  ; -> float
     )
 )
 
+procedure(_Nth1(n_idx l_list "xl")  ; -> any
+    ; 返回列表的 1-based 元素（内部实现）。
+    ;
+    ; **参数**
+    ;   n_idx   (int)  - 1-based 下标
+    ;   l_list  (list) - 源列表
+    ;
+    ; **返回**
+    ;   (any) - 元素；越界为 nil
+    nth(n_idx - 1 l_list)
+)
+
 procedure(_Near(n_a n_b n_eps "nnn")  ; -> t | nil
     ; 判断两个数值是否在容差内。
     ;
@@ -273,8 +285,8 @@ procedure(_SignedArea(l_pts "l")  ; -> float
         n_len = length(l_pts)
         n_sum = 0.0
         for(n_i 1 n_len
-            g_a = nth(n_i l_pts)
-            g_b = nth(if(n_i == n_len 1 n_i + 1) l_pts)
+            g_a = _Nth1(n_i l_pts)
+            g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
             n_sum = n_sum + g_a->x() * g_b->y() - g_b->x() * g_a->y()
         )
         n_sum / 2.0
@@ -296,8 +308,8 @@ procedure(_PointInRing(l_pts g_p n_eps "lgg")  ; -> t | nil
         n_x = g_p->x()
         n_y = g_p->y()
         for(n_i 1 n_len
-            g_a = nth(n_i l_pts)
-            g_b = nth(if(n_i == n_len 1 n_i + 1) l_pts)
+            g_a = _Nth1(n_i l_pts)
+            g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
             when((g_a->y() > n_y) != (g_b->y() > n_y)
                 n_xint = g_a->x()
                     + (n_y - g_a->y()) * (g_b->x() - g_a->x())
@@ -392,8 +404,8 @@ procedure(_SeamKeys(l_pts "l")  ; -> table
         n_len = length(l_pts)
         t_cnt = makeTable("geomSeams" nil)
         for(n_i 1 n_len
-            t_key = _EdgeKey(nth(n_i l_pts) nth(if(n_i == n_len 1 n_i + 1) l_pts))
-            t_cnt[t_key] = if(t_cnt[t_key] t_cnt[t_key] + 1 1)
+            t_key = _EdgeKey(_Nth1(n_i l_pts) _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts))
+            t_cnt[t_key] = if(t_cnt[t_key] (t_cnt[t_key] + 1) 1)
         )
         t_cnt
     )
@@ -452,8 +464,8 @@ procedure(_Rings(l_pts "l")  ; -> list[list[Point]]
         t_adj = makeTable("geomAdj" nil)
         l_order = nil
         for(n_i 1 n_len
-            g_a = nth(n_i l_pts)
-            g_b = nth(if(n_i == n_len 1 n_i + 1) l_pts)
+            g_a = _Nth1(n_i l_pts)
+            g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
             t_sk = _EdgeKey(g_a g_b)
             unless(t_seams[t_sk] == 2
                 t_nk = _PtKey(g_a)
@@ -482,9 +494,11 @@ procedure(_Rings(l_pts "l")  ; -> list[list[Point]]
                 t_adj[_PtKey(g_cur)] = cdr(l_nei)
                 t_adj[_PtKey(g_next)] = _RemovePoint(t_adj[_PtKey(g_next)] g_cur)
                 if(_PtKey(g_next) == _PtKey(g_start)
-                    l_res = tconc(l_res car(l_ring))
-                    g_cur = nil
-                    l_ring = nil
+                    progn(
+                        l_res = tconc(l_res car(l_ring))
+                        g_cur = nil
+                        l_ring = nil
+                    )
                 )
                 when(g_cur
                     l_ring = tconc(l_ring g_next)

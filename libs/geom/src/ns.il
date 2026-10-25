@@ -17,6 +17,7 @@ addToNamespace("ycGeom"
         _Grid
         _Snap
         _Near
+        _Nth1
         _PointP
         _SegmentP
         _LineP
