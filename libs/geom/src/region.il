@@ -177,21 +177,25 @@ procedure(_InstallRegion(self "g")  ; -> t
             g_found
         )
     )
-    self->bBox = lambda(()  ; -> list[float] | nil
+    self->bBox = lambda(()  ; -> list[list[float]] | nil
         ; 返回包围盒并集。
         ;
         ; **返回**
-        ;   (list[float]|nil) - (xmin ymin xmax ymax)；空区域 nil
+        ;   (list[list[float]]|nil) - ((xmin ymin) (xmax ymax))；空区域 nil
         let((l_box l_b)
             foreach(g_p self->_data->polygons
                 l_b = g_p->bBox()
                 if(l_box == nil
                     l_box = copy(l_b)
                     l_box = list(
-                        min(car(l_box) car(l_b))
-                        min(cadr(l_box) cadr(l_b))
-                        max(caddr(l_box) caddr(l_b))
-                        max(_Nth1(4 l_box) _Nth1(4 l_b))
+                        list(
+                            min(car(car(l_box)) car(car(l_b)))
+                            min(cadr(car(l_box)) cadr(car(l_b)))
+                        )
+                        list(
+                            max(car(cadr(l_box)) car(cadr(l_b)))
+                            max(cadr(cadr(l_box)) cadr(cadr(l_b)))
+                        )
                     )
                 )
             )

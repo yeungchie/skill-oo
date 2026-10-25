@@ -325,10 +325,10 @@ Segment->contains(
 
 ```text
 Segment->bBox()
-=> list[float]
+=> list[list[float]]
 ```
 
-返回 `(xmin ymin xmax ymax)`。
+返回 `((xmin ymin) (xmax ymax))`。
 
 #### intersection <sub>`method`</sub>
 
@@ -677,10 +677,10 @@ Polygon->onBoundary(
 
 ```text
 Polygon->bBox()
-=> list[float]
+=> list[list[float]]
 ```
 
-返回 `(xmin ymin xmax ymax)`。
+返回 `((xmin ymin) (xmax ymax))`。
 
 #### isClockwise <sub>`method`</sub>
 
@@ -761,11 +761,11 @@ Polygon->size(
 ```lisp
 g_sq = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
 g_sq->size(1 ?corner 'miter)->bBox()
-; => (-1.0 -1.0 11.0 11.0)
+; => ((-1.0 -1.0) (11.0 11.0))
 g_sq->size(1 ?dir 'right ?corner 'miter)->bBox()
-; => (0.0 0.0 11.0 10.0)
+; => ((0.0 0.0) (11.0 10.0))
 g_sq->size(1.2 ?ratio t ?dir 'right)->bBox()
-; => (0.0 0.0 12.0 10.0)
+; => ((0.0 0.0) (12.0 10.0))
 ```
 
 #### or <sub>`method`</sub>
@@ -998,10 +998,10 @@ Region->onBoundary(
 
 ```text
 Region->bBox()
-=> list[float] | nil
+=> list[list[float]] | nil
 ```
 
-返回 `(xmin ymin xmax ymax)`；空区域返回 nil。
+返回 `((xmin ymin) (xmax ymax))`；空区域返回 nil。
 
 #### isEmpty <sub>`method`</sub>
 

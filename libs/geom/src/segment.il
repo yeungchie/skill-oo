@@ -303,16 +303,20 @@ procedure(_InstallSegment(self "g")  ; -> t
             _OnSegment(self->_data->start self->_data->end g_p n_eps)
         )
     )
-    self->bBox = lambda(()  ; -> list[float]
+    self->bBox = lambda(()  ; -> list[list[float]]
         ; 返回包围盒。
         ;
         ; **返回**
-        ;   (list[float]) - (xmin ymin xmax ymax)
+        ;   (list[list[float]]) - ((xmin ymin) (xmax ymax))
         list(
-            min(self->_data->start->x() self->_data->end->x())
-            min(self->_data->start->y() self->_data->end->y())
-            max(self->_data->start->x() self->_data->end->x())
-            max(self->_data->start->y() self->_data->end->y())
+            list(
+                min(self->_data->start->x() self->_data->end->x())
+                min(self->_data->start->y() self->_data->end->y())
+            )
+            list(
+                max(self->_data->start->x() self->_data->end->x())
+                max(self->_data->start->y() self->_data->end->y())
+            )
         )
     )
     self->intersection = lambda((g_other \@key (eps nil) "gg")  ; -> Point | Segment | nil

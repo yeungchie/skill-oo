@@ -280,11 +280,11 @@ procedure(_InstallPolygon(self "g")  ; -> t
             g_found
         )
     )
-    self->bBox = lambda(()  ; -> list[float]
+    self->bBox = lambda(()  ; -> list[list[float]]
         ; 返回包围盒。
         ;
         ; **返回**
-        ;   (list[float]) - (xmin ymin xmax ymax)
+        ;   (list[list[float]]) - ((xmin ymin) (xmax ymax))
         let((n_xmin n_ymin n_xmax n_ymax n_i g_p)
             n_xmin = _Nth1(1 self->_data->points)->x()
             n_ymin = _Nth1(1 self->_data->points)->y()
@@ -297,7 +297,7 @@ procedure(_InstallPolygon(self "g")  ; -> t
                 n_xmax = max(n_xmax g_p->x())
                 n_ymax = max(n_ymax g_p->y())
             )
-            list(n_xmin n_ymin n_xmax n_ymax)
+            list(list(n_xmin n_ymin) list(n_xmax n_ymax))
         )
     )
     self->isClockwise = lambda((\@key (eps nil) "g")  ; -> t | nil
