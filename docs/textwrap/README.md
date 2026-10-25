@@ -39,7 +39,6 @@ ycTextwrap::Dedent("  a\n    b\n  c")
 ycTextwrap::Indent("a\n b" ?prefix "- ")
 ; => 实际返回为字符串：
 ;    - a
-;
 ;    -  b
 ycTextwrap::Shorten("hello world" 8)                        ; => "hello..."
 ```
@@ -99,7 +98,7 @@ ycTextwrap::Wrap(
 | 1 | East Asian Ambiguous 字符按 1 列计 |
 | 2 | East Asian Ambiguous 字符按 2 列计 |
 
-其他 `?unit`、`?ambiguous` 值以 `error()` 中断。
+其他 `?unit` 值以 `error()` 中断；`?ambiguous` 仅在 `?unit "display"` 时校验，`"char"` 模式忽略。
 
 **返回值**
 
@@ -173,7 +172,7 @@ ycTextwrap::Fill(
 | 1 | East Asian Ambiguous 字符按 1 列计 |
 | 2 | East Asian Ambiguous 字符按 2 列计 |
 
-其他 `?unit`、`?ambiguous` 值以 `error()` 中断。
+其他 `?unit` 值以 `error()` 中断；`?ambiguous` 仅在 `?unit "display"` 时校验，`"char"` 模式忽略。
 
 **返回值**
 
@@ -312,7 +311,7 @@ ycTextwrap::Shorten(
 | 1 | East Asian Ambiguous 字符按 1 列计 |
 | 2 | East Asian Ambiguous 字符按 2 列计 |
 
-其他 `?unit`、`?ambiguous` 值以 `error()` 中断。
+其他 `?unit` 值以 `error()` 中断；`?ambiguous` 仅在 `?unit "display"` 时校验，`"char"` 模式忽略。
 
 **返回值**
 

@@ -128,9 +128,7 @@ ycTabulate::Render(
 | 1 | East Asian Ambiguous 字符按 1 列计 |
 | 2 | East Asian Ambiguous 字符按 2 列计 |
 
-其他值以 `error()` 中断。
-
-其他 `?format`、`?align`、`?unit` 值以 `error()` 中断；`?align` 为列表时长度须等于列数，否则以 `error()` 中断。
+其他 `?format`、`?align`、`?unit` 值以 `error()` 中断；`?ambiguous` 仅在 `?unit "display"` 时校验，`"char"` 模式忽略；`?align` 为列表时长度须等于列数，否则以 `error()` 中断。
 
 **返回值**
 

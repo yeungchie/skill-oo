@@ -48,7 +48,7 @@ defmethod(printself (self(Line))  ; -> str
 )
 
 inScheme(
-procedure(_InstallLine(self "g")  ; -> any
+procedure(_InstallLine(self "g")  ; -> t
     ; 把 Line 方法安装到 Line 类（由 initializeInstance 调用）。
     ;
     ; **返回**

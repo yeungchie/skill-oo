@@ -273,7 +273,7 @@ render(
 | 1 | East Asian Ambiguous 字符按 1 列计 |
 | 2 | East Asian Ambiguous 字符按 2 列计 |
 
-其他值以 `error()` 中断。
+其他 `?format`、`?align`、`?unit` 值以 `error()` 中断；`?ambiguous` 仅在 `?unit "display"` 时校验，`"char"` 模式忽略。
 
 
 `t_csv` 的值如下所示：

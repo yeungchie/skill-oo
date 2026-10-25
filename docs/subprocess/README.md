@@ -102,7 +102,7 @@ ycSubProcess::CreateJob(
 | --- | --- | --- | --- |
 | g_arg | any | | 命令，非字符串会自动转换 |
 | l_args | any | | 命令的其余部分；多个参数以空格拼接 |
-| ?callback g_funcobj | nil / sym / funcobj | nil | 可选，回调函数 |
+| ?callback g_funcobj | nil / sym / funobj | nil | 可选，回调函数 |
 | ?userData g_data | any | nil | 可选，随任务对象携带的数据 |
 | ?verbose g_enable | nil / t | nil | 可选，控制是否实时打印子进程输出 |
 
@@ -161,7 +161,7 @@ ycSubProcess::AsyncJob(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_cmd | str | | 完整命令串 |
-| ?callback g_funcobj | nil / sym / funcobj | nil | 可选，回调函数（签名见 `CreateJob`） |
+| ?callback g_funcobj | nil / sym / funobj | nil | 可选，回调函数（签名见 `CreateJob`） |
 | ?userData g_data | any | nil | 可选，可用于携带任意数据 |
 | ?verbose g_enable | nil / t | nil | 可选，控制是否实时打印子进程输出 |
 
@@ -184,7 +184,7 @@ aj->start()
 | --- | --- | --- |
 | cmd | str | 执行的命令 |
 | userData | any | 可用于携带任意数据 |
-| callback | nil / sym / funcobj | 特定事件触发的回调函数 |
+| callback | nil / sym / funobj | 特定事件触发的回调函数 |
 | verbose | nil / t | 控制是否实时打印子进程输出 |
 | ipcId | nil / ipcId | 进程间通信 ID，任务还未启动时的值为 `nil` |
 | returncode | nil / int | 进程退出状态码，任务还未启动时的值为 `nil` |

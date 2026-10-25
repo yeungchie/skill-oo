@@ -677,36 +677,36 @@ defmethod(printself (self(Matched))  ; -> str
 ; ---------- method installation ----------
 
 inScheme(
-procedure(_InstallMatch(self "g")  ; -> any
+procedure(_InstallMatch(self "g")  ; -> t
     ; 把 Matched 方法安装到 Matched 类（由 initializeInstance 调用）。
     ;
     ; **返回**
-    ;   (any) - 返回最后一条安装赋值的结果，调用方忽略
+    ;   (t) - 安装完成；调用方忽略
 
-procedure(_Error(t_method t_formatString \@rest g_args "ttg")  ; -> never
+procedure(_Error(t_method t_formatString \@rest l_args "ttg")  ; -> never
     ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
     ;
     ; **参数**
     ;   t_method        (str) - 出错的方法名
     ;   t_formatString  (str) - 错误说明格式串（lsprintf 格式）
-    ;   g_args          (list) - 变参：格式串实参
+    ;   l_args          (list) - 变参：格式串实参
     ;
     ; **返回**
     ;   (never) - 总是调用 error()，不返回
-    error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString g_args))
+    error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString l_args))
 )
 
-self->span = lambda((\@rest g_args "g")  ; -> (int, int)
+self->span = lambda((\@rest l_args "g")  ; -> (int, int)
     ; 返回匹配区间 (start end) 的 0-based 字节位（end 开区间）。
     ;
     ; **参数**
-    ;   g_args  (list) - 变参：组选择参数（span(g) 预留），传入任意参数即 _Error() 中断
+    ;   l_args  (list) - 变参：组选择参数（span(g) 预留），传入任意参数即 _Error() 中断
     ;
     ; **返回**
     ;   (int, int) - (start end) 字节位；位置由构造方给出，缺失时走慢路径回填
     ;                无命中走 _Error() 中断
     let((l_rec)
-        when(g_args
+        when(l_args
             _Error("span" "group arguments are not supported yet (reserved)")
         )
         when(self->_data->start == nil
@@ -723,39 +723,39 @@ self->span = lambda((\@rest g_args "g")  ; -> (int, int)
     )
 )
 
-self->start = lambda((\@rest g_args "g")  ; -> int
+self->start = lambda((\@rest l_args "g")  ; -> int
     ; 返回匹配起始字节位（0-based）。
     ;
     ; **参数**
-    ;   g_args  (list) - 变参：组选择参数（start(g) 预留），传入任意参数即 _Error() 中断
+    ;   l_args  (list) - 变参：组选择参数（start(g) 预留），传入任意参数即 _Error() 中断
     ;
     ; **返回**
     ;   (int) - span() 的 start；位置惰性时首次调用走慢路径回填
-    when(g_args
+    when(l_args
         _Error("start" "group arguments are not supported yet (reserved)")
     )
     car(self->span())
 )
 
-self->end = lambda((\@rest g_args "g")  ; -> int
+self->end = lambda((\@rest l_args "g")  ; -> int
     ; 返回匹配结束字节位（0-based，开区间）。
     ;
     ; **参数**
-    ;   g_args  (list) - 变参：组选择参数（end(g) 预留），传入任意参数即 _Error() 中断
+    ;   l_args  (list) - 变参：组选择参数（end(g) 预留），传入任意参数即 _Error() 中断
     ;
     ; **返回**
     ;   (int) - span() 的 end（start + 整体串字节长）；位置惰性时首次调用走慢路径回填
-    when(g_args
+    when(l_args
         _Error("end" "group arguments are not supported yet (reserved)")
     )
     car(cdr(self->span()))
 )
 
-self->group = lambda((\@rest g_args "g")  ; -> str | list[str]
+self->group = lambda((\@rest l_args "g")  ; -> str | list[str]
     ; 按组序号取组值；按名取组预留，调用即 error() 中断。
     ;
     ; **参数**
-    ;   g_args  (list) - 变参：组选择器——无参取整体；单参 0 = 整体、1..n_g = 对应捕获组；
+    ;   l_args  (list) - 变参：组选择器——无参取整体；单参 0 = 整体、1..n_g = 对应捕获组；
     ;                    多参逐个取值（0 可混入）；字符串参数（按名取组）预留
     ;
     ; **返回**
@@ -763,7 +763,7 @@ self->group = lambda((\@rest g_args "g")  ; -> str | list[str]
     ;                     非参与组为 ""；序号越界走 error()（_GroupAt 直调）；
     ;                     非数字或按名参数走 _Error() 中断
     let((n_g)
-        foreach(g g_args
+        foreach(g l_args
             unless(fixp(g)
                 if(stringp(g)
                     _Error("group" "group by name is not supported yet (reserved)")
@@ -773,15 +773,15 @@ self->group = lambda((\@rest g_args "g")  ; -> str | list[str]
         )
         n_g = length(self->_data->groups)
         cond(
-            (g_args == nil
+            (l_args == nil
                 _GroupWhole(self)
             )
-            (length(g_args) == 1
-                _GroupAt(self car(g_args) n_g)
+            (length(l_args) == 1
+                _GroupAt(self car(l_args) n_g)
             )
             (t
                 let((l_res)
-                    foreach(g g_args
+                    foreach(g l_args
                         l_res = tconc(l_res _GroupAt(self g n_g))
                     )
                     car(l_res)

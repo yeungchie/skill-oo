@@ -38,7 +38,7 @@ defmethod(printself (self(Point))  ; -> str
 )
 
 inScheme(
-procedure(_InstallPoint(self "g")  ; -> any
+procedure(_InstallPoint(self "g")  ; -> t
     ; 把 Point 方法安装到 Point 类（由 initializeInstance 调用）。
     ;
     ; **返回**

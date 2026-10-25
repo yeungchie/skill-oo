@@ -666,6 +666,8 @@ p = ycRegEx::Compile("\\d+")
 length(p->finditer("a1b22"))  ; => 2
 ```
 
+#### 拆分
+
 ##### split <sub>`method`</sub>
 
 ```text
@@ -1053,7 +1055,7 @@ m->expand("\\2-\\1")  ; => "20-10"
 - `g` 不再是标志；`Sub`/`Subn` 全局替换用 `?all t`，`Split` 默认全部分割、用 `?first t` 只切首处（`?flags` 中出现 `g` 会 `error()` 并提示）。
 - 非法输入（数字、未知字母）以 `error()` 中断。
 
-`?first` 与 `?all` 控制处理范围：`Split` 默认切分全部，`?first t` 只切首处；`Sub`/`Subn` 默认替换首处，`?all t` 替换全部。注意：零宽 pattern（能匹配空串者，如 `x*`）在本引擎下 `Split` 和 `Sub`/`Subn` 都只处理首个空匹配（`pcreReplace` 限制）。
+`?first` 与 `?all` 控制处理范围：`Split` 默认切分全部，`?first t` 只切首处；`Sub`/`Subn` 默认替换首处，`?all t` 替换全部。注意：零宽 pattern（能匹配空串者，如 `x*`）在本引擎下 `Split` 和 `Sub`/`Subn` 都只处理首个空匹配（受匹配引擎限制）。
 
 ```lisp
 ; ?all — 全局（对照默认单次）

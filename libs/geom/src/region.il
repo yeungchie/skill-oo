@@ -62,7 +62,7 @@ procedure(_UnionAll(l_polys n_grid n_eps "lgg")  ; -> list[Polygon]
 )
 
 inScheme(
-procedure(_InstallRegion(self "g")  ; -> any
+procedure(_InstallRegion(self "g")  ; -> t
     ; 把 Region 方法安装到 Region 类（由 initializeInstance 调用）。
     ;
     ; **返回**

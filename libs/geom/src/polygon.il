@@ -133,7 +133,7 @@ procedure(_PolygonOp(self g_other g_op n_grid n_eps t_ctx "gggggt")  ; -> Region
 )
 
 inScheme(
-procedure(_InstallPolygon(self "g")  ; -> any
+procedure(_InstallPolygon(self "g")  ; -> t
     ; 把 Polygon 方法安装到 Polygon 类（由 initializeInstance 调用）。
     ;
     ; **返回**

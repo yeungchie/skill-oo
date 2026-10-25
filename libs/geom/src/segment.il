@@ -177,7 +177,7 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggg")  ; -> Point | Segme
 )
 
 inScheme(
-procedure(_InstallSegment(self "g")  ; -> any
+procedure(_InstallSegment(self "g")  ; -> t
     ; 把 Segment 方法安装到 Segment 类（由 initializeInstance 调用）。
     ;
     ; **返回**
