@@ -58,6 +58,15 @@ let((g_s g_o)
 _AssertError(lambda(() ycGeom::Segment(1 2) t)  "segment: two numbers rejected")
 _AssertError(lambda(() ycGeom::Segment(list(list(1 2))) t)  "segment: one-point list rejected")
 
+let((g_s g_z g_l)
+    g_s = ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(10 0))
+    g_l = g_s->toLine()
+    _Assert(classOf(g_l) == findClass('ycGeom::Line)  "segment: toLine class")
+    _Assert(g_l->contains(ycGeom::Point(-5 0))  "segment: toLine extends")
+    g_z = ycGeom::Segment(ycGeom::Point(1 1) ycGeom::Point(1 1))
+    _Assert(g_z->toLine() == nil  "segment: toLine zero length")
+)
+
 _TestSegmentDone = t
 
 ; END

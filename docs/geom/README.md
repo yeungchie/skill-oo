@@ -347,6 +347,15 @@ Segment->intersection(
 | g_other | Line / Segment | | `Line` 或 `Segment` |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+#### toLine <sub>`method`</sub>
+
+```text
+Segment->toLine()
+=> Line | nil
+```
+
+返回经过起终点的无限直线；零长度线段无对应直线，返回 nil。
+
 #### toSkill <sub>`method`</sub>
 
 ```text

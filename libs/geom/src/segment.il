@@ -31,6 +31,7 @@ defclass(Segment () (
     contains()
     bBox()
     intersection()
+    toLine()
     toSkill()
 ))
 
@@ -342,6 +343,15 @@ procedure(_InstallSegment(self "g")  ; -> t
                     error("ycGeom::Segment->intersection: expected a Line or Segment, got %A"
                         g_other))
             )
+        )
+    )
+    self->toLine = lambda(()  ; -> Line | nil
+        ; 返回对应的无限直线。
+        ;
+        ; **返回**
+        ;   (Line|nil) - 经过起终点的无限直线；零长度线段为 nil
+        unless(self->_data->start->equals(self->_data->end)
+            Line(self->_data->start self->_data->end)
         )
     )
     self->toSkill = lambda(()  ; -> list[list[float]]
