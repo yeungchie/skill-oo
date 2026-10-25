@@ -5,7 +5,7 @@
 
 let((t_dir)
     t_dir = ycPathLib::CurrentFile()->parent()
-    foreach(t_file '("ns.il" "internal.il" "point.il" "segment.il" "line.il"
+    foreach(t_file '("ns.il" "internal.il" "point.il" "segment.il" "line.il" "rect.il"
                      "polygon.il" "boolean.il" "region.il" "size.il")
         t_dir->join("src" t_file)->load()
     )

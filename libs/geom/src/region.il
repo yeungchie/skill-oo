@@ -23,6 +23,7 @@ defclass(Region () (
     contains()
     onBoundary()
     bBox()
+    toRect()
     isEmpty()
     size()
     or()
@@ -200,6 +201,16 @@ procedure(_InstallRegion(self "g")  ; -> t
                 )
             )
             l_box
+        )
+    )
+    self->toRect = lambda(()  ; -> Rect | nil
+        ; 返回包围矩形。
+        ;
+        ; **返回**
+        ;   (Rect|nil) - 由 bBox 构造的轴对齐矩形；空区域 nil
+        let((l_box)
+            l_box = self->bBox()
+            when(l_box Rect(l_box))
         )
     )
     self->isEmpty = lambda(()  ; -> t | nil

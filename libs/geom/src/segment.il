@@ -30,6 +30,7 @@ defclass(Segment () (
     distanceTo()
     contains()
     bBox()
+    toRect()
     intersection()
     toLine()
     toSkill()
@@ -321,6 +322,13 @@ procedure(_InstallSegment(self "g")  ; -> t
                 max(self->_data->start->y() self->_data->end->y())
             )
         )
+    )
+    self->toRect = lambda(()  ; -> Rect
+        ; 返回包围矩形。
+        ;
+        ; **返回**
+        ;   (Rect) - 由 bBox 构造；水平、垂直或零长度线段可为退化矩形
+        Rect(self->bBox())
     )
     self->intersection = lambda((g_other \@key (eps nil) "gg")  ; -> Point | Segment | nil
         ; 计算与 Line 或 Segment 的交点。

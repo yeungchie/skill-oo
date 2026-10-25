@@ -12,11 +12,11 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、keyhole 多边形�
 - `Region` 表示 0..n 个多边形的并集，默认归一化为互不重叠的多边形集合。
 - `?eps` 默认 `1e-9`，`?grid` 为正数或 nil；参数类型不符或取值非法时以 `error()` 中断。
 - 对象按不可变值使用；运算返回新对象，不修改输入。
-- 例程中 `; =>` 表示返回值；五类对象都提供 `toSkill()`，输出只含 list 与 float 的原生数据。
+- 例程中 `; =>` 表示返回值；六类对象都提供 `toSkill()`，输出只含 list 与 float 的原生数据。
 
-![ycGeom 五类对象概览](img/overview.svg)
+![ycGeom 六类对象概览](img/overview.svg)
 
-*点、线段、直线、多边形与区域。*
+*点、线段、直线、矩形、多边形与区域。*
 
 ## 快速上手
 
@@ -37,6 +37,11 @@ g_s->contains(ycGeom::Point(5 0))
 g_l = ycGeom::Line(ycGeom::Point(0 0) ycGeom::Point(0 10))
 g_l->distanceTo(ycGeom::Point(5 3))
 ; => 5.0
+
+; 轴对齐矩形
+g_rect = ycGeom::Rect(ycGeom::Point(10 4) ycGeom::Point(2 0))
+g_rect->toSkill()
+; => ((2.0 0.0) (10.0 4.0))
 
 ; 正方形多边形
 g_sq = ycGeom::Polygon(list(
@@ -330,6 +335,15 @@ Segment->bBox()
 
 返回 `((xmin ymin) (xmax ymax))`。
 
+#### toRect <sub>`method`</sub>
+
+```text
+Segment->toRect()
+=> Rect
+```
+
+返回以该线段包围盒为范围的轴对齐矩形；水平、垂直或零长度线段得到退化矩形（宽或高为 0）。
+
 #### intersection <sub>`method`</sub>
 
 ```text
@@ -538,6 +552,144 @@ Line->toSkill()
 
 返回 `((ax ay) (bx by))`，两点为 anchor 与 anchor 加单位方向。
 
+### ycGeom::Rect <sub>`function`</sub> <sub>`class`</sub>
+
+```text
+ycGeom::Rect(g_args ...)
+=> Rect
+```
+
+**描述**
+
+构造不可变轴对齐矩形；接受两个对角点、两点列表或四个坐标，并自动规范化为 `xmin`/`ymin`/`xmax`/`ymax`。零宽或零高合法；非法参数以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_args | any | | 两个 `Point`、两点坐标列表或四个坐标 |
+
+**返回值**
+
+`Rect` — 新矩形；对角点顺序任意。
+
+**例程**
+
+```lisp
+g_rect = ycGeom::Rect(ycGeom::Point(10 4) ycGeom::Point(2 0))
+g_rect->width()
+; => 8.0
+g_rect->toSkill()
+; => ((2.0 0.0) (10.0 4.0))
+```
+
+**方法**
+
+> 必须使用 `->` 符号调用方法。
+
+#### xmin <sub>`method`</sub>
+
+```text
+Rect->xmin()
+=> float
+```
+
+返回左边界 `xmin`。
+
+#### ymin <sub>`method`</sub>
+
+```text
+Rect->ymin()
+=> float
+```
+
+返回下边界 `ymin`。
+
+#### xmax <sub>`method`</sub>
+
+```text
+Rect->xmax()
+=> float
+```
+
+返回右边界 `xmax`。
+
+#### ymax <sub>`method`</sub>
+
+```text
+Rect->ymax()
+=> float
+```
+
+返回上边界 `ymax`。
+
+#### width <sub>`method`</sub>
+
+```text
+Rect->width()
+=> float
+```
+
+返回宽度 `xmax - xmin`。
+
+#### height <sub>`method`</sub>
+
+```text
+Rect->height()
+=> float
+```
+
+返回高度 `ymax - ymin`。
+
+#### area <sub>`method`</sub>
+
+```text
+Rect->area()
+=> float
+```
+
+返回面积 `width * height`；退化矩形为 0。
+
+#### center <sub>`method`</sub>
+
+```text
+Rect->center()
+=> Point
+```
+
+返回矩形中心点。
+
+#### contains <sub>`method`</sub>
+
+```text
+Rect->contains(g_point)
+=> t | nil
+```
+
+判断点是否在矩形内（含边界）。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_point | Point | | 查询点 |
+
+#### bBox <sub>`method`</sub>
+
+```text
+Rect->bBox()
+=> list[list[float]]
+```
+
+返回 `((xmin ymin) (xmax ymax))`。
+
+#### toSkill <sub>`method`</sub>
+
+```text
+Rect->toSkill()
+=> list[list[float]]
+```
+
+返回 `((xmin ymin) (xmax ymax))` 浮点坐标列表。
+
 ### ycGeom::Polygon <sub>`function`</sub> <sub>`class`</sub>
 
 ```text
@@ -690,6 +842,15 @@ Polygon->bBox()
 ```
 
 返回 `((xmin ymin) (xmax ymax))`。
+
+#### toRect <sub>`method`</sub>
+
+```text
+Polygon->toRect()
+=> Rect
+```
+
+返回以该多边形包围盒为范围的轴对齐矩形。
 
 #### isClockwise <sub>`method`</sub>
 
@@ -1011,6 +1172,15 @@ Region->bBox()
 ```
 
 返回 `((xmin ymin) (xmax ymax))`；空区域返回 nil。
+
+#### toRect <sub>`method`</sub>
+
+```text
+Region->toRect()
+=> Rect | nil
+```
+
+返回区域包围盒对应的轴对齐矩形；空区域返回 nil。
 
 #### isEmpty <sub>`method`</sub>
 

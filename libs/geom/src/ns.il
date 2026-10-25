@@ -9,6 +9,8 @@ addToNamespace("ycGeom"
         SegmentData
         Line
         LineData
+        Rect
+        RectData
         Polygon
         PolygonData
         Region
@@ -99,6 +101,7 @@ addToNamespace("ycGeom"
         _InstallPoint
         _InstallSegment
         _InstallLine
+        _InstallRect
         _InstallPolygon
         _InstallRegion
     ))

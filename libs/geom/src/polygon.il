@@ -36,6 +36,7 @@ defclass(Polygon () (
     contains()
     onBoundary()
     bBox()
+    toRect()
     isClockwise()
     reverse()
     size()
@@ -299,6 +300,13 @@ procedure(_InstallPolygon(self "g")  ; -> t
             )
             list(list(n_xmin n_ymin) list(n_xmax n_ymax))
         )
+    )
+    self->toRect = lambda(()  ; -> Rect
+        ; 返回包围矩形。
+        ;
+        ; **返回**
+        ;   (Rect) - 由 bBox 构造的轴对齐矩形
+        Rect(self->bBox())
     )
     self->isClockwise = lambda((\@key (eps nil) "g")  ; -> t | nil
         ; 判断点列绕行方向。

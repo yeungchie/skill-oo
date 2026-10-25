@@ -125,6 +125,16 @@ let((l_res t_self t_dir)
         )
     )
 
+    _TestRectDone = nil
+    l_res = errset(load(strcat(t_dir "test_rect.il")) t)
+    unless(_TestRectDone
+        _TestCount = _TestCount + 1
+        _TestFail = _TestFail + 1
+        printf("TEST FAILED - test_rect.il did not run to completion%s\n"
+            if(l_res "" " (load raised an error)")
+        )
+    )
+
     _TestPolygonDone = nil
     l_res = errset(load(strcat(t_dir "test_polygon.il")) t)
     unless(_TestPolygonDone

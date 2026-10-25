@@ -13,6 +13,8 @@ let((g_sq)
     _Assert(g_sq->area() == 100.0  "polygon: area")
     _Assert(g_sq->perimeter() == 40.0  "polygon: perimeter")
     _Assert(g_sq->bBox() == list(list(0.0 0.0) list(10.0 10.0))  "polygon: bBox")
+    _Assert(g_sq->toRect()->toSkill() == list(list(0.0 0.0) list(10.0 10.0))  "polygon: toRect")
+    _Assert(ycGeom::Polygon('((0 0) (4 0) (1 2)))->toRect()->toSkill() == list(list(0.0 0.0) list(4.0 2.0))  "polygon: toRect triangle")
     _Assert(g_sq->isClockwise() == nil  "polygon: ccw")
     _Assert(g_sq->reverse()->isClockwise()  "polygon: reverse cw")
     _Assert(g_sq->toSkill() == list(

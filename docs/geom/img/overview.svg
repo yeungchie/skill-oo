@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 240" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 240" role="img" aria-labelledby="title desc">
   <title id="title">ycGeom 对象概览</title>
-  <desc id="desc">五个面板依次展示点、线段、无限直线、闭合多边形，以及由两个重叠多边形组成的区域。</desc>
+  <desc id="desc">六个面板依次展示点、线段、无限直线、轴对齐矩形、闭合多边形，以及由两个重叠多边形组成的区域。</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M0 0L10 5L0 10z" fill="#2563eb"/>
@@ -61,5 +61,12 @@
     <rect class="area" x="754" y="90" width="70" height="70" rx="2"/>
     <rect class="area2" x="789" y="115" width="70" height="70" rx="2"/>
     <text class="caption" x="804" y="195">0..n 个 Polygon</text>
+  </g>
+
+  <g>
+    <rect class="panel" x="900" y="20" width="160" height="200" rx="10"/>
+    <text class="title" x="980" y="45">Rect</text>
+    <rect class="area" x="930" y="85" width="100" height="80" rx="2"/>
+    <text class="caption" x="980" y="195">轴对齐范围</text>
   </g>
 </svg>

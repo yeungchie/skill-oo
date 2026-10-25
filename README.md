@@ -33,7 +33,7 @@
 
 ### 几何
 
-+ [ycGeom](docs/geom/README.md) —— 平面点、线段、直线、keyhole 多边形与区域布尔运算。
++ [ycGeom](docs/geom/README.md) —— 平面点、线段、直线、矩形、keyhole 多边形与区域布尔运算。
 
 ## 调用约定
 
