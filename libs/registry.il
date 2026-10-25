@@ -27,6 +27,7 @@ ycNamespace:::_ValidNames = list(
     "ycString"
     "ycUnits"
     "ycRadix"
+    "ycGeom"
     "ycTextwrap"
     "ycTabulate"
 )

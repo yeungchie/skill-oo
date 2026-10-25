@@ -28,6 +28,7 @@ let((t_dir t_pkgs)
         "string"
         "units"
         "radix"
+        "geom"
         "textwrap"
         "tabulate"
     )

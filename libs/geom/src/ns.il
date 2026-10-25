@@ -1,0 +1,85 @@
+unless(findNamespace("ycGeom")
+    makeNamespace("ycGeom")
+)
+addToNamespace("ycGeom"
+    mapcar('symbolToString '(
+        Point
+        PointData
+        Segment
+        SegmentData
+        Line
+        LineData
+        Polygon
+        PolygonData
+        Region
+        RegionData
+        _Eps
+        _Grid
+        _Snap
+        _Near
+        _PointP
+        _SegmentP
+        _LineP
+        _PolygonP
+        _RegionP
+        _AsPoint
+        _AsSegment
+        _AsLine
+        _AsPolygon
+        _AsRegion
+        _PtKey
+        _EdgeKey
+        _Cross
+        _SignedArea
+        _PointInRing
+        _OnSegment
+        _Orient
+        _SegmentsCross
+        _SeamKeys
+        _Rings
+        _RemovePoint
+        _FirstAdjPoint
+        _RingPointsClean
+        _CheckPolygon
+        _SegPointAt
+        _LineSegmentIntersection
+        _SegSegIntersection
+        _SnapRing
+        _CollectRings
+        _InsideRings
+        _ClassifyEdges
+        _RingEdgeList
+        _EdgeT
+        _AddCut
+        _InsertNum
+        _SortUniqueNums
+        _Lerp
+        _SplitEdges
+        _TraceLoops
+        _FirstTraceEdge
+        _ChooseNext
+        _RemoveEdge
+        _EvenDepth
+        _LoopDepth
+        _NestLoops
+        _RightmostIndex
+        _Rotate
+        _BridgeVisible
+        _FindBridge
+        _SpliceHole
+        _BuildPolygons
+        _BoundaryMode
+        _Flag
+        _InResult
+        _Boolean
+        _UnionAll
+        _InstallPoint
+        _InstallSegment
+        _InstallLine
+        _InstallPolygon
+        _InstallRegion
+    ))
+)
+unuseNamespace("ycGeom")
+
+; END
