@@ -431,7 +431,7 @@ procedure(_RemovePoint(l_list g_p "lg")  ; -> list
     )
 )
 
-procedure(_FirstAdjPoint(t_adj l_order "tl")  ; -> Point | nil
+procedure(_FirstAdjPoint(t_adj l_order "gl")  ; -> Point | nil
     ; 返回邻接表中第一个尚有余边的点。
     ;
     ; **参数**
@@ -484,7 +484,7 @@ procedure(_Rings(l_pts "l")  ; -> list[list[Point]]
         while(_FirstAdjPoint(t_adj l_order)
             g_start = _FirstAdjPoint(t_adj l_order)
             g_cur = g_start
-            l_ring = list(g_start)
+            l_ring = tconc(nil g_start)
             while(g_cur
                 l_nei = t_adj[_PtKey(g_cur)]
                 unless(l_nei

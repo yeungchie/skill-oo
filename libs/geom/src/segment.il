@@ -136,25 +136,28 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggg")  ; -> Point | Segme
         n_rxs = n_rx * n_sy - n_ry * n_sx
         n_qpxr = n_qpx * n_ry - n_qpy * n_rx
         n_rr = n_rx * n_rx + n_ry * n_ry
-        if(abs(n_rxs) <= n_eps && abs(n_qpxr) <= n_eps
-            progn(
-                n_t0 = (n_qpx * n_rx + n_qpy * n_ry) / n_rr
-                n_t1 = ((g_d->x() - g_a->x()) * n_rx
-                    + (g_d->y() - g_a->y()) * n_ry) / n_rr
-                n_min = min(n_t0 n_t1)
-                n_max = max(n_t0 n_t1)
-                if(n_max < -n_eps || n_min > 1.0 + n_eps
-                    nil
-                    progn(
-                        n_min = max(n_min 0.0)
-                        n_max = min(n_max 1.0)
-                        if(_Near(n_min n_max n_eps)
-                            _SegPointAt(g_a g_b n_min)
-                            Segment(_SegPointAt(g_a g_b n_min)
-                                _SegPointAt(g_a g_b n_max))
+        if(abs(n_rxs) <= n_eps
+            if(abs(n_qpxr) <= n_eps
+                progn(
+                    n_t0 = (n_qpx * n_rx + n_qpy * n_ry) / n_rr
+                    n_t1 = ((g_d->x() - g_a->x()) * n_rx
+                        + (g_d->y() - g_a->y()) * n_ry) / n_rr
+                    n_min = min(n_t0 n_t1)
+                    n_max = max(n_t0 n_t1)
+                    if(n_max < -n_eps || n_min > 1.0 + n_eps
+                        nil
+                        progn(
+                            n_min = max(n_min 0.0)
+                            n_max = min(n_max 1.0)
+                            if(_Near(n_min n_max n_eps)
+                                _SegPointAt(g_a g_b n_min)
+                                Segment(_SegPointAt(g_a g_b n_min)
+                                    _SegPointAt(g_a g_b n_max))
+                            )
                         )
                     )
                 )
+                nil
             )
             progn(
                 n_t = (n_qpx * n_sy - n_qpy * n_sx) / n_rxs
