@@ -152,10 +152,10 @@ ycJson::Encode(
 | g_val | any | | 待编码值；`"jsonl"` 时为列表 |
 | ?format | str | "json" | `"json"`/`"jsonc"` 或 `"jsonl"`；其他值以 `error()` 中断 |
 | ?indent | int | nil | 缩进空格数；正整数启用多行美化，其余等价紧凑输出 |
-| ?sortKeys | t \| nil | nil | 对象键是否按字符串升序输出；默认随表序 |
-| ?strict | t \| nil | nil | t 时对象键必须为字符串，符号/整数键以 `error()` 中断 |
+| ?sortKeys | t / nil | nil | 对象键是否按字符串升序输出；默认随表序 |
+| ?strict | t / nil | nil | t 时对象键必须为字符串，符号/整数键以 `error()` 中断 |
 | ?nilAs | str | "array" | `nil` 的输出形式：`"array"`（`[]`）或 `"false"` |
-| ?finalNewline | t \| nil | t | `"jsonl"` 非空输出末尾是否补换行 |
+| ?finalNewline | t / nil | t | `"jsonl"` 非空输出末尾是否补换行 |
 | ?maxDepth | int | 800 | 最大嵌套深度（≥1；超限以 `error()` 中断） |
 
 **返回值**

@@ -93,7 +93,7 @@ ycCsv::Table(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | l_rows | list[list[str]] | | 数据行 |
-| ?header | list[str] \| nil | nil | 可选列名列表；`nil` 表示无表头 |
+| ?header | list[str] / nil | nil | 可选列名列表；`nil` 表示无表头 |
 
 **返回值**
 
@@ -232,9 +232,9 @@ render(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | ?format | str | "simple" | `plain` / `simple` / `grid` / `pipe` |
-| ?align | str \| list | "left" | 单列或逐列对齐 |
+| ?align | str / list | "left" | 单列或逐列对齐 |
 | ?missingVal | str | "" | 缺失单元格替代文本 |
-| ?maxColWidth | int \| nil | nil | 单元格折行宽度 |
+| ?maxColWidth | int / nil | nil | 单元格折行宽度 |
 | ?unit | str | "display" | `display` 或 `char` |
 | ?ambiguous | int | 1 | East Asian Ambiguous 宽度 |
 
@@ -318,10 +318,10 @@ ycCsv::Decode(
 | --- | --- | --- | --- |
 | t_str | str | | 输入文本 |
 | ?format | str | "csv" | `"csv"` 或 `"tsv"`；其他值以 `error()` 中断 |
-| ?header | t \| list[str] \| nil | nil | `t` 首行作表头（`?skipEmpty t` 时为首个非空行）；列表使用给定列名；`nil` 无表头 |
-| ?delimiter | str \| nil | nil | 单字节分隔符覆盖；默认逗号或制表符 |
-| ?skipEmpty | t \| nil | nil | t 时跳过单空字段记录 |
-| ?stripBom | t \| nil | t | t 时剥离开头 UTF-8 BOM |
+| ?header | t / list[str] / nil | nil | `t` 首行作表头（`?skipEmpty t` 时为首个非空行）；列表使用给定列名；`nil` 无表头 |
+| ?delimiter | str / nil | nil | 单字节分隔符覆盖；默认逗号或制表符 |
+| ?skipEmpty | t / nil | nil | t 时跳过单空字段记录 |
+| ?stripBom | t / nil | t | t 时剥离开头 UTF-8 BOM |
 
 **返回值**
 
@@ -397,10 +397,10 @@ ycCsv::Encode(
 | --- | --- | --- | --- |
 | g_table | Table | | 待编码表格 |
 | ?format | str | "csv" | `"csv"` 或 `"tsv"`；其他值以 `error()` 中断 |
-| ?delimiter | str \| nil | nil | 单字节分隔符覆盖；默认逗号或制表符 |
+| ?delimiter | str / nil | nil | 单字节分隔符覆盖；默认逗号或制表符 |
 | ?eol | str | "\n" | 行尾 `"\n"` 或 `"\r\n"` |
-| ?quoteAll | t \| nil | nil | t 时所有字段加引号 |
-| ?finalNewline | t \| nil | t | 非空输出末尾是否补行尾 |
+| ?quoteAll | t / nil | nil | t 时所有字段加引号 |
+| ?finalNewline | t / nil | t | 非空输出末尾是否补行尾 |
 
 **返回值**
 

@@ -174,7 +174,7 @@ Point->equals(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Point | | 另一个 `Point` |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 ycGeom::Point(0 0)->equals(ycGeom::Point(1e-10 0) ?eps 1e-9)
@@ -215,8 +215,8 @@ ycGeom::Segment(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_start | Point \| list[num] | | 起点 |
-| g_end | Point \| list[num] | | 终点 |
+| g_start | Point / list[num] | | 起点 |
+| g_end | Point / list[num] | | 终点 |
 | l_points | list | | 两点列表、两点坐标列表或扁平坐标 |
 | n_x1 ... n_y2 | num | | 四个端点坐标 |
 
@@ -334,7 +334,7 @@ Segment->contains(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### bBox <sub>`method`</sub>
 
@@ -359,8 +359,8 @@ Segment->intersection(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Line \| Segment | | `Line` 或 `Segment` |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| g_other | Line / Segment | | `Line` 或 `Segment` |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### toSkill <sub>`method`</sub>
 
@@ -396,8 +396,8 @@ ycGeom::Line(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_p1 | Point \| list[num] | | 点一 |
-| g_p2 | Point \| list[num] | | 点二，必须与点一不同 |
+| g_p1 | Point / list[num] | | 点一 |
+| g_p2 | Point / list[num] | | 点二，必须与点一不同 |
 | l_points | list | | 两点列表、两点坐标列表或扁平坐标 |
 | n_x1 ... n_y2 | num | | 四个坐标 |
 
@@ -512,7 +512,7 @@ Line->contains(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### isParallel <sub>`method`</sub>
 
@@ -529,7 +529,7 @@ Line->isParallel(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_line | Line | | 另一条 `Line` |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### intersection <sub>`method`</sub>
 
@@ -545,8 +545,8 @@ Line->intersection(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Line \| Segment | | `Line` 或 `Segment` |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| g_other | Line / Segment | | `Line` 或 `Segment` |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### toSkill <sub>`method`</sub>
 
@@ -634,8 +634,8 @@ Polygon->perimeter(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?includeSeams | t \| nil | nil | t 时计入切割线；默认 nil |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?includeSeams | t / nil | nil | t 时计入切割线；默认 nil |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### centroid <sub>`method`</sub>
 
@@ -663,7 +663,7 @@ Polygon->contains(
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
 | ?boundary | str | "inside" | `"inside"` 或 `"outside"`；默认 `"inside"` |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 g_p = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
@@ -689,8 +689,8 @@ Polygon->onBoundary(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
-| ?includeSeams | t \| nil | nil | t 时把切割线视为边界；默认 nil |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?includeSeams | t / nil | nil | t 时把切割线视为边界；默认 nil |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### bBox <sub>`method`</sub>
 
@@ -712,7 +712,7 @@ Polygon->isClockwise([ ?eps ])
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### reverse <sub>`method`</sub>
 
@@ -742,11 +742,11 @@ Polygon->size(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | n_value | num | | 距离或倍率 |
-| ?dir | sym \| list[sym] | 'all | `'all`、`'left`、`'right`、`'up`、`'down` 或方向列表；默认 `'all` |
-| ?ratio | t \| nil | nil | t 时启用倍率模式；默认 nil |
+| ?dir | sym / list[sym] | 'all | `'all`、`'left`、`'right`、`'up`、`'down` 或方向列表；默认 `'all` |
+| ?ratio | t / nil | nil | t 时启用倍率模式；默认 nil |
 | ?corner | sym | 'miter | `'miter`、`'round`、`'bevel`、`'none`；默认 `'miter` |
-| ?miterLimit | num \| nil | 4 | miter 长度限制；默认 4 |
-| ?roundSegments | int \| nil | 8 | 每 90 度圆角线段数；默认 8 |
+| ?miterLimit | num / nil | 4 | miter 长度限制；默认 4 |
+| ?roundSegments | int / nil | 8 | 每 90 度圆角线段数；默认 8 |
 
 `?corner 'none` 只保留边带、不补拐角，可能产生十字/缺口轮廓。offset 可能拆分或合并图形，因此统一返回 Region。
 
@@ -775,9 +775,9 @@ Polygon->or(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Polygon \| list | | 另一 `Polygon` 或点列；非法类型以 `error()` 中断 |
-| ?grid | num \| nil | nil | 布尔网格；默认 nil |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| g_other | Polygon / list | | 另一 `Polygon` 或点列；非法类型以 `error()` 中断 |
+| ?grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### and <sub>`method`</sub>
 
@@ -794,9 +794,9 @@ Polygon->and(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Polygon \| list | | 另一 `Polygon` 或点列 |
-| ?grid | num \| nil | nil | 布尔网格；默认 nil |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| g_other | Polygon / list | | 另一 `Polygon` 或点列 |
+| ?grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### not <sub>`method`</sub>
 
@@ -813,9 +813,9 @@ Polygon->not(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Polygon \| list | | 另一 `Polygon` 或点列 |
-| ?grid | num \| nil | nil | 布尔网格；默认 nil |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| g_other | Polygon / list | | 另一 `Polygon` 或点列 |
+| ?grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### xor <sub>`method`</sub>
 
@@ -832,9 +832,9 @@ Polygon->xor(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Polygon \| list | | 另一 `Polygon` 或点列 |
-| ?grid | num \| nil | nil | 布尔网格；默认 nil |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| g_other | Polygon / list | | 另一 `Polygon` 或点列 |
+| ?grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 g_a = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
@@ -875,9 +875,9 @@ ycGeom::Region(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | l_polygons | list | | Polygon 列表或点列列表；nil 表示空区域 |
-| ?normalize | t \| nil | t | 是否归一化为互不重叠 |
-| ?grid | num \| nil | nil | 布尔网格；只影响归一化 |
-| ?eps | num \| nil | 1e-9 | 容差 |
+| ?normalize | t / nil | t | 是否归一化为互不重叠 |
+| ?grid | num / nil | nil | 布尔网格；只影响归一化 |
+| ?eps | num / nil | 1e-9 | 容差 |
 
 **返回值**
 
@@ -927,8 +927,8 @@ Region->perimeter(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?includeSeams | t \| nil | nil | t 时计入切割线；默认 nil |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?includeSeams | t / nil | nil | t 时计入切割线；默认 nil |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### centroid <sub>`method`</sub>
 
@@ -956,7 +956,7 @@ Region->contains(
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
 | ?boundary | str | "inside" | `"inside"` 或 `"outside"`；默认 `"inside"` |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### onBoundary <sub>`method`</sub>
 
@@ -974,8 +974,8 @@ Region->onBoundary(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
-| ?includeSeams | t \| nil | nil | t 时计入切割线；默认 nil |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?includeSeams | t / nil | nil | t 时计入切割线；默认 nil |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 #### bBox <sub>`method`</sub>
 
@@ -1014,11 +1014,11 @@ Region->size(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | n_value | num | | 距离或倍率 |
-| ?dir | sym \| list[sym] | 'all | 方向或方向列表；默认 `'all` |
-| ?ratio | t \| nil | nil | t 时启用倍率模式；默认 nil |
+| ?dir | sym / list[sym] | 'all | 方向或方向列表；默认 `'all` |
+| ?ratio | t / nil | nil | t 时启用倍率模式；默认 nil |
 | ?corner | sym | 'miter | 拐角风格；默认 `'miter` |
-| ?miterLimit | num \| nil | 4 | miter 长度限制；默认 4 |
-| ?roundSegments | int \| nil | 8 | 每 90 度圆角线段数；默认 8 |
+| ?miterLimit | num / nil | 4 | miter 长度限制；默认 4 |
+| ?roundSegments | int / nil | 8 | 每 90 度圆角线段数；默认 8 |
 
 ```lisp
 g_a = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
@@ -1043,8 +1043,8 @@ Region->or(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Region | | 另一 `Region`；其他类型以 `error()` 中断 |
-| ?grid | num \| nil | nil | 布尔网格；默认 nil |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
@@ -1069,8 +1069,8 @@ Region->and(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Region | | 另一 `Region`；其他类型以 `error()` 中断 |
-| ?grid | num \| nil | nil | 布尔网格；默认 nil |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
@@ -1095,8 +1095,8 @@ Region->not(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Region | | 另一 `Region`；其他类型以 `error()` 中断 |
-| ?grid | num \| nil | nil | 布尔网格；默认 nil |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
@@ -1121,8 +1121,8 @@ Region->xor(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Region | | 另一 `Region`；其他类型以 `error()` 中断 |
-| ?grid | num \| nil | nil | 布尔网格；默认 nil |
-| ?eps | num \| nil | 1e-9 | 容差；默认 `1e-9` |
+| ?grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
 g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))

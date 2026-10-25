@@ -67,9 +67,9 @@ ycTextwrap::Wrap(
 | ?width | int | 70 | 目标行宽（含缩进，≥ 1） |
 | ?initialIndent | str | `""` | 首行缩进 |
 | ?subsequentIndent | str | `""` | 其余内容行缩进 |
-| ?breakLongWords | t \| nil | t | 非 nil 时硬切超宽词 |
-| ?breakOnHyphens | t \| nil | t | 非 nil 时优先在连字符后断 |
-| ?maxLines | int \| nil | nil | 最大输出行数；nil 不限 |
+| ?breakLongWords | t / nil | t | 非 nil 时硬切超宽词 |
+| ?breakOnHyphens | t / nil | t | 非 nil 时优先在连字符后断 |
+| ?maxLines | int / nil | nil | 最大输出行数；nil 不限 |
 | ?placeholder | str | `"..."` | 截断占位符 |
 | ?unit | str | `"display"` | `"display"` 显示列宽或 `"char"` 码点数 |
 | ?ambiguous | int | 1 | East Asian Ambiguous 宽度（1 或 2） |
@@ -124,9 +124,9 @@ ycTextwrap::Fill(
 | ?width | int | 70 | 目标行宽 |
 | ?initialIndent | str | `""` | 首行缩进 |
 | ?subsequentIndent | str | `""` | 其余内容行缩进 |
-| ?breakLongWords | t \| nil | t | 非 nil 时硬切超宽词 |
-| ?breakOnHyphens | t \| nil | t | 非 nil 时优先在连字符后断 |
-| ?maxLines | int \| nil | nil | 最大输出行数 |
+| ?breakLongWords | t / nil | t | 非 nil 时硬切超宽词 |
+| ?breakOnHyphens | t / nil | t | 非 nil 时优先在连字符后断 |
+| ?maxLines | int / nil | nil | 最大输出行数 |
 | ?placeholder | str | `"..."` | 截断占位符 |
 | ?unit | str | `"display"` | 宽度单位 |
 | ?ambiguous | int | 1 | East Asian Ambiguous 宽度 |

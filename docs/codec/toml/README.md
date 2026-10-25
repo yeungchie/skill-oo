@@ -188,9 +188,9 @@ ycToml::Encode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_val | table | | 根表 |
-| ?sortKeys | t \| nil | nil | 每层键是否按字符串升序输出；默认随表序 |
-| ?strict | t \| nil | nil | t 时键必须为字符串，符号/整数键以 `error()` 中断 |
-| ?finalNewline | t \| nil | t | 非空输出末尾是否补换行 |
+| ?sortKeys | t / nil | nil | 每层键是否按字符串升序输出；默认随表序 |
+| ?strict | t / nil | nil | t 时键必须为字符串，符号/整数键以 `error()` 中断 |
+| ?finalNewline | t / nil | t | 非空输出末尾是否补换行 |
 | ?maxDepth | int | 800 | 最大嵌套深度（≥1；超限以 `error()` 中断） |
 
 **返回值**

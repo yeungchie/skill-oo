@@ -86,13 +86,13 @@ ycTabulate::Render(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| l_rows | list[list[any]] \| nil |  | 行数据 |
-| ?headers | list[any] \| nil | nil | 表头单元格；nil 无表头 |
+| l_rows | list[list[any]] / nil |  | 行数据 |
+| ?headers | list[any] / nil | nil | 表头单元格；nil 无表头 |
 | ?format | str | `"simple"` | `"plain"` / `"simple"` / `"grid"` / `"pipe"` |
-| ?align | str \| list[str] | `"left"` | 单值或逐列对齐 |
+| ?align | str / list[str] | `"left"` | 单值或逐列对齐 |
 | ?floatFmt | str | `"%g"` | 浮点单元格格式 |
 | ?missingVal | str | `""` | nil 单元格的替代文本 |
-| ?maxColWidth | int \| nil | nil | 单元格折行宽度；nil 不折行 |
+| ?maxColWidth | int / nil | nil | 单元格折行宽度；nil 不折行 |
 | ?unit | str | `"display"` | `"display"` 显示列宽或 `"char"` 码点数 |
 | ?ambiguous | int | 1 | East Asian Ambiguous 宽度（1 或 2） |
 

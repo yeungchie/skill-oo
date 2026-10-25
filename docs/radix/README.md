@@ -60,8 +60,8 @@ ycRadix::Parse(
 | --- | --- | --- | --- |
 | t_text | str |  | 输入文本 |
 | ?base g_base | int | nil | 2–36；nil 时按前缀或前导 `0` 推断，否则十进制 |
-| ?prefix g_prefix | t \| nil | t | 是否识别 `0b`/`0o`/`0x` 与前导 `0` 八进制 |
-| ?wrap g_wrap | t \| nil | nil | t 时允许 32 位无符号位型 |
+| ?prefix g_prefix | t / nil | t | 是否识别 `0b`/`0o`/`0x` 与前导 `0` 八进制 |
+| ?wrap g_wrap | t / nil | nil | t 时允许 32 位无符号位型 |
 
 **返回值**
 
@@ -120,8 +120,8 @@ ycRadix::Format(
 | --- | --- | --- | --- |
 | n_value | int |  | 待格式化整数 |
 | ?base g_base | int | 10 | 2–36 |
-| ?prefix g_prefix | t \| nil \| str | nil | t 时按 2/8/16 使用规范前缀；字符串为自定义前缀 |
-| ?upper g_upper | t \| nil | nil | t 时数字与规范前缀大写 |
+| ?prefix g_prefix | t / nil / str | nil | t 时按 2/8/16 使用规范前缀；字符串为自定义前缀 |
+| ?upper g_upper | t / nil | nil | t 时数字与规范前缀大写 |
 | ?width g_width | int | nil | 数字部分最小宽度；nil 不补 |
 | ?pad t_pad | str | "0" | 单字符填充 |
 

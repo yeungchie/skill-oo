@@ -52,7 +52,7 @@ ycPathLib::Path(g_args ...)
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| g_args ... | str \| Path | 每段；零段时为 `"."` |
+| g_args ... | str / Path | 每段；零段时为 `"."` |
 
 **返回值**
 
@@ -393,7 +393,7 @@ p->join(
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| g_args ... | str \| Path | 每段 |
+| g_args ... | str / Path | 每段 |
 
 **返回值**
 
@@ -424,7 +424,7 @@ p->relativeTo(g_other)
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| g_other | str \| Path | 前缀路径 |
+| g_other | str / Path | 前缀路径 |
 
 **返回值**
 
@@ -454,7 +454,7 @@ p->isRelativeTo(g_other)
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| g_other | str \| Path | 前缀路径 |
+| g_other | str / Path | 前缀路径 |
 
 **返回值**
 
@@ -846,8 +846,8 @@ p->mkdir(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?parents | t \| nil | nil | 逐级创建父目录 |
-| ?existOk | t \| nil | nil | 目录已存在时不以 `error()` 中断 |
+| ?parents | t / nil | nil | 逐级创建父目录 |
+| ?existOk | t / nil | nil | 目录已存在时不以 `error()` 中断 |
 
 **返回值**
 
@@ -907,7 +907,7 @@ p->unlink(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?missingOk | t \| nil | nil | 目标不存在时不以 `error()` 中断 |
+| ?missingOk | t / nil | nil | 目标不存在时不以 `error()` 中断 |
 
 **返回值**
 
@@ -934,7 +934,7 @@ p->rename(g_target)
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| g_target | str \| Path | 目标路径 |
+| g_target | str / Path | 目标路径 |
 
 **返回值**
 
@@ -1296,7 +1296,7 @@ p->load([g_password])
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_password | str \| nil | nil | 加密文件密码；`nil` 表示无密码 |
+| g_password | str / nil | nil | 加密文件密码；`nil` 表示无密码 |
 
 **返回值**
 
@@ -1325,7 +1325,7 @@ p->loadi([g_password])
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_password | str \| nil | nil | 加密文件密码；`nil` 表示无密码 |
+| g_password | str / nil | nil | 加密文件密码；`nil` 表示无密码 |
 
 **返回值**
 

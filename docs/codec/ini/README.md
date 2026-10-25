@@ -65,8 +65,8 @@ ycIni::Decode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `t_str` | `str` | | INI 文本 |
-| `?delimiter` | `str \| nil` | `"="` | 单字节键值分隔符 |
-| `?duplicates` | `str \| nil` | `"error"` | 重复项策略：`"error"`、`"first"`、`"last"` |
+| `?delimiter` | `str / nil` | `"="` | 单字节键值分隔符 |
+| `?duplicates` | `str / nil` | `"error"` | 重复项策略：`"error"`、`"first"`、`"last"` |
 
 **返回值**
 
@@ -122,10 +122,10 @@ ycIni::Encode(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `g_val` | `table` | | 根 table |
-| `?sortKeys` | `t \| nil` | `nil` | 分别排序根键、段名和段内键 |
-| `?strict` | `t \| nil` | `nil` | 键必须为字符串 |
-| `?delimiter` | `str \| nil` | `"="` | 单字节键值分隔符 |
-| `?finalNewline` | `t \| nil` | `t` | 非空输出末尾补换行 |
+| `?sortKeys` | `t / nil` | `nil` | 分别排序根键、段名和段内键 |
+| `?strict` | `t / nil` | `nil` | 键必须为字符串 |
+| `?delimiter` | `str / nil` | `"="` | 单字节键值分隔符 |
+| `?finalNewline` | `t / nil` | `t` | 非空输出末尾补换行 |
 
 **返回值**
 

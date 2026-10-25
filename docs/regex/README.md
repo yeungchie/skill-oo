@@ -55,9 +55,9 @@ ycRegEx::Compile(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
-| ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?compileOpts g_compileOpts | sym \| list \| nil | nil | 编译选项符号或列表；详见 [编译选项](#编译选项) |
+| g_pat | str / Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
+| ?flags g_flags | sym / str / nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?compileOpts g_compileOpts | sym / list / nil | nil | 编译选项符号或列表；详见 [编译选项](#编译选项) |
 
 **返回值**
 
@@ -91,10 +91,10 @@ ycRegEx::Match(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
+| g_pat | str / Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
-| ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?flags g_flags | sym / str / nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -127,10 +127,10 @@ ycRegEx::Search(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
+| g_pat | str / Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
-| ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?flags g_flags | sym / str / nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -165,10 +165,10 @@ ycRegEx::Fullmatch(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
+| g_pat | str / Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
-| ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?flags g_flags | sym / str / nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -201,10 +201,10 @@ ycRegEx::Findall(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
+| g_pat | str / Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
-| ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?flags g_flags | sym / str / nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -237,10 +237,10 @@ ycRegEx::Finditer(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
+| g_pat | str / Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
-| ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?flags g_flags | sym / str / nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -272,10 +272,10 @@ ycRegEx::Partialp(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
+| g_pat | str / Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
-| ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?flags g_flags | sym / str / nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -310,11 +310,11 @@ ycRegEx::Split(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
+| g_pat | str / Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_subj | str |  | 被处理字符串 |
-| ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?first g_first | t \| nil | nil | t 时只切首处，否则切分全部 |
-| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?flags g_flags | sym / str / nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?first g_first | t / nil | nil | t 时只切首处，否则切分全部 |
+| ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -350,12 +350,12 @@ ycRegEx::Sub(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
+| g_pat | str / Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
-| ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
-| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?flags g_flags | sym / str / nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?all g_all | t / nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -391,12 +391,12 @@ ycRegEx::Subn(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_pat | str \| Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
+| g_pat | str / Pattern |  | 模式串或已编译 Pattern（复用不重编译） |
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
-| ?flags g_flags | sym \| str \| nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
-| ?execOpts g_execOpts | sym \| list \| nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?flags g_flags | sym / str / nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
+| ?all g_all | t / nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -489,7 +489,7 @@ p->match(
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
 | t_subj | str | 被处理字符串 |
-| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -522,7 +522,7 @@ p->search(
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
 | t_subj | str | 被处理字符串 |
-| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -554,7 +554,7 @@ p->fullmatch(
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
 | t_subj | str | 被处理字符串 |
-| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -589,7 +589,7 @@ p->findall(
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
 | t_subj | str | 被处理字符串 |
-| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -621,7 +621,7 @@ p->finditer(
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
 | t_subj | str | 被处理字符串 |
-| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -655,7 +655,7 @@ p->partialp(
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
 | t_subj | str | 被处理字符串 |
-| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **例程**
 
@@ -684,8 +684,8 @@ p->split(
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | t_subj | str |  | 被处理字符串 |
-| ?first g_first | t \| nil | nil | t 时只切首处，否则切分全部 |
-| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?first g_first | t / nil | nil | t 时只切首处，否则切分全部 |
+| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -723,8 +723,8 @@ p->sub(
 | --- | --- | --- | --- |
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
-| ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
-| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?all g_all | t / nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
@@ -760,8 +760,8 @@ p->subn(
 | --- | --- | --- | --- |
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
-| ?all g_all | t \| nil | nil | t 时处理全部匹配，否则只处理首处 |
-| ?execOpts g_execOpts | sym \| list \| nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
+| ?all g_all | t / nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?execOpts g_execOpts | sym / list / nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
 
