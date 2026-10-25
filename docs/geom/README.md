@@ -817,13 +817,20 @@ Region->or(g_other [ ?grid ] [ ?eps ])
 => Region
 ```
 
-返回并集 `A ∪ B`。
+返回并集 `A ∪ B`。结果按 Region 的集合语义归一化；两区域都为空时结果为空 Region。
 
 | 参数 | 说明 |
 | --- | --- |
-| `g_other` | 另一 `Region` |
+| `g_other` | 另一 `Region`；其他类型以 `error()` 中断 |
 | `?grid` | 布尔网格；默认 nil |
 | `?eps` | 容差；默认 `1e-9` |
+
+```lisp
+g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
+g_b = ycGeom::Region(list(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))))
+g_a->or(g_b)->area()
+; => 28.0
+```
 
 #### and <sub>`method`</sub>
 
@@ -832,13 +839,18 @@ Region->and(g_other [ ?grid ] [ ?eps ])
 => Region
 ```
 
-返回交集 `A ∩ B`。
+返回交集 `A ∩ B`。两区域无公共部分时返回空 Region；空 Region 的 `isEmpty()` 为 t。
 
 | 参数 | 说明 |
 | --- | --- |
-| `g_other` | 另一 `Region` |
+| `g_other` | 另一 `Region`；其他类型以 `error()` 中断 |
 | `?grid` | 布尔网格；默认 nil |
 | `?eps` | 容差；默认 `1e-9` |
+
+```lisp
+g_a->and(g_b)->area()
+; => 4.0
+```
 
 #### not <sub>`method`</sub>
 
@@ -847,13 +859,18 @@ Region->not(g_other [ ?grid ] [ ?eps ])
 => Region
 ```
 
-返回二元差集 `A - B`；`not` 不是一元补集。
+返回二元差集 `A - B`：保留属于 A 且不属于 B 的部分。`not` 不是一元补集；B 为空时返回 A，A 为空时返回空 Region。
 
 | 参数 | 说明 |
 | --- | --- |
-| `g_other` | 另一 `Region` |
+| `g_other` | 另一 `Region`；其他类型以 `error()` 中断 |
 | `?grid` | 布尔网格；默认 nil |
 | `?eps` | 容差；默认 `1e-9` |
+
+```lisp
+g_a->not(g_b)->area()
+; => 12.0
+```
 
 #### xor <sub>`method`</sub>
 
@@ -862,13 +879,18 @@ Region->xor(g_other [ ?grid ] [ ?eps ])
 => Region
 ```
 
-返回对称差。
+返回对称差：只属于 A 或只属于 B 的部分，等价于 `(A->or(B))->not(A->and(B))`。
 
 | 参数 | 说明 |
 | --- | --- |
-| `g_other` | 另一 `Region` |
+| `g_other` | 另一 `Region`；其他类型以 `error()` 中断 |
 | `?grid` | 布尔网格；默认 nil |
 | `?eps` | 容差；默认 `1e-9` |
+
+```lisp
+g_a->xor(g_b)->area()
+; => 24.0
+```
 
 #### toSkill <sub>`method`</sub>
 
