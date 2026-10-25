@@ -228,6 +228,11 @@ aj->wait(
 | n_timeout | int | 1000000 | 单位 **秒**，等待超时时间 |
 | n_interval | int | 30 | 单位 **秒**，提示信息打印时间间隔 |
 
+```lisp
+ycSubProcess::CreateJob("echo" "ok")->start()->wait()->stdout->last()
+; => "ok\n"
+```
+
 #### await <sub>`method`</sub>
 
 ```text
@@ -267,6 +272,11 @@ aj->kill()
 
 强制终止任务；任务未启动时以 `error()` 中断。
 
+```lisp
+ycSubProcess::CreateJob("sleep" "5")->start()->kill()
+; => t
+```
+
 #### state <sub>`method`</sub>
 
 ```text
@@ -283,6 +293,13 @@ aj->state()
 | `'Dead` | 已结束 |
 | `'Stopped` | 已暂停 |
 
+```lisp
+g_aj = ycSubProcess::CreateJob("true")
+g_aj->await()
+g_aj->state()
+; => 'Dead
+```
+
 #### stop <sub>`method`</sub>
 
 ```text
@@ -292,6 +309,13 @@ aj->stop()
 
 暂停任务，类似 Ctrl+Z；任务未启动时以 `error()` 中断。
 
+```lisp
+g_aj = ycSubProcess::CreateJob("sleep" "5")->start()->wait(1)
+g_aj->stop()
+; => t
+g_aj->kill()
+```
+
 #### continue <sub>`method`</sub>
 
 ```text
@@ -300,6 +324,14 @@ aj->continue()
 ```
 
 继续执行已暂停的任务；任务未启动时以 `error()` 中断。
+
+```lisp
+g_aj = ycSubProcess::CreateJob("sleep" "5")->start()->wait(1)
+g_aj->stop()
+g_aj->continue()
+; => t
+g_aj->kill()
+```
 
 #### print <sub>`method`</sub>
 
@@ -346,6 +378,13 @@ aj->close()
 
 关闭标准输入通道，类似 `Ctrl + D`；任务未启动时以 `error()` 中断。
 
+```lisp
+g_aj = ycSubProcess::CreateJob("cat")->start()
+g_aj->close()
+; => t
+g_aj->wait(1)
+```
+
 #### signal <sub>`method`</sub>
 
 ```text
@@ -368,6 +407,13 @@ aj->signal(
 | `'TERM` | 终止任务进程， 类似 `kill -15 PID` |
 | `'KILL` | 强制终止任务进程，类似 `kill -9 PID` |
 
+```lisp
+g_aj = ycSubProcess::CreateJob("sleep" "5")->start()->wait(1)
+g_aj->signal('TERM)
+; => t
+g_aj->wait(1)
+```
+
 #### sleep <sub>`method`</sub>
 
 ```text
@@ -382,6 +428,11 @@ aj->sleep(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | n_second | int / float | 0 | 单位 **秒** |
+
+```lisp
+ycSubProcess::CreateJob("echo" "ok")->sleep(0.1)->await()
+; => "ok\n"
+```
 
 #### 方法链
 
@@ -467,6 +518,11 @@ aj->stdout->size()
 
 获取数据流中数据数量。
 
+```lisp
+ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout->size()
+; => 1
+```
+
 #### isEmpty <sub>`method`</sub>
 
 ```text
@@ -475,6 +531,11 @@ aj->stdout->isEmpty()
 ```
 
 判断数据是否为空。
+
+```lisp
+ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout->isEmpty()
+; => nil
+```
 
 #### last <sub>`method`</sub>
 
@@ -485,6 +546,11 @@ aj->stdout->last()
 
 获取最后一条数据，无数据时返回 nil。
 
+```lisp
+ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout->last()
+; => "a\n"
+```
+
 #### shift <sub>`method`</sub>
 
 ```text
@@ -493,6 +559,11 @@ aj->stdout->shift()
 ```
 
 获取并移除第一条数据，无数据时返回 nil。
+
+```lisp
+ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout->shift()
+; => "a\n"
+```
 
 ### ycSubProcess::Elapsed <sub>`class`</sub>
 

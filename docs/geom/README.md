@@ -13,6 +13,7 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole �
 - `?eps` 默认 `1e-9`，`?grid` 为正数或 nil；参数类型不符或取值非法时以 `error()` 中断。
 - 对象按不可变值使用；运算返回新对象，不修改输入。
 - `Polygon`、`Rect`、`Region` 可互相作为布尔运算的右操作数；结果统一为 `Region`。
+- 非退化 `Rect` 与 `Polygon` 可通过 `toPolygon()`/`toRect()` 互转；退化 `Rect` 无对应 `Polygon`。
 - 例程中 `; =>` 表示返回值；六类对象都提供 `toSkill()`，输出只含 list 与 float 的原生数据。
 
 ![ycGeom 六类对象概览](img/overview.svg)
@@ -111,6 +112,11 @@ Point->x()
 
 返回 x 坐标。
 
+```lisp
+ycGeom::Point(3 4)->x()
+; => 3.0
+```
+
 #### y <sub>`method`</sub>
 
 ```text
@@ -119,6 +125,11 @@ Point->y()
 ```
 
 返回 y 坐标。
+
+```lisp
+ycGeom::Point(3 4)->y()
+; => 4.0
+```
 
 #### distanceTo <sub>`method`</sub>
 
@@ -133,6 +144,11 @@ Point->distanceTo(g_other)
 | --- | --- | --- | --- |
 | g_other | Point | | 另一个 `Point` |
 
+```lisp
+ycGeom::Point(3 4)->distanceTo(ycGeom::Point(0 0))
+; => 5.0
+```
+
 #### midpoint <sub>`method`</sub>
 
 ```text
@@ -145,6 +161,11 @@ Point->midpoint(g_other)
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_other | Point | | 另一个 `Point` |
+
+```lisp
+ycGeom::Point(0 0)->midpoint(ycGeom::Point(4 2))->toSkill()
+; => (2.0 1.0)
+```
 
 #### translate <sub>`method`</sub>
 
@@ -162,6 +183,11 @@ Point->translate(
 | --- | --- | --- | --- |
 | n_dx | num | | x 位移 |
 | n_dy | num | | y 位移 |
+
+```lisp
+ycGeom::Point(1 2)->translate(3 -1)->toSkill()
+; => (4.0 1.0)
+```
 
 #### equals <sub>`method`</sub>
 
@@ -193,6 +219,11 @@ Point->toSkill()
 ```
 
 返回 `(x y)` 浮点坐标列表。
+
+```lisp
+ycGeom::Point(3 4)->toSkill()
+; => (3.0 4.0)
+```
 
 ### ycGeom::Segment <sub>`function`</sub> <sub>`class`</sub>
 
@@ -235,6 +266,11 @@ Segment->start()
 
 返回起点。
 
+```lisp
+ycGeom::Segment(0 0 10 0)->start()->toSkill()
+; => (0.0 0.0)
+```
+
 #### end <sub>`method`</sub>
 
 ```text
@@ -243,6 +279,11 @@ Segment->end()
 ```
 
 返回终点。
+
+```lisp
+ycGeom::Segment(0 0 10 0)->end()->toSkill()
+; => (10.0 0.0)
+```
 
 #### length <sub>`method`</sub>
 
@@ -253,6 +294,11 @@ Segment->length()
 
 返回线段长度。
 
+```lisp
+ycGeom::Segment(0 0 10 0)->length()
+; => 10.0
+```
+
 #### midpoint <sub>`method`</sub>
 
 ```text
@@ -262,6 +308,11 @@ Segment->midpoint()
 
 返回线段中点。
 
+```lisp
+ycGeom::Segment(0 0 10 0)->midpoint()->toSkill()
+; => (5.0 0.0)
+```
+
 #### direction <sub>`method`</sub>
 
 ```text
@@ -270,6 +321,11 @@ Segment->direction()
 ```
 
 返回单位方向向量；零长度线段返回 nil。
+
+```lisp
+ycGeom::Segment(0 0 10 0)->direction()
+; => (1.0 0.0)
+```
 
 #### project <sub>`method`</sub>
 
@@ -284,6 +340,11 @@ Segment->project(g_point)
 | --- | --- | --- | --- |
 | g_point | Point | | 待投影的 `Point` |
 
+```lisp
+ycGeom::Segment(0 0 10 0)->project(ycGeom::Point(3 5))->toSkill()
+; => (3.0 0.0)
+```
+
 #### nearestPoint <sub>`method`</sub>
 
 ```text
@@ -297,6 +358,11 @@ Segment->nearestPoint(g_point)
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
 
+```lisp
+ycGeom::Segment(0 0 10 0)->nearestPoint(ycGeom::Point(15 5))->toSkill()
+; => (10.0 0.0)
+```
+
 #### distanceTo <sub>`method`</sub>
 
 ```text
@@ -309,6 +375,11 @@ Segment->distanceTo(g_point)
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
+
+```lisp
+ycGeom::Segment(0 0 10 0)->distanceTo(ycGeom::Point(15 0))
+; => 5.0
+```
 
 #### contains <sub>`method`</sub>
 
@@ -327,6 +398,11 @@ Segment->contains(
 | g_point | Point | | 查询点 |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Segment(0 0 10 0)->contains(ycGeom::Point(5 0))
+; => t
+```
+
 #### bBox <sub>`method`</sub>
 
 ```text
@@ -336,6 +412,11 @@ Segment->bBox()
 
 返回 `((xmin ymin) (xmax ymax))`。
 
+```lisp
+ycGeom::Segment(0 0 10 0)->bBox()
+; => ((0.0 0.0) (10.0 0.0))
+```
+
 #### toRect <sub>`method`</sub>
 
 ```text
@@ -344,6 +425,11 @@ Segment->toRect()
 ```
 
 返回以该线段包围盒为范围的轴对齐矩形；水平、垂直或零长度线段得到退化矩形（宽或高为 0）。
+
+```lisp
+ycGeom::Segment(0 0 10 0)->toRect()->toSkill()
+; => ((0.0 0.0) (10.0 0.0))
+```
 
 #### intersection <sub>`method`</sub>
 
@@ -362,6 +448,11 @@ Segment->intersection(
 | g_other | Line / Segment | | `Line` 或 `Segment` |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Segment(0 0 10 0)->intersection(ycGeom::Segment(5 -5 5 5))->toSkill()
+; => (5.0 0.0)
+```
+
 #### toLine <sub>`method`</sub>
 
 ```text
@@ -371,6 +462,11 @@ Segment->toLine()
 
 返回经过起终点的无限直线；零长度线段无对应直线，返回 nil。
 
+```lisp
+ycGeom::Segment(0 0 10 0)->toLine()->contains(ycGeom::Point(-5 0))
+; => t
+```
+
 #### toSkill <sub>`method`</sub>
 
 ```text
@@ -379,6 +475,11 @@ Segment->toSkill()
 ```
 
 返回 `((sx sy) (ex ey))` 浮点坐标列表。
+
+```lisp
+ycGeom::Segment(0 0 10 0)->toSkill()
+; => ((0.0 0.0) (10.0 0.0))
+```
 
 ### ycGeom::Line <sub>`function`</sub> <sub>`class`</sub>
 
@@ -422,6 +523,11 @@ Line->a()
 
 返回规范化方程 `a*x+b*y+c=0` 的 `a`。
 
+```lisp
+ycGeom::Line(0 0 10 0)->a()
+; => 0.0
+```
+
 #### b <sub>`method`</sub>
 
 ```text
@@ -430,6 +536,11 @@ Line->b()
 ```
 
 返回方程系数 `b`。
+
+```lisp
+ycGeom::Line(0 0 10 0)->b()
+; => -1.0
+```
 
 #### c <sub>`method`</sub>
 
@@ -440,6 +551,11 @@ Line->c()
 
 返回方程系数 `c`。
 
+```lisp
+ycGeom::Line(0 0 10 0)->c()
+; => 0.0
+```
+
 #### anchor <sub>`method`</sub>
 
 ```text
@@ -448,6 +564,11 @@ Line->anchor()
 ```
 
 返回直线上离原点最近的点。
+
+```lisp
+ycGeom::Line(0 0 10 0)->anchor()->toSkill()
+; => (0.0 0.0)
+```
 
 #### direction <sub>`method`</sub>
 
@@ -458,6 +579,11 @@ Line->direction()
 
 返回单位方向向量。
 
+```lisp
+ycGeom::Line(0 0 10 0)->direction()
+; => (1.0 0.0)
+```
+
 #### normal <sub>`method`</sub>
 
 ```text
@@ -466,6 +592,11 @@ Line->normal()
 ```
 
 返回单位法向量。
+
+```lisp
+ycGeom::Line(0 0 10 0)->normal()
+; => (0.0 -1.0)
+```
 
 #### project <sub>`method`</sub>
 
@@ -480,6 +611,11 @@ Line->project(g_point)
 | --- | --- | --- | --- |
 | g_point | Point | | 待投影点 |
 
+```lisp
+ycGeom::Line(0 0 10 0)->project(ycGeom::Point(3 5))->toSkill()
+; => (3.0 0.0)
+```
+
 #### distanceTo <sub>`method`</sub>
 
 ```text
@@ -492,6 +628,11 @@ Line->distanceTo(g_point)
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
+
+```lisp
+ycGeom::Line(0 0 10 0)->distanceTo(ycGeom::Point(3 5))
+; => 5.0
+```
 
 #### contains <sub>`method`</sub>
 
@@ -510,6 +651,11 @@ Line->contains(
 | g_point | Point | | 查询点 |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Line(0 0 10 0)->contains(ycGeom::Point(4 0))
+; => t
+```
+
 #### isParallel <sub>`method`</sub>
 
 ```text
@@ -526,6 +672,11 @@ Line->isParallel(
 | --- | --- | --- | --- |
 | g_line | Line | | 另一条 `Line` |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+
+```lisp
+ycGeom::Line(0 0 10 0)->isParallel(ycGeom::Line(0 1 10 1))
+; => t
+```
 
 #### intersection <sub>`method`</sub>
 
@@ -544,6 +695,11 @@ Line->intersection(
 | g_other | Line / Segment | | `Line` 或 `Segment` |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Line(0 0 10 0)->intersection(ycGeom::Line(5 -5 5 5))->toSkill()
+; => (5.0 0.0)
+```
+
 #### toSkill <sub>`method`</sub>
 
 ```text
@@ -552,6 +708,11 @@ Line->toSkill()
 ```
 
 返回 `((ax ay) (bx by))`，两点为 anchor 与 anchor 加单位方向。
+
+```lisp
+ycGeom::Line(0 0 10 0)->toSkill()
+; => ((0.0 0.0) (1.0 0.0))
+```
 
 ### ycGeom::Rect <sub>`function`</sub> <sub>`class`</sub>
 
@@ -597,6 +758,11 @@ Rect->xmin()
 
 返回左边界 `xmin`。
 
+```lisp
+ycGeom::Rect(0 0 10 4)->xmin()
+; => 0.0
+```
+
 #### ymin <sub>`method`</sub>
 
 ```text
@@ -605,6 +771,11 @@ Rect->ymin()
 ```
 
 返回下边界 `ymin`。
+
+```lisp
+ycGeom::Rect(0 0 10 4)->ymin()
+; => 0.0
+```
 
 #### xmax <sub>`method`</sub>
 
@@ -615,6 +786,11 @@ Rect->xmax()
 
 返回右边界 `xmax`。
 
+```lisp
+ycGeom::Rect(0 0 10 4)->xmax()
+; => 10.0
+```
+
 #### ymax <sub>`method`</sub>
 
 ```text
@@ -623,6 +799,11 @@ Rect->ymax()
 ```
 
 返回上边界 `ymax`。
+
+```lisp
+ycGeom::Rect(0 0 10 4)->ymax()
+; => 4.0
+```
 
 #### width <sub>`method`</sub>
 
@@ -633,6 +814,11 @@ Rect->width()
 
 返回宽度 `xmax - xmin`。
 
+```lisp
+ycGeom::Rect(0 0 10 4)->width()
+; => 10.0
+```
+
 #### height <sub>`method`</sub>
 
 ```text
@@ -641,6 +827,11 @@ Rect->height()
 ```
 
 返回高度 `ymax - ymin`。
+
+```lisp
+ycGeom::Rect(0 0 10 4)->height()
+; => 4.0
+```
 
 #### area <sub>`method`</sub>
 
@@ -651,6 +842,67 @@ Rect->area()
 
 返回面积 `width * height`；退化矩形为 0。
 
+```lisp
+ycGeom::Rect(0 0 10 4)->area()
+; => 40.0
+```
+
+#### size <sub>`method`</sub>
+
+```text
+Rect->size(
+    n_value
+    [ ?dir g_dir ]
+    [ ?ratio g_ratio ]
+    [ ?corner g_corner ]
+    [ ?miterLimit n_miterLimit ]
+    [ ?roundSegments n_roundSegments ]
+)
+=> Region
+```
+
+按真实边界做方向涨缩，返回 Region；参数语义与 `Polygon->size` 相同。退化矩形返回空 Region。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| n_value | num | | 距离或倍率 |
+| ?dir g_dir | sym / list[sym] | 'all | `'all`、`'left`、`'right`、`'up`、`'down` 或方向列表；默认 `'all` |
+| ?ratio g_ratio | t / nil | nil | nil 时按绝对距离，t 时按 bBox 范围的倍率；1.0 无变化 |
+| ?corner g_corner | sym | 'miter | `'miter`、`'round`、`'bevel`、`'none`；默认 `'miter` |
+| ?miterLimit n_miterLimit | num / nil | 4 | miter 长度限制；默认 4 |
+| ?roundSegments n_roundSegments | int / nil | 8 | 每 90 度圆角线段数；默认 8 |
+
+`?dir` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'left` | 选择左侧（x 最小）方向的边 |
+| `'right` | 选择右侧（x 最大）方向的边 |
+| `'up` | 选择上方（y 最大）方向的边 |
+| `'down` | 选择下方（y 最小）方向的边 |
+| `'all` | 四个方向全部选择 |
+
+`?dir` 可传方向列表组合选择，但不能与 `'all` 混用；空列表、未知符号或非法类型以 `error()` 中断。
+
+`?corner` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'miter` | 尖角帽；超过 `?miterLimit` 时退回 bevel |
+| `'round` | 圆弧帽，段数由 `?roundSegments` 控制 |
+| `'bevel` | 斜切帽 |
+| `'none` | 不补帽，只保留边带 |
+
+其他值以 `error()` 中断。
+
+```lisp
+g_rect = ycGeom::Rect(0 0 10 10)
+g_rect->size(1)->area()
+; => 144.0
+g_rect->size(1 ?dir 'right)->area()
+; => 110.0
+```
+
 #### center <sub>`method`</sub>
 
 ```text
@@ -659,6 +911,11 @@ Rect->center()
 ```
 
 返回矩形中心点。
+
+```lisp
+ycGeom::Rect(0 0 10 4)->center()->toSkill()
+; => (5.0 2.0)
+```
 
 #### contains <sub>`method`</sub>
 
@@ -673,6 +930,11 @@ Rect->contains(g_point)
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
 
+```lisp
+ycGeom::Rect(0 0 10 4)->contains(ycGeom::Point(5 2))
+; => t
+```
+
 #### bBox <sub>`method`</sub>
 
 ```text
@@ -681,6 +943,11 @@ Rect->bBox()
 ```
 
 返回 `((xmin ymin) (xmax ymax))`。
+
+```lisp
+ycGeom::Rect(0 0 10 4)->bBox()
+; => ((0.0 0.0) (10.0 4.0))
+```
 
 #### or <sub>`method`</sub>
 
@@ -701,6 +968,11 @@ Rect->or(
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Rect(0 0 4 4)->or(ycGeom::Rect(2 2 6 6))->area()
+; => 28.0
+```
+
 #### and <sub>`method`</sub>
 
 ```text
@@ -719,6 +991,11 @@ Rect->and(
 | g_other | Polygon / Rect / Region / list | | 另一二维图形或点列 |
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+
+```lisp
+ycGeom::Rect(0 0 4 4)->and(ycGeom::Rect(2 2 6 6))->area()
+; => 4.0
+```
 
 #### not <sub>`method`</sub>
 
@@ -739,6 +1016,11 @@ Rect->not(
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Rect(0 0 4 4)->not(ycGeom::Rect(2 2 6 6))->area()
+; => 12.0
+```
+
 #### xor <sub>`method`</sub>
 
 ```text
@@ -758,6 +1040,25 @@ Rect->xor(
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Rect(0 0 4 4)->xor(ycGeom::Rect(2 2 6 6))->area()
+; => 24.0
+```
+
+#### toPolygon <sub>`method`</sub>
+
+```text
+Rect->toPolygon()
+=> Polygon | nil
+```
+
+返回逆时针四角 Polygon；宽/高为 0 或面积不超过 `1e-9` 的退化矩形返回 nil。
+
+```lisp
+ycGeom::Rect(0 0 4 4)->toPolygon()->toSkill()
+; => ((0.0 0.0) (4.0 0.0) (4.0 4.0) (0.0 4.0))
+```
+
 #### toSkill <sub>`method`</sub>
 
 ```text
@@ -766,6 +1067,11 @@ Rect->toSkill()
 ```
 
 返回 `((xmin ymin) (xmax ymax))` 浮点坐标列表。
+
+```lisp
+ycGeom::Rect(0 0 10 4)->toSkill()
+; => ((0.0 0.0) (10.0 4.0))
+```
 
 ### ycGeom::Polygon <sub>`function`</sub> <sub>`class`</sub>
 
@@ -812,6 +1118,11 @@ Polygon->points()
 
 返回内部点列；调用方不得原地修改。
 
+```lisp
+car(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->points())->toSkill()
+; => (0.0 0.0)
+```
+
 #### edges <sub>`method`</sub>
 
 ```text
@@ -821,6 +1132,11 @@ Polygon->edges()
 
 返回相邻点形成的所有边，包含切割边。
 
+```lisp
+length(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->edges())
+; => 4
+```
+
 #### area <sub>`method`</sub>
 
 ```text
@@ -829,6 +1145,11 @@ Polygon->area()
 ```
 
 返回绝对面积；切割线往返抵消。
+
+```lisp
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->area()
+; => 16.0
+```
 
 #### perimeter <sub>`method`</sub>
 
@@ -847,6 +1168,11 @@ Polygon->perimeter(
 | ?includeSeams g_includeSeams | t / nil | nil | t 时计入切割线；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->perimeter()
+; => 16.0
+```
+
 #### centroid <sub>`method`</sub>
 
 ```text
@@ -855,6 +1181,11 @@ Polygon->centroid()
 ```
 
 返回面积加权质心。
+
+```lisp
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->centroid()->toSkill()
+; => (2.0 2.0)
+```
 
 #### contains <sub>`method`</sub>
 
@@ -911,6 +1242,11 @@ Polygon->onBoundary(
 | ?includeSeams g_includeSeams | t / nil | nil | t 时把切割线视为边界；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->onBoundary(ycGeom::Point(0 2))
+; => t
+```
+
 #### bBox <sub>`method`</sub>
 
 ```text
@@ -920,6 +1256,11 @@ Polygon->bBox()
 
 返回 `((xmin ymin) (xmax ymax))`。
 
+```lisp
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->bBox()
+; => ((0.0 0.0) (4.0 4.0))
+```
+
 #### toRect <sub>`method`</sub>
 
 ```text
@@ -928,6 +1269,11 @@ Polygon->toRect()
 ```
 
 返回以该多边形包围盒为范围的轴对齐矩形。
+
+```lisp
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->toRect()->toSkill()
+; => ((0.0 0.0) (4.0 4.0))
+```
 
 #### isClockwise <sub>`method`</sub>
 
@@ -942,6 +1288,11 @@ Polygon->isClockwise([ ?eps n_eps ])
 | --- | --- | --- | --- |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->isClockwise()
+; => nil
+```
+
 #### reverse <sub>`method`</sub>
 
 ```text
@@ -950,6 +1301,11 @@ Polygon->reverse()
 ```
 
 返回反向绕行的新多边形。
+
+```lisp
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->reverse()->toSkill()
+; => ((0.0 4.0) (4.0 4.0) (4.0 0.0) (0.0 0.0))
+```
 
 #### size <sub>`method`</sub>
 
@@ -1034,6 +1390,11 @@ Polygon->or(
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->or(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6))))->area()
+; => 28.0
+```
+
 #### and <sub>`method`</sub>
 
 ```text
@@ -1053,6 +1414,11 @@ Polygon->and(
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->and(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6))))->area()
+; => 4.0
+```
+
 #### not <sub>`method`</sub>
 
 ```text
@@ -1071,6 +1437,11 @@ Polygon->not(
 | g_other | Polygon / Rect / Region / list | | 另一二维图形或点列；其他类型以 `error()` 中断 |
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+
+```lisp
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->not(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6))))->area()
+; => 12.0
+```
 
 #### xor <sub>`method`</sub>
 
@@ -1108,6 +1479,11 @@ Polygon->toSkill()
 ```
 
 返回 `((x1 y1) (x2 y2) ...)`，保留切割线与点序。
+
+```lisp
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->toSkill()
+; => ((0.0 0.0) (4.0 0.0) (4.0 4.0) (0.0 4.0))
+```
 
 ### ycGeom::Region <sub>`function`</sub> <sub>`class`</sub>
 
@@ -1159,6 +1535,11 @@ Region->polygons()
 
 返回内部 Polygon 列表；调用方不得原地修改。
 
+```lisp
+length(ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->polygons())
+; => 1
+```
+
 #### area <sub>`method`</sub>
 
 ```text
@@ -1167,6 +1548,11 @@ Region->area()
 ```
 
 返回面积和；空区域为 `0.0`。
+
+```lisp
+ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->area()
+; => 16.0
+```
 
 #### perimeter <sub>`method`</sub>
 
@@ -1185,6 +1571,11 @@ Region->perimeter(
 | ?includeSeams g_includeSeams | t / nil | nil | t 时计入切割线；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->perimeter()
+; => 16.0
+```
+
 #### centroid <sub>`method`</sub>
 
 ```text
@@ -1193,6 +1584,11 @@ Region->centroid()
 ```
 
 返回面积加权质心；空区域返回 nil。
+
+```lisp
+ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->centroid()->toSkill()
+; => (2.0 2.0)
+```
 
 #### contains <sub>`method`</sub>
 
@@ -1222,6 +1618,11 @@ Region->contains(
 
 其他值以 `error()` 中断。
 
+```lisp
+ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->contains(ycGeom::Point(2 2))
+; => t
+```
+
 #### onBoundary <sub>`method`</sub>
 
 ```text
@@ -1241,6 +1642,11 @@ Region->onBoundary(
 | ?includeSeams g_includeSeams | t / nil | nil | t 时计入切割线；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
+```lisp
+ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->onBoundary(ycGeom::Point(0 0))
+; => t
+```
+
 #### bBox <sub>`method`</sub>
 
 ```text
@@ -1249,6 +1655,11 @@ Region->bBox()
 ```
 
 返回 `((xmin ymin) (xmax ymax))`；空区域返回 nil。
+
+```lisp
+ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->bBox()
+; => ((0.0 0.0) (4.0 4.0))
+```
 
 #### toRect <sub>`method`</sub>
 
@@ -1259,6 +1670,11 @@ Region->toRect()
 
 返回区域包围盒对应的轴对齐矩形；空区域返回 nil。
 
+```lisp
+ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->toRect()->toSkill()
+; => ((0.0 0.0) (4.0 4.0))
+```
+
 #### isEmpty <sub>`method`</sub>
 
 ```text
@@ -1267,6 +1683,11 @@ Region->isEmpty()
 ```
 
 空区域返回 t。
+
+```lisp
+ycGeom::Region(nil)->isEmpty()
+; => t
+```
 
 #### size <sub>`method`</sub>
 
@@ -1437,6 +1858,11 @@ Region->toSkill()
 返回每个 Polygon 一个坐标点列；空区域返回 nil。
 
 ## 几何约定
+
+```lisp
+ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->toSkill()
+; => (((0.0 0.0) (4.0 0.0) (4.0 4.0) (0.0 4.0)))
+```
 
 ### keyhole 多边形
 

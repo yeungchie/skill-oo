@@ -343,7 +343,8 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Region) - 结果区域
-        _SizePolygon(self n_value dir ratio corner miterLimit roundSegments)
+        _SizePolygon(self n_value dir ratio corner miterLimit roundSegments
+            "ycGeom::Polygon->size")
     )
     self->or = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
         ; 返回并集。

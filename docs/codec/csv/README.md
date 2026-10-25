@@ -129,6 +129,11 @@ rowCount()
 
 返回数据行数；空表为 0。
 
+```lisp
+ycCsv::Table(list(list("a" "b") list("c" "d")))->rowCount()
+; => 2
+```
+
 #### columnCount <sub>`method`</sub>
 
 ```text
@@ -137,6 +142,11 @@ columnCount()
 ```
 
 返回列数：有表头时为列名数，否则为最长行宽；空表为 0。
+
+```lisp
+ycCsv::Table(list(list("a" "b") list("c" "d")))->columnCount()
+; => 2
+```
 
 #### header <sub>`method`</sub>
 
@@ -147,6 +157,11 @@ header()
 
 返回表头列名列表；无表头返回 `nil`。返回内部列表，请勿原地修改。
 
+```lisp
+ycCsv::Table(list(list("a" "b")) ?header list("x" "y"))->header()
+; => ("x" "y")
+```
+
 #### rows <sub>`method`</sub>
 
 ```text
@@ -155,6 +170,11 @@ rows()
 ```
 
 返回数据行列表（每行为 `list[str]`）。返回内部列表，请勿原地修改。
+
+```lisp
+ycCsv::Table(list(list("a" "b") list("c" "d")))->rows()
+; => (("a" "b") ("c" "d"))
+```
 
 #### row <sub>`method`</sub>
 
@@ -168,6 +188,11 @@ row(g_row)
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_row | int | | 行号（1-based） |
+
+```lisp
+ycCsv::Table(list(list("a" "b") list("c" "d")))->row(2)
+; => ("c" "d")
+```
 
 #### cell <sub>`method`</sub>
 
@@ -186,6 +211,11 @@ cell(
 | g_row | int | | 行号（1-based） |
 | g_col | int | | 列号（1-based） |
 
+```lisp
+ycCsv::Table(list(list("a" "b") list("c" "d")))->cell(2 1)
+; => "c"
+```
+
 #### columnAt <sub>`method`</sub>
 
 ```text
@@ -198,6 +228,11 @@ columnAt(g_col)
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_col | int | | 列号（1-based） |
+
+```lisp
+ycCsv::Table(list(list("a" "b") list("c" "d")))->columnAt(1)
+; => ("a" "c")
+```
 
 #### value <sub>`method`</sub>
 
@@ -215,6 +250,11 @@ value(
 | --- | --- | --- | --- |
 | g_row | int | | 行号（1-based） |
 | g_name | str | | 列名 |
+
+```lisp
+ycCsv::Table(list(list("a" "b")) ?header list("x" "y"))->value(1 "y")
+; => "b"
+```
 
 #### render <sub>`method`</sub>
 

@@ -24,6 +24,7 @@ addToNamespace("ycGeom"
         _SegmentP
         _LineP
         _RectP
+        _RectPolygon
         _PolygonP
         _RegionP
         _PairP

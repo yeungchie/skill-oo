@@ -356,15 +356,12 @@ procedure(_AsRegion(g_x t_ctx "gt")  ; -> Region
         (_RegionP(g_x) g_x)
         (_PolygonP(g_x) Region(list(g_x) ?normalize nil))
         (_RectP(g_x)
-            if(g_x->width() <= 0.0 || g_x->height() <= 0.0
-                    || g_x->area() <= 1e-9
-                Region(nil)
-                Region(list(Polygon(list(
-                    Point(g_x->xmin() g_x->ymin())
-                    Point(g_x->xmax() g_x->ymin())
-                    Point(g_x->xmax() g_x->ymax())
-                    Point(g_x->xmin() g_x->ymax())
-                ))) ?normalize nil)
+            let((g_poly)
+                g_poly = _RectPolygon(g_x)
+                if(g_poly
+                    Region(list(g_poly) ?normalize nil)
+                    Region(nil)
+                )
             )
         )
         (listp(g_x) Region(list(Polygon(g_x)) ?normalize nil))

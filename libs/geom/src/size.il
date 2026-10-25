@@ -442,7 +442,7 @@ procedure(_SizeExtendCap(g_v g_pa g_nb l_e1 l_e2 g_corner "gggllg")  ; -> Polygo
     )
 )
 
-procedure(_SizePolygon(self n_value g_dir g_ratio g_corner g_miterLimit g_roundSegments "gnggggg")  ; -> Region
+procedure(_SizePolygon(self n_value g_dir g_ratio g_corner g_miterLimit g_roundSegments t_ctx "gngggggt")  ; -> Region
     ; 对单个 Polygon 执行方向 offset。
     ;
     ; **参数**
@@ -453,13 +453,14 @@ procedure(_SizePolygon(self n_value g_dir g_ratio g_corner g_miterLimit g_roundS
     ;   g_corner          (sym)       - 拐角风格
     ;   g_miterLimit      (num|nil)   - miter 限制
     ;   g_roundSegments   (int|nil)   - 圆角段数
+    ;   t_ctx             (str)       - 错误上下文
     ;
     ; **返回**
     ;   (Region) - 涨缩结果
     let((l_check l_dirs g_ratioMode l_box n_width n_height n_limit n_segments
          l_ops l_region l_rings l_enh)
         l_check = _SizeCheck(n_value g_dir g_ratio g_corner g_miterLimit
-            g_roundSegments "ycGeom::Polygon->size")
+            g_roundSegments t_ctx)
         l_dirs = car(l_check)
         g_ratioMode = cadr(l_check)
         l_box = self->bBox()
@@ -553,7 +554,8 @@ procedure(_SizeRegion(l_polys n_value g_dir g_ratio g_corner g_miterLimit g_roun
             "ycGeom::Region->size")
         foreach(g_poly l_polys
             foreach(g_part _SizePolygon(g_poly n_value g_dir g_ratio
-                    g_corner g_miterLimit g_roundSegments)->polygons()
+                    g_corner g_miterLimit g_roundSegments
+                    "ycGeom::Region->size")->polygons()
                 l_res = tconc(l_res g_part)
             )
         )

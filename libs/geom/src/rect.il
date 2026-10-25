@@ -35,6 +35,7 @@ defclass(Rect () (
     width()
     height()
     area()
+    size()
     center()
     contains()
     bBox()
@@ -42,6 +43,7 @@ defclass(Rect () (
     and()
     not()
     xor()
+    toPolygon()
     toSkill()
 ))
 
@@ -53,6 +55,29 @@ defmethod(printself (self(Rect))  ; -> str
     lsprintf("<%A ((%A %A) (%A %A))>" className(self)
         self->_data->xmin self->_data->ymin
         self->_data->xmax self->_data->ymax)
+)
+
+procedure(_RectPolygon(g_rect "g")  ; -> Polygon | nil
+    ; 把非退化 Rect 转为四点 Polygon（内部实现）。
+    ;
+    ; **参数**
+    ;   g_rect  (Rect) - 源矩形
+    ;
+    ; **返回**
+    ;   (Polygon|nil) - 逆时针四角 Polygon；退化时 nil；非法对象 error
+    unless(_RectP(g_rect)
+        error("ycGeom::_RectPolygon: expected a Rect, got %A" g_rect)
+    )
+    if(g_rect->width() <= 0.0 || g_rect->height() <= 0.0
+            || g_rect->area() <= 1e-9
+        nil
+        Polygon(list(
+            Point(g_rect->xmin() g_rect->ymin())
+            Point(g_rect->xmax() g_rect->ymin())
+            Point(g_rect->xmax() g_rect->ymax())
+            Point(g_rect->xmin() g_rect->ymax())
+        ))
+    )
 )
 
 inScheme(
@@ -110,6 +135,28 @@ procedure(_InstallRect(self "g")  ; -> t
         ;   (float) - 宽度乘高度；退化矩形为 0
         (self->_data->xmax - self->_data->xmin)
             * (self->_data->ymax - self->_data->ymin)
+    )
+    self->size = lambda((n_value \@key (dir 'all) (ratio nil) (corner 'miter) (miterLimit nil) (roundSegments nil) "nggggg")  ; -> Region
+        ; 返回方向 offset 后的 Region。
+        ;
+        ; **参数**
+        ;   n_value         (num)      - 距离或倍率
+        ;   ?dir            (sym|list) - 方向；默认 'all
+        ;   ?ratio          (t|nil)    - 倍率模式；默认 nil
+        ;   ?corner         (sym)      - 拐角风格；默认 'miter
+        ;   ?miterLimit     (num|nil)  - miter 限制；默认 nil（4.0）
+        ;   ?roundSegments  (int|nil)  - 圆角段数；默认 nil（8）
+        ;
+        ; **返回**
+        ;   (Region) - 结果区域；退化 Rect 为空 Region
+        let((g_poly)
+            g_poly = _RectPolygon(self)
+            if(g_poly
+                _SizePolygon(g_poly n_value dir ratio corner miterLimit
+                    roundSegments "ycGeom::Rect->size")
+                Region(nil)
+            )
+        )
     )
     self->center = lambda(()  ; -> Point
         ; 返回中心点。
@@ -192,6 +239,13 @@ procedure(_InstallRect(self "g")  ; -> t
         ; **返回**
         ;   (Region) - 对称差区域
         _ShapeOp(self g_other 'xor grid eps "ycGeom::Rect->xor")
+    )
+    self->toPolygon = lambda(()  ; -> Polygon | nil
+        ; 转换为四点多边形。
+        ;
+        ; **返回**
+        ;   (Polygon|nil) - 逆时针四角 Polygon；退化矩形 nil
+        _RectPolygon(self)
     )
     self->toSkill = lambda(()  ; -> list[list[float]]
         ; 转换为纯坐标列表。
