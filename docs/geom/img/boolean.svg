@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 260" role="img" aria-labelledby="title desc">
-  <title id="title">Region boolean operations</title>
-  <desc id="desc">Four panels showing union, intersection, difference and symmetric difference of two overlapping axis-aligned rectangles A and B.</desc>
+  <title id="title">Region 布尔运算</title>
+  <desc id="desc">四个面板展示两个重叠矩形 A、B 的并集、交集、差集与对称差。</desc>
   <defs>
     <style>
       .panel { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.2; }
@@ -26,7 +26,7 @@
     <rect class="fill-b" x="105" y="105" width="90" height="95" fill-opacity=".7"/>
     <rect class="outline" x="50" y="85" width="90" height="95"/>
     <rect class="outline-b" x="105" y="105" width="90" height="95"/>
-    <text class="caption" x="130" y="215">union</text>
+    <text class="caption" x="130" y="215">并集</text>
   </g>
 
   <g>
@@ -36,7 +36,7 @@
     <rect class="outline" x="280" y="85" width="90" height="95"/>
     <rect class="outline-b" x="335" y="105" width="90" height="95"/>
     <rect class="fill-ab" x="335" y="105" width="35" height="75"/>
-    <text class="caption" x="360" y="215">intersection</text>
+    <text class="caption" x="360" y="215">交集</text>
   </g>
 
   <g>
@@ -47,7 +47,7 @@
     <rect class="outline" x="510" y="85" width="90" height="95"/>
     <rect class="bg" x="565" y="105" width="90" height="95"/>
     <rect class="outline-b-dash" x="565" y="105" width="90" height="95"/>
-    <text class="caption" x="590" y="215">difference</text>
+    <text class="caption" x="590" y="215">差集</text>
   </g>
 
   <g>
@@ -59,6 +59,6 @@
     <rect class="bg" x="795" y="105" width="35" height="75"/>
     <rect class="outline" x="740" y="85" width="90" height="95"/>
     <rect class="outline-b" x="795" y="105" width="90" height="95"/>
-    <text class="caption" x="820" y="215">symmetric difference</text>
+    <text class="caption" x="820" y="215">对称差</text>
   </g>
 </svg>

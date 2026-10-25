@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 300" role="img" aria-labelledby="title desc">
-  <title id="title">Keyhole polygon</title>
-  <desc id="desc">An outer square joined to a rectangular hole by a dashed seam that is traversed in both directions.</desc>
+  <title id="title">keyhole 多边形</title>
+  <desc id="desc">外层方形通过一条往返两次的虚线切割线连接到矩形洞。</desc>
   <defs>
     <marker id="seam-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
       <path d="M0 0L10 5L0 10z" fill="#dc2626"/>
@@ -18,7 +18,7 @@
   </defs>
 
   <rect class="bg" x="20" y="20" width="420" height="260" rx="10"/>
-  <text class="title" x="40" y="48">Keyhole polygon</text>
+  <text class="title" x="40" y="48">keyhole 多边形</text>
 
   <polygon class="outer" points="60,240 360,240 360,60 60,60"/>
   <rect class="hole" x="160" y="100" width="120" height="90"/>
@@ -26,8 +26,8 @@
   <circle class="dot" cx="360" cy="240" r="4"/>
   <circle class="dot" cx="160" cy="190" r="4"/>
 
-  <text class="label" x="80" y="82">outer ring</text>
-  <text class="label" x="190" y="132">hole</text>
-  <text class="note" x="210" y="232">seam (traversed twice)</text>
-  <text class="note" x="40" y="270">The dashed seam joins the outer ring to the hole and is not a polygon edge.</text>
+  <text class="label" x="80" y="82">外环</text>
+  <text class="label" x="190" y="132">洞</text>
+  <text class="note" x="210" y="232">切割线（往返两次）</text>
+  <text class="note" x="40" y="270">虚线切割线连接外环与洞，不属于多边形边界。</text>
 </svg>
