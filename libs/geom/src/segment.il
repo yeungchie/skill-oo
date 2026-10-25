@@ -228,14 +228,14 @@ procedure(_InstallSegment(self "g")  ; -> t
             )
         )
     )
-    self->project = lambda((g_point "g")  ; -> Point
-        ; 返回到无限直线的投影点。
+    self->project = lambda((g_point "g")  ; -> Point | nil
+        ; 返回线段上的正交投影点。
         ;
         ; **参数**
         ;   g_point  (Point) - 待投影点
         ;
         ; **返回**
-        ;   (Point) - 投影点；零长度返回起点
+        ;   (Point|nil) - 垂足落在线段内为投影点，落在线段外为 nil；零长度返回起点
         let((g_p n_dx n_dy n_den n_t)
             g_p = _AsPoint(g_point "ycGeom::Segment->project")
             n_dx = self->_data->end->x() - self->_data->start->x()
@@ -246,7 +246,9 @@ procedure(_InstallSegment(self "g")  ; -> t
                 progn(
                     n_t = ((g_p->x() - self->_data->start->x()) * n_dx
                         + (g_p->y() - self->_data->start->y()) * n_dy) / n_den
-                    _SegPointAt(self->_data->start self->_data->end n_t)
+                    when(n_t >= 0.0 && n_t <= 1.0
+                        _SegPointAt(self->_data->start self->_data->end n_t)
+                    )
                 )
             )
         )
