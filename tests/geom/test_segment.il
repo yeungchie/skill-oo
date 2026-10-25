@@ -1,4 +1,51 @@
-; placeholder; replaced in later task
+_TestSegmentDone = nil
+
+let((g_s g_p)
+    g_s = ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(10 0))
+    _Assert(classOf(g_s) == findClass('ycGeom::Segment)  "segment: class identity")
+    _Assert(g_s->start()->toSkill() == list(0.0 0.0)  "segment: start")
+    _Assert(g_s->end()->toSkill() == list(10.0 0.0)  "segment: end")
+    _Assert(g_s->length() == 10.0  "segment: length")
+    _Assert(g_s->midpoint()->toSkill() == list(5.0 0.0)  "segment: midpoint")
+    _Assert(car(g_s->direction()) == 1.0  "segment: direction x")
+    _Assert(cadr(g_s->direction()) == 0.0  "segment: direction y")
+    _Assert(g_s->bbox() == list(0.0 0.0 10.0 0.0)  "segment: bbox")
+    _Assert(g_s->toSkill() == list(list(0.0 0.0) list(10.0 0.0))  "segment: toSkill")
+    g_p = ycGeom::Point(15 5)
+    _Assert(g_s->project(g_p)->toSkill() == list(15.0 0.0)  "segment: projection outside")
+    _Assert(g_s->nearestPoint(g_p)->toSkill() == list(10.0 0.0)  "segment: nearest endpoint")
+    _Assert(abs(g_s->distanceTo(g_p) - sqrt(50.0)) <= 1e-9  "segment: distance")
+    _Assert(g_s->contains(ycGeom::Point(5 0))  "segment: contains")
+)
+let((g_s)
+    g_s = ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(3 4))
+    _Assert(g_s->length() == 5.0  "segment: diagonal length")
+    _Assert(g_s->midpoint()->toSkill() == list(1.5 2.0)  "segment: diagonal midpoint")
+    _Assert(car(g_s->direction()) == 0.6  "segment: diagonal direction x")
+    _Assert(cadr(g_s->direction()) == 0.8  "segment: diagonal direction y")
+)
+
+let((g_s g_z)
+    g_z = ycGeom::Segment(ycGeom::Point(1 1) ycGeom::Point(1 1))
+    _Assert(g_z->length() == 0.0  "segment: zero length")
+    _Assert(g_z->direction() == nil  "segment: zero direction")
+    _Assert(g_z->project(ycGeom::Point(2 2))->toSkill() == list(1.0 1.0)  "segment: zero projection")
+    g_s = ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(10 0))
+    _Assert(g_s->intersection(ycGeom::Segment(ycGeom::Point(5 -5) ycGeom::Point(5 5)))->toSkill() == list(5.0 0.0)  "segment: segment intersection")
+    _Assert(g_s->intersection(ycGeom::Line(ycGeom::Point(0 1) ycGeom::Point(10 1))) == nil  "segment: parallel line")
+)
+
+let((g_a g_b)
+    g_a = ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(10 0))
+    g_b = ycGeom::Segment(ycGeom::Point(5 0) ycGeom::Point(15 0))
+    _Assert(g_a->intersection(g_b)->start()->toSkill() == list(5.0 0.0)  "segment: collinear overlap start")
+    _Assert(g_a->intersection(g_b)->end()->toSkill() == list(10.0 0.0)  "segment: collinear overlap end")
+)
+
+_AssertError(lambda(() ycGeom::Segment(1 2) t)  "segment: non-Point start rejected")
+_AssertError(lambda(() ycGeom::Segment(ycGeom::Point(0 0) 2) t)  "segment: non-Point end rejected")
+_AssertError(lambda(() ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(1 1))->intersection(1) t)  "segment: bad intersection type")
+
 _TestSegmentDone = t
 
 ; END

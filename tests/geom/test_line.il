@@ -1,4 +1,42 @@
-; placeholder; replaced in later task
+_TestLineDone = nil
+
+let((g_l)
+    g_l = ycGeom::Line(ycGeom::Point(0 0) ycGeom::Point(10 0))
+    _Assert(classOf(g_l) == findClass('ycGeom::Line)  "line: class identity")
+    _Assert(g_l->a() == 0.0  "line: horizontal a")
+    _Assert(g_l->b() == -1.0  "line: horizontal b")
+    _Assert(g_l->c() == 0.0  "line: horizontal c")
+    _Assert(g_l->anchor()->toSkill() == list(0.0 0.0)  "line: anchor")
+    _Assert(g_l->direction() == list(1.0 0.0)  "line: direction")
+    _Assert(g_l->normal() == list(0.0 -1.0)  "line: normal")
+    _Assert(g_l->project(ycGeom::Point(3 5))->toSkill() == list(3.0 0.0)  "line: project")
+    _Assert(g_l->distanceTo(ycGeom::Point(3 5)) == 5.0  "line: distance")
+    _Assert(g_l->contains(ycGeom::Point(3 0))  "line: contains")
+    _Assert(g_l->toSkill() == list(list(0.0 0.0) list(1.0 0.0))  "line: toSkill")
+)
+
+let((g_v)
+    g_v = ycGeom::Line(ycGeom::Point(0 0) ycGeom::Point(0 10))
+    _Assert(g_v->a() == 1.0  "line: vertical a")
+    _Assert(g_v->b() == 0.0  "line: vertical b")
+    _Assert(g_v->direction() == list(0.0 1.0)  "line: vertical direction")
+    _Assert(g_v->project(ycGeom::Point(5 3))->toSkill() == list(0.0 3.0)  "line: vertical project")
+    _Assert(g_v->isParallel(ycGeom::Line(ycGeom::Point(1 0) ycGeom::Point(1 10)))  "line: parallel")
+    _Assert(!g_v->isParallel(ycGeom::Line(ycGeom::Point(0 0) ycGeom::Point(10 0)))  "line: not parallel")
+)
+
+let((g_h)
+    g_h = ycGeom::Line(ycGeom::Point(0 0) ycGeom::Point(10 0))
+    _Assert(g_h->intersection(ycGeom::Line(ycGeom::Point(5 -5) ycGeom::Point(5 5)))->toSkill() == list(5.0 0.0)  "line: line intersection")
+    _Assert(g_h->intersection(ycGeom::Line(ycGeom::Point(0 1) ycGeom::Point(10 1))) == nil  "line: parallel nil")
+    _Assert(g_h->intersection(ycGeom::Segment(ycGeom::Point(5 -5) ycGeom::Point(5 5)))->toSkill() == list(5.0 0.0)  "line: segment intersection")
+    _Assert(g_h->intersection(ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(10 0)))->start()->toSkill() == list(0.0 0.0)  "line: collinear overlap")
+)
+
+_AssertError(lambda(() ycGeom::Line(ycGeom::Point(0 0) ycGeom::Point(0 0)) t)  "line: coincident points rejected")
+_AssertError(lambda(() ycGeom::Line(1 ycGeom::Point(0 0)) t)  "line: non-Point rejected")
+_AssertError(lambda(() ycGeom::Line(ycGeom::Point(0 0) ycGeom::Point(1 1))->isParallel(1) t)  "line: bad parallel type")
+
 _TestLineDone = t
 
 ; END
