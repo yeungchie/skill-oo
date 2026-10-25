@@ -1,11 +1,11 @@
 _TestSizeDone = nil
 
 procedure(_SizeBoxNear(l_a l_b "ll")  ; -> t | nil
-    ; 判断两个 bbox 是否在容差内相等（测试辅助）。
+    ; 判断两个 bBox 是否在容差内相等（测试辅助）。
     ;
     ; **参数**
-    ;   l_a  (list[float]) - bbox 一
-    ;   l_b  (list[float]) - bbox 二
+    ;   l_a  (list[float]) - bBox 一
+    ;   l_b  (list[float]) - bBox 二
     ;
     ; **返回**
     ;   (t|nil) - 四项都在 1e-9 内相等为 t
@@ -37,20 +37,20 @@ _AssertError(lambda(() ycGeom::Polygon('((0 0) (4 0) (0 4)))->size(1 ?roundSegme
 
 let((g_sq)
     g_sq = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
-    _Assert(g_sq->size(1 ?corner 'miter)->bbox() == list(-1.0 -1.0 11.0 11.0)  "size: miter bbox")
+    _Assert(g_sq->size(1 ?corner 'miter)->bBox() == list(-1.0 -1.0 11.0 11.0)  "size: miter bBox")
     _Assert(g_sq->size(1 ?corner 'miter)->area() == 144.0  "size: miter area")
-    _Assert(g_sq->size(1 ?dir 'right ?corner 'miter)->bbox() == list(0.0 0.0 11.0 10.0)  "size: right bbox")
-    _Assert(g_sq->size(1 ?dir '(up down) ?corner 'miter)->bbox() == list(0.0 -1.0 10.0 11.0)  "size: vertical bbox")
-    _Assert(g_sq->size(1 ?dir '(left up) ?corner 'miter)->bbox() == list(-1.0 0.0 10.0 11.0)  "size: corner directions bbox")
+    _Assert(g_sq->size(1 ?dir 'right ?corner 'miter)->bBox() == list(0.0 0.0 11.0 10.0)  "size: right bBox")
+    _Assert(g_sq->size(1 ?dir '(up down) ?corner 'miter)->bBox() == list(0.0 -1.0 10.0 11.0)  "size: vertical bBox")
+    _Assert(g_sq->size(1 ?dir '(left up) ?corner 'miter)->bBox() == list(-1.0 0.0 10.0 11.0)  "size: corner directions bBox")
     _Assert(g_sq->size(1 ?corner 'bevel)->area() == 142.0  "size: bevel area")
     _Assert(g_sq->size(1 ?corner 'none)->area() == 140.0  "size: none area")
     _Assert(g_sq->size(1 ?corner 'miter ?miterLimit 1)->area() < 144.0  "size: miter limit")
     _Assert(g_sq->size(1 ?corner 'round)->area() < 144.0  "size: round area")
     _Assert(g_sq->size(1 ?corner 'round)->area() > 100.0  "size: round grows")
-    _Assert(_SizeBoxNear(g_sq->size(1.2 ?ratio t)->bbox() list(-1.0 -1.0 11.0 11.0))  "size: ratio all bbox")
-    _Assert(_SizeBoxNear(g_sq->size(0.8 ?ratio t)->bbox() list(1.0 1.0 9.0 9.0))  "size: ratio shrink bbox")
-    _Assert(g_sq->size(1.2 ?ratio t ?dir 'right)->bbox() == list(0.0 0.0 12.0 10.0)  "size: ratio right bbox")
-    _Assert(_SizeBoxNear(g_sq->size(1.2 ?ratio t ?dir '(left right))->bbox() list(-1.0 0.0 11.0 10.0))  "size: ratio both x bbox")
+    _Assert(_SizeBoxNear(g_sq->size(1.2 ?ratio t)->bBox() list(-1.0 -1.0 11.0 11.0))  "size: ratio all bBox")
+    _Assert(_SizeBoxNear(g_sq->size(0.8 ?ratio t)->bBox() list(1.0 1.0 9.0 9.0))  "size: ratio shrink bBox")
+    _Assert(g_sq->size(1.2 ?ratio t ?dir 'right)->bBox() == list(0.0 0.0 12.0 10.0)  "size: ratio right bBox")
+    _Assert(_SizeBoxNear(g_sq->size(1.2 ?ratio t ?dir '(left right))->bBox() list(-1.0 0.0 11.0 10.0))  "size: ratio both x bBox")
 )
 
 let((g_hole g_r g_multi)

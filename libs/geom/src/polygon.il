@@ -23,7 +23,7 @@ defclass(Polygon () (
     centroid()
     contains()
     onBoundary()
-    bbox()
+    bBox()
     isClockwise()
     reverse()
     size()
@@ -268,7 +268,7 @@ procedure(_InstallPolygon(self "g")  ; -> any
             g_found
         )
     )
-    self->bbox = lambda(()  ; -> list[float]
+    self->bBox = lambda(()  ; -> list[float]
         ; 返回包围盒。
         ;
         ; **返回**

@@ -12,7 +12,7 @@ let((g_sq)
     _Assert(length(g_sq->edges()) == 4  "polygon: edge count")
     _Assert(g_sq->area() == 100.0  "polygon: area")
     _Assert(g_sq->perimeter() == 40.0  "polygon: perimeter")
-    _Assert(g_sq->bbox() == list(0.0 0.0 10.0 10.0)  "polygon: bbox")
+    _Assert(g_sq->bBox() == list(0.0 0.0 10.0 10.0)  "polygon: bBox")
     _Assert(g_sq->isClockwise() == nil  "polygon: ccw")
     _Assert(g_sq->reverse()->isClockwise()  "polygon: reverse cw")
     _Assert(g_sq->toSkill() == list(

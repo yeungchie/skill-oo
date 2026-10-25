@@ -22,7 +22,7 @@ defclass(Region () (
     centroid()
     contains()
     onBoundary()
-    bbox()
+    bBox()
     isEmpty()
     size()
     or()
@@ -177,14 +177,14 @@ procedure(_InstallRegion(self "g")  ; -> any
             g_found
         )
     )
-    self->bbox = lambda(()  ; -> list[float] | nil
+    self->bBox = lambda(()  ; -> list[float] | nil
         ; 返回包围盒并集。
         ;
         ; **返回**
         ;   (list[float]|nil) - (xmin ymin xmax ymax)；空区域 nil
         let((l_box l_b)
             foreach(g_p self->_data->polygons
-                l_b = g_p->bbox()
+                l_b = g_p->bBox()
                 if(l_box == nil
                     l_box = copy(l_b)
                     l_box = list(

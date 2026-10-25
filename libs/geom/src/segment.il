@@ -29,7 +29,7 @@ defclass(Segment () (
     nearestPoint()
     distanceTo()
     contains()
-    bbox()
+    bBox()
     intersection()
     toSkill()
 ))
@@ -303,7 +303,7 @@ procedure(_InstallSegment(self "g")  ; -> any
             _OnSegment(self->_data->start self->_data->end g_p n_eps)
         )
     )
-    self->bbox = lambda(()  ; -> list[float]
+    self->bBox = lambda(()  ; -> list[float]
         ; 返回包围盒。
         ;
         ; **返回**

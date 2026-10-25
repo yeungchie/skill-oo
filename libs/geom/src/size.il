@@ -211,8 +211,8 @@ procedure(_SizeEdgeDistance(n_nx n_ny n_width n_height l_dirs n_value t_ratio "n
     ; **参数**
     ;   n_nx      (float)     - 外法线 x
     ;   n_ny      (float)     - 外法线 y
-    ;   n_width   (float)     - 原 bbox 宽度
-    ;   n_height  (float)     - 原 bbox 高度
+    ;   n_width   (float)     - 原 bBox 宽度
+    ;   n_height  (float)     - 原 bBox 高度
     ;   l_dirs    (list[sym]) - 方向
     ;   n_value   (num)       - 距离或倍率
     ;   t_ratio   (t|nil)     - 倍率模式
@@ -451,7 +451,7 @@ procedure(_SizePolygon(self n_value g_dir g_ratio g_corner g_miterLimit g_roundS
             g_roundSegments "ycGeom::Polygon->size")
         l_dirs = car(l_check)
         t_ratio = cadr(l_check)
-        l_box = self->bbox()
+        l_box = self->bBox()
         n_width = _Nth1(3 l_box) - _Nth1(1 l_box)
         n_height = _Nth1(4 l_box) - _Nth1(2 l_box)
         n_limit = _SizeMiterLimit(g_miterLimit)

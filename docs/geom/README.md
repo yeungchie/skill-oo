@@ -65,7 +65,10 @@ g_a->or(g_b)->area()
 构造不可变平面点。
 
 ```text
-ycGeom::Point(n_x n_y)
+ycGeom::Point(
+    n_x
+    n_y
+)
 ycGeom::Point(l_xy)
 => Point
 ```
@@ -142,7 +145,10 @@ Point->midpoint(g_other)
 #### translate <sub>`method`</sub>
 
 ```text
-Point->translate(n_dx n_dy)
+Point->translate(
+    n_dx
+    n_dy
+)
 => Point
 ```
 
@@ -156,7 +162,10 @@ Point->translate(n_dx n_dy)
 #### equals <sub>`method`</sub>
 
 ```text
-Point->equals(g_other [ ?eps ])
+Point->equals(
+    g_other
+    [ ?eps ]
+)
 => t | nil
 ```
 
@@ -186,9 +195,17 @@ Point->toSkill()
 构造不可变线段；零长度合法。
 
 ```text
-ycGeom::Segment(g_start g_end)
+ycGeom::Segment(
+    g_start
+    g_end
+)
 ycGeom::Segment(l_points)
-ycGeom::Segment(n_x1 n_y1 n_x2 n_y2)
+ycGeom::Segment(
+    n_x1
+    n_y1
+    n_x2
+    n_y2
+)
 => Segment
 ```
 
@@ -305,7 +322,10 @@ Segment->distanceTo(g_point)
 #### contains <sub>`method`</sub>
 
 ```text
-Segment->contains(g_point [ ?eps ])
+Segment->contains(
+    g_point
+    [ ?eps ]
+)
 => t | nil
 ```
 
@@ -316,10 +336,10 @@ Segment->contains(g_point [ ?eps ])
 | `g_point` | 查询点 |
 | `?eps` | 容差；默认 `1e-9` |
 
-#### bbox <sub>`method`</sub>
+#### bBox <sub>`method`</sub>
 
 ```text
-Segment->bbox()
+Segment->bBox()
 => list[float]
 ```
 
@@ -328,7 +348,10 @@ Segment->bbox()
 #### intersection <sub>`method`</sub>
 
 ```text
-Segment->intersection(g_other [ ?eps ])
+Segment->intersection(
+    g_other
+    [ ?eps ]
+)
 => Point | Segment | nil
 ```
 
@@ -359,9 +382,17 @@ Segment->toSkill()
 构造不可变无限直线。
 
 ```text
-ycGeom::Line(g_p1 g_p2)
+ycGeom::Line(
+    g_p1
+    g_p2
+)
 ycGeom::Line(l_points)
-ycGeom::Line(n_x1 n_y1 n_x2 n_y2)
+ycGeom::Line(
+    n_x1
+    n_y1
+    n_x2
+    n_y2
+)
 => Line
 ```
 
@@ -473,7 +504,10 @@ Line->distanceTo(g_point)
 #### contains <sub>`method`</sub>
 
 ```text
-Line->contains(g_point [ ?eps ])
+Line->contains(
+    g_point
+    [ ?eps ]
+)
 => t | nil
 ```
 
@@ -487,7 +521,10 @@ Line->contains(g_point [ ?eps ])
 #### isParallel <sub>`method`</sub>
 
 ```text
-Line->isParallel(g_line [ ?eps ])
+Line->isParallel(
+    g_line
+    [ ?eps ]
+)
 => t | nil
 ```
 
@@ -501,7 +538,10 @@ Line->isParallel(g_line [ ?eps ])
 #### intersection <sub>`method`</sub>
 
 ```text
-Line->intersection(g_other [ ?eps ])
+Line->intersection(
+    g_other
+    [ ?eps ]
+)
 => Point | Segment | nil
 ```
 
@@ -590,7 +630,10 @@ Polygon->area()
 #### perimeter <sub>`method`</sub>
 
 ```text
-Polygon->perimeter([ ?includeSeams ] [ ?eps ])
+Polygon->perimeter(
+    [ ?includeSeams ]
+    [ ?eps ]
+)
 => float
 ```
 
@@ -613,7 +656,11 @@ Polygon->centroid()
 #### contains <sub>`method`</sub>
 
 ```text
-Polygon->contains(g_point [ ?boundary ] [ ?eps ])
+Polygon->contains(
+    g_point
+    [ ?boundary ]
+    [ ?eps ]
+)
 => t | nil
 ```
 
@@ -635,7 +682,11 @@ g_p->contains(ycGeom::Point(0 0) ?boundary "outside")
 #### onBoundary <sub>`method`</sub>
 
 ```text
-Polygon->onBoundary(g_point [ ?includeSeams ] [ ?eps ])
+Polygon->onBoundary(
+    g_point
+    [ ?includeSeams ]
+    [ ?eps ]
+)
 => t | nil
 ```
 
@@ -647,10 +698,10 @@ Polygon->onBoundary(g_point [ ?includeSeams ] [ ?eps ])
 | `?includeSeams` | t 时把切割线视为边界；默认 nil |
 | `?eps` | 容差；默认 `1e-9` |
 
-#### bbox <sub>`method`</sub>
+#### bBox <sub>`method`</sub>
 
 ```text
-Polygon->bbox()
+Polygon->bBox()
 => list[float]
 ```
 
@@ -681,8 +732,14 @@ Polygon->reverse()
 #### size <sub>`method`</sub>
 
 ```text
-Polygon->size(n_value [ ?dir 'all ] [ ?ratio nil ] [ ?corner 'miter ]
-                     [ ?miterLimit 4 ] [ ?roundSegments 8 ])
+Polygon->size(
+    n_value
+    [ ?dir 'all ]
+    [ ?ratio nil ]
+    [ ?corner 'miter ]
+    [ ?miterLimit 4 ]
+    [ ?roundSegments 8 ]
+)
 => Region
 ```
 
@@ -701,18 +758,22 @@ Polygon->size(n_value [ ?dir 'all ] [ ?ratio nil ] [ ?corner 'miter ]
 
 ```lisp
 g_sq = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
-g_sq->size(1 ?corner 'miter)->bbox()
+g_sq->size(1 ?corner 'miter)->bBox()
 ; => (-1.0 -1.0 11.0 11.0)
-g_sq->size(1 ?dir 'right ?corner 'miter)->bbox()
+g_sq->size(1 ?dir 'right ?corner 'miter)->bBox()
 ; => (0.0 0.0 11.0 10.0)
-g_sq->size(1.2 ?ratio t ?dir 'right)->bbox()
+g_sq->size(1.2 ?ratio t ?dir 'right)->bBox()
 ; => (0.0 0.0 12.0 10.0)
 ```
 
 #### or <sub>`method`</sub>
 
 ```text
-Polygon->or(g_other [ ?grid ] [ ?eps ])
+Polygon->or(
+    g_other
+    [ ?grid ]
+    [ ?eps ]
+)
 => Region
 ```
 
@@ -727,7 +788,11 @@ Polygon->or(g_other [ ?grid ] [ ?eps ])
 #### and <sub>`method`</sub>
 
 ```text
-Polygon->and(g_other [ ?grid ] [ ?eps ])
+Polygon->and(
+    g_other
+    [ ?grid ]
+    [ ?eps ]
+)
 => Region
 ```
 
@@ -742,7 +807,11 @@ Polygon->and(g_other [ ?grid ] [ ?eps ])
 #### not <sub>`method`</sub>
 
 ```text
-Polygon->not(g_other [ ?grid ] [ ?eps ])
+Polygon->not(
+    g_other
+    [ ?grid ]
+    [ ?eps ]
+)
 => Region
 ```
 
@@ -757,7 +826,11 @@ Polygon->not(g_other [ ?grid ] [ ?eps ])
 #### xor <sub>`method`</sub>
 
 ```text
-Polygon->xor(g_other [ ?grid ] [ ?eps ])
+Polygon->xor(
+    g_other
+    [ ?grid ]
+    [ ?eps ]
+)
 => Region
 ```
 
@@ -792,7 +865,12 @@ Polygon->toSkill()
 构造不可变区域；空区域合法。
 
 ```text
-ycGeom::Region(l_polygons [ ?normalize ] [ ?grid ] [ ?eps ])
+ycGeom::Region(
+    l_polygons
+    [ ?normalize ]
+    [ ?grid ]
+    [ ?eps ]
+)
 => Region
 ```
 
@@ -842,7 +920,10 @@ Region->area()
 #### perimeter <sub>`method`</sub>
 
 ```text
-Region->perimeter([ ?includeSeams ] [ ?eps ])
+Region->perimeter(
+    [ ?includeSeams ]
+    [ ?eps ]
+)
 => float
 ```
 
@@ -865,7 +946,11 @@ Region->centroid()
 #### contains <sub>`method`</sub>
 
 ```text
-Region->contains(g_point [ ?boundary ] [ ?eps ])
+Region->contains(
+    g_point
+    [ ?boundary ]
+    [ ?eps ]
+)
 => t | nil
 ```
 
@@ -880,7 +965,11 @@ Region->contains(g_point [ ?boundary ] [ ?eps ])
 #### onBoundary <sub>`method`</sub>
 
 ```text
-Region->onBoundary(g_point [ ?includeSeams ] [ ?eps ])
+Region->onBoundary(
+    g_point
+    [ ?includeSeams ]
+    [ ?eps ]
+)
 => t | nil
 ```
 
@@ -892,10 +981,10 @@ Region->onBoundary(g_point [ ?includeSeams ] [ ?eps ])
 | `?includeSeams` | t 时计入切割线；默认 nil |
 | `?eps` | 容差；默认 `1e-9` |
 
-#### bbox <sub>`method`</sub>
+#### bBox <sub>`method`</sub>
 
 ```text
-Region->bbox()
+Region->bBox()
 => list[float] | nil
 ```
 
@@ -913,8 +1002,14 @@ Region->isEmpty()
 #### size <sub>`method`</sub>
 
 ```text
-Region->size(n_value [ ?dir 'all ] [ ?ratio nil ] [ ?corner 'miter ]
-                    [ ?miterLimit 4 ] [ ?roundSegments 8 ])
+Region->size(
+    n_value
+    [ ?dir 'all ]
+    [ ?ratio nil ]
+    [ ?corner 'miter ]
+    [ ?miterLimit 4 ]
+    [ ?roundSegments 8 ]
+)
 => Region
 ```
 
@@ -939,7 +1034,11 @@ g_r->size(1)->area()
 #### or <sub>`method`</sub>
 
 ```text
-Region->or(g_other [ ?grid ] [ ?eps ])
+Region->or(
+    g_other
+    [ ?grid ]
+    [ ?eps ]
+)
 => Region
 ```
 
@@ -961,7 +1060,11 @@ g_a->or(g_b)->area()
 #### and <sub>`method`</sub>
 
 ```text
-Region->and(g_other [ ?grid ] [ ?eps ])
+Region->and(
+    g_other
+    [ ?grid ]
+    [ ?eps ]
+)
 => Region
 ```
 
@@ -981,7 +1084,11 @@ g_a->and(g_b)->area()
 #### not <sub>`method`</sub>
 
 ```text
-Region->not(g_other [ ?grid ] [ ?eps ])
+Region->not(
+    g_other
+    [ ?grid ]
+    [ ?eps ]
+)
 => Region
 ```
 
@@ -1001,7 +1108,11 @@ g_a->not(g_b)->area()
 #### xor <sub>`method`</sub>
 
 ```text
-Region->xor(g_other [ ?grid ] [ ?eps ])
+Region->xor(
+    g_other
+    [ ?grid ]
+    [ ?eps ]
+)
 => Region
 ```
 
