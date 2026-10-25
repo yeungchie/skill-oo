@@ -103,6 +103,17 @@ procedure(_LineP(g_x "g")  ; -> t | nil
     classOf(g_x) == findClass('ycGeom::Line)
 )
 
+procedure(_RectP(g_x "g")  ; -> t | nil
+    ; 判断对象是否为 Rect（内部实现）。
+    ;
+    ; **参数**
+    ;   g_x  (any) - 待判断对象
+    ;
+    ; **返回**
+    ;   (t|nil) - 是 Rect 为 t
+    classOf(g_x) == findClass('ycGeom::Rect)
+)
+
 procedure(_PolygonP(g_x "g")  ; -> t | nil
     ; 判断对象是否为 Polygon（内部实现）。
     ;
@@ -333,18 +344,33 @@ procedure(_AsPolygon(g_x t_ctx "gt")  ; -> Polygon
 )
 
 procedure(_AsRegion(g_x t_ctx "gt")  ; -> Region
-    ; 校验并返回 Region。
+    ; 归一化为 Region：接受 Region、Polygon、Rect 或点列。
     ;
     ; **参数**
-    ;   g_x    (any) - 待校验对象
+    ;   g_x    (any) - 待归一化对象
     ;   t_ctx  (str) - 错误上下文
     ;
     ; **返回**
-    ;   (Region) - 原对象；非 Region 时 error
-    unless(_RegionP(g_x)
-        error("%s: expected a Region, got %A" t_ctx g_x)
+    ;   (Region) - 原 Region，或由二维图形/点列构造的 Region；非法时 error
+    cond(
+        (_RegionP(g_x) g_x)
+        (_PolygonP(g_x) Region(list(g_x) ?normalize nil))
+        (_RectP(g_x)
+            if(g_x->width() <= 0.0 || g_x->height() <= 0.0
+                    || g_x->area() <= 1e-9
+                Region(nil)
+                Region(list(Polygon(list(
+                    Point(g_x->xmin() g_x->ymin())
+                    Point(g_x->xmax() g_x->ymin())
+                    Point(g_x->xmax() g_x->ymax())
+                    Point(g_x->xmin() g_x->ymax())
+                ))) ?normalize nil)
+            )
+        )
+        (listp(g_x) Region(list(Polygon(g_x)) ?normalize nil))
+        (t error("%s: expected a Region, Polygon, Rect, or point list, got %A"
+            t_ctx g_x))
     )
-    g_x
 )
 
 procedure(_BoundaryMode(g_boundary "g")  ; -> str

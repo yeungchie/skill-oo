@@ -113,12 +113,12 @@ defmethod(printself (self(Polygon))  ; -> str
         length(self->_data->points) abs(_SignedArea(self->_data->points)))
 )
 
-procedure(_PolygonOp(self g_other g_op n_grid n_eps t_ctx "gggggt")  ; -> Region
-    ; 对两个 Polygon 执行布尔运算并返回 Region（内部实现）。
+procedure(_ShapeOp(g_left g_other g_op n_grid n_eps t_ctx "gggggt")  ; -> Region
+    ; 对任意二维图形执行布尔运算并返回 Region（内部实现）。
     ;
     ; **参数**
-    ;   self     (Polygon)   - 左操作数
-    ;   g_other  (Polygon)   - 右操作数
+    ;   g_left   (any)       - 左操作数：Polygon/Rect/Region/点列
+    ;   g_other  (any)       - 右操作数：Polygon/Rect/Region/点列
     ;   g_op     (sym)       - union/intersection/difference/xor
     ;   n_grid   (float|nil) - 网格
     ;   n_eps    (float|nil) - 容差
@@ -126,9 +126,11 @@ procedure(_PolygonOp(self g_other g_op n_grid n_eps t_ctx "gggggt")  ; -> Region
     ;
     ; **返回**
     ;   (Region) - 结果区域
-    let((g_o l_res)
-        g_o = _AsPolygon(g_other t_ctx)
-        l_res = _Boolean(list(self) list(g_o) g_op n_grid n_eps)
+    let((g_l g_r l_res)
+        g_l = _AsRegion(g_left t_ctx)
+        g_r = _AsRegion(g_other t_ctx)
+        l_res = _Boolean(g_l->polygons() g_r->polygons()
+            g_op n_grid n_eps)
         Region(l_res ?normalize nil)
     )
 )
@@ -347,49 +349,49 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ; 返回并集。
         ;
         ; **参数**
-        ;   g_other  (Polygon)   - 另一多边形
+        ;   g_other  (Polygon|Rect|Region|list) - 另一二维图形或点列
         ;   ?grid    (num|nil)   - 网格；默认 nil
         ;   ?eps     (num|nil)   - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Region) - 并集区域
-        _PolygonOp(self g_other 'union grid eps "ycGeom::Polygon->or")
+        _ShapeOp(self g_other 'union grid eps "ycGeom::Polygon->or")
     )
     self->and = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
         ; 返回交集。
         ;
         ; **参数**
-        ;   g_other  (Polygon)   - 另一多边形
+        ;   g_other  (Polygon|Rect|Region|list) - 另一二维图形或点列
         ;   ?grid    (num|nil)   - 网格；默认 nil
         ;   ?eps     (num|nil)   - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Region) - 交集区域
-        _PolygonOp(self g_other 'intersection grid eps "ycGeom::Polygon->and")
+        _ShapeOp(self g_other 'intersection grid eps "ycGeom::Polygon->and")
     )
     self->not = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
         ; 返回二元差集。
         ;
         ; **参数**
-        ;   g_other  (Polygon)   - 另一多边形
+        ;   g_other  (Polygon|Rect|Region|list) - 另一二维图形或点列
         ;   ?grid    (num|nil)   - 网格；默认 nil
         ;   ?eps     (num|nil)   - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Region) - A-B 区域
-        _PolygonOp(self g_other 'difference grid eps "ycGeom::Polygon->not")
+        _ShapeOp(self g_other 'difference grid eps "ycGeom::Polygon->not")
     )
     self->xor = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
         ; 返回对称差。
         ;
         ; **参数**
-        ;   g_other  (Polygon)   - 另一多边形
+        ;   g_other  (Polygon|Rect|Region|list) - 另一二维图形或点列
         ;   ?grid    (num|nil)   - 网格；默认 nil
         ;   ?eps     (num|nil)   - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Region) - 对称差区域
-        _PolygonOp(self g_other 'xor grid eps "ycGeom::Polygon->xor")
+        _ShapeOp(self g_other 'xor grid eps "ycGeom::Polygon->xor")
     )
     self->toSkill = lambda(()  ; -> list[list[float]]
         ; 转换为纯坐标点列。

@@ -23,6 +23,7 @@ addToNamespace("ycGeom"
         _PointP
         _SegmentP
         _LineP
+        _RectP
         _PolygonP
         _RegionP
         _PairP
@@ -48,7 +49,7 @@ addToNamespace("ycGeom"
         _FirstAdjPoint
         _RingPointsClean
         _CheckPolygon
-        _PolygonOp
+        _ShapeOp
         _SegPointAt
         _LineSegmentIntersection
         _SegSegIntersection

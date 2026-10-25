@@ -41,6 +41,40 @@ _AssertError(lambda(() ycGeom::Rect("a" "b") t)  "rect: non-point rejected")
 _AssertError(lambda(() ycGeom::Rect(1 2 3 "x") t)  "rect: nonnumeric coordinate rejected")
 _AssertError(lambda(() ycGeom::Rect(0 0 1 1)->contains(1) t)  "rect: bad contains type")
 
+let((g_a g_b)
+    g_a = ycGeom::Rect(0 0 4 4)
+    g_b = ycGeom::Rect(2 2 6 6)
+    _Assert(g_a->or(g_b)->area() == 28.0  "rect: or")
+    _Assert(g_a->and(g_b)->area() == 4.0  "rect: and")
+    _Assert(g_a->not(g_b)->area() == 12.0  "rect: not")
+    _Assert(g_a->xor(g_b)->area() == 24.0  "rect: xor")
+)
+
+let((g_rect g_poly g_region)
+    g_rect = ycGeom::Rect(0 0 4 4)
+    g_poly = ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))
+    g_region = ycGeom::Region(list(g_poly))
+    _Assert(g_rect->or(g_poly)->area() == 28.0  "rect: or Polygon")
+    _Assert(g_poly->or(g_region)->area() == 16.0  "polygon: or Region")
+    _Assert(g_region->or(g_poly)->area() == 16.0  "region: or Polygon")
+    _Assert(g_poly->and(g_rect)->area() == 4.0  "polygon: and Rect")
+    _Assert(g_rect->and(g_region)->area() == 4.0  "rect: and Region")
+    _Assert(g_region->or(g_rect)->area() == 28.0  "region: or Rect")
+    _Assert(g_rect->or('((4 0) (8 0) (8 4) (4 4)))->area() == 32.0  "rect: or point list")
+)
+
+let((g_z g_r)
+    g_z = ycGeom::Rect(1 1 1 1)
+    g_r = ycGeom::Rect(0 0 2 2)
+    _Assert(g_z->or(g_r)->area() == 4.0  "rect: degenerate union")
+    _Assert(ycGeom::Rect(0 0 1e-10 1e-10)->or(g_r)->area() == 4.0  "rect: tiny treated empty")
+    _Assert(g_r->and(g_z)->area() == 0.0  "rect: degenerate intersection")
+)
+
+_AssertError(lambda(() ycGeom::Rect(0 0 1 1)->or(ycGeom::Segment(0 0 1 1)) t)  "rect: booleans reject Segment")
+_AssertError(lambda(() ycGeom::Polygon('((0 0) (1 0) (0 1)))->or(ycGeom::Line(0 0 1 0)) t)  "polygon: booleans reject Line")
+_AssertError(lambda(() ycGeom::Region(nil)->and(ycGeom::Segment(0 0 1 1)) t)  "region: booleans reject Segment")
+
 _TestRectDone = t
 
 ; END

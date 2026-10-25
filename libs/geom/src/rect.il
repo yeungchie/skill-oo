@@ -38,6 +38,10 @@ defclass(Rect () (
     center()
     contains()
     bBox()
+    or()
+    and()
+    not()
+    xor()
     toSkill()
 ))
 
@@ -140,6 +144,54 @@ procedure(_InstallRect(self "g")  ; -> t
             list(self->_data->xmin self->_data->ymin)
             list(self->_data->xmax self->_data->ymax)
         )
+    )
+    self->or = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
+        ; 返回并集。
+        ;
+        ; **参数**
+        ;   g_other  (Polygon|Rect|Region|list) - 另一二维图形或点列
+        ;   ?grid    (num|nil)                  - 网格；默认 nil
+        ;   ?eps     (num|nil)                  - 容差；默认 nil（1e-9）
+        ;
+        ; **返回**
+        ;   (Region) - 并集区域
+        _ShapeOp(self g_other 'union grid eps "ycGeom::Rect->or")
+    )
+    self->and = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
+        ; 返回交集。
+        ;
+        ; **参数**
+        ;   g_other  (Polygon|Rect|Region|list) - 另一二维图形或点列
+        ;   ?grid    (num|nil)                  - 网格；默认 nil
+        ;   ?eps     (num|nil)                  - 容差；默认 nil（1e-9）
+        ;
+        ; **返回**
+        ;   (Region) - 交集区域
+        _ShapeOp(self g_other 'intersection grid eps "ycGeom::Rect->and")
+    )
+    self->not = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
+        ; 返回二元差集。
+        ;
+        ; **参数**
+        ;   g_other  (Polygon|Rect|Region|list) - 另一二维图形或点列
+        ;   ?grid    (num|nil)                  - 网格；默认 nil
+        ;   ?eps     (num|nil)                  - 容差；默认 nil（1e-9）
+        ;
+        ; **返回**
+        ;   (Region) - A-B 区域
+        _ShapeOp(self g_other 'difference grid eps "ycGeom::Rect->not")
+    )
+    self->xor = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
+        ; 返回对称差。
+        ;
+        ; **参数**
+        ;   g_other  (Polygon|Rect|Region|list) - 另一二维图形或点列
+        ;   ?grid    (num|nil)                  - 网格；默认 nil
+        ;   ?eps     (num|nil)                  - 容差；默认 nil（1e-9）
+        ;
+        ; **返回**
+        ;   (Region) - 对称差区域
+        _ShapeOp(self g_other 'xor grid eps "ycGeom::Rect->xor")
     )
     self->toSkill = lambda(()  ; -> list[list[float]]
         ; 转换为纯坐标列表。

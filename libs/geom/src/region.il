@@ -240,7 +240,7 @@ procedure(_InstallRegion(self "g")  ; -> t
         ; 返回并集。
         ;
         ; **参数**
-        ;   g_other  (Region)     - 另一区域
+        ;   g_other  (Region|Polygon|Rect|list) - 另一二维图形或点列
         ;   ?grid    (num|nil)    - 网格；默认 nil
         ;   ?eps     (num|nil)    - 容差；默认 nil（1e-9）
         ;
@@ -257,7 +257,7 @@ procedure(_InstallRegion(self "g")  ; -> t
         ; 返回交集。
         ;
         ; **参数**
-        ;   g_other  (Region)     - 另一区域
+        ;   g_other  (Region|Polygon|Rect|list) - 另一二维图形或点列
         ;   ?grid    (num|nil)    - 网格；默认 nil
         ;   ?eps     (num|nil)    - 容差；默认 nil（1e-9）
         ;
@@ -274,7 +274,7 @@ procedure(_InstallRegion(self "g")  ; -> t
         ; 返回 A-B。
         ;
         ; **参数**
-        ;   g_other  (Region)     - 另一区域
+        ;   g_other  (Region|Polygon|Rect|list) - 另一二维图形或点列
         ;   ?grid    (num|nil)    - 网格；默认 nil
         ;   ?eps     (num|nil)    - 容差；默认 nil（1e-9）
         ;
@@ -291,7 +291,7 @@ procedure(_InstallRegion(self "g")  ; -> t
         ; 返回对称差。
         ;
         ; **参数**
-        ;   g_other  (Region)     - 另一区域
+        ;   g_other  (Region|Polygon|Rect|list) - 另一二维图形或点列
         ;   ?grid    (num|nil)    - 网格；默认 nil
         ;   ?eps     (num|nil)    - 容差；默认 nil（1e-9）
         ;

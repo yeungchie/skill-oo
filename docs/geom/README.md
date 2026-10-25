@@ -2,7 +2,7 @@
 
 [返回首页](../../README.md)
 
-Cadence SKILL++ 的平面几何库：点、线段、直线、keyhole 多边形与区域布尔运算。
+Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole 多边形与区域布尔运算。
 
 ## 概要
 
@@ -12,6 +12,7 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、keyhole 多边形�
 - `Region` 表示 0..n 个多边形的并集，默认归一化为互不重叠的多边形集合。
 - `?eps` 默认 `1e-9`，`?grid` 为正数或 nil；参数类型不符或取值非法时以 `error()` 中断。
 - 对象按不可变值使用；运算返回新对象，不修改输入。
+- `Polygon`、`Rect`、`Region` 可互相作为布尔运算的右操作数；结果统一为 `Region`。
 - 例程中 `; =>` 表示返回值；六类对象都提供 `toSkill()`，输出只含 list 与 float 的原生数据。
 
 ![ycGeom 六类对象概览](img/overview.svg)
@@ -681,6 +682,82 @@ Rect->bBox()
 
 返回 `((xmin ymin) (xmax ymax))`。
 
+#### or <sub>`method`</sub>
+
+```text
+Rect->or(
+    g_other
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
+)
+=> Region
+```
+
+返回与另一二维图形的并集 Region。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_other | Polygon / Rect / Region / list | | 另一二维图形或点列 |
+| ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+
+#### and <sub>`method`</sub>
+
+```text
+Rect->and(
+    g_other
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
+)
+=> Region
+```
+
+返回与另一二维图形的交集 Region；无公共部分时返回空 Region。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_other | Polygon / Rect / Region / list | | 另一二维图形或点列 |
+| ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+
+#### not <sub>`method`</sub>
+
+```text
+Rect->not(
+    g_other
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
+)
+=> Region
+```
+
+返回二元差集 `A - B` 的 Region；`not` 不是一元补集。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_other | Polygon / Rect / Region / list | | 另一二维图形或点列 |
+| ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+
+#### xor <sub>`method`</sub>
+
+```text
+Rect->xor(
+    g_other
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
+)
+=> Region
+```
+
+返回与另一二维图形的对称差 Region。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_other | Polygon / Rect / Region / list | | 另一二维图形或点列 |
+| ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+
 #### toSkill <sub>`method`</sub>
 
 ```text
@@ -949,11 +1026,11 @@ Polygon->or(
 => Region
 ```
 
-返回与另一多边形的并集 Region。
+返回与另一二维图形的并集 Region。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Polygon / list | | 另一 `Polygon` 或点列；非法类型以 `error()` 中断 |
+| g_other | Polygon / Rect / Region / list | | 另一二维图形或点列；非法类型以 `error()` 中断 |
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
@@ -968,11 +1045,11 @@ Polygon->and(
 => Region
 ```
 
-返回与另一多边形的交集 Region；无公共部分时返回空 Region。
+返回与另一二维图形的交集 Region；无公共部分时返回空 Region。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Polygon / list | | 另一 `Polygon` 或点列；其他类型以 `error()` 中断 |
+| g_other | Polygon / Rect / Region / list | | 另一二维图形或点列；其他类型以 `error()` 中断 |
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
@@ -987,11 +1064,11 @@ Polygon->not(
 => Region
 ```
 
-返回二元差集 `A - B` 的 Region；`not` 不是一元补集。
+返回与另一二维图形的二元差集 `A - B` 的 Region；`not` 不是一元补集。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Polygon / list | | 另一 `Polygon` 或点列；其他类型以 `error()` 中断 |
+| g_other | Polygon / Rect / Region / list | | 另一二维图形或点列；其他类型以 `error()` 中断 |
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
@@ -1006,11 +1083,11 @@ Polygon->xor(
 => Region
 ```
 
-返回与另一多边形的对称差 Region。
+返回与另一二维图形的对称差 Region。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Polygon / list | | 另一 `Polygon` 或点列；其他类型以 `error()` 中断 |
+| g_other | Polygon / Rect / Region / list | | 另一二维图形或点列；其他类型以 `error()` 中断 |
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
@@ -1261,7 +1338,7 @@ Region->or(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Region | | 另一 `Region`；其他类型以 `error()` 中断 |
+| g_other | Region / Polygon / Rect / list | | 另一二维图形或点列；其他类型以 `error()` 中断 |
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
@@ -1287,7 +1364,7 @@ Region->and(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Region | | 另一 `Region`；其他类型以 `error()` 中断 |
+| g_other | Region / Polygon / Rect / list | | 另一二维图形或点列；其他类型以 `error()` 中断 |
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
@@ -1313,7 +1390,7 @@ Region->not(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Region | | 另一 `Region`；其他类型以 `error()` 中断 |
+| g_other | Region / Polygon / Rect / list | | 另一二维图形或点列；其他类型以 `error()` 中断 |
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
@@ -1339,7 +1416,7 @@ Region->xor(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Region | | 另一 `Region`；其他类型以 `error()` 中断 |
+| g_other | Region / Polygon / Rect / list | | 另一二维图形或点列；其他类型以 `error()` 中断 |
 | ?grid n_grid | num / nil | nil | 布尔网格；默认 nil |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
@@ -1399,6 +1476,7 @@ g_hole->perimeter()
 - 默认 `?normalize t` 会把输入合并、裁剪为互不重叠的多边形集合。
 - `?normalize nil` 信任输入已互不重叠，跳过归一化；此时面积按各块面积求和。
 - `?grid` 把输入和输出顶点吸附到网格；吸附导致拓扑塌缩时以 `error()` 中断。
+- `Polygon`、`Rect`、`Region` 可互相参与 `or`/`and`/`not`/`xor`；右操作数也接受点列，结果统一为 `Region`。退化 `Rect`（宽/高为 0 或面积不超过 `1e-9`）与空 `Region` 按空集处理。
 
 ![区域布尔运算：并、交、差、对称差](img/boolean.svg)
 
@@ -1415,6 +1493,8 @@ g_b = ycGeom::Polygon(list(
 ))
 ycGeom::Region(list(g_a))->and(ycGeom::Region(list(g_b)))->area()
 ; => 4.0
+ycGeom::Rect(0 0 4 4)->or(g_b)->area()
+; => 28.0
 ```
 
 [返回首页](../../README.md)
