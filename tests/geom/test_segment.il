@@ -46,6 +46,16 @@ _AssertError(lambda(() ycGeom::Segment(1 2) t)  "segment: non-Point start reject
 _AssertError(lambda(() ycGeom::Segment(ycGeom::Point(0 0) 2) t)  "segment: non-Point end rejected")
 _AssertError(lambda(() ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(1 1))->intersection(1) t)  "segment: bad intersection type")
 
+let((g_s g_o)
+    g_o = ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(3 4))
+    _Assert(ycGeom::Segment(list(ycGeom::Point(0 0) ycGeom::Point(3 4)))->toSkill() == g_o->toSkill()  "segment: two-point list form")
+    _Assert(ycGeom::Segment(list(list(0 0) list(3 4)))->toSkill() == g_o->toSkill()  "segment: pair list form")
+    _Assert(ycGeom::Segment(0 0 3 4)->toSkill() == g_o->toSkill()  "segment: four-number form")
+    _Assert(ycGeom::Segment(g_o->toSkill())->toSkill() == g_o->toSkill()  "segment: toSkill roundtrip")
+)
+_AssertError(lambda(() ycGeom::Segment(1 2) t)  "segment: two numbers rejected")
+_AssertError(lambda(() ycGeom::Segment(list(list(1 2))) t)  "segment: one-point list rejected")
+
 _TestSegmentDone = t
 
 ; END

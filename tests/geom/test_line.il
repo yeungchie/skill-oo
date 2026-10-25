@@ -37,6 +37,16 @@ _AssertError(lambda(() ycGeom::Line(ycGeom::Point(0 0) ycGeom::Point(0 0)) t)  "
 _AssertError(lambda(() ycGeom::Line(1 ycGeom::Point(0 0)) t)  "line: non-Point rejected")
 _AssertError(lambda(() ycGeom::Line(ycGeom::Point(0 0) ycGeom::Point(1 1))->isParallel(1) t)  "line: bad parallel type")
 
+let((g_l g_o)
+    g_o = ycGeom::Line(ycGeom::Point(0 0) ycGeom::Point(3 4))
+    _Assert(ycGeom::Line(list(ycGeom::Point(0 0) ycGeom::Point(3 4)))->toSkill() == g_o->toSkill()  "line: two-point list form")
+    _Assert(ycGeom::Line(list(list(0 0) list(3 4)))->toSkill() == g_o->toSkill()  "line: pair list form")
+    _Assert(ycGeom::Line(0 0 3 4)->toSkill() == g_o->toSkill()  "line: four-number form")
+    _Assert(ycGeom::Line(g_o->toSkill())->toSkill() == g_o->toSkill()  "line: toSkill roundtrip")
+)
+_AssertError(lambda(() ycGeom::Line(1 2) t)  "line: two numbers rejected")
+_AssertError(lambda(() ycGeom::Line(list(list(1 2))) t)  "line: one-point list rejected")
+
 _TestLineDone = t
 
 ; END

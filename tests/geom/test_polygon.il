@@ -85,6 +85,20 @@ let((g_tri)
     _AssertError(lambda(() g_tri->onBoundary(ycGeom::Point(0 0) ?includeSeams "x") t)  "polygon: bad includeSeams")
 )
 
+let((g_sq g_pairs)
+    g_sq = ycGeom::Polygon(list(
+        ycGeom::Point(0 0) ycGeom::Point(4 0)
+        ycGeom::Point(4 4) ycGeom::Point(0 4)
+    ))
+    g_pairs = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
+    _Assert(g_pairs->toSkill() == g_sq->toSkill()  "polygon: pair list form")
+    _Assert(ycGeom::Polygon(list(0 0 4 0 4 4 0 4))->toSkill() == g_sq->toSkill()  "polygon: flat number form")
+    _Assert(ycGeom::Polygon(g_sq->toSkill())->toSkill() == g_sq->toSkill()  "polygon: toSkill roundtrip")
+    _Assert(ycGeom::Polygon('((0 0) (0 1) (1 1)))->area() == 0.5  "polygon: user pair example")
+)
+_AssertError(lambda(() ycGeom::Polygon(list(0 0 4 0 4)) t)  "polygon: odd flat list rejected")
+_AssertError(lambda(() ycGeom::Polygon(list(list(0 0) list(4 0))) t)  "polygon: two points rejected")
+
 _TestPolygonDone = t
 
 ; END

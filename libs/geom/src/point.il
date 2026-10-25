@@ -139,17 +139,41 @@ defmethod(initializeInstance (self(Point) \@rest _args)
 )
 )
 
-procedure(Point(n_x n_y "nn")  ; -> Point
+procedure(Point(\@rest l_args "g")  ; -> Point
     ; 构造不可变平面点。
     ;
     ; **参数**
-    ;   n_x  (num) - x 坐标
-    ;   n_y  (num) - y 坐标
+    ;   l_args  (list) - (x y) 或两个数值实参
     ;
     ; **返回**
-    ;   (Point) - 坐标已转 flonum 的新点
-    makeInstance('Point ?_data
-        makeInstance('PointData ?x float(n_x) ?y float(n_y)))
+    ;   (Point) - 坐标已转 flonum 的新点；格式不合法 error
+    let((n_x n_y g_pair)
+        cond(
+            (length(l_args) == 2
+                n_x = _Nth1(1 l_args)
+                n_y = _Nth1(2 l_args)
+                unless(numberp(n_x) && numberp(n_y)
+                    error("ycGeom::Point: coordinates must be numbers, got %A"
+                        l_args)
+                )
+            )
+            (length(l_args) == 1
+                g_pair = _Nth1(1 l_args)
+                unless(_PairP(g_pair)
+                    error("ycGeom::Point: expected (x y) or two numbers, got %A"
+                        g_pair)
+                )
+                n_x = car(g_pair)
+                n_y = cadr(g_pair)
+            )
+            (t
+                error("ycGeom::Point: expected (x y) or two numbers, got %A"
+                    l_args)
+            )
+        )
+        makeInstance('Point ?_data
+            makeInstance('PointData ?x float(n_x) ?y float(n_y)))
+    )
 )
 
 unuseNamespace("ycGeom")

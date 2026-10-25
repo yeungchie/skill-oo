@@ -59,6 +59,17 @@ _AssertError(lambda(() ycGeom::Region(list(ycGeom::Polygon(list(
 ))) ?grid 0) t)  "region: bad grid")
 _AssertError(lambda(() ycGeom::Region(list())->union(1) t)  "region: bad union type")
 
+let((g_r g_src)
+    g_src = ycGeom::Region(list(ycGeom::Polygon(list(
+        ycGeom::Point(0 0) ycGeom::Point(4 0)
+        ycGeom::Point(4 4) ycGeom::Point(0 4)
+    ))))
+    g_r = ycGeom::Region(list('((0 0) (4 0) (4 4) (0 4))))
+    _Assert(g_r->area() == g_src->area()  "region: pair list form")
+    _Assert(ycGeom::Region(g_src->toSkill())->area() == g_src->area()  "region: toSkill roundtrip")
+)
+_AssertError(lambda(() ycGeom::Region(list(1)) t)  "region: scalar element rejected")
+
 _TestRegionDone = t
 
 ; END

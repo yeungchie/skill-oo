@@ -316,13 +316,16 @@ procedure(Polygon(l_points "l")  ; -> Polygon
     ; 构造不可变 keyhole 多边形。
     ;
     ; **参数**
-    ;   l_points  (list[Point]) - 闭合点列；切割边以同一无向边往返出现两次表示
+    ;   l_points  (list) - Point 列表、(x y) 列表或扁平数值坐标
     ;
     ; **返回**
     ;   (Polygon) - 复制外层点列的新多边形；非法点列 error
-    _CheckPolygon(l_points 1e-9)
-    makeInstance('Polygon ?_data
-        makeInstance('PolygonData ?points copy(l_points)))
+    let((l_pts)
+        l_pts = _AsPointList(l_points "ycGeom::Polygon")
+        _CheckPolygon(l_pts 1e-9)
+        makeInstance('Polygon ?_data
+            makeInstance('PolygonData ?points copy(l_pts)))
+    )
 )
 
 unuseNamespace("ycGeom")

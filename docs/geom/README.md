@@ -66,6 +66,7 @@ g_a->union(g_b)->area()
 
 ```text
 ycGeom::Point(n_x n_y)
+ycGeom::Point(l_xy)
 => Point
 ```
 
@@ -75,6 +76,9 @@ ycGeom::Point(n_x n_y)
 | --- | --- | --- | --- |
 | `n_x` | num | | x 坐标 |
 | `n_y` | num | | y 坐标 |
+| `l_xy` | list[num] | | `(x y)` 坐标对 |
+
+也接受 `ycGeom::Point(list(1 2))` 与 `ycGeom::Point('(1 2))`。
 
 **返回值**
 
@@ -183,6 +187,8 @@ Point->toSkill()
 
 ```text
 ycGeom::Segment(g_start g_end)
+ycGeom::Segment(l_points)
+ycGeom::Segment(n_x1 n_y1 n_x2 n_y2)
 => Segment
 ```
 
@@ -190,8 +196,12 @@ ycGeom::Segment(g_start g_end)
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `g_start` | Point | | 起点 |
-| `g_end` | Point | | 终点 |
+| `g_start` | Point \| list[num] | | 起点 |
+| `g_end` | Point \| list[num] | | 终点 |
+| `l_points` | list | | 两点列表、两点坐标列表或扁平坐标 |
+| `n_x1` ... `n_y2` | num | | 四个端点坐标 |
+
+`Segment(segment->toSkill())` 与对象形式等价。
 
 **返回值**
 
@@ -350,6 +360,8 @@ Segment->toSkill()
 
 ```text
 ycGeom::Line(g_p1 g_p2)
+ycGeom::Line(l_points)
+ycGeom::Line(n_x1 n_y1 n_x2 n_y2)
 => Line
 ```
 
@@ -357,8 +369,10 @@ ycGeom::Line(g_p1 g_p2)
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `g_p1` | Point | | 点一 |
-| `g_p2` | Point | | 点二，必须与点一不同 |
+| `g_p1` | Point \| list[num] | | 点一 |
+| `g_p2` | Point \| list[num] | | 点二，必须与点一不同 |
+| `l_points` | list | | 两点列表、两点坐标列表或扁平坐标 |
+| `n_x1` ... `n_y2` | num | | 四个坐标 |
 
 **返回值**
 
@@ -525,7 +539,7 @@ ycGeom::Polygon(l_points)
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `l_points` | list[Point] | | 闭合点列；切割边以同一无向边往返出现两次表示 |
+| `l_points` | list | | Point 列表、(x y) 列表或扁平数值坐标；切割边以同一无向边往返出现两次表示 |
 
 **返回值**
 
@@ -534,13 +548,11 @@ ycGeom::Polygon(l_points)
 **例程**
 
 ```lisp
-g_p = ycGeom::Polygon(list(
-    ycGeom::Point(0 0)
-    ycGeom::Point(4 0)
-    ycGeom::Point(4 4)
-    ycGeom::Point(0 4)
-))
+g_p = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
 g_p->area()
+; => 16.0
+
+ycGeom::Polygon(list(0 0 4 0 4 4 0 4))->area()
 ; => 16.0
 ```
 
@@ -688,7 +700,7 @@ ycGeom::Region(l_polygons [ ?normalize ] [ ?grid ] [ ?eps ])
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `l_polygons` | list[Polygon] | | 多边形列表；nil 表示空区域 |
+| `l_polygons` | list | | Polygon 列表或点列列表；nil 表示空区域 |
 | `?normalize` | t \\| nil | `t` | 是否归一化为互不重叠 |
 | `?grid` | num \\| nil | nil | 布尔网格；只影响归一化 |
 | `?eps` | num \\| nil | nil | 容差；默认 `1e-9` |

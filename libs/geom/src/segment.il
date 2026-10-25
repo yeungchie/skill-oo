@@ -363,19 +363,21 @@ defmethod(initializeInstance (self(Segment) \@rest _args)
 )
 )
 
-procedure(Segment(g_start g_end "gg")  ; -> Segment
+procedure(Segment(\@rest l_args "g")  ; -> Segment
     ; 构造不可变线段。
     ;
     ; **参数**
-    ;   g_start  (Point) - 起点
-    ;   g_end    (Point) - 终点
+    ;   l_args  (list) - 两个点、两点列表、四个坐标，或点列
     ;
     ; **返回**
-    ;   (Segment) - 新线段；零长度合法
-    makeInstance('Segment ?_data
-        makeInstance('SegmentData
-            ?start _AsPoint(g_start "ycGeom::Segment")
-            ?end _AsPoint(g_end "ycGeom::Segment")))
+    ;   (Segment) - 新线段；零长度合法；格式不合法 error
+    let((l_pts)
+        l_pts = _TwoPoints(l_args "ycGeom::Segment")
+        makeInstance('Segment ?_data
+            makeInstance('SegmentData
+                ?start _Nth1(1 l_pts)
+                ?end _Nth1(2 l_pts)))
+    )
 )
 
 unuseNamespace("ycGeom")

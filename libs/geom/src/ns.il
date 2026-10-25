@@ -23,10 +23,14 @@ addToNamespace("ycGeom"
         _LineP
         _PolygonP
         _RegionP
+        _PairP
         _AsPoint
+        _AsPointList
+        _TwoPoints
         _AsSegment
         _AsLine
         _AsPolygon
+        _AsPolygonList
         _AsRegion
         _PtKey
         _EdgeKey

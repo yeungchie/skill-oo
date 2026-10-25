@@ -317,12 +317,7 @@ procedure(Region(l_polygons \@key (normalize t) (grid nil) (eps nil) "lggg")  ; 
         _Flag(normalize "normalize")
         n_grid = _Grid(grid)
         n_eps = _Eps(eps)
-        when(l_polygons
-            foreach(g_p l_polygons
-                _AsPolygon(g_p "ycGeom::Region")
-            )
-        )
-        t_polys = copy(l_polygons)
+        t_polys = _AsPolygonList(l_polygons "ycGeom::Region")
         when(normalize && t_polys
             t_polys = _UnionAll(t_polys n_grid n_eps)
         )

@@ -28,6 +28,17 @@ _AssertError(lambda(() ycGeom::Point(1 t) t)  "point: symbol y rejected")
 _AssertError(lambda(() ycGeom::Point(1 2)->distanceTo(1) t)  "point: non-Point distance rejected")
 _AssertError(lambda(() ycGeom::Point(1 2)->equals(1) t)  "point: non-Point equals rejected")
 
+let((g_p g_q)
+    g_p = ycGeom::Point(1 2)
+    g_q = ycGeom::Point(list(1 2))
+    _Assert(g_q->toSkill() == list(1.0 2.0)  "point: list form")
+    _Assert(g_q->equals(g_p)  "point: list form equals")
+    _Assert(ycGeom::Point(g_p->toSkill())->equals(g_p)  "point: toSkill roundtrip")
+)
+_AssertError(lambda(() ycGeom::Point(1) t)  "point: one number rejected")
+_AssertError(lambda(() ycGeom::Point(list(1 2 3)) t)  "point: long list rejected")
+_AssertError(lambda(() ycGeom::Point(list("a" 2)) t)  "point: non-number pair rejected")
+
 _TestPointDone = t
 
 ; END

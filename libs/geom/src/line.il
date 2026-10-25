@@ -225,18 +225,18 @@ defmethod(initializeInstance (self(Line) \@rest _args)
 )
 )
 
-procedure(Line(g_p1 g_p2 "gg")  ; -> Line
+procedure(Line(\@rest l_args "g")  ; -> Line
     ; 构造不可变无限直线。
     ;
     ; **参数**
-    ;   g_p1  (Point) - 点一
-    ;   g_p2  (Point) - 点二，必须与点一不同
+    ;   l_args  (list) - 两个点、两点列表、四个坐标，或点列
     ;
     ; **返回**
-    ;   (Line) - 规范化 a*x+b*y+c=0；重合点 error
-    let((n_a n_b n_c n_norm)
-        _AsPoint(g_p1 "ycGeom::Line")
-        _AsPoint(g_p2 "ycGeom::Line")
+    ;   (Line) - 规范化 a*x+b*y+c=0；重合点或格式不合法 error
+    let((l_pts g_p1 g_p2 n_a n_b n_c n_norm)
+        l_pts = _TwoPoints(l_args "ycGeom::Line")
+        g_p1 = _Nth1(1 l_pts)
+        g_p2 = _Nth1(2 l_pts)
         when(g_p1->equals(g_p2 ?eps 1e-9)
             error("ycGeom::Line: construction points must differ")
         )

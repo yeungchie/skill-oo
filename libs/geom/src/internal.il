@@ -125,19 +125,163 @@ procedure(_RegionP(g_x "g")  ; -> t | nil
     classOf(g_x) == findClass('ycGeom::Region)
 )
 
-procedure(_AsPoint(g_x t_ctx "gt")  ; -> Point
-    ; 校验并返回 Point。
+procedure(_PairP(g_x "g")  ; -> t | nil
+    ; 判断是否为二元数值列表（内部实现）。
     ;
     ; **参数**
-    ;   g_x    (any) - 待校验对象
+    ;   g_x  (any) - 待判断对象
+    ;
+    ; **返回**
+    ;   (t|nil) - 长度为 2 且两项都是数值为 t
+    listp(g_x) && length(g_x) == 2
+        && numberp(car(g_x)) && numberp(cadr(g_x))
+)
+
+procedure(_AsPoint(g_x t_ctx "gt")  ; -> Point
+    ; 归一化为 Point：接受 Point 或 (x y) 数值列表。
+    ;
+    ; **参数**
+    ;   g_x    (any) - Point 或 (x y)
     ;   t_ctx  (str) - 错误上下文
     ;
     ; **返回**
-    ;   (Point) - 原对象；非 Point 时 error
-    unless(_PointP(g_x)
-        error("%s: expected a Point, got %A" t_ctx g_x)
+    ;   (Point) - 归一化后的点；无法识别时 error
+    cond(
+        (_PointP(g_x) g_x)
+        (_PairP(g_x) Point(g_x))
+        (t error("%s: expected a Point or (x y) list, got %A" t_ctx g_x))
     )
-    g_x
+)
+
+procedure(_AsPointList(l_data t_ctx "lt")  ; -> list[Point]
+    ; 归一化点列：接受 Point/(x y) 列表，或扁平数值列表。
+    ;
+    ; **参数**
+    ;   l_data  (list) - 点列或扁平坐标
+    ;   t_ctx   (str)  - 错误上下文
+    ;
+    ; **返回**
+    ;   (list[Point]) - 归一化点列；格式不合法时 error
+    let((l_res n_len n_i)
+        if(l_data == nil
+            nil
+            progn(
+            unless(listp(l_data)
+                error("%s: expected a point list, got %A" t_ctx l_data)
+            )
+            if(numberp(car(l_data))
+                progn(
+                    n_len = length(l_data)
+                    unless(n_len - int(n_len / 2) * 2 == 0
+                        error("%s: coordinate list must have an even length" t_ctx)
+                    )
+                    n_i = 1
+                    while(n_i <= n_len
+                        unless(numberp(_Nth1(n_i l_data))
+                            && numberp(_Nth1(n_i + 1 l_data))
+                            error("%s: coordinate list contains non-numbers" t_ctx)
+                        )
+                        l_res = tconc(l_res Point(
+                            _Nth1(n_i l_data) _Nth1(n_i + 1 l_data)))
+                        n_i = n_i + 2
+                    )
+                    car(l_res)
+                )
+                progn(
+                    foreach(g_item l_data
+                        l_res = tconc(l_res _AsPoint(g_item t_ctx))
+                    )
+                    car(l_res)
+                )
+            )
+            )
+        )
+    )
+)
+
+procedure(_TwoPoints(l_args t_ctx "lt")  ; -> list[Point]
+    ; 归一化“两点”构造参数。
+    ;
+    ; **参数**
+    ;   l_args  (list) - 构造实参
+    ;   t_ctx   (str)  - 错误上下文
+    ;
+    ; **返回**
+    ;   (list[Point]) - 两个点；格式不合法时 error
+    let((l_data n_len)
+        cond(
+            (length(l_args) == 2
+                list(_AsPoint(_Nth1(1 l_args) t_ctx)
+                    _AsPoint(_Nth1(2 l_args) t_ctx)))
+            (length(l_args) == 4
+                unless(numberp(_Nth1(1 l_args)) && numberp(_Nth1(2 l_args))
+                    && numberp(_Nth1(3 l_args)) && numberp(_Nth1(4 l_args))
+                    error("%s: four coordinates must be numbers" t_ctx)
+                )
+                list(Point(_Nth1(1 l_args) _Nth1(2 l_args))
+                    Point(_Nth1(3 l_args) _Nth1(4 l_args)))
+            )
+            (length(l_args) == 1
+                l_data = _Nth1(1 l_args)
+                unless(listp(l_data)
+                    error("%s: expected two points or four coordinates" t_ctx)
+                )
+                n_len = length(l_data)
+                cond(
+                    ((n_len == 2 && !numberp(car(l_data)))
+                        list(_AsPoint(car(l_data) t_ctx)
+                            _AsPoint(cadr(l_data) t_ctx)))
+                    ((n_len == 4 && numberp(car(l_data)))
+                        unless(numberp(cadr(l_data))
+                            && numberp(_Nth1(3 l_data))
+                            && numberp(_Nth1(4 l_data))
+                            error("%s: four coordinates must be numbers" t_ctx)
+                        )
+                        list(Point(car(l_data) cadr(l_data))
+                            Point(_Nth1(3 l_data) _Nth1(4 l_data)))
+                    )
+                    (t error("%s: expected two points or four coordinates" t_ctx))
+                )
+            )
+            (t error("%s: expected two points or four coordinates" t_ctx))
+        )
+    )
+)
+
+procedure(_AsPolygonList(l_data t_ctx "lt")  ; -> list[Polygon]
+    ; 归一化多边形列表：接受 Polygon 或点列。
+    ;
+    ; **参数**
+    ;   l_data  (list) - Polygon 列表或点列列表
+    ;   t_ctx   (str)  - 错误上下文
+    ;
+    ; **返回**
+    ;   (list[Polygon]) - 归一化多边形列表；格式不合法时 error
+    let((l_res)
+        if(l_data == nil
+            nil
+            progn(
+            unless(listp(l_data)
+                error("%s: expected a Polygon list, got %A" t_ctx l_data)
+            )
+            progn(
+                foreach(g_item l_data
+                    if(_PolygonP(g_item)
+                        l_res = tconc(l_res g_item)
+                        progn(
+                            unless(listp(g_item)
+                                error("%s: expected a Polygon or point list, got %A"
+                                    t_ctx g_item)
+                            )
+                            l_res = tconc(l_res Polygon(g_item))
+                        )
+                    )
+                )
+                car(l_res)
+            )
+            )
+        )
+    )
 )
 
 procedure(_AsSegment(g_x t_ctx "gt")  ; -> Segment
