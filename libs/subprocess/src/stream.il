@@ -25,11 +25,11 @@ defmethod(printself (self(Stream))  ; -> str
 ; ---------- 构造时安装全部方法 ----------
 
 inScheme(
-defmethod(initializeInstance (self(Stream) \@rest _args)
+defmethod(initializeInstance (self(Stream) \@rest l_args)
     ; 安装 Stream 全部方法：push/last/shift/text/size/isEmpty。
     ;
     ; **参数**
-    ;   _args  (list) - 变参：附加初始化参数，本实现忽略
+    ;   l_args  (list) - 变参：附加初始化参数，本实现忽略
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t

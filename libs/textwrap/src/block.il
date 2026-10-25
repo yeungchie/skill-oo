@@ -3,6 +3,8 @@
 ; Language : Cadence Skill
 ;--------------------------
 
+ycNamespace:::Require("ycUtf8")
+
 useNamespace("ycTextwrap")
 
 ; ---------- 行与前导空白 ----------

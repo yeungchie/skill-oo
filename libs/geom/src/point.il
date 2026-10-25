@@ -42,7 +42,7 @@ procedure(_InstallPoint(self "g")  ; -> any
     ; 把 Point 方法安装到 Point 类（由 initializeInstance 调用）。
     ;
     ; **返回**
-    ;   (any) - 最后一条安装赋值结果，调用方忽略
+    ;   (t) - 安装完成；调用方忽略
     self->x = lambda(()  ; -> float
         ; 返回 x 坐标。
         ;
@@ -147,7 +147,7 @@ procedure(Point(\@rest l_args "g")  ; -> Point
     ;
     ; **返回**
     ;   (Point) - 坐标已转 flonum 的新点；格式不合法 error
-    let((n_x n_y g_pair)
+    let((n_x n_y l_pair)
         cond(
             (length(l_args) == 2
                 n_x = _Nth1(1 l_args)
@@ -158,13 +158,13 @@ procedure(Point(\@rest l_args "g")  ; -> Point
                 )
             )
             (length(l_args) == 1
-                g_pair = _Nth1(1 l_args)
-                unless(_PairP(g_pair)
+                l_pair = _Nth1(1 l_args)
+                unless(_PairP(l_pair)
                     error("ycGeom::Point: expected (x y) or two numbers, got %A"
-                        g_pair)
+                        l_pair)
                 )
-                n_x = car(g_pair)
-                n_y = cadr(g_pair)
+                n_x = car(l_pair)
+                n_y = cadr(l_pair)
             )
             (t
                 error("ycGeom::Point: expected (x y) or two numbers, got %A"

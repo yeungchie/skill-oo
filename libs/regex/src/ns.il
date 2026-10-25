@@ -42,6 +42,7 @@ addToNamespace("ycRegEx"
         _ExportRecords
         _HasBit
         _HasNumericGroupRef
+        _ShiftNumericRefs
         _ZeroAtStart
         _ZeroWidthRecords
         _WalkRecords

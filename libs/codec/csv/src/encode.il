@@ -72,7 +72,7 @@ procedure(Encode(g_table \@key (format "csv") (delimiter nil) (eol "\n") (quoteA
     ; **参数**
     ;   g_table       (Table) - 待编码表格
     ;   ?format       (str) - "csv"（默认）或 "tsv"，决定默认分隔符
-    ;   ?delimiter    (str) - 单字节分隔符覆盖
+    ;   ?delimiter    (str) - 单字节分隔符覆盖；默认 nil（按 format 选择）
     ;   ?eol          (str) - 行尾 "\n"（默认）或 "\r\n"
     ;   ?quoteAll     (t|nil) - t 时所有字段加引号；默认 nil
     ;   ?finalNewline (t|nil) - 非空输出末尾是否补行尾；默认 t

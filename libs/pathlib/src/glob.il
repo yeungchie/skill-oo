@@ -70,7 +70,7 @@ procedure(_GlobChain(g_dir l_segs "gl")  ; -> list[Path] | nil
     ;
     ; **参数**
     ;   g_dir   (Path) - 当前所在目录
-    ;   l_segs  (list) - 剩余 pattern 段："" 锚定当前目录，".." 字面拼接，"**" 递归展开，其余段 fnmatch 匹配条目名
+    ;   l_segs  (list) - 剩余 pattern 段："" 锚定当前目录，".." 字面拼接，"**" 递归展开，其余段按通配符匹配条目名
     ;
     ; **返回**
     ;   (list[Path]|nil) - 匹配路径列表（终端段产出匹配条目；终端 "**" 与 "" 锚点另含 g_dir 自身；
@@ -122,15 +122,15 @@ procedure(_GlobPattern(g_base t_pattern "gt")  ; -> list[Path] | nil
     ;
     ; **返回**
     ;   (list[Path]|nil) - 按字符串去重的匹配列表（顺序未定义）；g_base 非目录或无匹配返回 nil；绝对 pattern 抛
-    ;                      "Non-relative patterns are unsupported"，解析后无有效段（如 ""、"."）抛 "Unacceptable pattern"
+    ;                      "ycPathLib::_GlobPattern: non-relative patterns are unsupported"；解析后无有效段（如 ""、"."）抛 "ycPathLib::_GlobPattern: unacceptable pattern"
     let((l_parse l_segs)
         when(pcreMatchp("^/" t_pattern)
-            error("Non-relative patterns are unsupported")
+            error("ycPathLib::_GlobPattern: non-relative patterns are unsupported")
         )
         l_parse = _ParsePath(t_pattern)
         l_segs = cdr(l_parse)
         when(l_segs == nil
-            error("Unacceptable pattern: '%s'" t_pattern)
+            error("ycPathLib::_GlobPattern: unacceptable pattern: '%s'" t_pattern)
         )
         when(_EndsWith(t_pattern "/")
             l_segs = append(l_segs list(""))
@@ -207,7 +207,7 @@ self->rglob = lambda((t_pattern "t")  ; -> list[Path] | nil
     ; **返回**
     ;   (list[Path]|nil) - 同 glob；绝对 pattern 在拼接 "**/" 之前检查并 error() 中断
     when(pcreMatchp("^/" t_pattern)
-        error("Non-relative patterns are unsupported")
+        error("ycPathLib::_GlobPattern: non-relative patterns are unsupported")
     )
     _GlobPattern(self strcat("**/" t_pattern))
 )

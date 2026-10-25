@@ -78,26 +78,26 @@ defmethod(printself (self(Elapsed))  ; -> str
 ; ---------- 构造时安装全部方法 ----------
 
 inScheme(
-defmethod(initializeInstance (self(Elapsed) \@rest _args)
+defmethod(initializeInstance (self(Elapsed) \@rest l_args)
     ; 安装 Elapsed 全部方法：mark/getStart/getEnd/getSeconds/humanReadable。
     ;
     ; **参数**
-    ;   _args  (list) - 变参：附加初始化参数，本实现忽略
+    ;   l_args  (list) - 变参：附加初始化参数，本实现忽略
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
     let((_start_ts _end_ts _second _humanReadable)
-        procedure(_Error(t_method t_formatString \@rest g_args "ttg")  ; -> never
+        procedure(_Error(t_method t_formatString \@rest l_args "ttg")  ; -> never
             ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
             ;
             ; **参数**
             ;   t_method        (str) - 出错的方法名
             ;   t_formatString  (str) - 错误说明格式串（lsprintf 格式）
-            ;   g_args          (list) - 变参：格式串实参
+            ;   l_args          (list) - 变参：格式串实参
             ;
             ; **返回**
             ;   (never) - 总是调用 error()，不返回
-            error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString g_args))
+            error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString l_args))
         )
         self->mark = lambda(()  ; -> str | nil
             ; 记录时间点：首次调用记开始时间，再次调用记结束时间，此后无效果。

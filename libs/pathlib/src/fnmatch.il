@@ -1,13 +1,13 @@
 useNamespace("ycPathLib")
 
 
-; ---------- fnmatch 匹配翻译（不导出） ----------
+; ---------- 通配符匹配翻译（不导出） ----------
 
-procedure(_FnmatchBracket(t_pattern n_open n_len)  ; -> (str, int)
-    ; 把 pattern 中单个 "[" 字符类段编译为 pcre 字符类（fnmatch._translate 的 "[" 分支）。
+procedure(_FnmatchBracket(t_pattern n_open n_len "txx")  ; -> (str, int)
+    ; 把 pattern 中单个 "[" 字符类段编译为 pcre 字符类（通配符字符类翻译的 "[" 分支）。
     ;
     ; **参数**
-    ;   t_pattern  (str) - 完整 fnmatch pattern
+    ;   t_pattern  (str) - 完整通配符 pattern
     ;   n_open     (int) - "[" 的 1-based 位置
     ;   n_len      (int) - t_pattern 的串长
     ;
@@ -73,10 +73,10 @@ procedure(_FnmatchBracket(t_pattern n_open n_len)  ; -> (str, int)
 )
 
 procedure(_FnmatchToPcre(t_pattern "t")  ; -> str
-    ; 把 fnmatch 风格 pattern 编译为 pcre 正则串（"*" "?" 不跨 /）。
+    ; 把通配符 pattern 编译为正则串（"*" "?" 不跨 /）。
     ;
     ; **参数**
-    ;   t_pattern  (str) - 含 "*"、"?"、"[seq]" 的 fnmatch pattern
+    ;   t_pattern  (str) - 含 "*"、"?"、"[seq]" 的通配符 pattern
     ;
     ; **返回**
     ;   (str) - 供 ^...\z 全串匹配使用的正则；其余正则元字符逐个加反斜杠转义
@@ -116,7 +116,7 @@ procedure(_FnmatchToPcre(t_pattern "t")  ; -> str
 )
 
 procedure(_Fnmatch1(t_name t_comp "tt")  ; -> t | nil
-    ; 按 fnmatch 语义判断单个名字是否匹配单段 pattern。
+    ; 按通配符语义判断单个名字是否匹配单段 pattern。
     ;
     ; **参数**
     ;   t_name  (str) - 被匹配的名字（路径部件）

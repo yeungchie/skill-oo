@@ -111,14 +111,14 @@ procedure(_EncCp(n_cp "x")  ; -> str
             strcat(intToChar(192 + n_cp/64) intToChar(128 + remainder(n_cp 64)))
         )
         (n_cp < 65536
-            strcat(
+            lsprintf("%s%s%s"
                 intToChar(224 + n_cp/4096)
                 intToChar(128 + remainder(n_cp/64 64))
                 intToChar(128 + remainder(n_cp 64))
             )
         )
         (t
-            strcat(
+            lsprintf("%s%s%s%s"
                 intToChar(240 + n_cp/262144)
                 intToChar(128 + remainder(n_cp/4096 64))
                 intToChar(128 + remainder(n_cp/64 64))
@@ -175,20 +175,20 @@ procedure(Encode(l_cps "l")  ; -> str
     unless(listp(l_cps)
         error("ycUtf8::Encode: expects a list")
     )
-    let((l_p n_idx g_cp)
+    let((l_p n_idx n_cp)
         n_idx = 0
-        foreach(g_cp l_cps
+        foreach(n_cp l_cps
             n_idx = n_idx + 1
-            unless(fixp(g_cp) && g_cp >= 0 && g_cp <= 1114111
-                error("ycUtf8::Encode: invalid codepoint at index %d (%A)" n_idx g_cp)
+            unless(fixp(n_cp) && n_cp >= 0 && n_cp <= 1114111
+                error("ycUtf8::Encode: invalid codepoint at index %d (%A)" n_idx n_cp)
             )
-            when(g_cp >= 55296 && g_cp <= 57343
-                error("ycUtf8::Encode: invalid codepoint at index %d (%A)" n_idx g_cp)
+            when(n_cp >= 55296 && n_cp <= 57343
+                error("ycUtf8::Encode: invalid codepoint at index %d (%A)" n_idx n_cp)
             )
-            when(g_cp == 0
-                error("ycUtf8::Encode: codepoint at index %d (%A) cannot be represented in a SKILL string" n_idx g_cp)
+            when(n_cp == 0
+                error("ycUtf8::Encode: codepoint at index %d (%A) cannot be represented in a SKILL string" n_idx n_cp)
             )
-            l_p = tconc(l_p _EncCp(g_cp))
+            l_p = tconc(l_p _EncCp(n_cp))
         )
         _Build(l_p)
     )

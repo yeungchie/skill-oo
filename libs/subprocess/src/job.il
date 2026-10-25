@@ -3,28 +3,28 @@ useNamespace("ycSubProcess")
 
 ; ---------- 函数 ----------
 
-procedure(Run(g_arg \@rest g_args "gg")  ; -> t | nil
+procedure(Run(g_arg \@rest l_args "gg")  ; -> t | nil
     ; 执行命令并等待任务完成，子进程输出实时打印到终端。
     ;
     ; **参数**
     ;   g_arg   (any) - 命令；非字符串按 %A 自动转换
-    ;   g_args  (list) - 命令的其余部分；非字符串同样自动转换
+    ;   l_args  (list) - 命令的其余部分；非字符串同样自动转换
     ;
     ; **返回**
     ;   (t|nil) - 正常结束（退出码 0）返回 t；退出码非零返回 nil
     let((aj)
-        (aj = apply('CreateJob g_arg ?verbose t g_args))->await()
+        (aj = apply('CreateJob g_arg ?verbose t l_args))->await()
         aj->returncode == 0
     )
 )
 
 
-procedure(CreateJob(g_arg \@key callback userData verbose \@rest g_args "ggggg")  ; -> AsyncJob
+procedure(CreateJob(g_arg \@key callback userData verbose \@rest l_args "ggggg")  ; -> AsyncJob
     ; 创建异步任务对象：命令各段拼接后构造 AsyncJob（未启动）。
     ;
     ; **参数**
     ;   g_arg      (any) - 命令；非字符串按 %A 自动转换
-    ;   g_args     (list) - 命令的其余部分；非字符串同样自动转换
+    ;   l_args     (list) - 命令的其余部分；非字符串同样自动转换
     ;   ?callback  (any) - 事件回调函数 callback(s_event g_job)；默认 nil
     ;   ?userData  (any) - 随对象携带的任意数据；默认 nil
     ;   ?verbose   (t|nil) - 是否实时打印子进程输出；默认 nil
@@ -32,7 +32,7 @@ procedure(CreateJob(g_arg \@key callback userData verbose \@rest g_args "ggggg")
     ; **返回**
     ;   (AsyncJob) - 未启动的任务对象，需再调用 start() 启动
     AsyncJob(
-        buildString(foreach(mapcar x cons(g_arg g_args)
+        buildString(foreach(mapcar x cons(g_arg l_args)
             stringp(x) && x || lsprintf("%A" x)
         ))
         ?callback   callback
@@ -146,25 +146,25 @@ procedure(_Rstring(t_s "t")  ; -> str
     pcreReplace(_rsrec t_s "\\\\\\0" 0)
 )
 
-defmethod(initializeInstance (self(AsyncJob) \@rest _args)
+defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
     ; 安装 AsyncJob 全部方法：start/wait/await/kill/state/stop/continue/print/close/signal/sleep。
     ;
     ; **参数**
-    ;   _args  (list) - 变参：附加初始化参数，本实现忽略
+    ;   l_args  (list) - 变参：附加初始化参数，本实现忽略
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
-    procedure(_Error(t_method t_formatString \@rest g_args "ttg")  ; -> never
+    procedure(_Error(t_method t_formatString \@rest l_args "ttg")  ; -> never
         ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
         ;
         ; **参数**
         ;   t_method        (str) - 出错的方法名
         ;   t_formatString  (str) - 错误说明格式串（lsprintf 格式）
-        ;   g_args          (list) - 变参：格式串实参
+        ;   l_args          (list) - 变参：格式串实参
         ;
         ; **返回**
         ;   (never) - 总是调用 error()，不返回
-        error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString g_args))
+        error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString l_args))
     )
     procedure(_CheckStarted(t_method "t")
         ; 前置校验：任务未启动（ipcId 为 nil）时以 _Error 中断。
@@ -298,19 +298,19 @@ defmethod(initializeInstance (self(AsyncJob) \@rest _args)
         _CheckStarted("continue")
         ipcContProcess(self->ipcId)
     )
-    self->print = lambda((t_formatString \@key end("\n") \@rest g_args "ttg")  ; -> AsyncJob
+    self->print = lambda((t_formatString \@key end("\n") \@rest l_args "ttg")  ; -> AsyncJob
         ; 向子进程标准输入写入一行（lsprintf 先格式化，再补 end 结尾）。
         ;
         ; **参数**
         ;   t_formatString  (str) - 格式串
         ;   ?end            (str) - 行结尾（默认 "\n"）
-        ;   g_args          (list) - 变参：格式串实参
+        ;   l_args          (list) - 变参：格式串实参
         ;
         ; **返回**
         ;   (AsyncJob) - self；写入失败（进程已退出）时 error() 中断
         _CheckStarted("print")
         ipcWriteProcess(self->ipcId
-            strcat(apply('lsprintf t_formatString g_args) end)
+            strcat(apply('lsprintf t_formatString l_args) end)
         ) || _Error("print" "job process has expired, current status is '%s'" self->state())
         self
     )

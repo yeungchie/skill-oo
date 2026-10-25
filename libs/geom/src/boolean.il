@@ -21,7 +21,7 @@ procedure(_SnapRing(l_pts n_grid n_eps "lgg")  ; -> list[Point]
         )
         l_clean = _RingPointsClean(car(l_res) n_eps)
         unless(length(l_clean) >= 3 && abs(_SignedArea(l_clean)) > n_eps
-            error("ycGeom: grid snapping collapsed polygon topology")
+            error("ycGeom::_SnapRing: grid snapping collapsed polygon topology")
         )
         l_clean
     )
@@ -230,14 +230,14 @@ procedure(_InsideRings(l_rings g_p n_eps "lgg")  ; -> t | nil
     )
 )
 
-procedure(_ClassifyEdges(l_edges l_ra l_rb t_op n_eps "lllgg")  ; -> list[list[Point]]
+procedure(_ClassifyEdges(l_edges l_ra l_rb g_op n_eps "lllgg")  ; -> list[list[Point]]
     ; 按两侧采样结果保留结果边界的有向边。
     ;
     ; **参数**
     ;   l_edges  (list[list[Point]]) - 拆分后的无向边
     ;   l_ra     (list[list[Point]]) - A 环
     ;   l_rb     (list[list[Point]]) - B 环
-    ;   t_op     (sym)               - union/intersection/difference/xor
+    ;   g_op     (sym)               - union/intersection/difference/xor
     ;   n_eps    (float)             - 容差
     ;
     ; **返回**
@@ -261,8 +261,8 @@ procedure(_ClassifyEdges(l_edges l_ra l_rb t_op n_eps "lllgg")  ; -> list[list[P
                 g_lb = _InsideRings(l_rb g_left n_eps)
                 g_ra = _InsideRings(l_ra g_right n_eps)
                 g_rb = _InsideRings(l_rb g_right n_eps)
-                g_lkeep = _InResult(t_op g_la g_lb)
-                g_rkeep = _InResult(t_op g_ra g_rb)
+                g_lkeep = _InResult(g_op g_la g_lb)
+                g_rkeep = _InResult(g_op g_ra g_rb)
                 when(g_lkeep != g_rkeep
                     l_res = tconc(l_res
                         if(g_lkeep list(g_a g_b) list(g_b g_a)))
@@ -354,7 +354,6 @@ procedure(_TraceLoops(l_edges n_eps "lg")  ; -> list[list[Point]]
     ;   (list[list[Point]]) - 闭环点列
     let((t_adj l_order l_res l_e g_start g_cur g_prev g_next l_ring l_cands t_key)
         t_adj = makeTable("geomTrace" nil)
-        l_order = nil
         foreach(l_e l_edges
             t_key = _PtKey(car(l_e))
             unless(t_adj[t_key]
@@ -375,7 +374,7 @@ procedure(_TraceLoops(l_edges n_eps "lg")  ; -> list[list[Point]]
                 l_ring = tconc(l_ring g_cur)
                 l_cands = t_adj[_PtKey(g_cur)]
                 unless(l_cands
-                    error("ycGeom: boolean trace lost its boundary")
+                    error("ycGeom::_TraceLoops: boolean trace lost its boundary")
                 )
                 g_next = _ChooseNext(g_prev g_cur l_cands n_eps)
                 t_adj[_PtKey(g_cur)] = _RemoveEdge(l_cands g_cur g_next)
@@ -388,39 +387,39 @@ procedure(_TraceLoops(l_edges n_eps "lg")  ; -> list[list[Point]]
     )
 )
 
-procedure(_InResult(t_op g_inA g_inB "ggg")  ; -> t | nil
+procedure(_InResult(g_op g_inA g_inB "ggg")  ; -> t | nil
     ; 判断采样点是否属于布尔结果。
     ;
     ; **参数**
-    ;   t_op   (sym)   - union/intersection/difference/xor
+    ;   g_op   (sym)   - union/intersection/difference/xor
     ;   g_inA  (t|nil) - 点在 A 内
     ;   g_inB  (t|nil) - 点在 B 内
     ;
     ; **返回**
     ;   (t|nil) - 属于结果为 t
     cond(
-        (t_op == 'union g_inA || g_inB)
-        (t_op == 'intersection g_inA && g_inB)
-        (t_op == 'difference g_inA && !g_inB)
-        (t_op == 'xor g_inA != g_inB)
+        (g_op == 'union g_inA || g_inB)
+        (g_op == 'intersection g_inA && g_inB)
+        (g_op == 'difference g_inA && !g_inB)
+        (g_op == 'xor g_inA != g_inB)
     )
 )
 
-procedure(_Boolean(l_a l_b t_op n_grid n_eps "llggg")  ; -> list[Polygon]
+procedure(_Boolean(l_a l_b g_op n_grid n_eps "llggg")  ; -> list[Polygon]
     ; 计算两个多边形集合的布尔结果。
     ;
     ; **参数**
     ;   l_a     (list[Polygon]) - A
     ;   l_b     (list[Polygon]) - B
-    ;   t_op    (sym)           - union/intersection/difference/xor
+    ;   g_op    (sym)           - union/intersection/difference/xor
     ;   n_grid  (float|nil)     - 网格
     ;   n_eps   (float)         - 容差
     ;
     ; **返回**
     ;   (list[Polygon]) - 结果多边形；空结果 nil
     let((n_gridv n_epsv l_ra l_rb l_edges l_kept l_loops l_res)
-        unless(t_op == 'union || t_op == 'intersection || t_op == 'difference || t_op == 'xor
-            error("ycGeom::_Boolean: unknown operation %A" t_op)
+        unless(g_op == 'union || g_op == 'intersection || g_op == 'difference || g_op == 'xor
+            error("ycGeom::_Boolean: unknown operation %A" g_op)
         )
         foreach(g_p l_a
             _AsPolygon(g_p "ycGeom::_Boolean")
@@ -432,16 +431,16 @@ procedure(_Boolean(l_a l_b t_op n_grid n_eps "llggg")  ; -> list[Polygon]
         n_epsv = _Eps(n_eps)
         cond(
             (l_a == nil && l_b == nil nil)
-            (l_a == nil && (t_op == 'union || t_op == 'xor) l_b)
+            (l_a == nil && (g_op == 'union || g_op == 'xor) l_b)
             (l_a == nil nil)
-            (l_b == nil && t_op == 'union l_a)
-            (l_b == nil && (t_op == 'difference || t_op == 'xor) l_a)
+            (l_b == nil && g_op == 'union l_a)
+            (l_b == nil && (g_op == 'difference || g_op == 'xor) l_a)
             (l_b == nil nil)
             (t
                 l_ra = _CollectRings(l_a n_gridv n_epsv)
                 l_rb = _CollectRings(l_b n_gridv n_epsv)
                 l_edges = _SplitEdges(append(_RingEdgeList(l_ra) _RingEdgeList(l_rb)) n_epsv)
-                l_kept = _ClassifyEdges(l_edges l_ra l_rb t_op n_epsv)
+                l_kept = _ClassifyEdges(l_edges l_ra l_rb g_op n_epsv)
                 l_loops = _TraceLoops(l_kept n_epsv)
                 when(l_loops
                     l_res = _BuildPolygons(
@@ -534,7 +533,7 @@ procedure(_NestLoops(l_loops n_eps "lg")  ; -> list
                     )
                 )
                 unless(n_owner
-                    error("ycGeom: hole has no containing outer loop")
+                    error("ycGeom::_NestLoops: hole has no containing outer loop")
                 )
                 l_new = nil
                 for(n_k 1 length(l_groups)
@@ -695,14 +694,12 @@ procedure(_SpliceHole(l_outer l_hole n_eps "llg")  ; -> list[Point]
         g_h = car(l_h)
         n_oi = _FindBridge(l_outer l_h n_eps)
         unless(n_oi
-            error("ycGeom: no visible bridge for hole")
+            error("ycGeom::_SpliceHole: no visible bridge for hole")
         )
         g_o = _Nth1(n_oi l_outer)
-        l_prefix = nil
         for(n_i 1 n_oi
             l_prefix = tconc(l_prefix _Nth1(n_i l_outer))
         )
-        l_suffix = nil
         for(n_i n_oi + 1 length(l_outer)
             l_suffix = tconc(l_suffix _Nth1(n_i l_outer))
         )

@@ -45,7 +45,7 @@ defclass(Polygon () (
     xor()
     toSkill()
 ))
-procedure(_CheckPolygon(l_points n_eps "lg")  ; -> t
+procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
     ; 校验点列可构成 keyhole 多边形。
     ;
     ; **参数**
@@ -112,13 +112,13 @@ defmethod(printself (self(Polygon))  ; -> str
         length(self->_data->points) abs(_SignedArea(self->_data->points)))
 )
 
-procedure(_PolygonOp(self g_other t_op n_grid n_eps t_ctx "gggggt")  ; -> Region
+procedure(_PolygonOp(self g_other g_op n_grid n_eps t_ctx "gggggt")  ; -> Region
     ; 对两个 Polygon 执行布尔运算并返回 Region（内部实现）。
     ;
     ; **参数**
     ;   self     (Polygon)   - 左操作数
     ;   g_other  (Polygon)   - 右操作数
-    ;   t_op     (sym)       - union/intersection/difference/xor
+    ;   g_op     (sym)       - union/intersection/difference/xor
     ;   n_grid   (float|nil) - 网格
     ;   n_eps    (float|nil) - 容差
     ;   t_ctx    (str)       - 错误上下文
@@ -127,7 +127,7 @@ procedure(_PolygonOp(self g_other t_op n_grid n_eps t_ctx "gggggt")  ; -> Region
     ;   (Region) - 结果区域
     let((g_o l_res)
         g_o = _AsPolygon(g_other t_ctx)
-        l_res = _Boolean(list(self) list(g_o) t_op n_grid n_eps)
+        l_res = _Boolean(list(self) list(g_o) g_op n_grid n_eps)
         Region(l_res ?normalize nil)
     )
 )
@@ -137,7 +137,7 @@ procedure(_InstallPolygon(self "g")  ; -> any
     ; 把 Polygon 方法安装到 Polygon 类（由 initializeInstance 调用）。
     ;
     ; **返回**
-    ;   (any) - 最后一条安装赋值结果，调用方忽略
+    ;   (t) - 安装完成；调用方忽略
     self->points = lambda(()  ; -> list[Point]
         ; 返回内部 keyhole 点列。
         ;
@@ -172,8 +172,8 @@ procedure(_InstallPolygon(self "g")  ; -> any
         ; 返回周长；默认排除切割线。
         ;
         ; **参数**
-        ;   ?includeSeams  (t|nil)   - 是否把切割线计入
-        ;   ?eps           (num|nil) - 容差
+        ;   ?includeSeams  (t|nil)   - 是否把切割线计入；默认 nil
+        ;   ?eps           (num|nil) - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (float) - 周长
@@ -224,8 +224,8 @@ procedure(_InstallPolygon(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_point   (Point)       - 查询点
-        ;   ?boundary (str)         - "inside" 或 "outside"
-        ;   ?eps      (num|nil)     - 容差
+        ;   ?boundary (str)         - "inside" 或 "outside"；默认 "inside"
+        ;   ?eps      (num|nil)     - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (t|nil) - 在内部或按选项在边界上为 t
@@ -255,8 +255,8 @@ procedure(_InstallPolygon(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_point        (Point)   - 查询点
-        ;   ?includeSeams  (t|nil)   - 是否把切割线视为边界
-        ;   ?eps           (num|nil) - 容差
+        ;   ?includeSeams  (t|nil)   - 是否把切割线视为边界；默认 nil
+        ;   ?eps           (num|nil) - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (t|nil) - 在边界上为 t
@@ -304,7 +304,7 @@ procedure(_InstallPolygon(self "g")  ; -> any
         ; 判断点列绕行方向。
         ;
         ; **参数**
-        ;   ?eps  (num|nil) - 容差
+        ;   ?eps  (num|nil) - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (t|nil) - 顺时针为 t
@@ -325,11 +325,11 @@ procedure(_InstallPolygon(self "g")  ; -> any
         ;
         ; **参数**
         ;   n_value         (num)      - 距离或倍率
-        ;   ?dir            (sym|list) - 方向
-        ;   ?ratio          (t|nil)    - 倍率模式
-        ;   ?corner         (sym)      - 拐角风格
-        ;   ?miterLimit     (num|nil)  - miter 限制
-        ;   ?roundSegments  (int|nil)  - 圆角段数
+        ;   ?dir            (sym|list) - 方向；默认 'all
+        ;   ?ratio          (t|nil)    - 倍率模式；默认 nil
+        ;   ?corner         (sym)      - 拐角风格；默认 'miter
+        ;   ?miterLimit     (num|nil)  - miter 限制；默认 nil（4.0）
+        ;   ?roundSegments  (int|nil)  - 圆角段数；默认 nil（8）
         ;
         ; **返回**
         ;   (Region) - 结果区域
@@ -340,8 +340,8 @@ procedure(_InstallPolygon(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_other  (Polygon)   - 另一多边形
-        ;   ?grid    (num|nil)   - 网格
-        ;   ?eps     (num|nil)   - 容差
+        ;   ?grid    (num|nil)   - 网格；默认 nil
+        ;   ?eps     (num|nil)   - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Region) - 并集区域
@@ -352,8 +352,8 @@ procedure(_InstallPolygon(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_other  (Polygon)   - 另一多边形
-        ;   ?grid    (num|nil)   - 网格
-        ;   ?eps     (num|nil)   - 容差
+        ;   ?grid    (num|nil)   - 网格；默认 nil
+        ;   ?eps     (num|nil)   - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Region) - 交集区域
@@ -364,8 +364,8 @@ procedure(_InstallPolygon(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_other  (Polygon)   - 另一多边形
-        ;   ?grid    (num|nil)   - 网格
-        ;   ?eps     (num|nil)   - 容差
+        ;   ?grid    (num|nil)   - 网格；默认 nil
+        ;   ?eps     (num|nil)   - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Region) - A-B 区域
@@ -376,8 +376,8 @@ procedure(_InstallPolygon(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_other  (Polygon)   - 另一多边形
-        ;   ?grid    (num|nil)   - 网格
-        ;   ?eps     (num|nil)   - 容差
+        ;   ?grid    (num|nil)   - 网格；默认 nil
+        ;   ?eps     (num|nil)   - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Region) - 对称差区域

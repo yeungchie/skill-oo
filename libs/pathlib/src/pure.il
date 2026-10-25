@@ -10,17 +10,17 @@ procedure(_InstallPure(self "g")  ; -> any
     ; **返回**
     ;   (any) - 返回最后一条安装赋值的结果，调用方忽略
 
-procedure(_Error(t_method t_formatString \@rest g_args "ttg")  ; -> never
+procedure(_Error(t_method t_formatString \@rest l_args "ttg")  ; -> never
     ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
     ;
     ; **参数**
     ;   t_method        (str) - 出错的方法名
     ;   t_formatString  (str) - 错误说明格式串（lsprintf 格式）
-    ;   g_args          (list) - 变参：格式串实参
+    ;   l_args          (list) - 变参：格式串实参
     ;
     ; **返回**
     ;   (never) - 总是调用 error()，不返回
-    error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString g_args))
+    error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString l_args))
 )
 
 self->str = lambda(()  ; -> str
@@ -132,18 +132,18 @@ self->isAbsolute = lambda(()  ; -> t | nil
     self->_data->anchor != ""
 )
 
-self->join = lambda((\@rest g_args "g")  ; -> Path
+self->join = lambda((\@rest l_args "g")  ; -> Path
     ; 逐段拼接路径：绝对段丢弃此前拼接，"." 丢弃，".." 保留不折叠。
     ;
     ; **参数**
-    ;   g_args  (list) - 变参：每段 string 或 Path（取 str() 再解析），其他类型走 _Error() 中断
+    ;   l_args  (list) - 变参：每段 string 或 Path（取 str() 再解析），其他类型走 _Error() 中断
     ;
     ; **返回**
     ;   (Path) - 拼接结果（按规范串驻留）；零段返回按驻留规则复用的等价实例
     let((t_anchor l_parts l_parse p_seg)
         t_anchor = self->_data->anchor
         l_parts = self->_data->parts
-        foreach(g_seg g_args
+        foreach(g_seg l_args
             p_seg = _AsPath(g_seg)
             unless(p_seg
                 _Error("join" "expected string or Path, got %A" g_seg)

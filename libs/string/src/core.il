@@ -85,6 +85,9 @@ procedure(Width(t_s \@key (unit "display") (ambiguous 1) "ttx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 显示列宽或码点数
+    unless(ambiguous == 1 || ambiguous == 2
+        error("ycString::Width: ambiguous must be 1 or 2")
+    )
     cond(
         (unit == "display" ycUtf8:::Width(t_s ?ambiguous ambiguous))
         (unit == "char" ycUtf8:::CharCount(t_s))
@@ -136,6 +139,9 @@ procedure(Pad(t_s n_width \@key (fill " ") (side "end") (unit "display") (ambigu
     )
     unless(unit == "display" || unit == "char"
         error("ycString::Pad: unknown unit %A" unit)
+    )
+    unless(ambiguous == 1 || ambiguous == 2
+        error("ycString::Pad: ambiguous must be 1 or 2")
     )
     when(unit == "display" && ycUtf8:::Width(fill ?ambiguous ambiguous) != 1
         error("ycString::Pad: fill must be single width in display mode (%A)" fill)
@@ -255,7 +261,7 @@ procedure(Split(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> list
     ; **参数**
     ;   t_s        (str)     - 输入串
     ;   ?sep       (str|nil) - 分隔符或正则模式；缺省时按空白符切分
-    ;   ?regex     (any)     - 非 nil 时 ?sep 按正则模式解释
+    ;   ?regex     (any)     - 非 nil 时 ?sep 按正则模式解释；默认 nil
     ;   ?keepEmpty (any)     - 非 nil 时保留空段；默认 t
     ;
     ; **返回**
@@ -302,15 +308,15 @@ procedure(Join(l_items \@key (sep "") "lt")  ; -> str
     )
     let((l_p n_i)
         n_i = 0
-        foreach(g_item l_items
+        foreach(t_item l_items
             n_i = n_i + 1
-            unless(stringp(g_item)
-                error("ycString::Join: item #%d is not a string (%A)" n_i g_item)
+            unless(stringp(t_item)
+                error("ycString::Join: item #%d is not a string (%A)" n_i t_item)
             )
             unless(n_i == 1
                 l_p = tconc(l_p sep)
             )
-            l_p = tconc(l_p g_item)
+            l_p = tconc(l_p t_item)
         )
         if(l_p
             apply('strcat car(l_p))
@@ -365,7 +371,7 @@ procedure(Replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
     ;   t_s    (str) - 输入串
     ;   t_old  (str) - 待替换串或正则模式
     ;   t_new  (str) - 替换串（正则模式下按 ycRegEx 的替换模板展开）
-    ;   ?regex (any) - 非 nil 时 t_old 按正则模式解释
+    ;   ?regex (any) - 非 nil 时 t_old 按正则模式解释；默认 nil
     ;
     ; **返回**
     ;   (str) - 替换后的串；无匹配原样返回
@@ -414,7 +420,7 @@ procedure(Count(t_s t_sub \@key (regex nil) "ttg")  ; -> int
     ; **参数**
     ;   t_s    (str) - 输入串
     ;   t_sub  (str) - 待计数子串或正则模式
-    ;   ?regex (any) - 非 nil 时 t_sub 按正则模式解释
+    ;   ?regex (any) - 非 nil 时 t_sub 按正则模式解释；默认 nil
     ;
     ; **返回**
     ;   (int) - 出现次数

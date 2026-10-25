@@ -75,7 +75,7 @@ procedure(_LineSegmentIntersection(g_line g_seg n_eps "ggg")  ; -> Point | Segme
         g_s = g_seg->start()
         g_e = g_seg->end()
         if(g_s->equals(g_e ?eps n_eps)
-            if(g_line->contains(g_s ?eps n_eps) g_s nil)
+            when(g_line->contains(g_s ?eps n_eps) g_s)
             if(g_line->contains(g_s ?eps n_eps) && g_line->contains(g_e ?eps n_eps)
                 g_seg
                 if(g_line->contains(g_s ?eps n_eps)
@@ -121,11 +121,11 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggg")  ; -> Point | Segme
     let((n_rx n_ry n_sx n_sy n_qx n_qy n_qpx n_qpy n_rxs n_qpxr
          n_rr n_t0 n_t1 n_min n_max n_t n_u)
         if(g_a->equals(g_b ?eps n_eps) && g_c->equals(g_d ?eps n_eps)
-            if(g_a->equals(g_c ?eps n_eps) g_a nil)
+            when(g_a->equals(g_c ?eps n_eps) g_a)
             if(g_a->equals(g_b ?eps n_eps)
-                if(_OnSegment(g_c g_d g_a n_eps) g_a nil)
+                when(_OnSegment(g_c g_d g_a n_eps) g_a)
                 if(g_c->equals(g_d ?eps n_eps)
-                    if(_OnSegment(g_a g_b g_c n_eps) g_c nil)
+                    when(_OnSegment(g_a g_b g_c n_eps) g_c)
                     progn(
                     n_rx = g_b->x() - g_a->x()
         n_ry = g_b->y() - g_a->y()
@@ -181,7 +181,7 @@ procedure(_InstallSegment(self "g")  ; -> any
     ; 把 Segment 方法安装到 Segment 类（由 initializeInstance 调用）。
     ;
     ; **返回**
-    ;   (any) - 最后一条安装赋值结果，调用方忽略
+    ;   (t) - 安装完成；调用方忽略
     self->start = lambda(()  ; -> Point
         ; 返回起点。
         ;
@@ -293,7 +293,7 @@ procedure(_InstallSegment(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_point  (Point)   - 查询点
-        ;   ?eps     (num|nil) - 容差
+        ;   ?eps     (num|nil) - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (t|nil) - 在线段上为 t
@@ -320,7 +320,7 @@ procedure(_InstallSegment(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_other  (Line|Segment) - 另一对象
-        ;   ?eps     (num|nil)      - 容差
+        ;   ?eps     (num|nil)      - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Point|Segment|nil) - 唯一交点、重叠线段或无交

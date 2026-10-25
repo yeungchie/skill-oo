@@ -106,14 +106,14 @@ procedure(_AnchorAt(g_pat n_off "gx")  ; -> compiled
     ;   (compiled) - n_off 为 0 时复用 span 对象；否则以 (?<=\A[\s\S]{n_off})(?:…) 编译；
     ;                n_off > 65535 或编译失败时 error() 中断
     when(n_off > 65535
-        error("ycRegEx: anchor offset %d exceeds the 65535-byte limit" n_off)
+        error("ycRegEx::_AnchorAt: anchor offset %d exceeds the 65535-byte limit" n_off)
     )
     if(n_off == 0
         g_pat->_data->span
         let((g_obj)
             g_obj = _CompileChecked(
                 lsprintf("%s(?<=\\A[\\s\\S]{%d})(?:%s)" g_pat->_data->flags n_off g_pat->_data->pattern)
-                lsprintf("ycRegEx: anchor at offset %d" n_off)
+                lsprintf("ycRegEx::_AnchorAt: anchor at offset %d" n_off)
                 g_pat->_data->compileOpts
             )
             g_obj
@@ -568,7 +568,7 @@ procedure(_NextMatch(g_pat t_subj n_from n_exec "gtxx")  ; -> (int, int . list[s
 )
 
 procedure(_FindAllItem(g_pat t_subj l_m "gtl")  ; -> str | list[str]
-    ; 把单个命中记录转换为 findall 的结果项（对齐 Python 形态）。
+    ; 把单个命中记录转换为 findall 的结果项。
     ;
     ; **参数**
     ;   g_pat   (Pattern) - 提供捕获组数的 Pattern 实例
@@ -752,7 +752,7 @@ self->end = lambda((\@rest g_args "g")  ; -> int
 )
 
 self->group = lambda((\@rest g_args "g")  ; -> str | list[str]
-    ; 按组序号取组值（语义同 Python re.Matched.group；按名取组预留，调用即 error() 中断）。
+    ; 按组序号取组值；按名取组预留，调用即 error() 中断。
     ;
     ; **参数**
     ;   g_args  (list) - 变参：组选择器——无参取整体；单参 0 = 整体、1..n_g = 对应捕获组；
@@ -760,7 +760,7 @@ self->group = lambda((\@rest g_args "g")  ; -> str | list[str]
     ;
     ; **返回**
     ;   (str|list[str]) - 无参返回整体串，单参返回该组串，多参返回组值列表；
-    ;                     非参与组为 ""（CPython None → ""）；序号越界走 error()（_GroupAt 直调）；
+    ;                     非参与组为 ""；序号越界走 error()（_GroupAt 直调）；
     ;                     非数字或按名参数走 _Error() 中断
     let((n_g)
         foreach(g g_args
@@ -817,10 +817,10 @@ self->groupdict = lambda(()  ; -> never
 )
 
 self->expand = lambda((t_tpl "t")  ; -> str
-    ; 按模板展开整体匹配（语义同 Python re.Matched.expand：先重挂状态再按引擎方言展开）。
+    ; 按模板展开整体匹配：先重挂状态再按引擎方言展开。
     ;
     ; **参数**
-    ;   t_tpl  (str) - 替换模板：引擎方言展开 \1~\9、&（整体）、\0、\n；& 在 Python 是字面量
+    ;   t_tpl  (str) - 替换模板：引擎方言展开 \1~\9、&（整体）、\0、\n
     ;
     ; **返回**
     ;   (str) - 在全主题串上按匹配偏移重挂锚状态后由 pcreSubstitute 展开的结果；

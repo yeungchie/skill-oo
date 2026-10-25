@@ -255,7 +255,7 @@ self->rename = lambda((g_target "g")  ; -> Path
 )
 
 self->touch = lambda(()  ; -> t
-    ; 文件不存在则创建；已存在则更新修改时间、不截断内容（与 CPython Path.touch() 一致）。
+    ; 文件不存在则创建；已存在则更新修改时间、不截断内容。
     ;
     ; **返回**
     ;   (t) - 成功返回 t；目标是目录、touch 命令失败或文件未生成，走 _Error() 中断

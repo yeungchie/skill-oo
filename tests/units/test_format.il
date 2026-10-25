@@ -14,6 +14,7 @@ _Assert(ycUnits::Format(1e-24) == "1y"  "format: yocto")
 _Assert(ycUnits::Format(1e24) == "1Y"  "format: yotta")
 _Assert(ycUnits::Format(1e-30) == "1e-30"  "format: below range")
 _Assert(ycUnits::Format(1e30) == "1e+30"  "format: above range")
+_Assert(ycUnits::Format(1.23456789e30 ?precision 3) == "1.23e+30"  "format: precision above range")
 
 ; ---- 精度与进位 ----
 _Assert(ycUnits::Format(1.23456789) == "1.23457"  "format: default precision")

@@ -541,7 +541,7 @@ procedure(Decode(t_str \@key (format "yaml") (maxDepth nil) "ttg")  ; -> any | l
     ;
     ; **参数**
     ;   t_str     (str) - 输入文本
-    ;   ?format   (str) - "yaml" 或 "yaml-stream"
+    ;   ?format   (str) - "yaml" 或 "yaml-stream"；默认 "yaml"
     ;   ?maxDepth (int) - 最大嵌套深度；默认 800
     ;
     ; **返回**

@@ -121,16 +121,16 @@ procedure(_TailAfter(t_s n_start "tx")  ; -> str
     if(n_start > length(t_s) "" substring(t_s n_start length(t_s) - n_start + 1))
 )
 
-procedure(_PrefixScale(t_rest t_space "tg")  ; -> list
+procedure(_PrefixScale(t_rest g_space "tg")  ; -> list
     ; 把后缀拆为倍率与单位（内部实现）。
     ;
     ; **参数**
     ;   t_rest   (str) - 数值后的后缀
-    ;   t_space  (t|nil) - 数值与后缀之间是否有空白
+    ;   g_space  (t|nil) - 数值与后缀之间是否有空白
     ;
     ; **返回**
     ;   (list) - (倍率 单位)；空白分隔时不识别前缀
-    if(t_space
+    if(g_space
         list(1.0 t_rest)
         let((l_found t_factor t_tail)
             foreach(l_pair _PrefixAliases()
@@ -256,7 +256,7 @@ procedure(_Parse(t_str t_ctx "tt")  ; -> list
         )
         t_unit = if(n_i <= n_len substring(t_str n_i n_len - n_i + 1) "")
         while(
-            length(t_unit) > 0
+            t_unit != ""
             && _IsWs(charToInt(getchar(t_unit length(t_unit))))
             t_unit = substring(t_unit 1 length(t_unit) - 1)
         )
@@ -303,12 +303,12 @@ procedure(Format(n_value \@key (unit "") (precision 6) "ntx")  ; -> str
         strcat("0" unit)
         let((n_abs n_exp n_mant t_fmt t_mant n_rounded)
             n_abs = abs(n_value)
+            t_fmt = lsprintf("%%.%dg" precision)
             if(n_abs < 1e-24 || n_abs >= 1e27
-                strcat(sprintf(nil "%g" n_value) unit)
+                strcat(sprintf(nil t_fmt n_value) unit)
                 progn(
                     n_exp = floor(log10(n_abs) / 3) * 3
                     n_mant = n_value * expt(10.0 -n_exp)
-                    t_fmt = lsprintf("%%.%dg" precision)
                     t_mant = sprintf(nil t_fmt n_mant)
                     n_rounded = atof(t_mant)
                     when(abs(n_rounded) >= 1000
@@ -319,13 +319,13 @@ procedure(Format(n_value \@key (unit "") (precision 6) "ntx")  ; -> str
                                 t_mant = sprintf(nil t_fmt n_mant)
                             )
                             progn(
-                                t_mant = sprintf(nil "%g" n_value)
+                                t_mant = sprintf(nil t_fmt n_value)
                                 n_exp = nil
                             )
                         )
                     )
                     if(n_exp
-                        strcat(t_mant _PrefixForExp(n_exp) unit)
+                        lsprintf("%s%s%s" t_mant _PrefixForExp(n_exp) unit)
                         strcat(t_mant unit)
                     )
                 )

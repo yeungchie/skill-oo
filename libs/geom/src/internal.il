@@ -11,7 +11,7 @@ procedure(_Eps(g_eps "g")  ; -> float
     cond(
         (g_eps == nil 1e-9)
         (numberp(g_eps) && g_eps > 0.0 float(g_eps))
-        (t error("ycGeom: ?eps must be a positive number, got %A" g_eps))
+        (t error("ycGeom::_Eps: ?eps must be a positive number, got %A" g_eps))
     )
 )
 
@@ -26,7 +26,7 @@ procedure(_Grid(g_grid "g")  ; -> float | nil
     cond(
         (g_grid == nil nil)
         (numberp(g_grid) && g_grid > 0.0 float(g_grid))
-        (t error("ycGeom: ?grid must be a positive number, got %A" g_grid))
+        (t error("ycGeom::_Grid: ?grid must be a positive number, got %A" g_grid))
     )
 )
 
@@ -356,7 +356,7 @@ procedure(_BoundaryMode(g_boundary "g")  ; -> str
     ; **返回**
     ;   (str) - 规范值；非法值 error
     unless(stringp(g_boundary) && (g_boundary == "inside" || g_boundary == "outside")
-        error("ycGeom: ?boundary must be \"inside\" or \"outside\", got %A" g_boundary)
+        error("ycGeom::_BoundaryMode: ?boundary must be \"inside\" or \"outside\", got %A" g_boundary)
     )
     g_boundary
 )
@@ -371,7 +371,7 @@ procedure(_Flag(g_value t_name "gt")  ; -> t | nil
     ; **返回**
     ;   (t|nil) - 原值；非 t/nil 时 error
     unless(g_value == t || g_value == nil
-        error("ycGeom: ?%s must be t or nil, got %A" t_name g_value)
+        error("ycGeom::_Flag: ?%s must be t or nil, got %A" t_name g_value)
     )
     g_value
 )
@@ -609,7 +609,6 @@ procedure(_Rings(l_pts "l")  ; -> list[list[Point]]
         n_len = length(l_pts)
         t_seams = _SeamKeys(l_pts)
         t_adj = makeTable("geomAdj" nil)
-        l_order = nil
         for(n_i 1 n_len
             g_a = _Nth1(n_i l_pts)
             g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
@@ -635,7 +634,7 @@ procedure(_Rings(l_pts "l")  ; -> list[list[Point]]
             while(g_cur
                 l_nei = t_adj[_PtKey(g_cur)]
                 unless(l_nei
-                    error("ycGeom: cannot close polygon ring")
+                    error("ycGeom::_Rings: cannot close polygon ring")
                 )
                 g_next = car(l_nei)
                 t_adj[_PtKey(g_cur)] = cdr(l_nei)

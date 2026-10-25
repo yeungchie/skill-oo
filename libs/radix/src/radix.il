@@ -234,7 +234,7 @@ procedure(Format(n_value \@key (base 10) (prefix nil) (upper nil) (width nil) (p
                 n_need = n_need - 1
             )
         )
-        strcat(if(g_neg "-" "") t_pre t_out)
+        lsprintf("%s%s%s" if(g_neg "-" "") t_pre t_out)
     )
 )
 

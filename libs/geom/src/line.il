@@ -52,7 +52,7 @@ procedure(_InstallLine(self "g")  ; -> any
     ; 把 Line 方法安装到 Line 类（由 initializeInstance 调用）。
     ;
     ; **返回**
-    ;   (any) - 最后一条安装赋值结果，调用方忽略
+    ;   (t) - 安装完成；调用方忽略
     self->a = lambda(()  ; -> float
         ; 返回方程系数 a。
         ;
@@ -131,7 +131,7 @@ procedure(_InstallLine(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_point  (Point)   - 查询点
-        ;   ?eps     (num|nil) - 容差
+        ;   ?eps     (num|nil) - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (t|nil) - 在直线上为 t
@@ -147,7 +147,7 @@ procedure(_InstallLine(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_line  (Line)     - 另一条直线
-        ;   ?eps    (num|nil)  - 容差
+        ;   ?eps    (num|nil)  - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (t|nil) - 平行或重合为 t
@@ -166,7 +166,7 @@ procedure(_InstallLine(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_other  (Line|Segment) - 另一对象
-        ;   ?eps     (num|nil)      - 容差
+        ;   ?eps     (num|nil)      - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Point|Segment|nil) - 唯一交点、重叠线段或无交

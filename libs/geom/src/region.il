@@ -66,7 +66,7 @@ procedure(_InstallRegion(self "g")  ; -> any
     ; 把 Region 方法安装到 Region 类（由 initializeInstance 调用）。
     ;
     ; **返回**
-    ;   (any) - 最后一条安装赋值结果，调用方忽略
+    ;   (t) - 安装完成；调用方忽略
     self->polygons = lambda(()  ; -> list[Polygon]
         ; 返回内部 Polygon 列表。
         ;
@@ -91,8 +91,8 @@ procedure(_InstallRegion(self "g")  ; -> any
         ; 返回周长和。
         ;
         ; **参数**
-        ;   ?includeSeams  (t|nil)   - 是否计入切割线
-        ;   ?eps           (num|nil) - 容差
+        ;   ?includeSeams  (t|nil)   - 是否计入切割线；默认 nil
+        ;   ?eps           (num|nil) - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (float) - 周长
@@ -133,8 +133,8 @@ procedure(_InstallRegion(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_point   (Point)       - 待判断点
-        ;   ?boundary (str)         - "inside" 或 "outside"
-        ;   ?eps      (num|nil)     - 容差
+        ;   ?boundary (str)         - "inside" 或 "outside"；默认 "inside"
+        ;   ?eps      (num|nil)     - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (t|nil) - 属于区域为 t
@@ -157,8 +157,8 @@ procedure(_InstallRegion(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_point        (Point)   - 查询点
-        ;   ?includeSeams  (t|nil)   - 是否计入切割线
-        ;   ?eps           (num|nil) - 容差
+        ;   ?includeSeams  (t|nil)   - 是否计入切割线；默认 nil
+        ;   ?eps           (num|nil) - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (t|nil) - 在边界上为 t
@@ -210,11 +210,11 @@ procedure(_InstallRegion(self "g")  ; -> any
         ;
         ; **参数**
         ;   n_value         (num)      - 距离或倍率
-        ;   ?dir            (sym|list) - 方向
-        ;   ?ratio          (t|nil)    - 倍率模式
-        ;   ?corner         (sym)      - 拐角风格
-        ;   ?miterLimit     (num|nil)  - miter 限制
-        ;   ?roundSegments  (int|nil)  - 圆角段数
+        ;   ?dir            (sym|list) - 方向；默认 'all
+        ;   ?ratio          (t|nil)    - 倍率模式；默认 nil
+        ;   ?corner         (sym)      - 拐角风格；默认 'miter
+        ;   ?miterLimit     (num|nil)  - miter 限制；默认 nil（4.0）
+        ;   ?roundSegments  (int|nil)  - 圆角段数；默认 nil（8）
         ;
         ; **返回**
         ;   (Region) - 结果区域
@@ -226,8 +226,8 @@ procedure(_InstallRegion(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_other  (Region)     - 另一区域
-        ;   ?grid    (num|nil)    - 网格
-        ;   ?eps     (num|nil)    - 容差
+        ;   ?grid    (num|nil)    - 网格；默认 nil
+        ;   ?eps     (num|nil)    - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Region) - 新区域
@@ -243,8 +243,8 @@ procedure(_InstallRegion(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_other  (Region)     - 另一区域
-        ;   ?grid    (num|nil)    - 网格
-        ;   ?eps     (num|nil)    - 容差
+        ;   ?grid    (num|nil)    - 网格；默认 nil
+        ;   ?eps     (num|nil)    - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Region) - 新区域
@@ -260,8 +260,8 @@ procedure(_InstallRegion(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_other  (Region)     - 另一区域
-        ;   ?grid    (num|nil)    - 网格
-        ;   ?eps     (num|nil)    - 容差
+        ;   ?grid    (num|nil)    - 网格；默认 nil
+        ;   ?eps     (num|nil)    - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Region) - 新区域
@@ -277,8 +277,8 @@ procedure(_InstallRegion(self "g")  ; -> any
         ;
         ; **参数**
         ;   g_other  (Region)     - 另一区域
-        ;   ?grid    (num|nil)    - 网格
-        ;   ?eps     (num|nil)    - 容差
+        ;   ?grid    (num|nil)    - 网格；默认 nil
+        ;   ?eps     (num|nil)    - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Region) - 新区域

@@ -10,7 +10,7 @@ procedure(Escape(t_s \@key (quote nil) "tg")  ; -> str
     ;
     ; **参数**
     ;   t_s    (str) - 输入串
-    ;   ?quote (any) - 非 nil 时包裹双引号
+    ;   ?quote (any) - 非 nil 时包裹双引号；默认 nil
     ;
     ; **返回**
     ;   (str) - 转义后的串；?quote 时可直接 evalstring 回读
@@ -35,7 +35,7 @@ procedure(Escape(t_s \@key (quote nil) "tg")  ; -> str
             ""
         )
         if(quote
-            strcat("\"" t_out "\"")
+            lsprintf("\"%s\"" t_out)
             t_out
         )
     )
@@ -46,7 +46,7 @@ procedure(Unescape(t_s \@key (strict nil) "tg")  ; -> str
     ;
     ; **参数**
     ;   t_s     (str) - 输入串
-    ;   ?strict (any) - 非 nil 时未知转义与悬尾反斜杠报错；默认原样保留
+    ;   ?strict (any) - 非 nil 时未知转义与悬尾反斜杠报错；默认 nil（原样保留）
     ;
     ; **返回**
     ;   (str) - 还原后的串

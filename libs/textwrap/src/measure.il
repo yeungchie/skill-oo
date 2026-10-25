@@ -271,7 +271,7 @@ procedure(_LogicalLines(t_s "t")  ; -> list[str]
     ;   t_s  (str) - 已归一换行的串
     ;
     ; **返回**
-    ;   (list[str]) - 行列表；空串为 (\"\")
+    ;   (list[str]) - 行列表；空串为 nil
     let((l_res l_line n_i n_len)
         l_res = cons(nil nil)
         n_i = 1

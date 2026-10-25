@@ -190,7 +190,7 @@ procedure(_FlagsFromValue(g_flags t_ctx "gt")  ; -> str
                     error("%A: flag 'g' is not supported; use ?all t for global matching" t_ctx)
                 )
                 (t
-                    error("%A: unknown flag '%s (use 'I 'M 'S 'X)" t_ctx t_c)
+                    error("%A: unknown flag '%s' (use 'I 'M 'S 'X)" t_ctx t_c)
                 )
             )
             n_i = n_i + 1
@@ -285,7 +285,7 @@ procedure(_ExecOptsBits(g_opts t_ctx "gt")  ; -> int
 )
 
 procedure(_CompileChecked(t_str t_ctx n_opts "ttx")  ; -> compiled
-    ; 编译 PCRE 串；原生诊断照常打印，失败统一转成带上下文的 error()。
+    ; 编译模式串；原生诊断照常打印，失败统一转成带上下文的 error()。
     ;
     ; **参数**
     ;   t_str  (str) - 待编译的正则串
@@ -356,7 +356,7 @@ procedure(_AsPat(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
 )
 
 
-; ---------- module-level free functions (Python re skin) ----------
+; ---------- module-level free functions ----------
 
 procedure(Compile(g_pat \@key flags compileOpts "ggg")  ; -> Pattern
     ; 编译模式串并返回可复用的 Pattern（双表皮 API 的编译入口）。
@@ -365,7 +365,7 @@ procedure(Compile(g_pat \@key flags compileOpts "ggg")  ; -> Pattern
     ;   g_pat   (str|Pattern) - 模式串（源串反斜杠按 2 写，如 "\\d+"）或已编译 Pattern；
     ;                           传 Pattern 时直接复用、原样返回该实例（不再重编译），此时不能带 flags
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（大小写皆可，默认 nil 不修饰）
-    ;   ?compileOpts (sym|list|nil) - 编译选项符号或列表，见 README
+    ;   ?compileOpts (sym|list|nil) - 编译选项符号或列表，默认 nil
     ;
     ; **返回**
     ;   (Pattern) - 编译失败、非法 pattern、类型非法，或 Pattern 与 flags/compileOpts 同用时 error() 中断
@@ -374,12 +374,13 @@ procedure(Compile(g_pat \@key flags compileOpts "ggg")  ; -> Pattern
 )
 
 procedure(Match(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Matched | nil
-    ; 在主题串开头做锚定匹配（语义同 Python re.match，前锚 \A）。
+    ; 在主题串开头做锚定匹配。
     ;
     ; **参数**
-    ;   g_pat   (any)         - 模式串或已编译 Pattern（双表皮）
+    ;   g_pat   (str|Pattern) - 模式串或已编译 Pattern
     ;   t_subj  (str)         - 主题串
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
+    ;   ?execOpts (sym|list|nil) - 执行选项符号或列表；默认 nil
     ;
     ; **返回**
     ;   (Matched|nil) - 主题串起始处命中返回 Matched，未命中返回 nil
@@ -390,12 +391,13 @@ procedure(Match(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Matched | nil
 )
 
 procedure(Search(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Matched | nil
-    ; 在主题串中搜索首个匹配（语义同 Python re.search）。
+    ; 在主题串中搜索首个匹配。
     ;
     ; **参数**
-    ;   g_pat   (any)         - 模式串或已编译 Pattern（双表皮）
+    ;   g_pat   (str|Pattern) - 模式串或已编译 Pattern
     ;   t_subj  (str)         - 主题串
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
+    ;   ?execOpts (sym|list|nil) - 执行选项符号或列表；默认 nil
     ;
     ; **返回**
     ;   (Matched|nil) - 命中返回 Matched（span 惰性），未命中返回 nil
@@ -406,12 +408,13 @@ procedure(Search(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Matched | nil
 )
 
 procedure(Fullmatch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Matched | nil
-    ; 整串匹配（语义同 Python re.fullmatch，经 \A(?:…)\z 第三编译对象）。
+    ; 整串匹配（要求匹配覆盖整个主题串）。
     ;
     ; **参数**
-    ;   g_pat   (any)         - 模式串或已编译 Pattern（双表皮）
+    ;   g_pat   (str|Pattern) - 模式串或已编译 Pattern
     ;   t_subj  (str)         - 主题串
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
+    ;   ?execOpts (sym|list|nil) - 执行选项符号或列表；默认 nil
     ;
     ; **返回**
     ;   (Matched|nil) - 匹配覆盖整个主题串返回 Matched，否则返回 nil
@@ -422,12 +425,13 @@ procedure(Fullmatch(g_pat t_subj \@key flags execOpts "gtgg")  ; -> Matched | ni
 )
 
 procedure(Findall(g_pat t_subj \@key flags execOpts "gtgg")  ; -> list
-    ; 返回主题串中全部匹配的结果列表（语义同 Python re.findall）。
+    ; 返回主题串中全部匹配的结果列表。
     ;
     ; **参数**
-    ;   g_pat   (any)         - 模式串或已编译 Pattern（双表皮）
+    ;   g_pat   (str|Pattern) - 模式串或已编译 Pattern
     ;   t_subj  (str)         - 主题串
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
+    ;   ?execOpts (sym|list|nil) - 执行选项符号或列表；默认 nil
     ;
     ; **返回**
     ;   (list) - 0 组整体串列表 / 1 组扁平组值列表 / ≥2 组每匹配一个子列表
@@ -438,12 +442,13 @@ procedure(Findall(g_pat t_subj \@key flags execOpts "gtgg")  ; -> list
 )
 
 procedure(Finditer(g_pat t_subj \@key flags execOpts "gtgg")  ; -> list[Matched]
-    ; 返回全部匹配的 Matched 列表（语义同 Python re.finditer，全量返回）。
+    ; 返回全部匹配的 Matched 列表。
     ;
     ; **参数**
-    ;   g_pat   (any)         - 模式串或已编译 Pattern（双表皮）
+    ;   g_pat   (str|Pattern) - 模式串或已编译 Pattern
     ;   t_subj  (str)         - 主题串
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
+    ;   ?execOpts (sym|list|nil) - 执行选项符号或列表；默认 nil
     ;
     ; **返回**
     ;   (list[Matched]) - 全量 Matched 列表；慢路径逐位置扫描
@@ -457,7 +462,7 @@ procedure(Partialp(g_pat t_subj \@key flags execOpts "gtgg")  ; -> t | nil
     ; 判断主题串是否为部分匹配或完整匹配。
     ;
     ; **参数**
-    ;   g_pat   (any)         - 模式串或已编译 Pattern（双表皮）
+    ;   g_pat   (str|Pattern) - 模式串或已编译 Pattern
     ;   t_subj  (str)         - 主题串
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
     ;   ?execOpts (sym|list|nil) - 执行选项符号或列表（默认 nil）
@@ -471,13 +476,14 @@ procedure(Partialp(g_pat t_subj \@key flags execOpts "gtgg")  ; -> t | nil
 )
 
 procedure(Split(g_pat t_subj \@key flags first execOpts "gtggg")  ; -> list[str]
-    ; 按模式切分主题串（语义同 Python re.split）。
+    ; 按模式切分主题串。
     ;
     ; **参数**
-    ;   g_pat   (any)         - 模式串或已编译 Pattern（双表皮）
+    ;   g_pat   (str|Pattern) - 模式串或已编译 Pattern
     ;   t_subj  (str)         - 主题串
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
     ;   ?first  (t|nil)       - t 时只切首处，nil（默认）切分全部
+    ;   ?execOpts (sym|list|nil) - 执行选项符号或列表；默认 nil
     ;
     ; **返回**
     ;   (list[str]) - 切分段列表（保留捕获组段）
@@ -488,14 +494,15 @@ procedure(Split(g_pat t_subj \@key flags first execOpts "gtggg")  ; -> list[str]
 )
 
 procedure(Sub(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> str
-    ; 替换主题串中的匹配（语义同 Python re.sub，参数序为 pattern repl subj）。
+    ; 替换主题串中的匹配；参数序为模式、替换模板、主题串。
     ;
     ; **参数**
-    ;   g_pat   (any)         - 模式串或已编译 Pattern（双表皮）
+    ;   g_pat   (str|Pattern) - 模式串或已编译 Pattern
     ;   t_repl  (str)         - 替换模板（引擎方言，展开 \1、&、\0）
     ;   t_subj  (str)         - 主题串
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
     ;   ?all    (t|nil)       - t 时替换全部匹配，nil（默认）只替首处
+    ;   ?execOpts (sym|list|nil) - 执行选项符号或列表；默认 nil
     ;
     ; **返回**
     ;   (str) - 替换后的串
@@ -506,14 +513,15 @@ procedure(Sub(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> str
 )
 
 procedure(Subn(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> (str, int)
-    ; 同 Sub，另返回实际替换次数（语义同 Python re.subn）。
+    ; 同 Sub，另返回实际替换次数。
     ;
     ; **参数**
-    ;   g_pat   (any)         - 模式串或已编译 Pattern（双表皮）
+    ;   g_pat   (str|Pattern) - 模式串或已编译 Pattern
     ;   t_repl  (str)         - 替换模板（引擎方言，见 README）
     ;   t_subj  (str)         - 主题串
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
     ;   ?all    (t|nil)       - t 时替换全部匹配，nil（默认）只替首处
+    ;   ?execOpts (sym|list|nil) - 执行选项符号或列表；默认 nil
     ;
     ; **返回**
     ;   (str, int) - (替换后的串, 实际替换次数)
@@ -524,7 +532,7 @@ procedure(Subn(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> (str
 )
 
 procedure(GetRecursionLimit()  ; -> int
-    ; 返回 PCRE 匹配算法的当前最大递归深度（进程级设置）。
+    ; 返回正则匹配引擎的当前最大递归深度（进程级设置）。
     ;
     ; **参数**
     ;   无
@@ -535,7 +543,7 @@ procedure(GetRecursionLimit()  ; -> int
 )
 
 procedure(SetRecursionLimit(n_limit "x")  ; -> t
-    ; 设置 PCRE 匹配算法的最大递归深度（进程级设置）。
+    ; 设置正则匹配引擎的最大递归深度（进程级设置）。
     ;
     ; **参数**
     ;   n_limit  (int) - 最大递归深度

@@ -388,13 +388,13 @@ procedure(Encode(g_val \@key (format "yaml") (indent nil) (sortKeys nil) (strict
     ;
     ; **参数**
     ;   g_val         (any) - 待编码值；yaml-stream 时为文档列表
-    ;   ?format       (str) - "yaml" 或 "yaml-stream"
+    ;   ?format       (str) - "yaml" 或 "yaml-stream"；默认 "yaml"
     ;   ?indent       (int) - 每层缩进空格数；默认 2
     ;   ?sortKeys     (t|nil) - 映射键排序；默认 nil
-    ;   ?strict       (t|nil) - t 时映射键必须为字符串
-    ;   ?flow         (t|nil) - t 时全部使用流式风格
-    ;   ?explicitStart(t|nil) - 单文档添加 `---`
-    ;   ?explicitEnd  (t|nil) - 单文档添加 `...`
+    ;   ?strict       (t|nil) - t 时映射键必须为字符串；默认 nil
+    ;   ?flow         (t|nil) - t 时全部使用流式风格；默认 nil
+    ;   ?explicitStart (t|nil) - 单文档添加 `---`；默认 nil
+    ;   ?explicitEnd   (t|nil) - 单文档添加 `...`；默认 nil
     ;   ?finalNewline (t|nil) - 末尾换行；默认 t
     ;   ?maxDepth     (int) - 最大嵌套深度；默认 800
     ;
