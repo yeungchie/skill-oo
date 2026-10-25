@@ -24,9 +24,9 @@ defclass(Region () (
     onBoundary()
     bbox()
     isEmpty()
-    union()
-    intersection()
-    difference()
+    or()
+    and()
+    not()
     xor()
     toSkill()
 ))
@@ -204,7 +204,7 @@ procedure(_InstallRegion(self "g")  ; -> any
         ;   (t|nil) - 无 Polygon 为 t
         self->_data->polygons == nil
     )
-    self->union = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
+    self->or = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
         ; 返回并集。
         ;
         ; **参数**
@@ -215,13 +215,13 @@ procedure(_InstallRegion(self "g")  ; -> any
         ; **返回**
         ;   (Region) - 新区域
         let((g_o l_res)
-            g_o = _AsRegion(g_other "ycGeom::Region->union")
+            g_o = _AsRegion(g_other "ycGeom::Region->or")
             l_res = _Boolean(self->_data->polygons g_o->polygons()
                 'union _Grid(grid) _Eps(eps))
             Region(l_res ?normalize nil)
         )
     )
-    self->intersection = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
+    self->and = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
         ; 返回交集。
         ;
         ; **参数**
@@ -232,13 +232,13 @@ procedure(_InstallRegion(self "g")  ; -> any
         ; **返回**
         ;   (Region) - 新区域
         let((g_o l_res)
-            g_o = _AsRegion(g_other "ycGeom::Region->intersection")
+            g_o = _AsRegion(g_other "ycGeom::Region->and")
             l_res = _Boolean(self->_data->polygons g_o->polygons()
                 'intersection _Grid(grid) _Eps(eps))
             Region(l_res ?normalize nil)
         )
     )
-    self->difference = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
+    self->not = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
         ; 返回 A-B。
         ;
         ; **参数**
@@ -249,7 +249,7 @@ procedure(_InstallRegion(self "g")  ; -> any
         ; **返回**
         ;   (Region) - 新区域
         let((g_o l_res)
-            g_o = _AsRegion(g_other "ycGeom::Region->difference")
+            g_o = _AsRegion(g_other "ycGeom::Region->not")
             l_res = _Boolean(self->_data->polygons g_o->polygons()
                 'difference _Grid(grid) _Eps(eps))
             Region(l_res ?normalize nil)

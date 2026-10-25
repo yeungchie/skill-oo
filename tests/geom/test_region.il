@@ -43,9 +43,9 @@ let((g_a g_b g_r)
         ycGeom::Point(6 6) ycGeom::Point(2 6)
     ))
     _Assert(ycGeom::Region(list(g_a g_b) ?normalize nil)->area() == 32.0  "region: trust input area")
-    _Assert(ycGeom::Region(list(g_a))->union(ycGeom::Region(list(g_b)))->area() == 28.0  "region: union")
-    _Assert(ycGeom::Region(list(g_a))->intersection(ycGeom::Region(list(g_b)))->area() == 4.0  "region: intersection")
-    _Assert(ycGeom::Region(list(g_a))->difference(ycGeom::Region(list(g_b)))->area() == 12.0  "region: difference")
+    _Assert(ycGeom::Region(list(g_a))->or(ycGeom::Region(list(g_b)))->area() == 28.0  "region: or")
+    _Assert(ycGeom::Region(list(g_a))->and(ycGeom::Region(list(g_b)))->area() == 4.0  "region: and")
+    _Assert(ycGeom::Region(list(g_a))->not(ycGeom::Region(list(g_b)))->area() == 12.0  "region: not")
     _Assert(ycGeom::Region(list(g_a))->xor(ycGeom::Region(list(g_b)))->area() == 24.0  "region: xor")
     _Assert(ycGeom::Region(list(g_a))->onBoundary(ycGeom::Point(0 0))  "region: on boundary")
     _Assert(!ycGeom::Region(list(g_a))->onBoundary(ycGeom::Point(1 1))  "region: not on boundary")
@@ -57,7 +57,7 @@ _AssertError(lambda(() ycGeom::Region(nil ?normalize "bad") t)  "region: bad nor
 _AssertError(lambda(() ycGeom::Region(list(ycGeom::Polygon(list(
     ycGeom::Point(0 0) ycGeom::Point(1 0) ycGeom::Point(0 1)
 ))) ?grid 0) t)  "region: bad grid")
-_AssertError(lambda(() ycGeom::Region(list())->union(1) t)  "region: bad union type")
+_AssertError(lambda(() ycGeom::Region(list())->or(1) t)  "region: bad or type")
 
 let((g_r g_src)
     g_src = ycGeom::Region(list(ycGeom::Polygon(list(

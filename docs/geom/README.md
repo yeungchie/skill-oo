@@ -54,7 +54,7 @@ g_b = ycGeom::Region(list(ycGeom::Polygon(list(
     ycGeom::Point(15 15)
     ycGeom::Point(5 15)
 ))))
-g_a->union(g_b)->area()
+g_a->or(g_b)->area()
 ; => 175.0
 ```
 
@@ -810,14 +810,14 @@ Region->isEmpty()
 
 空区域返回 t。
 
-#### union <sub>`method`</sub>
+#### or <sub>`method`</sub>
 
 ```text
-Region->union(g_other [ ?grid ] [ ?eps ])
+Region->or(g_other [ ?grid ] [ ?eps ])
 => Region
 ```
 
-返回并集。
+返回并集 `A ∪ B`。
 
 | 参数 | 说明 |
 | --- | --- |
@@ -825,14 +825,14 @@ Region->union(g_other [ ?grid ] [ ?eps ])
 | `?grid` | 布尔网格；默认 nil |
 | `?eps` | 容差；默认 `1e-9` |
 
-#### intersection <sub>`method`</sub>
+#### and <sub>`method`</sub>
 
 ```text
-Region->intersection(g_other [ ?grid ] [ ?eps ])
+Region->and(g_other [ ?grid ] [ ?eps ])
 => Region
 ```
 
-返回交集。
+返回交集 `A ∩ B`。
 
 | 参数 | 说明 |
 | --- | --- |
@@ -840,14 +840,14 @@ Region->intersection(g_other [ ?grid ] [ ?eps ])
 | `?grid` | 布尔网格；默认 nil |
 | `?eps` | 容差；默认 `1e-9` |
 
-#### difference <sub>`method`</sub>
+#### not <sub>`method`</sub>
 
 ```text
-Region->difference(g_other [ ?grid ] [ ?eps ])
+Region->not(g_other [ ?grid ] [ ?eps ])
 => Region
 ```
 
-返回 `A-B`。
+返回二元差集 `A - B`；`not` 不是一元补集。
 
 | 参数 | 说明 |
 | --- | --- |
@@ -926,7 +926,7 @@ g_b = ycGeom::Polygon(list(
     ycGeom::Point(2 2) ycGeom::Point(6 2)
     ycGeom::Point(6 6) ycGeom::Point(2 6)
 ))
-ycGeom::Region(list(g_a))->intersection(ycGeom::Region(list(g_b)))->area()
+ycGeom::Region(list(g_a))->and(ycGeom::Region(list(g_b)))->area()
 ; => 4.0
 ```
 
