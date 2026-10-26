@@ -1,7 +1,7 @@
 _TestConvertDone = nil
 
 let((g_p g_s g_l g_r g_poly g_region)
-    g_p = ycGeom::Point(list(1 2))
+    g_p = ycGeom::Point(1:2)
     g_s = ycGeom::Segment(list(0:0 1:1))
     g_l = ycGeom::Line(list(0:0 1:1))
     g_r = ycGeom::Rect(list(0:0 1:1))
@@ -24,7 +24,7 @@ _AssertError(lambda(() ycGeom::Rect(0:0 5:5) t)  "constructor: Rect multiple arg
 
 _Assert(ycGeom::Segment(list(ycGeom::Point(0:0) 1:1))->toSkill()
     == list(list(0.0 0.0) list(1.0 1.0))  "constructor: Segment mixed points")
-_Assert(ycGeom::Line(list(ycGeom::Point(0:0) 1:1))->contains(ycGeom::Point(list(0.5 0.5)))
+_Assert(ycGeom::Line(list(ycGeom::Point(0:0) 1:1))->contains(ycGeom::Point(0.5:0.5))
     "constructor: Line mixed points")
 _Assert(ycGeom::Rect(list(ycGeom::Point(0:0) 1:1))->area() == 1.0
     "constructor: Rect mixed points")
@@ -56,7 +56,7 @@ _AssertErrorMsg(lambda(() ycGeom::ConvertToGeomObject(list(0:0 1:1)) t)
 
 _Assert(ycGeom::ConvertToGeomObject(list(0:0 1:1) ?as 'Segment)->toSkill()
     == list(list(0.0 0.0) list(1.0 1.0))  "convert: ?as Segment")
-_Assert(ycGeom::ConvertToGeomObject(list(0:0 1:1) ?as 'Line)->contains(ycGeom::Point(list(0.5 0.5)))
+_Assert(ycGeom::ConvertToGeomObject(list(0:0 1:1) ?as 'Line)->contains(ycGeom::Point(0.5:0.5))
     "convert: ?as Line")
 _Assert(ycGeom::ConvertToGeomObject(list(0:0 1:1) ?as 'Rect)->toSkill()
     == list(list(0.0 0.0) list(1.0 1.0))  "convert: ?as Rect")

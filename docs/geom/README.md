@@ -7,7 +7,7 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole �
 ## 概要
 
 - 所有坐标在构造时转为浮点数；整数输入不会产生舍入误差，`toSkill()` 始终输出浮点坐标。
-- 构造器只接受一个列表参数；`Point(1:2)` 与 `Point(list(1 2))` 等价，`Point(1 2)` 非法。列表元素可以是坐标、Point/图形对象或嵌套列表。
+- 构造器只接受一个列表参数；`Point(1:2)` 与 `Point(1:2)` 等价，`Point(1 2)` 非法。列表元素可以是坐标、Point/图形对象或嵌套列表。
 - `Polygon` 只保存闭合点列；洞用水平或垂直切割线并入外环。
 - `perimeter()` 默认扣除切割线，`?includeSeams t` 时按完整点列环计算。
 - `Region` 表示 0..n 个多边形的并集，默认归一化为互不重叠的多边形集合。
@@ -27,46 +27,46 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole �
 
 ```lisp
 ; 点与线段
-g_p = ycGeom::Point(list(3 4))
-g_q = ycGeom::Point(list(0 0))
+g_p = ycGeom::Point(3:4)
+g_q = ycGeom::Point(0:0)
 g_p->distanceTo(g_q)
 ; => 5.0
 
-g_s = ycGeom::Segment(list(ycGeom::Point(list(0 0)) ycGeom::Point(list(10 0))))
+g_s = ycGeom::Segment(list(ycGeom::Point(0:0) ycGeom::Point(10:0)))
 g_s->midpoint()->toSkill()
 ; => (5.0 0.0)
-g_s->contains(ycGeom::Point(list(5 0)))
+g_s->contains(ycGeom::Point(5:0))
 ; => t
 
 ; 无限直线
-g_l = ycGeom::Line(list(ycGeom::Point(list(0 0)) ycGeom::Point(list(0 10))))
-g_l->distanceTo(ycGeom::Point(list(5 3)))
+g_l = ycGeom::Line(list(ycGeom::Point(0:0) ycGeom::Point(0:10)))
+g_l->distanceTo(ycGeom::Point(5:3))
 ; => 5.0
 
 ; 轴对齐矩形
-g_rect = ycGeom::Rect(list(ycGeom::Point(list(10 4)) ycGeom::Point(list(2 0))))
+g_rect = ycGeom::Rect(list(ycGeom::Point(10:4) ycGeom::Point(2:0)))
 g_rect->toSkill()
 ; => ((2.0 0.0) (10.0 4.0))
 
 ; 正方形多边形
 g_sq = ycGeom::Polygon(list(
-    ycGeom::Point(list(0 0))
-    ycGeom::Point(list(10 0))
-    ycGeom::Point(list(10 10))
-    ycGeom::Point(list(0 10))
+    ycGeom::Point(0:0)
+    ycGeom::Point(10:0)
+    ycGeom::Point(10:10)
+    ycGeom::Point(0:10)
 ))
 g_sq->area()
 ; => 100.0
-g_sq->contains(ycGeom::Point(list(5 5)))
+g_sq->contains(ycGeom::Point(5:5))
 ; => t
 
 ; 区域并集
 g_a = ycGeom::Region(list(g_sq))
 g_b = ycGeom::Region(list(ycGeom::Polygon(list(
-    ycGeom::Point(list(5 5))
-    ycGeom::Point(list(15 5))
-    ycGeom::Point(list(15 15))
-    ycGeom::Point(list(5 15))
+    ycGeom::Point(5:5)
+    ycGeom::Point(15:5)
+    ycGeom::Point(15:15)
+    ycGeom::Point(5:15)
 ))))
 g_a->or(g_b)->area()
 ; => 175.0
@@ -98,7 +98,7 @@ ycGeom::Point(l_data)
 **例程**
 
 ```lisp
-ycGeom::Point(list(1 2))->toSkill()
+ycGeom::Point(1:2)->toSkill()
 ; => (1.0 2.0)
 ```
 
@@ -116,7 +116,7 @@ Point->x()
 返回 x 坐标。
 
 ```lisp
-ycGeom::Point(list(3 4))->x()
+ycGeom::Point(3:4)->x()
 ; => 3.0
 ```
 
@@ -130,7 +130,7 @@ Point->y()
 返回 y 坐标。
 
 ```lisp
-ycGeom::Point(list(3 4))->y()
+ycGeom::Point(3:4)->y()
 ; => 4.0
 ```
 
@@ -148,7 +148,7 @@ Point->distanceTo(g_other)
 | g_other | Point | | 另一个 `Point` |
 
 ```lisp
-ycGeom::Point(list(3 4))->distanceTo(ycGeom::Point(list(0 0)))
+ycGeom::Point(3:4)->distanceTo(ycGeom::Point(0:0))
 ; => 5.0
 ```
 
@@ -166,7 +166,7 @@ Point->midpoint(g_other)
 | g_other | Point | | 另一个 `Point` |
 
 ```lisp
-ycGeom::Point(list(0 0))->midpoint(ycGeom::Point(list(4 2)))->toSkill()
+ycGeom::Point(0:0)->midpoint(ycGeom::Point(4:2))->toSkill()
 ; => (2.0 1.0)
 ```
 
@@ -188,7 +188,7 @@ Point->translate(
 | n_dy | num | | y 位移 |
 
 ```lisp
-ycGeom::Point(list(1 2))->translate(3 -1)->toSkill()
+ycGeom::Point(1:2)->translate(3 -1)->toSkill()
 ; => (4.0 1.0)
 ```
 
@@ -210,7 +210,7 @@ Point->equals(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Point(list(0 0))->equals(ycGeom::Point(list(1e-10 0)) ?eps 1e-9)
+ycGeom::Point(0:0)->equals(ycGeom::Point(1e-10:0) ?eps 1e-9)
 ; => t
 ```
 
@@ -224,7 +224,7 @@ Point->toSkill()
 返回 `(x y)` 浮点坐标列表。
 
 ```lisp
-ycGeom::Point(list(3 4))->toSkill()
+ycGeom::Point(3:4)->toSkill()
 ; => (3.0 4.0)
 ```
 
@@ -252,7 +252,7 @@ ycGeom::Segment(l_data)
 **例程**
 
 ```lisp
-ycGeom::Segment(list(ycGeom::Point(list(0 0)) ycGeom::Point(list(3 4))))->length()
+ycGeom::Segment(list(ycGeom::Point(0:0) ycGeom::Point(3:4)))->length()
 ; => 5.0
 ```
 
@@ -344,7 +344,7 @@ Segment->project(g_point)
 | g_point | Point | | 待投影的 `Point` |
 
 ```lisp
-ycGeom::Segment(list(0 0 10 0))->project(ycGeom::Point(list(3 5)))->toSkill()
+ycGeom::Segment(list(0 0 10 0))->project(ycGeom::Point(3:5))->toSkill()
 ; => (3.0 0.0)
 ```
 
@@ -362,7 +362,7 @@ Segment->nearestPoint(g_point)
 | g_point | Point | | 查询点 |
 
 ```lisp
-ycGeom::Segment(list(0 0 10 0))->nearestPoint(ycGeom::Point(list(15 5)))->toSkill()
+ycGeom::Segment(list(0 0 10 0))->nearestPoint(ycGeom::Point(15:5))->toSkill()
 ; => (10.0 0.0)
 ```
 
@@ -380,7 +380,7 @@ Segment->distanceTo(g_point)
 | g_point | Point | | 查询点 |
 
 ```lisp
-ycGeom::Segment(list(0 0 10 0))->distanceTo(ycGeom::Point(list(15 0)))
+ycGeom::Segment(list(0 0 10 0))->distanceTo(ycGeom::Point(15:0))
 ; => 5.0
 ```
 
@@ -402,7 +402,7 @@ Segment->contains(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Segment(list(0 0 10 0))->contains(ycGeom::Point(list(5 0)))
+ycGeom::Segment(list(0 0 10 0))->contains(ycGeom::Point(5:0))
 ; => t
 ```
 
@@ -440,19 +440,31 @@ ycGeom::Segment(list(0 0 10 0))->toRect()->toSkill()
 Segment->intersection(
     g_other
     [ ?eps n_eps ]
+    [ ?as g_kind ]
 )
 => Point | Segment | nil
 ```
 
-计算与 `Line` 或 `Segment` 的交点：唯一交点返回 `Point`；共线重叠返回重叠部分 `Segment`；零长度线段按点处理；平行或无交返回 nil；其他对象类型以 `error()` 中断。
+计算与 `Line` 或 `Segment` 的交点：唯一交点返回 `Point`；共线重叠返回重叠部分 `Segment`；零长度线段按点处理；平行或无交返回 nil；其他对象类型以 `error()` 中断。`g_other` 为两点数组时必须用 `?as` 指定按直线还是线段解释。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Line / Segment | | `Line` 或 `Segment` |
+| g_other | Line / Segment / list | | `Line`、`Segment` 或两点数组 |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?as g_kind | sym / nil | nil | 数组目标类型；`'Line` 或 `'Segment` |
+
+`?as` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'Line` | 两点数组按无限直线解释 |
+| `'Segment` | 两点数组按线段解释 |
 
 ```lisp
 ycGeom::Segment(list(0 0 10 0))->intersection(ycGeom::Segment(list(5 -5 5 5)))->toSkill()
+; => (5.0 0.0)
+
+ycGeom::Segment(list(0 0 10 0))->intersection(list(5 -5 5 5) ?as 'Line)->toSkill()
 ; => (5.0 0.0)
 ```
 
@@ -466,7 +478,7 @@ Segment->toLine()
 返回经过起终点的无限直线；零长度线段无对应直线，返回 nil。
 
 ```lisp
-ycGeom::Segment(list(0 0 10 0))->toLine()->contains(ycGeom::Point(list(-5 0)))
+ycGeom::Segment(list(0 0 10 0))->toLine()->contains(ycGeom::Point(-5:0))
 ; => t
 ```
 
@@ -508,8 +520,8 @@ ycGeom::Line(l_data)
 **例程**
 
 ```lisp
-g_l = ycGeom::Line(list(ycGeom::Point(list(0 0)) ycGeom::Point(list(10 0))))
-g_l->contains(ycGeom::Point(list(4 0)))
+g_l = ycGeom::Line(list(ycGeom::Point(0:0) ycGeom::Point(10:0)))
+g_l->contains(ycGeom::Point(4:0))
 ; => t
 ```
 
@@ -615,7 +627,7 @@ Line->project(g_point)
 | g_point | Point | | 待投影点 |
 
 ```lisp
-ycGeom::Line(list(0 0 10 0))->project(ycGeom::Point(list(3 5)))->toSkill()
+ycGeom::Line(list(0 0 10 0))->project(ycGeom::Point(3:5))->toSkill()
 ; => (3.0 0.0)
 ```
 
@@ -633,7 +645,7 @@ Line->distanceTo(g_point)
 | g_point | Point | | 查询点 |
 
 ```lisp
-ycGeom::Line(list(0 0 10 0))->distanceTo(ycGeom::Point(list(3 5)))
+ycGeom::Line(list(0 0 10 0))->distanceTo(ycGeom::Point(3:5))
 ; => 5.0
 ```
 
@@ -655,7 +667,7 @@ Line->contains(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Line(list(0 0 10 0))->contains(ycGeom::Point(list(4 0)))
+ycGeom::Line(list(0 0 10 0))->contains(ycGeom::Point(4:0))
 ; => t
 ```
 
@@ -669,15 +681,15 @@ Line->isParallel(
 => t | nil
 ```
 
-判断两条直线是否平行或重合。
+判断两条直线是否平行或重合。`g_line` 也接受两点数组，数组按无限直线解释。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_line | Line | | 另一条 `Line` |
+| g_line | Line / list | | 另一条 `Line` 或两点数组 |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Line(list(0 0 10 0))->isParallel(ycGeom::Line(list(0 1 10 1)))
+ycGeom::Line(list(0 0 10 0))->isParallel(list(0 1 10 1))
 ; => t
 ```
 
@@ -687,19 +699,31 @@ ycGeom::Line(list(0 0 10 0))->isParallel(ycGeom::Line(list(0 1 10 1)))
 Line->intersection(
     g_other
     [ ?eps n_eps ]
+    [ ?as g_kind ]
 )
 => Point | Segment | nil
 ```
 
-计算与 `Line` 或 `Segment` 的交点：唯一交点返回 `Point`；与线段共线时返回重叠 `Segment`；两条直线平行或重合返回 nil；其他对象类型以 `error()` 中断。
+计算与 `Line` 或 `Segment` 的交点：唯一交点返回 `Point`；与线段共线时返回重叠 `Segment`；两条直线平行或重合返回 nil；其他对象类型以 `error()` 中断。`g_other` 为两点数组时必须用 `?as` 指定按直线还是线段解释。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_other | Line / Segment | | `Line` 或 `Segment` |
+| g_other | Line / Segment / list | | `Line`、`Segment` 或两点数组 |
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+| ?as g_kind | sym / nil | nil | 数组目标类型；`'Line` 或 `'Segment` |
+
+`?as` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'Line` | 两点数组按无限直线解释 |
+| `'Segment` | 两点数组按线段解释 |
 
 ```lisp
 ycGeom::Line(list(0 0 10 0))->intersection(ycGeom::Line(list(5 -5 5 5)))->toSkill()
+; => (5.0 0.0)
+
+ycGeom::Line(list(0 0 10 0))->intersection(list(5 -5 5 5) ?as 'Segment)->toSkill()
 ; => (5.0 0.0)
 ```
 
@@ -741,7 +765,7 @@ ycGeom::Rect(l_data)
 **例程**
 
 ```lisp
-g_rect = ycGeom::Rect(list(ycGeom::Point(list(10 4)) ycGeom::Point(list(2 0))))
+g_rect = ycGeom::Rect(list(ycGeom::Point(10:4) ycGeom::Point(2:0)))
 g_rect->width()
 ; => 8.0
 g_rect->toSkill()
@@ -934,7 +958,7 @@ Rect->contains(g_point)
 | g_point | Point | | 查询点 |
 
 ```lisp
-ycGeom::Rect(list(0 0 10 4))->contains(ycGeom::Point(list(5 2)))
+ycGeom::Rect(list(0 0 10 4))->contains(ycGeom::Point(5:2))
 ; => t
 ```
 
@@ -1220,9 +1244,9 @@ Polygon->contains(
 
 ```lisp
 g_p = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
-g_p->contains(ycGeom::Point(list(0 0)))
+g_p->contains(ycGeom::Point(0:0))
 ; => t
-g_p->contains(ycGeom::Point(list(0 0)) ?boundary "outside")
+g_p->contains(ycGeom::Point(0:0) ?boundary "outside")
 ; => nil
 ```
 
@@ -1246,7 +1270,7 @@ Polygon->onBoundary(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->onBoundary(ycGeom::Point(list(0 2)))
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->onBoundary(ycGeom::Point(0:2))
 ; => t
 ```
 
@@ -1640,7 +1664,7 @@ Region->contains(
 其他值以 `error()` 中断。
 
 ```lisp
-ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->contains(ycGeom::Point(list(2 2)))
+ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->contains(ycGeom::Point(2:2))
 ; => t
 ```
 
@@ -1664,7 +1688,7 @@ Region->onBoundary(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->onBoundary(ycGeom::Point(list(0 0)))
+ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->onBoundary(ycGeom::Point(0:0))
 ; => t
 ```
 
@@ -1953,17 +1977,17 @@ ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->toSkill()
 
 ```lisp
 g_hole = ycGeom::Polygon(list(
-    ycGeom::Point(list(0 0))
-    ycGeom::Point(list(10 0))
-    ycGeom::Point(list(10 7))
-    ycGeom::Point(list(7 7))
-    ycGeom::Point(list(7 3))
-    ycGeom::Point(list(3 3))
-    ycGeom::Point(list(3 7))
-    ycGeom::Point(list(7 7))
-    ycGeom::Point(list(10 7))
-    ycGeom::Point(list(10 10))
-    ycGeom::Point(list(0 10))
+    ycGeom::Point(0:0)
+    ycGeom::Point(10:0)
+    ycGeom::Point(10:7)
+    ycGeom::Point(7:7)
+    ycGeom::Point(7:3)
+    ycGeom::Point(3:3)
+    ycGeom::Point(3:7)
+    ycGeom::Point(7:7)
+    ycGeom::Point(10:7)
+    ycGeom::Point(10:10)
+    ycGeom::Point(0:10)
 ))
 g_hole->area()
 ; => 84.0
@@ -1985,12 +2009,12 @@ g_hole->perimeter()
 
 ```lisp
 g_a = ycGeom::Polygon(list(
-    ycGeom::Point(list(0 0)) ycGeom::Point(list(4 0))
-    ycGeom::Point(list(4 4)) ycGeom::Point(list(0 4))
+    ycGeom::Point(0:0) ycGeom::Point(4:0)
+    ycGeom::Point(4:4) ycGeom::Point(0:4)
 ))
 g_b = ycGeom::Polygon(list(
-    ycGeom::Point(list(2 2)) ycGeom::Point(list(6 2))
-    ycGeom::Point(list(6 6)) ycGeom::Point(list(2 6))
+    ycGeom::Point(2:2) ycGeom::Point(6:2)
+    ycGeom::Point(6:6) ycGeom::Point(2:6)
 ))
 ycGeom::Region(list(g_a))->and(ycGeom::Region(list(g_b)))->area()
 ; => 4.0

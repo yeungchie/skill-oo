@@ -326,26 +326,28 @@ procedure(_InstallSegment(self "g")  ; -> t
         ;   (Rect) - 由 bBox 构造；水平、垂直或零长度线段可为退化矩形
         Rect(self->bBox())
     )
-    self->intersection = lambda((g_other \@key (eps nil) "gg")  ; -> Point | Segment | nil
+    self->intersection = lambda((g_other \@key (eps nil) (as nil) "ggg")  ; -> Point | Segment | nil
         ; 计算与 Line 或 Segment 的交点。
         ;
         ; **参数**
-        ;   g_other  (Line|Segment) - 另一对象
-        ;   ?eps     (num|nil)      - 容差；默认 nil（1e-9）
+        ;   g_other  (Line|Segment|list) - 另一对象或两点数组
+        ;   ?eps     (num|nil)           - 容差；默认 nil（1e-9）
+        ;   ?as      (sym|nil)           - 数组目标类型 'Line/'Segment；默认 nil
         ;
         ; **返回**
         ;   (Point|Segment|nil) - 唯一交点、重叠线段或无交
-        let((n_eps)
+        let((n_eps g_o)
             n_eps = _Eps(eps)
+            g_o = _AsLineOrSegment(g_other as "ycGeom::Segment->intersection")
             cond(
-                (_LineP(g_other)
-                    _LineSegmentIntersection(g_other self n_eps))
-                (_SegmentP(g_other)
+                (_LineP(g_o)
+                    _LineSegmentIntersection(g_o self n_eps))
+                (_SegmentP(g_o)
                     _SegSegIntersection(self->_data->start self->_data->end
-                        g_other->start() g_other->end() n_eps))
+                        g_o->start() g_o->end() n_eps))
                 (t
                     error("ycGeom::Segment->intersection: expected a Line or Segment, got %A"
-                        g_other))
+                        g_o))
             )
         )
     )

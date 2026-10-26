@@ -361,6 +361,46 @@ procedure(_AsLine(g_x t_ctx "gt")  ; -> Line
     )
 )
 
+procedure(_AsLineOrSegment(g_x g_as t_ctx "ggt")  ; -> Line | Segment
+    ; 归一化为 Line 或 Segment：对象直接返回，数组需 ?as 指定。
+    ;
+    ; **参数**
+    ;   g_x    (any)     - Line、Segment 或两点数组
+    ;   g_as   (sym|nil) - 数组目标类型；nil 表示未指定
+    ;   t_ctx  (str)     - 错误上下文
+    ;
+    ; **返回**
+    ;   (Line|Segment) - 归一化对象；数组歧义或类型非法时 error
+    let((t_as)
+        cond(
+            (_LineP(g_x) g_x)
+            (_SegmentP(g_x) g_x)
+            (listp(g_x)
+                when(g_as == nil
+                    error("%s: ?as is required for array input ('Line or 'Segment)"
+                        t_ctx)
+                )
+                unless(symbolp(g_as)
+                    error("%s: ?as must be 'Line or 'Segment, got %A" t_ctx g_as)
+                )
+                t_as = symbolToString(g_as)
+                cond(
+                    ((t_as == "Line") _AsLine(g_x t_ctx))
+                    ((t_as == "Segment") _AsSegment(g_x t_ctx))
+                    (t
+                        error("%s: ?as must be 'Line or 'Segment, got %A"
+                            t_ctx g_as)
+                    )
+                )
+            )
+            (t
+                error("%s: expected a Line, Segment, or two-point array, got %A"
+                    t_ctx g_x)
+            )
+        )
+    )
+)
+
 procedure(_GeomKind(g_x "g")  ; -> sym | nil
     ; 返回图形对象的类别符号（内部实现）。
     ;

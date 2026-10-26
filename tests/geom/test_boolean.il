@@ -49,12 +49,12 @@ procedure(_AssertAxisSeams(l_polys "l")  ; -> t
 
 let((l_a l_b l_r)
     l_a = list(ycGeom::Polygon(list(
-        ycGeom::Point(list(0 0)) ycGeom::Point(list(4 0))
-        ycGeom::Point(list(4 4)) ycGeom::Point(list(0 4))
+        ycGeom::Point(0:0) ycGeom::Point(4:0)
+        ycGeom::Point(4:4) ycGeom::Point(0:4)
     )))
     l_b = list(ycGeom::Polygon(list(
-        ycGeom::Point(list(2 2)) ycGeom::Point(list(6 2))
-        ycGeom::Point(list(6 6)) ycGeom::Point(list(2 6))
+        ycGeom::Point(2:2) ycGeom::Point(6:2)
+        ycGeom::Point(6:6) ycGeom::Point(2:6)
     )))
     l_r = ycGeom::_Boolean(l_a l_b 'union nil 1e-9)
     _Assert(_BoolArea(l_r) == 28.0  "boolean: union area")
@@ -76,12 +76,12 @@ let((g_a g_b g_r)
 
 let((l_a l_b l_r)
     l_a = list(ycGeom::Polygon(list(
-        ycGeom::Point(list(0 0)) ycGeom::Point(list(2 0))
-        ycGeom::Point(list(2 2)) ycGeom::Point(list(0 2))
+        ycGeom::Point(0:0) ycGeom::Point(2:0)
+        ycGeom::Point(2:2) ycGeom::Point(0:2)
     )))
     l_b = list(ycGeom::Polygon(list(
-        ycGeom::Point(list(10 0)) ycGeom::Point(list(12 0))
-        ycGeom::Point(list(12 2)) ycGeom::Point(list(10 2))
+        ycGeom::Point(10:0) ycGeom::Point(12:0)
+        ycGeom::Point(12:2) ycGeom::Point(10:2)
     )))
     _Assert(_BoolArea(ycGeom::_Boolean(l_a l_b 'union nil 1e-9)) == 8.0  "boolean: disjoint union")
     _Assert(ycGeom::_Boolean(l_a l_b 'intersection nil 1e-9) == nil  "boolean: disjoint intersection empty")
@@ -92,19 +92,19 @@ _AssertError(lambda(() ycGeom::_Boolean(list(1) nil 'union nil 1e-9) t)  "boolea
 
 let((g_outer g_inner l_r)
     g_outer = ycGeom::Polygon(list(
-        ycGeom::Point(list(0 0)) ycGeom::Point(list(10 0))
-        ycGeom::Point(list(10 10)) ycGeom::Point(list(0 10))
+        ycGeom::Point(0:0) ycGeom::Point(10:0)
+        ycGeom::Point(10:10) ycGeom::Point(0:10)
     ))
     g_inner = ycGeom::Polygon(list(
-        ycGeom::Point(list(3 3)) ycGeom::Point(list(7 3))
-        ycGeom::Point(list(7 7)) ycGeom::Point(list(3 7))
+        ycGeom::Point(3:3) ycGeom::Point(7:3)
+        ycGeom::Point(7:7) ycGeom::Point(3:7)
     ))
     l_r = ycGeom::_Boolean(list(g_outer) list(g_inner) 'difference nil 1e-9)
     _AssertAxisSeams(l_r)
     _Assert(_BoolArea(l_r) == 84.0  "boolean: difference creates hole")
     _Assert(length(car(l_r)->points()) > 8  "boolean: keyhole output")
-    _Assert(!car(l_r)->contains(ycGeom::Point(list(5 5)))  "boolean: hole excluded")
-    _Assert(car(l_r)->contains(ycGeom::Point(list(1 1)))  "boolean: outer included")
+    _Assert(!car(l_r)->contains(ycGeom::Point(5:5))  "boolean: hole excluded")
+    _Assert(car(l_r)->contains(ycGeom::Point(1:1))  "boolean: outer included")
 )
 
 let((g_outer g_h1 g_h2 g_r)
@@ -114,8 +114,8 @@ let((g_outer g_h1 g_h2 g_r)
     g_r = ycGeom::_Boolean(list(g_outer) list(g_h1 g_h2) 'difference nil 1e-9)
     _AssertAxisSeams(g_r)
     _Assert(_BoolArea(g_r) == 192.0  "boolean: two holes area")
-    _Assert(!car(g_r)->contains(ycGeom::Point(list(2 2)))  "boolean: first hole excluded")
-    _Assert(!car(g_r)->contains(ycGeom::Point(list(6 2)))  "boolean: second hole excluded")
+    _Assert(!car(g_r)->contains(ycGeom::Point(2:2))  "boolean: first hole excluded")
+    _Assert(!car(g_r)->contains(ycGeom::Point(6:2))  "boolean: second hole excluded")
 )
 
 let((g_outer g_hole g_r)
@@ -128,12 +128,12 @@ let((g_outer g_hole g_r)
 
 let((g_a g_b g_r)
     g_a = ycGeom::Polygon(list(
-        ycGeom::Point(list(0 0)) ycGeom::Point(list(1e-5 0))
-        ycGeom::Point(list(1e-5 1)) ycGeom::Point(list(0 1))
+        ycGeom::Point(0:0) ycGeom::Point(1e-5:0)
+        ycGeom::Point(1e-5:1) ycGeom::Point(0:1)
     ))
     g_b = ycGeom::Polygon(list(
-        ycGeom::Point(list(1e-5 + 5e-10 0)) ycGeom::Point(list(1 0))
-        ycGeom::Point(list(1 1)) ycGeom::Point(list(1e-5 + 5e-10 1))
+        ycGeom::Point(list(1e-5 + 5e-10 0)) ycGeom::Point(1:0)
+        ycGeom::Point(1:1) ycGeom::Point(list(1e-5 + 5e-10 1))
     ))
     g_r = errset(g_a->or(g_b) nil)
     _Assert(g_r && length(car(g_r)->polygons()) == 1
@@ -142,18 +142,18 @@ let((g_a g_b g_r)
         "boolean: near shared edge area")
 )
 
-_Assert(ycGeom::_PtKey(ycGeom::Point(list(1e9 0)))
+_Assert(ycGeom::_PtKey(ycGeom::Point(1e9:0))
     != ycGeom::_PtKey(ycGeom::Point(list(1e9 + 100 0)))
     "point: key keeps distinct large coordinates")
 
 let((g_a g_b g_r)
     g_a = ycGeom::Polygon(list(
-        ycGeom::Point(list(1e3 0)) ycGeom::Point(list(1e3 + 1e-5 0))
-        ycGeom::Point(list(1e3 + 1e-5 1)) ycGeom::Point(list(1e3 1))
+        ycGeom::Point(1e3:0) ycGeom::Point(list(1e3 + 1e-5 0))
+        ycGeom::Point(list(1e3 + 1e-5 1)) ycGeom::Point(1e3:1)
     ))
     g_b = ycGeom::Polygon(list(
-        ycGeom::Point(list(1e3 + 1e-5 + 5e-10 0)) ycGeom::Point(list(1e4 0))
-        ycGeom::Point(list(1e4 1)) ycGeom::Point(list(1e3 + 1e-5 + 5e-10 1))
+        ycGeom::Point(list(1e3 + 1e-5 + 5e-10 0)) ycGeom::Point(1e4:0)
+        ycGeom::Point(1e4:1) ycGeom::Point(list(1e3 + 1e-5 + 5e-10 1))
     ))
     g_r = errset(g_a->or(g_b) nil)
     _Assert(g_r && length(car(g_r)->polygons()) == 1
@@ -162,9 +162,9 @@ let((g_a g_b g_r)
         "boolean: large cell coordinate area")
 )
 _Assert(ycGeom::_PointInRing(
-    list(ycGeom::Point(list(0 0)) ycGeom::Point(list(1 0))
-        ycGeom::Point(list(1 1)) ycGeom::Point(list(0 1)))
-    ycGeom::Point(list(0 1)) 1e-9)
+    list(ycGeom::Point(0:0) ycGeom::Point(1:0)
+        ycGeom::Point(1:1) ycGeom::Point(0:1))
+    ycGeom::Point(0:1) 1e-9)
     "point: point-in-ring boundary is deterministic")
 
 _TestBooleanDone = t

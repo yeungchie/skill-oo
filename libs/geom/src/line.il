@@ -146,49 +146,49 @@ procedure(_InstallLine(self "g")  ; -> t
         ; 判断两直线是否平行。
         ;
         ; **参数**
-        ;   g_line  (Line)     - 另一条直线
-        ;   ?eps    (num|nil)  - 容差；默认 nil（1e-9）
+        ;   g_line  (Line|list) - 另一条直线或两点数组
+        ;   ?eps    (num|nil)   - 容差；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (t|nil) - 平行或重合为 t
-        let((n_eps n_det)
-            unless(_LineP(g_line)
-                error("ycGeom::Line->isParallel: expected a Line, got %A" g_line)
-            )
+        let((n_eps n_det g_o)
+            g_o = _AsLine(g_line "ycGeom::Line->isParallel")
             n_eps = _Eps(eps)
-            n_det = self->_data->a * g_line->b()
-                - self->_data->b * g_line->a()
+            n_det = self->_data->a * g_o->b()
+                - self->_data->b * g_o->a()
             abs(n_det) <= n_eps
         )
     )
-    self->intersection = lambda((g_other \@key (eps nil) "gg")  ; -> Point | Segment | nil
+    self->intersection = lambda((g_other \@key (eps nil) (as nil) "ggg")  ; -> Point | Segment | nil
         ; 计算与 Line 或 Segment 的交点。
         ;
         ; **参数**
-        ;   g_other  (Line|Segment) - 另一对象
-        ;   ?eps     (num|nil)      - 容差；默认 nil（1e-9）
+        ;   g_other  (Line|Segment|list) - 另一对象或两点数组
+        ;   ?eps     (num|nil)           - 容差；默认 nil（1e-9）
+        ;   ?as      (sym|nil)           - 数组目标类型 'Line/'Segment；默认 nil
         ;
         ; **返回**
         ;   (Point|Segment|nil) - 唯一交点、重叠线段或无交
-        let((n_eps n_det n_x n_y)
+        let((n_eps g_o n_det n_x n_y)
             n_eps = _Eps(eps)
+            g_o = _AsLineOrSegment(g_other as "ycGeom::Line->intersection")
             cond(
-                (_LineP(g_other)
-                    n_det = self->_data->a * g_other->b()
-                        - self->_data->b * g_other->a()
+                (_LineP(g_o)
+                    n_det = self->_data->a * g_o->b()
+                        - self->_data->b * g_o->a()
                     unless(abs(n_det) <= n_eps
-                        n_x = (self->_data->b * g_other->c()
-                            - g_other->b() * self->_data->c) / n_det
-                        n_y = (self->_data->c * g_other->a()
-                            - g_other->c() * self->_data->a) / n_det
+                        n_x = (self->_data->b * g_o->c()
+                            - g_o->b() * self->_data->c) / n_det
+                        n_y = (self->_data->c * g_o->a()
+                            - g_o->c() * self->_data->a) / n_det
                         Point(list(n_x n_y))
                     )
                 )
-                (_SegmentP(g_other)
-                    _LineSegmentIntersection(self g_other n_eps))
+                (_SegmentP(g_o)
+                    _LineSegmentIntersection(self g_o n_eps))
                 (t
                     error("ycGeom::Line->intersection: expected a Line or Segment, got %A"
-                        g_other))
+                        g_o))
             )
         )
     )
