@@ -17,28 +17,26 @@ procedure(_ParseQuoted(t_s n_i n_delim "txn")  ; -> list
     let((n_len n_open n_run l_p g_closed n_c)
         n_len = length(t_s)
         n_open = n_i
-        n_i = n_i + 1
+        n_i++
         n_run = n_i
         while(n_i <= n_len && !g_closed
             n_c = _Code(t_s n_i)
             if(n_c == 34
-                progn(
-                    when(n_run < n_i
-                        l_p = tconc(l_p substring(t_s n_run n_i - n_run))
-                    )
-                    if(_Code(t_s n_i + 1) == 34
-                        progn(
-                            l_p = tconc(l_p "\"")
-                            n_i = n_i + 2
-                            n_run = n_i
-                        )
-                        progn(
-                            n_i = n_i + 1
-                            g_closed = t
-                        )
-                    )
+            then
+                when(n_run < n_i
+                    l_p = tconc(l_p substring(t_s n_run n_i - n_run))
                 )
-                n_i = n_i + 1
+                if(_Code(t_s n_i + 1) == 34
+                then
+                    l_p = tconc(l_p "\"")
+                    n_i = n_i + 2
+                    n_run = n_i
+                else
+                    n_i++
+                    g_closed = t
+                )
+            else
+                n_i++
             )
         )
         unless(g_closed
@@ -65,25 +63,25 @@ procedure(_ParseField(t_s n_i n_delim "txn")  ; -> list
     let((n_len n_start n_c g_stop)
         n_len = length(t_s)
         if(n_i <= n_len && _Code(t_s n_i) == 34
+        then
             _ParseQuoted(t_s n_i n_delim)
-            progn(
-                n_start = n_i
-                while(n_i <= n_len && !g_stop
-                    n_c = _Code(t_s n_i)
-                    cond(
-                        (n_c == n_delim || n_c == 10 || n_c == 13
-                            g_stop = t
-                        )
-                        (n_c == 34
-                            _Error(t_s n_i "unexpected quote in unquoted field")
-                        )
-                        (t
-                            n_i = n_i + 1
-                        )
+        else
+            n_start = n_i
+            while(n_i <= n_len && !g_stop
+                n_c = _Code(t_s n_i)
+                cond(
+                    (n_c == n_delim || n_c == 10 || n_c == 13
+                        g_stop = t
+                    )
+                    (n_c == 34
+                        _Error(t_s n_i "unexpected quote in unquoted field")
+                    )
+                    (t
+                        n_i++
                     )
                 )
-                list(if(n_start < n_i substring(t_s n_start n_i - n_start) "") n_i)
             )
+            list(if(n_start < n_i substring(t_s n_start n_i - n_start) "") n_i)
         )
     )
 )
@@ -109,12 +107,12 @@ procedure(_ParseRecord(t_s n_i n_delim "txn")  ; -> list
                     g_done = t
                 )
                 (n_c == n_delim
-                    n_i = n_i + 1
+                    n_i++
                 )
                 (t
                     if(n_c == 13 && _Code(t_s n_i + 1) == 10
                         n_i = n_i + 2
-                        n_i = n_i + 1
+                        n_i++
                     )
                     g_done = t
                 )
@@ -217,11 +215,11 @@ procedure(Decode(t_str \@key (format "csv") (header nil) (delimiter nil) (skipEm
         cond(
             (g_header == t
                 if(l_rows
-                    progn(
-                        l_names = _CheckHeader(car(l_rows) "ycCsv::Decode")
-                        _CheckWidths(cdr(l_rows) cdr(l_starts) length(l_names) t_body)
-                        Table(cdr(l_rows) ?header l_names)
-                    )
+                then
+                    l_names = _CheckHeader(car(l_rows) "ycCsv::Decode")
+                    _CheckWidths(cdr(l_rows) cdr(l_starts) length(l_names) t_body)
+                    Table(cdr(l_rows) ?header l_names)
+                else
                     Table(nil)
                 )
             )

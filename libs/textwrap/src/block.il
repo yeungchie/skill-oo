@@ -18,20 +18,19 @@ procedure(_SplitAll(t_s "t")  ; -> list[str]
     ; **返回**
     ;   (list[str]) - 行列表
     let((l_res l_line n_i n_len)
-        l_res = cons(nil nil)
         n_i = 1
         n_len = length(t_s)
         while(n_i <= n_len
             if(charToInt(getchar(t_s n_i)) == 10
-                progn(
-                    tconc(l_res buildString(car(l_line) ""))
-                    l_line = nil
-                )
+            then
+                l_res = tconc(l_res buildString(car(l_line) ""))
+                l_line = nil
+            else
                 l_line = tconc(l_line getchar(t_s n_i))
             )
-            n_i = n_i + 1
+            n_i++
         )
-        tconc(l_res buildString(car(l_line) ""))
+        l_res = tconc(l_res buildString(car(l_line) ""))
         car(l_res)
     )
 )
@@ -73,7 +72,7 @@ procedure(_CommonPrefix(t_a t_b "tt")  ; -> str
     let((n_len)
         n_len = if(length(t_a) <= length(t_b) length(t_a) length(t_b))
         while(n_len > 0 && substring(t_a 1 n_len) != substring(t_b 1 n_len)
-            n_len = n_len - 1
+            n_len--
         )
         if(n_len == 0 "" substring(t_a 1 n_len))
     )
@@ -99,23 +98,22 @@ procedure(Dedent(t_text "t")  ; -> str
                 l_wp = _WsPrefix(t_line)
                 unless(cadr(l_wp)
                     if(g_have
+                    then
                         t_common = _CommonPrefix(t_common car(l_wp))
-                        progn(
-                            t_common = car(l_wp)
-                            g_have = t
-                        )
+                    else
+                        t_common = car(l_wp)
+                        g_have = t
                     )
                 )
             )
         )
         unless(g_have t_common = "")
-        l_out = cons(nil nil)
         foreach(t_line l_lines
             let((l_wp)
                 l_wp = _WsPrefix(t_line)
                 if(cadr(l_wp)
-                    tconc(l_out "")
-                    tconc(l_out substring(
+                    l_out = tconc(l_out "")
+                    l_out = tconc(l_out substring(
                         t_line
                         length(t_common) + 1
                         length(t_line) - length(t_common)
@@ -144,11 +142,10 @@ procedure(Indent(t_text \@key (prefix "  ") "tt")  ; -> str
     )
     let((l_lines l_out)
         l_lines = _SplitAll(_NormalizeNewlines(t_text))
-        l_out = cons(nil nil)
         foreach(t_line l_lines
             if(cadr(_WsPrefix(t_line))
-                tconc(l_out t_line)
-                tconc(l_out strcat(prefix t_line))
+                l_out = tconc(l_out t_line)
+                l_out = tconc(l_out strcat(prefix t_line))
             )
         )
         buildString(car(l_out) "\n")

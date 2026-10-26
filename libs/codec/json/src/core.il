@@ -45,7 +45,7 @@ procedure(_LineCol(t_s n_i "tx")  ; -> list
         when(1 < n_i
             for(n_k 1 n_i - 1
                 when(_Code(t_s n_k) == 10
-                    n_line = n_line + 1
+                    n_line++
                     n_last = n_k
                 )
             )

@@ -25,18 +25,18 @@ procedure(_SkipWs(t_s n_i g_relaxed "txg")  ; -> int
             n_c = _Code(t_s n_i)
             cond(
                 (n_c == 32 || n_c == 9 || n_c == 10 || n_c == 13
-                    n_i = n_i + 1
+                    n_i++
                 )
                 (g_relaxed && n_c == 47 && _Code(t_s n_i + 1) == 47
                     n_i = n_i + 2
                     while(n_i <= n_len && _Code(t_s n_i) != 10
-                        n_i = n_i + 1
+                        n_i++
                     )
                 )
                 (g_relaxed && n_c == 47 && _Code(t_s n_i + 1) == 42
                     n_close = n_i + 2
                     while(n_close <= n_len - 1 && !(_Code(t_s n_close) == 42 && _Code(t_s n_close + 1) == 47)
-                        n_close = n_close + 1
+                        n_close++
                     )
                     if(n_close <= n_len - 1
                         n_i = n_close + 2
@@ -107,7 +107,7 @@ procedure(_Object(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
         g_done = nil
         when(_Code(t_s n_k) == 125
             g_done = t
-            n_k = n_k + 1
+            n_k++
         )
         while(!g_done
             n_k = _SkipWs(t_s n_k g_relaxed)
@@ -129,7 +129,7 @@ procedure(_Object(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
                 (125
                     {
                     g_done = t
-                    n_k = n_k + 1
+                    n_k++
                     }
                 )
                 (44
@@ -137,7 +137,7 @@ procedure(_Object(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
                     n_k = _SkipWs(t_s n_k + 1 g_relaxed)
                     when(g_relaxed && _Code(t_s n_k) == 125
                         g_done = t
-                        n_k = n_k + 1
+                        n_k++
                     )
                     }
                 )
@@ -168,7 +168,7 @@ procedure(_Array(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
         g_done = nil
         when(_Code(t_s n_k) == 93
             g_done = t
-            n_k = n_k + 1
+            n_k++
         )
         while(!g_done
             n_k = _SkipWs(t_s n_k g_relaxed)
@@ -180,7 +180,7 @@ procedure(_Array(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
                 (93
                     {
                     g_done = t
-                    n_k = n_k + 1
+                    n_k++
                     }
                 )
                 (44
@@ -188,7 +188,7 @@ procedure(_Array(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
                     n_k = _SkipWs(t_s n_k + 1 g_relaxed)
                     when(g_relaxed && _Code(t_s n_k) == 93
                         g_done = t
-                        n_k = n_k + 1
+                        n_k++
                     )
                     }
                 )

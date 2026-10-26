@@ -102,16 +102,16 @@ procedure(_DecodeText(t_s t_delim t_dup "ttt")  ; -> table
         n_line = 0
         l_lines = _SplitLines(t_s)
         foreach(t_line l_lines
-            n_line = n_line + 1
+            n_line++
             n_ind = _LineIndent(t_line)
             t_body = _Ltrim(t_line)
             unless(t_body == "" || _Code(t_body 1) == 35 || _Code(t_body 1) == 59
                 n_col = n_ind + 1
                 if(_Code(t_body 1) == 91
-                    {
+                then
                     t_name = _HeaderName(t_body n_line n_col)
                     if(_HasKey(t_root t_name)
-                        {
+                    then
                         unless(tablep(t_root[t_name])
                             _Error(n_line n_col "section name conflicts with key")
                         )
@@ -119,14 +119,11 @@ procedure(_DecodeText(t_s t_delim t_dup "ttt")  ; -> table
                             _Error(n_line n_col "duplicate section")
                         )
                         t_cur = t_root[t_name]
-                        }
-                        {
+                    else
                         t_cur = _NewTable()
                         t_root[t_name] = t_cur
-                        }
                     )
-                    }
-                    {
+                else
                     l_kv = _KeyValue(t_body n_line n_col t_delim)
                     when(_HasKey(t_cur car(l_kv))
                         when(t_dup == "error"
@@ -136,7 +133,6 @@ procedure(_DecodeText(t_s t_delim t_dup "ttt")  ; -> table
                     unless(t_dup == "first" && _HasKey(t_cur car(l_kv))
                         t_cur[car(l_kv)] = cadr(l_kv)
                     )
-                    }
                 )
             )
         )

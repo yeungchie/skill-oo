@@ -52,7 +52,7 @@ procedure(_ParseBasicString(t_s n_i g_key "txg")  ; -> list
         g_triple = !g_key && _Code(t_s n_i + 1) == 34 && _Code(t_s n_i + 2) == 34
         n_k = n_i + if(g_triple 3 1)
         when(g_triple && _Code(t_s n_k) == 10
-            n_k = n_k + 1
+            n_k++
         )
         n_seg = n_k
         g_done = nil
@@ -64,13 +64,13 @@ procedure(_ParseBasicString(t_s n_i g_key "txg")  ; -> list
             cond(
                 (n_c == 34
                     if(g_triple
-                        {
+                    then
                         n_run = 0
                         while(_Code(t_s n_k + n_run) == 34
-                            n_run = n_run + 1
+                            n_run++
                         )
                         if(n_run >= 3
-                            {
+                        then
                             when(n_run > 5
                                 _Error(t_s n_k "too many consecutive quotation marks")
                             )
@@ -82,17 +82,15 @@ procedure(_ParseBasicString(t_s n_i g_key "txg")  ; -> list
                             )
                             n_k = n_k + n_run
                             g_done = t
-                            }
+                        else
                             n_k = n_k + n_run
                         )
-                        }
-                        {
+                    else
                         when(n_seg < n_k
                             l_p = tconc(l_p substring(t_s n_seg n_k - n_seg))
                         )
-                        n_k = n_k + 1
+                        n_k++
                         g_done = t
-                        }
                     )
                 )
                 (n_c == 92
@@ -101,17 +99,17 @@ procedure(_ParseBasicString(t_s n_i g_key "txg")  ; -> list
                         l_p = tconc(l_p substring(t_s n_seg n_k - n_seg))
                     )
                     n_esc = n_k
-                    n_k = n_k + 1
+                    n_k++
                     when(n_k > n_len
                         _Error(t_s n_esc "unterminated escape")
                     )
                     n_c = _Code(t_s n_k)
                     if(g_triple && (n_c == 10 || n_c == 32 || n_c == 9)
-                        {
+                    then
                         n_probe = n_k
                         while(n_probe <= n_len
                             && (_Code(t_s n_probe) == 32 || _Code(t_s n_probe) == 9)
-                            n_probe = n_probe + 1
+                            n_probe++
                         )
                         unless(_Code(t_s n_probe) == 10
                             _Error(t_s n_esc "invalid escape")
@@ -119,11 +117,10 @@ procedure(_ParseBasicString(t_s n_i g_key "txg")  ; -> list
                         n_k = n_probe + 1
                         while(n_k <= n_len
                             && (_Code(t_s n_k) == 32 || _Code(t_s n_k) == 9 || _Code(t_s n_k) == 10)
-                            n_k = n_k + 1
+                            n_k++
                         )
                         n_seg = n_k
-                        }
-                        {
+                    else
                         case(n_c
                             (34
                                 {
@@ -188,7 +185,6 @@ procedure(_ParseBasicString(t_s n_i g_key "txg")  ; -> list
                         l_p = tconc(l_p t_esc)
                         n_k = n_next
                         n_seg = n_k
-                        }
                     )
                     }
                 )
@@ -196,7 +192,7 @@ procedure(_ParseBasicString(t_s n_i g_key "txg")  ; -> list
                     when((n_c < 32 || n_c == 127) && n_c != 9 && !(g_triple && n_c == 10)
                         _Error(t_s n_k "control character in string")
                     )
-                    n_k = n_k + 1
+                    n_k++
                 )
             )
         )
@@ -222,7 +218,7 @@ procedure(_ParseLiteralString(t_s n_i g_key "txg")  ; -> list
         g_triple = !g_key && _Code(t_s n_i + 1) == 39 && _Code(t_s n_i + 2) == 39
         n_k = n_i + if(g_triple 3 1)
         when(g_triple && _Code(t_s n_k) == 10
-            n_k = n_k + 1
+            n_k++
         )
         n_seg = n_k
         g_done = nil
@@ -232,14 +228,15 @@ procedure(_ParseLiteralString(t_s n_i g_key "txg")  ; -> list
             )
             n_c = _Code(t_s n_k)
             if(n_c == 39
+            then
                 if(g_triple
-                    {
+                then
                     n_run = 0
                     while(_Code(t_s n_k + n_run) == 39
-                        n_run = n_run + 1
+                        n_run++
                     )
                     if(n_run >= 3
-                        {
+                    then
                         when(n_run > 5
                             _Error(t_s n_k "too many consecutive quotation marks")
                         )
@@ -251,24 +248,21 @@ procedure(_ParseLiteralString(t_s n_i g_key "txg")  ; -> list
                         )
                         n_k = n_k + n_run
                         g_done = t
-                        }
+                    else
                         n_k = n_k + n_run
                     )
-                    }
-                    {
+                else
                     when(n_seg < n_k
                         l_p = tconc(l_p substring(t_s n_seg n_k - n_seg))
                     )
-                    n_k = n_k + 1
+                    n_k++
                     g_done = t
-                    }
                 )
-                {
+            else
                 when((n_c < 32 || n_c == 127) && n_c != 9 && !(g_triple && n_c == 10)
                     _Error(t_s n_k "control character in literal string")
                 )
-                n_k = n_k + 1
-                }
+                n_k++
             )
         )
         list(_Build(l_p) n_k)
@@ -313,7 +307,7 @@ procedure(_IntValue(t_s n_i n_end "txx")  ; -> int
             _Error(t_s n_i "invalid integer")
         )
         if(n_base == 10
-            {
+        then
             n_v = atof(t_clean)
             when(n_v > 2147483647
                 unless(n_sign < 0 && t_clean == "2147483648"
@@ -321,17 +315,16 @@ procedure(_IntValue(t_s n_i n_end "txx")  ; -> int
                 )
             )
             if(n_sign < 0 && t_clean == "2147483648"
+            then
                 (-2147483647 - 1)
-                {
+            else
                 n_v = atoi(t_clean)
                 when(n_sign < 0
                     n_v = -n_v
                 )
                 n_v
-                }
             )
-            }
-            {
+        else
             n_v = 0
             n_pos = 1
             while(n_pos <= length(t_clean)
@@ -346,10 +339,9 @@ procedure(_IntValue(t_s n_i n_end "txx")  ; -> int
                 when(n_v > 2147483647
                     _Error(t_s n_i "integer out of fixnum range")
                 )
-                n_pos = n_pos + 1
+                n_pos++
             )
             n_v
-            }
         )
     )
 )
@@ -374,7 +366,7 @@ procedure(_ParseNumber(t_s n_i "tx")  ; -> list
                 || _Code(t_s n_end) == 44
                 || _Code(t_s n_end) == 93
                 || _Code(t_s n_end) == 125)
-            n_end = n_end + 1
+            n_end++
         )
         t_tok = substring(t_s n_i n_end - n_i)
         cond(

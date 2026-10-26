@@ -14,7 +14,7 @@ procedure(_SkipIgnorable(l_lines n_pos "lx")  ; -> int
     let((n_len)
         n_len = length(l_lines)
         while(n_pos <= n_len && _Blankp(_Nth1(n_pos l_lines))
-            n_pos = n_pos + 1
+            n_pos++
         )
         n_pos
     )
@@ -56,7 +56,7 @@ procedure(_FindKeyColon(t_s "t")  ; -> int | nil
                     )
                 )
             )
-            n_i = n_i + 1
+            n_i++
         )
         return(nil)
     )
@@ -127,7 +127,7 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
         n_len = length(t_text)
         n_i = 1
         while(n_i <= n_len && _Code(t_text n_i) == 32
-            n_i = n_i + 1
+            n_i++
         )
         t_text = _Tail(t_text n_i)
         g_stop = nil
@@ -137,7 +137,7 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
                 (n_c == 38
                     n_end = 2
                     while(n_end <= length(t_text) && _Code(t_text n_end) != 32
-                        n_end = n_end + 1
+                        n_end++
                     )
                     t_anchor = substring(t_text 2 n_end - 2)
                     when(t_anchor == "" _ErrorLine("empty anchor name" n_line n_col))
@@ -146,7 +146,7 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
                 (n_c == 33
                     n_end = 2
                     while(n_end <= length(t_text) && _Code(t_text n_end) != 32
-                        n_end = n_end + 1
+                        n_end++
                     )
                     t_tag = substring(t_text 1 n_end - 1)
                     t_text = _Rtrim(_StripComment(_Tail(t_text n_end)))
@@ -160,7 +160,7 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
         when(_Code(t_text 1) == 42
             n_end = 2
             while(n_end <= length(t_text) && _Code(t_text n_end) != 32
-                n_end = n_end + 1
+                n_end++
             )
             unless(_Rtrim(_Tail(t_text n_end)) == ""
                 _ErrorLine("unexpected characters after alias" n_line n_col)
@@ -184,17 +184,17 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
             )
             (t
                 if(_Code(t_text 1) == 91 || _Code(t_text 1) == 123
-                    progn(
-                        l_v = errset(_FlowValue(t_text 1 n_max))
-                        unless(l_v
-                            _ErrorLine("unterminated or invalid flow value" n_line n_col)
-                        )
-                        l_v = car(l_v)
-                        unless(_Rtrim(_Tail(t_text cadr(l_v))) == ""
-                            _ErrorLine("unexpected characters after value" n_line n_col)
-                        )
-                        l_v = list(car(l_v) n_pos)
+                then
+                    l_v = errset(_FlowValue(t_text 1 n_max))
+                    unless(l_v
+                        _ErrorLine("unterminated or invalid flow value" n_line n_col)
                     )
+                    l_v = car(l_v)
+                    unless(_Rtrim(_Tail(t_text cadr(l_v))) == ""
+                        _ErrorLine("unexpected characters after value" n_line n_col)
+                    )
+                    l_v = list(car(l_v) n_pos)
+                else
                     l_v = list(_ParseScalarText(t_text) n_pos)
                 )
             )
@@ -251,7 +251,7 @@ procedure(_ParseMapInto(t_map l_lines n_pos n_indent n_max t_first n_line n_col 
                         when(n_ind == n_indent
                             t_content = _StripComment(substring(t_line n_ind + 1 length(t_line) - n_ind))
                             n_col = n_ind + 1
-                            n_pos = n_pos + 1
+                            n_pos++
                         )
                     )
                 )
@@ -338,11 +338,11 @@ procedure(_ParseSeqNested(l_lines n_pos n_indent n_max t_first n_line n_col "lxn
                     (t
                         t_content = _StripComment(substring(t_line n_ind + 1 length(t_line) - n_ind))
                         if(_Code(t_content 1) == 45
-                            progn(
-                                l_v = _ParseValueText(_Tail(t_content 3) l_lines n_pos + 1 n_indent n_max n_pos n_ind + 3)
-                                l_res = tconc(l_res car(l_v))
-                                n_pos = cadr(l_v)
-                            )
+                        then
+                            l_v = _ParseValueText(_Tail(t_content 3) l_lines n_pos + 1 n_indent n_max n_pos n_ind + 3)
+                            l_res = tconc(l_res car(l_v))
+                            n_pos = cadr(l_v)
+                        else
                             g_stop = t
                         )
                     )

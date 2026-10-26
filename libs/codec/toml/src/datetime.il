@@ -119,18 +119,18 @@ procedure(_ParseTimeAt(t_s n_i g_offset "txg")  ; -> int
         )
         n_k = n_i + 8
         when(_Code(t_s n_k) == 46
-            n_k = n_k + 1
+            n_k++
             unless(_Digitp(_Code(t_s n_k))
                 _Error(t_s n_k "invalid fractional seconds")
             )
             while(_Digitp(_Code(t_s n_k))
-                n_k = n_k + 1
+                n_k++
             )
         )
         when(g_offset
             cond(
                 ((_Code(t_s n_k) == 90 || _Code(t_s n_k) == 122)
-                    n_k = n_k + 1
+                    n_k++
                 )
                 ((_Code(t_s n_k) == 43 || _Code(t_s n_k) == 45)
                     {
@@ -159,10 +159,9 @@ procedure(_ParseDateTime(t_s n_i "tx")  ; -> list
     ;   (list) - (原文字符串 下一位置)
     let((n_year n_month n_day n_k n_days)
         if(_LooksTime(t_s n_i)
-            {
+        then
             n_k = _ParseTimeAt(t_s n_i nil)
-            }
-            {
+        else
             n_year = _ReadDigits(t_s n_i 4)
             n_month = _ReadDigits(t_s n_i + 5 2)
             n_day = _ReadDigits(t_s n_i + 8 2)
@@ -182,7 +181,6 @@ procedure(_ParseDateTime(t_s n_i "tx")  ; -> list
                     n_k = _ParseTimeAt(t_s n_k + 1 t)
                 )
             )
-            }
         )
         list(substring(t_s n_i n_k - n_i) n_k)
     )

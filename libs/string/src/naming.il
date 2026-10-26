@@ -137,7 +137,7 @@ procedure(JoinWords(l_words \@key (style "snake") "lt")  ; -> str
         )
         n_i = 0
         foreach(t_item l_words
-            n_i = n_i + 1
+            n_i++
             unless(stringp(t_item)
                 error("ycString::JoinWords: item #%d is not a string (%A)" n_i t_item)
             )

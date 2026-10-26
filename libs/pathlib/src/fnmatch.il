@@ -18,12 +18,12 @@ procedure(_FnmatchBracket(t_pattern n_open n_len "txx")  ; -> (str, int)
         n_j = n_open + 1
         when(n_j <= n_len
             when(substring(t_pattern n_j 1) == "!"
-                n_j = n_j + 1
+                n_j++
             )
         )
         when(n_j <= n_len
             when(substring(t_pattern n_j 1) == "]"
-                n_j = n_j + 1
+                n_j++
             )
         )
         while(!g_stop
@@ -55,7 +55,7 @@ procedure(_FnmatchBracket(t_pattern n_open n_len "txx")  ; -> (str, int)
                             t_ch
                         )
                     )
-                    n_k = n_k + 1
+                    n_k++
                 )
                 unless(t_out == ""
                     when(index("^[]" substring(t_out 1 1))
@@ -86,7 +86,7 @@ procedure(_FnmatchToPcre(t_pattern "t")  ; -> str
         n_len = length(t_pattern)
         while(n_i <= n_len
             t_c = substring(t_pattern n_i 1)
-            n_i = n_i + 1
+            n_i++
             case(t_c
                 ("*"
                     t_res = strcat(t_res "[^/]*")

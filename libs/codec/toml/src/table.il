@@ -30,17 +30,17 @@ procedure(_AssignValue(t_s t_meta l_base t_obj l_path g_val n_pos n_max "tglglgx
         n_i = 0
         n_n = length(l_path)
         foreach(t_key l_path
-            n_i = n_i + 1
+            n_i++
             if(n_i < n_n
+            then
                 if(!_HasKey(t_obj t_key)
-                    {
+                then
                     t_tab = _NewTable()
                     t_obj[t_key] = t_tab
                     _MetaSet(t_meta append1(l_cur t_key) "dotted")
                     l_cur = append1(l_cur t_key)
                     t_obj = t_tab
-                    }
-                    {
+                else
                     g_next = t_obj[t_key]
                     when(listp(g_next)
                         _Error(t_s n_pos "key path crosses an array")
@@ -57,15 +57,13 @@ procedure(_AssignValue(t_s t_meta l_base t_obj l_path g_val n_pos n_max "tglglgx
                     )
                     l_cur = append1(l_cur t_key)
                     t_obj = g_next
-                    }
                 )
-                {
+            else
                 when(_HasKey(t_obj t_key)
                     _Error(t_s n_pos "duplicate key")
                 )
                 t_obj[t_key] = g_val
                 _MarkInline(t_meta append1(l_cur t_key) g_val)
-                }
             )
         )
         t
@@ -95,21 +93,21 @@ procedure(_HeaderTarget(t_s t_root t_meta l_path n_pos g_array n_max "tgglxgx") 
         t_obj = t_root
         l_cur = nil
         foreach(t_key l_path
-            n_i = n_i + 1
+            n_i++
             g_has = _HasKey(t_obj t_key)
             g_val = t_obj[t_key]
             if(n_i < n_n
+            then
                 if(!g_has
-                    {
+                then
                     t_tab = _NewTable()
                     t_obj[t_key] = t_tab
                     _MetaSet(t_meta append1(l_cur t_key) "implicit")
                     l_cur = append1(l_cur t_key)
                     t_obj = t_tab
-                    }
-                    {
+                else
                     if(listp(g_val)
-                        {
+                    then
                         t_kind = _MetaGet(t_meta append1(l_cur t_key))
                         unless(t_kind == "array" && length(g_val) > 0
                             _Error(t_s n_pos "key path is not a table")
@@ -117,8 +115,7 @@ procedure(_HeaderTarget(t_s t_root t_meta l_path n_pos g_array n_max "tgglxgx") 
                         n_last = length(g_val)
                         l_cur = append1(append1(l_cur t_key) n_last)
                         t_obj = nth(n_last - 1 g_val)
-                        }
-                        {
+                    else
                         unless(tablep(g_val)
                             _Error(t_s n_pos "key path is not a table")
                         )
@@ -131,24 +128,21 @@ procedure(_HeaderTarget(t_s t_root t_meta l_path n_pos g_array n_max "tgglxgx") 
                         )
                         l_cur = append1(l_cur t_key)
                         t_obj = g_val
-                        }
                     )
-                    }
                 )
-                {
+            else
                 if(g_array
                     if(!g_has
-                        {
+                    then
                         t_tab = _NewTable()
                         t_obj[t_key] = list(t_tab)
                         _MetaSet(t_meta append1(l_cur t_key) "array")
                         _MetaSet(t_meta append1(append1(l_cur t_key) 1) "explicit")
                         l_cur = append1(append1(l_cur t_key) 1)
                         t_obj = t_tab
-                        }
-                        {
+                    else
                         if(listp(g_val)
-                            {
+                        then
                             t_kind = _MetaGet(t_meta append1(l_cur t_key))
                             unless(t_kind == "array"
                                 _Error(t_s n_pos "key is not an array of tables")
@@ -159,20 +153,18 @@ procedure(_HeaderTarget(t_s t_root t_meta l_path n_pos g_array n_max "tgglxgx") 
                             _MetaSet(t_meta append1(append1(l_cur t_key) n_last) "explicit")
                             l_cur = append1(append1(l_cur t_key) n_last)
                             t_obj = t_tab
-                            }
+                        else
                             _Error(t_s n_pos "key is not an array of tables")
                         )
-                        }
                     )
                     if(!g_has
-                        {
+                    then
                         t_tab = _NewTable()
                         t_obj[t_key] = t_tab
                         _MetaSet(t_meta append1(l_cur t_key) "explicit")
                         l_cur = append1(l_cur t_key)
                         t_obj = t_tab
-                        }
-                        {
+                    else
                         unless(tablep(g_val)
                             _Error(t_s n_pos "key is not a table")
                         )
@@ -196,10 +188,8 @@ procedure(_HeaderTarget(t_s t_root t_meta l_path n_pos g_array n_max "tgglxgx") 
                         )
                         l_cur = append1(l_cur t_key)
                         t_obj = g_val
-                        }
                     )
                 )
-                }
             )
         )
         list(t_obj l_cur)

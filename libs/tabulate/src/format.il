@@ -25,7 +25,6 @@ procedure(_RowLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; 
                 n_lines = length(l_block)
             )
         )
-        l_res = cons(nil nil)
         for(n_i 0 n_lines - 1
             t_line = ""
             for(n_c 0 length(l_blocks) - 1
@@ -44,7 +43,7 @@ procedure(_RowLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; 
                     )
                 )
             )
-            tconc(l_res _Rstrip(t_line))
+            l_res = tconc(l_res _Rstrip(t_line))
         )
         car(l_res)
     )
@@ -70,7 +69,6 @@ procedure(_BoxLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; 
                 n_lines = length(l_block)
             )
         )
-        l_res = cons(nil nil)
         for(n_i 0 n_lines - 1
             t_line = "| "
             for(n_c 0 length(l_blocks) - 1
@@ -89,7 +87,7 @@ procedure(_BoxLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; 
                     )
                 )
             )
-            tconc(l_res strcat(t_line " |"))
+            l_res = tconc(l_res strcat(t_line " |"))
         )
         car(l_res)
     )
@@ -174,15 +172,14 @@ procedure(_FormatPlain(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llll
     ; **返回**
     ;   (str) - 表格文本
     let((l_out)
-        l_out = cons(nil nil)
         when(l_head
             foreach(t_line _RowLines(l_head l_widths l_aligns l_decs t_unit n_amb)
-                tconc(l_out t_line)
+                l_out = tconc(l_out t_line)
             )
         )
         foreach(l_row l_rows
             foreach(t_line _RowLines(l_row l_widths l_aligns l_decs t_unit n_amb)
-                tconc(l_out t_line)
+                l_out = tconc(l_out t_line)
             )
         )
         buildString(car(l_out) "\n")
@@ -204,16 +201,15 @@ procedure(_FormatSimple(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "lll
     ; **返回**
     ;   (str) - 表格文本
     let((l_out)
-        l_out = cons(nil nil)
         when(l_head
             foreach(t_line _RowLines(l_head l_widths l_aligns l_decs t_unit n_amb)
-                tconc(l_out t_line)
+                l_out = tconc(l_out t_line)
             )
-            tconc(l_out _SimpleSep(l_widths))
+            l_out = tconc(l_out _SimpleSep(l_widths))
         )
         foreach(l_row l_rows
             foreach(t_line _RowLines(l_row l_widths l_aligns l_decs t_unit n_amb)
-                tconc(l_out t_line)
+                l_out = tconc(l_out t_line)
             )
         )
         buildString(car(l_out) "\n")
@@ -235,19 +231,18 @@ procedure(_FormatGrid(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "lllll
     ; **返回**
     ;   (str) - 表格文本
     let((l_out)
-        l_out = cons(nil nil)
-        tconc(l_out _Border(l_widths "-"))
+        l_out = tconc(l_out _Border(l_widths "-"))
         when(l_head
             foreach(t_line _BoxLines(l_head l_widths l_aligns l_decs t_unit n_amb)
-                tconc(l_out t_line)
+                l_out = tconc(l_out t_line)
             )
-            tconc(l_out _Border(l_widths "="))
+            l_out = tconc(l_out _Border(l_widths "="))
         )
         foreach(l_row l_rows
             foreach(t_line _BoxLines(l_row l_widths l_aligns l_decs t_unit n_amb)
-                tconc(l_out t_line)
+                l_out = tconc(l_out t_line)
             )
-            tconc(l_out _Border(l_widths "-"))
+            l_out = tconc(l_out _Border(l_widths "-"))
         )
         buildString(car(l_out) "\n")
     )
@@ -268,16 +263,15 @@ procedure(_FormatPipe(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "lllll
     ; **返回**
     ;   (str) - 表格文本
     let((l_out)
-        l_out = cons(nil nil)
         when(l_head
             foreach(t_line _BoxLines(l_head l_widths l_aligns l_decs t_unit n_amb)
-                tconc(l_out t_line)
+                l_out = tconc(l_out t_line)
             )
-            tconc(l_out _PipeSep(l_widths l_aligns))
+            l_out = tconc(l_out _PipeSep(l_widths l_aligns))
         )
         foreach(l_row l_rows
             foreach(t_line _BoxLines(l_row l_widths l_aligns l_decs t_unit n_amb)
-                tconc(l_out t_line)
+                l_out = tconc(l_out t_line)
             )
         )
         buildString(car(l_out) "\n")

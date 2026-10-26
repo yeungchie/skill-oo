@@ -86,7 +86,7 @@ procedure(_DecodeLines(t_str n_max "tx")  ; -> list
         n_idx = 0
         while(l_lines
             t_line = car(l_lines)
-            n_idx = n_idx + 1
+            n_idx++
             unless(_LineBlankp(t_line)
                 l_r = errset(_DecodeText(t_line nil n_max) nil)
                 if(l_r

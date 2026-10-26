@@ -36,12 +36,12 @@ procedure(_LineCol(t_s n_i "tx")  ; -> list
                 n_c = _Code(t_s n_k)
                 cond(
                     (n_c == 13
-                        n_line = n_line + 1
+                        n_line++
                         n_last = n_k
                     )
                     (n_c == 10
                         unless(g_prevCr
-                            n_line = n_line + 1
+                            n_line++
                         )
                         n_last = n_k
                     )
@@ -127,18 +127,18 @@ procedure(_DelimCode(g_delim n_default t_ctx "gnt")  ; -> int
     ; **返回**
     ;   (int) - 分隔符字节码；类型/长度/字符非法时报错
     if(g_delim == nil
+    then
         n_default
-        progn(
-            unless(stringp(g_delim) && length(g_delim) == 1
-                error("%s: delimiter must be a single-byte string" t_ctx)
+    else
+        unless(stringp(g_delim) && length(g_delim) == 1
+            error("%s: delimiter must be a single-byte string" t_ctx)
+        )
+        let((n_c)
+            n_c = _Code(g_delim 1)
+            when(n_c == 34 || n_c == 10 || n_c == 13
+                error("%s: delimiter cannot be a quote or line break" t_ctx)
             )
-            let((n_c)
-                n_c = _Code(g_delim 1)
-                when(n_c == 34 || n_c == 10 || n_c == 13
-                    error("%s: delimiter cannot be a quote or line break" t_ctx)
-                )
-                n_c
-            )
+            n_c
         )
     )
 )

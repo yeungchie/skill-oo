@@ -85,12 +85,12 @@ procedure(_EdgeT(g_a g_b g_p "ggg")  ; -> float
         n_dy = g_b->y() - g_a->y()
         n_den = n_dx * n_dx + n_dy * n_dy
         if(n_den == 0.0
+        then
             0.0
-            progn(
-                n_t = ((g_p->x() - g_a->x()) * n_dx
-                    + (g_p->y() - g_a->y()) * n_dy) / n_den
-                max(0.0 min(1.0 n_t))
-            )
+        else
+            n_t = ((g_p->x() - g_a->x()) * n_dx
+                + (g_p->y() - g_a->y()) * n_dy) / n_den
+            max(0.0 min(1.0 n_t))
         )
     )
 )
@@ -501,7 +501,7 @@ procedure(_LoopDepth(l_loops n_idx n_eps "lng")  ; -> int
                 n_area_j = abs(_SignedArea(_Nth1(n_j l_loops)))
                 when(n_area_j > n_area_i
                     && _PointInRing(_Nth1(n_j l_loops) g_p n_eps)
-                    n_depth = n_depth + 1
+                    n_depth++
                 )
             )
         )

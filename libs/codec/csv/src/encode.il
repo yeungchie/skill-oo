@@ -24,24 +24,24 @@ procedure(_QuoteField(t_s n_delim g_quoteAll "tng")  ; -> str
             )
         )
         if(!g_need
+        then
             t_s
-            progn(
-                n_run = 1
-                for(n_i 1 n_len
-                    n_c = _Code(t_s n_i)
-                    when(n_c == 34
-                        when(n_run < n_i
-                            l_p = tconc(l_p substring(t_s n_run n_i - n_run))
-                        )
-                        l_p = tconc(l_p "\"\"")
-                        n_run = n_i + 1
+        else
+            n_run = 1
+            for(n_i 1 n_len
+                n_c = _Code(t_s n_i)
+                when(n_c == 34
+                    when(n_run < n_i
+                        l_p = tconc(l_p substring(t_s n_run n_i - n_run))
                     )
+                    l_p = tconc(l_p "\"\"")
+                    n_run = n_i + 1
                 )
-                when(n_run <= n_len
-                    l_p = tconc(l_p substring(t_s n_run n_len - n_run + 1))
-                )
-                strcat("\"" _Build(l_p) "\"")
             )
+            when(n_run <= n_len
+                l_p = tconc(l_p substring(t_s n_run n_len - n_run + 1))
+            )
+            strcat("\"" _Build(l_p) "\"")
         )
     )
 )

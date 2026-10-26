@@ -101,11 +101,10 @@ procedure(_TakeCps(l_cps n_count "lx")  ; -> list[int]
     ; **返回**
     ;   (list[int]) - 前 n 项；不足时取全部
     let((l_res)
-        l_res = cons(nil nil)
         while(l_cps && n_count > 0
-            tconc(l_res car(l_cps))
+            l_res = tconc(l_res car(l_cps))
             l_cps = cdr(l_cps)
-            n_count = n_count - 1
+            n_count--
         )
         car(l_res)
     )
@@ -122,7 +121,7 @@ procedure(_DropCps(l_cps n_count "lx")  ; -> list[int]
     ;   (list[int]) - 剩余部分
     while(l_cps && n_count > 0
         l_cps = cdr(l_cps)
-        n_count = n_count - 1
+        n_count--
     )
     l_cps
 )
@@ -143,7 +142,7 @@ procedure(_FitCount(l_cps n_max t_unit n_amb "lxtx")  ; -> int
         n_have = 0
         while(l_cps && n_sum + _CpWidth(car(l_cps) t_unit n_amb) <= n_max
             n_sum = n_sum + _CpWidth(car(l_cps) t_unit n_amb)
-            n_have = n_have + 1
+            n_have++
             l_cps = cdr(l_cps)
         )
         n_have
@@ -185,7 +184,7 @@ procedure(_FirstChunk(l_word n_max g_hyphen t_unit n_amb "lxgtx")  ; -> list[int
             n_i = 1
             foreach(n_cp _TakeCps(l_word n_count)
                 when(n_cp == 45 n_hy = n_i)
-                n_i = n_i + 1
+                n_i++
             )
             when(n_hy n_count = n_hy)
         )
@@ -202,17 +201,16 @@ procedure(_WordsFromCps(l_cps "l")  ; -> list | nil
     ; **返回**
     ;   (list[list[int]]|nil) - 词列表；全空白为 nil
     let((l_res l_acc)
-        l_res = cons(nil nil)
         foreach(n_cp l_cps
             if(_IsSpaceCp(n_cp)
                 when(l_acc
-                    tconc(l_res car(l_acc))
+                    l_res = tconc(l_res car(l_acc))
                     l_acc = nil
                 )
                 l_acc = tconc(l_acc n_cp)
             )
         )
-        when(l_acc tconc(l_res car(l_acc)))
+        when(l_acc l_res = tconc(l_res car(l_acc)))
         car(l_res)
     )
 )
@@ -226,10 +224,9 @@ procedure(_JoinWordsCps(l_words "l")  ; -> list[int]
     ; **返回**
     ;   (list[int]) - 拼接后的码点
     let((l_res)
-        l_res = cons(nil nil)
         foreach(l_word l_words
             when(car(l_res) l_res = tconc(l_res 32))
-            foreach(n_cp l_word tconc(l_res n_cp))
+            foreach(n_cp l_word l_res = tconc(l_res n_cp))
         )
         car(l_res)
     )
@@ -244,21 +241,20 @@ procedure(_NormalizeNewlines(t_s "t")  ; -> str
     ; **返回**
     ;   (str) - 统一换行后的串
     let((l_res n_i n_len n_b)
-        l_res = cons(nil nil)
         n_i = 1
         n_len = length(t_s)
         while(n_i <= n_len
             n_b = charToInt(getchar(t_s n_i))
             if(n_b == 13
-                progn(
-                    tconc(l_res "\n")
-                    when(n_i < n_len && charToInt(getchar(t_s n_i + 1)) == 10
-                        n_i = n_i + 1
-                    )
+            then
+                l_res = tconc(l_res "\n")
+                when(n_i < n_len && charToInt(getchar(t_s n_i + 1)) == 10
+                    n_i++
                 )
-                tconc(l_res getchar(t_s n_i))
+            else
+                l_res = tconc(l_res getchar(t_s n_i))
             )
-            n_i = n_i + 1
+            n_i++
         )
         buildString(car(l_res) "")
     )
@@ -273,21 +269,20 @@ procedure(_LogicalLines(t_s "t")  ; -> list[str]
     ; **返回**
     ;   (list[str]) - 行列表；空串为 nil
     let((l_res l_line n_i n_len)
-        l_res = cons(nil nil)
         n_i = 1
         n_len = length(t_s)
         while(n_i <= n_len
             if(charToInt(getchar(t_s n_i)) == 10
-                progn(
-                    tconc(l_res buildString(car(l_line) ""))
-                    l_line = nil
-                )
+            then
+                l_res = tconc(l_res buildString(car(l_line) ""))
+                l_line = nil
+            else
                 l_line = tconc(l_line getchar(t_s n_i))
             )
-            n_i = n_i + 1
+            n_i++
         )
         unless(t_s == "" || charToInt(getchar(t_s n_len)) == 10
-            tconc(l_res buildString(car(l_line) ""))
+            l_res = tconc(l_res buildString(car(l_line) ""))
         )
         car(l_res)
     )

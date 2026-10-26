@@ -44,7 +44,7 @@ procedure(_HasWs(t_s "t")  ; -> t | nil
             when(_IsWs(charToInt(getchar(t_s n_i)))
                 g_found = t
             )
-            n_i = n_i + 1
+            n_i++
         )
         g_found
     )
@@ -212,7 +212,7 @@ procedure(_Parse(t_str t_ctx "tt")  ; -> list
         n_len = length(t_str)
         n_i = 1
         while(n_i <= n_len && _IsWs(charToInt(getchar(t_str n_i)))
-            n_i = n_i + 1
+            n_i++
         )
         unless(n_i <= n_len
             error("%s: expected a number (%A)" t_ctx t_str)
@@ -220,18 +220,18 @@ procedure(_Parse(t_str t_ctx "tt")  ; -> list
         n_start = n_i
         n_b = charToInt(getchar(t_str n_i))
         when(n_b == 43 || n_b == 45
-            n_i = n_i + 1
+            n_i++
         )
         n_digits = 0
         while(n_i <= n_len && _IsDigit(charToInt(getchar(t_str n_i)))
-            n_i = n_i + 1
-            n_digits = n_digits + 1
+            n_i++
+            n_digits++
         )
         when(n_i <= n_len && charToInt(getchar(t_str n_i)) == 46
-            n_i = n_i + 1
+            n_i++
             while(n_i <= n_len && _IsDigit(charToInt(getchar(t_str n_i)))
-                n_i = n_i + 1
-                n_digits = n_digits + 1
+                n_i++
+                n_digits++
             )
         )
         unless(n_digits > 0
@@ -239,15 +239,15 @@ procedure(_Parse(t_str t_ctx "tt")  ; -> list
         )
         when(n_i <= n_len && (charToInt(getchar(t_str n_i)) == 101 || charToInt(getchar(t_str n_i)) == 69)
             n_expStart = n_i
-            n_i = n_i + 1
+            n_i++
             n_b = when(n_i <= n_len charToInt(getchar(t_str n_i)))
             when(n_b == 43 || n_b == 45
-                n_i = n_i + 1
+                n_i++
             )
             n_edigits = 0
             while(n_i <= n_len && _IsDigit(charToInt(getchar(t_str n_i)))
-                n_i = n_i + 1
-                n_edigits = n_edigits + 1
+                n_i++
+                n_edigits++
             )
             unless(n_edigits > 0
                 error("%s: invalid exponent (%A)" t_ctx t_str)
@@ -256,7 +256,7 @@ procedure(_Parse(t_str t_ctx "tt")  ; -> list
         t_num = substring(t_str n_start n_i - n_start)
         g_space = when(n_i <= n_len _IsWs(charToInt(getchar(t_str n_i))))
         while(n_i <= n_len && _IsWs(charToInt(getchar(t_str n_i)))
-            n_i = n_i + 1
+            n_i++
         )
         t_unit = if(n_i <= n_len substring(t_str n_i n_len - n_i + 1) "")
         while(
@@ -309,29 +309,27 @@ procedure(Format(n_value \@key (unit "") (precision 6) "ntx")  ; -> str
             n_abs = abs(n_value)
             t_fmt = lsprintf("%%.%dg" precision)
             if(n_abs < 1e-24 || n_abs >= 1e27
+            then
                 strcat(sprintf(nil t_fmt n_value) unit)
-                progn(
-                    n_exp = floor(log10(n_abs) / 3) * 3
-                    n_mant = n_value * expt(10.0 -n_exp)
-                    t_mant = sprintf(nil t_fmt n_mant)
-                    n_rounded = atof(t_mant)
-                    when(abs(n_rounded) >= 1000
-                        if(n_exp < 24
-                            progn(
-                                n_exp = n_exp + 3
-                                n_mant = n_value * expt(10.0 -n_exp)
-                                t_mant = sprintf(nil t_fmt n_mant)
-                            )
-                            progn(
-                                t_mant = sprintf(nil t_fmt n_value)
-                                n_exp = nil
-                            )
-                        )
+            else
+                n_exp = floor(log10(n_abs) / 3) * 3
+                n_mant = n_value * expt(10.0 -n_exp)
+                t_mant = sprintf(nil t_fmt n_mant)
+                n_rounded = atof(t_mant)
+                when(abs(n_rounded) >= 1000
+                    if(n_exp < 24
+                    then
+                        n_exp = n_exp + 3
+                        n_mant = n_value * expt(10.0 -n_exp)
+                        t_mant = sprintf(nil t_fmt n_mant)
+                    else
+                        t_mant = sprintf(nil t_fmt n_value)
+                        n_exp = nil
                     )
-                    if(n_exp
-                        lsprintf("%s%s%s" t_mant _PrefixForExp(n_exp) unit)
-                        strcat(t_mant unit)
-                    )
+                )
+                if(n_exp
+                    lsprintf("%s%s%s" t_mant _PrefixForExp(n_exp) unit)
+                    strcat(t_mant unit)
                 )
             )
         )

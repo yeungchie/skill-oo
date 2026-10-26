@@ -74,7 +74,7 @@ procedure(_Rstrip(t_s "t")  ; -> str
     let((n_end)
         n_end = length(t_s)
         while(n_end > 0 && charToInt(getchar(t_s n_end)) == 32
-            n_end = n_end - 1
+            n_end--
         )
         substring(t_s 1 n_end)
     )
@@ -110,33 +110,32 @@ procedure(_SplitCellLines(t_s "t")  ; -> list[str]
     ; **返回**
     ;   (list[str]) - 行列表；空串为 ("")
     let((l_res l_line n_i n_len n_b)
-        l_res = cons(nil nil)
         n_i = 1
         n_len = length(t_s)
         while(n_i <= n_len
             n_b = charToInt(getchar(t_s n_i))
             if(n_b == 13
-                progn(
-                    tconc(l_res buildString(car(l_line) ""))
-                    l_line = nil
-                    when(n_i < n_len && charToInt(getchar(t_s n_i + 1)) == 10
-                        n_i = n_i + 1
-                    )
+            then
+                l_res = tconc(l_res buildString(car(l_line) ""))
+                l_line = nil
+                when(n_i < n_len && charToInt(getchar(t_s n_i + 1)) == 10
+                    n_i++
                 )
+            else
                 if(n_b == 10
-                    progn(
-                        tconc(l_res buildString(car(l_line) ""))
-                        l_line = nil
-                    )
+                then
+                    l_res = tconc(l_res buildString(car(l_line) ""))
+                    l_line = nil
+                else
                     l_line = tconc(l_line getchar(t_s n_i))
                 )
             )
-            n_i = n_i + 1
+            n_i++
         )
         unless(
             t_s != ""
             && (charToInt(getchar(t_s n_len)) == 10 || charToInt(getchar(t_s n_len)) == 13)
-            tconc(l_res buildString(car(l_line) ""))
+            l_res = tconc(l_res buildString(car(l_line) ""))
         )
         car(l_res)
     )
@@ -174,16 +173,15 @@ procedure(_EscapePipe(t_s "t")  ; -> str
     ; **返回**
     ;   (str) - 竖线写成 \\|
     let((l_res n_i n_len n_b)
-        l_res = cons(nil nil)
         n_i = 1
         n_len = length(t_s)
         while(n_i <= n_len
             n_b = charToInt(getchar(t_s n_i))
             if(n_b == 124
-                tconc(l_res "\\|")
-                tconc(l_res getchar(t_s n_i))
+                l_res = tconc(l_res "\\|")
+                l_res = tconc(l_res getchar(t_s n_i))
             )
-            n_i = n_i + 1
+            n_i++
         )
         buildString(car(l_res) "")
     )
@@ -215,7 +213,7 @@ procedure(_SplitDecimal(t_s "t")  ; -> list[str]
             n_b = charToInt(getchar(t_s n_i))
             if(n_b == 46
                 g_found = t
-                n_i = n_i + 1
+                n_i++
             )
         )
         if(g_found
@@ -240,28 +238,27 @@ procedure(_NormalizeAlign(g_align n_cols "gx")  ; -> list[str]
     ; **返回**
     ;   (list[str]) - 每列对齐方式
     let((l_res)
-        l_res = cons(nil nil)
         if(stringp(g_align)
-            progn(
-                unless(member(g_align '("left" "right" "center" "decimal"))
-                    error("ycTabulate::Render: unknown align %A" g_align)
-                )
-                for(n_i 1 n_cols
-                    tconc(l_res g_align)
-                )
+        then
+            unless(member(g_align '("left" "right" "center" "decimal"))
+                error("ycTabulate::Render: unknown align %A" g_align)
             )
+            for(n_i 1 n_cols
+                l_res = tconc(l_res g_align)
+            )
+        else
             if(listp(g_align)
-                progn(
-                    unless(length(g_align) == n_cols
-                        error("ycTabulate::Render: align list has %d entries for %d columns" length(g_align) n_cols)
-                    )
-                    foreach(g_item g_align
-                        unless(stringp(g_item) && member(g_item '("left" "right" "center" "decimal"))
-                            error("ycTabulate::Render: unknown align %A" g_item)
-                        )
-                        tconc(l_res g_item)
-                    )
+            then
+                unless(length(g_align) == n_cols
+                    error("ycTabulate::Render: align list has %d entries for %d columns" length(g_align) n_cols)
                 )
+                foreach(g_item g_align
+                    unless(stringp(g_item) && member(g_item '("left" "right" "center" "decimal"))
+                        error("ycTabulate::Render: unknown align %A" g_item)
+                    )
+                    l_res = tconc(l_res g_item)
+                )
+            else
                 error("ycTabulate::Render: align must be a string or a list (%A)" g_align)
             )
         )
@@ -280,12 +277,11 @@ procedure(_ColumnBlocks(l_head l_rows n_col "llx")  ; -> list
     ; **返回**
     ;   (list[list[str]]) - 单元格块列表
     let((l_res)
-        l_res = cons(nil nil)
         when(l_head
-            tconc(l_res nth(n_col l_head))
+            l_res = tconc(l_res nth(n_col l_head))
         )
         foreach(l_row l_rows
-            tconc(l_res nth(n_col l_row))
+            l_res = tconc(l_res nth(n_col l_row))
         )
         car(l_res)
     )

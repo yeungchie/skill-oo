@@ -44,7 +44,7 @@ procedure(_FlowTokenEnd(t_s n_i "tx")  ; -> int
             n_c = _Code(t_s n_i)
             if(n_c == 32 || n_c == 9 || n_c == 44 || n_c == 93 || n_c == 125
                 g_stop = t
-                n_i = n_i + 1
+                n_i++
             )
         )
         if(g_stop n_i - 1 n_i)
@@ -148,11 +148,11 @@ procedure(_FlowValue(t_s n_i n_max "txn")  ; -> list
         )
         cond(
             (n_c == 91
-                n_i = n_i + 1
+                n_i++
                 l_v = _FlowSeq(t_s n_i n_max - 1)
             )
             (n_c == 123
-                n_i = n_i + 1
+                n_i++
                 l_v = _FlowMap(t_s n_i n_max - 1)
             )
             (n_c == 34 || n_c == 39
@@ -169,7 +169,7 @@ procedure(_FlowValue(t_s n_i n_max "txn")  ; -> list
                         g_stop = t
                     )
                     unless(g_stop
-                        n_end = n_end + 1
+                        n_end++
                     )
                 )
                 l_v = list(_ParseScalarText(_Rtrim(substring(t_s n_i n_end - n_i))) n_end)
@@ -221,12 +221,12 @@ procedure(_FlowSeq(t_s n_i n_max "txn")  ; -> list
                     n_i = _FlowSkip(t_s n_i + 1)
                     when(n_i <= n_len && _Code(t_s n_i) == 93
                         g_done = t
-                        n_i = n_i + 1
+                        n_i++
                     )
                 )
                 (93
                     g_done = t
-                    n_i = n_i + 1
+                    n_i++
                 )
                 (t
                     error("ycYaml::Decode: expected ',' or ']' in flow sequence")
@@ -250,7 +250,7 @@ procedure(_ParseKeyText(t_text "t")  ; -> any
         n_i = 1
         n_len = length(t_text)
         while(n_i <= n_len && _Code(t_text n_i) == 32
-            n_i = n_i + 1
+            n_i++
         )
         when(n_i > n_len
             return("")
@@ -309,7 +309,7 @@ procedure(_FlowKey(t_s n_i "tx")  ; -> list
                     error("ycYaml::Decode: expected ':' in flow mapping")
                 )
             )
-            n_k = n_k + 1
+            n_k++
         )
         error("ycYaml::Decode: expected ':' in flow mapping")
     )
@@ -364,12 +364,12 @@ procedure(_FlowMap(t_s n_i n_max "txn")  ; -> list
                     n_i = _FlowSkip(t_s n_i + 1)
                     when(n_i <= n_len && _Code(t_s n_i) == 125
                         g_done = t
-                        n_i = n_i + 1
+                        n_i++
                     )
                 )
                 (125
                     g_done = t
-                    n_i = n_i + 1
+                    n_i++
                 )
                 (t
                     error("ycYaml::Decode: expected ',' or '}' in flow mapping")

@@ -81,7 +81,7 @@ procedure(_MkPath(t_anchor l_parts "tl")  ; -> Path
             hit = makeInstance('Path ?_data
                 makeInstance('PathData ?anchor t_anchor ?parts l_parts))
             _PathCache[t_key] = hit
-            _PathCacheN = _PathCacheN + 1
+            _PathCacheN++
             when(_PathCacheN > _PathCacheCap
                 _PathCache = makeTable("pathCache" nil)
                 _PathCacheN = 0
@@ -150,7 +150,7 @@ procedure(_DotIndex(t_name "t")  ; -> int | nil
             when(substring(t_name n_i 1) == "."
                 n_found = n_i
             )
-            n_i = n_i + 1
+            n_i++
         )
         n_found
     )
@@ -167,7 +167,7 @@ procedure(_LstripDots(t_str "t")  ; -> str
     let((n_i)
         n_i = 1
         while(n_i <= length(t_str) && substring(t_str n_i 1) == "."
-            n_i = n_i + 1
+            n_i++
         )
         if(n_i > length(t_str)
             ""
@@ -197,7 +197,7 @@ procedure(_SplitKeep(t_str t_sep "tt")  ; -> list[str]
             unless(substring(t_str n_i 1) == t_sep
                 t_cur = strcat(t_cur substring(t_str n_i 1))
             )
-            n_i = n_i + 1
+            n_i++
         )
         car(tconc(l_res t_cur))
     )
@@ -261,7 +261,7 @@ procedure(_ShellQuote(t_str "t")  ; -> str
             unless(t_c == "'"
                 t_res = strcat(t_res t_c)
             )
-            n_i = n_i + 1
+            n_i++
         )
         strcat(t_res "'")
     )

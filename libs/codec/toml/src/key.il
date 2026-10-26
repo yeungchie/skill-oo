@@ -35,7 +35,7 @@ procedure(_ParseKeyPart(t_s n_i "tx")  ; -> list
                         || (_Code(t_s n_k) >= 97 && _Code(t_s n_k) <= 122)
                         || _Code(t_s n_k) == 45
                         || _Code(t_s n_k) == 95)
-                    n_k = n_k + 1
+                    n_k++
                 )
                 when(n_k == n_i
                     _Error(t_s n_i "expected a key")

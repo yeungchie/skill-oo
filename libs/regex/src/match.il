@@ -52,7 +52,7 @@ procedure(_WholeTemplate(n_g "x")  ; -> str
         n_k = 1
         while(n_k <= n_g
             t_t = lsprintf("%s<YC-B>%s" t_t _Backref(n_k))
-            n_k = n_k + 1
+            n_k++
         )
         t_t
     )
@@ -71,7 +71,7 @@ procedure(_SplitTemplate(n_g "x")  ; -> str
         n_k = 1
         while(n_k <= n_g
             t_t = lsprintf("%s%s<YC-S>" t_t _Backref(n_k))
-            n_k = n_k + 1
+            n_k++
         )
         t_t
     )
@@ -192,7 +192,7 @@ procedure(_ExportTemplate(n_g t_m t_g "xtt")  ; -> str
         n_k = 1
         while(n_k <= n_g
             t_t = strcat(t_t _Backref(n_k) t_g)
-            n_k = n_k + 1
+            n_k++
         )
         t_t
     )
@@ -245,17 +245,17 @@ procedure(_ExportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
                                 t_cur = substring(t_rest 1 length(t_rest) - length(t_tail))
                                 l_groups = tconc(l_groups t_cur)
                                 t_rest = _Suffix(t_tail length(t_g) + 1)
-                                n_k = n_k + 1
+                                n_k++
                             )
                         )
                         when(l_res != 'fallback
                             if(n_consumed == 0
+                            then
                                 l_res = 'fallback
-                                progn(
-                                    l_res = tconc(l_res cons(n_start cons(n_start + n_consumed car(l_groups))))
-                                    n_delta = n_delta + (length(t_seg) - length(t_rest)) - n_consumed
-                                    n_out = n_out + (length(t_seg) - length(t_rest))
-                                )
+                            else
+                                l_res = tconc(l_res cons(n_start cons(n_start + n_consumed car(l_groups))))
+                                n_delta = n_delta + (length(t_seg) - length(t_rest)) - n_consumed
+                                n_out = n_out + (length(t_seg) - length(t_rest))
                             )
                         )
                     )
@@ -296,7 +296,7 @@ procedure(_HasNumericGroupRef(t_pat "t")  ; -> t | nil
             when(index(t_pat strcat("\\g{" sprintf(nil "%d" n_i) "}")) g_found = t)
             when(index(t_pat strcat("\\g<" sprintf(nil "%d" n_i) ">")) g_found = t)
             when(index(t_pat strcat("\\k<" sprintf(nil "%d" n_i) ">")) g_found = t)
-            n_i = n_i + 1
+            n_i++
         )
         g_found
     )
@@ -334,68 +334,62 @@ procedure(_ShiftNumericRefs(t_pat n_g "tx")  ; -> str | sym
                             (t_c == "\\"
                                 t_next = substring(t_pat n_i + 1 1)
                                 if(index("123456789" t_next)
-                                    progn(
-                                        n_j = n_i + 1
-                                        while(n_j <= n_len && index("0123456789" substring(t_pat n_j 1))
-                                            n_j = n_j + 1
-                                        )
-                                        n_num = atoi(substring(t_pat n_i + 1 n_j - n_i - 1))
-                                        if(n_num <= n_g
-                                            progn(
-                                                t_res = strcat(t_res "\\" sprintf(nil "%d" n_num + 2))
-                                                n_i = n_j
-                                            )
-                                            progn(
-                                                n_first = atoi(t_next)
-                                                if(n_first <= n_g
-                                                    progn(
-                                                        t_res = strcat(t_res "\\" sprintf(nil "%d" n_first + 2)
-                                                            if(n_j - n_i - 2 > 0 substring(t_pat n_i + 2 n_j - n_i - 2) ""))
-                                                        n_i = n_j
-                                                    )
-                                                    t_res = 'fallback
-                                                )
-                                            )
+                                then
+                                    n_j = n_i + 1
+                                    while(n_j <= n_len && index("0123456789" substring(t_pat n_j 1))
+                                        n_j++
+                                    )
+                                    n_num = atoi(substring(t_pat n_i + 1 n_j - n_i - 1))
+                                    if(n_num <= n_g
+                                    then
+                                        t_res = strcat(t_res "\\" sprintf(nil "%d" n_num + 2))
+                                        n_i = n_j
+                                    else
+                                        n_first = atoi(t_next)
+                                        if(n_first <= n_g
+                                        then
+                                            t_res = strcat(t_res "\\" sprintf(nil "%d" n_first + 2)
+                                                if(n_j - n_i - 2 > 0 substring(t_pat n_i + 2 n_j - n_i - 2) ""))
+                                            n_i = n_j
+                                        else
+                                            t_res = 'fallback
                                         )
                                     )
-                                    progn(
-                                        t_res = strcat(t_res t_c t_next)
-                                        n_i = n_i + 2
-                                    )
+                                else
+                                    t_res = strcat(t_res t_c t_next)
+                                    n_i = n_i + 2
                                 )
                             )
                             (t_c == "(" && substring(t_pat n_i 2) == "(?"
                                 t_next = substring(t_pat n_i + 2 1)
                                 if(index("123456789" t_next)
-                                    progn(
-                                        n_j = n_i + 2
-                                        while(n_j <= n_len && index("0123456789" substring(t_pat n_j 1))
-                                            n_j = n_j + 1
-                                        )
-                                        n_num = atoi(substring(t_pat n_i + 2 n_j - n_i - 2))
-                                        t_res = strcat(t_res "(?" sprintf(nil "%d" n_num + 2))
-                                        n_i = n_j
+                                then
+                                    n_j = n_i + 2
+                                    while(n_j <= n_len && index("0123456789" substring(t_pat n_j 1))
+                                        n_j++
                                     )
+                                    n_num = atoi(substring(t_pat n_i + 2 n_j - n_i - 2))
+                                    t_res = strcat(t_res "(?" sprintf(nil "%d" n_num + 2))
+                                    n_i = n_j
+                                else
                                     if(t_next == "(" && index("123456789" substring(t_pat n_i + 3 1))
-                                        progn(
-                                            n_j = n_i + 3
-                                            while(n_j <= n_len && index("0123456789" substring(t_pat n_j 1))
-                                                n_j = n_j + 1
-                                            )
-                                            n_num = atoi(substring(t_pat n_i + 3 n_j - n_i - 3))
-                                            t_res = strcat(t_res "(?(" sprintf(nil "%d" n_num + 2))
-                                            n_i = n_j
+                                    then
+                                        n_j = n_i + 3
+                                        while(n_j <= n_len && index("0123456789" substring(t_pat n_j 1))
+                                            n_j++
                                         )
-                                        progn(
-                                            t_res = strcat(t_res t_c)
-                                            n_i = n_i + 1
-                                        )
+                                        n_num = atoi(substring(t_pat n_i + 3 n_j - n_i - 3))
+                                        t_res = strcat(t_res "(?(" sprintf(nil "%d" n_num + 2))
+                                        n_i = n_j
+                                    else
+                                        t_res = strcat(t_res t_c)
+                                        n_i++
                                     )
                                 )
                             )
                             (t
                                 t_res = strcat(t_res t_c)
-                                n_i = n_i + 1
+                                n_i++
                             )
                         )
                     )
@@ -445,58 +439,58 @@ procedure(_ZeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
             (t
                 t_pat2 = _ShiftNumericRefs(g_pat->_data->pattern g_pat->_data->nGroups)
                 if(t_pat2 == 'fallback
+                then
                     'fallback
-                    progn(
-                        t_qpat = lsprintf("%s([\\s\\S])(?=((?:%s)))"
-                            g_pat->_data->flags t_pat2)
-                        g_qobj = _CompileChecked(t_qpat
-                            "ycRegEx: zero-width probe" g_pat->_data->compileOpts)
-                        if(g_qobj
-                            progn(
-                                n_q = pcreSubpatCount(g_qobj)
-                                g_qpat = makeInstance('Pattern ?_data makeInstance('PatternData
-                                    ?pcre g_qobj ?nGroups n_q))
-                                l_q = _ExportRecords(g_qpat t_subj n_exec)
-                                n_skip = 0
-                                when(l_q == 'fallback g_bad = t)
-                                when(pcreMatchp(g_pat->_data->span t_subj 0 n_exec)
-                                    l_parts = _ExtractParts(g_pat g_pat->_data->span)
-                                    if(length(car(l_parts)) == 0
-                                        unless(_HasBit(n_exec 1024)
-                                            l_0 = cons(0 cons(0 cdr(l_parts)))
-                                        )
-                                        g_bad = t
-                                    )
+                else
+                    t_qpat = lsprintf("%s([\\s\\S])(?=((?:%s)))"
+                        g_pat->_data->flags t_pat2)
+                    g_qobj = _CompileChecked(t_qpat
+                        "ycRegEx: zero-width probe" g_pat->_data->compileOpts)
+                    if(g_qobj
+                    then
+                        n_q = pcreSubpatCount(g_qobj)
+                        g_qpat = makeInstance('Pattern ?_data makeInstance('PatternData
+                            ?pcre g_qobj ?nGroups n_q))
+                        l_q = _ExportRecords(g_qpat t_subj n_exec)
+                        n_skip = 0
+                        when(l_q == 'fallback g_bad = t)
+                        when(pcreMatchp(g_pat->_data->span t_subj 0 n_exec)
+                            l_parts = _ExtractParts(g_pat g_pat->_data->span)
+                            if(length(car(l_parts)) == 0
+                                unless(_HasBit(n_exec 1024)
+                                    l_0 = cons(0 cons(0 cdr(l_parts)))
                                 )
-                                when(!g_bad
-                                    l_res = when(l_0 tconc(nil l_0))
-                                    foreach(l_m l_q
-                                        l_qgroups = cdr(cdr(l_m))
-                                        if(length(l_qgroups) < 2
-                                            g_bad = t
+                                g_bad = t
+                            )
+                        )
+                        when(!g_bad
+                            l_res = when(l_0 tconc(nil l_0))
+                            foreach(l_m l_q
+                                l_qgroups = cdr(cdr(l_m))
+                                if(length(l_qgroups) < 2
+                                then
+                                    g_bad = t
+                                else
+                                    t_pw = car(cdr(l_qgroups))
+                                    n_start = car(l_m) + 1
+                                    cond(
+                                        (n_start < n_skip nil)
+                                        (t_pw == "" && _HasBit(n_exec 1024) nil)
+                                        (t
                                             progn(
-                                                t_pw = car(cdr(l_qgroups))
-                                                n_start = car(l_m) + 1
-                                                cond(
-                                                    (n_start < n_skip nil)
-                                                    (t_pw == "" && _HasBit(n_exec 1024) nil)
-                                                    (t
-                                                        progn(
-                                                            l_res = tconc(l_res cons(n_start cons(n_start + length(t_pw) cdr(cdr(l_qgroups)))))
-                                                            when(length(t_pw) > 0
-                                                                n_skip = n_start + length(t_pw)
-                                                            )
-                                                        )
-                                                    )
+                                                l_res = tconc(l_res cons(n_start cons(n_start + length(t_pw) cdr(cdr(l_qgroups)))))
+                                                when(length(t_pw) > 0
+                                                    n_skip = n_start + length(t_pw)
                                                 )
                                             )
                                         )
                                     )
                                 )
-                                if(g_bad 'fallback car(l_res))
                             )
-                            'fallback
                         )
+                        if(g_bad 'fallback car(l_res))
+                    else
+                        'fallback
                     )
                 )
             )
@@ -555,7 +549,7 @@ procedure(_NextMatch(g_pat t_subj n_from n_exec "gtxx")  ; -> (int, int . list[s
                         l_parts = _ExtractParts(g_pat g_obj)
                         l_res = cons(n_i cons(n_i + length(car(l_parts)) cdr(l_parts)))
                     )
-                    n_i = n_i + 1
+                    n_i++
                 )
             )
         )

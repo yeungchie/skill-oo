@@ -99,7 +99,7 @@ procedure(_String(t_s n_i "tx")  ; -> list
                         l_p = tconc(l_p substring(t_s n_run n_k - n_run))
                     )
                     n_esc = n_k
-                    n_k = n_k + 1
+                    n_k++
                     n_c = _Code(t_s n_k)
                     when(!n_c
                         _Error(t_s n_esc "unterminated string")
@@ -108,49 +108,49 @@ procedure(_String(t_s n_i "tx")  ; -> list
                         (34
                             {
                             l_p = tconc(l_p "\"")
-                            n_k = n_k + 1
+                            n_k++
                             }
                         )
                         (92
                             {
                             l_p = tconc(l_p "\\")
-                            n_k = n_k + 1
+                            n_k++
                             }
                         )
                         (47
                             {
                             l_p = tconc(l_p "/")
-                            n_k = n_k + 1
+                            n_k++
                             }
                         )
                         (98
                             {
                             l_p = tconc(l_p strcat(intToChar(8)))
-                            n_k = n_k + 1
+                            n_k++
                             }
                         )
                         (102
                             {
                             l_p = tconc(l_p strcat(intToChar(12)))
-                            n_k = n_k + 1
+                            n_k++
                             }
                         )
                         (110
                             {
                             l_p = tconc(l_p strcat(intToChar(10)))
-                            n_k = n_k + 1
+                            n_k++
                             }
                         )
                         (114
                             {
                             l_p = tconc(l_p strcat(intToChar(13)))
-                            n_k = n_k + 1
+                            n_k++
                             }
                         )
                         (116
                             {
                             l_p = tconc(l_p strcat(intToChar(9)))
-                            n_k = n_k + 1
+                            n_k++
                             }
                         )
                         (117
@@ -184,7 +184,7 @@ procedure(_String(t_s n_i "tx")  ; -> list
                 (t
                     if(n_c < 32
                         _Error(t_s n_k "control character in string")
-                        n_k = n_k + 1
+                        n_k++
                     )
                 )
             )
@@ -232,17 +232,17 @@ procedure(_Number(t_s n_i "tx")  ; -> list
         n_k = n_i
         n_c = _Code(t_s n_k)
         when(n_c == 45
-            n_k = n_k + 1
+            n_k++
             n_c = _Code(t_s n_k)
         )
         cond(
             (n_c == 48
-                n_k = n_k + 1
+                n_k++
             )
             (n_c >= 49 && n_c <= 57
-                n_k = n_k + 1
+                n_k++
                 while(n_k <= n_len && _Digitp(_Code(t_s n_k))
-                    n_k = n_k + 1
+                    n_k++
                 )
             )
             (t
@@ -253,39 +253,39 @@ procedure(_Number(t_s n_i "tx")  ; -> list
             _Error(t_s n_k "invalid number")
         )
         when(_Code(t_s n_k) == 46
-            n_k = n_k + 1
+            n_k++
             unless(_Digitp(_Code(t_s n_k))
                 _Error(t_s n_i "invalid number")
             )
             while(n_k <= n_len && _Digitp(_Code(t_s n_k))
-                n_k = n_k + 1
+                n_k++
             )
         )
         n_c = _Code(t_s n_k)
         when(n_c == 101 || n_c == 69
-            n_k = n_k + 1
+            n_k++
             n_c = _Code(t_s n_k)
             when(n_c == 43 || n_c == 45
-                n_k = n_k + 1
+                n_k++
             )
             unless(_Digitp(_Code(t_s n_k))
                 _Error(t_s n_i "invalid number")
             )
             while(n_k <= n_len && _Digitp(_Code(t_s n_k))
-                n_k = n_k + 1
+                n_k++
             )
         )
         t_tok = substring(t_s n_i n_k - n_i)
         if(pcreMatchp("[.eE]" t_tok)
+        then
             list(atof(t_tok) n_k)
-            {
+        else
             n_v = atof(t_tok)
             if(n_v >= (-2147483647 - 1) && n_v <= 2147483647
                 g_num = atoi(t_tok)
                 g_num = n_v
             )
             list(g_num n_k)
-            }
         )
     )
 )

@@ -51,7 +51,7 @@ procedure(_Find(t_s t_sub "tt")  ; -> int | nil
         n_c = _Code(t_sub 1)
         n_i = 1
         while(n_i <= n_len && _Code(t_s n_i) != n_c
-            n_i = n_i + 1
+            n_i++
         )
         when(n_i <= n_len
             n_i
@@ -71,7 +71,7 @@ procedure(_Ltrim(t_s "t")  ; -> str
         n_len = length(t_s)
         n_i = 1
         while(n_i <= n_len && (_Code(t_s n_i) == 32 || _Code(t_s n_i) == 9)
-            n_i = n_i + 1
+            n_i++
         )
         if(n_i > n_len
             ""
@@ -91,7 +91,7 @@ procedure(_Rtrim(t_s "t")  ; -> str
     let((n_end)
         n_end = length(t_s)
         while(n_end > 0 && (_Code(t_s n_end) == 32 || _Code(t_s n_end) == 9)
-            n_end = n_end - 1
+            n_end--
         )
         if(n_end == 0
             ""
@@ -127,7 +127,7 @@ procedure(_HasControl(t_s "t")  ; -> t | nil
             when((n_c < 32 && n_c != 9) || n_c == 127
                 g_hit = t
             )
-            n_i = n_i + 1
+            n_i++
         )
         g_hit
     )
@@ -145,7 +145,7 @@ procedure(_LineIndent(t_line "t")  ; -> int
         n_len = length(t_line)
         n_i = 1
         while(n_i <= n_len && (_Code(t_line n_i) == 32 || _Code(t_line n_i) == 9)
-            n_i = n_i + 1
+            n_i++
         )
         n_i - 1
     )
@@ -169,17 +169,15 @@ procedure(_Normalize(t_s "t")  ; -> str
         n_len = length(t_s)
         while(n_i <= n_len
             if(_Code(t_s n_i) == 13
-                {
+            then
                 l_p = tconc(l_p "\n")
-                n_i = n_i + 1
+                n_i++
                 when(_Code(t_s n_i) == 10
-                    n_i = n_i + 1
+                    n_i++
                 )
-                }
-                {
+            else
                 l_p = tconc(l_p substring(t_s n_i 1))
-                n_i = n_i + 1
-                }
+                n_i++
             )
         )
         _Build(l_p)

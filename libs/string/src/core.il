@@ -24,12 +24,12 @@ procedure(_TrimSide(t_s t_chars g_left g_right "ttgg")  ; -> str
         n_end = n_len
         when(g_left
             while(n_start <= n_end && index(t_chars ycUtf8:::Slice(t_s n_start 1))
-                n_start = n_start + 1
+                n_start++
             )
         )
         when(g_right
             while(n_end >= n_start && index(t_chars ycUtf8:::Slice(t_s n_end 1))
-                n_end = n_end - 1
+                n_end--
             )
         )
         if(n_start > n_end
@@ -188,11 +188,11 @@ procedure(_SplitWhitespace(t_s "t")  ; -> list[str]
         n_i = 1
         while(n_i <= n_len
             while(n_i <= n_len && _IsWhitespace(substring(t_s n_i 1))
-                n_i = n_i + 1
+                n_i++
             )
             n_j = n_i
             while(n_j <= n_len && !_IsWhitespace(substring(t_s n_j 1))
-                n_j = n_j + 1
+                n_j++
             )
             when(n_j > n_i
                 l_p = tconc(l_p substring(t_s n_i n_j - n_i))
@@ -218,7 +218,7 @@ procedure(_SplitLiteral(t_s t_sep "tt")  ; -> list[str]
         while(!g_done
             n_cut = index(t_rest t_sep)
             if(n_cut
-                {
+            then
                 n_len = length(t_rest)
                 n_pos = n_len - length(n_cut) + 1
                 l_p = tconc(l_p if(n_pos > 1 substring(t_rest 1 n_pos - 1) ""))
@@ -226,11 +226,9 @@ procedure(_SplitLiteral(t_s t_sep "tt")  ; -> list[str]
                     ""
                     substring(t_rest n_pos + n_sep n_len - n_pos - n_sep + 1)
                 )
-                }
-                {
+            else
                 l_p = tconc(l_p t_rest)
                 g_done = t
-                }
             )
         )
         car(l_p)
@@ -309,7 +307,7 @@ procedure(Join(l_items \@key (sep "") "lt")  ; -> str
     let((l_p n_i)
         n_i = 0
         foreach(t_item l_items
-            n_i = n_i + 1
+            n_i++
             unless(stringp(t_item)
                 error("ycString::Join: item #%d is not a string (%A)" n_i t_item)
             )
@@ -392,7 +390,7 @@ procedure(Replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
                 while(!g_done
                     n_cut = index(t_rest t_old)
                     if(n_cut
-                        {
+                    then
                         n_len = length(t_rest)
                         n_pos = n_len - length(n_cut) + 1
                         l_p = tconc(l_p if(n_pos > 1 substring(t_rest 1 n_pos - 1) ""))
@@ -401,11 +399,9 @@ procedure(Replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
                             ""
                             substring(t_rest n_pos + n_old n_len - n_pos - n_old + 1)
                         )
-                        }
-                        {
+                    else
                         l_p = tconc(l_p t_rest)
                         g_done = t
-                        }
                     )
                 )
                 apply('strcat car(l_p))
@@ -442,18 +438,16 @@ procedure(Count(t_s t_sub \@key (regex nil) "ttg")  ; -> int
                 while(!g_done
                     n_cut = index(t_rest t_sub)
                     if(n_cut
-                        {
-                        n_n = n_n + 1
+                    then
+                        n_n++
                         n_len = length(t_rest)
                         n_pos = n_len - length(n_cut) + 1
                         t_rest = if(n_pos + n_sub > n_len
                             ""
                             substring(t_rest n_pos + n_sub n_len - n_pos - n_sub + 1)
                         )
-                        }
-                        {
+                    else
                         g_done = t
-                        }
                     )
                 )
                 n_n

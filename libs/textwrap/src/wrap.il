@@ -24,40 +24,38 @@ procedure(_PackCps(l_words n_first n_rest g_breakLong g_hyphen t_unit n_amb "lxx
     ; **返回**
     ;   (list[list[int]]) - 行码点列表
     let((l_lines l_cur n_curw n_limit)
-        l_lines = cons(nil nil)
         n_limit = n_first
         foreach(l_word l_words
             let((n_ww g_place)
                 n_ww = _WidthCps(l_word t_unit n_amb)
                 if(l_cur
                     if(n_curw + 1 + n_ww <= n_limit
-                        progn(
-                            l_cur = append(l_cur list(32))
-                            l_cur = append(l_cur l_word)
-                            n_curw = n_curw + 1 + n_ww
-                        )
-                        progn(
-                            tconc(l_lines l_cur)
-                            l_cur = nil
-                            n_curw = 0
-                            n_limit = n_rest
-                            g_place = t
-                        )
+                    then
+                        l_cur = append(l_cur list(32))
+                        l_cur = append(l_cur l_word)
+                        n_curw = n_curw + 1 + n_ww
+                    else
+                        l_lines = tconc(l_lines l_cur)
+                        l_cur = nil
+                        n_curw = 0
+                        n_limit = n_rest
+                        g_place = t
                     )
                     g_place = t
                 )
                 when(g_place
                     if(n_ww <= n_limit
-                        progn(
-                            l_cur = l_word
-                            n_curw = n_ww
-                        )
+                    then
+                        l_cur = l_word
+                        n_curw = n_ww
+                    else
                         if(g_breakLong
+                        then
                             let((l_rest l_chunk)
                                 l_rest = l_word
                                 while(l_rest && _WidthCps(l_rest t_unit n_amb) > n_limit
                                     l_chunk = _FirstChunk(l_rest n_limit g_hyphen t_unit n_amb)
-                                    tconc(l_lines l_chunk)
+                                    l_lines = tconc(l_lines l_chunk)
                                     l_rest = _DropCps(l_rest length(l_chunk))
                                     n_limit = n_rest
                                 )
@@ -66,16 +64,15 @@ procedure(_PackCps(l_words n_first n_rest g_breakLong g_hyphen t_unit n_amb "lxx
                                     n_curw = _WidthCps(l_rest t_unit n_amb)
                                 )
                             )
-                            progn(
-                                l_cur = l_word
-                                n_curw = n_ww
-                            )
+                        else
+                            l_cur = l_word
+                            n_curw = n_ww
                         )
                     )
                 )
             )
         )
-        when(l_cur tconc(l_lines l_cur))
+        when(l_cur l_lines = tconc(l_lines l_cur))
         car(l_lines)
     )
 )
@@ -138,7 +135,7 @@ procedure(_CutAtSpace(l_cps n_max t_unit n_amb "lxtx")  ; -> list[int]
         n_i = 1
         foreach(n_cp l_pre
             when(n_cp == 32 n_last = n_i)
-            n_i = n_i + 1
+            n_i++
         )
         when(n_last
             l_pre = _TrimTrailingSpaces(_TakeCps(l_pre n_last - 1))
@@ -163,12 +160,12 @@ procedure(_FitPlaceholder(l_cps t_ph n_max t_unit n_amb "ltxtx")  ; -> list[int]
         l_ph = ycUtf8:::Decode(t_ph)
         n_ph = _WidthCps(l_ph t_unit n_amb)
         if(n_ph >= n_max
+        then
             _TakeCps(l_ph _FitCount(l_ph n_max t_unit n_amb))
-            progn(
-                n_room = n_max - n_ph
-                l_pre = _CutAtSpace(l_cps n_room t_unit n_amb)
-                append(l_pre l_ph)
-            )
+        else
+            n_room = n_max - n_ph
+            l_pre = _CutAtSpace(l_cps n_room t_unit n_amb)
+            append(l_pre l_ph)
         )
     )
 )
@@ -240,52 +237,46 @@ procedure(Wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") 
         )
         unless(t_text == ""
             let((l_lines l_out l_meta g_first g_any)
-                l_out = cons(nil nil)
-                l_meta = cons(nil nil)
                 l_lines = _LogicalLines(_NormalizeNewlines(t_text))
                 g_first = t
                 foreach(t_line l_lines
                     let((l_words l_packs t_indent n_avail)
                         l_words = _WordsFromCps(ycUtf8:::Decode(t_line))
                         if(l_words
-                            progn(
-                                n_avail = if(g_first n_availInit n_availSub)
-                                l_packs = _PackCps(
-                                    l_words
-                                    n_avail
-                                    n_availSub
-                                    breakLongWords
-                                    breakOnHyphens
-                                    unit
-                                    ambiguous
-                                )
-                                foreach(l_pack l_packs
-                                    t_indent = if(g_first initialIndent subsequentIndent)
-                                    tconc(l_out strcat(t_indent ycUtf8:::Encode(l_pack)))
-                                    tconc(l_meta list(t_indent n_avail))
-                                    g_first = nil
-                                    g_any = t
-                                )
+                        then
+                            n_avail = if(g_first n_availInit n_availSub)
+                            l_packs = _PackCps(
+                                l_words
+                                n_avail
+                                n_availSub
+                                breakLongWords
+                                breakOnHyphens
+                                unit
+                                ambiguous
                             )
-                            progn(
-                                tconc(l_out "")
-                                tconc(l_meta nil)
+                            foreach(l_pack l_packs
+                                t_indent = if(g_first initialIndent subsequentIndent)
+                                l_out = tconc(l_out strcat(t_indent ycUtf8:::Encode(l_pack)))
+                                l_meta = tconc(l_meta list(t_indent n_avail))
+                                g_first = nil
+                                g_any = t
                             )
+                        else
+                            l_out = tconc(l_out "")
+                            l_meta = tconc(l_meta nil)
                         )
                     )
                 )
                 if(maxLines && length(car(l_out)) > maxLines
                     let((l_keep l_kmeta l_metaList l_final n_i t_last g_meta t_indent n_avail l_cps)
-                        l_keep = cons(nil nil)
-                        l_kmeta = cons(nil nil)
                         l_metaList = car(l_meta)
                         n_i = 0
                         foreach(t_line car(l_out)
                             when(n_i < maxLines
-                                tconc(l_keep t_line)
-                                tconc(l_kmeta nth(n_i l_metaList))
+                                l_keep = tconc(l_keep t_line)
+                                l_kmeta = tconc(l_kmeta nth(n_i l_metaList))
                             )
-                            n_i = n_i + 1
+                            n_i++
                         )
                         l_final = car(l_keep)
                         t_last = car(reverse(l_final))

@@ -55,12 +55,12 @@ procedure(_ParseQuoted(t_s n_i n_line "txn")  ; -> list
                                 (t
                                     l_p = tconc(l_p substring(t_s n_seg n_pos - n_seg))
                                     g_done = t
-                                    n_pos = n_pos + 1
+                                    n_pos++
                                 )
                             )
                         )
                         (t
-                            n_pos = n_pos + 1
+                            n_pos++
                         )
                     )
                 )
@@ -69,12 +69,12 @@ procedure(_ParseQuoted(t_s n_i n_line "txn")  ; -> list
                         (n_c == 34
                             l_p = tconc(l_p substring(t_s n_seg n_pos - n_seg))
                             g_done = t
-                            n_pos = n_pos + 1
+                            n_pos++
                         )
                         (n_c == 92
                             l_p = tconc(l_p substring(t_s n_seg n_pos - n_seg))
                             n_esc = n_pos
-                            n_pos = n_pos + 1
+                            n_pos++
                             when(n_pos > n_len
                                 _ErrorLine("unterminated escape" n_line n_esc)
                             )
@@ -137,11 +137,11 @@ procedure(_ParseQuoted(t_s n_i n_line "txn")  ; -> list
                                     _ErrorLine("invalid escape" n_line n_esc)
                                 )
                             )
-                            n_pos = n_pos + 1
+                            n_pos++
                             n_seg = n_pos
                         )
                         (t
-                            n_pos = n_pos + 1
+                            n_pos++
                         )
                     )
                 )
@@ -168,7 +168,7 @@ procedure(_ParseIntText(t_s "t")  ; -> any
             when(_Code(t_clean n_i) == 45
                 n_sign = -1
             )
-            n_i = n_i + 1
+            n_i++
         )
         n_base = 10
         when(n_i + 1 <= n_len && _Code(t_clean n_i) == 48
@@ -191,7 +191,7 @@ procedure(_ParseIntText(t_s "t")  ; -> any
                 g_bad = t
                 n_v = n_v * n_base + n_digit
             )
-            n_i = n_i + 1
+            n_i++
         )
         unless(g_bad
             when(n_sign < 0 n_v = -n_v)
@@ -251,19 +251,19 @@ procedure(_ParseScalarText(t_text "t")  ; -> any
         n_len = length(t_text)
         n_i = 1
         while(n_i <= n_len && _Code(t_text n_i) == 32
-            n_i = n_i + 1
+            n_i++
         )
         when(n_i > n_len
             return(ycCodec:::Null)
         )
         if(_Code(t_text n_i) == 34 || _Code(t_text n_i) == 39
-            progn(
-                l_q = _ParseQuoted(t_text n_i 1)
-                when(_Rtrim(_Tail(t_text cadr(l_q))) != ""
-                    _ErrorLine("unexpected characters after quoted scalar" 1 cadr(l_q))
-                )
-                return(car(l_q))
+        then
+            l_q = _ParseQuoted(t_text n_i 1)
+            when(_Rtrim(_Tail(t_text cadr(l_q))) != ""
+                _ErrorLine("unexpected characters after quoted scalar" 1 cadr(l_q))
             )
+            return(car(l_q))
+        else
             return(_ResolvePlain(_Rtrim(substring(t_text n_i n_len - n_i + 1))))
         )
     )
@@ -309,26 +309,26 @@ procedure(_TagValue(g_val t_tag "gt")  ; -> any
             ("!!str" _ScalarText(g_val))
             ("!!int"
                 if(fixp(g_val)
+                then
                     g_val
-                    progn(
-                        t_s = _ScalarText(g_val)
-                        unless(pcreMatchp("^[+-]?(0[xX][0-9a-fA-F_]+|0[oO][0-7_]+|0[bB][01_]+|[0-9_]+)\\z" t_s)
-                            error("ycYaml::Decode: !!int value is not an integer")
-                        )
-                        _ParseIntText(t_s)
+                else
+                    t_s = _ScalarText(g_val)
+                    unless(pcreMatchp("^[+-]?(0[xX][0-9a-fA-F_]+|0[oO][0-7_]+|0[bB][01_]+|[0-9_]+)\\z" t_s)
+                        error("ycYaml::Decode: !!int value is not an integer")
                     )
+                    _ParseIntText(t_s)
                 )
             )
             ("!!float"
                 if(floatp(g_val)
+                then
                     g_val
-                    progn(
-                        t_s = _ScalarText(g_val)
-                        unless(pcreMatchp("^[+-]?([0-9_]+(\\.[0-9_]*)?|\\.[0-9_]+)([eE][+-]?[0-9]+)?\\z" t_s)
-                            error("ycYaml::Decode: !!float value is not a number")
-                        )
-                        atof(pcreReplace(pcreCompile("_") t_s "" 0))
+                else
+                    t_s = _ScalarText(g_val)
+                    unless(pcreMatchp("^[+-]?([0-9_]+(\\.[0-9_]*)?|\\.[0-9_]+)([eE][+-]?[0-9]+)?\\z" t_s)
+                        error("ycYaml::Decode: !!float value is not a number")
                     )
+                    atof(pcreReplace(pcreCompile("_") t_s "" 0))
                 )
             )
             ("!!bool"
@@ -389,7 +389,7 @@ procedure(_ParseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
                 (n_c == 32 || n_c == 9 n_i = n_len + 1)
                 (t _ErrorLine("invalid block scalar header" n_line n_col))
             )
-            n_i = n_i + 1
+            n_i++
         )
         n_last = n_pos
         l_raw = nil
@@ -400,7 +400,7 @@ procedure(_ParseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
             n_ind = _LineIndent(t_line n_last)
             when(_Rtrim(t_line) == ""
                 l_raw = tconc(l_raw "")
-                n_last = n_last + 1
+                n_last++
             )
             unless(g_stop || _Rtrim(t_line) == ""
                 when(n_content == nil
@@ -412,7 +412,7 @@ procedure(_ParseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
                     )
                     (t
                         l_raw = tconc(l_raw substring(t_line n_content + 1 length(t_line) - n_content))
-                        n_last = n_last + 1
+                        n_last++
                     )
                 )
             )
@@ -420,7 +420,7 @@ procedure(_ParseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
         l_raw = car(l_raw)
         n_count = length(l_raw)
         while(n_count > 0 && _Nth1(n_count l_raw) == ""
-            n_count = n_count - 1
+            n_count--
         )
         cond(
             (n_style == 62
@@ -431,15 +431,15 @@ procedure(_ParseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
                     let((g_more t_sep)
                         g_more = length(t_line) > 0 && (_Code(t_line 1) == 32 || _Code(t_line 1) == 9)
                         if(n_i == 1
+                        then
                             t_body = t_line
-                            progn(
-                                t_sep = cond(
-                                    (t_line == "" && !g_prevMore && !g_prevBlank "")
-                                    (t_line == "" || g_prevBlank || g_more || g_prevMore "\n")
-                                    (t " ")
-                                )
-                                t_body = strcat(t_body t_sep t_line)
+                        else
+                            t_sep = cond(
+                                (t_line == "" && !g_prevMore && !g_prevBlank "")
+                                (t_line == "" || g_prevBlank || g_more || g_prevMore "\n")
+                                (t " ")
                             )
+                            t_body = strcat(t_body t_sep t_line)
                         )
                         g_prevBlank = t_line == ""
                         g_prevMore = g_more

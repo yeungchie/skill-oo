@@ -60,7 +60,7 @@ procedure(_SplitBy(t_str t_delim "tt")  ; -> list[str]
             )
             if(g_hit
                 n_i = n_i + n_d
-                n_i = n_i + 1
+                n_i++
             )
         )
         car(tconc(l_res t_cur))
@@ -84,11 +84,11 @@ procedure(_CountSub(t_str t_sub "tt")  ; -> int
         while(n_i <= n_len
             g_hit = n_d > 0 && n_d <= n_len - n_i + 1 && substring(t_str n_i n_d) == t_sub
             when(g_hit
-                n_c = n_c + 1
+                n_c++
             )
             if(g_hit
                 n_i = n_i + n_d
-                n_i = n_i + 1
+                n_i++
             )
         )
         n_c
@@ -193,7 +193,7 @@ procedure(_FlagsFromValue(g_flags t_ctx "gt")  ; -> str
                     error("%A: unknown flag '%s' (use 'I 'M 'S 'X)" t_ctx t_c)
                 )
             )
-            n_i = n_i + 1
+            n_i++
         )
         t_in = ""
         when(index(t_letters "i")

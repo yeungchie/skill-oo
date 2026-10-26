@@ -134,7 +134,7 @@ procedure(Parse(t_text \@key (base nil) (prefix t) (wrap nil) "tggg")  ; -> int
             when(f_acc > 4294967295.0
                 error("ycRadix::Parse: value out of 32-bit range in %A" t_text)
             )
-            n_i = n_i + 1
+            n_i++
         )
         cond(
             (g_neg
@@ -233,7 +233,7 @@ procedure(Format(n_value \@key (base 10) (prefix nil) (upper nil) (width nil) (p
             n_need = width - length(t_out)
             while(n_need > 0
                 t_out = strcat(pad t_out)
-                n_need = n_need - 1
+                n_need--
             )
         )
         lsprintf("%s%s%s" if(g_neg "-" "") t_pre t_out)

@@ -39,7 +39,7 @@ procedure(_Next(t_s n_i "tx")  ; -> list
             n_left = n_need
             n_k = n_i
             while(n_left > 0 && !g_bad
-                n_k = n_k + 1
+                n_k++
                 when(n_k > n_len
                     g_bad = t
                 )
@@ -52,7 +52,7 @@ procedure(_Next(t_s n_i "tx")  ; -> list
                         n_cp = n_cp * 64 + n_b - 128
                     )
                 )
-                n_left = n_left - 1
+                n_left--
             )
             unless(g_bad
                 cond(
@@ -178,7 +178,7 @@ procedure(Encode(l_cps "l")  ; -> str
     let((l_p n_idx n_cp)
         n_idx = 0
         foreach(n_cp l_cps
-            n_idx = n_idx + 1
+            n_idx++
             unless(fixp(n_cp) && n_cp >= 0 && n_cp <= 1114111
                 error("ycUtf8::Encode: invalid codepoint at index %d (%A)" n_idx n_cp)
             )
@@ -212,7 +212,7 @@ procedure(CharCount(t_str \@key (strict t) "tg")  ; -> int
         while(n_i <= length(t_str)
             l_res = _Read(t_str n_i strict "ycUtf8::CharCount")
             n_i = cadr(l_res)
-            n_n = n_n + 1
+            n_n++
         )
         n_n
     )
@@ -245,7 +245,7 @@ procedure(Slice(t_str n_start n_len \@key (strict t) "txxg")  ; -> str | nil
         while(n_i <= n_total && n_seen < n_start - 1
             l_res = _Read(t_str n_i strict "ycUtf8::Slice")
             n_i = cadr(l_res)
-            n_seen = n_seen + 1
+            n_seen++
         )
         unless(n_i > n_total
             n_take = 0
@@ -253,7 +253,7 @@ procedure(Slice(t_str n_start n_len \@key (strict t) "txxg")  ; -> str | nil
                 l_res = _Read(t_str n_i strict "ycUtf8::Slice")
                 l_p = tconc(l_p _EncCp(car(l_res)))
                 n_i = cadr(l_res)
-                n_take = n_take + 1
+                n_take++
             )
             _Build(l_p)
         )

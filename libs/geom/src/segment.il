@@ -138,6 +138,7 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggg")  ; -> Point | Segme
                 n_qpxr = n_qpx * n_ry - n_qpy * n_rx
                 n_rr = n_rx * n_rx + n_ry * n_ry
                 if(abs(n_rxs) <= n_eps
+                then
                     when(abs(n_qpxr) <= n_eps
                         n_t0 = (n_qpx * n_rx + n_qpy * n_ry) / n_rr
                         n_t1 = ((g_d->x() - g_a->x()) * n_rx
@@ -154,13 +155,12 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggg")  ; -> Point | Segme
                             )
                         )
                     )
-                    progn(
-                        n_t = (n_qpx * n_sy - n_qpy * n_sx) / n_rxs
-                        n_u = (n_qpx * n_ry - n_qpy * n_rx) / n_rxs
-                        when(n_t >= -n_eps && n_t <= 1.0 + n_eps
-                            && n_u >= -n_eps && n_u <= 1.0 + n_eps
-                            _SegPointAt(g_a g_b n_t)
-                        )
+                else
+                    n_t = (n_qpx * n_sy - n_qpy * n_sx) / n_rxs
+                    n_u = (n_qpx * n_ry - n_qpy * n_rx) / n_rxs
+                    when(n_t >= -n_eps && n_t <= 1.0 + n_eps
+                        && n_u >= -n_eps && n_u <= 1.0 + n_eps
+                        _SegPointAt(g_a g_b n_t)
                     )
                 )
             )
@@ -234,13 +234,13 @@ procedure(_InstallSegment(self "g")  ; -> t
             n_dy = self->_data->end->y() - self->_data->start->y()
             n_den = n_dx * n_dx + n_dy * n_dy
             if(n_den <= 1e-18
+            then
                 self->_data->start
-                progn(
-                    n_t = ((g_p->x() - self->_data->start->x()) * n_dx
-                        + (g_p->y() - self->_data->start->y()) * n_dy) / n_den
-                    when(n_t >= 0.0 && n_t <= 1.0
-                        _SegPointAt(self->_data->start self->_data->end n_t)
-                    )
+            else
+                n_t = ((g_p->x() - self->_data->start->x()) * n_dx
+                    + (g_p->y() - self->_data->start->y()) * n_dy) / n_den
+                when(n_t >= 0.0 && n_t <= 1.0
+                    _SegPointAt(self->_data->start self->_data->end n_t)
                 )
             )
         )
@@ -259,13 +259,13 @@ procedure(_InstallSegment(self "g")  ; -> t
             n_dy = self->_data->end->y() - self->_data->start->y()
             n_den = n_dx * n_dx + n_dy * n_dy
             if(n_den <= 1e-18
+            then
                 self->_data->start
-                progn(
-                    n_t = ((g_p->x() - self->_data->start->x()) * n_dx
-                        + (g_p->y() - self->_data->start->y()) * n_dy) / n_den
-                    n_t = max(0.0 min(1.0 n_t))
-                    _SegPointAt(self->_data->start self->_data->end n_t)
-                )
+            else
+                n_t = ((g_p->x() - self->_data->start->x()) * n_dx
+                    + (g_p->y() - self->_data->start->y()) * n_dy) / n_den
+                n_t = max(0.0 min(1.0 n_t))
+                _SegPointAt(self->_data->start self->_data->end n_t)
             )
         )
     )

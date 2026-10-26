@@ -179,29 +179,27 @@ procedure(_AsPointList(l_data t_ctx "lt")  ; -> list[Point]
                 error("%s: expected a point list, got %A" t_ctx l_data)
             )
             if(numberp(car(l_data))
-                progn(
-                    n_len = length(l_data)
-                    unless(n_len - int(n_len / 2) * 2 == 0
-                        error("%s: coordinate list must have an even length" t_ctx)
-                    )
-                    n_i = 1
-                    while(n_i <= n_len
-                        unless(numberp(_Nth1(n_i l_data))
-                            && numberp(_Nth1(n_i + 1 l_data))
-                            error("%s: coordinate list contains non-numbers" t_ctx)
-                        )
-                        l_res = tconc(l_res Point(
-                            _Nth1(n_i l_data) _Nth1(n_i + 1 l_data)))
-                        n_i = n_i + 2
-                    )
-                    car(l_res)
+            then
+                n_len = length(l_data)
+                unless(n_len - int(n_len / 2) * 2 == 0
+                    error("%s: coordinate list must have an even length" t_ctx)
                 )
-                progn(
-                    foreach(g_item l_data
-                        l_res = tconc(l_res _AsPoint(g_item t_ctx))
+                n_i = 1
+                while(n_i <= n_len
+                    unless(numberp(_Nth1(n_i l_data))
+                        && numberp(_Nth1(n_i + 1 l_data))
+                        error("%s: coordinate list contains non-numbers" t_ctx)
                     )
-                    car(l_res)
+                    l_res = tconc(l_res Point(
+                        _Nth1(n_i l_data) _Nth1(n_i + 1 l_data)))
+                    n_i = n_i + 2
                 )
+                car(l_res)
+            else
+                foreach(g_item l_data
+                    l_res = tconc(l_res _AsPoint(g_item t_ctx))
+                )
+                car(l_res)
             )
         )
     )
@@ -272,14 +270,14 @@ procedure(_AsPolygonList(l_data t_ctx "lt")  ; -> list[Polygon]
             )
             foreach(g_item l_data
                 if(_PolygonP(g_item)
+                then
                     l_res = tconc(l_res g_item)
-                    progn(
-                        unless(listp(g_item)
-                            error("%s: expected a Polygon or point list, got %A"
-                                t_ctx g_item)
-                        )
-                        l_res = tconc(l_res Polygon(g_item))
+                else
+                    unless(listp(g_item)
+                        error("%s: expected a Polygon or point list, got %A"
+                            t_ctx g_item)
                     )
+                    l_res = tconc(l_res Polygon(g_item))
                 )
             )
             car(l_res)
@@ -697,12 +695,10 @@ procedure(_Rings(l_pts "l")  ; -> list[list[Point]]
                 g_next = car(l_nei)
                 t_adj[_PtKey(g_cur)] = cdr(l_nei)
                 t_adj[_PtKey(g_next)] = _RemovePoint(t_adj[_PtKey(g_next)] g_cur)
-                if(_PtKey(g_next) == _PtKey(g_start)
-                    progn(
-                        l_res = tconc(l_res car(l_ring))
-                        g_cur = nil
-                        l_ring = nil
-                    )
+                when(_PtKey(g_next) == _PtKey(g_start)
+                    l_res = tconc(l_res car(l_ring))
+                    g_cur = nil
+                    l_ring = nil
                 )
                 when(g_cur
                     l_ring = tconc(l_ring g_next)

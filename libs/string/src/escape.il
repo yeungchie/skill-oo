@@ -56,7 +56,7 @@ procedure(Unescape(t_s \@key (strict nil) "tg")  ; -> str
         while(n_i <= n_len
             t_ch = substring(t_s n_i 1)
             if(t_ch == "\\" && n_i < n_len
-                {
+            then
                 t_nx = substring(t_s n_i + 1 1)
                 cond(
                     (t_nx == "\\" l_p = tconc(l_p "\\"))
@@ -68,8 +68,7 @@ procedure(Unescape(t_s \@key (strict nil) "tg")  ; -> str
                     (t l_p = tconc(l_p strcat("\\" t_nx)))
                 )
                 n_i = n_i + 2
-                }
-                {
+            else
                 when(t_ch == "\\"
                     if(strict
                         error("ycString::Unescape: trailing backslash")
@@ -79,8 +78,7 @@ procedure(Unescape(t_s \@key (strict nil) "tg")  ; -> str
                 unless(t_ch == "\\"
                     l_p = tconc(l_p t_ch)
                 )
-                n_i = n_i + 1
-                }
+                n_i++
             )
         )
         if(l_p

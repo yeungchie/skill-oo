@@ -82,7 +82,7 @@ procedure(_ParseArray(t_s n_i n_depth n_max "txxx")  ; -> list
         g_done = nil
         when(_Code(t_s n_i) == 93
             g_done = t
-            n_i = n_i + 1
+            n_i++
         )
         while(!g_done
             when(n_i > n_len
@@ -95,14 +95,14 @@ procedure(_ParseArray(t_s n_i n_depth n_max "txxx")  ; -> list
             case(n_c
                 (93
                     g_done = t
-                    n_i = n_i + 1
+                    n_i++
                 )
                 (44
                     {
                     n_i = _SkipWs(t_s n_i + 1 t t)
                     when(_Code(t_s n_i) == 93
                         g_done = t
-                        n_i = n_i + 1
+                        n_i++
                     )
                     }
                 )
@@ -133,7 +133,7 @@ procedure(_ParseInlineTable(t_s n_i n_depth n_max "txxx")  ; -> list
         g_done = nil
         when(_Code(t_s n_i) == 125
             g_done = t
-            n_i = n_i + 1
+            n_i++
         )
         while(!g_done
             n_key = n_i
@@ -159,7 +159,7 @@ procedure(_ParseInlineTable(t_s n_i n_depth n_max "txxx")  ; -> list
                 )
                 (125
                     g_done = t
-                    n_i = n_i + 1
+                    n_i++
                 )
                 (10
                     _Error(t_s n_i "newline in inline table")
@@ -193,18 +193,16 @@ procedure(_ParseHeader(t_s n_i n_max "txx")  ; -> list
         l_path = car(l_r)
         n_k = _SkipWs(t_s cadr(l_r) nil nil)
         if(g_array
-            {
+        then
             unless(_Code(t_s n_k) == 93 && _Code(t_s n_k + 1) == 93
                 _Error(t_s n_k "expected ']]'")
             )
             n_k = n_k + 2
-            }
-            {
+        else
             unless(_Code(t_s n_k) == 93
                 _Error(t_s n_k "expected ']'")
             )
-            n_k = n_k + 1
-            }
+            n_k++
         )
         list(l_path _LineEnd(t_s n_k) g_array)
     )
@@ -231,14 +229,13 @@ procedure(_DecodeText(t_s n_max "tx")  ; -> table
             n_i = _SkipWs(t_s n_i t t)
             when(n_i <= n_len
                 if(_Code(t_s n_i) == 91
-                    {
+                then
                     l_h = _ParseHeader(t_s n_i n_max)
                     l_r = _HeaderTarget(t_s t_root t_meta car(l_h) n_i cadr(cdr(l_h)) n_max)
                     t_cur = car(l_r)
                     l_cur = cadr(l_r)
                     n_i = cadr(l_h)
-                    }
-                    {
+                else
                     n_key = n_i
                     l_r = _ParseKeyPath(t_s n_i)
                     l_path = car(l_r)
@@ -250,7 +247,6 @@ procedure(_DecodeText(t_s n_max "tx")  ; -> table
                     l_v = _ParseValue(t_s n_i 0 n_max)
                     _AssignValue(t_s t_meta l_cur t_cur l_path car(l_v) n_key n_max)
                     n_i = _LineEnd(t_s cadr(l_v))
-                    }
                 )
             )
         )

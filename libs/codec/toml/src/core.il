@@ -52,7 +52,7 @@ procedure(_LineCol(t_s n_i "tx")  ; -> list
         when(1 < n_i
             for(n_k 1 n_i - 1
                 when(_Code(t_s n_k) == 10
-                    n_line = n_line + 1
+                    n_line++
                     n_last = n_k
                 )
             )
@@ -104,17 +104,15 @@ procedure(_Normalize(t_s "t")  ; -> str
         n_len = length(t_s)
         while(n_i <= n_len
             if(_Code(t_s n_i) == 13
-                {
+            then
                 l_p = tconc(l_p "\n")
-                n_i = n_i + 1
+                n_i++
                 when(_Code(t_s n_i) == 10
-                    n_i = n_i + 1
+                    n_i++
                 )
-                }
-                {
+            else
                 l_p = tconc(l_p substring(t_s n_i 1))
-                n_i = n_i + 1
-                }
+                n_i++
             )
         )
         _Build(l_p)
@@ -138,28 +136,28 @@ procedure(_SkipWs(t_s n_i g_newlines g_comments "txgg")  ; -> int
         while(!g_stop && n_i <= n_len
             case(_Code(t_s n_i)
                 ((32 9)
-                    n_i = n_i + 1
+                    n_i++
                 )
                 (10
                     if(g_newlines
-                        n_i = n_i + 1
+                        n_i++
                         g_stop = t
                     )
                 )
                 (35
                     if(g_comments
-                        progn(
-                            while(n_i <= n_len && _Code(t_s n_i) != 10
-                                n_c = _Code(t_s n_i)
-                                when((n_c < 32 && n_c != 9) || n_c == 127
-                                    _Error(t_s n_i "control character in comment")
-                                )
-                                n_i = n_i + 1
+                    then
+                        while(n_i <= n_len && _Code(t_s n_i) != 10
+                            n_c = _Code(t_s n_i)
+                            when((n_c < 32 && n_c != 9) || n_c == 127
+                                _Error(t_s n_i "control character in comment")
                             )
-                            when(!g_newlines
-                                g_stop = t
-                            )
+                            n_i++
                         )
+                        when(!g_newlines
+                            g_stop = t
+                        )
+                    else
                         g_stop = t
                     )
                 )
@@ -311,7 +309,7 @@ procedure(_MarkInline(t_meta l_path g_val "glg")  ; -> t
             let((n_i)
                 n_i = 0
                 foreach(g_item g_val
-                    n_i = n_i + 1
+                    n_i++
                     _MarkInline(t_meta append1(l_path n_i) g_item)
                 )
             )
@@ -405,7 +403,7 @@ procedure(_ValidUtf8(t_s "t")  ; -> t | nil
             n_b = _Code(t_s n_i)
             cond(
                 (n_b <= 127
-                    n_i = n_i + 1
+                    n_i++
                 )
                 ((n_b >= 194 && n_b <= 223)
                     n_b1 = _Code(t_s n_i + 1)

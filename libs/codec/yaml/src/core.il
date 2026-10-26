@@ -70,7 +70,7 @@ procedure(_Ltrim(t_s "t")  ; -> str
         n_len = length(t_s)
         n_i = 1
         while(n_i <= n_len && (_Code(t_s n_i) == 32 || _Code(t_s n_i) == 9)
-            n_i = n_i + 1
+            n_i++
         )
         _Tail(t_s n_i)
     )
@@ -153,7 +153,7 @@ procedure(_LineCol(t_s n_i "tx")  ; -> list
         when(1 < n_i
             for(n_k 1 n_i - 1
                 when(_Code(t_s n_k) == 10
-                    n_line = n_line + 1
+                    n_line++
                     n_last = n_k
                 )
             )
@@ -187,7 +187,7 @@ procedure(_Rtrim(t_s "t")  ; -> str
         n_end = length(t_s)
         n_c = 0
         while(n_end > 0 && (n_c = _Code(t_s n_end)) && (n_c == 32 || n_c == 9)
-            n_end = n_end - 1
+            n_end--
         )
         if(n_end == 0
             ""
@@ -290,30 +290,30 @@ procedure(_StripComment(t_line "t")  ; -> str
                     when(!g_esc && n_c == 34
                         g_dq = nil
                     )
-                    n_i = n_i + 1
+                    n_i++
                 )
                 (g_sq
                     when(n_c == 39
                         if(_Code(t_line n_i + 1) == 39
-                            n_i = n_i + 1
+                            n_i++
                             g_sq = nil
                         )
                     )
-                    n_i = n_i + 1
+                    n_i++
                 )
                 (n_c == 34
                     g_dq = t
-                    n_i = n_i + 1
+                    n_i++
                 )
                 (n_c == 39
                     g_sq = t
-                    n_i = n_i + 1
+                    n_i++
                 )
                 (n_c == 35 && (n_i == 1 || n_prev == 32 || n_prev == 9)
                     n_cut = n_i
                 )
                 (t
-                    n_i = n_i + 1
+                    n_i++
                 )
             )
         )

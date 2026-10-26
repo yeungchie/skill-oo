@@ -177,7 +177,7 @@ procedure(_EncodeList(l_arr n_depth g_opt "lxg")  ; -> str
         )
         l_items = car(l_items)
         if(n_indent > 0
-            {
+        then
             l_q = nil
             while(l_items
                 l_q = tconc(l_q
@@ -190,7 +190,7 @@ procedure(_EncodeList(l_arr n_depth g_opt "lxg")  ; -> str
                 l_items = cdr(l_items)
             )
             lsprintf("[\n%s\n%s]" buildString(car(l_q) "\n") t_pad)
-            }
+        else
             lsprintf("[%s]" buildString(l_items ","))
         )
     )

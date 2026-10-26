@@ -47,87 +47,86 @@ procedure(Render(l_rows \@key (headers nil) (format "simple") (align "left") (fl
     unless(errset(sprintf(nil floatFmt 0.0) nil)
         error("ycTabulate::Render: invalid floatFmt %A" floatFmt)
     )
-    let((n_cols l_head l_cellRows l_aligns l_decs l_widths)
+    let((n_cols n_row l_head l_cellRows l_aligns l_decs l_widths)
         n_cols = cond(
             (headers length(headers))
             (l_rows length(car(l_rows)))
             (t 0)
         )
         if(n_cols == 0
+        then
             ""
-            progn(
-        l_head = when(headers
-            mapcar(
-                lambda((g_cell) _CellLines(g_cell floatFmt missingVal maxColWidth unit ambiguous))
-                headers
-            )
-        )
-        l_cellRows = cons(nil nil)
-        foreach(l_row l_rows
-            unless(listp(l_row)
-                error("ycTabulate::Render: row %d is not a list" length(car(l_cellRows)) + 1)
-            )
-            unless(length(l_row) == n_cols
-                error(
-                    "ycTabulate::Render: row %d has %d cells, expected %d"
-                    length(car(l_cellRows)) + 1
-                    length(l_row)
-                    n_cols
+        else
+            l_head = when(headers
+                mapcar(
+                    lambda((g_cell) _CellLines(g_cell floatFmt missingVal maxColWidth unit ambiguous))
+                    headers
                 )
             )
-            let((l_cells)
-                l_cells = cons(nil nil)
-                foreach(g_cell l_row
-                    tconc(l_cells _CellLines(g_cell floatFmt missingVal maxColWidth unit ambiguous))
+            n_row = 0
+            foreach(l_row l_rows
+                n_row++
+                unless(listp(l_row)
+                    error("ycTabulate::Render: row %d is not a list" n_row)
                 )
-                tconc(l_cellRows car(l_cells))
-            )
-        )
-        l_rows = car(l_cellRows)
-        when(format == "pipe"
-            l_head = when(l_head
-                mapcar(lambda((l_block) _PipeCell(l_block)) l_head)
-            )
-            l_rows = mapcar(
-                lambda((l_row)
-                    mapcar(lambda((l_block) _PipeCell(l_block)) l_row)
+                unless(length(l_row) == n_cols
+                    error(
+                        "ycTabulate::Render: row %d has %d cells, expected %d"
+                        n_row
+                        length(l_row)
+                        n_cols
+                    )
                 )
-                l_rows
-            )
-        )
-        l_aligns = _NormalizeAlign(align n_cols)
-        l_widths = cons(nil nil)
-        l_decs = cons(nil nil)
-        for(n_i 0 n_cols - 1
-            let((l_blocks l_dec n_w)
-                l_blocks = _ColumnBlocks(l_head l_rows n_i)
-                l_dec = when(nth(n_i l_aligns) == "decimal"
-                    _DecInfo(l_blocks unit ambiguous)
+                let((l_cells)
+                    foreach(g_cell l_row
+                        l_cells = tconc(l_cells
+                            _CellLines(g_cell floatFmt missingVal maxColWidth unit ambiguous))
+                    )
+                    l_cellRows = tconc(l_cellRows car(l_cells))
                 )
-                n_w = _ColWidth(l_blocks l_dec unit ambiguous)
-                when(format == "pipe" && n_w < 3
-                    n_w = 3
+            )
+            l_rows = car(l_cellRows)
+            when(format == "pipe"
+                l_head = when(l_head
+                    mapcar(lambda((l_block) _PipeCell(l_block)) l_head)
                 )
-                tconc(l_widths n_w)
-                tconc(l_decs l_dec)
+                l_rows = mapcar(
+                    lambda((l_row)
+                        mapcar(lambda((l_block) _PipeCell(l_block)) l_row)
+                    )
+                    l_rows
+                )
+            )
+            l_aligns = _NormalizeAlign(align n_cols)
+            for(n_i 0 n_cols - 1
+                let((l_blocks l_dec n_w)
+                    l_blocks = _ColumnBlocks(l_head l_rows n_i)
+                    l_dec = when(nth(n_i l_aligns) == "decimal"
+                        _DecInfo(l_blocks unit ambiguous)
+                    )
+                    n_w = _ColWidth(l_blocks l_dec unit ambiguous)
+                    when(format == "pipe" && n_w < 3
+                        n_w = 3
+                    )
+                    l_widths = tconc(l_widths n_w)
+                    l_decs = tconc(l_decs l_dec)
+                )
+            )
+            cond(
+                ((format == "plain")
+                    _FormatPlain(l_head l_rows car(l_widths) l_aligns car(l_decs) unit ambiguous)
+                )
+                ((format == "simple")
+                    _FormatSimple(l_head l_rows car(l_widths) l_aligns car(l_decs) unit ambiguous)
+                )
+                ((format == "grid")
+                    _FormatGrid(l_head l_rows car(l_widths) l_aligns car(l_decs) unit ambiguous)
+                )
+                (t
+                    _FormatPipe(l_head l_rows car(l_widths) l_aligns car(l_decs) unit ambiguous)
+                )
             )
         )
-        cond(
-            ((format == "plain")
-                _FormatPlain(l_head l_rows car(l_widths) l_aligns car(l_decs) unit ambiguous)
-            )
-            ((format == "simple")
-                _FormatSimple(l_head l_rows car(l_widths) l_aligns car(l_decs) unit ambiguous)
-            )
-            ((format == "grid")
-                _FormatGrid(l_head l_rows car(l_widths) l_aligns car(l_decs) unit ambiguous)
-            )
-            (t
-                _FormatPipe(l_head l_rows car(l_widths) l_aligns car(l_decs) unit ambiguous)
-            )
-        )
-        )
-    )
 )
 )
 unuseNamespace("ycTabulate")
