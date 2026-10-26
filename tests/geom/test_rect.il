@@ -92,7 +92,12 @@ let((g_z g_r)
     _Assert(g_z->or(g_r)->area() == 4.0  "rect: degenerate union")
     _Assert(ycGeom::Rect(0 0 1e-10 1e-10)->or(g_r)->area() == 4.0  "rect: tiny treated empty")
     _Assert(g_r->and(g_z)->area() == 0.0  "rect: degenerate intersection")
+    _Assert(ycGeom::Rect(0 0 1e-5 1e-5)->toPolygon() != nil
+        "rect: small nonzero toPolygon")
 )
+
+_Assert(ycGeom::Rect(0 0 1e-5 1e-5)->or(ycGeom::Rect(0 0 2 2))->area() == 4.0
+    "rect: small nonzero union")
 
 _AssertError(lambda(() ycGeom::Rect(0 0 1 1)->or(ycGeom::Segment(0 0 1 1)) t)  "rect: booleans reject Segment")
 _AssertError(lambda(() ycGeom::Polygon('((0 0) (1 0) (0 1)))->or(ycGeom::Line(0 0 1 0)) t)  "polygon: booleans reject Line")

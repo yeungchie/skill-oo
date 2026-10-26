@@ -70,7 +70,7 @@ procedure(_LineSegmentIntersection(g_line g_seg n_eps "ggg")  ; -> Point | Segme
     ;
     ; **返回**
     ;   (Point|Segment|nil) - 唯一交点、重叠线段或无交
-    let((n_a n_b n_c g_s g_e n_dx n_dy n_x0 n_y0 n_den n_t)
+    let((n_a n_b n_c g_s g_e n_dx n_dy n_x0 n_y0 n_den n_t n_len n_tol)
         n_a = g_line->a()
         n_b = g_line->b()
         n_c = g_line->c()
@@ -89,12 +89,14 @@ procedure(_LineSegmentIntersection(g_line g_seg n_eps "ggg")  ; -> Point | Segme
             (t
                 n_dx = g_e->x() - g_s->x()
                 n_dy = g_e->y() - g_s->y()
+                n_len = sqrt(n_dx * n_dx + n_dy * n_dy)
                 n_den = n_a * n_dx + n_b * n_dy
                 unless(abs(n_den) <= n_eps
                     n_x0 = g_s->x()
                     n_y0 = g_s->y()
                     n_t = -(n_a * n_x0 + n_b * n_y0 + n_c) / n_den
-                    when(n_t >= -n_eps && n_t <= 1.0 + n_eps
+                    n_tol = n_eps / n_len
+                    when(n_t >= -n_tol && n_t <= 1.0 + n_tol
                         _SegPointAt(g_s g_e n_t)
                     )
                 )
@@ -116,7 +118,7 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggg")  ; -> Point | Segme
     ; **返回**
     ;   (Point|Segment|nil) - 唯一交点、重叠线段或无交
     let((n_rx n_ry n_sx n_sy n_qx n_qy n_qpx n_qpy n_rxs n_qpxr
-         n_rr n_t0 n_t1 n_min n_max n_t n_u)
+         n_rr n_lenr n_lens n_tolr n_tols n_t0 n_t1 n_min n_max n_t n_u)
         cond(
             (g_a->equals(g_b ?eps n_eps) && g_c->equals(g_d ?eps n_eps)
                 when(g_a->equals(g_c ?eps n_eps) g_a)
@@ -137,18 +139,22 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggg")  ; -> Point | Segme
                 n_rxs = n_rx * n_sy - n_ry * n_sx
                 n_qpxr = n_qpx * n_ry - n_qpy * n_rx
                 n_rr = n_rx * n_rx + n_ry * n_ry
-                if(abs(n_rxs) <= n_eps
+                n_lenr = sqrt(n_rr)
+                n_lens = sqrt(n_sx * n_sx + n_sy * n_sy)
+                n_tolr = n_eps / n_lenr
+                n_tols = n_eps / n_lens
+                if(abs(n_rxs) <= n_eps * n_lenr * n_lens
                 then
-                    when(abs(n_qpxr) <= n_eps
+                    when(abs(n_qpxr) <= n_eps * n_lenr
                         n_t0 = (n_qpx * n_rx + n_qpy * n_ry) / n_rr
                         n_t1 = ((g_d->x() - g_a->x()) * n_rx
                             + (g_d->y() - g_a->y()) * n_ry) / n_rr
                         n_min = min(n_t0 n_t1)
                         n_max = max(n_t0 n_t1)
-                        unless(n_max < -n_eps || n_min > 1.0 + n_eps
+                        unless(n_max < -n_tolr || n_min > 1.0 + n_tolr
                             n_min = max(n_min 0.0)
                             n_max = min(n_max 1.0)
-                            if(_Near(n_min n_max n_eps)
+                            if(_Near(n_min n_max n_tolr)
                                 _SegPointAt(g_a g_b n_min)
                                 Segment(_SegPointAt(g_a g_b n_min)
                                     _SegPointAt(g_a g_b n_max))
@@ -158,8 +164,8 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggg")  ; -> Point | Segme
                 else
                     n_t = (n_qpx * n_sy - n_qpy * n_sx) / n_rxs
                     n_u = (n_qpx * n_ry - n_qpy * n_rx) / n_rxs
-                    when(n_t >= -n_eps && n_t <= 1.0 + n_eps
-                        && n_u >= -n_eps && n_u <= 1.0 + n_eps
+                    when(n_t >= -n_tolr && n_t <= 1.0 + n_tolr
+                        && n_u >= -n_tols && n_u <= 1.0 + n_tols
                         _SegPointAt(g_a g_b n_t)
                     )
                 )

@@ -74,7 +74,7 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
                 error("ycGeom::Polygon: consecutive duplicate point at index %d" n_i)
             )
         )
-        when(abs(_SignedArea(l_points)) <= n_eps
+        when(abs(_SignedArea(l_points)) <= _AreaTol(l_points n_eps)
             error("ycGeom::Polygon: zero-area point sequence")
         )
         t_seams = _SeamKeys(l_points)
@@ -88,10 +88,10 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
                             g_c = _Nth1(n_j l_points)
                             g_d = _Nth1(if(n_j == n_len 1 (n_j + 1)) l_points)
                             unless(t_seams[_EdgeKey(g_c g_d)] == 2
-                                unless(_PtKey(g_a) == _PtKey(g_c)
-                                    || _PtKey(g_a) == _PtKey(g_d)
-                                    || _PtKey(g_b) == _PtKey(g_c)
-                                    || _PtKey(g_b) == _PtKey(g_d)
+                                unless(_SamePoint(g_a g_c n_eps)
+                                    || _SamePoint(g_a g_d n_eps)
+                                    || _SamePoint(g_b g_c n_eps)
+                                    || _SamePoint(g_b g_d n_eps)
                                     when(_SegmentsCross(g_a g_b g_c g_d n_eps)
                                         error("ycGeom::Polygon: non-seam edges intersect")
                                     )
@@ -203,24 +203,30 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point) - 质心；零面积 error
-        let((n_len n_i g_a g_b n_cross n_a n_cx n_cy)
+        let((n_len n_i g_a g_b n_cross n_a n_cx n_cy n_ox n_oy)
             n_len = length(self->_data->points)
             n_a = 0.0
             n_cx = 0.0
             n_cy = 0.0
+            n_ox = car(self->_data->points)->x()
+            n_oy = car(self->_data->points)->y()
             for(n_i 1 n_len
                 g_a = _Nth1(n_i self->_data->points)
                 g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
-                n_cross = g_a->x() * g_b->y() - g_b->x() * g_a->y()
+                n_cross = (g_a->x() - n_ox) * (g_b->y() - n_oy)
+                    - (g_b->x() - n_ox) * (g_a->y() - n_oy)
                 n_a = n_a + n_cross
-                n_cx = n_cx + (g_a->x() + g_b->x()) * n_cross
-                n_cy = n_cy + (g_a->y() + g_b->y()) * n_cross
+                n_cx = n_cx
+                    + ((g_a->x() - n_ox) + (g_b->x() - n_ox)) * n_cross
+                n_cy = n_cy
+                    + ((g_a->y() - n_oy) + (g_b->y() - n_oy)) * n_cross
             )
             n_a = n_a / 2.0
-            when(abs(n_a) <= 1e-9
+            when(abs(n_a) <= _AreaTol(self->_data->points _Eps(nil))
                 error("ycGeom::Polygon->centroid: zero-area polygon")
             )
-            Point(n_cx / (6.0 * n_a) n_cy / (6.0 * n_a))
+            Point(n_ox + n_cx / (6.0 * n_a)
+                n_oy + n_cy / (6.0 * n_a))
         )
     )
     self->contains = lambda((g_point \@key (boundary "inside") (eps nil) "ggg")  ; -> t | nil
@@ -321,7 +327,7 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ;   (t|nil) - 顺时针为 t
         let((n_eps)
             n_eps = _Eps(eps)
-            _SignedArea(self->_data->points) < -n_eps
+            _SignedArea(self->_data->points) < -_AreaTol(self->_data->points n_eps)
         )
     )
     self->reverse = lambda(()  ; -> Polygon

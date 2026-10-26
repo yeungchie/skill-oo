@@ -1053,7 +1053,7 @@ Rect->toPolygon()
 => Polygon | nil
 ```
 
-返回逆时针四角 Polygon；宽/高为 0 或面积不超过 `1e-9` 的退化矩形返回 nil。
+返回逆时针四角 Polygon；宽/高为 0 或面积低于按尺度计算的退化阈值的矩形返回 nil。
 
 ```lisp
 ycGeom::Rect(0 0 4 4)->toPolygon()->toSkill()
@@ -1921,7 +1921,7 @@ g_hole->perimeter()
 - 默认 `?normalize t` 会把输入合并、裁剪为互不重叠的多边形集合。
 - `?normalize nil` 信任输入已互不重叠，跳过归一化；此时面积按各块面积求和。
 - `?grid` 把输入和输出顶点吸附到网格；吸附导致拓扑塌缩时以 `error()` 中断。
-- `Polygon`、`Rect`、`Region` 可互相参与 `or`/`and`/`not`/`xor`；右操作数也接受点列，结果统一为 `Region`。退化 `Rect`（宽/高为 0 或面积不超过 `1e-9`）与空 `Region` 按空集处理。
+- `Polygon`、`Rect`、`Region` 可互相参与 `or`/`and`/`not`/`xor`；右操作数也接受点列，结果统一为 `Region`。退化 `Rect`（宽/高为 0 或面积低于按尺度计算的退化阈值）与空 `Region` 按空集处理。
 - 默认归一化、布尔与 `size` 输出的多边形均已去除共线中间点；切割边端点保留。
 
 ![区域布尔运算：并、交、差、对称差](img/boolean.svg)

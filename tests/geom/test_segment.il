@@ -77,6 +77,15 @@ let((g_s g_z g_l)
     _Assert(g_z->toLine() == nil  "segment: toLine zero length")
 )
 
+let((g_s)
+    g_s = ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(1e-3 0))
+    _Assert(!g_s->contains(ycGeom::Point(0.5e-3 1e-6))
+        "segment: cross tolerance is scale independent")
+    g_s = ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(1000 0))
+    _Assert(g_s->contains(ycGeom::Point(1000 + 1e-9 0))
+        "segment: endpoint tolerance is scale independent")
+)
+
 _TestSegmentDone = t
 
 ; END

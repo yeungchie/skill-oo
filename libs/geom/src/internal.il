@@ -70,6 +70,20 @@ procedure(_Near(n_a n_b n_eps "nnn")  ; -> t | nil
     abs(float(n_a) - float(n_b)) <= n_eps
 )
 
+procedure(_SamePoint(g_a g_b n_eps "ggg")  ; -> t | nil
+    ; 判断两个点是否在容差内重合。
+    ;
+    ; **参数**
+    ;   g_a    (Point) - 点一
+    ;   g_b    (Point) - 点二
+    ;   n_eps  (float) - 容差
+    ;
+    ; **返回**
+    ;   (t|nil) - 两点坐标均在容差内为 t
+    _Near(g_a->x() g_b->x() n_eps)
+        && _Near(g_a->y() g_b->y() n_eps)
+)
+
 procedure(_PointP(g_x "g")  ; -> t | nil
     ; 判断对象是否为 Point（内部实现）。
     ;
@@ -387,6 +401,17 @@ procedure(_Flag(g_value t_name "gt")  ; -> t | nil
     g_value
 )
 
+procedure(_NumKey(n_v "n")  ; -> str
+    ; 生成数值的稳定文本键（保留双精度有效位）。
+    ;
+    ; **参数**
+    ;   n_v  (num) - 数值
+    ;
+    ; **返回**
+    ;   (str) - 规范化的数值文本；零统一为 "0"
+    if(n_v == 0.0 "0" lsprintf("%.17g" float(n_v)))
+)
+
 procedure(_PtKey(g_p "g")  ; -> str
     ; 生成点坐标的稳定键。
     ;
@@ -394,8 +419,8 @@ procedure(_PtKey(g_p "g")  ; -> str
     ;   g_p  (Point) - 点
     ;
     ; **返回**
-    ;   (str) - x 与 y 的字面量键
-    lsprintf("%A|%A" g_p->x() g_p->y())
+    ;   (str) - x 与 y 的稳定文本键
+    lsprintf("%s|%s" _NumKey(g_p->x()) _NumKey(g_p->y()))
 )
 
 procedure(_EdgeKey(g_a g_b "gg")  ; -> str
@@ -417,6 +442,48 @@ procedure(_EdgeKey(g_a g_b "gg")  ; -> str
     )
 )
 
+procedure(_CanonPoint(g_p n_eps t_reg "ggg")  ; -> Point
+    ; 在容差登记表中查找或登记点的规范代表。
+    ;
+    ; **参数**
+    ;   g_p      (Point) - 输入点
+    ;   n_eps    (float) - 容差
+    ;   t_reg    (table) - 规范点登记表（键 "all"）
+    ;
+    ; **返回**
+    ;   (Point) - 容差内已登记的规范点，或新登记的原点
+    let((g_found g_q)
+        foreach(g_q t_reg["all"]
+            when(!g_found && _SamePoint(g_p g_q n_eps)
+                g_found = g_q
+            )
+        )
+        unless(g_found
+            t_reg["all"] = cons(g_p t_reg["all"])
+            g_found = g_p
+        )
+        g_found
+    )
+)
+
+procedure(_CanonRing(l_pts n_eps t_reg "lgg")  ; -> list[Point]
+    ; 把点列中的点替换为容差登记表中的规范代表。
+    ;
+    ; **参数**
+    ;   l_pts    (list[Point]) - 源点列
+    ;   n_eps    (float)       - 容差
+    ;   t_reg    (table)       - 规范点登记表
+    ;
+    ; **返回**
+    ;   (list[Point]) - 规范化并去除连续重复后的点列
+    let((l_res)
+        foreach(g_p l_pts
+            l_res = tconc(l_res _CanonPoint(g_p n_eps t_reg))
+        )
+        _RingPointsClean(car(l_res) n_eps)
+    )
+)
+
 procedure(_Cross(g_a g_b g_c "ggg")  ; -> float
     ; 计算 (b-a) × (c-a)。
     ;
@@ -431,28 +498,56 @@ procedure(_Cross(g_a g_b g_c "ggg")  ; -> float
         - (g_b->y() - g_a->y()) * (g_c->x() - g_a->x())
 )
 
+procedure(_AreaTol(l_pts n_eps "lg")  ; -> float
+    ; 计算与坐标尺度相关的面积容差。
+    ;
+    ; **参数**
+    ;   l_pts  (list[Point]) - 点列
+    ;   n_eps  (float)       - 长度容差
+    ;
+    ; **返回**
+    ;   (float) - 容差面积；取 bbox 长边乘 n_eps
+    let((n_xmin n_ymin n_xmax n_ymax)
+        n_xmin = car(l_pts)->x()
+        n_xmax = n_xmin
+        n_ymin = car(l_pts)->y()
+        n_ymax = n_ymin
+        foreach(g_p l_pts
+            n_xmin = min(n_xmin g_p->x())
+            n_xmax = max(n_xmax g_p->x())
+            n_ymin = min(n_ymin g_p->y())
+            n_ymax = max(n_ymax g_p->y())
+        )
+        n_eps * max(n_xmax - n_xmin n_ymax - n_ymin)
+    )
+)
+
 procedure(_SignedArea(l_pts "l")  ; -> float
-    ; 计算点列的有符号面积（shoelace）。
+    ; 计算点列的有符号面积（shoelace，先平移到首点消除大数抵消）。
     ;
     ; **参数**
     ;   l_pts  (list[Point]) - 闭合点列（不重复首点）
     ;
     ; **返回**
     ;   (float) - 有符号面积
-    let((n_len n_sum n_i g_a g_b)
+    let((n_len n_sum n_i g_a g_b n_ox n_oy)
         n_len = length(l_pts)
         n_sum = 0.0
+        n_ox = car(l_pts)->x()
+        n_oy = car(l_pts)->y()
         for(n_i 1 n_len
             g_a = _Nth1(n_i l_pts)
             g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
-            n_sum = n_sum + g_a->x() * g_b->y() - g_b->x() * g_a->y()
+            n_sum = n_sum
+                + (g_a->x() - n_ox) * (g_b->y() - n_oy)
+                - (g_b->x() - n_ox) * (g_a->y() - n_oy)
         )
         n_sum / 2.0
     )
 )
 
 procedure(_PointInRing(l_pts g_p n_eps "lgg")  ; -> t | nil
-    ; 奇偶规则判断点是否在环内；边界行为由调用方处理。
+    ; 奇偶规则判断点是否在环内；边界点按内部处理。
     ;
     ; **参数**
     ;   l_pts  (list[Point]) - 闭合点列
@@ -460,14 +555,17 @@ procedure(_PointInRing(l_pts g_p n_eps "lgg")  ; -> t | nil
     ;   n_eps  (float)       - 容差
     ;
     ; **返回**
-    ;   (t|nil) - 在环内为 t
-    let((n_len n_x n_y n_i g_a g_b g_in n_xint)
+    ;   (t|nil) - 在环内或边界上为 t
+    let((n_len n_x n_y n_i g_a g_b g_in g_boundary n_xint)
         n_len = length(l_pts)
         n_x = g_p->x()
         n_y = g_p->y()
         for(n_i 1 n_len
             g_a = _Nth1(n_i l_pts)
             g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
+            when(_OnSegment(g_a g_b g_p n_eps)
+                g_boundary = t
+            )
             when((g_a->y() > n_y) != (g_b->y() > n_y)
                 n_xint = g_a->x()
                     + (n_y - g_a->y()) * (g_b->x() - g_a->x())
@@ -477,7 +575,7 @@ procedure(_PointInRing(l_pts g_p n_eps "lgg")  ; -> t | nil
                 )
             )
         )
-        g_in
+        if(g_boundary t g_in)
     )
 )
 
@@ -492,7 +590,7 @@ procedure(_OnSegment(g_a g_b g_p n_eps "gggg")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 在线段上为 t
-    let((n_dx n_dy n_apx n_apy n_cross n_dot n_len2)
+    let((n_dx n_dy n_apx n_apy n_cross n_dot n_len2 n_len n_tol)
         n_dx = g_b->x() - g_a->x()
         n_dy = g_b->y() - g_a->y()
         n_apx = g_p->x() - g_a->x()
@@ -500,11 +598,15 @@ procedure(_OnSegment(g_a g_b g_p n_eps "gggg")  ; -> t | nil
         n_cross = n_dx * n_apy - n_dy * n_apx
         n_dot = n_dx * n_apx + n_dy * n_apy
         n_len2 = n_dx * n_dx + n_dy * n_dy
-        if(n_len2 <= n_eps * n_eps
+        n_len = sqrt(n_len2)
+        if(n_len <= n_eps
+        then
             abs(n_apx) <= n_eps && abs(n_apy) <= n_eps
-            abs(n_cross) <= n_eps
-                && n_dot >= -n_eps
-                && n_dot <= n_len2 + n_eps
+        else
+            n_tol = n_eps * n_len
+            abs(n_cross) <= n_tol
+                && n_dot >= -n_tol
+                && n_dot <= n_len2 + n_tol
         )
     )
 )
@@ -534,13 +636,21 @@ procedure(_SegmentsCross(g_a g_b g_c g_d n_eps "ggggg")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 有交点、端点接触或共线重叠为 t
-    let((n_o1 n_o2 n_o3 n_o4)
+    let((n_o1 n_o2 n_o3 n_o4 n_len_ab n_len_cd n_tol_ab n_tol_cd)
         n_o1 = _Orient(g_a g_b g_c)
         n_o2 = _Orient(g_a g_b g_d)
         n_o3 = _Orient(g_c g_d g_a)
         n_o4 = _Orient(g_c g_d g_b)
-        if(((n_o1 > n_eps && n_o2 < -n_eps) || (n_o1 < -n_eps && n_o2 > n_eps))
-            && ((n_o3 > n_eps && n_o4 < -n_eps) || (n_o3 < -n_eps && n_o4 > n_eps))
+        n_len_ab = sqrt((g_b->x() - g_a->x()) * (g_b->x() - g_a->x())
+            + (g_b->y() - g_a->y()) * (g_b->y() - g_a->y()))
+        n_len_cd = sqrt((g_d->x() - g_c->x()) * (g_d->x() - g_c->x())
+            + (g_d->y() - g_c->y()) * (g_d->y() - g_c->y()))
+        n_tol_ab = n_eps * n_len_ab
+        n_tol_cd = n_eps * n_len_cd
+        if(((n_o1 > n_tol_ab && n_o2 < -n_tol_ab)
+                || (n_o1 < -n_tol_ab && n_o2 > n_tol_ab))
+            && ((n_o3 > n_tol_cd && n_o4 < -n_tol_cd)
+                || (n_o3 < -n_tol_cd && n_o4 > n_tol_cd))
             t
             (_OnSegment(g_a g_b g_c n_eps)
                 || _OnSegment(g_a g_b g_d n_eps)
@@ -578,7 +688,7 @@ procedure(_CollinearClean(l_pts n_eps "lg")  ; -> list[Point]
     ;
     ; **返回**
     ;   (list[Point]) - 去除共线点后的点列；切割边端点保留
-    let((n_len n_changed t_seams l_res n_i g_prev g_cur g_next n_dot)
+    let((n_len n_changed t_seams l_res n_i g_prev g_cur g_next n_dot n_line_len)
         n_len = length(l_pts)
         n_changed = t
         while(n_changed && n_len > 3
@@ -593,12 +703,18 @@ procedure(_CollinearClean(l_pts n_eps "lg")  ; -> list[Point]
                         * (g_next->x() - g_cur->x())
                     + (g_cur->y() - g_prev->y())
                         * (g_next->y() - g_cur->y())
+                n_line_len = sqrt(
+                    (g_next->x() - g_prev->x())
+                        * (g_next->x() - g_prev->x())
+                    + (g_next->y() - g_prev->y())
+                        * (g_next->y() - g_prev->y()))
                 cond(
                     (t_seams[_EdgeKey(g_prev g_cur)] == 2
                         || t_seams[_EdgeKey(g_cur g_next)] == 2
                         l_res = tconc(l_res g_cur)
                     )
-                    ((abs(_Cross(g_prev g_cur g_next)) <= n_eps
+                    ((abs(_Cross(g_prev g_cur g_next))
+                        <= n_eps * n_line_len
                         && n_dot >= 0.0)
                         n_changed = t
                     )

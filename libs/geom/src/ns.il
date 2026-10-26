@@ -36,9 +36,14 @@ addToNamespace("ycGeom"
         _AsPolygon
         _AsPolygonList
         _AsRegion
+        _SamePoint
+        _NumKey
         _PtKey
         _EdgeKey
+        _CanonPoint
+        _CanonRing
         _Cross
+        _AreaTol
         _SignedArea
         _PointInRing
         _OnSegment

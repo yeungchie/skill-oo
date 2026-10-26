@@ -68,14 +68,18 @@ procedure(_RectPolygon(g_rect "g")  ; -> Polygon | nil
     unless(_RectP(g_rect)
         error("ycGeom::_RectPolygon: expected a Rect, got %A" g_rect)
     )
-    unless(g_rect->width() <= 0.0 || g_rect->height() <= 0.0
-            || g_rect->area() <= 1e-9
-        Polygon(list(
-            Point(g_rect->xmin() g_rect->ymin())
-            Point(g_rect->xmax() g_rect->ymin())
-            Point(g_rect->xmax() g_rect->ymax())
-            Point(g_rect->xmin() g_rect->ymax())
-        ))
+    let((n_eps n_scale)
+        n_eps = _Eps(nil)
+        n_scale = max(g_rect->width() g_rect->height())
+        unless(g_rect->width() <= 0.0 || g_rect->height() <= 0.0
+                || g_rect->area() <= n_eps * n_scale
+            Polygon(list(
+                Point(g_rect->xmin() g_rect->ymin())
+                Point(g_rect->xmax() g_rect->ymin())
+                Point(g_rect->xmax() g_rect->ymax())
+                Point(g_rect->xmin() g_rect->ymax())
+            ))
+        )
     )
 )
 

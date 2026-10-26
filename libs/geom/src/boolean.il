@@ -20,27 +20,30 @@ procedure(_SnapRing(l_pts n_grid n_eps "lgg")  ; -> list[Point]
             g_prev = g_snap
         )
         l_clean = _RingPointsClean(car(l_res) n_eps)
-        unless(length(l_clean) >= 3 && abs(_SignedArea(l_clean)) > n_eps
+        unless(length(l_clean) >= 3
+                && abs(_SignedArea(l_clean)) > _AreaTol(l_clean n_eps)
             error("ycGeom::_SnapRing: grid snapping collapsed polygon topology")
         )
         l_clean
     )
 )
 
-procedure(_CollectRings(l_polys n_grid n_eps "lgg")  ; -> list[list[Point]]
+procedure(_CollectRings(l_polys n_grid n_eps t_reg "lggg")  ; -> list[list[Point]]
     ; 收集多个多边形的所有环。
     ;
     ; **参数**
     ;   l_polys  (list[Polygon]) - 多边形列表
     ;   n_grid   (float|nil)     - 网格
     ;   n_eps    (float)         - 容差
+    ;   t_reg    (table)         - 点规范登记表
     ;
     ; **返回**
     ;   (list[list[Point]]) - 环列表
     let((l_res)
         foreach(g_p l_polys
             _AsPolygon(g_p "ycGeom::_Boolean")
-            foreach(l_r _Rings(_SnapRing(g_p->points() n_grid n_eps))
+            foreach(l_r _Rings(_CanonRing(
+                    _SnapRing(g_p->points() n_grid n_eps) n_eps t_reg))
                 l_res = tconc(l_res l_r)
             )
         )
@@ -70,13 +73,14 @@ procedure(_RingEdgeList(l_rings "l")  ; -> list[list[Point]]
     )
 )
 
-procedure(_EdgeT(g_a g_b g_p "ggg")  ; -> float
+procedure(_EdgeT(g_a g_b g_p n_eps "gggn")  ; -> float
     ; 返回点在线段上的参数 t，并夹到 0..1。
     ;
     ; **参数**
-    ;   g_a  (Point) - 起点
-    ;   g_b  (Point) - 终点
-    ;   g_p  (Point) - 点
+    ;   g_a    (Point) - 起点
+    ;   g_b    (Point) - 终点
+    ;   g_p    (Point) - 点
+    ;   n_eps  (float) - 容差
     ;
     ; **返回**
     ;   (float) - 0..1 的参数
@@ -84,7 +88,7 @@ procedure(_EdgeT(g_a g_b g_p "ggg")  ; -> float
         n_dx = g_b->x() - g_a->x()
         n_dy = g_b->y() - g_a->y()
         n_den = n_dx * n_dx + n_dy * n_dy
-        if(n_den == 0.0
+        if(n_den <= n_eps * n_eps
         then
             0.0
         else
@@ -112,10 +116,10 @@ procedure(_AddCut(g_a g_b g_c g_d n_eps l_t "gggggl")  ; -> list[float]
         g_x = _SegSegIntersection(g_a g_b g_c g_d n_eps)
         cond(
             (g_x == nil l_t)
-            (_PointP(g_x) cons(_EdgeT(g_a g_b g_x) l_t))
+            (_PointP(g_x) cons(_EdgeT(g_a g_b g_x n_eps) l_t))
             (_SegmentP(g_x)
-                cons(_EdgeT(g_a g_b g_x->start())
-                    cons(_EdgeT(g_a g_b g_x->end()) l_t)))
+                cons(_EdgeT(g_a g_b g_x->start() n_eps)
+                    cons(_EdgeT(g_a g_b g_x->end() n_eps) l_t)))
             (t l_t)
         )
     )
@@ -174,31 +178,37 @@ procedure(_Lerp(g_a g_b n_t "ggn")  ; -> Point
         g_a->y() + (g_b->y() - g_a->y()) * n_t)
 )
 
-procedure(_SplitEdges(l_edges n_eps "lg")  ; -> list[list[Point]]
+procedure(_SplitEdges(l_edges n_eps t_reg "lgg")  ; -> list[list[Point]]
     ; 在所有交点处拆分边并去重。
     ;
     ; **参数**
     ;   l_edges  (list[list[Point]]) - 无向边
     ;   n_eps    (float)             - 容差
+    ;   t_reg    (table)         - 点规范登记表
     ;
     ; **返回**
     ;   (list[list[Point]]) - 拆分后的无向边
-    let((t_seen l_res n_i n_len l_t g_a g_b g_prev g_cur t_key)
+    let((t_seen l_res n_i n_len l_t g_a g_b g_prev g_cur t_key n_edge_len n_tol)
         t_seen = makeTable("geomSplit" nil)
         foreach(l_e l_edges
             g_a = car(l_e)
             g_b = cadr(l_e)
+            n_edge_len = sqrt((g_b->x() - g_a->x()) * (g_b->x() - g_a->x())
+                + (g_b->y() - g_a->y()) * (g_b->y() - g_a->y()))
+            n_tol = if(n_edge_len > n_eps n_eps / n_edge_len 0.0)
             l_t = list(0.0 1.0)
             foreach(l_o l_edges
                 unless(l_e == l_o
                     l_t = _AddCut(g_a g_b car(l_o) cadr(l_o) n_eps l_t)
                 )
             )
-            l_t = _SortUniqueNums(l_t n_eps)
+            l_t = _SortUniqueNums(l_t n_tol)
             n_len = length(l_t)
             for(n_i 1 n_len - 1
-                g_prev = _Lerp(g_a g_b _Nth1(n_i l_t))
-                g_cur = _Lerp(g_a g_b _Nth1(n_i + 1 l_t))
+                g_prev = _CanonPoint(
+                    _Lerp(g_a g_b _Nth1(n_i l_t)) n_eps t_reg)
+                g_cur = _CanonPoint(
+                    _Lerp(g_a g_b _Nth1(n_i + 1 l_t)) n_eps t_reg)
                 t_key = _EdgeKey(g_prev g_cur)
                 unless(t_seen[t_key]
                     t_seen[t_key] = t
@@ -434,7 +444,7 @@ procedure(_Boolean(l_a l_b g_op n_grid n_eps "llggg")  ; -> list[Polygon]
     ;
     ; **返回**
     ;   (list[Polygon]) - 结果多边形；空结果 nil
-    let((n_gridv n_epsv l_ra l_rb l_edges l_kept l_loops l_res)
+    let((n_gridv n_epsv l_ra l_rb l_edges l_kept l_loops l_res t_reg)
         unless(g_op == 'union || g_op == 'intersection || g_op == 'difference || g_op == 'xor
             error("ycGeom::_Boolean: unknown operation %A" g_op)
         )
@@ -455,9 +465,12 @@ procedure(_Boolean(l_a l_b g_op n_grid n_eps "llggg")  ; -> list[Polygon]
                 l_res = l_a)
             (l_b == nil l_res = nil)
             (t
-                l_ra = _CollectRings(l_a n_gridv n_epsv)
-                l_rb = _CollectRings(l_b n_gridv n_epsv)
-                l_edges = _SplitEdges(append(_RingEdgeList(l_ra) _RingEdgeList(l_rb)) n_epsv)
+                t_reg = makeTable("geomCanon" nil)
+                l_ra = _CollectRings(l_a n_gridv n_epsv t_reg)
+                l_rb = _CollectRings(l_b n_gridv n_epsv t_reg)
+                l_edges = _SplitEdges(
+                    append(_RingEdgeList(l_ra) _RingEdgeList(l_rb))
+                    n_epsv t_reg)
                 l_kept = _ClassifyEdges(l_edges l_ra l_rb g_op n_epsv)
                 l_loops = _TraceLoops(l_kept n_epsv)
                 when(l_loops
@@ -492,14 +505,16 @@ procedure(_LoopDepth(l_loops n_idx n_eps "lng")  ; -> int
     ;
     ; **返回**
     ;   (int) - 包含计数
-    let((n_depth n_area_i g_p n_j n_area_j)
+    let((n_depth n_area_i n_tol_i g_p n_j n_area_j n_tol_j)
         n_depth = 0
         n_area_i = abs(_SignedArea(_Nth1(n_idx l_loops)))
+        n_tol_i = _AreaTol(_Nth1(n_idx l_loops) n_eps)
         g_p = car(_Nth1(n_idx l_loops))
         for(n_j 1 length(l_loops)
             unless(n_j == n_idx
                 n_area_j = abs(_SignedArea(_Nth1(n_j l_loops)))
-                when(n_area_j > n_area_i
+                n_tol_j = _AreaTol(_Nth1(n_j l_loops) n_eps)
+                when(n_area_j > n_area_i + max(n_tol_i n_tol_j)
                     && _PointInRing(_Nth1(n_j l_loops) g_p n_eps)
                     n_depth++
                 )
@@ -574,21 +589,24 @@ procedure(_NestLoops(l_loops n_eps "lg")  ; -> list
     )
 )
 
-procedure(_RightmostIndex(l_ring "l")  ; -> int
+procedure(_RightmostIndex(l_ring n_eps "lg")  ; -> int
     ; 返回点列最右点的 1-based 下标。
     ;
     ; **参数**
     ;   l_ring  (list[Point]) - 点列
+    ;   n_eps   (float)       - 容差
     ;
     ; **返回**
-    ;   (int) - 最右点下标
+    ;   (int) - 最右点下标；x 在容差内时取 y 更大者
     let((n_best n_bx n_by n_i g_p)
         n_best = 1
         n_bx = _Nth1(1 l_ring)->x()
         n_by = _Nth1(1 l_ring)->y()
         for(n_i 2 length(l_ring)
             g_p = _Nth1(n_i l_ring)
-            when(g_p->x() > n_bx || (g_p->x() == n_bx && g_p->y() > n_by)
+            when(g_p->x() > n_bx + n_eps
+                || (abs(g_p->x() - n_bx) <= n_eps
+                    && g_p->y() > n_by + n_eps)
                 n_best = n_i
                 n_bx = g_p->x()
                 n_by = g_p->y()
@@ -707,7 +725,7 @@ procedure(_SpliceHole(l_outer l_hole n_eps "llg")  ; -> list[Point]
     ; **返回**
     ;   (list[Point]) - keyhole 点列
     let((n_hi l_h n_oi l_prefix l_suffix g_o g_h n_i)
-        n_hi = _RightmostIndex(l_hole)
+        n_hi = _RightmostIndex(l_hole n_eps)
         l_h = _Rotate(l_hole n_hi)
         g_h = car(l_h)
         n_oi = _FindBridge(l_outer l_h n_eps)

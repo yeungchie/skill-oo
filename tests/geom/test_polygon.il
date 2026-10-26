@@ -136,6 +136,38 @@ let((g_a g_b g_r)
 )
 _AssertError(lambda(() ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->or(1) t)  "polygon: bad boolean operand")
 
+let((g_sq g_c)
+    g_sq = ycGeom::Polygon(list(
+        ycGeom::Point(100000 100000)
+        ycGeom::Point(100000.1 100000)
+        ycGeom::Point(100000.1 100000.1)
+        ycGeom::Point(100000 100000.1)
+    ))
+    _Assert(abs(g_sq->area() - 0.01) <= 1e-9  "polygon: large offset area stable")
+    _Assert(abs(g_sq->centroid()->x() - 100000.05) <= 1e-9
+        "polygon: large offset centroid x")
+    _Assert(abs(g_sq->centroid()->y() - 100000.05) <= 1e-9
+        "polygon: large offset centroid y")
+    g_c = ycGeom::Polygon('((0 0) (0.0005 1e-6) (0.001 0)
+                            (0.001 0.001) (0 0.001)))
+    _Assert(length(g_c->removeCollinear()->points()) == 5
+        "polygon: small-angle collinear tolerance is scale independent")
+)
+
+let((l_tiny l_large)
+    l_tiny = errset(ycGeom::Polygon(list(
+        ycGeom::Point(0 0) ycGeom::Point(1e-5 0)
+        ycGeom::Point(1e-5 1e-5) ycGeom::Point(0 1e-5)
+    )) nil)
+    _Assert(l_tiny  "polygon: tiny polygon constructed")
+    l_large = errset(ycGeom::Polygon(list(
+        ycGeom::Point(1e7 1e7) ycGeom::Point(1e7 + 0.1 1e7)
+        ycGeom::Point(1e7 + 0.1 1e7 + 0.1) ycGeom::Point(1e7 1e7 + 0.1)
+    )) nil)
+    _Assert(l_large && abs(car(l_large)->area() - 0.01) <= 1e-9
+        "polygon: very large offset area stable")
+)
+
 _TestPolygonDone = t
 
 ; END
