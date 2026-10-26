@@ -34,7 +34,7 @@ _AssertError(lambda(() ycGeom::Point(1:2)->equals(1) t)  "point: non-Point equal
 
 let((g_p g_q)
     g_p = ycGeom::Point(1:2)
-    g_q = ycGeom::Point(1:2)
+    g_q = ycGeom::Point(list(1 2))
     _Assert(g_q->toSkill() == list(1.0 2.0)  "point: list form")
     _Assert(g_q->equals(g_p)  "point: list form equals")
     _Assert(ycGeom::Point(g_p->toSkill())->equals(g_p)  "point: toSkill roundtrip")

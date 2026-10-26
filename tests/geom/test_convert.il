@@ -65,7 +65,39 @@ _Assert(ycGeom::ConvertToGeomObject(list(0:0 1:1) ?as 'Region)->area() == 1.0
 _Assert(ycGeom::ConvertToGeomObject(list(0:0 1:0 1:1 0:1))->area() == 1.0
     "convert: point list to Polygon")
 _Assert(ycGeom::ConvertToGeomObject(list(list(0:0 1:0 1:1 0:1)))->area() == 1.0
-    "convert: nested list to Region")
+    "convert: nested point list to Polygon")
+
+let((g_poly g_r1 g_r2 g_r)
+    g_poly = ycGeom::Polygon('((0 0) (1 0) (1 1) (0 1)))
+    g_r1 = list(0:0 1:0 1:1)
+    g_r2 = list(2:0 3:0 3:1)
+    _Assert(ycGeom::Region(list(list(g_poly)))->area() == 1.0
+        "constructor: Region nested Polygon object")
+    _Assert(ycGeom::Region(list(list(g_r1 g_r2)))->area() == 1.0
+        "constructor: Region nested point lists")
+    _Assert(ycGeom::Region(list(list(0:0 5:5)))->area() == 25.0
+        "constructor: Region nested two-point rectangle")
+    _Assert(ycGeom::ConvertToGeomObject(list(list(g_poly)) ?as 'Region)->area() == 1.0
+        "convert: nested Polygon object as Region")
+    _Assert(ycGeom::ConvertToGeomObject(list(list(0:0 5:5)) ?as 'Region)->area() == 25.0
+        "convert: nested two-point rectangle as Region")
+    _Assert(ycGeom::Polygon(list(0 0 ycGeom::Point(1:0) 1:1 0:1))->area() == 1.0
+        "constructor: Polygon mixed raw numbers and Point")
+    g_r = ycGeom::Rect(list(0:0 1:1))
+    _Assert(ycGeom::Rect(g_r->toSkill())->area() == 1.0
+        "constructor: Rect toSkill roundtrip")
+    _AssertErrorMsg(lambda(() ycGeom::ConvertToGeomObject(g_poly ?as 'Region) t)
+        "expected"  "convert: object target mismatch rejected")
+)
+
+_AssertError(lambda(() ycGeom::Polygon(list(0:0 1:0 1:1) list(2:2 3:2 3:3)) t)
+    "constructor: Polygon multiple args rejected")
+_AssertError(lambda(() ycGeom::Region(list(0:0 1:0 1:1)) list(0:0 1:0 1:1) t)
+    "constructor: Region multiple args rejected")
+_Assert(ycGeom::ConvertToGeomObject(list())->area() == 0.0
+    "convert: empty list is empty Region")
+_Assert(ycGeom::ConvertToGeomObject(nil)->area() == 0.0
+    "convert: nil is empty Region")
 
 _AssertErrorMsg(lambda(() ycGeom::ConvertToGeomObject(1:2 ?as 'Blah) t)
     "?as"  "convert: invalid ?as rejected")

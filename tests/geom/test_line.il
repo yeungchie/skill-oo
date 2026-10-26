@@ -46,6 +46,8 @@ let((g_l)
         "line: array intersection as Segment")
     _AssertErrorMsg(lambda(() g_l->intersection(list(5:-5 5:5)) t)
         "?as"  "line: ambiguous array intersection requires ?as")
+    _AssertErrorMsg(lambda(() g_l->intersection(list(5:-5 5:5) ?as 'Rect) t)
+        "?as"  "line: invalid array target rejected")
 )
 
 let((g_l g_o)
