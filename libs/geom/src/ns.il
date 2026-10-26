@@ -37,6 +37,9 @@ addToNamespace("ycGeom"
         _AsPolygon
         _AsPolygonList
         _AsRegion
+        _GeomKind
+        _ConvertToGeomObject
+        ConvertToGeomObject
         _SamePoint
         _NumKey
         _PtKey

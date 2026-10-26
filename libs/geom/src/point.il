@@ -82,8 +82,8 @@ procedure(_InstallPoint(self "g")  ; -> t
         ;   (Point) - 中点
         let((g_o)
             g_o = _AsPoint(g_other "ycGeom::Point->midpoint")
-            Point((self->_data->x + g_o->x()) / 2.0
-                (self->_data->y + g_o->y()) / 2.0)
+            Point(list((self->_data->x + g_o->x()) / 2.0
+                (self->_data->y + g_o->y()) / 2.0))
         )
     )
     self->translate = lambda((n_dx n_dy "nn")  ; -> Point
@@ -95,8 +95,8 @@ procedure(_InstallPoint(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point) - 新点
-        Point(self->_data->x + float(n_dx)
-            self->_data->y + float(n_dy))
+        Point(list(self->_data->x + float(n_dx)
+            self->_data->y + float(n_dy)))
     )
     self->equals = lambda((g_other \@key (eps nil) "gg")  ; -> t | nil
         ; 判断与另一点是否在容差内相等。
@@ -139,41 +139,15 @@ defmethod(initializeInstance (self(Point) \@rest _args)
 )
 )
 
-procedure(Point(\@rest l_args "g")  ; -> Point
+procedure(Point(l_data "l")  ; -> Point
     ; 构造不可变平面点。
     ;
     ; **参数**
-    ;   l_args  (list) - (x y) 或两个数值实参
+    ;   l_data  (list) - (x y) 坐标列表或单元素包装
     ;
     ; **返回**
-    ;   (Point) - 坐标已转 flonum 的新点；格式不合法 error
-    let((n_x n_y l_pair)
-        cond(
-            (length(l_args) == 2
-                n_x = _Nth1(1 l_args)
-                n_y = _Nth1(2 l_args)
-                unless(numberp(n_x) && numberp(n_y)
-                    error("ycGeom::Point: coordinates must be numbers, got %A"
-                        l_args)
-                )
-            )
-            (length(l_args) == 1
-                l_pair = _Nth1(1 l_args)
-                unless(_PairP(l_pair)
-                    error("ycGeom::Point: expected (x y) or two numbers, got %A"
-                        l_pair)
-                )
-                n_x = car(l_pair)
-                n_y = cadr(l_pair)
-            )
-            (t
-                error("ycGeom::Point: expected (x y) or two numbers, got %A"
-                    l_args)
-            )
-        )
-        makeInstance('Point ?_data
-            makeInstance('PointData ?x float(n_x) ?y float(n_y)))
-    )
+    ;   (Point) - 坐标已转浮点的新点；格式不合法 error
+    _AsPoint(l_data "ycGeom::Point")
 )
 
 unuseNamespace("ycGeom")

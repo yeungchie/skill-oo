@@ -56,8 +56,8 @@ procedure(_SegPointAt(g_a g_b n_t "ggn")  ; -> Point
     ;
     ; **返回**
     ;   (Point) - 插值点
-    Point(g_a->x() + (g_b->x() - g_a->x()) * n_t
-        g_a->y() + (g_b->y() - g_a->y()) * n_t)
+    Point(list(g_a->x() + (g_b->x() - g_a->x()) * n_t
+        g_a->y() + (g_b->y() - g_a->y()) * n_t))
 )
 
 procedure(_LineSegmentIntersection(g_line g_seg n_eps "ggg")  ; -> Point | Segment | nil
@@ -156,8 +156,8 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggg")  ; -> Point | Segme
                             n_max = min(n_max 1.0)
                             if(_Near(n_min n_max n_tolr)
                                 _SegPointAt(g_a g_b n_min)
-                                Segment(_SegPointAt(g_a g_b n_min)
-                                    _SegPointAt(g_a g_b n_max))
+                                Segment(list(_SegPointAt(g_a g_b n_min)
+                                    _SegPointAt(g_a g_b n_max)))
                             )
                         )
                     )
@@ -355,7 +355,7 @@ procedure(_InstallSegment(self "g")  ; -> t
         ; **返回**
         ;   (Line|nil) - 经过起终点的无限直线；零长度线段为 nil
         unless(self->_data->start->equals(self->_data->end)
-            Line(self->_data->start self->_data->end)
+            Line(list(self->_data->start self->_data->end))
         )
     )
     self->toSkill = lambda(()  ; -> list[list[float]]
@@ -383,16 +383,16 @@ defmethod(initializeInstance (self(Segment) \@rest _args)
 )
 )
 
-procedure(Segment(\@rest l_args "g")  ; -> Segment
+procedure(Segment(l_data "l")  ; -> Segment
     ; 构造不可变线段。
     ;
     ; **参数**
-    ;   l_args  (list) - 两个点、两点列表、四个坐标，或点列
+    ;   l_data  (list) - 两点列表、包一层的两点列表或四个坐标
     ;
     ; **返回**
     ;   (Segment) - 新线段；零长度合法；格式不合法 error
     let((l_pts)
-        l_pts = _TwoPoints(l_args "ycGeom::Segment")
+        l_pts = _TwoPoints(l_data "ycGeom::Segment")
         makeInstance('Segment ?_data
             makeInstance('SegmentData
                 ?start _Nth1(1 l_pts)

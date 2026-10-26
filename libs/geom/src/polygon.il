@@ -163,10 +163,10 @@ procedure(_InstallPolygon(self "g")  ; -> t
         let((l_res n_len n_i)
             n_len = length(self->_data->points)
             for(n_i 1 n_len
-                l_res = tconc(l_res Segment(
+                l_res = tconc(l_res Segment(list(
                     _Nth1(n_i self->_data->points)
                     _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
-                ))
+                )))
             )
             car(l_res)
         )
@@ -198,7 +198,7 @@ procedure(_InstallPolygon(self "g")  ; -> t
                 g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
                 n_seam = t_seams[_EdgeKey(g_a g_b)] == 2
                 unless(n_seam && !includeSeams
-                    n_sum = n_sum + Segment(g_a g_b)->length()
+                    n_sum = n_sum + Segment(list(g_a g_b))->length()
                 )
             )
             n_sum
@@ -231,8 +231,8 @@ procedure(_InstallPolygon(self "g")  ; -> t
             when(abs(n_a) <= _AreaTol(self->_data->points _Eps(nil))
                 error("ycGeom::Polygon->centroid: zero-area polygon")
             )
-            Point(n_ox + n_cx / (6.0 * n_a)
-                n_oy + n_cy / (6.0 * n_a))
+            Point(list(n_ox + n_cx / (6.0 * n_a)
+                n_oy + n_cy / (6.0 * n_a)))
         )
     )
     self->contains = lambda((g_point \@key (boundary "inside") (eps nil) "ggg")  ; -> t | nil

@@ -265,8 +265,8 @@ procedure(_SizeLinePoint(g_p g_u g_q g_v "gggg")  ; -> Point | nil
         unless(abs(n_det) <= _AngleTol()
             n_t = ((g_q->x() - g_p->x()) * n_vy
                 - (g_q->y() - g_p->y()) * n_vx) / n_det
-            Point(g_p->x() + n_ux * n_t
-                g_p->y() + n_uy * n_t)
+            Point(list(g_p->x() + n_ux * n_t
+                g_p->y() + n_uy * n_t))
         )
     )
 )
@@ -287,8 +287,8 @@ procedure(_SizeStrip(g_a g_b n_nx n_ny n_d "ggggn")  ; -> Polygon | nil
         Polygon(list(
             g_a
             g_b
-            Point(g_b->x() + n_nx * n_d g_b->y() + n_ny * n_d)
-            Point(g_a->x() + n_nx * n_d g_a->y() + n_ny * n_d)
+            Point(list(g_b->x() + n_nx * n_d g_b->y() + n_ny * n_d))
+            Point(list(g_a->x() + n_nx * n_d g_a->y() + n_ny * n_d))
         ))
     )
 )
@@ -324,10 +324,10 @@ procedure(_SizeRoundCap(g_v g_v1 g_v2 n_d1 n_d2 n_segments "gggnnx")  ; -> Polyg
         n_rad = max(abs(n_d1) abs(n_d2))
         l_res = tconc(l_res g_v1)
         for(n_i 1 n_steps - 1
-            l_res = tconc(l_res Point(
+            l_res = tconc(l_res Point(list(
                 g_v->x() + n_rad * cos(n_a1 + n_delta * n_i / n_steps)
                 g_v->y() + n_rad * sin(n_a1 + n_delta * n_i / n_steps)
-            ))
+            )))
         )
         l_res = tconc(l_res g_v2)
         l_res = tconc(l_res g_v)
@@ -357,10 +357,10 @@ procedure(_SizeCapSelected(g_v g_pa g_nb l_e1 l_e2 n_limit n_segments g_corner "
         n_nx2 = _Nth1(3 l_e2)
         n_ny2 = _Nth1(4 l_e2)
         n_d2 = _Nth1(6 l_e2)
-        g_v1 = Point(g_v->x() + n_nx1 * n_d1
-            g_v->y() + n_ny1 * n_d1)
-        g_v2 = Point(g_v->x() + n_nx2 * n_d2
-            g_v->y() + n_ny2 * n_d2)
+        g_v1 = Point(list(g_v->x() + n_nx1 * n_d1
+            g_v->y() + n_ny1 * n_d1))
+        g_v2 = Point(list(g_v->x() + n_nx2 * n_d2
+            g_v->y() + n_ny2 * n_d2))
         cond(
             (g_corner == 'none nil)
             (g_corner == 'bevel Polygon(list(g_v1 g_v g_v2)))
@@ -406,8 +406,8 @@ procedure(_SizeExtendCap(g_v g_pa g_nb l_e1 l_e2 g_corner "gggllg")  ; -> Polygo
             n_d2 = _Nth1(6 l_e2)
             when(n_sel1 && !n_sel2
                 progn(
-                    g_v1 = Point(g_v->x() + n_nx1 * n_d1
-                        g_v->y() + n_ny1 * n_d1)
+                    g_v1 = Point(list(g_v->x() + n_nx1 * n_d1
+                        g_v->y() + n_ny1 * n_d1))
                     g_q = _SizeLinePoint(g_v1
                         list(g_v->x() - g_pa->x() g_v->y() - g_pa->y())
                         g_v
@@ -420,8 +420,8 @@ procedure(_SizeExtendCap(g_v g_pa g_nb l_e1 l_e2 g_corner "gggllg")  ; -> Polygo
             )
             when(!n_sel1 && n_sel2
                 progn(
-                    g_v2 = Point(g_v->x() + n_nx2 * n_d2
-                        g_v->y() + n_ny2 * n_d2)
+                    g_v2 = Point(list(g_v->x() + n_nx2 * n_d2
+                        g_v->y() + n_ny2 * n_d2))
                     g_q = _SizeLinePoint(g_v
                         list(g_v->x() - g_pa->x() g_v->y() - g_pa->y())
                         g_v2

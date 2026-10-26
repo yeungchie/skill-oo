@@ -74,10 +74,10 @@ procedure(_RectPolygon(g_rect "g")  ; -> Polygon | nil
         unless(g_rect->width() <= 0.0 || g_rect->height() <= 0.0
                 || g_rect->area() <= n_eps * n_scale
             Polygon(list(
-                Point(g_rect->xmin() g_rect->ymin())
-                Point(g_rect->xmax() g_rect->ymin())
-                Point(g_rect->xmax() g_rect->ymax())
-                Point(g_rect->xmin() g_rect->ymax())
+                Point(list(g_rect->xmin() g_rect->ymin()))
+                Point(list(g_rect->xmax() g_rect->ymin()))
+                Point(list(g_rect->xmax() g_rect->ymax()))
+                Point(list(g_rect->xmin() g_rect->ymax()))
             ))
         )
     )
@@ -166,8 +166,8 @@ procedure(_InstallRect(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point) - 中心点
-        Point((self->_data->xmin + self->_data->xmax) / 2.0
-            (self->_data->ymin + self->_data->ymax) / 2.0)
+        Point(list((self->_data->xmin + self->_data->xmax) / 2.0
+            (self->_data->ymin + self->_data->ymax) / 2.0))
     )
     self->contains = lambda((g_point "g")  ; -> t | nil
         ; 判断点是否在矩形内（含边界）。
@@ -278,16 +278,16 @@ defmethod(initializeInstance (self(Rect) \@rest _args)
 )
 )
 
-procedure(Rect(\@rest l_args "g")  ; -> Rect
+procedure(Rect(l_data "l")  ; -> Rect
     ; 构造不可变轴对齐矩形。
     ;
     ; **参数**
-    ;   l_args  (list) - 两个对角点、两点列表或四个坐标
+    ;   l_data  (list) - 两个对角点、包一层的两点列表或四个坐标
     ;
     ; **返回**
     ;   (Rect) - 新矩形；两个对角点自动规范化；零宽或零高合法
     let((l_pts g_p1 g_p2 n_xmin n_ymin n_xmax n_ymax)
-        l_pts = _TwoPoints(l_args "ycGeom::Rect")
+        l_pts = _TwoPoints(l_data "ycGeom::Rect")
         g_p1 = _Nth1(1 l_pts)
         g_p2 = _Nth1(2 l_pts)
         n_xmin = min(g_p1->x() g_p2->x())

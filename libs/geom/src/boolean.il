@@ -12,7 +12,7 @@ procedure(_SnapRing(l_pts n_grid n_eps "lgg")  ; -> list[Point]
     ;   (list[Point]) - 清理后的点列
     let((l_res g_prev g_snap l_clean)
         foreach(g_p l_pts
-            g_snap = Point(_Snap(g_p->x() n_grid) _Snap(g_p->y() n_grid))
+            g_snap = Point(list(_Snap(g_p->x() n_grid) _Snap(g_p->y() n_grid)))
             unless(g_prev && _Near(g_prev->x() g_snap->x() n_eps)
                 && _Near(g_prev->y() g_snap->y() n_eps)
                 l_res = tconc(l_res g_snap)
@@ -174,8 +174,8 @@ procedure(_Lerp(g_a g_b n_t "ggn")  ; -> Point
     ;
     ; **返回**
     ;   (Point) - 插值点
-    Point(g_a->x() + (g_b->x() - g_a->x()) * n_t
-        g_a->y() + (g_b->y() - g_a->y()) * n_t)
+    Point(list(g_a->x() + (g_b->x() - g_a->x()) * n_t
+        g_a->y() + (g_b->y() - g_a->y()) * n_t))
 )
 
 procedure(_SplitEdges(l_edges n_eps t_reg "lgg")  ; -> list[list[Point]]
@@ -274,8 +274,8 @@ procedure(_ClassifyEdges(l_edges l_ra l_rb g_op n_eps "lllgg")  ; -> list[list[P
                 n_my = (g_a->y() + g_b->y()) / 2.0
                 n_nx = -n_dy / n_len
                 n_ny = n_dx / n_len
-                g_left = Point(n_mx + n_nx * n_delta n_my + n_ny * n_delta)
-                g_right = Point(n_mx - n_nx * n_delta n_my - n_ny * n_delta)
+                g_left = Point(list(n_mx + n_nx * n_delta n_my + n_ny * n_delta))
+                g_right = Point(list(n_mx - n_nx * n_delta n_my - n_ny * n_delta))
                 g_la = _InsideRings(l_ra g_left n_eps)
                 g_lb = _InsideRings(l_rb g_left n_eps)
                 g_ra = _InsideRings(l_ra g_right n_eps)
@@ -738,7 +738,7 @@ procedure(_SpliceHole(l_outer l_hole n_eps "llg")  ; -> list[Point]
         n_ei = cadr(l_hit)
         g_a = _Nth1(n_ei l_outer)
         g_b = _Nth1(if(n_ei == length(l_outer) 1 (n_ei + 1)) l_outer)
-        g_o = Point(n_x g_h->y())
+        g_o = Point(list(n_x g_h->y()))
         cond(
             (_SamePoint(g_o g_a n_eps)
                 n_oi = n_ei

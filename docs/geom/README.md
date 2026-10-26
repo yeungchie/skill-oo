@@ -7,10 +7,12 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole �
 ## 概要
 
 - 所有坐标在构造时转为浮点数；整数输入不会产生舍入误差，`toSkill()` 始终输出浮点坐标。
+- 构造器只接受一个列表参数；`Point(1:2)` 与 `Point(list(1 2))` 等价，`Point(1 2)` 非法。列表元素可以是坐标、Point/图形对象或嵌套列表。
 - `Polygon` 只保存闭合点列；洞用水平或垂直切割线并入外环。
 - `perimeter()` 默认扣除切割线，`?includeSeams t` 时按完整点列环计算。
 - `Region` 表示 0..n 个多边形的并集，默认归一化为互不重叠的多边形集合。
 - `?eps` 默认 `1e-9`；比较同时吸收坐标量级的机器精度相对误差；`?grid` 为正数或 nil；参数类型不符或取值非法时以 `error()` 中断。
+- `ConvertToGeomObject` 统一接收已有图形对象或坐标数组；两点数组有歧义时必须用 `?as` 指定类型。
 - 对象按不可变值使用；运算返回新对象，不修改输入。
 - `Polygon`、`Rect`、`Region` 可互相作为布尔运算的右操作数；结果统一为 `Region`。
 - 非退化 `Rect` 与 `Polygon` 可通过 `toPolygon()`/`toRect()` 互转；退化 `Rect` 无对应 `Polygon`。
@@ -25,46 +27,46 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole �
 
 ```lisp
 ; 点与线段
-g_p = ycGeom::Point(3 4)
-g_q = ycGeom::Point(0 0)
+g_p = ycGeom::Point(list(3 4))
+g_q = ycGeom::Point(list(0 0))
 g_p->distanceTo(g_q)
 ; => 5.0
 
-g_s = ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(10 0))
+g_s = ycGeom::Segment(list(ycGeom::Point(list(0 0)) ycGeom::Point(list(10 0))))
 g_s->midpoint()->toSkill()
 ; => (5.0 0.0)
-g_s->contains(ycGeom::Point(5 0))
+g_s->contains(ycGeom::Point(list(5 0)))
 ; => t
 
 ; 无限直线
-g_l = ycGeom::Line(ycGeom::Point(0 0) ycGeom::Point(0 10))
-g_l->distanceTo(ycGeom::Point(5 3))
+g_l = ycGeom::Line(list(ycGeom::Point(list(0 0)) ycGeom::Point(list(0 10))))
+g_l->distanceTo(ycGeom::Point(list(5 3)))
 ; => 5.0
 
 ; 轴对齐矩形
-g_rect = ycGeom::Rect(ycGeom::Point(10 4) ycGeom::Point(2 0))
+g_rect = ycGeom::Rect(list(ycGeom::Point(list(10 4)) ycGeom::Point(list(2 0))))
 g_rect->toSkill()
 ; => ((2.0 0.0) (10.0 4.0))
 
 ; 正方形多边形
 g_sq = ycGeom::Polygon(list(
-    ycGeom::Point(0 0)
-    ycGeom::Point(10 0)
-    ycGeom::Point(10 10)
-    ycGeom::Point(0 10)
+    ycGeom::Point(list(0 0))
+    ycGeom::Point(list(10 0))
+    ycGeom::Point(list(10 10))
+    ycGeom::Point(list(0 10))
 ))
 g_sq->area()
 ; => 100.0
-g_sq->contains(ycGeom::Point(5 5))
+g_sq->contains(ycGeom::Point(list(5 5)))
 ; => t
 
 ; 区域并集
 g_a = ycGeom::Region(list(g_sq))
 g_b = ycGeom::Region(list(ycGeom::Polygon(list(
-    ycGeom::Point(5 5)
-    ycGeom::Point(15 5)
-    ycGeom::Point(15 15)
-    ycGeom::Point(5 15)
+    ycGeom::Point(list(5 5))
+    ycGeom::Point(list(15 5))
+    ycGeom::Point(list(15 15))
+    ycGeom::Point(list(5 15))
 ))))
 g_a->or(g_b)->area()
 ; => 175.0
@@ -75,19 +77,19 @@ g_a->or(g_b)->area()
 ### ycGeom::Point <sub>`function`</sub> <sub>`class`</sub>
 
 ```text
-ycGeom::Point(g_args ...)
+ycGeom::Point(l_data)
 => Point
 ```
 
 **描述**
 
-构造不可变平面点。支持两个数值坐标或一个 `(x y)` 坐标对；非法参数以 `error()` 中断。
+构造不可变平面点；只接受一个 `(x y)` 坐标列表（`1:2` 与 `list(1 2)` 等价）。传入多个位置参数或非法坐标以 `error()` 中断。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_args | any | | 两个数值坐标，或一个 `(x y)` 坐标对 |
+| l_data | list | | 一个坐标列表；元素为两个数值 |
 
 **返回值**
 
@@ -96,7 +98,7 @@ ycGeom::Point(g_args ...)
 **例程**
 
 ```lisp
-ycGeom::Point(1 2)->toSkill()
+ycGeom::Point(list(1 2))->toSkill()
 ; => (1.0 2.0)
 ```
 
@@ -114,7 +116,7 @@ Point->x()
 返回 x 坐标。
 
 ```lisp
-ycGeom::Point(3 4)->x()
+ycGeom::Point(list(3 4))->x()
 ; => 3.0
 ```
 
@@ -128,7 +130,7 @@ Point->y()
 返回 y 坐标。
 
 ```lisp
-ycGeom::Point(3 4)->y()
+ycGeom::Point(list(3 4))->y()
 ; => 4.0
 ```
 
@@ -146,7 +148,7 @@ Point->distanceTo(g_other)
 | g_other | Point | | 另一个 `Point` |
 
 ```lisp
-ycGeom::Point(3 4)->distanceTo(ycGeom::Point(0 0))
+ycGeom::Point(list(3 4))->distanceTo(ycGeom::Point(list(0 0)))
 ; => 5.0
 ```
 
@@ -164,7 +166,7 @@ Point->midpoint(g_other)
 | g_other | Point | | 另一个 `Point` |
 
 ```lisp
-ycGeom::Point(0 0)->midpoint(ycGeom::Point(4 2))->toSkill()
+ycGeom::Point(list(0 0))->midpoint(ycGeom::Point(list(4 2)))->toSkill()
 ; => (2.0 1.0)
 ```
 
@@ -186,7 +188,7 @@ Point->translate(
 | n_dy | num | | y 位移 |
 
 ```lisp
-ycGeom::Point(1 2)->translate(3 -1)->toSkill()
+ycGeom::Point(list(1 2))->translate(3 -1)->toSkill()
 ; => (4.0 1.0)
 ```
 
@@ -208,7 +210,7 @@ Point->equals(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Point(0 0)->equals(ycGeom::Point(1e-10 0) ?eps 1e-9)
+ycGeom::Point(list(0 0))->equals(ycGeom::Point(list(1e-10 0)) ?eps 1e-9)
 ; => t
 ```
 
@@ -222,26 +224,26 @@ Point->toSkill()
 返回 `(x y)` 浮点坐标列表。
 
 ```lisp
-ycGeom::Point(3 4)->toSkill()
+ycGeom::Point(list(3 4))->toSkill()
 ; => (3.0 4.0)
 ```
 
 ### ycGeom::Segment <sub>`function`</sub> <sub>`class`</sub>
 
 ```text
-ycGeom::Segment(g_args ...)
+ycGeom::Segment(l_data)
 => Segment
 ```
 
 **描述**
 
-构造不可变线段；支持两点、两点列表或四个坐标，零长度合法。传入非法参数以 `error()` 中断。
+构造不可变线段；只接受一个列表，列表可为两点、四点坐标或单层包装；元素可为坐标或 Point。零长度合法，非法参数以 `error()` 中断。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_args | any | | 两个 `Point`、两点坐标列表或四个端点坐标 |
+| l_data | list | | 两点、四点坐标或嵌套列表 |
 
 **返回值**
 
@@ -250,7 +252,7 @@ ycGeom::Segment(g_args ...)
 **例程**
 
 ```lisp
-ycGeom::Segment(ycGeom::Point(0 0) ycGeom::Point(3 4))->length()
+ycGeom::Segment(list(ycGeom::Point(list(0 0)) ycGeom::Point(list(3 4))))->length()
 ; => 5.0
 ```
 
@@ -268,7 +270,7 @@ Segment->start()
 返回起点。
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->start()->toSkill()
+ycGeom::Segment(list(0 0 10 0))->start()->toSkill()
 ; => (0.0 0.0)
 ```
 
@@ -282,7 +284,7 @@ Segment->end()
 返回终点。
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->end()->toSkill()
+ycGeom::Segment(list(0 0 10 0))->end()->toSkill()
 ; => (10.0 0.0)
 ```
 
@@ -296,7 +298,7 @@ Segment->length()
 返回线段长度。
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->length()
+ycGeom::Segment(list(0 0 10 0))->length()
 ; => 10.0
 ```
 
@@ -310,7 +312,7 @@ Segment->midpoint()
 返回线段中点。
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->midpoint()->toSkill()
+ycGeom::Segment(list(0 0 10 0))->midpoint()->toSkill()
 ; => (5.0 0.0)
 ```
 
@@ -324,7 +326,7 @@ Segment->direction()
 返回单位方向向量；零长度线段返回 nil。
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->direction()
+ycGeom::Segment(list(0 0 10 0))->direction()
 ; => (1.0 0.0)
 ```
 
@@ -342,7 +344,7 @@ Segment->project(g_point)
 | g_point | Point | | 待投影的 `Point` |
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->project(ycGeom::Point(3 5))->toSkill()
+ycGeom::Segment(list(0 0 10 0))->project(ycGeom::Point(list(3 5)))->toSkill()
 ; => (3.0 0.0)
 ```
 
@@ -360,7 +362,7 @@ Segment->nearestPoint(g_point)
 | g_point | Point | | 查询点 |
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->nearestPoint(ycGeom::Point(15 5))->toSkill()
+ycGeom::Segment(list(0 0 10 0))->nearestPoint(ycGeom::Point(list(15 5)))->toSkill()
 ; => (10.0 0.0)
 ```
 
@@ -378,7 +380,7 @@ Segment->distanceTo(g_point)
 | g_point | Point | | 查询点 |
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->distanceTo(ycGeom::Point(15 0))
+ycGeom::Segment(list(0 0 10 0))->distanceTo(ycGeom::Point(list(15 0)))
 ; => 5.0
 ```
 
@@ -400,7 +402,7 @@ Segment->contains(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->contains(ycGeom::Point(5 0))
+ycGeom::Segment(list(0 0 10 0))->contains(ycGeom::Point(list(5 0)))
 ; => t
 ```
 
@@ -414,7 +416,7 @@ Segment->bBox()
 返回 `((xmin ymin) (xmax ymax))`。
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->bBox()
+ycGeom::Segment(list(0 0 10 0))->bBox()
 ; => ((0.0 0.0) (10.0 0.0))
 ```
 
@@ -428,7 +430,7 @@ Segment->toRect()
 返回以该线段包围盒为范围的轴对齐矩形；水平、垂直或零长度线段得到退化矩形（宽或高为 0）。
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->toRect()->toSkill()
+ycGeom::Segment(list(0 0 10 0))->toRect()->toSkill()
 ; => ((0.0 0.0) (10.0 0.0))
 ```
 
@@ -450,7 +452,7 @@ Segment->intersection(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->intersection(ycGeom::Segment(5 -5 5 5))->toSkill()
+ycGeom::Segment(list(0 0 10 0))->intersection(ycGeom::Segment(list(5 -5 5 5)))->toSkill()
 ; => (5.0 0.0)
 ```
 
@@ -464,7 +466,7 @@ Segment->toLine()
 返回经过起终点的无限直线；零长度线段无对应直线，返回 nil。
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->toLine()->contains(ycGeom::Point(-5 0))
+ycGeom::Segment(list(0 0 10 0))->toLine()->contains(ycGeom::Point(list(-5 0)))
 ; => t
 ```
 
@@ -478,26 +480,26 @@ Segment->toSkill()
 返回 `((sx sy) (ex ey))` 浮点坐标列表。
 
 ```lisp
-ycGeom::Segment(0 0 10 0)->toSkill()
+ycGeom::Segment(list(0 0 10 0))->toSkill()
 ; => ((0.0 0.0) (10.0 0.0))
 ```
 
 ### ycGeom::Line <sub>`function`</sub> <sub>`class`</sub>
 
 ```text
-ycGeom::Line(g_args ...)
+ycGeom::Line(l_data)
 => Line
 ```
 
 **描述**
 
-构造不可变无限直线；支持两点、两点列表或四个坐标。两点重合或非法参数以 `error()` 中断。
+构造不可变无限直线；只接受一个列表，列表可为两点、四点坐标或单层包装。两点重合或非法参数以 `error()` 中断。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_args | any | | 两个 `Point`、两点坐标列表或四个坐标；两点重合时以 `error()` 中断 |
+| l_data | list | | 两点、四点坐标或嵌套列表；两点重合时以 `error()` 中断 |
 
 **返回值**
 
@@ -506,8 +508,8 @@ ycGeom::Line(g_args ...)
 **例程**
 
 ```lisp
-g_l = ycGeom::Line(ycGeom::Point(0 0) ycGeom::Point(10 0))
-g_l->contains(ycGeom::Point(4 0))
+g_l = ycGeom::Line(list(ycGeom::Point(list(0 0)) ycGeom::Point(list(10 0))))
+g_l->contains(ycGeom::Point(list(4 0)))
 ; => t
 ```
 
@@ -525,7 +527,7 @@ Line->a()
 返回规范化方程 `a*x+b*y+c=0` 的 `a`。
 
 ```lisp
-ycGeom::Line(0 0 10 0)->a()
+ycGeom::Line(list(0 0 10 0))->a()
 ; => 0.0
 ```
 
@@ -539,7 +541,7 @@ Line->b()
 返回方程系数 `b`。
 
 ```lisp
-ycGeom::Line(0 0 10 0)->b()
+ycGeom::Line(list(0 0 10 0))->b()
 ; => -1.0
 ```
 
@@ -553,7 +555,7 @@ Line->c()
 返回方程系数 `c`。
 
 ```lisp
-ycGeom::Line(0 0 10 0)->c()
+ycGeom::Line(list(0 0 10 0))->c()
 ; => 0.0
 ```
 
@@ -567,7 +569,7 @@ Line->anchor()
 返回直线上离原点最近的点。
 
 ```lisp
-ycGeom::Line(0 0 10 0)->anchor()->toSkill()
+ycGeom::Line(list(0 0 10 0))->anchor()->toSkill()
 ; => (0.0 0.0)
 ```
 
@@ -581,7 +583,7 @@ Line->direction()
 返回单位方向向量。
 
 ```lisp
-ycGeom::Line(0 0 10 0)->direction()
+ycGeom::Line(list(0 0 10 0))->direction()
 ; => (1.0 0.0)
 ```
 
@@ -595,7 +597,7 @@ Line->normal()
 返回单位法向量。
 
 ```lisp
-ycGeom::Line(0 0 10 0)->normal()
+ycGeom::Line(list(0 0 10 0))->normal()
 ; => (0.0 -1.0)
 ```
 
@@ -613,7 +615,7 @@ Line->project(g_point)
 | g_point | Point | | 待投影点 |
 
 ```lisp
-ycGeom::Line(0 0 10 0)->project(ycGeom::Point(3 5))->toSkill()
+ycGeom::Line(list(0 0 10 0))->project(ycGeom::Point(list(3 5)))->toSkill()
 ; => (3.0 0.0)
 ```
 
@@ -631,7 +633,7 @@ Line->distanceTo(g_point)
 | g_point | Point | | 查询点 |
 
 ```lisp
-ycGeom::Line(0 0 10 0)->distanceTo(ycGeom::Point(3 5))
+ycGeom::Line(list(0 0 10 0))->distanceTo(ycGeom::Point(list(3 5)))
 ; => 5.0
 ```
 
@@ -653,7 +655,7 @@ Line->contains(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Line(0 0 10 0)->contains(ycGeom::Point(4 0))
+ycGeom::Line(list(0 0 10 0))->contains(ycGeom::Point(list(4 0)))
 ; => t
 ```
 
@@ -675,7 +677,7 @@ Line->isParallel(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Line(0 0 10 0)->isParallel(ycGeom::Line(0 1 10 1))
+ycGeom::Line(list(0 0 10 0))->isParallel(ycGeom::Line(list(0 1 10 1)))
 ; => t
 ```
 
@@ -697,7 +699,7 @@ Line->intersection(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Line(0 0 10 0)->intersection(ycGeom::Line(5 -5 5 5))->toSkill()
+ycGeom::Line(list(0 0 10 0))->intersection(ycGeom::Line(list(5 -5 5 5)))->toSkill()
 ; => (5.0 0.0)
 ```
 
@@ -711,26 +713,26 @@ Line->toSkill()
 返回 `((ax ay) (bx by))`，两点为 anchor 与 anchor 加单位方向。
 
 ```lisp
-ycGeom::Line(0 0 10 0)->toSkill()
+ycGeom::Line(list(0 0 10 0))->toSkill()
 ; => ((0.0 0.0) (1.0 0.0))
 ```
 
 ### ycGeom::Rect <sub>`function`</sub> <sub>`class`</sub>
 
 ```text
-ycGeom::Rect(g_args ...)
+ycGeom::Rect(l_data)
 => Rect
 ```
 
 **描述**
 
-构造不可变轴对齐矩形；接受两个对角点、两点列表或四个坐标，并自动规范化为 `xmin`/`ymin`/`xmax`/`ymax`。零宽或零高合法；非法参数以 `error()` 中断。
+构造不可变轴对齐矩形；只接受一个列表，列表可为两点、四点坐标或单层包装，并自动规范化为 `xmin`/`ymin`/`xmax`/`ymax`。零宽或零高合法；非法参数以 `error()` 中断。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_args | any | | 两个 `Point`、两点坐标列表或四个坐标 |
+| l_data | list | | 两点、四点坐标或嵌套列表 |
 
 **返回值**
 
@@ -739,7 +741,7 @@ ycGeom::Rect(g_args ...)
 **例程**
 
 ```lisp
-g_rect = ycGeom::Rect(ycGeom::Point(10 4) ycGeom::Point(2 0))
+g_rect = ycGeom::Rect(list(ycGeom::Point(list(10 4)) ycGeom::Point(list(2 0))))
 g_rect->width()
 ; => 8.0
 g_rect->toSkill()
@@ -760,7 +762,7 @@ Rect->xmin()
 返回左边界 `xmin`。
 
 ```lisp
-ycGeom::Rect(0 0 10 4)->xmin()
+ycGeom::Rect(list(0 0 10 4))->xmin()
 ; => 0.0
 ```
 
@@ -774,7 +776,7 @@ Rect->ymin()
 返回下边界 `ymin`。
 
 ```lisp
-ycGeom::Rect(0 0 10 4)->ymin()
+ycGeom::Rect(list(0 0 10 4))->ymin()
 ; => 0.0
 ```
 
@@ -788,7 +790,7 @@ Rect->xmax()
 返回右边界 `xmax`。
 
 ```lisp
-ycGeom::Rect(0 0 10 4)->xmax()
+ycGeom::Rect(list(0 0 10 4))->xmax()
 ; => 10.0
 ```
 
@@ -802,7 +804,7 @@ Rect->ymax()
 返回上边界 `ymax`。
 
 ```lisp
-ycGeom::Rect(0 0 10 4)->ymax()
+ycGeom::Rect(list(0 0 10 4))->ymax()
 ; => 4.0
 ```
 
@@ -816,7 +818,7 @@ Rect->width()
 返回宽度 `xmax - xmin`。
 
 ```lisp
-ycGeom::Rect(0 0 10 4)->width()
+ycGeom::Rect(list(0 0 10 4))->width()
 ; => 10.0
 ```
 
@@ -830,7 +832,7 @@ Rect->height()
 返回高度 `ymax - ymin`。
 
 ```lisp
-ycGeom::Rect(0 0 10 4)->height()
+ycGeom::Rect(list(0 0 10 4))->height()
 ; => 4.0
 ```
 
@@ -844,7 +846,7 @@ Rect->area()
 返回面积 `width * height`；退化矩形为 0。
 
 ```lisp
-ycGeom::Rect(0 0 10 4)->area()
+ycGeom::Rect(list(0 0 10 4))->area()
 ; => 40.0
 ```
 
@@ -897,7 +899,7 @@ Rect->size(
 其他值以 `error()` 中断。
 
 ```lisp
-g_rect = ycGeom::Rect(0 0 10 10)
+g_rect = ycGeom::Rect(list(0 0 10 10))
 g_rect->size(1)->area()
 ; => 144.0
 g_rect->size(1 ?dir 'right)->area()
@@ -914,7 +916,7 @@ Rect->center()
 返回矩形中心点。
 
 ```lisp
-ycGeom::Rect(0 0 10 4)->center()->toSkill()
+ycGeom::Rect(list(0 0 10 4))->center()->toSkill()
 ; => (5.0 2.0)
 ```
 
@@ -932,7 +934,7 @@ Rect->contains(g_point)
 | g_point | Point | | 查询点 |
 
 ```lisp
-ycGeom::Rect(0 0 10 4)->contains(ycGeom::Point(5 2))
+ycGeom::Rect(list(0 0 10 4))->contains(ycGeom::Point(list(5 2)))
 ; => t
 ```
 
@@ -946,7 +948,7 @@ Rect->bBox()
 返回 `((xmin ymin) (xmax ymax))`。
 
 ```lisp
-ycGeom::Rect(0 0 10 4)->bBox()
+ycGeom::Rect(list(0 0 10 4))->bBox()
 ; => ((0.0 0.0) (10.0 4.0))
 ```
 
@@ -970,7 +972,7 @@ Rect->or(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Rect(0 0 4 4)->or(ycGeom::Rect(2 2 6 6))->area()
+ycGeom::Rect(list(0 0 4 4))->or(ycGeom::Rect(list(2 2 6 6)))->area()
 ; => 28.0
 ```
 
@@ -994,7 +996,7 @@ Rect->and(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Rect(0 0 4 4)->and(ycGeom::Rect(2 2 6 6))->area()
+ycGeom::Rect(list(0 0 4 4))->and(ycGeom::Rect(list(2 2 6 6)))->area()
 ; => 4.0
 ```
 
@@ -1018,7 +1020,7 @@ Rect->not(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Rect(0 0 4 4)->not(ycGeom::Rect(2 2 6 6))->area()
+ycGeom::Rect(list(0 0 4 4))->not(ycGeom::Rect(list(2 2 6 6)))->area()
 ; => 12.0
 ```
 
@@ -1042,7 +1044,7 @@ Rect->xor(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Rect(0 0 4 4)->xor(ycGeom::Rect(2 2 6 6))->area()
+ycGeom::Rect(list(0 0 4 4))->xor(ycGeom::Rect(list(2 2 6 6)))->area()
 ; => 24.0
 ```
 
@@ -1056,7 +1058,7 @@ Rect->toPolygon()
 返回逆时针四角 Polygon；宽/高为 0 或面积低于按尺度计算的退化阈值的矩形返回 nil。
 
 ```lisp
-ycGeom::Rect(0 0 4 4)->toPolygon()->toSkill()
+ycGeom::Rect(list(0 0 4 4))->toPolygon()->toSkill()
 ; => ((0.0 0.0) (4.0 0.0) (4.0 4.0) (0.0 4.0))
 ```
 
@@ -1070,7 +1072,7 @@ Rect->toSkill()
 返回 `((xmin ymin) (xmax ymax))` 浮点坐标列表。
 
 ```lisp
-ycGeom::Rect(0 0 10 4)->toSkill()
+ycGeom::Rect(list(0 0 10 4))->toSkill()
 ; => ((0.0 0.0) (10.0 4.0))
 ```
 
@@ -1083,7 +1085,7 @@ ycGeom::Polygon(l_points)
 
 **描述**
 
-构造不可变 keyhole 多边形。`l_points` 接受 Point 列表、`(x y)` 列表或扁平数值坐标；切割边以同一无向边往返出现两次表示，且必须是水平或垂直方向；非法点列以 `error()` 中断。
+构造不可变 keyhole 多边形；只接受一个列表，元素可为坐标、Point、混合列表或扁平数值坐标。切割边以同一无向边往返出现两次表示，且必须是水平或垂直方向；非法点列以 `error()` 中断。
 
 **参数**
 
@@ -1218,9 +1220,9 @@ Polygon->contains(
 
 ```lisp
 g_p = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
-g_p->contains(ycGeom::Point(0 0))
+g_p->contains(ycGeom::Point(list(0 0)))
 ; => t
-g_p->contains(ycGeom::Point(0 0) ?boundary "outside")
+g_p->contains(ycGeom::Point(list(0 0)) ?boundary "outside")
 ; => nil
 ```
 
@@ -1244,7 +1246,7 @@ Polygon->onBoundary(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->onBoundary(ycGeom::Point(0 2))
+ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->onBoundary(ycGeom::Point(list(0 2)))
 ; => t
 ```
 
@@ -1518,13 +1520,13 @@ ycGeom::Region(
 
 **描述**
 
-构造不可变区域，空区域合法。`l_polygons` 接受 Polygon 列表或点列列表；默认归一化为互不重叠的多边形集合；非法参数以 `error()` 中断。
+构造不可变区域，空区域合法；只接受一个列表，元素可为 Polygon、Rect、Region、点列或它们的嵌套列表。默认归一化为互不重叠的多边形集合；非法参数以 `error()` 中断。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| l_polygons | list | | Polygon 列表或点列列表；nil 表示空区域 |
+| l_polygons | list | | Polygon/Rect/Region/点列或嵌套列表；nil 表示空区域 |
 | ?normalize g_normalize | t / nil | t | 是否归一化为互不重叠 |
 | ?grid n_grid | num / nil | nil | 布尔网格；只影响归一化 |
 | ?eps n_eps | num / nil | 1e-9 | 容差 |
@@ -1638,7 +1640,7 @@ Region->contains(
 其他值以 `error()` 中断。
 
 ```lisp
-ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->contains(ycGeom::Point(2 2))
+ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->contains(ycGeom::Point(list(2 2)))
 ; => t
 ```
 
@@ -1662,7 +1664,7 @@ Region->onBoundary(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->onBoundary(ycGeom::Point(0 0))
+ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->onBoundary(ycGeom::Point(list(0 0)))
 ; => t
 ```
 
@@ -1876,6 +1878,58 @@ Region->toSkill()
 
 返回每个 Polygon 一个坐标点列；空区域返回 nil。
 
+### ycGeom::ConvertToGeomObject <sub>`function`</sub>
+
+```text
+ycGeom::ConvertToGeomObject(
+    g_value
+    [ ?as g_kind ]
+)
+=> Point | Segment | Line | Rect | Polygon | Region
+```
+
+**描述**
+
+把图形对象或原始坐标数组统一转换为几何对象。已有图形对象原样返回；指定 `?as` 时对象类型必须与目标一致，否则以 `error()` 中断。原始数组按 `?as` 指定类型构造，未指定时只接受无歧义的结构。两点数组同时可能表示线段、直线或矩形，必须用 `?as` 明确目标，否则以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_value | any | | 图形对象或坐标数组 |
+| ?as g_kind | sym / nil | nil | 目标类型；nil 表示自动推断 |
+
+`?as` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'Point` | 一个坐标构造 `Point` |
+| `'Segment` | 两点数组构造 `Segment` |
+| `'Line` | 两点数组构造 `Line` |
+| `'Rect` | 两点数组构造 `Rect` |
+| `'Polygon` | 三个及以上点构造 `Polygon` |
+| `'Region` | 两点数组按 `Rect` 处理，多点数组按 `Polygon` 处理，嵌套列表按 `Region` 处理 |
+
+**返回值**
+
+`Point` / `Segment` / `Line` / `Rect` / `Polygon` / `Region` — 已有对象原样返回，或按数组构造的新对象；无法确定时以 `error()` 中断。
+
+**例程**
+
+```lisp
+ycGeom::ConvertToGeomObject(1:2)->toSkill()
+; => (1.0 2.0)
+
+ycGeom::ConvertToGeomObject(list(0:0 1:1) ?as 'Rect)->area()
+; => 1.0
+
+ycGeom::ConvertToGeomObject(list(0:0 1:0 1:1 0:1))->area()
+; => 1.0
+
+ycGeom::ConvertToGeomObject(list(0:0 1:1))
+; => 以 error() 中断（两点数组有歧义，需指定 ?as）
+```
+
 ## 几何约定
 
 ```lisp
@@ -1899,17 +1953,17 @@ ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->toSkill()
 
 ```lisp
 g_hole = ycGeom::Polygon(list(
-    ycGeom::Point(0 0)
-    ycGeom::Point(10 0)
-    ycGeom::Point(10 7)
-    ycGeom::Point(7 7)
-    ycGeom::Point(7 3)
-    ycGeom::Point(3 3)
-    ycGeom::Point(3 7)
-    ycGeom::Point(7 7)
-    ycGeom::Point(10 7)
-    ycGeom::Point(10 10)
-    ycGeom::Point(0 10)
+    ycGeom::Point(list(0 0))
+    ycGeom::Point(list(10 0))
+    ycGeom::Point(list(10 7))
+    ycGeom::Point(list(7 7))
+    ycGeom::Point(list(7 3))
+    ycGeom::Point(list(3 3))
+    ycGeom::Point(list(3 7))
+    ycGeom::Point(list(7 7))
+    ycGeom::Point(list(10 7))
+    ycGeom::Point(list(10 10))
+    ycGeom::Point(list(0 10))
 ))
 g_hole->area()
 ; => 84.0
@@ -1922,7 +1976,7 @@ g_hole->perimeter()
 - 默认 `?normalize t` 会把输入合并、裁剪为互不重叠的多边形集合。
 - `?normalize nil` 信任输入已互不重叠，跳过归一化；此时面积按各块面积求和。
 - `?grid` 把输入和输出顶点吸附到网格；吸附导致拓扑塌缩时以 `error()` 中断。
-- `Polygon`、`Rect`、`Region` 可互相参与 `or`/`and`/`not`/`xor`；右操作数也接受点列，结果统一为 `Region`。退化 `Rect`（宽/高为 0 或面积低于按尺度计算的退化阈值）与空 `Region` 按空集处理。
+- `Polygon`、`Rect`、`Region` 可互相参与 `or`/`and`/`not`/`xor`；右操作数也接受点列，结果统一为 `Region`。布尔上下文中的两点列表按对角矩形解释，三点及以上按多边形解释。退化 `Rect`（宽/高为 0 或面积低于按尺度计算的退化阈值）与空 `Region` 按空集处理。
 - 默认归一化、布尔与 `size` 输出的多边形均已去除共线中间点；切割边端点保留。
 
 ![区域布尔运算：并、交、差、对称差](img/boolean.svg)
@@ -1931,16 +1985,16 @@ g_hole->perimeter()
 
 ```lisp
 g_a = ycGeom::Polygon(list(
-    ycGeom::Point(0 0) ycGeom::Point(4 0)
-    ycGeom::Point(4 4) ycGeom::Point(0 4)
+    ycGeom::Point(list(0 0)) ycGeom::Point(list(4 0))
+    ycGeom::Point(list(4 4)) ycGeom::Point(list(0 4))
 ))
 g_b = ycGeom::Polygon(list(
-    ycGeom::Point(2 2) ycGeom::Point(6 2)
-    ycGeom::Point(6 6) ycGeom::Point(2 6)
+    ycGeom::Point(list(2 2)) ycGeom::Point(list(6 2))
+    ycGeom::Point(list(6 6)) ycGeom::Point(list(2 6))
 ))
 ycGeom::Region(list(g_a))->and(ycGeom::Region(list(g_b)))->area()
 ; => 4.0
-ycGeom::Rect(0 0 4 4)->or(g_b)->area()
+ycGeom::Rect(list(0 0 4 4))->or(g_b)->area()
 ; => 28.0
 ```
 

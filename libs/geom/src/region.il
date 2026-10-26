@@ -125,7 +125,7 @@ procedure(_InstallRegion(self "g")  ; -> t
                 n_sy = n_sy + n_a * g_c->y()
             )
             when(n_total > 0.0
-                Point(n_sx / n_total n_sy / n_total)
+                Point(list(n_sx / n_total n_sy / n_total))
             )
         )
     )

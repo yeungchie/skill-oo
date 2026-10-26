@@ -79,8 +79,8 @@ procedure(_InstallLine(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point) - anchor
-        Point(-self->_data->a * self->_data->c
-            -self->_data->b * self->_data->c)
+        Point(list(-self->_data->a * self->_data->c
+            -self->_data->b * self->_data->c))
     )
     self->direction = lambda(()  ; -> list[float]
         ; 返回单位方向向量。
@@ -108,8 +108,8 @@ procedure(_InstallLine(self "g")  ; -> t
             g_p = _AsPoint(g_point "ycGeom::Line->project")
             n_d = self->_data->a * g_p->x()
                 + self->_data->b * g_p->y() + self->_data->c
-            Point(g_p->x() - n_d * self->_data->a
-                g_p->y() - n_d * self->_data->b)
+            Point(list(g_p->x() - n_d * self->_data->a
+                g_p->y() - n_d * self->_data->b))
         )
     )
     self->distanceTo = lambda((g_point "g")  ; -> float
@@ -181,7 +181,7 @@ procedure(_InstallLine(self "g")  ; -> t
                             - g_other->b() * self->_data->c) / n_det
                         n_y = (self->_data->c * g_other->a()
                             - g_other->c() * self->_data->a) / n_det
-                        Point(n_x n_y)
+                        Point(list(n_x n_y))
                     )
                 )
                 (_SegmentP(g_other)
@@ -201,7 +201,7 @@ procedure(_InstallLine(self "g")  ; -> t
             g_a = self->anchor()
             g_d = self->direction()
             list(g_a->toSkill()
-                Point(g_a->x() + car(g_d) g_a->y() + cadr(g_d))->toSkill())
+                Point(list(g_a->x() + car(g_d) g_a->y() + cadr(g_d)))->toSkill())
         )
     )
     t
@@ -222,16 +222,16 @@ defmethod(initializeInstance (self(Line) \@rest _args)
 )
 )
 
-procedure(Line(\@rest l_args "g")  ; -> Line
+procedure(Line(l_data "l")  ; -> Line
     ; 构造不可变无限直线。
     ;
     ; **参数**
-    ;   l_args  (list) - 两个点、两点列表、四个坐标，或点列
+    ;   l_data  (list) - 两点列表、包一层的两点列表或四个坐标
     ;
     ; **返回**
     ;   (Line) - 规范化 a*x+b*y+c=0；重合点或格式不合法 error
     let((l_pts g_p1 g_p2 n_a n_b n_c n_norm)
-        l_pts = _TwoPoints(l_args "ycGeom::Line")
+        l_pts = _TwoPoints(l_data "ycGeom::Line")
         g_p1 = _Nth1(1 l_pts)
         g_p2 = _Nth1(2 l_pts)
         when(g_p1->equals(g_p2 ?eps _Eps(nil))

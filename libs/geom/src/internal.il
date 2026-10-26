@@ -176,8 +176,21 @@ procedure(_PairP(g_x "g")  ; -> t | nil
         && numberp(car(g_x)) && numberp(cadr(g_x))
 )
 
+procedure(_PointAt(n_x n_y "nn")  ; -> Point
+    ; 用已校验坐标直接构造 Point（内部实现）。
+    ;
+    ; **参数**
+    ;   n_x  (num) - x 坐标
+    ;   n_y  (num) - y 坐标
+    ;
+    ; **返回**
+    ;   (Point) - 新点
+    makeInstance('Point ?_data
+        makeInstance('PointData ?x float(n_x) ?y float(n_y)))
+)
+
 procedure(_AsPoint(g_x t_ctx "gt")  ; -> Point
-    ; 归一化为 Point：接受 Point 或 (x y) 数值列表。
+    ; 归一化为 Point：接受 Point、(x y) 或单元素包装列表。
     ;
     ; **参数**
     ;   g_x    (any) - Point 或 (x y)
@@ -187,13 +200,15 @@ procedure(_AsPoint(g_x t_ctx "gt")  ; -> Point
     ;   (Point) - 归一化后的点；无法识别时 error
     cond(
         (_PointP(g_x) g_x)
-        (_PairP(g_x) Point(g_x))
+        (_PairP(g_x) _PointAt(car(g_x) cadr(g_x)))
+        ((listp(g_x) && length(g_x) == 1)
+            _AsPoint(car(g_x) t_ctx))
         (t error("%s: expected a Point or (x y) list, got %A" t_ctx g_x))
     )
 )
 
 procedure(_AsPointList(l_data t_ctx "lt")  ; -> list[Point]
-    ; 归一化点列：接受 Point/(x y) 列表，或扁平数值列表。
+    ; 归一化点列：接受 Point/(x y) 列表、单层包装或扁平数值列表。
     ;
     ; **参数**
     ;   l_data  (list) - 点列或扁平坐标
@@ -206,84 +221,72 @@ procedure(_AsPointList(l_data t_ctx "lt")  ; -> list[Point]
             unless(listp(l_data)
                 error("%s: expected a point list, got %A" t_ctx l_data)
             )
-            if(numberp(car(l_data))
-            then
-                n_len = length(l_data)
-                unless(n_len - int(n_len / 2) * 2 == 0
-                    error("%s: coordinate list must have an even length" t_ctx)
+            cond(
+                (length(l_data) == 1
+                        && listp(car(l_data))
+                        && !_PairP(car(l_data))
+                    _AsPointList(car(l_data) t_ctx)
                 )
-                n_i = 1
-                while(n_i <= n_len
-                    unless(numberp(_Nth1(n_i l_data))
-                        && numberp(_Nth1(n_i + 1 l_data))
-                        error("%s: coordinate list contains non-numbers" t_ctx)
+                (numberp(car(l_data))
+                    n_len = length(l_data)
+                    unless(n_len - int(n_len / 2) * 2 == 0
+                        error("%s: coordinate list must have an even length" t_ctx)
                     )
-                    l_res = tconc(l_res Point(
-                        _Nth1(n_i l_data) _Nth1(n_i + 1 l_data)))
-                    n_i = n_i + 2
+                    n_i = 1
+                    while(n_i <= n_len
+                        unless(numberp(_Nth1(n_i l_data))
+                            && numberp(_Nth1(n_i + 1 l_data))
+                            error("%s: coordinate list contains non-numbers" t_ctx)
+                        )
+                        l_res = tconc(l_res _PointAt(
+                            _Nth1(n_i l_data) _Nth1(n_i + 1 l_data)))
+                        n_i = n_i + 2
+                    )
+                    car(l_res)
                 )
-                car(l_res)
-            else
-                foreach(g_item l_data
-                    l_res = tconc(l_res _AsPoint(g_item t_ctx))
+                (t
+                    foreach(g_item l_data
+                        l_res = tconc(l_res _AsPoint(g_item t_ctx))
+                    )
+                    car(l_res)
                 )
-                car(l_res)
             )
         )
     )
 )
 
-procedure(_TwoPoints(l_args t_ctx "lt")  ; -> list[Point]
-    ; 归一化“两点”构造参数。
+procedure(_TwoPoints(l_data t_ctx "lt")  ; -> list[Point]
+    ; 归一化“两点”构造参数：只接受一个列表。
     ;
     ; **参数**
-    ;   l_args  (list) - 构造实参
+    ;   l_data  (list) - 两点列表、包一层的两点列表或四个坐标
     ;   t_ctx   (str)  - 错误上下文
     ;
     ; **返回**
     ;   (list[Point]) - 两个点；格式不合法时 error
-    let((l_data n_len)
+    let((n_len)
+        unless(listp(l_data)
+            error("%s: expected a two-point list, got %A" t_ctx l_data)
+        )
+        n_len = length(l_data)
         cond(
-            (length(l_args) == 2
-                list(_AsPoint(_Nth1(1 l_args) t_ctx)
-                    _AsPoint(_Nth1(2 l_args) t_ctx)))
-            (length(l_args) == 4
-                unless(numberp(_Nth1(1 l_args)) && numberp(_Nth1(2 l_args))
-                    && numberp(_Nth1(3 l_args)) && numberp(_Nth1(4 l_args))
-                    error("%s: four coordinates must be numbers" t_ctx)
-                )
-                list(Point(_Nth1(1 l_args) _Nth1(2 l_args))
-                    Point(_Nth1(3 l_args) _Nth1(4 l_args)))
+            ((n_len == 2 && !numberp(car(l_data)))
+                list(_AsPoint(car(l_data) t_ctx)
+                    _AsPoint(cadr(l_data) t_ctx))
             )
-            (length(l_args) == 1
-                l_data = _Nth1(1 l_args)
-                unless(listp(l_data)
-                    error("%s: expected two points or four coordinates" t_ctx)
-                )
-                n_len = length(l_data)
-                cond(
-                    ((n_len == 2 && !numberp(car(l_data)))
-                        list(_AsPoint(car(l_data) t_ctx)
-                            _AsPoint(cadr(l_data) t_ctx)))
-                    ((n_len == 4 && numberp(car(l_data)))
-                        unless(numberp(cadr(l_data))
-                            && numberp(_Nth1(3 l_data))
-                            && numberp(_Nth1(4 l_data))
-                            error("%s: four coordinates must be numbers" t_ctx)
-                        )
-                        list(Point(car(l_data) cadr(l_data))
-                            Point(_Nth1(3 l_data) _Nth1(4 l_data)))
-                    )
-                    (t error("%s: expected two points or four coordinates" t_ctx))
-                )
+            ((n_len == 4 && numberp(car(l_data)))
+                _AsPointList(l_data t_ctx)
             )
-            (t error("%s: expected two points or four coordinates" t_ctx))
+            ((n_len == 1 && listp(car(l_data)))
+                _TwoPoints(car(l_data) t_ctx)
+            )
+            (t error("%s: expected a two-point list, got %A" t_ctx l_data))
         )
     )
 )
 
 procedure(_AsPolygonList(l_data t_ctx "lt")  ; -> list[Polygon]
-    ; 归一化多边形列表：接受 Polygon 或点列。
+    ; 归一化多边形列表：接受 Polygon/Rect/点列或它们的嵌套列表。
     ;
     ; **参数**
     ;   l_data  (list) - Polygon 列表或点列列表
@@ -291,21 +294,34 @@ procedure(_AsPolygonList(l_data t_ctx "lt")  ; -> list[Polygon]
     ;
     ; **返回**
     ;   (list[Polygon]) - 归一化多边形列表；格式不合法时 error
-    let((l_res)
+    let((l_res g_poly)
         when(l_data
             unless(listp(l_data)
                 error("%s: expected a Polygon list, got %A" t_ctx l_data)
             )
             foreach(g_item l_data
-                if(_PolygonP(g_item)
-                then
-                    l_res = tconc(l_res g_item)
-                else
-                    unless(listp(g_item)
-                        error("%s: expected a Polygon or point list, got %A"
+                cond(
+                    (_PolygonP(g_item)
+                        l_res = tconc(l_res g_item)
+                    )
+                    (_RectP(g_item)
+                        g_poly = _RectPolygon(g_item)
+                        when(g_poly
+                            l_res = tconc(l_res g_poly)
+                        )
+                    )
+                    (_RegionP(g_item)
+                        foreach(g_poly g_item->polygons()
+                            l_res = tconc(l_res g_poly)
+                        )
+                    )
+                    (listp(g_item)
+                        l_res = tconc(l_res Polygon(g_item))
+                    )
+                    (t
+                        error("%s: expected a Polygon, Rect, Region, or point list, got %A"
                             t_ctx g_item)
                     )
-                    l_res = tconc(l_res Polygon(g_item))
                 )
             )
             car(l_res)
@@ -314,33 +330,53 @@ procedure(_AsPolygonList(l_data t_ctx "lt")  ; -> list[Polygon]
 )
 
 procedure(_AsSegment(g_x t_ctx "gt")  ; -> Segment
-    ; 校验并返回 Segment。
+    ; 归一化为 Segment：接受 Segment 或两点数组。
     ;
     ; **参数**
     ;   g_x    (any) - 待校验对象
     ;   t_ctx  (str) - 错误上下文
     ;
     ; **返回**
-    ;   (Segment) - 原对象；非 Segment 时 error
-    unless(_SegmentP(g_x)
-        error("%s: expected a Segment, got %A" t_ctx g_x)
+    ;   (Segment) - 原对象或新线段；非法时 error
+    cond(
+        (_SegmentP(g_x) g_x)
+        (listp(g_x) Segment(g_x))
+        (t error("%s: expected a Segment or two-point array, got %A" t_ctx g_x))
     )
-    g_x
 )
 
 procedure(_AsLine(g_x t_ctx "gt")  ; -> Line
-    ; 校验并返回 Line。
+    ; 归一化为 Line：接受 Line 或两点数组。
     ;
     ; **参数**
     ;   g_x    (any) - 待校验对象
     ;   t_ctx  (str) - 错误上下文
     ;
     ; **返回**
-    ;   (Line) - 原对象；非 Line 时 error
-    unless(_LineP(g_x)
-        error("%s: expected a Line, got %A" t_ctx g_x)
+    ;   (Line) - 原对象或新直线；非法时 error
+    cond(
+        (_LineP(g_x) g_x)
+        (listp(g_x) Line(g_x))
+        (t error("%s: expected a Line or two-point array, got %A" t_ctx g_x))
     )
-    g_x
+)
+
+procedure(_GeomKind(g_x "g")  ; -> sym | nil
+    ; 返回图形对象的类别符号（内部实现）。
+    ;
+    ; **参数**
+    ;   g_x  (any) - 待判断对象
+    ;
+    ; **返回**
+    ;   (sym|nil) - Point/Segment/Line/Rect/Polygon/Region；非图形为 nil
+    cond(
+        (_PointP(g_x) 'Point)
+        (_SegmentP(g_x) 'Segment)
+        (_LineP(g_x) 'Line)
+        (_RectP(g_x) 'Rect)
+        (_PolygonP(g_x) 'Polygon)
+        (_RegionP(g_x) 'Region)
+    )
 )
 
 procedure(_AsPolygon(g_x t_ctx "gt")  ; -> Polygon
@@ -368,22 +404,135 @@ procedure(_AsRegion(g_x t_ctx "gt")  ; -> Region
     ;
     ; **返回**
     ;   (Region) - 原 Region，或由二维图形/点列构造的 Region；非法时 error
-    cond(
-        (_RegionP(g_x) g_x)
-        (_PolygonP(g_x) Region(list(g_x) ?normalize nil))
-        (_RectP(g_x)
-            let((g_poly)
+    let((l_pts g_poly l_res)
+        cond(
+            (_RegionP(g_x) g_x)
+            (_PolygonP(g_x) Region(list(g_x) ?normalize nil))
+            (_RectP(g_x)
                 g_poly = _RectPolygon(g_x)
                 if(g_poly
                     Region(list(g_poly) ?normalize nil)
                     Region(nil)
                 )
             )
+            (listp(g_x)
+                l_pts = errset(_AsPointList(g_x t_ctx) nil)
+                cond(
+                    ((l_pts && car(l_pts))
+                        l_pts = car(l_pts)
+                        cond(
+                            ((length(l_pts) == 2)
+                                g_poly = _RectPolygon(Rect(l_pts))
+                                if(g_poly
+                                    Region(list(g_poly) ?normalize nil)
+                                    Region(nil)
+                                )
+                            )
+                            ((length(l_pts) >= 3)
+                                Region(list(Polygon(l_pts)) ?normalize nil)
+                            )
+                            (t
+                                error("%s: expected a Region, Polygon, Rect, or point list, got %A"
+                                    t_ctx g_x)
+                            )
+                        )
+                    )
+                    (t
+                        l_res = errset(Region(g_x ?normalize nil) nil)
+                        if(l_res
+                        then
+                            car(l_res)
+                        else
+                            error("%s: expected a Region, Polygon, Rect, or point list, got %A"
+                                t_ctx g_x)
+                        )
+                    )
+                )
+            )
+            (t error("%s: expected a Region, Polygon, Rect, or point list, got %A"
+                t_ctx g_x))
         )
-        (listp(g_x) Region(list(Polygon(g_x)) ?normalize nil))
-        (t error("%s: expected a Region, Polygon, Rect, or point list, got %A"
-            t_ctx g_x))
     )
+)
+
+procedure(_ConvertToGeomObject(g_value t_ctx g_as "gtg")  ; -> any
+    ; 按目标类型转换原始数组或返回已有图形对象（内部实现）。
+    ;
+    ; **参数**
+    ;   g_value  (any)     - 图形对象或原始数组
+    ;   t_ctx    (str)     - 错误上下文
+    ;   g_as     (sym|nil) - 目标类型；nil 表示自动推断
+    ;
+    ; **返回**
+    ;   (any) - Point/Segment/Line/Rect/Polygon/Region
+    let((t_kind t_as t_actual l_pts l_res)
+        when(g_as && !symbolp(g_as)
+            error("%s: ?as must be a symbol, got %A" t_ctx g_as)
+        )
+        when(g_as
+            t_as = symbolToString(g_as)
+            unless(member(t_as '("Point" "Segment" "Line" "Rect" "Polygon" "Region"))
+                error("%s: ?as must be Point, Segment, Line, Rect, Polygon, or Region, got %A"
+                    t_ctx g_as)
+            )
+        )
+        t_kind = _GeomKind(g_value)
+        cond(
+            (t_kind
+                t_actual = symbolToString(t_kind)
+                if(t_as == nil || t_as == t_actual
+                then
+                    g_value
+                else
+                    error("%s: expected %s, got %A" t_ctx t_as g_value)
+                )
+            )
+            ((t_as == "Point") _AsPoint(g_value t_ctx))
+            ((t_as == "Segment") Segment(g_value))
+            ((t_as == "Line") Line(g_value))
+            ((t_as == "Rect") Rect(g_value))
+            ((t_as == "Polygon") Polygon(g_value))
+            ((t_as == "Region") _AsRegion(g_value t_ctx))
+            (t
+                l_pts = errset(_AsPointList(g_value t_ctx) nil)
+                cond(
+                    (l_pts
+                        l_pts = car(l_pts)
+                        cond(
+                            ((length(l_pts) == 1) car(l_pts))
+                            ((length(l_pts) == 2)
+                                error("%s: ambiguous two-point array; specify ?as 'Segment, 'Line, or 'Rect"
+                                    t_ctx)
+                            )
+                            (t Polygon(l_pts))
+                        )
+                    )
+                    (t
+                        l_res = errset(_AsRegion(g_value t_ctx) nil)
+                        if(l_res
+                        then
+                            car(l_res)
+                        else
+                            error("%s: expected a geometry object or coordinate array, got %A"
+                                t_ctx g_value)
+                        )
+                    )
+                )
+            )
+        )
+    )
+)
+
+procedure(ConvertToGeomObject(g_value \@key (as nil) "gg")  ; -> any
+    ; 把图形对象或原始坐标数组统一转换为几何对象。
+    ;
+    ; **参数**
+    ;   g_value  (any)     - 图形对象或坐标数组
+    ;   ?as      (sym|nil) - 目标类型；nil 表示自动推断
+    ;
+    ; **返回**
+    ;   (any) - Point/Segment/Line/Rect/Polygon/Region；无法确定时 error
+    _ConvertToGeomObject(g_value "ycGeom::ConvertToGeomObject" as)
 )
 
 procedure(_BoundaryMode(g_boundary "g")  ; -> str
