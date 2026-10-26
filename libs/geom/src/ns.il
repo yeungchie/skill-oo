@@ -81,8 +81,7 @@ addToNamespace("ycGeom"
         _NestLoops
         _RightmostIndex
         _Rotate
-        _BridgeVisible
-        _FindBridge
+        _AxisHit
         _SpliceHole
         _BuildPolygons
         _BoundaryMode

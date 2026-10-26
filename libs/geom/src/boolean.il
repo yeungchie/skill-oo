@@ -647,99 +647,117 @@ procedure(_Rotate(l_ring n_start "lx")  ; -> list[Point]
     )
 )
 
-procedure(_BridgeVisible(l_outer l_hole n_oi n_eps "llxg")  ; -> t | nil
-    ; 判断洞右点与外环顶点的桥是否可见。
+procedure(_AxisHit(l_outer g_h n_eps "lgg")  ; -> list | nil
+    ; 从洞右点向右投射水平线，找最近的实际边界交点。
     ;
     ; **参数**
-    ;   l_outer  (list[Point]) - 外环
-    ;   l_hole   (list[Point]) - 洞环，首点为 H
-    ;   n_oi     (int)         - 外环顶点下标
+    ;   l_outer  (list[Point]) - 当前 keyhole 点列
+    ;   g_h      (Point)       - 洞的最右点
     ;   n_eps    (float)       - 容差
     ;
     ; **返回**
-    ;   (t|nil) - 桥不与边界相交且中点位置正确
-    let((g_h g_o n_len n_i g_a g_b g_mid t_oh t_o g_ok)
-        g_h = car(l_hole)
-        g_o = _Nth1(n_oi l_outer)
-        t_oh = _PtKey(g_h)
-        t_o = _PtKey(g_o)
-        g_ok = t
+    ;   (list(num int)|nil) - 交点 x 与所在边下标；无交点为 nil
+    let((t_seams n_len n_i g_a g_b n_x n_bestX n_bestI n_ay n_by)
+        t_seams = _SeamKeys(l_outer)
         n_len = length(l_outer)
         for(n_i 1 n_len
-            when(g_ok
-                g_a = _Nth1(n_i l_outer)
-                g_b = _Nth1(if(n_i == n_len 1 n_i + 1) l_outer)
-                unless(_PtKey(g_a) == t_o || _PtKey(g_b) == t_o
-                    when(_SegmentsCross(g_h g_o g_a g_b n_eps)
-                        g_ok = nil
+            g_a = _Nth1(n_i l_outer)
+            g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_outer)
+            unless(t_seams[_EdgeKey(g_a g_b)] == 2
+                n_ay = g_a->y()
+                n_by = g_b->y()
+                cond(
+                    (_Near(n_ay g_h->y() n_eps)
+                        && _Near(n_by g_h->y() n_eps)
+                        n_x = min(g_a->x() g_b->x())
+                        when(n_x > g_h->x() + n_eps
+                            when(n_bestX == nil || n_x < n_bestX
+                                n_bestX = n_x
+                                n_bestI = n_i
+                            )
+                        )
+                    )
+                    (((n_ay < g_h->y() - n_eps
+                            && n_by > g_h->y() + n_eps)
+                        || (n_ay > g_h->y() + n_eps
+                            && n_by < g_h->y() - n_eps))
+                        n_x = g_a->x()
+                            + (g_h->y() - n_ay) * (g_b->x() - g_a->x())
+                            / (n_by - n_ay)
+                        when(n_x > g_h->x() + n_eps
+                            when(n_bestX == nil || n_x < n_bestX
+                                n_bestX = n_x
+                                n_bestI = n_i
+                            )
+                        )
+                    )
+                    (_Near(n_ay g_h->y() n_eps)
+                        n_x = g_a->x()
+                        when(n_x > g_h->x() + n_eps
+                            when(n_bestX == nil || n_x < n_bestX
+                                n_bestX = n_x
+                                n_bestI = n_i
+                            )
+                        )
+                    )
+                    (_Near(n_by g_h->y() n_eps)
+                        n_x = g_b->x()
+                        when(n_x > g_h->x() + n_eps
+                            when(n_bestX == nil || n_x < n_bestX
+                                n_bestX = n_x
+                                n_bestI = n_i
+                            )
+                        )
                     )
                 )
             )
         )
-        n_len = length(l_hole)
-        for(n_i 1 n_len
-            when(g_ok
-                g_a = _Nth1(n_i l_hole)
-                g_b = _Nth1(if(n_i == n_len 1 n_i + 1) l_hole)
-                unless(_PtKey(g_a) == t_oh || _PtKey(g_b) == t_oh
-                    when(_SegmentsCross(g_h g_o g_a g_b n_eps)
-                        g_ok = nil
-                    )
-                )
-            )
-        )
-        when(g_ok
-            g_mid = Point((g_h->x() + g_o->x()) / 2.0
-                (g_h->y() + g_o->y()) / 2.0)
-            g_ok = _PointInRing(l_outer g_mid n_eps)
-                && !_PointInRing(l_hole g_mid n_eps)
-        )
-        g_ok
-    )
-)
-
-procedure(_FindBridge(l_outer l_hole n_eps "llg")  ; -> int | nil
-    ; 选择距离最近的可见桥。
-    ;
-    ; **参数**
-    ;   l_outer  (list[Point]) - 外环
-    ;   l_hole   (list[Point]) - 洞环，首点为 H
-    ;   n_eps    (float)       - 容差
-    ;
-    ; **返回**
-    ;   (int|nil) - 外环顶点下标；无可见桥为 nil
-    let((n_best n_bestDist n_i n_dist)
-        n_bestDist = 0.0
-        for(n_i 1 length(l_outer)
-            when(_BridgeVisible(l_outer l_hole n_i n_eps)
-                n_dist = _Nth1(n_i l_outer)->distanceTo(car(l_hole))
-                when(n_best == nil || n_dist < n_bestDist
-                    n_best = n_i
-                    n_bestDist = n_dist
-                )
-            )
-        )
-        n_best
+        when(n_bestX list(n_bestX n_bestI))
     )
 )
 
 procedure(_SpliceHole(l_outer l_hole n_eps "llg")  ; -> list[Point]
-    ; 把洞环用切割线接回外环。
+    ; 把洞环用水平切割线接回当前 keyhole 点列。
     ;
     ; **参数**
-    ;   l_outer  (list[Point]) - 外环
+    ;   l_outer  (list[Point]) - 外环或已拼接的 keyhole 点列
     ;   l_hole   (list[Point]) - 洞环
     ;   n_eps    (float)       - 容差
     ;
     ; **返回**
-    ;   (list[Point]) - keyhole 点列
-    let((n_hi l_h n_oi l_prefix l_suffix g_o g_h n_i)
+    ;   (list[Point]) - 新增水平切割线的 keyhole 点列
+    let((n_hi l_h g_h l_hit n_x n_ei n_len n_i g_a g_b g_o n_oi l_new l_prefix l_suffix)
         n_hi = _RightmostIndex(l_hole n_eps)
         l_h = _Rotate(l_hole n_hi)
         g_h = car(l_h)
-        n_oi = _FindBridge(l_outer l_h n_eps)
-        unless(n_oi
-            error("ycGeom::_SpliceHole: no visible bridge for hole")
+        l_hit = _AxisHit(l_outer g_h n_eps)
+        unless(l_hit
+            error("ycGeom::_SpliceHole: no axis-aligned bridge for hole")
+        )
+        n_x = car(l_hit)
+        n_ei = cadr(l_hit)
+        g_a = _Nth1(n_ei l_outer)
+        g_b = _Nth1(if(n_ei == length(l_outer) 1 (n_ei + 1)) l_outer)
+        g_o = Point(n_x g_h->y())
+        cond(
+            (_SamePoint(g_o g_a n_eps)
+                n_oi = n_ei
+            )
+            (_SamePoint(g_o g_b n_eps)
+                n_oi = if(n_ei == length(l_outer) 1 (n_ei + 1))
+            )
+            (t
+                l_new = nil
+                n_len = length(l_outer)
+                for(n_i 1 n_len
+                    l_new = tconc(l_new _Nth1(n_i l_outer))
+                    when(n_i == n_ei
+                        l_new = tconc(l_new g_o)
+                    )
+                )
+                l_outer = car(l_new)
+                n_oi = n_ei + 1
+            )
         )
         g_o = _Nth1(n_oi l_outer)
         for(n_i 1 n_oi

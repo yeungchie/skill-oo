@@ -17,6 +17,36 @@ procedure(_BoolArea(l_polys "l")  ; -> float
     )
 )
 
+procedure(_AssertAxisSeams(l_polys "l")  ; -> t
+    ; 断言 keyhole 切割边都是水平或垂直方向（测试辅助）。
+    ;
+    ; **参数**
+    ;   l_polys  (list[Polygon]) - 多边形列表
+    ;
+    ; **返回**
+    ;   (t) - 全部通过；否则测试失败
+    let((n_seams n_len n_i g_a g_b t_seams)
+        n_seams = 0
+        foreach(g_p l_polys
+            t_seams = ycGeom::_SeamKeys(g_p->points())
+            n_len = length(g_p->points())
+            for(n_i 1 n_len
+                g_a = ycGeom::_Nth1(n_i g_p->points())
+                g_b = ycGeom::_Nth1(
+                    if(n_i == n_len 1 (n_i + 1)) g_p->points())
+                when(t_seams[ycGeom::_EdgeKey(g_a g_b)] == 2
+                    n_seams++
+                    _Assert(ycGeom::_Near(g_a->x() g_b->x() 1e-9)
+                        || ycGeom::_Near(g_a->y() g_b->y() 1e-9)
+                        "boolean: keyhole seam is axis-aligned")
+                )
+            )
+        )
+        _Assert(n_seams > 0 "boolean: keyhole seam exists")
+        t
+    )
+)
+
 let((l_a l_b l_r)
     l_a = list(ycGeom::Polygon(list(
         ycGeom::Point(0 0) ycGeom::Point(4 0)
@@ -70,10 +100,30 @@ let((g_outer g_inner l_r)
         ycGeom::Point(7 7) ycGeom::Point(3 7)
     ))
     l_r = ycGeom::_Boolean(list(g_outer) list(g_inner) 'difference nil 1e-9)
+    _AssertAxisSeams(l_r)
     _Assert(_BoolArea(l_r) == 84.0  "boolean: difference creates hole")
     _Assert(length(car(l_r)->points()) > 8  "boolean: keyhole output")
     _Assert(!car(l_r)->contains(ycGeom::Point(5 5))  "boolean: hole excluded")
     _Assert(car(l_r)->contains(ycGeom::Point(1 1))  "boolean: outer included")
+)
+
+let((g_outer g_h1 g_h2 g_r)
+    g_outer = ycGeom::Polygon('((0 0) (20 0) (20 10) (0 10)))
+    g_h1 = ycGeom::Polygon('((1 1) (3 1) (3 3) (1 3)))
+    g_h2 = ycGeom::Polygon('((5 1) (7 1) (7 3) (5 3)))
+    g_r = ycGeom::_Boolean(list(g_outer) list(g_h1 g_h2) 'difference nil 1e-9)
+    _AssertAxisSeams(g_r)
+    _Assert(_BoolArea(g_r) == 192.0  "boolean: two holes area")
+    _Assert(!car(g_r)->contains(ycGeom::Point(2 2))  "boolean: first hole excluded")
+    _Assert(!car(g_r)->contains(ycGeom::Point(6 2))  "boolean: second hole excluded")
+)
+
+let((g_outer g_hole g_r)
+    g_outer = ycGeom::Polygon('((0 0) (10 0) (0 10)))
+    g_hole = ycGeom::Polygon('((1 1) (3 1) (3 3) (1 3)))
+    g_r = ycGeom::_Boolean(list(g_outer) list(g_hole) 'difference nil 1e-9)
+    _AssertAxisSeams(g_r)
+    _Assert(_BoolArea(g_r) == 46.0  "boolean: slanted outer area")
 )
 
 let((g_a g_b g_r)

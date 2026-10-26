@@ -81,6 +81,12 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
         for(n_i 1 n_len
             g_a = _Nth1(n_i l_points)
             g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_points)
+            when(t_seams[_EdgeKey(g_a g_b)] == 2
+                unless(_Near(g_a->x() g_b->x() n_eps)
+                    || _Near(g_a->y() g_b->y() n_eps)
+                    error("ycGeom::Polygon: seam must be horizontal or vertical")
+                )
+            )
             unless(t_seams[_EdgeKey(g_a g_b)] == 2
                 for(n_j 1 n_len
                     when(n_j > n_i

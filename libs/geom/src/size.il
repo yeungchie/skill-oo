@@ -146,6 +146,7 @@ procedure(_SizeOrientRings(l_rings "l")  ; -> list[list[Point]]
     let((n_max l_infos l_res)
         foreach(l_ring l_rings
             let((n_area)
+                l_ring = _CollinearClean(l_ring _Eps(nil))
                 n_area = abs(_SignedArea(l_ring))
                 l_infos = tconc(l_infos list(l_ring n_area))
                 when(n_max == nil || n_area > n_max

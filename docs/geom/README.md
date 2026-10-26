@@ -7,7 +7,7 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole �
 ## 概要
 
 - 所有坐标在构造时转为浮点数；整数输入不会产生舍入误差，`toSkill()` 始终输出浮点坐标。
-- `Polygon` 只保存闭合点列；洞用切割线并入外环。
+- `Polygon` 只保存闭合点列；洞用水平或垂直切割线并入外环。
 - `perimeter()` 默认扣除切割线，`?includeSeams t` 时按完整点列环计算。
 - `Region` 表示 0..n 个多边形的并集，默认归一化为互不重叠的多边形集合。
 - `?eps` 默认 `1e-9`；比较同时吸收坐标量级的机器精度相对误差；`?grid` 为正数或 nil；参数类型不符或取值非法时以 `error()` 中断。
@@ -1083,7 +1083,7 @@ ycGeom::Polygon(l_points)
 
 **描述**
 
-构造不可变 keyhole 多边形。`l_points` 接受 Point 列表、`(x y)` 列表或扁平数值坐标；切割边以同一无向边往返出现两次表示；非法点列以 `error()` 中断。
+构造不可变 keyhole 多边形。`l_points` 接受 Point 列表、`(x y)` 列表或扁平数值坐标；切割边以同一无向边往返出现两次表示，且必须是水平或垂直方向；非法点列以 `error()` 中断。
 
 **参数**
 
@@ -1885,28 +1885,29 @@ ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->toSkill()
 
 ### keyhole 多边形
 
-有洞多边形使用切割线把内环并入外环：
+有洞多边形使用水平或垂直切割线把内环并入外环：
 
 ```text
-外环若干点 -> 切割线进入内环 -> 内环一圈 -> 沿切割线返回 -> 外环剩余点
+外环若干点 -> 水平/垂直切割线进入内环 -> 内环一圈 -> 沿切割线返回 -> 外环剩余点
 ```
 
-切割边通过同一无向边出现两次识别，不写入对象状态。外环与洞环应反向绕行；布尔运算输出保证这一点。
+切割边通过同一无向边出现两次识别，不写入对象状态。切割线只能是水平或垂直方向，斜线切割以 `error()` 中断。外环与洞环应反向绕行；布尔运算输出保证这一点，并优先使用水平切割线。
 
-![keyhole 多边形的外环、洞与切割线](img/keyhole.svg)
+![keyhole 多边形的外环、洞与水平切割线](img/keyhole.svg)
 
-*图：外环通过切割线连接内洞。*
+*图：外环通过水平切割线连接内洞。*
 
 ```lisp
 g_hole = ycGeom::Polygon(list(
     ycGeom::Point(0 0)
     ycGeom::Point(10 0)
-    ycGeom::Point(3 3)
-    ycGeom::Point(3 7)
+    ycGeom::Point(10 7)
     ycGeom::Point(7 7)
     ycGeom::Point(7 3)
     ycGeom::Point(3 3)
-    ycGeom::Point(10 0)
+    ycGeom::Point(3 7)
+    ycGeom::Point(7 7)
+    ycGeom::Point(10 7)
     ycGeom::Point(10 10)
     ycGeom::Point(0 10)
 ))
