@@ -174,9 +174,7 @@ procedure(_AsPointList(l_data t_ctx "lt")  ; -> list[Point]
     ; **返回**
     ;   (list[Point]) - 归一化点列；格式不合法时 error
     let((l_res n_len n_i)
-        if(l_data == nil
-            nil
-            progn(
+        when(l_data
             unless(listp(l_data)
                 error("%s: expected a point list, got %A" t_ctx l_data)
             )
@@ -204,7 +202,6 @@ procedure(_AsPointList(l_data t_ctx "lt")  ; -> list[Point]
                     )
                     car(l_res)
                 )
-            )
             )
         )
     )
@@ -269,28 +266,23 @@ procedure(_AsPolygonList(l_data t_ctx "lt")  ; -> list[Polygon]
     ; **返回**
     ;   (list[Polygon]) - 归一化多边形列表；格式不合法时 error
     let((l_res)
-        if(l_data == nil
-            nil
-            progn(
+        when(l_data
             unless(listp(l_data)
                 error("%s: expected a Polygon list, got %A" t_ctx l_data)
             )
-            progn(
-                foreach(g_item l_data
-                    if(_PolygonP(g_item)
-                        l_res = tconc(l_res g_item)
-                        progn(
-                            unless(listp(g_item)
-                                error("%s: expected a Polygon or point list, got %A"
-                                    t_ctx g_item)
-                            )
-                            l_res = tconc(l_res Polygon(g_item))
+            foreach(g_item l_data
+                if(_PolygonP(g_item)
+                    l_res = tconc(l_res g_item)
+                    progn(
+                        unless(listp(g_item)
+                            error("%s: expected a Polygon or point list, got %A"
+                                t_ctx g_item)
                         )
+                        l_res = tconc(l_res Polygon(g_item))
                     )
                 )
-                car(l_res)
             )
-            )
+            car(l_res)
         )
     )
 )
@@ -334,12 +326,10 @@ procedure(_AsPolygon(g_x t_ctx "gt")  ; -> Polygon
     ;
     ; **返回**
     ;   (Polygon) - 原对象或由点列构造的新对象；非法时 error
-    if(_PolygonP(g_x)
-        g_x
-        if(listp(g_x)
-            Polygon(g_x)
-            error("%s: expected a Polygon or point list, got %A" t_ctx g_x)
-        )
+    cond(
+        (_PolygonP(g_x) g_x)
+        (listp(g_x) Polygon(g_x))
+        (t error("%s: expected a Polygon or point list, got %A" t_ctx g_x))
     )
 )
 

@@ -238,8 +238,7 @@ procedure(Wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") 
         unless(n_availSub >= 1
             error("ycTextwrap::Wrap: subsequentIndent leaves no room within width %d" width)
         )
-        if(t_text == ""
-            nil
+        unless(t_text == ""
             let((l_lines l_out l_meta g_first g_any)
                 l_out = cons(nil nil)
                 l_meta = cons(nil nil)
@@ -315,8 +314,7 @@ procedure(Wrap(t_text \@key (width 70) (initialIndent "") (subsequentIndent "") 
                         )
                         l_final
                     )
-                    if(!g_any && index(t_text "\n") == nil
-                        nil
+                    unless(!g_any && index(t_text "\n") == nil
                         car(l_out)
                     )
                 )

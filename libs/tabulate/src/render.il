@@ -48,7 +48,11 @@ procedure(Render(l_rows \@key (headers nil) (format "simple") (align "left") (fl
         error("ycTabulate::Render: invalid floatFmt %A" floatFmt)
     )
     let((n_cols l_head l_cellRows l_aligns l_decs l_widths)
-        n_cols = if(headers length(headers) if(l_rows length(car(l_rows)) 0))
+        n_cols = cond(
+            (headers length(headers))
+            (l_rows length(car(l_rows)))
+            (t 0)
+        )
         if(n_cols == 0
             ""
             progn(

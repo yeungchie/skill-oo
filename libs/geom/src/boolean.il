@@ -89,7 +89,7 @@ procedure(_EdgeT(g_a g_b g_p "ggg")  ; -> float
             progn(
                 n_t = ((g_p->x() - g_a->x()) * n_dx
                     + (g_p->y() - g_a->y()) * n_dy) / n_den
-                if(n_t < 0.0 0.0 if(n_t > 1.0 1.0 n_t))
+                max(0.0 min(1.0 n_t))
             )
         )
     )

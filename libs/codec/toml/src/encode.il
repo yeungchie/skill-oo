@@ -122,22 +122,26 @@ procedure(_EncodeNumber(g_n "n")  ; -> str
     ;
     ; **返回**
     ;   (str) - TOML 数字文本
-    if(fixp(g_n)
-        sprintf(nil "%d" g_n)
-        if(isNaN(g_n)
+    cond(
+        (fixp(g_n)
+            sprintf(nil "%d" g_n)
+        )
+        (isNaN(g_n)
             "nan"
-            if(isInfinity(g_n)
-                if(0 < g_n "inf" "-inf")
-                let((t_s)
-                    t_s = sprintf(nil "%.15g" g_n)
-                    unless(atof(t_s) == g_n
-                        t_s = sprintf(nil "%.17g" g_n)
-                    )
-                    unless(pcreMatchp("[.eE]" t_s)
-                        t_s = strcat(t_s ".0")
-                    )
-                    t_s
+        )
+        (isInfinity(g_n)
+            if(0 < g_n "inf" "-inf")
+        )
+        (t
+            let((t_s)
+                t_s = sprintf(nil "%.15g" g_n)
+                unless(atof(t_s) == g_n
+                    t_s = sprintf(nil "%.17g" g_n)
                 )
+                unless(pcreMatchp("[.eE]" t_s)
+                    t_s = strcat(t_s ".0")
+                )
+                t_s
             )
         )
     )
@@ -404,12 +408,12 @@ procedure(Encode(g_val \@key (sortKeys nil) (strict nil) (finalNewline t) (maxDe
         g_opt["maxDepth"] = maxDepth
         l_p = _EmitBody(nil g_val nil 0 g_opt)
         t_out = buildString(car(l_p) "\n")
-        if(t_out == ""
-            ""
-            if(finalNewline
+        cond(
+            (t_out == "" "")
+            (finalNewline
                 strcat(t_out "\n")
-                t_out
             )
+            (t t_out)
         )
     )
 )

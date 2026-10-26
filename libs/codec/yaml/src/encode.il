@@ -147,12 +147,10 @@ procedure(_EncodeKey(g_key g_opt "gg")  ; -> str
         unless(t_s
             error("ycYaml::Encode: unsupported table key of type %s" symbolToString(type(g_key)))
         )
-        if(fixp(g_key)
-            t_s
-            if(_PlainSafe(t_s) && !pcreMatchp("[ 	]" t_s)
-                t_s
-                _EncodeString(t_s)
-            )
+        cond(
+            (fixp(g_key) t_s)
+            (_PlainSafe(t_s) && !pcreMatchp("[ 	]" t_s) t_s)
+            (t _EncodeString(t_s))
         )
     )
 )
@@ -442,9 +440,10 @@ procedure(Encode(g_val \@key (format "yaml") (indent nil) (sortKeys nil) (strict
                     )
                 )
                 t_s = buildString(car(l_docs) "\n")
-                if(t_s == ""
-                    ""
-                    if(finalNewline strcat(t_s "\n") t_s)
+                cond(
+                    (t_s == "" "")
+                    (finalNewline strcat(t_s "\n"))
+                    (t t_s)
                 )
             )
             (t

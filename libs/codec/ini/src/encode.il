@@ -93,12 +93,12 @@ procedure(Encode(g_val \@key (sortKeys nil) (strict nil) (delimiter nil) (finalN
             l_p = _EmitSection(l_p g_val g_key g_opt)
         )
         t_out = buildString(car(l_p) "\n")
-        if(t_out == ""
-            ""
-            if(finalNewline
+        cond(
+            (t_out == "" "")
+            (finalNewline
                 strcat(t_out "\n")
-                t_out
             )
+            (t t_out)
         )
     )
 )

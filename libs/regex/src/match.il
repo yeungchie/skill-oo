@@ -210,7 +210,7 @@ procedure(_ExportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
     ;   (list|sym) - (start end . groups) 记录列表；无命中 nil；需回退 'fallback
     let((l_marks t_m t_g t_tpl t_out t_rest t_seg t_tail t_whole l_groups l_res
           n_delta n_out n_start n_consumed n_k t_cur)
-        if(pcreMatchp(g_pat->_data->pcre t_subj 0 n_exec)
+        when(pcreMatchp(g_pat->_data->pcre t_subj 0 n_exec)
             progn(
                 l_marks = _ExportMarkers(t_subj)
                 t_m = car(l_marks)
@@ -262,7 +262,6 @@ procedure(_ExportRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
                 )
                 if(l_res == 'fallback 'fallback car(l_res))
             )
-            nil
         )
     )
 )
@@ -418,15 +417,12 @@ procedure(_ZeroAtStart(g_pat t_subj n_exec "gtx")  ; -> list | sym
     ; **返回**
     ;   (list|sym) - 位置 0 的零宽记录；非零宽或不匹配时回 'fallback/nil
     let((l_parts)
-        if(pcreMatchp(g_pat->_data->span t_subj 0 n_exec)
-            progn(
-                l_parts = _ExtractParts(g_pat g_pat->_data->span)
-                if(length(car(l_parts)) == 0
-                    list(cons(0 cons(0 cdr(l_parts))))
-                    'fallback
-                )
+        when(pcreMatchp(g_pat->_data->span t_subj 0 n_exec)
+            l_parts = _ExtractParts(g_pat g_pat->_data->span)
+            if(length(car(l_parts)) == 0
+                list(cons(0 cons(0 cdr(l_parts))))
+                'fallback
             )
-            nil
         )
     )
 )
@@ -473,7 +469,7 @@ procedure(_ZeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
                                     )
                                 )
                                 when(!g_bad
-                                    l_res = if(l_0 tconc(nil l_0) nil)
+                                    l_res = when(l_0 tconc(nil l_0))
                                     foreach(l_m l_q
                                         l_qgroups = cdr(cdr(l_m))
                                         if(length(l_qgroups) < 2

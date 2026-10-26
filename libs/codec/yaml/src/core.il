@@ -27,9 +27,14 @@ procedure(_Build(l_p "l")  ; -> str
     ;
     ; **返回**
     ;   (str) - 各片段顺序拼接
-    if(l_p && listp(car(l_p))
-        buildString(car(l_p) "")
-        if(l_p buildString(l_p "") "")
+    cond(
+        (l_p && listp(car(l_p))
+            buildString(car(l_p) "")
+        )
+        (l_p
+            buildString(l_p "")
+        )
+        (t "")
     )
 )
 
@@ -42,9 +47,14 @@ procedure(_JoinBuild(l_p t_sep "lt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 拼接结果；空列表为空串
-    if(l_p && listp(car(l_p))
-        buildString(car(l_p) t_sep)
-        if(l_p buildString(l_p t_sep) "")
+    cond(
+        (l_p && listp(car(l_p))
+            buildString(car(l_p) t_sep)
+        )
+        (l_p
+            buildString(l_p t_sep)
+        )
+        (t "")
     )
 )
 

@@ -57,12 +57,10 @@ procedure(_Mask(n_bits t_ctx "xt")  ; -> int
     unless(fixp(n_bits) && 0 <= n_bits && n_bits <= 32
         error("%s: bits must be an integer in 0..32, got %A" t_ctx n_bits)
     )
-    if(n_bits == 0
-        0
-        if(n_bits == 32
-            -1
-            (1 << n_bits) - 1
-        )
+    case(n_bits
+        (0 0)
+        (32 -1)
+        (t (1 << n_bits) - 1)
     )
 )
 
@@ -138,20 +136,24 @@ procedure(Parse(t_text \@key (base nil) (prefix t) (wrap nil) "tggg")  ; -> int
             )
             n_i = n_i + 1
         )
-        if(g_neg
-            let((n_val)
-                when(f_acc > 2147483648.0
-                    error("ycRadix::Parse: value out of 32-bit range in %A" t_text)
+        cond(
+            (g_neg
+                let((n_val)
+                    when(f_acc > 2147483648.0
+                        error("ycRadix::Parse: value out of 32-bit range in %A" t_text)
+                    )
+                    n_val = int(0.0 - f_acc)
+                    n_val
                 )
-                n_val = int(0.0 - f_acc)
-                n_val
             )
-            if(f_acc <= 2147483647.0
+            (f_acc <= 2147483647.0
                 int(f_acc)
-                if(wrap
-                    int(f_acc - 4294967296.0)
-                    error("ycRadix::Parse: value out of signed 32-bit range; use ?wrap t for bit patterns")
-                )
+            )
+            (wrap
+                int(f_acc - 4294967296.0)
+            )
+            (t
+                error("ycRadix::Parse: value out of signed 32-bit range; use ?wrap t for bit patterns")
             )
         )
     )

@@ -147,10 +147,14 @@ procedure(_PrefixScale(t_rest g_space "tg")  ; -> list
                     )
                 )
             )
-            if(l_found
-                list(t_factor t_tail)
-                if(t_rest == ""
+            cond(
+                (l_found
+                    list(t_factor t_tail)
+                )
+                (t_rest == ""
                     list(1.0 "")
+                )
+                (t
                     let((n_factor)
                         n_factor = _ShortFactor(charToInt(getchar(t_rest 1)))
                         if(n_factor
@@ -236,7 +240,7 @@ procedure(_Parse(t_str t_ctx "tt")  ; -> list
         when(n_i <= n_len && (charToInt(getchar(t_str n_i)) == 101 || charToInt(getchar(t_str n_i)) == 69)
             n_expStart = n_i
             n_i = n_i + 1
-            n_b = if(n_i <= n_len charToInt(getchar(t_str n_i)) nil)
+            n_b = when(n_i <= n_len charToInt(getchar(t_str n_i)))
             when(n_b == 43 || n_b == 45
                 n_i = n_i + 1
             )

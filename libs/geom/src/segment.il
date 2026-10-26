@@ -76,31 +76,26 @@ procedure(_LineSegmentIntersection(g_line g_seg n_eps "ggg")  ; -> Point | Segme
         n_c = g_line->c()
         g_s = g_seg->start()
         g_e = g_seg->end()
-        if(g_s->equals(g_e ?eps n_eps)
-            when(g_line->contains(g_s ?eps n_eps) g_s)
-            if(g_line->contains(g_s ?eps n_eps) && g_line->contains(g_e ?eps n_eps)
+        cond(
+            (g_s->equals(g_e ?eps n_eps)
+                when(g_line->contains(g_s ?eps n_eps) g_s)
+            )
+            (g_line->contains(g_s ?eps n_eps)
+                && g_line->contains(g_e ?eps n_eps)
                 g_seg
-                if(g_line->contains(g_s ?eps n_eps)
-                    g_s
-                    if(g_line->contains(g_e ?eps n_eps)
-                        g_e
-                        progn(
-                            n_dx = g_e->x() - g_s->x()
-                            n_dy = g_e->y() - g_s->y()
-                            n_den = n_a * n_dx + n_b * n_dy
-                            if(abs(n_den) <= n_eps
-                                nil
-                                progn(
-                                    n_x0 = g_s->x()
-                                    n_y0 = g_s->y()
-                                    n_t = -(n_a * n_x0 + n_b * n_y0 + n_c) / n_den
-                                    if(n_t >= -n_eps && n_t <= 1.0 + n_eps
-                                        _SegPointAt(g_s g_e n_t)
-                                        nil
-                                    )
-                                )
-                            )
-                        )
+            )
+            (g_line->contains(g_s ?eps n_eps) g_s)
+            (g_line->contains(g_e ?eps n_eps) g_e)
+            (t
+                n_dx = g_e->x() - g_s->x()
+                n_dy = g_e->y() - g_s->y()
+                n_den = n_a * n_dx + n_b * n_dy
+                unless(abs(n_den) <= n_eps
+                    n_x0 = g_s->x()
+                    n_y0 = g_s->y()
+                    n_t = -(n_a * n_x0 + n_b * n_y0 + n_c) / n_den
+                    when(n_t >= -n_eps && n_t <= 1.0 + n_eps
+                        _SegPointAt(g_s g_e n_t)
                     )
                 )
             )
@@ -122,33 +117,34 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggg")  ; -> Point | Segme
     ;   (Point|Segment|nil) - 唯一交点、重叠线段或无交
     let((n_rx n_ry n_sx n_sy n_qx n_qy n_qpx n_qpy n_rxs n_qpxr
          n_rr n_t0 n_t1 n_min n_max n_t n_u)
-        if(g_a->equals(g_b ?eps n_eps) && g_c->equals(g_d ?eps n_eps)
-            when(g_a->equals(g_c ?eps n_eps) g_a)
-            if(g_a->equals(g_b ?eps n_eps)
+        cond(
+            (g_a->equals(g_b ?eps n_eps) && g_c->equals(g_d ?eps n_eps)
+                when(g_a->equals(g_c ?eps n_eps) g_a)
+            )
+            (g_a->equals(g_b ?eps n_eps)
                 when(_OnSegment(g_c g_d g_a n_eps) g_a)
-                if(g_c->equals(g_d ?eps n_eps)
-                    when(_OnSegment(g_a g_b g_c n_eps) g_c)
-                    progn(
-                    n_rx = g_b->x() - g_a->x()
-        n_ry = g_b->y() - g_a->y()
-        n_sx = g_d->x() - g_c->x()
-        n_sy = g_d->y() - g_c->y()
-        n_qpx = g_c->x() - g_a->x()
-        n_qpy = g_c->y() - g_a->y()
-        n_rxs = n_rx * n_sy - n_ry * n_sx
-        n_qpxr = n_qpx * n_ry - n_qpy * n_rx
-        n_rr = n_rx * n_rx + n_ry * n_ry
-        if(abs(n_rxs) <= n_eps
-            if(abs(n_qpxr) <= n_eps
-                progn(
-                    n_t0 = (n_qpx * n_rx + n_qpy * n_ry) / n_rr
-                    n_t1 = ((g_d->x() - g_a->x()) * n_rx
-                        + (g_d->y() - g_a->y()) * n_ry) / n_rr
-                    n_min = min(n_t0 n_t1)
-                    n_max = max(n_t0 n_t1)
-                    if(n_max < -n_eps || n_min > 1.0 + n_eps
-                        nil
-                        progn(
+            )
+            (g_c->equals(g_d ?eps n_eps)
+                when(_OnSegment(g_a g_b g_c n_eps) g_c)
+            )
+            (t
+                n_rx = g_b->x() - g_a->x()
+                n_ry = g_b->y() - g_a->y()
+                n_sx = g_d->x() - g_c->x()
+                n_sy = g_d->y() - g_c->y()
+                n_qpx = g_c->x() - g_a->x()
+                n_qpy = g_c->y() - g_a->y()
+                n_rxs = n_rx * n_sy - n_ry * n_sx
+                n_qpxr = n_qpx * n_ry - n_qpy * n_rx
+                n_rr = n_rx * n_rx + n_ry * n_ry
+                if(abs(n_rxs) <= n_eps
+                    when(abs(n_qpxr) <= n_eps
+                        n_t0 = (n_qpx * n_rx + n_qpy * n_ry) / n_rr
+                        n_t1 = ((g_d->x() - g_a->x()) * n_rx
+                            + (g_d->y() - g_a->y()) * n_ry) / n_rr
+                        n_min = min(n_t0 n_t1)
+                        n_max = max(n_t0 n_t1)
+                        unless(n_max < -n_eps || n_min > 1.0 + n_eps
                             n_min = max(n_min 0.0)
                             n_max = min(n_max 1.0)
                             if(_Near(n_min n_max n_eps)
@@ -158,19 +154,13 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggg")  ; -> Point | Segme
                             )
                         )
                     )
-                )
-                nil
-            )
-            progn(
-                n_t = (n_qpx * n_sy - n_qpy * n_sx) / n_rxs
-                n_u = (n_qpx * n_ry - n_qpy * n_rx) / n_rxs
-                if(n_t >= -n_eps && n_t <= 1.0 + n_eps
-                    && n_u >= -n_eps && n_u <= 1.0 + n_eps
-                    _SegPointAt(g_a g_b n_t)
-                    nil
-                )
-            )
-        )
+                    progn(
+                        n_t = (n_qpx * n_sy - n_qpy * n_sx) / n_rxs
+                        n_u = (n_qpx * n_ry - n_qpy * n_rx) / n_rxs
+                        when(n_t >= -n_eps && n_t <= 1.0 + n_eps
+                            && n_u >= -n_eps && n_u <= 1.0 + n_eps
+                            _SegPointAt(g_a g_b n_t)
+                        )
                     )
                 )
             )
@@ -273,7 +263,7 @@ procedure(_InstallSegment(self "g")  ; -> t
                 progn(
                     n_t = ((g_p->x() - self->_data->start->x()) * n_dx
                         + (g_p->y() - self->_data->start->y()) * n_dy) / n_den
-                    n_t = if(n_t < 0.0 0.0 if(n_t > 1.0 1.0 n_t))
+                    n_t = max(0.0 min(1.0 n_t))
                     _SegPointAt(self->_data->start self->_data->end n_t)
                 )
             )

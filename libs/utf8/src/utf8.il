@@ -85,12 +85,12 @@ procedure(_Read(t_s n_i g_strict t_ctx "txgt")  ; -> list
     ;   (list) - (码点 下一位置)
     let((l_res)
         l_res = _Next(t_s n_i)
-        if(car(l_res)
-            l_res
-            if(g_strict
+        cond(
+            (car(l_res) l_res)
+            (g_strict
                 error("%s: invalid UTF-8 at byte %d" t_ctx n_i)
-                list(65533 n_i + 1)
             )
+            (t list(65533 n_i + 1))
         )
     )
 )

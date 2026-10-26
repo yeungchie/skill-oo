@@ -391,10 +391,14 @@ procedure(_NumText(g_n t_ctx "nt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 数字文本；inf / nan 报错
-    if(fixp(g_n)
-        sprintf(nil "%d" g_n)
-        if(isNaN(g_n) || isInfinity(g_n)
+    cond(
+        (fixp(g_n)
+            sprintf(nil "%d" g_n)
+        )
+        (isNaN(g_n) || isInfinity(g_n)
             error("%s: cannot represent non-finite numbers" t_ctx)
+        )
+        (t
             let((t_s)
                 t_s = sprintf(nil "%.15g" g_n)
                 unless(atof(t_s) == g_n

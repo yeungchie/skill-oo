@@ -311,12 +311,12 @@ procedure(Encode(g_val \@key (format "json") (indent nil) (sortKeys nil) (strict
                         l_p = tconc(l_p _EncodeValue(g_item 0 g_opt))
                     )
                     t_s = buildString(car(l_p) "\n")
-                    if(t_s == ""
-                        ""
-                        if(finalNewline
+                    cond(
+                        (t_s == "" "")
+                        (finalNewline
                             strcat(t_s "\n")
-                            t_s
                         )
+                        (t t_s)
                     )
                 )
             )

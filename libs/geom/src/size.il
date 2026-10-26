@@ -261,14 +261,11 @@ procedure(_SizeLinePoint(g_p g_u g_q g_v "gggg")  ; -> Point | nil
         n_vx = car(g_v)
         n_vy = cadr(g_v)
         n_det = n_ux * n_vy - n_uy * n_vx
-        if(abs(n_det) <= 1e-12
-            nil
-            progn(
-                n_t = ((g_q->x() - g_p->x()) * n_vy
-                    - (g_q->y() - g_p->y()) * n_vx) / n_det
-                Point(g_p->x() + n_ux * n_t
-                    g_p->y() + n_uy * n_t)
-            )
+        unless(abs(n_det) <= 1e-12
+            n_t = ((g_q->x() - g_p->x()) * n_vy
+                - (g_q->y() - g_p->y()) * n_vx) / n_det
+            Point(g_p->x() + n_ux * n_t
+                g_p->y() + n_uy * n_t)
         )
     )
 )
@@ -397,47 +394,44 @@ procedure(_SizeExtendCap(g_v g_pa g_nb l_e1 l_e2 g_corner "gggllg")  ; -> Polygo
     ; **返回**
     ;   (Polygon|nil) - 延伸帽
     let((n_sel1 n_sel2 n_nx1 n_ny1 n_d1 n_nx2 n_ny2 n_d2 g_v1 g_v2 g_q g_cap)
-        if(g_corner == 'none
-            nil
-            progn(
-                n_sel1 = _Nth1(5 l_e1)
-                n_sel2 = _Nth1(5 l_e2)
-                n_nx1 = _Nth1(3 l_e1)
-                n_ny1 = _Nth1(4 l_e1)
-                n_d1 = _Nth1(6 l_e1)
-                n_nx2 = _Nth1(3 l_e2)
-                n_ny2 = _Nth1(4 l_e2)
-                n_d2 = _Nth1(6 l_e2)
-                when(n_sel1 && !n_sel2
-                    progn(
-                        g_v1 = Point(g_v->x() + n_nx1 * n_d1
-                            g_v->y() + n_ny1 * n_d1)
-                        g_q = _SizeLinePoint(g_v1
-                            list(g_v->x() - g_pa->x() g_v->y() - g_pa->y())
-                            g_v
-                            list(g_nb->x() - g_v->x() g_nb->y() - g_v->y()))
-                        when(g_q && !g_q->equals(g_v1 ?eps 1e-9)
-                            && !g_q->equals(g_v ?eps 1e-9)
-                            g_cap = Polygon(list(g_v1 g_q g_v))
-                        )
+        unless(g_corner == 'none
+            n_sel1 = _Nth1(5 l_e1)
+            n_sel2 = _Nth1(5 l_e2)
+            n_nx1 = _Nth1(3 l_e1)
+            n_ny1 = _Nth1(4 l_e1)
+            n_d1 = _Nth1(6 l_e1)
+            n_nx2 = _Nth1(3 l_e2)
+            n_ny2 = _Nth1(4 l_e2)
+            n_d2 = _Nth1(6 l_e2)
+            when(n_sel1 && !n_sel2
+                progn(
+                    g_v1 = Point(g_v->x() + n_nx1 * n_d1
+                        g_v->y() + n_ny1 * n_d1)
+                    g_q = _SizeLinePoint(g_v1
+                        list(g_v->x() - g_pa->x() g_v->y() - g_pa->y())
+                        g_v
+                        list(g_nb->x() - g_v->x() g_nb->y() - g_v->y()))
+                    when(g_q && !g_q->equals(g_v1 ?eps 1e-9)
+                        && !g_q->equals(g_v ?eps 1e-9)
+                        g_cap = Polygon(list(g_v1 g_q g_v))
                     )
                 )
-                when(!n_sel1 && n_sel2
-                    progn(
-                        g_v2 = Point(g_v->x() + n_nx2 * n_d2
-                            g_v->y() + n_ny2 * n_d2)
-                        g_q = _SizeLinePoint(g_v
-                            list(g_v->x() - g_pa->x() g_v->y() - g_pa->y())
-                            g_v2
-                            list(g_nb->x() - g_v->x() g_nb->y() - g_v->y()))
-                        when(g_q && !g_q->equals(g_v2 ?eps 1e-9)
-                            && !g_q->equals(g_v ?eps 1e-9)
-                            g_cap = Polygon(list(g_v g_q g_v2))
-                        )
-                    )
-                )
-                g_cap
             )
+            when(!n_sel1 && n_sel2
+                progn(
+                    g_v2 = Point(g_v->x() + n_nx2 * n_d2
+                        g_v->y() + n_ny2 * n_d2)
+                    g_q = _SizeLinePoint(g_v
+                        list(g_v->x() - g_pa->x() g_v->y() - g_pa->y())
+                        g_v2
+                        list(g_nb->x() - g_v->x() g_nb->y() - g_v->y()))
+                    when(g_q && !g_q->equals(g_v2 ?eps 1e-9)
+                        && !g_q->equals(g_v ?eps 1e-9)
+                        g_cap = Polygon(list(g_v g_q g_v2))
+                    )
+                )
+            )
+            g_cap
         )
     )
 )

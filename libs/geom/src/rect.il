@@ -68,9 +68,8 @@ procedure(_RectPolygon(g_rect "g")  ; -> Polygon | nil
     unless(_RectP(g_rect)
         error("ycGeom::_RectPolygon: expected a Rect, got %A" g_rect)
     )
-    if(g_rect->width() <= 0.0 || g_rect->height() <= 0.0
+    unless(g_rect->width() <= 0.0 || g_rect->height() <= 0.0
             || g_rect->area() <= 1e-9
-        nil
         Polygon(list(
             Point(g_rect->xmin() g_rect->ymin())
             Point(g_rect->xmax() g_rect->ymin())

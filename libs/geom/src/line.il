@@ -176,15 +176,12 @@ procedure(_InstallLine(self "g")  ; -> t
                 (_LineP(g_other)
                     n_det = self->_data->a * g_other->b()
                         - self->_data->b * g_other->a()
-                    if(abs(n_det) <= n_eps
-                        nil
-                        progn(
-                            n_x = (self->_data->b * g_other->c()
-                                - g_other->b() * self->_data->c) / n_det
-                            n_y = (self->_data->c * g_other->a()
-                                - g_other->c() * self->_data->a) / n_det
-                            Point(n_x n_y)
-                        )
+                    unless(abs(n_det) <= n_eps
+                        n_x = (self->_data->b * g_other->c()
+                            - g_other->b() * self->_data->c) / n_det
+                        n_y = (self->_data->c * g_other->a()
+                            - g_other->c() * self->_data->a) / n_det
+                        Point(n_x n_y)
                     )
                 )
                 (_SegmentP(g_other)
