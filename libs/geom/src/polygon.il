@@ -450,7 +450,7 @@ procedure(Polygon(l_points "l")  ; -> Polygon
     ;   (Polygon) - 复制外层点列的新多边形；非法点列 error
     let((l_pts)
         l_pts = _AsPointList(l_points "ycGeom::Polygon")
-        _CheckPolygon(l_pts 1e-9)
+        _CheckPolygon(l_pts _Eps(nil))
         makeInstance('Polygon ?_data
             makeInstance('PolygonData ?points copy(l_pts)))
     )

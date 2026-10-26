@@ -252,8 +252,14 @@ procedure(_ClassifyEdges(l_edges l_ra l_rb g_op n_eps "lllgg")  ; -> list[list[P
     ;
     ; **返回**
     ;   (list[list[Point]]) - 结果内部在左侧的有向边
-    let((l_res g_a g_b n_dx n_dy n_len n_mx n_my n_nx n_ny n_delta g_left g_right g_la g_lb g_ra g_rb g_lkeep g_rkeep)
-        n_delta = if(n_eps * 100.0 > 1e-7 n_eps * 100.0 1e-7)
+    let((l_res g_a g_b n_dx n_dy n_len n_scale n_mx n_my n_nx n_ny n_delta g_left g_right g_la g_lb g_ra g_rb g_lkeep g_rkeep)
+        n_scale = 0.0
+        foreach(l_e l_edges
+            n_dx = cadr(l_e)->x() - car(l_e)->x()
+            n_dy = cadr(l_e)->y() - car(l_e)->y()
+            n_len = sqrt(n_dx * n_dx + n_dy * n_dy)
+            n_scale = if(n_scale == 0.0 n_len min(n_scale n_len))
+        )
         foreach(l_e l_edges
             g_a = car(l_e)
             g_b = cadr(l_e)
@@ -261,6 +267,9 @@ procedure(_ClassifyEdges(l_edges l_ra l_rb g_op n_eps "lllgg")  ; -> list[list[P
             n_dy = g_b->y() - g_a->y()
             n_len = sqrt(n_dx * n_dx + n_dy * n_dy)
             unless(n_len <= n_eps
+                ; 采样偏移：至少 100 eps，最多 1e6 eps，并按最短边缩放
+                n_delta = max(n_eps * 100.0
+                    min(n_scale * 1e-3 n_eps * 1e6))
                 n_mx = (g_a->x() + g_b->x()) / 2.0
                 n_my = (g_a->y() + g_b->y()) / 2.0
                 n_nx = -n_dy / n_len

@@ -189,7 +189,7 @@ procedure(_SizeRingEdges(l_ring "l")  ; -> list
             n_dx = g_b->x() - g_a->x()
             n_dy = g_b->y() - g_a->y()
             n_lenr = sqrt(n_dx * n_dx + n_dy * n_dy)
-            unless(n_lenr <= 1e-9
+            unless(n_lenr <= _Eps(nil)
                 l_res = tconc(l_res list(g_a g_b
                     n_dy / n_lenr (-n_dx) / n_lenr))
             )
@@ -261,7 +261,7 @@ procedure(_SizeLinePoint(g_p g_u g_q g_v "gggg")  ; -> Point | nil
         n_vx = car(g_v)
         n_vy = cadr(g_v)
         n_det = n_ux * n_vy - n_uy * n_vx
-        unless(abs(n_det) <= 1e-12
+        unless(abs(n_det) <= _AngleTol()
             n_t = ((g_q->x() - g_p->x()) * n_vy
                 - (g_q->y() - g_p->y()) * n_vx) / n_det
             Point(g_p->x() + n_ux * n_t
@@ -282,7 +282,7 @@ procedure(_SizeStrip(g_a g_b n_nx n_ny n_d "ggggn")  ; -> Polygon | nil
     ;
     ; **返回**
     ;   (Polygon|nil) - 边带；零距离为 nil
-    unless(abs(n_d) <= 1e-12
+    unless(abs(n_d) <= _Eps(nil)
         Polygon(list(
             g_a
             g_b
@@ -315,7 +315,7 @@ procedure(_SizeRoundCap(g_v g_v1 g_v2 n_d1 n_d2 n_segments "gggnnx")  ; -> Polyg
         while(n_delta < -3.141592653589793
             n_delta = n_delta + 6.283185307179586
         )
-        when(abs(n_delta) <= 1e-12
+        when(abs(n_delta) <= _AngleTol()
             nil
         )
         n_steps = int(abs(n_delta) / 1.570796326794897 * n_segments)
@@ -411,8 +411,8 @@ procedure(_SizeExtendCap(g_v g_pa g_nb l_e1 l_e2 g_corner "gggllg")  ; -> Polygo
                         list(g_v->x() - g_pa->x() g_v->y() - g_pa->y())
                         g_v
                         list(g_nb->x() - g_v->x() g_nb->y() - g_v->y()))
-                    when(g_q && !g_q->equals(g_v1 ?eps 1e-9)
-                        && !g_q->equals(g_v ?eps 1e-9)
+                    when(g_q && !g_q->equals(g_v1 ?eps _Eps(nil))
+                        && !g_q->equals(g_v ?eps _Eps(nil))
                         g_cap = Polygon(list(g_v1 g_q g_v))
                     )
                 )
@@ -425,8 +425,8 @@ procedure(_SizeExtendCap(g_v g_pa g_nb l_e1 l_e2 g_corner "gggllg")  ; -> Polygo
                         list(g_v->x() - g_pa->x() g_v->y() - g_pa->y())
                         g_v2
                         list(g_nb->x() - g_v->x() g_nb->y() - g_v->y()))
-                    when(g_q && !g_q->equals(g_v2 ?eps 1e-9)
-                        && !g_q->equals(g_v ?eps 1e-9)
+                    when(g_q && !g_q->equals(g_v2 ?eps _Eps(nil))
+                        && !g_q->equals(g_v ?eps _Eps(nil))
                         g_cap = Polygon(list(g_v g_q g_v2))
                     )
                 )
@@ -464,8 +464,8 @@ procedure(_SizePolygon(self n_value g_dir g_ratio g_corner g_miterLimit g_roundS
         n_limit = _SizeMiterLimit(g_miterLimit)
         n_segments = _SizeRoundSegments(g_roundSegments)
         l_region = Region(list(g_src) ?normalize nil)
-        unless((_Near(n_value 0.0 1e-12)
-                || (g_ratioMode && _Near(n_value 1.0 1e-12)))
+        unless((_Near(n_value 0.0 _Eps(nil))
+                || (g_ratioMode && _Near(n_value 1.0 _Eps(nil))))
             progn(
             l_rings = _SizeOrientRings(_Rings(g_src->points()))
             foreach(l_ring l_rings
@@ -477,7 +477,7 @@ procedure(_SizePolygon(self n_value g_dir g_ratio g_corner g_miterLimit g_roundS
                         g_b = _Nth1(2 l_e)
                         n_nx = _Nth1(3 l_e)
                         n_ny = _Nth1(4 l_e)
-                        n_sel = _SizeEdgeSelected(n_nx n_ny l_dirs 1e-9)
+                        n_sel = _SizeEdgeSelected(n_nx n_ny l_dirs _Eps(nil))
                         n_d = _SizeEdgeDistance(n_nx n_ny n_width n_height
                             l_dirs n_value g_ratioMode)
                         l_enh = tconc(l_enh list(g_a g_b n_nx n_ny n_sel n_d))
@@ -522,13 +522,13 @@ procedure(_SizePolygon(self n_value g_dir g_ratio g_corner g_miterLimit g_roundS
                         l_region->polygons() list(l_op)
                         if(if(g_ratioMode n_value > 1.0 n_value > 0.0)
                             'union 'difference)
-                        nil 1e-9)
+                        nil _Eps(nil))
                         ?normalize nil)
                 )
             )
             )
         )
-        Region(_CleanPolygons(l_region->polygons() 1e-9) ?normalize nil)
+        Region(_CleanPolygons(l_region->polygons() _Eps(nil)) ?normalize nil)
     )
 )
 

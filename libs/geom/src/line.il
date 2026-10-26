@@ -234,7 +234,7 @@ procedure(Line(\@rest l_args "g")  ; -> Line
         l_pts = _TwoPoints(l_args "ycGeom::Line")
         g_p1 = _Nth1(1 l_pts)
         g_p2 = _Nth1(2 l_pts)
-        when(g_p1->equals(g_p2 ?eps 1e-9)
+        when(g_p1->equals(g_p2 ?eps _Eps(nil))
             error("ycGeom::Line: construction points must differ")
         )
         n_a = g_p2->y() - g_p1->y()

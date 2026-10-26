@@ -16,6 +16,7 @@ addToNamespace("ycGeom"
         Region
         RegionData
         _Eps
+        _AngleTol
         _Grid
         _Snap
         _Near

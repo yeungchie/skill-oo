@@ -221,7 +221,7 @@ procedure(_InstallSegment(self "g")  ; -> t
             n_dx = self->_data->end->x() - self->_data->start->x()
             n_dy = self->_data->end->y() - self->_data->start->y()
             n_len = sqrt(n_dx * n_dx + n_dy * n_dy)
-            unless(n_len <= 1e-9
+            unless(n_len <= _Eps(nil)
                 list(n_dx / n_len n_dy / n_len)
             )
         )
@@ -239,7 +239,7 @@ procedure(_InstallSegment(self "g")  ; -> t
             n_dx = self->_data->end->x() - self->_data->start->x()
             n_dy = self->_data->end->y() - self->_data->start->y()
             n_den = n_dx * n_dx + n_dy * n_dy
-            if(n_den <= 1e-18
+            if(n_den <= _Eps(nil) * _Eps(nil)
             then
                 self->_data->start
             else
@@ -264,7 +264,7 @@ procedure(_InstallSegment(self "g")  ; -> t
             n_dx = self->_data->end->x() - self->_data->start->x()
             n_dy = self->_data->end->y() - self->_data->start->y()
             n_den = n_dx * n_dx + n_dy * n_dy
-            if(n_den <= 1e-18
+            if(n_den <= _Eps(nil) * _Eps(nil)
             then
                 self->_data->start
             else

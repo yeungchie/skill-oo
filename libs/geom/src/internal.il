@@ -15,6 +15,14 @@ procedure(_Eps(g_eps "g")  ; -> float
     )
 )
 
+procedure(_AngleTol()  ; -> float
+    ; 返回方向与角度判定的容差。
+    ;
+    ; **返回**
+    ;   (float) - 弧度容差 1e-12
+    1e-12
+)
+
 procedure(_Grid(g_grid "g")  ; -> float | nil
     ; 规范 ?grid 选项。
     ;
@@ -58,16 +66,22 @@ procedure(_Nth1(n_idx l_list "xl")  ; -> any
 )
 
 procedure(_Near(n_a n_b n_eps "nnn")  ; -> t | nil
-    ; 判断两个数值是否在容差内。
+    ; 判断两个数值是否在绝对或相对容差内。
     ;
     ; **参数**
     ;   n_a    (num) - 值一
     ;   n_b    (num) - 值二
-    ;   n_eps  (num) - 容差
+    ;   n_eps  (num) - 绝对容差
     ;
     ; **返回**
-    ;   (t|nil) - 差值不超过容差为 t
-    abs(float(n_a) - float(n_b)) <= n_eps
+    ;   (t|nil) - 差值不超过绝对容差或机器精度相对容差为 t
+    let((n_fa n_fb n_diff n_rel)
+        n_fa = float(n_a)
+        n_fb = float(n_b)
+        n_diff = abs(n_fa - n_fb)
+        n_rel = 1e-15 * max(abs(n_fa) abs(n_fb))
+        n_diff <= max(float(n_eps) n_rel)
+    )
 )
 
 procedure(_SamePoint(g_a g_b n_eps "ggg")  ; -> t | nil
