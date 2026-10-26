@@ -456,24 +456,49 @@ procedure(_EdgeKey(g_a g_b "gg")  ; -> str
     )
 )
 
+procedure(_CellNumKey(n_q "n")  ; -> str
+    ; 生成容差网格单元的文本键。
+    ;
+    ; **参数**
+    ;   n_q  (num) - 坐标除以容差后的单元坐标
+    ;
+    ; **返回**
+    ;   (str) - 四舍五入的单元键；零统一为 "0"
+    let((t_key)
+        t_key = lsprintf("%.0f" float(n_q))
+        if(t_key == "-0" "0" t_key)
+    )
+)
+
 procedure(_CanonPoint(g_p n_eps t_reg "ggg")  ; -> Point
-    ; 在容差登记表中查找或登记点的规范代表。
+    ; 在容差网格中查找或登记点的规范代表。
     ;
     ; **参数**
     ;   g_p      (Point) - 输入点
     ;   n_eps    (float) - 容差
-    ;   t_reg    (table) - 规范点登记表（键 "all"）
+    ;   t_reg    (table) - 单元键到规范点列表的登记表
     ;
     ; **返回**
     ;   (Point) - 容差内已登记的规范点，或新登记的原点
-    let((g_found g_q)
-        foreach(g_q t_reg["all"]
-            when(!g_found && _SamePoint(g_p g_q n_eps)
-                g_found = g_q
+    let((n_cx n_cy n_dx n_dy t_key g_found g_q)
+        n_cx = g_p->x() / n_eps
+        n_cy = g_p->y() / n_eps
+        for(n_dx -1 1
+            for(n_dy -1 1
+                t_key = lsprintf("%s|%s"
+                    _CellNumKey(n_cx + n_dx)
+                    _CellNumKey(n_cy + n_dy))
+                foreach(g_q t_reg[t_key]
+                    when(!g_found && _SamePoint(g_p g_q n_eps)
+                        g_found = g_q
+                    )
+                )
             )
         )
         unless(g_found
-            t_reg["all"] = cons(g_p t_reg["all"])
+            t_key = lsprintf("%s|%s"
+                _CellNumKey(n_cx) _CellNumKey(n_cy))
+            t_reg[t_key] = cons(g_p t_reg[t_key])
             g_found = g_p
         )
         g_found

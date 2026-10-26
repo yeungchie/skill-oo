@@ -95,6 +95,22 @@ let((g_a g_b g_r)
 _Assert(ycGeom::_PtKey(ycGeom::Point(1e9 0))
     != ycGeom::_PtKey(ycGeom::Point(1e9 + 100 0))
     "point: key keeps distinct large coordinates")
+
+let((g_a g_b g_r)
+    g_a = ycGeom::Polygon(list(
+        ycGeom::Point(1e3 0) ycGeom::Point(1e3 + 1e-5 0)
+        ycGeom::Point(1e3 + 1e-5 1) ycGeom::Point(1e3 1)
+    ))
+    g_b = ycGeom::Polygon(list(
+        ycGeom::Point(1e3 + 1e-5 + 5e-10 0) ycGeom::Point(1e4 0)
+        ycGeom::Point(1e4 1) ycGeom::Point(1e3 + 1e-5 + 5e-10 1)
+    ))
+    g_r = errset(g_a->or(g_b) nil)
+    _Assert(g_r && length(car(g_r)->polygons()) == 1
+        "boolean: large cell coordinate one polygon")
+    _Assert(g_r && abs(car(g_r)->area() - 9000.0) <= 1e-9
+        "boolean: large cell coordinate area")
+)
 _Assert(ycGeom::_PointInRing(
     list(ycGeom::Point(0 0) ycGeom::Point(1 0)
         ycGeom::Point(1 1) ycGeom::Point(0 1))
