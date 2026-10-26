@@ -12,7 +12,7 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole �
 - `perimeter()` 默认扣除切割线，`?includeSeams t` 时按完整点列环计算。
 - `Region` 表示 0..n 个多边形的并集，默认归一化为互不重叠的多边形集合。
 - `?eps` 默认 `1e-9`；比较同时吸收坐标量级的机器精度相对误差；`?grid` 为正数或 nil；参数类型不符或取值非法时以 `error()` 中断。
-- `ConvertToGeomObject` 统一接收已有图形对象或坐标数组；两点数组有歧义时必须用 `?as` 指定类型。
+- `ConvertToGeomObject` 统一接收已有图形对象或坐标数组；已有对象按其 `toSkill()` 重建新对象返回，两点数组有歧义时必须用 `?as` 指定类型。
 - 对象按不可变值使用；运算返回新对象，不修改输入。
 - `Polygon`、`Rect`、`Region` 可互相作为布尔运算的右操作数；结果统一为 `Region`。
 - 非退化 `Rect` 与 `Polygon` 可通过 `toPolygon()`/`toRect()` 互转；退化 `Rect` 无对应 `Polygon`。
@@ -1914,7 +1914,7 @@ ycGeom::ConvertToGeomObject(
 
 **描述**
 
-把图形对象或原始坐标数组统一转换为几何对象。已有图形对象原样返回；指定 `?as` 时对象类型必须与目标一致，否则以 `error()` 中断。原始数组按 `?as` 指定类型构造，未指定时只接受无歧义的结构；`nil` 与空列表按空 `Region` 处理。两点数组同时可能表示线段、直线、矩形或区域，必须用 `?as` 明确目标，否则以 `error()` 中断。
+把图形对象或原始坐标数组统一转换为几何对象。已有图形对象用其 `toSkill()` 构造新的同类对象返回（值等价，非同一实例）；指定 `?as` 时对象类型必须与目标一致，否则以 `error()` 中断。原始数组按 `?as` 指定类型构造，未指定时只接受无歧义的结构；`nil` 与空列表按空 `Region` 处理。两点数组同时可能表示线段、直线、矩形或区域，必须用 `?as` 明确目标，否则以 `error()` 中断。
 
 **参数**
 
@@ -1936,7 +1936,7 @@ ycGeom::ConvertToGeomObject(
 
 **返回值**
 
-`Point` / `Segment` / `Line` / `Rect` / `Polygon` / `Region` — 已有对象原样返回，或按数组构造的新对象；无法确定时以 `error()` 中断。
+`Point` / `Segment` / `Line` / `Rect` / `Polygon` / `Region` — 按对象或数组构造的新对象；无法确定时以 `error()` 中断。
 
 **例程**
 

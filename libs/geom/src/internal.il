@@ -569,7 +569,14 @@ procedure(_ConvertToGeomObject(g_value t_ctx g_as "gtg")  ; -> any
                 t_actual = symbolToString(t_kind)
                 if(t_as == nil || t_as == t_actual
                 then
-                    g_value
+                    cond(
+                        ((t_actual == "Point") Point(g_value->toSkill()))
+                        ((t_actual == "Segment") Segment(g_value->toSkill()))
+                        ((t_actual == "Line") Line(g_value->toSkill()))
+                        ((t_actual == "Rect") Rect(g_value->toSkill()))
+                        ((t_actual == "Polygon") Polygon(g_value->toSkill()))
+                        ((t_actual == "Region") Region(g_value->toSkill()))
+                    )
                 else
                     error("%s: expected %s, got %A" t_ctx t_as g_value)
                 )
