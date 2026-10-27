@@ -178,7 +178,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
             _Error(t_method "job has not started, current status is '%s'" self->state())
         )
     )
-    self->start = lambda(()  ; -> AsyncJob
+    self->start = lambda(()  ; -> self
         ; 启动子进程：注册 stdout/stderr/退出回调并等待到进程启动完成；
         ; 'beforeBegin 在启动前、'afterBegin 在启动后触发；回调抛出的错误只打印、不打断任务。
         ; 已启动（ipcId 非 nil）时 error() 中断。
@@ -225,7 +225,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         )
         self
     )
-    self->wait = lambda((\@optional n_timeout(1000000) n_interval(30) "xx")  ; -> AsyncJob
+    self->wait = lambda((\@optional n_timeout(1000000) n_interval(30) "xx")  ; -> self
         ; 等待进程结束或超时；间隔 n_interval 提示一次（单位与默认值见 README）。
         ;
         ; **参数**
@@ -298,7 +298,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         _CheckStarted("continue")
         ipcContProcess(self->ipcId)
     )
-    self->print = lambda((t_formatString \@key end("\n") \@rest l_args "ttg")  ; -> AsyncJob
+    self->print = lambda((t_formatString \@key end("\n") \@rest l_args "ttg")  ; -> self
         ; 向子进程标准输入写入一行（lsprintf 先格式化，再补 end 结尾）。
         ;
         ; **参数**
@@ -333,7 +333,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         _CheckStarted("signal")
         ipcSignalProcess(self->ipcId s_signal)
     )
-    self->sleep = lambda((\@optional n_second(0) "n")  ; -> AsyncJob
+    self->sleep = lambda((\@optional n_second(0) "n")  ; -> self
         ; 令父进程（当前会话）休眠指定秒数。
         ;
         ; **参数**

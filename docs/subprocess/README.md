@@ -17,19 +17,23 @@ Cadence SKILL++ 的子进程封装库：启动进程、实时读写输出、按�
 
 ```lisp
 ; 同步执行：执行并等待，输出实时打印
-ycSubProcess::Run("whoami")                              ; => t
+ycSubProcess::Run("whoami")
+; => t
 
 ; 异步执行：启动后取标准输出
 aj = ycSubProcess::CreateJob("date")
-aj->await()                                                 ; => "Tue Sep 15 22:50:10 CST 2026\n"
+aj->await()
+; => "Tue Sep 15 22:50:10 CST 2026\n"
 
 ; 链式调用：向子进程标准输入写入
 aj = ycSubProcess::CreateJob("cat")\
     ->start()\
     ->print("hello")\
-    ->print("world")\
-    ->close()
-aj->await()                                                 ; => "hello\nworld\n"
+    ->print("world")
+
+aj->close()
+aj->await()
+; => "hello\nworld\n"
 ```
 
 ## API 参考
@@ -376,7 +380,7 @@ aj->close()
 => t | nil
 ```
 
-关闭标准输入通道，类似 `Ctrl + D`；任务未启动时以 `error()` 中断。
+关闭标准输入通道，类似 `Ctrl + D`；任务未启动时以 `error()` 中断。返回值为底层结果，不能把 `close()` 接在任务方法链末尾继续调用其他方法；需要 `await()` 时保留原任务对象引用。
 
 ```lisp
 g_aj = ycSubProcess::CreateJob("cat")->start()
@@ -443,12 +447,15 @@ ycSubProcess::CreateJob("echo" "ok")->sleep(0.1)->await()
 + `wait`
 + `sleep`
 
+`close`、`kill`、`stop`、`continue`、`signal` 返回 `t | nil`，`await` 返回 `str`；它们只能作为终端调用，不能继续链式调用。
+
 ```lisp
-ycSubProcess::CreateJob("cat")\
+aj = ycSubProcess::CreateJob("cat")\
     ->start()\
     ->print("hello")\
-    ->print("world")\
-    ->close()
+    ->print("world")
+
+aj->close()
 ; => t
 ```
 
