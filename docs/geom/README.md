@@ -874,6 +874,20 @@ ycGeom::Rect(list(0 0 10 4))->area()
 ; => 40.0
 ```
 
+#### perimeter <sub>`method`</sub>
+
+```text
+Rect->perimeter()
+=> float
+```
+
+返回周长 `2 * (width + height)`；退化矩形为 0。
+
+```lisp
+ycGeom::Rect(list(0 0 10 4))->perimeter()
+; => 28.0
+```
+
 #### size <sub>`method`</sub>
 
 ```text
@@ -944,22 +958,77 @@ ycGeom::Rect(list(0 0 10 4))->center()->toSkill()
 ; => (5.0 2.0)
 ```
 
+#### centroid <sub>`method`</sub>
+
+```text
+Rect->centroid()
+=> Point
+```
+
+返回矩形中心点，语义与 `center()` 相同。
+
+```lisp
+ycGeom::Rect(list(0 0 10 4))->centroid()->toSkill()
+; => (5.0 2.0)
+```
+
 #### contains <sub>`method`</sub>
 
 ```text
-Rect->contains(g_point)
+Rect->contains(
+    g_point
+    [ ?boundary t_boundary ]
+    [ ?eps n_eps ]
+)
 => t | nil
 ```
 
-判断点是否在矩形内（含边界）。
+判断点是否属于矩形。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_point | Point | | 查询点 |
+| ?boundary t_boundary | str | "inside" | `"inside"` 或 `"outside"`；默认 `"inside"` |
+| ?eps n_eps | num / nil | 1e-9 | 边界容差；默认 `1e-9` |
+
+`?boundary` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `"inside"` | 边界上的点视为在内部 |
+| `"outside"` | 边界上的点视为在外部 |
+
+其他值以 `error()` 中断。
 
 ```lisp
 ycGeom::Rect(list(0 0 10 4))->contains(ycGeom::Point(5:2))
 ; => t
+ycGeom::Rect(list(0 0 10 4))->contains(ycGeom::Point(0:2) ?boundary "outside")
+; => nil
+```
+
+#### onBoundary <sub>`method`</sub>
+
+```text
+Rect->onBoundary(
+    g_point
+    [ ?eps n_eps ]
+)
+=> t | nil
+```
+
+判断点是否在矩形边界上；退化矩形按线或点处理。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_point | Point | | 查询点 |
+| ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
+
+```lisp
+ycGeom::Rect(list(0 0 10 4))->onBoundary(ycGeom::Point(0:2))
+; => t
+ycGeom::Rect(list(0 0 10 4))->onBoundary(ycGeom::Point(5:2))
+; => nil
 ```
 
 #### bBox <sub>`method`</sub>

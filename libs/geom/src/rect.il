@@ -35,9 +35,12 @@ defclass(Rect () (
     width()
     height()
     area()
+    perimeter()
     size()
     center()
+    centroid()
     contains()
+    onBoundary()
     bBox()
     or()
     and()
@@ -139,6 +142,13 @@ procedure(_InstallRect(self "g")  ; -> t
         (self->_data->xmax - self->_data->xmin)
             * (self->_data->ymax - self->_data->ymin)
     )
+    self->perimeter = lambda(()  ; -> float
+        ; 返回周长。
+        ;
+        ; **返回**
+        ;   (float) - 2 * (宽 + 高)；退化矩形为 0
+        2.0 * (self->width() + self->height())
+    )
     self->size = lambda((n_value \@key (dir 'all) (ratio nil) (corner 'miter) (miterLimit nil) (roundSegments nil) "nggggg")  ; -> Region
         ; 返回方向 offset 后的 Region。
         ;
@@ -169,20 +179,62 @@ procedure(_InstallRect(self "g")  ; -> t
         Point(list((self->_data->xmin + self->_data->xmax) / 2.0
             (self->_data->ymin + self->_data->ymax) / 2.0))
     )
-    self->contains = lambda((g_point "g")  ; -> t | nil
-        ; 判断点是否在矩形内（含边界）。
-        ;
-        ; **参数**
-        ;   g_point  (Point) - 查询点
+    self->centroid = lambda(()  ; -> Point
+        ; 返回中心点，语义与 center() 相同。
         ;
         ; **返回**
-        ;   (t|nil) - 在矩形内或边界上为 t
-        let((g_p)
+        ;   (Point) - 中心点
+        self->center()
+    )
+    self->contains = lambda((g_point \@key (boundary "inside") (eps nil) "ggg")  ; -> t | nil
+        ; 判断点是否属于矩形。
+        ;
+        ; **参数**
+        ;   g_point   (Point)       - 查询点
+        ;   ?boundary (str)         - "inside" 或 "outside"；默认 "inside"
+        ;   ?eps      (num|nil)     - 容差；默认 nil（1e-9）
+        ;
+        ; **返回**
+        ;   (t|nil) - 属于矩形为 t；边界按 ?boundary 处理
+        let((g_p n_eps g_on)
             g_p = _AsPoint(g_point "ycGeom::Rect->contains")
-            g_p->x() >= self->_data->xmin
-                && g_p->x() <= self->_data->xmax
-                && g_p->y() >= self->_data->ymin
-                && g_p->y() <= self->_data->ymax
+            _BoundaryMode(boundary)
+            n_eps = _Eps(eps)
+            g_on = self->onBoundary(g_p ?eps n_eps)
+            if(g_on
+                boundary == "inside"
+                g_p->x() >= self->_data->xmin
+                    && g_p->x() <= self->_data->xmax
+                    && g_p->y() >= self->_data->ymin
+                    && g_p->y() <= self->_data->ymax
+            )
+        )
+    )
+    self->onBoundary = lambda((g_point \@key (eps nil) "gg")  ; -> t | nil
+        ; 判断点是否在矩形边界上。
+        ;
+        ; **参数**
+        ;   g_point  (Point)       - 查询点
+        ;   ?eps     (num|nil)     - 容差；默认 nil（1e-9）
+        ;
+        ; **返回**
+        ;   (t|nil) - 在边界上为 t
+        let((g_p n_eps n_x n_y n_minx n_miny n_maxx n_maxy n_on_v n_on_h n_inside)
+            g_p = _AsPoint(g_point "ycGeom::Rect->onBoundary")
+            n_eps = _Eps(eps)
+            n_x = g_p->x()
+            n_y = g_p->y()
+            n_minx = self->_data->xmin
+            n_miny = self->_data->ymin
+            n_maxx = self->_data->xmax
+            n_maxy = self->_data->ymax
+            n_on_v = _Near(n_x n_minx n_eps) || _Near(n_x n_maxx n_eps)
+            n_on_h = _Near(n_y n_miny n_eps) || _Near(n_y n_maxy n_eps)
+            n_inside = (n_x >= n_minx || _Near(n_x n_minx n_eps))
+                && (n_x <= n_maxx || _Near(n_x n_maxx n_eps))
+                && (n_y >= n_miny || _Near(n_y n_miny n_eps))
+                && (n_y <= n_maxy || _Near(n_y n_maxy n_eps))
+            n_inside && (n_on_v || n_on_h)
         )
     )
     self->bBox = lambda(()  ; -> list[list[float]]
