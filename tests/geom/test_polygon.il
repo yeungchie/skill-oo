@@ -146,6 +146,26 @@ let((g_a g_b g_r)
 )
 _AssertError(lambda(() ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->or(1) t)  "polygon: bad boolean operand")
 
+let((g_hole)
+    g_hole = ycGeom::Polygon(list(
+        ycGeom::Point(0:0)
+        ycGeom::Point(10:0)
+        ycGeom::Point(10:7)
+        ycGeom::Point(7:7)
+        ycGeom::Point(7:3)
+        ycGeom::Point(3:3)
+        ycGeom::Point(3:7)
+        ycGeom::Point(7.000000000000001:7)
+        ycGeom::Point(10:7)
+        ycGeom::Point(10:10)
+        ycGeom::Point(0:10)
+    ))
+    _Assert(g_hole->area() == 84.0  "polygon: keyhole near seam area")
+    _Assert(g_hole->perimeter() == 56.0  "polygon: keyhole near seam perimeter")
+    _Assert(g_hole->perimeter(?includeSeams t) == 62.0
+        "polygon: keyhole near seam included perimeter")
+)
+
 let((g_sq g_c)
     g_sq = ycGeom::Polygon(list(
         ycGeom::Point(100000:100000)

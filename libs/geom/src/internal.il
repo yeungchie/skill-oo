@@ -723,9 +723,10 @@ procedure(_CanonPoint(g_p n_eps t_reg "ggg")  ; -> Point
     ;
     ; **返回**
     ;   (Point) - 容差内已登记的规范点，或新登记的原点
-    let((n_cx n_cy n_dx n_dy t_key g_found g_q)
-        n_cx = g_p->x() / n_eps
-        n_cy = g_p->y() / n_eps
+    let((n_eff n_cx n_cy n_dx n_dy t_key g_found g_q)
+        n_eff = max(n_eps 1e-15 * max(abs(g_p->x()) abs(g_p->y())))
+        n_cx = g_p->x() / n_eff
+        n_cy = g_p->y() / n_eff
         for(n_dx -1 1
             for(n_dy -1 1
                 t_key = lsprintf("%s|%s"
@@ -872,7 +873,7 @@ procedure(_OnSegment(g_a g_b g_p n_eps "gggg")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 在线段上为 t
-    let((n_dx n_dy n_apx n_apy n_cross n_dot n_len2 n_len n_tol)
+    let((n_dx n_dy n_apx n_apy n_cross n_dot n_len2 n_len n_scale n_tol)
         n_dx = g_b->x() - g_a->x()
         n_dy = g_b->y() - g_a->y()
         n_apx = g_p->x() - g_a->x()
@@ -885,7 +886,10 @@ procedure(_OnSegment(g_a g_b g_p n_eps "gggg")  ; -> t | nil
         then
             abs(n_apx) <= n_eps && abs(n_apy) <= n_eps
         else
-            n_tol = n_eps * n_len
+            n_scale = max(abs(g_a->x()) abs(g_a->y()))
+            n_scale = max(n_scale max(abs(g_b->x()) abs(g_b->y())))
+            n_scale = max(n_scale max(abs(g_p->x()) abs(g_p->y())))
+            n_tol = max(n_eps * n_len 1e-15 * n_len * n_scale)
             abs(n_cross) <= n_tol
                 && n_dot >= -n_tol
                 && n_dot <= n_len2 + n_tol
@@ -918,7 +922,7 @@ procedure(_SegmentsCross(g_a g_b g_c g_d n_eps "ggggg")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 有交点、端点接触或共线重叠为 t
-    let((n_o1 n_o2 n_o3 n_o4 n_len_ab n_len_cd n_tol_ab n_tol_cd)
+    let((n_o1 n_o2 n_o3 n_o4 n_len_ab n_len_cd n_scale n_tol_ab n_tol_cd)
         n_o1 = _Orient(g_a g_b g_c)
         n_o2 = _Orient(g_a g_b g_d)
         n_o3 = _Orient(g_c g_d g_a)
@@ -927,8 +931,12 @@ procedure(_SegmentsCross(g_a g_b g_c g_d n_eps "ggggg")  ; -> t | nil
             + (g_b->y() - g_a->y()) * (g_b->y() - g_a->y()))
         n_len_cd = sqrt((g_d->x() - g_c->x()) * (g_d->x() - g_c->x())
             + (g_d->y() - g_c->y()) * (g_d->y() - g_c->y()))
-        n_tol_ab = n_eps * n_len_ab
-        n_tol_cd = n_eps * n_len_cd
+        n_scale = max(abs(g_a->x()) abs(g_a->y()))
+        n_scale = max(n_scale max(abs(g_b->x()) abs(g_b->y())))
+        n_scale = max(n_scale max(abs(g_c->x()) abs(g_c->y())))
+        n_scale = max(n_scale max(abs(g_d->x()) abs(g_d->y())))
+        n_tol_ab = max(n_eps * n_len_ab 1e-15 * n_len_ab * n_scale)
+        n_tol_cd = max(n_eps * n_len_cd 1e-15 * n_len_cd * n_scale)
         if(((n_o1 > n_tol_ab && n_o2 < -n_tol_ab)
                 || (n_o1 < -n_tol_ab && n_o2 > n_tol_ab))
             && ((n_o3 > n_tol_cd && n_o4 < -n_tol_cd)
@@ -970,7 +978,7 @@ procedure(_CollinearClean(l_pts n_eps "lg")  ; -> list[Point]
     ;
     ; **返回**
     ;   (list[Point]) - 去除共线点后的点列；切割边端点保留
-    let((n_len n_changed t_seams l_res n_i g_prev g_cur g_next n_dot n_line_len)
+    let((n_len n_changed t_seams l_res n_i g_prev g_cur g_next n_dot n_line_len n_scale n_tol)
         n_len = length(l_pts)
         n_changed = t
         while(n_changed && n_len > 3
@@ -990,13 +998,17 @@ procedure(_CollinearClean(l_pts n_eps "lg")  ; -> list[Point]
                         * (g_next->x() - g_prev->x())
                     + (g_next->y() - g_prev->y())
                         * (g_next->y() - g_prev->y()))
+                n_scale = max(abs(g_prev->x()) abs(g_prev->y()))
+                n_scale = max(n_scale max(abs(g_cur->x()) abs(g_cur->y())))
+                n_scale = max(n_scale max(abs(g_next->x()) abs(g_next->y())))
+                n_tol = max(n_eps * n_line_len
+                    1e-15 * n_line_len * n_scale)
                 cond(
                     (t_seams[_EdgeKey(g_prev g_cur)] == 2
                         || t_seams[_EdgeKey(g_cur g_next)] == 2
                         l_res = tconc(l_res g_cur)
                     )
-                    ((abs(_Cross(g_prev g_cur g_next))
-                        <= n_eps * n_line_len
+                    ((abs(_Cross(g_prev g_cur g_next)) <= n_tol
                         && n_dot >= 0.0)
                         n_changed = t
                     )

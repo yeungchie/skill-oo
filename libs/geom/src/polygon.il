@@ -454,9 +454,13 @@ procedure(Polygon(l_points "l")  ; -> Polygon
     ;
     ; **返回**
     ;   (Polygon) - 复制外层点列的新多边形；非法点列 error
-    let((l_pts)
+    let((l_pts t_reg n_eps)
+        n_eps = _Eps(nil)
         l_pts = _AsPointList(l_points "ycGeom::Polygon")
-        _CheckPolygon(l_pts _Eps(nil))
+        _CheckPolygon(l_pts n_eps)
+        t_reg = makeTable("geomPolygonCanon" nil)
+        l_pts = _CanonRing(l_pts n_eps t_reg)
+        _CheckPolygon(l_pts n_eps)
         makeInstance('Polygon ?_data
             makeInstance('PolygonData ?points copy(l_pts)))
     )

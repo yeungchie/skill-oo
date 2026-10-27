@@ -161,6 +161,47 @@ let((g_a g_b g_r)
     _Assert(g_r && abs(car(g_r)->area() - 9000.0) <= 1e-9
         "boolean: large cell coordinate area")
 )
+let((n_x n_bx g_a g_b l_r)
+    n_x = 1e7 + 10.0
+    n_bx = n_x + 4e-9
+    g_a = ycGeom::Polygon(list(
+        ycGeom::Point(1e7:0)
+        ycGeom::Point(n_x:0)
+        ycGeom::Point(n_x:10)
+        ycGeom::Point(1e7:10)
+    ))
+    g_b = ycGeom::Polygon(list(
+        ycGeom::Point(list(n_bx 0))
+        ycGeom::Point(1e7 + 20.0:0)
+        ycGeom::Point(1e7 + 20.0:10)
+        ycGeom::Point(list(n_bx 10))
+    ))
+    l_r = errset(g_a->or(g_b) nil)
+    _Assert(l_r && length(car(l_r)->polygons()) == 1
+        "boolean: relative canonicalization one polygon")
+    _Assert(l_r && abs(car(l_r)->area() - 200.0) <= 1e-6
+        "boolean: relative canonicalization area")
+)
+let((g_outer g_h1 g_h2 l_r g_p t_seams)
+    g_outer = ycGeom::Polygon('((0 0) (20 0) (20 10) (0 10)))
+    g_h1 = ycGeom::Polygon('((1 1) (3 1) (3 3) (1 3)))
+    g_h2 = ycGeom::Polygon('((5 1) (7 1) (7 3) (5 3)))
+    l_r = ycGeom::_Boolean(list(g_outer) list(g_h1 g_h2)
+        'difference nil 1e-9)
+    _Assert(l_r && abs(car(l_r)->area() - 192.0) <= 1e-9
+        "boolean: multiple holes area")
+    g_p = car(l_r)
+    t_seams = ycGeom::_SeamKeys(g_p->points())
+    _Assert(!t_seams[ycGeom::_EdgeKey(
+        ycGeom::Point(3:3) ycGeom::Point(5:3))]
+        "boolean: hole bridge avoids sibling hole")
+)
+_Assert(ycGeom::_OnSegment(
+    ycGeom::Point(1e8:1e8)
+    ycGeom::Point(1e8 + 1.0:1e8 + 1.0)
+    ycGeom::Point(list(1e8 + 0.5 1e8 + 0.5 + 1e-8))
+    1e-9)
+    "point: relative cross tolerance")
 _Assert(ycGeom::_PointInRing(
     list(ycGeom::Point(0:0) ycGeom::Point(1:0)
         ycGeom::Point(1:1) ycGeom::Point(0:1))

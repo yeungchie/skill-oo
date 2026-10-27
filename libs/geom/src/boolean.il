@@ -647,13 +647,14 @@ procedure(_Rotate(l_ring n_start "lx")  ; -> list[Point]
     )
 )
 
-procedure(_AxisHit(l_outer g_h n_eps "lgg")  ; -> list | nil
+procedure(_AxisHit(l_outer g_h n_eps t_blocked "lggg")  ; -> list | nil
     ; 从洞右点向右投射水平线，找最近的实际边界交点。
     ;
     ; **参数**
-    ;   l_outer  (list[Point]) - 当前 keyhole 点列
-    ;   g_h      (Point)       - 洞的最右点
-    ;   n_eps    (float)       - 容差
+    ;   l_outer   (list[Point]) - 当前 keyhole 点列
+    ;   g_h       (Point)       - 洞的最右点
+    ;   n_eps     (float)       - 容差
+    ;   t_blocked (table)       - 已拼接洞的顶点表，这些边不参与桥接
     ;
     ; **返回**
     ;   (list(num int)|nil) - 交点 x 与所在边下标；无交点为 nil
@@ -664,6 +665,7 @@ procedure(_AxisHit(l_outer g_h n_eps "lgg")  ; -> list | nil
             g_a = _Nth1(n_i l_outer)
             g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_outer)
             unless(t_seams[_EdgeKey(g_a g_b)] == 2
+                    || (t_blocked[_PtKey(g_a)] || t_blocked[_PtKey(g_b)])
                 n_ay = g_a->y()
                 n_by = g_b->y()
                 cond(
@@ -716,13 +718,14 @@ procedure(_AxisHit(l_outer g_h n_eps "lgg")  ; -> list | nil
     )
 )
 
-procedure(_SpliceHole(l_outer l_hole n_eps "llg")  ; -> list[Point]
+procedure(_SpliceHole(l_outer l_hole n_eps t_blocked "llgg")  ; -> list[Point]
     ; 把洞环用水平切割线接回当前 keyhole 点列。
     ;
     ; **参数**
-    ;   l_outer  (list[Point]) - 外环或已拼接的 keyhole 点列
-    ;   l_hole   (list[Point]) - 洞环
-    ;   n_eps    (float)       - 容差
+    ;   l_outer   (list[Point]) - 外环或已拼接的 keyhole 点列
+    ;   l_hole    (list[Point]) - 洞环
+    ;   n_eps     (float)       - 容差
+    ;   t_blocked (table)       - 已拼接洞的顶点表，这些边不参与桥接
     ;
     ; **返回**
     ;   (list[Point]) - 新增水平切割线的 keyhole 点列
@@ -730,7 +733,7 @@ procedure(_SpliceHole(l_outer l_hole n_eps "llg")  ; -> list[Point]
         n_hi = _RightmostIndex(l_hole n_eps)
         l_h = _Rotate(l_hole n_hi)
         g_h = car(l_h)
-        l_hit = _AxisHit(l_outer g_h n_eps)
+        l_hit = _AxisHit(l_outer g_h n_eps t_blocked)
         unless(l_hit
             error("ycGeom::_SpliceHole: no axis-aligned bridge for hole")
         )
@@ -784,12 +787,16 @@ procedure(_BuildPolygons(l_groups n_grid n_eps "lgg")  ; -> list[Polygon]
     ;
     ; **返回**
     ;   (list[Polygon]) - 结果多边形
-    let((l_res l_outer l_holes)
+    let((l_res l_outer l_holes t_blocked)
         foreach(l_g l_groups
             l_outer = car(l_g)
             l_holes = cadr(l_g)
+            t_blocked = makeTable("geomHolePoints" nil)
             foreach(l_h l_holes
-                l_outer = _SpliceHole(l_outer l_h n_eps)
+                l_outer = _SpliceHole(l_outer l_h n_eps t_blocked)
+                foreach(g_p l_h
+                    t_blocked[_PtKey(g_p)] = t
+                )
             )
             l_outer = _SnapRing(l_outer n_grid n_eps)
             l_res = tconc(l_res Polygon(l_outer))
