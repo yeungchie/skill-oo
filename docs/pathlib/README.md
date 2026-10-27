@@ -1268,6 +1268,65 @@ p->readToml(?maxDepth 1)
 ; => 以 error() 中断（嵌套过深）
 ```
 
+##### readIni <sub>`method`</sub>
+
+```text
+p->readIni(
+    [ l_args ... ]
+)
+=> table
+```
+
+**描述**
+
+读取整个文件内容并解码为 INI 根 `table`。需要先加载 `ycIni`；未加载时以 `error()` 中断（`ycPathLib::Path->readIni: ycIni is not loaded - load it first`）。解码选项与错误契约由 `ycIni::Decode` 提供，本方法原样透传实参，不复制其校验逻辑。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| l_args ... | any | 原样透传给 `ycIni::Decode` 的实参（`?delimiter`、`?duplicates` 等，可全部省略）；文件文本自动读入，不占实参位。详见 [ycIni 手册](../codec/ini/README.md) 的 `Decode` 条目。 |
+
+**返回值**
+
+`table` — `ycIni::Decode` 的根表；文件读取或解码失败以 `error()` 中断。
+
+**例程**
+
+`t_ini` 的值如下所示：
+
+```text
+root = value
+[server]
+host = localhost
+port = 8080
+```
+
+`t_ini_colon` 的值如下所示：
+
+```text
+a: 1
+[s]
+b: 2
+```
+
+```lisp
+p = ycPathLib::Path("./a.ini")
+p->writeText(t_ini)
+t = p->readIni()
+t["root"]                        ; => "value"
+t["server"]["host"]              ; => "localhost"
+t["server"]["port"]              ; => "8080"
+
+p->writeText(t_ini_colon)
+p->readIni(?delimiter ":")["s"]["b"]  ; => "2"
+
+p->writeText("a = 1\na = 2\n")
+p->readIni(?duplicates "last")["a"]   ; => "2"
+p->readIni()
+; *Error* ycIni::Decode: duplicate key "a" at line 2, column 1
+```
+
 ##### writeText <sub>`method`</sub>
 
 ```text

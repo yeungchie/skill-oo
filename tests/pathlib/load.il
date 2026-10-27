@@ -46,6 +46,10 @@ ycNamespace:::Require("ycToml")
 unless(fboundp('ycToml:::Decode)
     loadi(strcat(_TestPathlibDir "../../libs/codec/toml/load.il"))
 )
+ycNamespace:::Require("ycIni")
+unless(fboundp('ycIni:::Decode)
+    loadi(strcat(_TestPathlibDir "../../libs/codec/ini/load.il"))
+)
 loadi(strcat(_TestPathlibDir "test_init.il"))
 
 ; END

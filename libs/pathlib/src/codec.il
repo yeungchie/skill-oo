@@ -7,6 +7,7 @@ ycNamespace:::Require("ycJson")
 ycNamespace:::Require("ycYaml")
 ycNamespace:::Require("ycCsv")
 ycNamespace:::Require("ycToml")
+ycNamespace:::Require("ycIni")
 
 useNamespace("ycPathLib")
 
@@ -84,6 +85,20 @@ self->readToml = lambda((\@rest l_args "g")  ; -> table
         _Error("readToml" "ycToml is not loaded - load it first")
     )
     apply('ycToml:::Decode self->readText() l_args)
+)
+
+self->readIni = lambda((\@rest l_args "g")  ; -> table
+    ; 读取整个文件内容并解码为 INI 根 table；实参原样透传给 ycIni::Decode。
+    ;
+    ; **参数**
+    ;   l_args  (list) - 原样透传给 ycIni::Decode 的实参（?delimiter、?duplicates 等；可全部省略）
+    ;
+    ; **返回**
+    ;   (table) - ycIni::Decode 的根 table；ycIni 未加载、文件错误、解码失败均以 error() 中断
+    unless(fboundp('ycIni:::Decode)
+        _Error("readIni" "ycIni is not loaded - load it first")
+    )
+    apply('ycIni:::Decode self->readText() l_args)
 )
 )
 )

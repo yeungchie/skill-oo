@@ -133,6 +133,11 @@ procedure(_SameYaml(g_a g_b "gg")  ; -> t | nil
         == ycYaml::Encode(g_b ?sortKeys t)
 )
 
+procedure(_SameIni(g_a g_b "gg")  ; -> t | nil
+    ycIni::Encode(g_a ?sortKeys t)
+        == ycIni::Encode(g_b ?sortKeys t)
+)
+
 let((l_res t_self t_dir)
     l_res = errset(get_filename(piport) nil)
     t_self = when(l_res && car(l_res) && stringp(car(l_res)) && car(l_res) != ""

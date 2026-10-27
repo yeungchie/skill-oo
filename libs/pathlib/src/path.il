@@ -412,6 +412,7 @@ defclass(Path () (
     readYaml()
     readCsv()
     readToml()
+    readIni()
 ))
 
 defmethod(printself (self(Path))  ; -> str
