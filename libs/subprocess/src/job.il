@@ -16,6 +16,26 @@ procedure(Run(g_arg \@rest l_args "gg")  ; -> t | nil
 )
 
 
+procedure(RunWithRead(g_arg \@rest l_args "gg")  ; -> list
+    ; 执行命令并等待完成，分别读取标准输出与标准错误，不向终端打印。
+    ;
+    ; **参数**
+    ;   g_arg   (any) - 命令；非字符串按 %A 自动转换
+    ;   l_args  (list) - 命令的其余部分；非字符串同样自动转换
+    ;
+    ; **返回**
+    ;   (list) - (returncode stdout stderr)：退出码、标准输出、标准错误
+    let((aj)
+        aj = apply('CreateJob g_arg l_args)->start()->wait()
+        list(
+            aj->returncode
+            aj->stdout->text()
+            aj->stderr->text()
+        )
+    )
+)
+
+
 procedure(CreateJob(g_arg \@key callback userData verbose \@rest l_args "ggggg")  ; -> AsyncJob
     ; 创建异步任务对象：命令各段拼接后构造 AsyncJob（未启动）。
     ;

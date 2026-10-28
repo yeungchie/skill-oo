@@ -80,6 +80,49 @@ ycSubProcess::Run("bad cmd")
 ; => nil
 ```
 
+### ycSubProcess::RunWithRead <sub>`function`</sub>
+
+```text
+ycSubProcess::RunWithRead(
+    g_arg
+    [ l_args ... ]
+)
+=> list
+```
+
+**描述**
+
+执行给定命令并等待完成，分别读取标准输出与标准错误；输出不实时打印到终端。返回码非零不触发错误，由调用方检查。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| g_arg | any | | 命令，非字符串会自动转换 |
+| l_args | any | | 命令的其余部分；多个参数以空格拼接 |
+
+**返回值**
+
+`list` — 依次为退出码（`int`）、标准输出（`str`）与标准错误（`str`）；两路输出分别完整收集，不保证交错顺序。
+
+**例程**
+
+```lisp
+l_res = ycSubProcess::RunWithRead("sh -c 'printf out; printf err >&2; exit 7'")
+car(l_res)
+; => 7
+cadr(l_res)
+; => "out"
+caddr(l_res)
+; => "err"
+```
+
+```lisp
+l_res = ycSubProcess::RunWithRead("printf 'hello'")
+cadr(l_res)
+; => "hello"
+```
+
 ### ycSubProcess::CreateJob <sub>`function`</sub>
 
 ```text

@@ -6,6 +6,7 @@ addToNamespace("ycSubProcess"
         Stream
         AsyncJob
         Run
+        RunWithRead
         CreateJob
         Elapsed
         _Rstring
