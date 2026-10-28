@@ -16,7 +16,7 @@ procedure(Run(g_arg \@rest l_args "gg")  ; -> t | nil
 )
 
 
-procedure(RunWithRead(g_arg \@rest l_args "gg")  ; -> list
+procedure(RunWithRead(g_arg \@rest l_args "gg")  ; -> (returncode:int, stdout:str, stderr:str)
     ; 执行命令并等待完成，分别读取标准输出与标准错误，不向终端打印。
     ;
     ; **参数**
@@ -24,7 +24,7 @@ procedure(RunWithRead(g_arg \@rest l_args "gg")  ; -> list
     ;   l_args  (list) - 命令的其余部分；非字符串同样自动转换
     ;
     ; **返回**
-    ;   (list) - (returncode stdout stderr)：退出码、标准输出、标准错误
+    ;   (returncode:int, stdout:str, stderr:str) - 固定三元列表：退出码、标准输出、标准错误
     let((aj)
         aj = apply('CreateJob g_arg l_args)->start()->wait()
         list(

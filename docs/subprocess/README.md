@@ -87,7 +87,7 @@ ycSubProcess::RunWithRead(
     g_arg
     [ l_args ... ]
 )
-=> list
+=> (returncode:int, stdout:str, stderr:str)
 ```
 
 **描述**
@@ -103,7 +103,7 @@ ycSubProcess::RunWithRead(
 
 **返回值**
 
-`list` — 依次为退出码（`int`）、标准输出（`str`）与标准错误（`str`）；两路输出分别完整收集，不保证交错顺序。
+`(returncode:int, stdout:str, stderr:str)` — 固定长度 3 的列表，依次为退出码、标准输出与标准错误；两路输出分别完整收集，不保证交错顺序。
 
 **例程**
 
