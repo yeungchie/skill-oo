@@ -152,7 +152,7 @@ procedure(_FlagsFromValue(g_flags t_ctx "gt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 无修饰返回 ""；否则按 i m s x 固定序去重拼成 "(?imsx)" 式串；
-    ;           遇 'g' 走 error() 提示改用 ?all；非符号/字符串或未知字母走 error() 中断
+    ;           遇 'g' 走 error() 提示全局匹配已是默认；非符号/字符串或未知字母走 error() 中断
     let((t_s t_letters t_c t_in n_i n_len)
         cond(
             (g_flags == nil
@@ -187,7 +187,7 @@ procedure(_FlagsFromValue(g_flags t_ctx "gt")  ; -> str
                     t_letters = strcat(t_letters "x")
                 )
                 (("g" "G")
-                    error("%A: flag 'g' is not supported; use ?all t for global matching" t_ctx)
+                    error("%A: flag 'g' is not supported; global matching is the default, use ?first t for first-only" t_ctx)
                 )
                 (t
                     error("%A: unknown flag '%s' (use 'I 'M 'S 'X)" t_ctx t_c)
@@ -493,7 +493,7 @@ procedure(Split(g_pat t_subj \@key flags first execOpts "gtggg")  ; -> list[str]
     )
 )
 
-procedure(Sub(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> str
+procedure(Sub(g_pat t_repl t_subj \@key flags first execOpts "gttggg")  ; -> str
     ; 替换主题串中的匹配；参数序为模式、替换模板、主题串。
     ;
     ; **参数**
@@ -501,18 +501,18 @@ procedure(Sub(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> str
     ;   t_repl  (str)         - 替换模板（引擎方言，展开 \1、&、\0）
     ;   t_subj  (str)         - 主题串
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
-    ;   ?all    (t|nil)       - t 时替换全部匹配，nil（默认）只替首处
+    ;   ?first  (t|nil)       - t 时只替换首处，nil（默认）替换全部
     ;   ?execOpts (sym|list|nil) - 执行选项符号或列表；默认 nil
     ;
     ; **返回**
     ;   (str) - 替换后的串
     let((p)
         p = _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::Sub") "ycRegEx::Sub" 0)
-        p->sub(t_repl t_subj ?all all ?execOpts execOpts)
+        p->sub(t_repl t_subj ?first first ?execOpts execOpts)
     )
 )
 
-procedure(Subn(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> (str, int)
+procedure(Subn(g_pat t_repl t_subj \@key flags first execOpts "gttggg")  ; -> (str, int)
     ; 同 Sub，另返回实际替换次数。
     ;
     ; **参数**
@@ -520,14 +520,14 @@ procedure(Subn(g_pat t_repl t_subj \@key flags all execOpts "gttggg")  ; -> (str
     ;   t_repl  (str)         - 替换模板（引擎方言，见 README）
     ;   t_subj  (str)         - 主题串
     ;   ?flags  (sym|str|nil) - 修饰标志 'I 'M 'S 'X（默认 nil）
-    ;   ?all    (t|nil)       - t 时替换全部匹配，nil（默认）只替首处
+    ;   ?first  (t|nil)       - t 时只替换首处，nil（默认）替换全部
     ;   ?execOpts (sym|list|nil) - 执行选项符号或列表；默认 nil
     ;
     ; **返回**
     ;   (str, int) - (替换后的串, 实际替换次数)
     let((p)
         p = _AsPat(g_pat _FlagsFromValue(flags "ycRegEx::Subn") "ycRegEx::Subn" 0)
-        p->subn(t_repl t_subj ?all all ?execOpts execOpts)
+        p->subn(t_repl t_subj ?first first ?execOpts execOpts)
     )
 )
 

@@ -230,37 +230,37 @@ self->split = lambda((t_subj \@key first execOpts "tgg")  ; -> list[str]
     )
 )
 
-self->sub = lambda((t_repl t_subj \@key all execOpts "ttgg")  ; -> str
+self->sub = lambda((t_repl t_subj \@key first execOpts "ttgg")  ; -> str
     ; 替换主题串中的匹配（同函数 ycRegEx::Sub）。
     ;
     ; **参数**
     ;   t_repl     (str)         - 替换模板（引擎方言，展开 \1、&、\0）
     ;   t_subj     (str)         - 主题串
-    ;   ?all       (t|nil)       - t 时替换全部匹配，nil 时只替首处，默认值为 nil
+    ;   ?first     (t|nil)       - t 时只替换首处，nil（默认）替换全部
     ;   ?execOpts  (sym|list|nil) - 执行选项符号或列表（默认 nil）
     ;
     ; **返回**
     ;   (str) - 替换后的串
     let((n_count n_exec)
         n_exec = _ExecOptsBits(execOpts "ycRegEx::Pattern->sub")
-        n_count = if(all 0 1)
+        n_count = if(first 1 0)
         pcreReplace(self->_data->pcre t_subj t_repl n_count n_exec)
     )
 )
-self->subn = lambda((t_repl t_subj \@key all execOpts "ttgg")  ; -> (str, int)
+self->subn = lambda((t_repl t_subj \@key first execOpts "ttgg")  ; -> (str, int)
     ; 同 sub，另返回实际替换次数（同函数 ycRegEx::Subn）。
     ;
     ; **参数**
     ;   t_repl     (str)         - 替换模板（引擎方言）
     ;   t_subj     (str)         - 主题串
-    ;   ?all       (t|nil)       - t 时替换全部匹配，nil（默认）只替首处
+    ;   ?first     (t|nil)       - t 时只替换首处，nil（默认）替换全部
     ;   ?execOpts  (sym|list|nil) - 执行选项符号或列表（默认 nil）
     ;
     ; **返回**
     ;   (str, int) - (替换后的串, 实际替换次数)
     let((t_buf n_c n_count n_exec)
         n_exec = _ExecOptsBits(execOpts "ycRegEx::Pattern->subn")
-        n_count = if(all 0 1)
+        n_count = if(first 1 0)
         t_buf = pcreReplace(self->_data->pcre t_subj strcat("<YC-N>" t_repl) n_count n_exec)
         n_c = _CountSub(t_buf "<YC-N>")
         list(_FoldCat(_SplitBy(t_buf "<YC-N>")) n_c)

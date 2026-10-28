@@ -10,7 +10,7 @@ Cadence SKILL++ 的正则表达式库：模块级自由函数与 `Compile()` 编
 - 未提供的能力（按名取组、`groupdict()`、位置方法的组号参数等）在调用时以 `error()` 中断，API 参考各条目中逐一注明。
 - 捕获组数不设上限。普通匹配、非空 `finditer`/`findall` 与可批量导出的零宽匹配不受 65535 字节偏移限制；复杂数字组引用（含字符类/`\g`/`\k`）或混合非空零宽模式无法安全批量，回退扫描仍以 65535 字节为上限。
 - 模板（`t_repl`/`expand`）按引擎方言展开：`\1`~`\9` 反向引用；`&`/`\0` 整体匹配；带编译对象时 `\{n}` 引用任意组，第 10 组以上必须用此形式；`\n` 是字面 `n`，换行请写真实换行字符；其他形式按字面处理。
-- flags 以关键字 `?flags` 传入（符号或字符串，如 `'I` 或 `"imsx"`）；`Split` 默认切分全部、`?first t` 只切首处；`Sub`/`Subn` 默认替换首处、`?all t` 替换全部。详见「flags 参数」。
+- flags 以关键字 `?flags` 传入（符号或字符串，如 `'I` 或 `"imsx"`）；`Split` 默认切分全部、`?first t` 只切首处；`Sub`/`Subn` 默认替换全部、`?first t` 只替换首处。详见「flags 参数」。
 - 各自由函数的 `g_pat` 可传模式串或已编译 `Pattern`；传 `Pattern` 时直接复用、不重编译（与 `?flags` 同用会以 `error()` 中断）。
 - pattern 与模板中的反斜杠在 SKILL 源字符串中写作两字符（如 `"\\d+"`、`"\\1"`）。
 
@@ -30,7 +30,7 @@ let((m)
 let((p)
     p = ycRegEx::Compile("\\d+")
     printf("%L\n" p->findall("a1b22"))        ; => ("1" "22")
-    printf("%s\n" p->sub("#" "a1b2" ?all t))  ; => "a#b#"
+    printf("%s\n" p->sub("#" "a1b2"))        ; => "a#b#"
 )
 ```
 
@@ -336,7 +336,7 @@ ycRegEx::Sub(
     t_repl
     t_subj
     [ ?flags g_flags ]
-    [ ?all g_all ]
+    [ ?first g_first ]
     [ ?execOpts g_execOpts ]
 )
 => str
@@ -344,7 +344,7 @@ ycRegEx::Sub(
 
 **描述**
 
-将匹配替换为 `t_repl` 展开串。模板按引擎方言展开 `\1`~`\9`、`&`、`\0`，带编译对象时可用 `\{n}` 引用任意组；`\n` 是字面 `n`，换行请写真实换行字符。默认只替换首处匹配，`?all t` 替换全部；零宽匹配在全部模式下亦仅替换首处一次。pattern 语法错误或参数类型不符时以 `error()` 中断。
+将匹配替换为 `t_repl` 展开串。模板按引擎方言展开 `\1`~`\9`、`&`、`\0`，带编译对象时可用 `\{n}` 引用任意组；`\n` 是字面 `n`，换行请写真实换行字符。默认替换全部匹配，`?first t` 只替换首处；零宽匹配仍仅替换首处一次（受引擎限制）。pattern 语法错误或参数类型不符时以 `error()` 中断。
 
 **参数**
 
@@ -354,7 +354,7 @@ ycRegEx::Sub(
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym / str / nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?all g_all | t / nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?first g_first | t / nil | nil | t 时只处理首处，否则处理全部 |
 | ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
@@ -364,9 +364,9 @@ ycRegEx::Sub(
 **例程**
 
 ```lisp
-ycRegEx::Sub("\\d+" "#" "a1b22" ?all t) ; => "a#b#"
-ycRegEx::Sub("\\d" "#" "a1b2")          ; => "a#b2"（默认单次）
-ycRegEx::Sub("x*" "-" "abc")            ; => "-abc"（零宽仅首处）
+ycRegEx::Sub("\\d+" "#" "a1b22")         ; => "a#b#"
+ycRegEx::Sub("\\d" "#" "a1b2" ?first t)  ; => "a#b2"
+ycRegEx::Sub("x*" "-" "abc")             ; => "-abc"（零宽仍只处理首处）
 ```
 
 ### ycRegEx::Subn <sub>`function`</sub>
@@ -377,7 +377,7 @@ ycRegEx::Subn(
     t_repl
     t_subj
     [ ?flags g_flags ]
-    [ ?all g_all ]
+    [ ?first g_first ]
     [ ?execOpts g_execOpts ]
 )
 => (str, int)
@@ -395,7 +395,7 @@ ycRegEx::Subn(
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
 | ?flags g_flags | sym / str / nil | nil | 修饰标志 `'I 'M 'S 'X`（大小写皆可）；详见 [flags 参数](#flags-参数) |
-| ?all g_all | t / nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?first g_first | t / nil | nil | t 时只处理首处，否则处理全部 |
 | ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
@@ -405,7 +405,8 @@ ycRegEx::Subn(
 **例程**
 
 ```lisp
-ycRegEx::Subn("\\d" "#" "a1b2" ?all t)  ; => ("a#b#" 2)
+ycRegEx::Subn("\\d" "#" "a1b2")         ; => ("a#b#" 2)
+ycRegEx::Subn("\\d" "#" "a1b2" ?first t) ; => ("a#b2" 1)
 ```
 
 ### ycRegEx::GetRecursionLimit <sub>`function`</sub>
@@ -466,7 +467,7 @@ ycRegEx::SetRecursionLimit(10000000)  ; => t（恢复默认）
 
 **描述**
 
-`Compile()` 的返回类型。方法与其对应的自由函数（如 `ycRegEx::Match` 与 `Pattern->match`）语义相同；已是编译对象，免重复编译；编译期修饰（`i/m/s/x`）在 `Compile` 时定死，方法不再提供 `?flags`；`split` 提供 `?first`，`sub`/`subn` 提供 `?all`。方法一律经 `->` 调用；`sub`/`subn` 首参为 `t_repl`，其余方法首参为 `t_subj`。
+`Compile()` 的返回类型。方法与其对应的自由函数（如 `ycRegEx::Match` 与 `Pattern->match`）语义相同；已是编译对象，免重复编译；编译期修饰（`i/m/s/x`）在 `Compile` 时定死，方法不再提供 `?flags`；`split`/`sub`/`subn` 均提供 `?first`。方法一律经 `->` 调用；`sub`/`subn` 首参为 `t_repl`，其余方法首参为 `t_subj`。
 
 #### 搜索与匹配
 
@@ -711,7 +712,7 @@ p->split("a,b,c" ?first t) ; => ("a" "b,c")
 p->sub(
     t_repl
     t_subj
-    [ ?all g_all ]
+    [ ?first g_first ]
     [ ?execOpts g_execOpts ]
 )
 => str
@@ -719,7 +720,7 @@ p->sub(
 
 **描述**
 
-将匹配替换为 `t_repl` 展开串；模板方言、零宽替换行为与 `?all` 语义同 `Sub`。
+将匹配替换为 `t_repl` 展开串；模板方言、零宽替换行为与 `Sub` 相同。
 
 **参数**
 
@@ -727,7 +728,7 @@ p->sub(
 | --- | --- | --- | --- |
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
-| ?all g_all | t / nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?first g_first | t / nil | nil | t 时只处理首处，否则处理全部 |
 | ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
@@ -738,8 +739,8 @@ p->sub(
 
 ```lisp
 p = ycRegEx::Compile("\\d+")
-p->sub("#" "a1b2")        ; => "a#b2"（默认单次）
-p->sub("#" "a1b2" ?all t) ; => "a#b#"
+p->sub("#" "a1b2")        ; => "a#b#"（默认全部）
+p->sub("#" "a1b2" ?first t) ; => "a#b2"
 ```
 
 ##### subn <sub>`method`</sub>
@@ -748,7 +749,7 @@ p->sub("#" "a1b2" ?all t) ; => "a#b#"
 p->subn(
     t_repl
     t_subj
-    [ ?all g_all ]
+    [ ?first g_first ]
     [ ?execOpts g_execOpts ]
 )
 => (str, int)
@@ -764,7 +765,7 @@ p->subn(
 | --- | --- | --- | --- |
 | t_repl | str |  | 替换模板 |
 | t_subj | str |  | 被处理字符串 |
-| ?all g_all | t / nil | nil | t 时处理全部匹配，否则只处理首处 |
+| ?first g_first | t / nil | nil | t 时只处理首处，否则处理全部 |
 | ?execOpts g_execOpts | sym / list / nil | nil | 执行选项符号或列表；详见 [执行选项](#执行选项) |
 
 **返回值**
@@ -775,8 +776,8 @@ p->subn(
 
 ```lisp
 p = ycRegEx::Compile("\\d")
-p->subn("#" "a1b2")        ; => ("a#b2" 1)（默认单次）
-p->subn("#" "a1b2" ?all t) ; => ("a#b#" 2)
+p->subn("#" "a1b2")        ; => ("a#b#" 2)（默认全部）
+p->subn("#" "a1b2" ?first t) ; => ("a#b2" 1)
 ```
 
 #### 元信息
@@ -1040,7 +1041,7 @@ m->expand("\\2-\\1")  ; => "20-10"
 
 ## flags 参数
 
-`?flags`、`Split` 的 `?first` 与 `Sub`/`Subn` 的 `?all` 为关键字参数（默认 `nil`）。
+`?flags` 与 `Split`/`Sub`/`Subn` 的 `?first` 为关键字参数（默认 `nil`）。
 
 `?flags` 指定修饰标志，接受符号或字符串（大小写皆可，`?flags 'I` 与 `?flags "i"` 等效），内部逐字符解析：
 
@@ -1052,15 +1053,15 @@ m->expand("\\2-\\1")  ; => "20-10"
 | `x` | `(?x)` | 详式：pattern 中空白不参与匹配 |
 
 - 可组合：`?flags "im"` ≡ `?flags 'IM`；重复字符去重。
-- `g` 不再是标志；`Sub`/`Subn` 全局替换用 `?all t`，`Split` 默认全部分割、用 `?first t` 只切首处（`?flags` 中出现 `g` 会 `error()` 并提示）。
+- `g` 不再是标志；`Sub`/`Subn` 默认全局替换、`Split` 默认全部分割，三者都用 `?first t` 只处理首处（`?flags` 中出现 `g` 会 `error()` 并提示）。
 - 非法输入（数字、未知字母）以 `error()` 中断。
 
-`?first` 与 `?all` 控制处理范围：`Split` 默认切分全部，`?first t` 只切首处；`Sub`/`Subn` 默认替换首处，`?all t` 替换全部。注意：零宽 pattern（能匹配空串者，如 `x*`）在本引擎下 `Split` 和 `Sub`/`Subn` 都只处理首个空匹配（受匹配引擎限制）。
+`?first` 控制处理范围：`Split`/`Sub`/`Subn` 默认处理全部，`?first t` 只处理首处。注意：零宽 pattern（能匹配空串者，如 `x*`）在本引擎下 `Split` 和 `Sub`/`Subn` 都只处理首个空匹配（受匹配引擎限制）。
 
 ```lisp
-; ?all — 全局（对照默认单次）
-ycRegEx::Sub("\\d" "a1b2c" "#" ?all t)  ; => "a#b#c"
-ycRegEx::Sub("\\d" "a1b2c" "#")         ; => "a#b2c"
+; ?first — 只处理首处（对照默认全部）
+ycRegEx::Sub("\\d" "#" "a1b2c")         ; => "a#b#c"
+ycRegEx::Sub("\\d" "#" "a1b2c" ?first t) ; => "a#b2c"
 
 ; i — 大小写不敏感
 ycRegEx::Search("hello" "Say HELLO")            ; => nil
