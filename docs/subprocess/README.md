@@ -108,18 +108,18 @@ ycSubProcess::RunWithRead(
 **例程**
 
 ```lisp
-l_res = ycSubProcess::RunWithRead("sh -c 'printf out; printf err >&2; exit 7'")
-car(l_res)
+res = ycSubProcess::RunWithRead("sh -c 'printf out; printf err >&2; exit 7'")
+car(res)
 ; => 7
-cadr(l_res)
+cadr(res)
 ; => "out"
-caddr(l_res)
+caddr(res)
 ; => "err"
 ```
 
 ```lisp
-l_res = ycSubProcess::RunWithRead("printf 'hello'")
-cadr(l_res)
+res = ycSubProcess::RunWithRead("printf 'hello'")
+cadr(res)
 ; => "hello"
 ```
 
@@ -338,9 +338,9 @@ aj->state()
 | `'Stopped` | 已暂停 |
 
 ```lisp
-g_aj = ycSubProcess::CreateJob("true")
-g_aj->await()
-g_aj->state()
+aj = ycSubProcess::CreateJob("true")
+aj->await()
+aj->state()
 ; => 'Dead
 ```
 
@@ -354,10 +354,10 @@ aj->stop()
 暂停任务，类似 Ctrl+Z；任务未启动时以 `error()` 中断。
 
 ```lisp
-g_aj = ycSubProcess::CreateJob("sleep" "5")->start()->wait(1)
-g_aj->stop()
+aj = ycSubProcess::CreateJob("sleep" "5")->start()->wait(1)
+aj->stop()
 ; => t
-g_aj->kill()
+aj->kill()
 ```
 
 #### continue <sub>`method`</sub>
@@ -370,11 +370,11 @@ aj->continue()
 继续执行已暂停的任务；任务未启动时以 `error()` 中断。
 
 ```lisp
-g_aj = ycSubProcess::CreateJob("sleep" "5")->start()->wait(1)
-g_aj->stop()
-g_aj->continue()
+aj = ycSubProcess::CreateJob("sleep" "5")->start()->wait(1)
+aj->stop()
+aj->continue()
 ; => t
-g_aj->kill()
+aj->kill()
 ```
 
 #### print <sub>`method`</sub>
@@ -423,10 +423,10 @@ aj->close()
 关闭标准输入通道，类似 `Ctrl + D`；任务未启动时以 `error()` 中断。
 
 ```lisp
-g_aj = ycSubProcess::CreateJob("cat")->start()
-g_aj->close()
+aj = ycSubProcess::CreateJob("cat")->start()
+aj->close()
 ; => t
-g_aj->wait(1)
+aj->wait(1)
 ```
 
 #### signal <sub>`method`</sub>
@@ -452,10 +452,10 @@ aj->signal(
 | `'KILL` | 强制终止任务进程，类似 `kill -9 PID` |
 
 ```lisp
-g_aj = ycSubProcess::CreateJob("sleep" "5")->start()->wait(1)
-g_aj->signal('TERM)
+aj = ycSubProcess::CreateJob("sleep" "5")->start()->wait(1)
+aj->signal('TERM)
 ; => t
-g_aj->wait(1)
+aj->wait(1)
 ```
 
 #### sleep <sub>`method`</sub>
