@@ -338,7 +338,7 @@ procedure(Region(l_polygons \@key (normalize t) (grid nil) (eps nil) "lggg")  ; 
     ; 构造不可变区域。
     ;
     ; **参数**
-    ;   l_polygons  (list[Polygon]|nil) - 多边形列表；nil 表示空区域
+    ;   l_polygons  (list[Polygon]|nil) - 多边形列表或点列；nil 表示空区域
     ;   ?normalize  (t|nil)             - 是否归一化为互不重叠；默认 t
     ;   ?grid       (num|nil)           - 布尔网格；默认 nil
     ;   ?eps        (num|nil)           - 容差；默认 nil（1e-9）

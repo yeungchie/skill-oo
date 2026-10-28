@@ -450,7 +450,7 @@ procedure(Polygon(l_points "l")  ; -> Polygon
     ; 构造不可变 keyhole 多边形。
     ;
     ; **参数**
-    ;   l_points  (list) - Point 列表、(x y) 列表或扁平数值坐标
+    ;   l_points  (list) - Point 列表或 (x y) 列表；不接受扁平数值坐标
     ;
     ; **返回**
     ;   (Polygon) - 复制外层点列的新多边形；非法点列 error

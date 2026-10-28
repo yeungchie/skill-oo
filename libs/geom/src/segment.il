@@ -389,7 +389,7 @@ procedure(Segment(l_data "l")  ; -> Segment
     ; 构造不可变线段。
     ;
     ; **参数**
-    ;   l_data  (list) - 两点列表、包一层的两点列表或四个坐标
+    ;   l_data  (list) - 两点列表、包一层的两点列表或 Point 列表
     ;
     ; **返回**
     ;   (Segment) - 新线段；零长度合法；格式不合法 error

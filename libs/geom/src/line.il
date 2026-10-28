@@ -226,7 +226,7 @@ procedure(Line(l_data "l")  ; -> Line
     ; 构造不可变无限直线。
     ;
     ; **参数**
-    ;   l_data  (list) - 两点列表、包一层的两点列表或四个坐标
+    ;   l_data  (list) - 两点列表、包一层的两点列表或 Point 列表
     ;
     ; **返回**
     ;   (Line) - 规范化 a*x+b*y+c=0；重合点或格式不合法 error

@@ -63,6 +63,8 @@ let((g_r)
 
 _AssertError(lambda(() ycGeom::Region("bad") t)  "region: non-list rejected")
 _AssertError(lambda(() ycGeom::Region(list(1)) t)  "region: non-Polygon rejected")
+_AssertError(lambda(() ycGeom::Region(list(0 0 1 0 1 1)) t)
+    "region: flat number list rejected")
 _AssertError(lambda(() ycGeom::Region(nil ?normalize "bad") t)  "region: bad normalize")
 _AssertError(lambda(() ycGeom::Region(list(ycGeom::Polygon(list(
     ycGeom::Point(0:0) ycGeom::Point(1:0) ycGeom::Point(0:1)

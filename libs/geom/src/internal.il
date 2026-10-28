@@ -208,10 +208,10 @@ procedure(_AsPoint(g_x t_ctx "gt")  ; -> Point
 )
 
 procedure(_AsPointList(l_data t_ctx "lt")  ; -> list[Point]
-    ; 归一化点列：接受 Point/(x y)、扁平数值与任意层嵌套列表。
+    ; 归一化点列：只接受 Point/(x y) 与任意层嵌套列表。
     ;
     ; **参数**
-    ;   l_data  (list) - 点列、坐标或嵌套列表
+    ;   l_data  (list) - 点列或嵌套列表
     ;   t_ctx   (str)  - 错误上下文
     ;
     ; **返回**
@@ -241,15 +241,6 @@ procedure(_AsPointList(l_data t_ctx "lt")  ; -> list[Point]
                                     cadr(car(l_rest))))
                             l_rest = cdr(l_rest)
                         )
-                        (numberp(car(l_rest))
-                            unless(cadr(l_rest) && numberp(cadr(l_rest))
-                                error("%s: coordinate list contains non-numbers"
-                                    t_ctx)
-                            )
-                            l_res = tconc(l_res
-                                _PointAt(car(l_rest) cadr(l_rest)))
-                            l_rest = cddr(l_rest)
-                        )
                         (t
                             error("%s: expected a Point or (x y) list, got %A"
                                 t_ctx car(l_rest))
@@ -263,10 +254,10 @@ procedure(_AsPointList(l_data t_ctx "lt")  ; -> list[Point]
 )
 
 procedure(_TwoPoints(l_data t_ctx "lt")  ; -> list[Point]
-    ; 归一化“两点”构造参数：只接受一个列表。
+    ; 归一化“两点”构造参数：只接受一个点列表。
     ;
     ; **参数**
-    ;   l_data  (list) - 两点列表、任意层嵌套列表或四个坐标
+    ;   l_data  (list) - 两点列表或任意层嵌套列表
     ;   t_ctx   (str)  - 错误上下文
     ;
     ; **返回**
@@ -588,27 +579,33 @@ procedure(_ConvertToGeomObject(g_value t_ctx g_as "gtg")  ; -> any
             ((t_as == "Polygon") Polygon(g_value))
             ((t_as == "Region") _AsRegion(g_value t_ctx))
             (t
-                l_pts = errset(_AsPointList(g_value t_ctx) nil)
-                cond(
-                    ((l_pts && car(l_pts))
-                        l_pts = car(l_pts)
-                        cond(
-                            ((length(l_pts) == 1) car(l_pts))
-                            ((length(l_pts) == 2)
-                                error("%s: ambiguous two-point array; specify ?as 'Segment, 'Line, 'Rect, or 'Region"
-                                    t_ctx)
+                l_res = errset(_AsPoint(g_value t_ctx) nil)
+                if(l_res
+                then
+                    car(l_res)
+                else
+                    l_pts = errset(_AsPointList(g_value t_ctx) nil)
+                    cond(
+                        ((l_pts && car(l_pts))
+                            l_pts = car(l_pts)
+                            cond(
+                                ((length(l_pts) == 1) car(l_pts))
+                                ((length(l_pts) == 2)
+                                    error("%s: ambiguous two-point array; specify ?as 'Segment, 'Line, 'Rect, or 'Region"
+                                        t_ctx)
+                                )
+                                (t Polygon(l_pts))
                             )
-                            (t Polygon(l_pts))
                         )
-                    )
-                    (t
-                        l_res = errset(_AsRegion(g_value t_ctx) nil)
-                        if(l_res
-                        then
-                            car(l_res)
-                        else
-                            error("%s: expected a geometry object or coordinate array, got %A"
-                                t_ctx g_value)
+                        (t
+                            l_res = errset(_AsRegion(g_value t_ctx) nil)
+                            if(l_res
+                            then
+                                car(l_res)
+                            else
+                                error("%s: expected a geometry object or coordinate array, got %A"
+                                    t_ctx g_value)
+                            )
                         )
                     )
                 )

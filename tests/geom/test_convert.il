@@ -72,6 +72,8 @@ _Assert(ycGeom::ConvertToGeomObject(list(0:0 1:1) ?as 'Rect)->toSkill()
     == list(list(0.0 0.0) list(1.0 1.0))  "convert: ?as Rect")
 _Assert(ycGeom::ConvertToGeomObject(list(0:0 1:1) ?as 'Region)->area() == 1.0
     "convert: ?as Region two points")
+_AssertError(lambda(() ycGeom::ConvertToGeomObject(list(0 0 1 0 1 1)) t)
+    "convert: flat coordinate array rejected")
 _Assert(ycGeom::ConvertToGeomObject(list(0:0 1:0 1:1 0:1))->area() == 1.0
     "convert: point list to Polygon")
 _Assert(ycGeom::ConvertToGeomObject(list(list(0:0 1:0 1:1 0:1)))->area() == 1.0
@@ -91,8 +93,8 @@ let((g_poly g_r1 g_r2 g_r)
         "convert: nested Polygon object as Region")
     _Assert(ycGeom::ConvertToGeomObject(list(list(0:0 5:5)) ?as 'Region)->area() == 25.0
         "convert: nested two-point rectangle as Region")
-    _Assert(ycGeom::Polygon(list(0 0 ycGeom::Point(1:0) 1:1 0:1))->area() == 1.0
-        "constructor: Polygon mixed raw numbers and Point")
+    _AssertError(lambda(() ycGeom::Polygon(list(0 0 ycGeom::Point(1:0) 1:1 0:1)) t)
+        "constructor: Polygon mixed raw numbers rejected")
     g_r = ycGeom::Rect(list(0:0 1:1))
     _Assert(ycGeom::Rect(g_r->toSkill())->area() == 1.0
         "constructor: Rect toSkill roundtrip")

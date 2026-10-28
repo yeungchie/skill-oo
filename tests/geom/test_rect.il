@@ -21,7 +21,7 @@ let((g_r)
     _Assert(!g_r->contains(ycGeom::Point(2.1:5))  "rect: outside")
     _Assert(g_r->onBoundary(ycGeom::Point(2:2))  "rect: onBoundary left edge")
     _Assert(!g_r->onBoundary(ycGeom::Point(6:2))  "rect: onBoundary inside")
-    _Assert(ycGeom::Rect(list(1e9 0 1e9 + 10 10))->onBoundary(
+    _Assert(ycGeom::Rect(list(list(1e9 0) list(1e9 + 10 10)))->onBoundary(
         ycGeom::Point(list(1e9 + 1e-7 5)) ?eps 1e-9)
         "rect: onBoundary relative tolerance")
     _Assert(!g_r->contains(ycGeom::Point(2:2) ?boundary "outside")
@@ -35,10 +35,8 @@ let((g_r)
     _Assert(g_r->toSkill() == list(list(0.0 0.0) list(5.0 3.0))  "rect: nested pair form")
 )
 
-let((g_r)
-    g_r = ycGeom::Rect(list(0 0 5 3))
-    _Assert(g_r->width() == 5.0  "rect: four-number form")
-)
+_AssertError(lambda(() ycGeom::Rect(list(0 0 5 3)) t)
+    "rect: four-number form rejected")
 
 let((g_r)
     g_r = ycGeom::Rect(list(ycGeom::Point(1:1) ycGeom::Point(1:1)))
@@ -52,25 +50,25 @@ let((g_r)
 _AssertError(lambda(() ycGeom::Rect(list(1 2 3)) t)  "rect: three coordinates rejected")
 _AssertError(lambda(() ycGeom::Rect(list("a" "b")) t)  "rect: non-point rejected")
 _AssertError(lambda(() ycGeom::Rect(list(1 2 3 "x")) t)  "rect: nonnumeric coordinate rejected")
-_AssertError(lambda(() ycGeom::Rect(list(0 0 1 1))->contains(1) t)  "rect: bad contains type")
-_AssertError(lambda(() ycGeom::Rect(list(0 0 1 1))->contains(
+_AssertError(lambda(() ycGeom::Rect(list(0:0 1:1))->contains(1) t)  "rect: bad contains type")
+_AssertError(lambda(() ycGeom::Rect(list(0:0 1:1))->contains(
     ycGeom::Point(0:0) ?boundary "bad") t)  "rect: bad contains boundary")
-_AssertError(lambda(() ycGeom::Rect(list(0 0 1 1))->onBoundary(
+_AssertError(lambda(() ycGeom::Rect(list(0:0 1:1))->onBoundary(
     ycGeom::Point(0:0) ?eps 0) t)  "rect: bad onBoundary eps")
 
 let((g_r)
-    g_r = ycGeom::Rect(list(0 0 10 10))
+    g_r = ycGeom::Rect(list(0:0 10:10))
     _Assert(classOf(g_r->size(1)) == findClass('ycGeom::Region)  "rect: size class")
     _Assert(g_r->size(1 ?corner 'miter)->area() == 144.0  "rect: size miter")
     _Assert(g_r->size(1 ?dir 'right)->area() == 110.0  "rect: size right")
     _Assert(g_r->size(1.2 ?ratio t)->area() == 144.0  "rect: size ratio")
-    _Assert(ycGeom::Rect(list(1 1 1 1))->size(1)->isEmpty()  "rect: size degenerate")
+    _Assert(ycGeom::Rect(list(1:1 1:1))->size(1)->isEmpty()  "rect: size degenerate")
 )
-_AssertErrorMsg(lambda(() ycGeom::Rect(list(0 0 4 4))->size(-1 ?ratio t) t)
+_AssertErrorMsg(lambda(() ycGeom::Rect(list(0:0 4:4))->size(-1 ?ratio t) t)
     "ycGeom::Rect->size"  "rect: size ratio error context")
 
 let((g_r g_p)
-    g_r = ycGeom::Rect(list(2 0 10 4))
+    g_r = ycGeom::Rect(list(2:0 10:4))
     g_p = g_r->toPolygon()
     _Assert(classOf(g_p) == findClass('ycGeom::Polygon)  "rect: toPolygon class")
     _Assert(g_p->toSkill() == list(
@@ -78,12 +76,12 @@ let((g_r g_p)
     )  "rect: toPolygon corners")
     _Assert(g_p->area() == 32.0  "rect: toPolygon area")
     _Assert(g_p->toRect()->toSkill() == g_r->toSkill()  "rect: toPolygon roundtrip")
-    _Assert(ycGeom::Rect(list(1 1 1 1))->toPolygon() == nil  "rect: degenerate toPolygon")
+    _Assert(ycGeom::Rect(list(1:1 1:1))->toPolygon() == nil  "rect: degenerate toPolygon")
 )
 
 let((g_a g_b)
-    g_a = ycGeom::Rect(list(0 0 4 4))
-    g_b = ycGeom::Rect(list(2 2 6 6))
+    g_a = ycGeom::Rect(list(0:0 4:4))
+    g_b = ycGeom::Rect(list(2:2 6:6))
     _Assert(g_a->or(g_b)->area() == 28.0  "rect: or")
     _Assert(g_a->and(g_b)->area() == 4.0  "rect: and")
     _Assert(g_a->not(g_b)->area() == 12.0  "rect: not")
@@ -91,7 +89,7 @@ let((g_a g_b)
 )
 
 let((g_rect g_poly g_region)
-    g_rect = ycGeom::Rect(list(0 0 4 4))
+    g_rect = ycGeom::Rect(list(0:0 4:4))
     g_poly = ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))
     g_region = ycGeom::Region(list(g_poly))
     _Assert(g_rect->or(g_poly)->area() == 28.0  "rect: or Polygon")
@@ -104,21 +102,21 @@ let((g_rect g_poly g_region)
 )
 
 let((g_z g_r)
-    g_z = ycGeom::Rect(list(1 1 1 1))
-    g_r = ycGeom::Rect(list(0 0 2 2))
+    g_z = ycGeom::Rect(list(1:1 1:1))
+    g_r = ycGeom::Rect(list(0:0 2:2))
     _Assert(g_z->or(g_r)->area() == 4.0  "rect: degenerate union")
-    _Assert(ycGeom::Rect(list(0 0 1e-10 1e-10))->or(g_r)->area() == 4.0  "rect: tiny treated empty")
+    _Assert(ycGeom::Rect(list(0:0 1e-10:1e-10))->or(g_r)->area() == 4.0  "rect: tiny treated empty")
     _Assert(g_r->and(g_z)->area() == 0.0  "rect: degenerate intersection")
-    _Assert(ycGeom::Rect(list(0 0 1e-5 1e-5))->toPolygon() != nil
+    _Assert(ycGeom::Rect(list(0:0 1e-5:1e-5))->toPolygon() != nil
         "rect: small nonzero toPolygon")
 )
 
-_Assert(ycGeom::Rect(list(0 0 1e-5 1e-5))->or(ycGeom::Rect(list(0 0 2 2)))->area() == 4.0
+_Assert(ycGeom::Rect(list(0:0 1e-5:1e-5))->or(ycGeom::Rect(list(0:0 2:2)))->area() == 4.0
     "rect: small nonzero union")
 
-_AssertError(lambda(() ycGeom::Rect(list(0 0 1 1))->or(ycGeom::Segment(list(0 0 1 1))) t)  "rect: booleans reject Segment")
-_AssertError(lambda(() ycGeom::Polygon('((0 0) (1 0) (0 1)))->or(ycGeom::Line(list(0 0 1 0))) t)  "polygon: booleans reject Line")
-_AssertError(lambda(() ycGeom::Region(nil)->and(ycGeom::Segment(list(0 0 1 1))) t)  "region: booleans reject Segment")
+_AssertError(lambda(() ycGeom::Rect(list(0:0 1:1))->or(ycGeom::Segment(list(0:0 1:1))) t)  "rect: booleans reject Segment")
+_AssertError(lambda(() ycGeom::Polygon('((0 0) (1 0) (0 1)))->or(ycGeom::Line(list(0:0 1:0))) t)  "polygon: booleans reject Line")
+_AssertError(lambda(() ycGeom::Region(nil)->and(ycGeom::Segment(list(0:0 1:1))) t)  "region: booleans reject Segment")
 
 _TestRectDone = t
 
