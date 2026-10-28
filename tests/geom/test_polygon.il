@@ -177,6 +177,17 @@ let((g_p g_q t_reg)
         "polygon: 1 ulp points share a canonical representative")
 )
 
+let((g_p g_q t_reg)
+    g_p = ycGeom::Point(list(-1354119.7609392945 1809784.94827771))
+    g_q = ycGeom::Point(list(-1354119.7609392938 1809784.9482777116))
+    t_reg = makeTable("geomCanonTest" nil)
+    _Assert(ycGeom::_SamePoint(g_p g_q 1e-9)
+        "polygon: nearby points with different magnitudes compare equal")
+    _Assert(ycGeom::_PtKey(ycGeom::_CanonPoint(g_p 1e-9 t_reg))
+        == ycGeom::_PtKey(ycGeom::_CanonPoint(g_q 1e-9 t_reg))
+        "polygon: canonical scale is stable across nearby magnitudes")
+)
+
 let((g_hole)
     g_hole = ycGeom::Polygon(list(
         ycGeom::Point(1000000:2778.75)

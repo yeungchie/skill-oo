@@ -727,6 +727,7 @@ procedure(_CanonPoint(g_p n_eps t_reg "ggg")  ; -> Point
         n_eff = t_reg["_canonScale"]
         unless(n_eff
             n_eff = max(n_eps 1e-15 * max(abs(g_p->x()) abs(g_p->y())))
+            t_reg["_canonScale"] = n_eff
         )
         ; 先取整格号，再在整数格号上做 ±1 探测；直接对未取整
         ; 商偏移会让 round-half-even 跳过一格。atof 保留 double，
