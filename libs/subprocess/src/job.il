@@ -12,10 +12,7 @@ procedure(Run(g_arg \@rest l_args "gg")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 正常结束（退出码 0）返回 t；退出码非零返回 nil
-    let((aj)
-        (aj = apply('CreateJob g_arg ?verbose t l_args))->await()
-        aj->returncode == 0
-    )
+    apply('CreateJob g_arg ?verbose t l_args)->start()->wait()->returncode == 0
 )
 
 

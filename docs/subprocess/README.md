@@ -26,11 +26,8 @@ aj->await()
 ; => "Tue Sep 15 22:50:10 CST 2026\n"
 
 ; 链式调用：向子进程标准输入写入
-aj = ycSubProcess::CreateJob("cat")\
-    ->start()\
-    ->print("hello")\
-    ->print("world")
-
+aj = ycSubProcess::CreateJob("cat")->start()
+aj->print("hello")->print("world")
 aj->close()
 aj->await()
 ; => "hello\nworld\n"
@@ -380,7 +377,7 @@ aj->close()
 => t | nil
 ```
 
-关闭标准输入通道，类似 `Ctrl + D`；任务未启动时以 `error()` 中断。返回值为底层结果，不能把 `close()` 接在任务方法链末尾继续调用其他方法；需要 `await()` 时保留原任务对象引用。
+关闭标准输入通道，类似 `Ctrl + D`；任务未启动时以 `error()` 中断。
 
 ```lisp
 g_aj = ycSubProcess::CreateJob("cat")->start()
