@@ -16,7 +16,7 @@ Cadence SKILL++ 的 TOML 1.0 编解码库。
 
 ## 快速上手
 
-`t_toml` 的值如下所示：
+`toml` 的值如下所示：
 
 ```text
 title = "demo"
@@ -26,44 +26,44 @@ host = "localhost"
 ports = [8000, 8001]
 ```
 
-`t_toml_date` 的值如下所示：
+`toml_date` 的值如下所示：
 
 ```text
 d = 1979-05-27
 ```
 
-`t_toml_products` 的值如下所示：
+`toml_products` 的值如下所示：
 
 ```text
 [[products]]
 name = "Hammer"
 ```
 
-`t_toml_bad_int` 的值如下所示：
+`toml_bad_int` 的值如下所示：
 
 ```text
 x = 2147483648
 ```
 
 ```lisp
-t_v = ycToml::Decode(t_toml)
-t_v["title"]                                        ; => "demo"
-t_v["server"]["host"]                               ; => "localhost"
-t_v["server"]["ports"]                              ; => (8000 8001)
-t_v["missing"]                                      ; => ycCodec::Missing
+res = ycToml::Decode(toml)
+res["title"]                                        ; => "demo"
+res["server"]["host"]                               ; => "localhost"
+res["server"]["ports"]                              ; => (8000 8001)
+res["missing"]                                      ; => ycCodec::Missing
 
-ycToml::Encode(t_v ?sortKeys t)
+ycToml::Encode(res ?sortKeys t)
 ; => title = "demo"
 ;
 ;    [server]
 ;    host = "localhost"
 ;    ports = [8000, 8001]
 
-ycToml::Decode(t_toml_date)["d"]                    ; => "1979-05-27"
-ycToml::Decode(t_toml_products)["products"]
+ycToml::Decode(toml_date)["d"]                    ; => "1979-05-27"
+ycToml::Decode(toml_products)["products"]
 ; => (<table: name = "Hammer">)
 
-ycToml::Decode(t_toml_bad_int)
+ycToml::Decode(toml_bad_int)
 ; *Error* ycToml::Decode: integer out of fixnum range at line 1, column 5
 ```
 
@@ -98,19 +98,19 @@ ycToml::Decode(
 
 **例程**
 
-`t_toml_dotted` 的值如下所示：
+`toml_dotted` 的值如下所示：
 
 ```text
 a.b = 1
 ```
 
-`t_toml_escape` 的值如下所示：
+`toml_escape` 的值如下所示：
 
 ```text
 name = "a\tb"
 ```
 
-`t_toml_arrays` 的值如下所示：
+`toml_arrays` 的值如下所示：
 
 ```text
 [[a]]
@@ -120,44 +120,44 @@ x = 1
 x = 2
 ```
 
-`t_toml_numbers` 的值如下所示：
+`toml_numbers` 的值如下所示：
 
 ```text
 f = 1e3
 n = nan
 ```
 
-`t_toml_duplicate` 的值如下所示：
+`toml_duplicate` 的值如下所示：
 
 ```text
 a = 1
 a = 2
 ```
 
-`t_toml_bad_date` 的值如下所示：
+`toml_bad_date` 的值如下所示：
 
 ```text
 a = 2023-02-29
 ```
 
 ```lisp
-t_v = ycToml::Decode(t_toml_dotted)
-t_v["a"]["b"]                                        ; => 1
+res = ycToml::Decode(toml_dotted)
+res["a"]["b"]                                        ; => 1
 
-t_v = ycToml::Decode(t_toml_escape)
-t_v["name"]                                          ; => "a\tb"
+res = ycToml::Decode(toml_escape)
+res["name"]                                          ; => "a\tb"
 
-t_v = ycToml::Decode(t_toml_arrays)
-t_v["a"]                                             ; => (<table: x = 1> <table: x = 2>)
+res = ycToml::Decode(toml_arrays)
+res["a"]                                             ; => (<table: x = 1> <table: x = 2>)
 
-t_v = ycToml::Decode(t_toml_numbers)
-t_v["f"]                                             ; => 1000.0
-isNaN(t_v["n"])                                      ; => t
+res = ycToml::Decode(toml_numbers)
+res["f"]                                             ; => 1000.0
+isNaN(res["n"])                                      ; => t
 
-ycToml::Decode(t_toml_duplicate)
+ycToml::Decode(toml_duplicate)
 ; *Error* ycToml::Decode: duplicate key at line 2, column 1
 
-ycToml::Decode(t_toml_bad_date)
+ycToml::Decode(toml_bad_date)
 ; *Error* ycToml::Decode: invalid date at line 1, column 5
 ```
 
@@ -198,7 +198,7 @@ ycToml::Encode(
 
 **例程**
 
-`t_toml_encode` 的值如下所示：
+`toml_encode` 的值如下所示：
 
 ```text
 title = "demo"
@@ -208,17 +208,17 @@ host = "localhost"
 ```
 
 ```lisp
-t_v = ycToml::Decode(t_toml_encode)
-ycToml::Encode(t_v ?sortKeys t)
+res = ycToml::Decode(toml_encode)
+ycToml::Encode(res ?sortKeys t)
 ; => title = "demo"
 ;
 ;    [server]
 ;    host = "localhost"
 
-t_v = makeTable("demo")
-t_v["a"] = list(1 2)
-t_v["s"] = "a\"b"
-ycToml::Encode(t_v ?sortKeys t)
+res = makeTable("demo")
+res["a"] = list(1 2)
+res["s"] = "a\"b"
+ycToml::Encode(res ?sortKeys t)
 ; => 格式化展示（实际返回为字符串）：
 ;    a = [1, 2]
 ;    s = "a\"b"

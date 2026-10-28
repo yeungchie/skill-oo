@@ -15,7 +15,7 @@ Cadence SKILL++ 的 INI 配置编解码库：把行式配置文本读成 table�
 
 ## 快速上手
 
-`t_cfg_text` 的值如下所示：
+`cfg_text` 的值如下所示：
 
 ```text
 root = value
@@ -24,7 +24,7 @@ host = localhost
 port = 8080
 ```
 
-`t_cfg_colon` 的值如下所示：
+`cfg_colon` 的值如下所示：
 
 ```text
 a: 1
@@ -33,12 +33,12 @@ b: 2
 ```
 
 ```lisp
-t_cfg = ycIni::Decode(t_cfg_text)
-t_cfg["root"]              ; => "value"
-t_cfg["server"]["host"]    ; => "localhost"
-t_cfg["server"]["port"]    ; => "8080"
+cfg = ycIni::Decode(cfg_text)
+cfg["root"]              ; => "value"
+cfg["server"]["host"]    ; => "localhost"
+cfg["server"]["port"]    ; => "8080"
 
-ycIni::Encode(t_cfg ?sortKeys t)
+ycIni::Encode(cfg ?sortKeys t)
 ; => 编码展示（实际返回为字符串）：
 ;    root = value
 ;
@@ -46,9 +46,9 @@ ycIni::Encode(t_cfg ?sortKeys t)
 ;    host = localhost
 ;    port = 8080
 
-t_cfg = ycIni::Decode(t_cfg_colon ?delimiter ":")
-t_cfg["a"]                 ; => "1"
-t_cfg["s"]["b"]            ; => "2"
+cfg = ycIni::Decode(cfg_colon ?delimiter ":")
+cfg["a"]                 ; => "1"
+cfg["s"]["b"]            ; => "2"
 ```
 
 ## API 参考
@@ -103,18 +103,18 @@ ycIni::Decode(
 **例程**
 
 ```lisp
-t_v = ycIni::Decode("")
-t_v["missing"] ; => ycCodec::Missing
+res = ycIni::Decode("")
+res["missing"] ; => ycCodec::Missing
 
-t_v = ycIni::Decode("a = 1\nb = text\n")
-t_v["a"] ; => "1"
-t_v["b"] ; => "text"
+res = ycIni::Decode("a = 1\nb = text\n")
+res["a"] ; => "1"
+res["b"] ; => "text"
 
-t_v = ycIni::Decode("[server]\nhost = localhost\n")
-t_v["server"]["host"] ; => "localhost"
+res = ycIni::Decode("[server]\nhost = localhost\n")
+res["server"]["host"] ; => "localhost"
 
-t_v = ycIni::Decode("a = 1\na = 2\n" ?duplicates "last")
-t_v["a"] ; => "2"
+res = ycIni::Decode("a = 1\na = 2\n" ?duplicates "last")
+res["a"] ; => "2"
 
 ycIni::Decode("[a]\n[a]\n")
 ; *Error* ycIni::Decode: duplicate section at line 2, column 1
@@ -163,31 +163,31 @@ ycIni::Encode(
 **例程**
 
 ```lisp
-t_cfg = makeTable("demo" ycCodec::Missing)
-t_cfg["title"] = "demo"
-t_cfg["server"] = makeTable("demo" ycCodec::Missing)
-t_cfg["server"]["host"] = "localhost"
+cfg = makeTable("demo" ycCodec::Missing)
+cfg["title"] = "demo"
+cfg["server"] = makeTable("demo" ycCodec::Missing)
+cfg["server"]["host"] = "localhost"
 
-ycIni::Encode(t_cfg ?sortKeys t)
+ycIni::Encode(cfg ?sortKeys t)
 ; => title = demo
 ;
 ;    [server]
 ;    host = localhost
 
-ycIni::Encode(t_cfg ?delimiter ":")
+ycIni::Encode(cfg ?delimiter ":")
 ; => title : demo
 ;
 ;    [server]
 ;    host : localhost
 
-ycIni::Encode(t_cfg ?finalNewline nil)
+ycIni::Encode(cfg ?finalNewline nil)
 ; => title = demo
 ;
 ;    [server]
 ;    host = localhost
 
-t_cfg["items"] = list(1 2)
-ycIni::Encode(t_cfg)
+cfg["items"] = list(1 2)
+ycIni::Encode(cfg)
 ; *Error* ycIni::Encode: list values are not supported
 
 ycIni::Encode("not a table")

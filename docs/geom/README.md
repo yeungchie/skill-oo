@@ -27,48 +27,48 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole �
 
 ```lisp
 ; 点与线段
-g_p = ycGeom::Point(3:4)
-g_q = ycGeom::Point(0:0)
-g_p->distanceTo(g_q)
+p = ycGeom::Point(3:4)
+q = ycGeom::Point(0:0)
+p->distanceTo(q)
 ; => 5.0
 
-g_s = ycGeom::Segment(list(ycGeom::Point(0:0) ycGeom::Point(10:0)))
-g_s->midpoint()->toSkill()
+s = ycGeom::Segment(list(ycGeom::Point(0:0) ycGeom::Point(10:0)))
+s->midpoint()->toSkill()
 ; => (5.0 0.0)
-g_s->contains(ycGeom::Point(5:0))
+s->contains(ycGeom::Point(5:0))
 ; => t
 
 ; 无限直线
-g_l = ycGeom::Line(list(ycGeom::Point(0:0) ycGeom::Point(0:10)))
-g_l->distanceTo(ycGeom::Point(5:3))
+l = ycGeom::Line(list(ycGeom::Point(0:0) ycGeom::Point(0:10)))
+l->distanceTo(ycGeom::Point(5:3))
 ; => 5.0
 
 ; 轴对齐矩形
-g_rect = ycGeom::Rect(list(ycGeom::Point(10:4) ycGeom::Point(2:0)))
-g_rect->toSkill()
+rect = ycGeom::Rect(list(ycGeom::Point(10:4) ycGeom::Point(2:0)))
+rect->toSkill()
 ; => ((2.0 0.0) (10.0 4.0))
 
 ; 正方形多边形
-g_sq = ycGeom::Polygon(list(
+sq = ycGeom::Polygon(list(
     ycGeom::Point(0:0)
     ycGeom::Point(10:0)
     ycGeom::Point(10:10)
     ycGeom::Point(0:10)
 ))
-g_sq->area()
+sq->area()
 ; => 100.0
-g_sq->contains(ycGeom::Point(5:5))
+sq->contains(ycGeom::Point(5:5))
 ; => t
 
 ; 区域并集
-g_a = ycGeom::Region(list(g_sq))
-g_b = ycGeom::Region(list(ycGeom::Polygon(list(
+a = ycGeom::Region(list(sq))
+b = ycGeom::Region(list(ycGeom::Polygon(list(
     ycGeom::Point(5:5)
     ycGeom::Point(15:5)
     ycGeom::Point(15:15)
     ycGeom::Point(5:15)
 ))))
-g_a->or(g_b)->area()
+a->or(b)->area()
 ; => 175.0
 ```
 
@@ -520,8 +520,8 @@ ycGeom::Line(l_data)
 **例程**
 
 ```lisp
-g_l = ycGeom::Line(list(ycGeom::Point(0:0) ycGeom::Point(10:0)))
-g_l->contains(ycGeom::Point(4:0))
+l = ycGeom::Line(list(ycGeom::Point(0:0) ycGeom::Point(10:0)))
+l->contains(ycGeom::Point(4:0))
 ; => t
 ```
 
@@ -765,10 +765,10 @@ ycGeom::Rect(l_data)
 **例程**
 
 ```lisp
-g_rect = ycGeom::Rect(list(ycGeom::Point(10:4) ycGeom::Point(2:0)))
-g_rect->width()
+rect = ycGeom::Rect(list(ycGeom::Point(10:4) ycGeom::Point(2:0)))
+rect->width()
 ; => 8.0
-g_rect->toSkill()
+rect->toSkill()
 ; => ((2.0 0.0) (10.0 4.0))
 ```
 
@@ -937,10 +937,10 @@ Rect->size(
 其他值以 `error()` 中断。
 
 ```lisp
-g_rect = ycGeom::Rect(list(0 0 10 10))
-g_rect->size(1)->area()
+rect = ycGeom::Rect(list(0 0 10 10))
+rect->size(1)->area()
 ; => 144.0
-g_rect->size(1 ?dir 'right)->area()
+rect->size(1 ?dir 'right)->area()
 ; => 110.0
 ```
 
@@ -1193,8 +1193,8 @@ ycGeom::Polygon(l_points)
 **例程**
 
 ```lisp
-g_p = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
-g_p->area()
+p = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
+p->area()
 ; => 16.0
 
 ycGeom::Polygon(list(0 0 4 0 4 4 0 4))->area()
@@ -1312,10 +1312,10 @@ Polygon->contains(
 其他值以 `error()` 中断。
 
 ```lisp
-g_p = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
-g_p->contains(ycGeom::Point(0:0))
+p = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
+p->contains(ycGeom::Point(0:0))
 ; => t
-g_p->contains(ycGeom::Point(0:0) ?boundary "outside")
+p->contains(ycGeom::Point(0:0) ?boundary "outside")
 ; => nil
 ```
 
@@ -1476,12 +1476,12 @@ Polygon->size(
 `?corner 'none` 只保留边带、不补拐角，可能产生十字/缺口轮廓。offset 可能拆分或合并图形，因此统一返回 Region。
 
 ```lisp
-g_sq = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
-g_sq->size(1 ?corner 'miter)->bBox()
+sq = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
+sq->size(1 ?corner 'miter)->bBox()
 ; => ((-1.0 -1.0) (11.0 11.0))
-g_sq->size(1 ?dir 'right ?corner 'miter)->bBox()
+sq->size(1 ?dir 'right ?corner 'miter)->bBox()
 ; => ((0.0 0.0) (11.0 10.0))
-g_sq->size(1.2 ?ratio t ?dir 'right)->bBox()
+sq->size(1.2 ?ratio t ?dir 'right)->bBox()
 ; => ((0.0 0.0) (12.0 10.0))
 ```
 
@@ -1577,11 +1577,11 @@ Polygon->xor(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-g_a = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
-g_b = ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))
-g_a->or(g_b)->area()
+a = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
+b = ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))
+a->or(b)->area()
 ; => 28.0
-g_a->not(g_b)->area()
+a->not(b)->area()
 ; => 12.0
 ```
 
@@ -1631,8 +1631,8 @@ ycGeom::Region(
 **例程**
 
 ```lisp
-g_r = ycGeom::Region(nil)
-g_r->isEmpty()
+r = ycGeom::Region(nil)
+r->isEmpty()
 ; => t
 ```
 
@@ -1852,9 +1852,9 @@ Region->size(
 其他值以 `error()` 中断。
 
 ```lisp
-g_a = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
-g_r = ycGeom::Region(list(g_a))
-g_r->size(1)->area()
+a = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
+r = ycGeom::Region(list(a))
+r->size(1)->area()
 ; => 144.0
 ```
 
@@ -1878,9 +1878,9 @@ Region->or(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
-g_b = ycGeom::Region(list(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))))
-g_a->or(g_b)->area()
+a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
+b = ycGeom::Region(list(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))))
+a->or(b)->area()
 ; => 28.0
 ```
 
@@ -1904,9 +1904,9 @@ Region->and(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
-g_b = ycGeom::Region(list(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))))
-g_a->and(g_b)->area()
+a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
+b = ycGeom::Region(list(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))))
+a->and(b)->area()
 ; => 4.0
 ```
 
@@ -1930,9 +1930,9 @@ Region->not(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
-g_b = ycGeom::Region(list(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))))
-g_a->not(g_b)->area()
+a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
+b = ycGeom::Region(list(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))))
+a->not(b)->area()
 ; => 12.0
 ```
 
@@ -1956,9 +1956,9 @@ Region->xor(
 | ?eps n_eps | num / nil | 1e-9 | 容差；默认 `1e-9` |
 
 ```lisp
-g_a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
-g_b = ycGeom::Region(list(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))))
-g_a->xor(g_b)->area()
+a = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
+b = ycGeom::Region(list(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))))
+a->xor(b)->area()
 ; => 24.0
 ```
 
@@ -2045,7 +2045,7 @@ ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))->toSkill()
 *图：外环通过水平切割线连接内洞。*
 
 ```lisp
-g_hole = ycGeom::Polygon(list(
+hole = ycGeom::Polygon(list(
     ycGeom::Point(0:0)
     ycGeom::Point(10:0)
     ycGeom::Point(10:7)
@@ -2058,9 +2058,9 @@ g_hole = ycGeom::Polygon(list(
     ycGeom::Point(10:10)
     ycGeom::Point(0:10)
 ))
-g_hole->area()
+hole->area()
 ; => 84.0
-g_hole->perimeter()
+hole->perimeter()
 ; => 56.0
 ```
 
@@ -2077,17 +2077,17 @@ g_hole->perimeter()
 *图：两个区域 A、B 的四种布尔结果。*
 
 ```lisp
-g_a = ycGeom::Polygon(list(
+a = ycGeom::Polygon(list(
     ycGeom::Point(0:0) ycGeom::Point(4:0)
     ycGeom::Point(4:4) ycGeom::Point(0:4)
 ))
-g_b = ycGeom::Polygon(list(
+b = ycGeom::Polygon(list(
     ycGeom::Point(2:2) ycGeom::Point(6:2)
     ycGeom::Point(6:6) ycGeom::Point(2:6)
 ))
-ycGeom::Region(list(g_a))->and(ycGeom::Region(list(g_b)))->area()
+ycGeom::Region(list(a))->and(ycGeom::Region(list(b)))->area()
 ; => 4.0
-ycGeom::Rect(list(0 0 4 4))->or(g_b)->area()
+ycGeom::Rect(list(0 0 4 4))->or(b)->area()
 ; => 28.0
 ```
 

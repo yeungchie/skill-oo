@@ -17,7 +17,7 @@ Cadence SKILL++ 的 YAML 1.2 编解码库：块式与流式集合、块标量、
 
 ## 快速上手
 
-`t_yaml` 的值如下所示：
+`yaml` 的值如下所示：
 
 ```text
 name: demo
@@ -26,14 +26,14 @@ items:
   - 2
 ```
 
-`t_yaml_anchor` 的值如下所示：
+`yaml_anchor` 的值如下所示：
 
 ```text
 base: &b {a: 1}
 copy: *b
 ```
 
-`t_yaml_stream` 的值如下所示：
+`yaml_stream` 的值如下所示：
 
 ```text
 ---
@@ -44,9 +44,9 @@ copy: *b
 
 ```lisp
 ; 块式文档
-t_v = ycYaml::Decode(t_yaml)
-t_v["name"]                                         ; => "demo"
-t_v["items"]                                        ; => (1 2)
+res = ycYaml::Decode(yaml)
+res["name"]                                         ; => "demo"
+res["items"]                                        ; => (1 2)
 
 ; 标量类型与哨兵
 ycYaml::Decode("null")                              ; => ycCodec::Type("Null")
@@ -55,11 +55,11 @@ ycYaml::Decode("0x10")                              ; => 16
 ycYaml::Decode("[]")                                ; => nil
 
 ; 锚点、别名与合并
-t_v = ycYaml::Decode(t_yaml_anchor)
-t_v["copy"]["a"]                                    ; => 1
+res = ycYaml::Decode(yaml_anchor)
+res["copy"]["a"]                                    ; => 1
 
 ; 多文档流
-ycYaml::Decode(t_yaml_stream ?format "yaml-stream")
+ycYaml::Decode(yaml_stream ?format "yaml-stream")
 ; => (1 2)
 
 ; 编码
@@ -67,7 +67,7 @@ ycYaml::Encode(list(1 2))
 ; => 块式展示（实际返回为字符串）：
 ;    - 1
 ;    - 2
-ycYaml::Encode(t_v ?flow t ?sortKeys t)
+ycYaml::Encode(res ?flow t ?sortKeys t)
 ; => 流式展示（实际返回为字符串）：
 ;    {base: {a: 1}, copy: {a: 1}}
 ```
@@ -118,14 +118,14 @@ ycYaml::Decode(
 
 **例程**
 
-`t_yaml_map` 的值如下所示：
+`yaml_map` 的值如下所示：
 
 ```text
 a: 1
 b: 2
 ```
 
-`t_yaml_literal` 的值如下所示：
+`yaml_literal` 的值如下所示：
 
 ```text
 s: |
@@ -133,7 +133,7 @@ s: |
   b
 ```
 
-`t_yaml_folded` 的值如下所示：
+`yaml_folded` 的值如下所示：
 
 ```text
 s: >
@@ -142,11 +142,11 @@ s: >
 ```
 
 ```lisp
-ycYaml::Decode(t_yaml_map)                        ; => <table: a = 1, b = 2>
+ycYaml::Decode(yaml_map)                        ; => <table: a = 1, b = 2>
 ycYaml::Decode("[1, 2.5, true, null]")
 ; => (1 2.5 ycCodec::Type("True") ycCodec::Type("Null"))
-ycYaml::Decode(t_yaml_literal)["s"]                ; => "a\nb\n"
-ycYaml::Decode(t_yaml_folded)["s"]                 ; => "a b\n"
+ycYaml::Decode(yaml_literal)["s"]                ; => "a\nb\n"
+ycYaml::Decode(yaml_folded)["s"]                 ; => "a b\n"
 ycYaml::Decode("a: 1\r\nb: 2\r\n")["b"]            ; => 2
 
 ycYaml::Decode("a: [1, 2\n")

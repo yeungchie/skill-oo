@@ -1019,8 +1019,8 @@ p->open(
 ```lisp
 p = ycPathLib::Path("./a.txt")
 p->writeText("x")
-g_port = p->open()               ; => port
-g_port = p->open(?mode "w")      ; => port
+port = p->open()               ; => port
+port = p->open(?mode "w")      ; => port
 p->open(?mode "b")
 ; *Error* ycPathLib::Path->open: invalid mode: 'b'
 ```
@@ -1077,19 +1077,19 @@ p->readJson(
 
 **例程**
 
-`t_json_scalar` 的值如下所示：
+`json_scalar` 的值如下所示：
 
 ```text
 42
 ```
 
-`t_json_doc` 的值如下所示：
+`json_doc` 的值如下所示：
 
 ```text
 {"a": [1, 2]}
 ```
 
-`t_jsonl` 的值如下所示：
+`jsonl` 的值如下所示：
 
 ```text
 {"a": 1}
@@ -1098,13 +1098,13 @@ p->readJson(
 
 ```lisp
 p = ycPathLib::Path("./a.json")
-p->writeText(t_json_scalar)
+p->writeText(json_scalar)
 p->readJson()                    ; => 42
 
-p->writeText(t_json_doc)
+p->writeText(json_doc)
 p->readJson()                    ; => table（绑定 "a" → (1 2)）
 
-p->writeText(t_jsonl)
+p->writeText(jsonl)
 p->readJson(?format "jsonl")     ; => list of 2 tables
 
 p->readJson(?format "xml")
@@ -1136,14 +1136,14 @@ p->readYaml(
 
 **例程**
 
-`t_yaml` 的值如下所示：
+`yaml` 的值如下所示：
 
 ```text
 a: 1
 b: [true, null]
 ```
 
-`t_yaml_stream` 的值如下所示：
+`yaml_stream` 的值如下所示：
 
 ```text
 ---
@@ -1154,11 +1154,11 @@ b: [true, null]
 
 ```lisp
 p = ycPathLib::Path("./a.yaml")
-p->writeText(t_yaml)
+p->writeText(yaml)
 t = p->readYaml()
 t["a"]                           ; => 1
 
-p->writeText(t_yaml_stream)
+p->writeText(yaml_stream)
 p->readYaml(?format "yaml-stream")  ; => (1 2)
 
 p->readYaml(?format "xml")
@@ -1190,14 +1190,14 @@ p->readCsv(
 
 **例程**
 
-`t_csv` 的值如下所示：
+`csv` 的值如下所示：
 
 ```text
 name,qty
 apple,3
 ```
 
-`t_tsv` 的值如下所示（字段之间是制表符）：
+`tsv` 的值如下所示（字段之间是制表符）：
 
 ```text
 a	b
@@ -1205,11 +1205,11 @@ a	b
 
 ```lisp
 p = ycPathLib::Path("./a.csv")
-p->writeText(t_csv)
+p->writeText(csv)
 t = p->readCsv(?header t)
 t->value(1 "qty")                ; => "3"
 
-p->writeText(t_tsv)
+p->writeText(tsv)
 p->readCsv(?format "tsv")->row(1)  ; => ("a" "b")
 
 p->readCsv(?format "xml")
@@ -1241,7 +1241,7 @@ p->readToml(
 
 **例程**
 
-`t_toml` 的值如下所示：
+`toml` 的值如下所示：
 
 ```text
 title = "demo"
@@ -1250,7 +1250,7 @@ title = "demo"
 host = "localhost"
 ```
 
-`t_toml_deep` 的值如下所示：
+`toml_deep` 的值如下所示：
 
 ```text
 a = [[1]]
@@ -1258,12 +1258,12 @@ a = [[1]]
 
 ```lisp
 p = ycPathLib::Path("./a.toml")
-p->writeText(t_toml)
+p->writeText(toml)
 t = p->readToml()
 t["title"]                       ; => "demo"
 t["server"]["host"]              ; => "localhost"
 
-p->writeText(t_toml_deep)
+p->writeText(toml_deep)
 p->readToml(?maxDepth 1)
 ; => 以 error() 中断（嵌套过深）
 ```
@@ -1293,7 +1293,7 @@ p->readIni(
 
 **例程**
 
-`t_ini` 的值如下所示：
+`ini` 的值如下所示：
 
 ```text
 root = value
@@ -1302,7 +1302,7 @@ host = localhost
 port = 8080
 ```
 
-`t_ini_colon` 的值如下所示：
+`ini_colon` 的值如下所示：
 
 ```text
 a: 1
@@ -1312,13 +1312,13 @@ b: 2
 
 ```lisp
 p = ycPathLib::Path("./a.ini")
-p->writeText(t_ini)
+p->writeText(ini)
 t = p->readIni()
 t["root"]                        ; => "value"
 t["server"]["host"]              ; => "localhost"
 t["server"]["port"]              ; => "8080"
 
-p->writeText(t_ini_colon)
+p->writeText(ini_colon)
 p->readIni(?delimiter ":")["s"]["b"]  ; => "2"
 
 p->writeText("a = 1\na = 2\n")

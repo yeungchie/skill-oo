@@ -16,33 +16,33 @@ Cadence SKILL++ 的 CSV/TSV 编解码库：RFC 4180 风格字段规则与带可�
 
 ## 快速上手
 
-`t_csv_header` 的值如下所示：
+`csv_header` 的值如下所示：
 
 ```text
 name,qty
 apple,3
 ```
 
-`t_csv_rows` 的值如下所示：
+`csv_rows` 的值如下所示：
 
 ```text
 a,b
 c,d
 ```
 
-`t_csv_quoted` 的值如下所示：
+`csv_quoted` 的值如下所示：
 
 ```text
 "a,b",c
 ```
 
-`t_csv_tsv` 的值如下所示（字段之间是制表符）：
+`csv_tsv` 的值如下所示（字段之间是制表符）：
 
 ```text
 a	b
 ```
 
-`t_csv_semicolon` 的值如下所示：
+`csv_semicolon` 的值如下所示：
 
 ```text
 x;y
@@ -50,20 +50,20 @@ x;y
 
 ```lisp
 ; 解码为 Table（首行作表头）
-t_v = ycCsv::Decode(t_csv_header ?header t)
-t_v->header()                                       ; => ("name" "qty")
-t_v->rowCount()                                     ; => 1
-t_v->value(1 "qty")                                 ; => "3"
+res = ycCsv::Decode(csv_header ?header t)
+res->header()                                       ; => ("name" "qty")
+res->rowCount()                                     ; => 1
+res->value(1 "qty")                                 ; => "3"
 
 ; 无表头：按行/列索引访问
-t_v = ycCsv::Decode(t_csv_rows)
-t_v->rows()                                         ; => (("a" "b") ("c" "d"))
-t_v->cell(2 1)                                      ; => "c"
+res = ycCsv::Decode(csv_rows)
+res->rows()                                         ; => (("a" "b") ("c" "d"))
+res->cell(2 1)                                      ; => "c"
 
 ; 引号、TSV 与自定义分隔符
-ycCsv::Decode(t_csv_quoted)->row(1)                 ; => ("a,b" "c")
-ycCsv::Decode(t_csv_tsv ?format "tsv")->row(1)      ; => ("a" "b")
-ycCsv::Decode(t_csv_semicolon ?delimiter ";")->row(1) ; => ("x" "y")
+ycCsv::Decode(csv_quoted)->row(1)                 ; => ("a,b" "c")
+ycCsv::Decode(csv_tsv ?format "tsv")->row(1)      ; => ("a" "b")
+ycCsv::Decode(csv_semicolon ?delimiter ";")->row(1) ; => ("x" "y")
 
 ; 编码
 ycCsv::Encode(ycCsv::Table(list(list("a,b" "c"))))
@@ -105,12 +105,12 @@ ycCsv::Table(
 **例程**
 
 ```lisp
-t_v = ycCsv::Table(list(list("a" "b") list("c" "d")))
-t_v->rowCount()                                     ; => 2
-t_v->columnCount()                                  ; => 2
+res = ycCsv::Table(list(list("a" "b") list("c" "d")))
+res->rowCount()                                     ; => 2
+res->columnCount()                                  ; => 2
 
-t_v = ycCsv::Table(list(list("1" "2")) ?header list("x" "y"))
-t_v->value(1 "y")                                   ; => "2"
+res = ycCsv::Table(list(list("1" "2")) ?header list("x" "y"))
+res->value(1 "y")                                   ; => "2"
 
 ycCsv::Table(list(list("1" "2")) ?header list("x"))
 ; *Error* ycCsv::Table: row 1 has 2 fields but header has 1
@@ -316,7 +316,7 @@ render(
 其他 `?format`、`?align`、`?unit` 值以 `error()` 中断；`?ambiguous` 仅在 `?unit "display"` 时校验，`"char"` 模式忽略。
 
 
-`t_csv` 的值如下所示：
+`csv` 的值如下所示：
 
 ```text
 name,qty
@@ -326,13 +326,13 @@ apple,3
 **例程**
 
 ```lisp
-t_v = ycCsv::Decode(t_csv ?header t)
-t_v->render()
+res = ycCsv::Decode(csv ?header t)
+res->render()
 ; => name   qty
 ;    -----  ---
 ;    apple  3
 
-t_v->render(?format "grid")
+res->render(?format "grid")
 ; => +-------+-----+
 ;    | name  | qty |
 ;    +=======+=====+
@@ -358,7 +358,7 @@ print(
 **例程**
 
 ```lisp
-t_v->print(?format "grid")
+res->print(?format "grid")
 ; 输出：
 ; +-------+-----+
 ; | name  | qty |
@@ -416,14 +416,14 @@ ycCsv::Decode(
 
 **例程**
 
-`t_csv_values` 的值如下所示：
+`csv_values` 的值如下所示：
 
 ```text
 a,b
 1,2
 ```
 
-`t_csv_blank` 的值如下所示：
+`csv_blank` 的值如下所示：
 
 ```text
 a
@@ -431,7 +431,7 @@ a
 b
 ```
 
-`t_csv_overlong` 的值如下所示：
+`csv_overlong` 的值如下所示：
 
 ```text
 a,b
@@ -439,24 +439,24 @@ a,b
 ```
 
 ```lisp
-t_v = ycCsv::Decode(t_csv_rows)
-t_v->rows()                                         ; => (("a" "b") ("c" "d"))
+res = ycCsv::Decode(csv_rows)
+res->rows()                                         ; => (("a" "b") ("c" "d"))
 
-t_v = ycCsv::Decode(t_csv_header ?header t)
-t_v->header()                                       ; => ("name" "qty")
-t_v->value(1 "name")                                ; => "apple"
+res = ycCsv::Decode(csv_header ?header t)
+res->header()                                       ; => ("name" "qty")
+res->value(1 "name")                                ; => "apple"
 
-ycCsv::Decode(t_csv_values ?header list("x" "y"))->value(1 "y")
+ycCsv::Decode(csv_values ?header list("x" "y"))->value(1 "y")
 ; => "b"
 
-ycCsv::Decode(t_csv_quoted)->row(1)                 ; => ("a,b" "c")
-ycCsv::Decode(t_csv_blank)->rowCount()              ; => 3
-ycCsv::Decode(t_csv_blank ?skipEmpty t)->rowCount() ; => 2
-ycCsv::Decode(t_csv_tsv ?format "tsv")->row(1)      ; => ("a" "b")
+ycCsv::Decode(csv_quoted)->row(1)                 ; => ("a,b" "c")
+ycCsv::Decode(csv_blank)->rowCount()              ; => 3
+ycCsv::Decode(csv_blank ?skipEmpty t)->rowCount() ; => 2
+ycCsv::Decode(csv_tsv ?format "tsv")->row(1)      ; => ("a" "b")
 
 ycCsv::Decode("\"a\"x\n")
 ; *Error* ycCsv::Decode: unexpected character after closing quote at line 1, column 4
-ycCsv::Decode(t_csv_overlong ?header t)
+ycCsv::Decode(csv_overlong ?header t)
 ; *Error* ycCsv::Decode: row 1 has 3 fields but header has 2 at line 2, column 1
 ```
 
