@@ -724,9 +724,15 @@ procedure(_CanonPoint(g_p n_eps t_reg "ggg")  ; -> Point
     ; **返回**
     ;   (Point) - 容差内已登记的规范点，或新登记的原点
     let((n_eff n_cx n_cy n_dx n_dy t_key g_found g_q)
-        n_eff = max(n_eps 1e-15 * max(abs(g_p->x()) abs(g_p->y())))
-        n_cx = g_p->x() / n_eff
-        n_cy = g_p->y() / n_eff
+        n_eff = t_reg["_canonScale"]
+        unless(n_eff
+            n_eff = max(n_eps 1e-15 * max(abs(g_p->x()) abs(g_p->y())))
+        )
+        ; 先取整格号，再在整数格号上做 ±1 探测；直接对未取整
+        ; 商偏移会让 round-half-even 跳过一格。atof 保留 double，
+        ; 不能用返回 fixnum 的取整函数。
+        n_cx = atof(_CellNumKey(g_p->x() / n_eff))
+        n_cy = atof(_CellNumKey(g_p->y() / n_eff))
         for(n_dx -1 1
             for(n_dy -1 1
                 t_key = lsprintf("%s|%s"
@@ -759,7 +765,14 @@ procedure(_CanonRing(l_pts n_eps t_reg "lgg")  ; -> list[Point]
     ;
     ; **返回**
     ;   (list[Point]) - 规范化并去除连续重复后的点列
-    let((l_res)
+    let((l_res n_mag)
+        unless(t_reg["_canonScale"]
+            n_mag = 0.0
+            foreach(g_p l_pts
+                n_mag = max(n_mag max(abs(g_p->x()) abs(g_p->y())))
+            )
+            t_reg["_canonScale"] = max(n_eps 1e-15 * n_mag)
+        )
         foreach(g_p l_pts
             l_res = tconc(l_res _CanonPoint(g_p n_eps t_reg))
         )

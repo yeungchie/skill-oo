@@ -39,7 +39,17 @@ procedure(_CollectRings(l_polys n_grid n_eps t_reg "lggg")  ; -> list[list[Point
     ;
     ; **返回**
     ;   (list[list[Point]]) - 环列表
-    let((l_res)
+    let((l_res n_mag g_pt)
+        unless(t_reg["_canonScale"]
+            n_mag = 0.0
+            foreach(g_p l_polys
+                _AsPolygon(g_p "ycGeom::_Boolean")
+                foreach(g_pt g_p->points()
+                    n_mag = max(n_mag max(abs(g_pt->x()) abs(g_pt->y())))
+                )
+            )
+            t_reg["_canonScale"] = max(n_eps 1e-15 * n_mag)
+        )
         foreach(g_p l_polys
             _AsPolygon(g_p "ycGeom::_Boolean")
             foreach(l_r _Rings(_CanonRing(

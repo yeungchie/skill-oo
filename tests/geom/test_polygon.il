@@ -166,6 +166,37 @@ let((g_hole)
         "polygon: keyhole near seam included perimeter")
 )
 
+let((g_p g_q t_reg)
+    g_p = ycGeom::Point(list(6500408.894374631 -5659520.731666292))
+    g_q = ycGeom::Point(list(6500408.894374632 -5659520.731666292))
+    t_reg = makeTable("geomCanonTest" nil)
+    _Assert(ycGeom::_SamePoint(g_p g_q 1e-9)
+        "polygon: 1 ulp points compare equal")
+    _Assert(ycGeom::_PtKey(ycGeom::_CanonPoint(g_p 1e-9 t_reg))
+        == ycGeom::_PtKey(ycGeom::_CanonPoint(g_q 1e-9 t_reg))
+        "polygon: 1 ulp points share a canonical representative")
+)
+
+let((g_hole)
+    g_hole = ycGeom::Polygon(list(
+        ycGeom::Point(1000000:2778.75)
+        ycGeom::Point(1000010:2778.75)
+        ycGeom::Point(1000010:2785.75)
+        ycGeom::Point(1000007:2785.75)
+        ycGeom::Point(1000007:2781.75)
+        ycGeom::Point(1000003:2781.75)
+        ycGeom::Point(1000003:2785.75)
+        ycGeom::Point(list(1000007.0000000001 2785.75))
+        ycGeom::Point(1000010:2785.75)
+        ycGeom::Point(1000010:2788.75)
+        ycGeom::Point(1000000:2788.75)
+    ))
+    _Assert(g_hole->perimeter() == 56.0
+        "polygon: shifted keyhole near seam perimeter")
+    _Assert(g_hole->perimeter(?includeSeams t) == 62.0
+        "polygon: shifted keyhole included perimeter")
+)
+
 let((g_sq g_c)
     g_sq = ycGeom::Polygon(list(
         ycGeom::Point(100000:100000)
