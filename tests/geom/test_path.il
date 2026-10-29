@@ -28,6 +28,40 @@ _AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2 ?eps 0) t)
 _AssertError(lambda(() ycGeom::Path(list(0 0 10 0) ?width 2) t)
     "path: flat coords rejected")
 
+let((g_p g_l g_s n_circle n_quarter)
+    n_circle = 16.0 * sin(3.141592653589793 / 16.0)
+    n_quarter = 4.0 * sin(3.141592653589793 / 16.0)
+    g_p = ycGeom::Path(list(0:0 10:0) ?width 2)
+
+    _Assert(abs(g_p->toRegion(?cap 'square)->area() - 24.0) <= 1e-9
+        "path: square cap area")
+    _Assert(abs(g_p->toRegion(?cap 'round)->area() - (20.0 + n_circle)) <= 1e-9
+        "path: round cap area")
+
+    g_l = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    _Assert(abs(g_l->toRegion(?join 'bevel)->area() - 39.5) <= 1e-9
+        "path: bevel join area")
+    _Assert(abs(g_l->toRegion(?join 'round)->area() - (40.0 - 1.0 + n_quarter)) <= 1e-9
+        "path: round join area")
+
+    g_s = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    _Assert(abs(g_s->toRegion(?cap 'round)->area() - 80.0) <= 1e-9
+        "path: closed ignores cap")
+)
+
+_AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?cap 'bogus) t)
+    "path: bad cap rejected")
+_AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?join 'bogus) t)
+    "path: bad join rejected")
+_AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?miterLimit 0) t)
+    "path: bad miter limit rejected")
+_AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?roundSegments 0) t)
+    "path: bad round segments rejected")
+_AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?eps 0) t)
+    "path: bad region eps rejected")
+_AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?grid 0) t)
+    "path: bad grid rejected")
+
 _TestPathDone = t
 
 ; END
