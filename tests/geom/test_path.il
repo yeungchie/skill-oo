@@ -77,6 +77,45 @@ let((g_p g_s)
     _Assert(g_s->centroid()->toSkill() == list(5.0 5.0)  "path: ring centroid")
 )
 
+let((g_p g_ok g_open g_edge)
+    g_p = ycGeom::Path(list(0:0 2:0 2:1 0:1 0:0) ?width 0.2)
+    _Assert(g_p->toLegalPathPoints() == list(
+        list(1.0 0.0) list(2.0 0.0) list(2.0 1.0)
+        list(0.0 1.0) list(0.0 0.0) list(1.0 0.0))
+        "path: seam moved to straight edge")
+
+    g_ok = ycGeom::Path(list(1:0 2:0 2:1 0:1 0:0 1:0) ?width 0.2)
+    _Assert(g_ok->toLegalPathPoints() == list(
+        list(1.0 0.0) list(2.0 0.0) list(2.0 1.0)
+        list(0.0 1.0) list(0.0 0.0) list(1.0 0.0))
+        "path: legal seam unchanged")
+
+    g_open = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    _Assert(g_open->toLegalPathPoints() == list(
+        list(0.0 0.0) list(10.0 0.0) list(10.0 10.0))
+        "path: open points unchanged")
+
+    g_edge = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    _Assert(g_edge->toLegalPathPoints(?edge 2 ?ratio 0.25) == list(
+        list(10.0 2.5) list(10.0 10.0) list(0.0 10.0)
+        list(0.0 0.0) list(10.0 0.0) list(10.0 2.5))
+        "path: edge and ratio options")
+)
+
+let((g_e g_o g_bad)
+    g_e = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    g_o = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    g_bad = ycGeom::Path(list(0:0 10:10 10:0 0:10 0:0) ?width 2)
+    _AssertError(lambda(() g_e->toLegalPathPoints(?edge 5) t)
+        "path: edge out of range")
+    _AssertError(lambda(() g_o->toLegalPathPoints(?ratio 0) t)
+        "path: ratio zero rejected")
+    _AssertError(lambda(() g_o->toLegalPathPoints(?ratio "x") t)
+        "path: string ratio rejected")
+    _AssertError(lambda(() g_bad->toLegalPathPoints() t)
+        "path: self-intersection rejected")
+)
+
 _TestPathDone = t
 
 ; END

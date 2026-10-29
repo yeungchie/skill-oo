@@ -31,6 +31,7 @@ defclass(Path () (
     toRect()
     contains()
     onBoundary()
+    toLegalPathPoints()
 ))
 
 defmethod(printself (self(Path))  ; -> str
@@ -235,6 +236,101 @@ procedure(_InstallPath(self "g")  ; -> t
         ;   (t|nil) - 在默认描边边界上为 t
         self->toRegion()->onBoundary(g_point
             ?includeSeams includeSeams ?eps eps)
+    )
+    self->toLegalPathPoints = lambda((\@key (edge 1) (ratio 0.5) (eps nil) "xng")  ; -> list[list[float]]
+        ; 返回本机可创建的合法 path 点列。
+        ;
+        ; **参数**
+        ;   ?edge   (int)     - 切开接缝的边序号，1-based；默认 1
+        ;   ?ratio  (num)     - 切点在边上的比例；默认 0.5
+        ;   ?eps    (num|nil) - 容差；默认 nil（1e-9）
+        ;
+        ; **返回**
+        ;   (list[list[float]]) - 闭合时首尾重复；无法单 path 表示 error
+        let((l_pts l_src l_res n_len n_eps g_closed n_i n_j g_a g_b g_c g_d
+                n_cross n_dot n_idx g_p n_edge)
+            unless(fixp(edge) && edge >= 1
+                error("ycGeom::Path->toLegalPathPoints: ?edge must be a positive integer, got %A"
+                    edge)
+            )
+            unless(numberp(ratio) && ratio > 0.0 && ratio < 1.0
+                error("ycGeom::Path->toLegalPathPoints: ?ratio must be in (0,1), got %A"
+                    ratio)
+            )
+            n_eps = _Eps(eps)
+            l_pts = self->_data->route->points()
+            n_len = length(l_pts)
+            g_closed = self->_data->route->isClosed()
+            when(g_closed && edge > n_len
+                error("ycGeom::Path->toLegalPathPoints: ?edge %d out of range 1..%d"
+                    edge n_len)
+            )
+
+            n_edge = if(g_closed n_len (n_len - 1))
+            for(n_i 1 n_edge
+                for(n_j 1 n_edge
+                    when(n_j > n_i
+                        && !(n_j == (n_i + 1))
+                        && !(g_closed && n_i == 1 && n_j == n_edge)
+                        g_a = _Nth1(n_i l_pts)
+                        g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
+                        g_c = _Nth1(n_j l_pts)
+                        g_d = _Nth1(if(n_j == n_len 1 (n_j + 1)) l_pts)
+                        when(_SegmentsCross(g_a g_b g_c g_d n_eps)
+                            error("ycGeom::Path->toLegalPathPoints: path self-intersects; a single native path cannot represent it, use toRegion()")
+                        )
+                    )
+                )
+            )
+
+            for(n_i if(g_closed 1 2) if(g_closed n_len (n_len - 1))
+                g_a = _Nth1(if(n_i == 1 n_len (n_i - 1)) l_pts)
+                g_b = _Nth1(n_i l_pts)
+                g_c = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
+                n_cross = (g_b->x() - g_a->x()) * (g_c->y() - g_b->y())
+                    - (g_b->y() - g_a->y()) * (g_c->x() - g_b->x())
+                n_dot = (g_b->x() - g_a->x()) * (g_c->x() - g_b->x())
+                    + (g_b->y() - g_a->y()) * (g_c->y() - g_b->y())
+                when(abs(n_cross) <= _AngleTol() && n_dot < 0.0
+                    error("ycGeom::Path->toLegalPathPoints: path doubles back at a vertex; use toRegion()")
+                )
+            )
+
+            if(!g_closed
+            then
+                self->_data->route->toSkill()
+            else
+                g_a = _Nth1(n_len l_pts)
+                g_b = car(l_pts)
+                g_c = _Nth1(2 l_pts)
+                n_cross = (g_b->x() - g_a->x()) * (g_c->y() - g_b->y())
+                    - (g_b->y() - g_a->y()) * (g_c->x() - g_b->x())
+                n_dot = (g_b->x() - g_a->x()) * (g_c->x() - g_b->x())
+                    + (g_b->y() - g_a->y()) * (g_c->y() - g_b->y())
+                if(abs(n_cross) <= _AngleTol() && n_dot > 0.0
+                then
+                    self->_data->route->toSkill()
+                else
+                    l_src = self->_data->route->points()
+                    g_a = _Nth1(edge l_src)
+                    g_b = _Nth1(if(edge == n_len 1 (edge + 1)) l_src)
+                    g_p = Point(list(
+                        g_a->x() + ratio * (g_b->x() - g_a->x())
+                        g_a->y() + ratio * (g_b->y() - g_a->y())
+                    ))
+                    l_res = tconc(l_res g_p->toSkill())
+                    for(n_i 1 n_len
+                        n_idx = edge + n_i
+                        when(n_idx > n_len
+                            n_idx = n_idx - n_len
+                        )
+                        l_res = tconc(l_res _Nth1(n_idx l_src)->toSkill())
+                    )
+                    l_res = tconc(l_res g_p->toSkill())
+                    car(l_res)
+                )
+            )
+        )
     )
     t
 )
