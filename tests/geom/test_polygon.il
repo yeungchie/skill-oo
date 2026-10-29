@@ -306,6 +306,43 @@ let((g_a g_b l_res g_r)
     )
 )
 
+let((g_a g_b g_r)
+    g_a = ycGeom::Polygon(list(
+        ycGeom::Point(0.15:0.15)
+        ycGeom::Point(0.35:0.15)
+        ycGeom::Point(0.35:0.35)
+        ycGeom::Point(0.15:0.35)
+    ))
+    g_b = ycGeom::Polygon(list(
+        ycGeom::Point(0.15:0.15)
+        ycGeom::Point(0.35:0.15)
+        ycGeom::Point(0.35:0.35)
+        ycGeom::Point(0.15:0.35)
+    ))
+    g_r = g_a->or(g_b ?grid 0.1)
+    _Assert(g_r->bBox() == list(list(0.2 0.2) list(0.4 0.4))
+        "polygon: grid snap corrects half-cell representation error")
+)
+
+let((g_a g_b g_r n_x)
+    n_x = 1.2 / (0.1 + 0.2) + 0.5
+    g_a = ycGeom::Polygon(list(
+        ycGeom::Point(list(n_x 0))
+        ycGeom::Point(6:0)
+        ycGeom::Point(6:1)
+        ycGeom::Point(list(n_x 1))
+    ))
+    g_b = ycGeom::Polygon(list(
+        ycGeom::Point(list(n_x 0))
+        ycGeom::Point(6:0)
+        ycGeom::Point(6:1)
+        ycGeom::Point(list(n_x 1))
+    ))
+    g_r = g_a->or(g_b ?grid 1.0)
+    _Assert(g_r->bBox() == list(list(5.0 0.0) list(6.0 1.0))
+        "polygon: grid snap uses round2 tie at half cell")
+)
+
 _TestPolygonDone = t
 
 ; END

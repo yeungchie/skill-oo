@@ -38,6 +38,30 @@ procedure(_Grid(g_grid "g")  ; -> float | nil
     )
 )
 
+procedure(_SnapRound(n_q "n")  ; -> float
+    ; 返回 double 精度的最近整数，平局远离零并修正表示误差。
+    ;
+    ; **参数**
+    ;   n_q  (num) - 待取整值
+    ;
+    ; **返回**
+    ;   (float) - 最近整数；全程不经过 fixnum，避免大数截断
+    let((n_qv n_base n_frac n_adj)
+        n_qv = float(n_q)
+        ; %.0f 先给出 double 整数（半偶）；只有落在向零一侧的
+        ; 近半格值时，再用 round2(小数部分) 修正到远离零一侧。
+        n_base = atof(lsprintf("%.0f" n_qv))
+        n_frac = n_qv - n_base
+        when(abs(n_base) < abs(n_qv)
+            n_adj = round2(n_frac)
+            when(n_adj != 0
+                n_base = n_base + float(n_adj)
+            )
+        )
+        if(n_base == 0.0 0.0 n_base)
+    )
+)
+
 procedure(_Snap(n_val n_grid "ng")  ; -> float
     ; 将数值吸附到网格。
     ;
@@ -49,9 +73,7 @@ procedure(_Snap(n_val n_grid "ng")  ; -> float
     ;   (float) - 吸附后的 flonum
     if(n_grid == nil
         float(n_val)
-        ; round 返回 fixnum，商超过 INT32 会被截到边界；改用文本
-        ; 取整再 atof 回 double，与 _CanonPoint 的格号处理一致。
-        float(atof(_CellNumKey(float(n_val) / n_grid)) * n_grid)
+        float(_SnapRound(float(n_val) / n_grid) * n_grid)
     )
 )
 
