@@ -13,6 +13,8 @@ addToNamespace("ycGeom"
         RectData
         Route
         RouteData
+        Path
+        PathData
         Polygon
         PolygonData
         Region
@@ -103,6 +105,11 @@ addToNamespace("ycGeom"
         _SizeLinePoint
         _SizeEdgeDistance
         _SizeEdgeSelected
+        _StrokePolygon
+        _StrokeBand
+        _StrokeCircle
+        _StrokeJoin
+        _StrokeCap
         _SizeRingEdges
         _SizeOrientRings
         _SizeCheck
