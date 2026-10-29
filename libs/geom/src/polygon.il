@@ -187,21 +187,31 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ;
         ; **返回**
         ;   (float) - 周长
-        let((n_eps n_len n_i g_a g_b t_seams n_sum n_seam)
+        let((n_eps n_len n_i g_a g_b t_seams n_sum n_comp n_term n_next n_seam)
             _Flag(includeSeams "includeSeams")
             n_eps = _Eps(eps)
             t_seams = _SeamKeys(self->_data->points)
             n_len = length(self->_data->points)
+            ; Kahan-Babuska-Neumaier 补偿求和：把每步舍入误差留在 n_comp。
             n_sum = 0.0
+            n_comp = 0.0
             for(n_i 1 n_len
                 g_a = _Nth1(n_i self->_data->points)
                 g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
                 n_seam = t_seams[_EdgeKey(g_a g_b)] == 2
                 unless(n_seam && !includeSeams
-                    n_sum = n_sum + Segment(list(g_a g_b))->length()
+                    n_term = Segment(list(g_a g_b))->length()
+                    n_next = n_sum + n_term
+                    if(abs(n_sum) >= abs(n_term)
+                    then
+                        n_comp = n_comp + ((n_sum - n_next) + n_term)
+                    else
+                        n_comp = n_comp + ((n_term - n_next) + n_sum)
+                    )
+                    n_sum = n_next
                 )
             )
-            n_sum
+            n_sum + n_comp
         )
     )
     self->centroid = lambda(()  ; -> Point

@@ -97,15 +97,25 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (float) - 周长
-        let((n_sum n_eps)
+        let((n_sum n_comp n_term n_next n_eps)
             _Flag(includeSeams "includeSeams")
             n_eps = _Eps(eps)
+            ; Kahan-Babuska-Neumaier 补偿求和：把每步舍入误差留在 n_comp。
             n_sum = 0.0
+            n_comp = 0.0
             foreach(g_p self->_data->polygons
-                n_sum = n_sum + g_p->perimeter(
+                n_term = g_p->perimeter(
                     ?includeSeams includeSeams ?eps n_eps)
+                n_next = n_sum + n_term
+                if(abs(n_sum) >= abs(n_term)
+                then
+                    n_comp = n_comp + ((n_sum - n_next) + n_term)
+                else
+                    n_comp = n_comp + ((n_term - n_next) + n_sum)
+                )
+                n_sum = n_next
             )
-            n_sum
+            n_sum + n_comp
         )
     )
     self->centroid = lambda(()  ; -> Point | nil

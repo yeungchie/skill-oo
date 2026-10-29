@@ -82,6 +82,25 @@ let((g_r g_src)
 )
 _AssertError(lambda(() ycGeom::Region(list(1)) t)  "region: scalar element rejected")
 
+let((l_polys g_p g_r n_i n_size n_step n_x n_y n_one)
+    n_size = 1e6
+    n_step = 2e6
+    n_x = 1e9
+    n_y = 3.7e8
+    for(n_i 0 999
+        g_p = ycGeom::Polygon(list(
+            ycGeom::Point(list(n_x + n_i * n_step n_y))
+            ycGeom::Point(list(n_x + n_i * n_step + n_size n_y))
+            ycGeom::Point(list(n_x + n_i * n_step n_y + n_size))
+        ))
+        l_polys = tconc(l_polys g_p)
+    )
+    g_r = ycGeom::Region(car(l_polys) ?normalize nil)
+    n_one = car(g_r->polygons())->perimeter()
+    _Assert(abs(g_r->perimeter() - 1000.0 * n_one) <= 1e-6
+        "region: perimeter accumulation stable")
+)
+
 _TestRegionDone = t
 
 ; END

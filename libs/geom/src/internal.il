@@ -726,13 +726,14 @@ procedure(_CanonPoint(g_p n_eps t_reg "ggg")  ; -> Point
             n_eff = max(n_eps 1e-15 * max(abs(g_p->x()) abs(g_p->y())))
             t_reg["_canonScale"] = n_eff
         )
-        ; 先取整格号，再在整数格号上做 ±1 探测；直接对未取整
-        ; 商偏移会让 round-half-even 跳过一格。atof 保留 double，
-        ; 不能用返回 fixnum 的取整函数。
+        ; 先取整格号，再在整数格号上做 ±2 探测；直接对未取整
+        ; 商偏移会让 round-half-even 跳过一格。两个 _SamePoint
+        ; 为真的点格号差最多 2，±1 会漏掉两者都落在 .5 边界的情况。
+        ; atof 保留 double，不能用返回 fixnum 的取整函数。
         n_cx = atof(_CellNumKey(g_p->x() / n_eff))
         n_cy = atof(_CellNumKey(g_p->y() / n_eff))
-        for(n_dx -1 1
-            for(n_dy -1 1
+        for(n_dx -2 2
+            for(n_dy -2 2
                 t_key = lsprintf("%s|%s"
                     _CellNumKey(n_cx + n_dx)
                     _CellNumKey(n_cy + n_dy))

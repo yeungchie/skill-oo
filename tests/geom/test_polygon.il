@@ -209,6 +209,47 @@ let((g_hole)
         "polygon: shifted keyhole included perimeter")
 )
 
+let((g_hole)
+    g_hole = ycGeom::Polygon(list(
+        ycGeom::Point(900000:900000)
+        ycGeom::Point(900010:900000)
+        ycGeom::Point(list(900010.0000000006 900007.0))
+        ycGeom::Point(900007:900007)
+        ycGeom::Point(900007:900003)
+        ycGeom::Point(900003:900003)
+        ycGeom::Point(900003:900007)
+        ycGeom::Point(900007:900007)
+        ycGeom::Point(list(900010.0000000015 900007.0))
+        ycGeom::Point(900010:900010)
+        ycGeom::Point(900000:900010)
+    ))
+    _Assert(g_hole->perimeter() == 56.0
+        "polygon: seam endpoints on cell boundary perimeter")
+    _Assert(abs(g_hole->perimeter(?includeSeams t) - 62.0) <= 1e-6
+        "polygon: seam endpoints on cell boundary included perimeter")
+)
+
+let((l_pts n_i n_teeth n_w n_h n_amp g_hi g_p)
+    n_teeth = 997
+    n_w = 1e6
+    n_h = 1e6
+    n_amp = 4e5
+    l_pts = tconc(l_pts ycGeom::Point(list(1e9 3.7e8)))
+    for(n_i 1 n_teeth
+        l_pts = tconc(l_pts ycGeom::Point(list(
+            1e9 + n_w * n_i / (n_teeth + 1)
+            3.7e8 + if(g_hi n_h - n_amp n_amp))))
+        g_hi = !g_hi
+    )
+    l_pts = tconc(l_pts ycGeom::Point(list(1e9 + n_w 3.7e8)))
+    l_pts = tconc(l_pts ycGeom::Point(list(1e9 + n_w 3.7e8 + n_h)))
+    l_pts = tconc(l_pts ycGeom::Point(list(1e9 3.7e8 + n_h)))
+    g_p = ycGeom::Polygon(car(l_pts))
+    ; 该梳形的精确周长（高精度基准）。
+    _Assert(abs(g_p->perimeter() - 203002502.4842986) <= 1e-6
+        "polygon: perimeter accumulation stable on long comb")
+)
+
 let((g_sq g_c)
     g_sq = ycGeom::Polygon(list(
         ycGeom::Point(100000:100000)
