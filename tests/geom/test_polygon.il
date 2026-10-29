@@ -343,6 +343,80 @@ let((g_a g_b g_r n_x)
         "polygon: grid snap uses round2 tie at half cell")
 )
 
+let((g_rect g_sq g_p)
+    g_rect = ycGeom::Polygon(list(0:0 10:0 10:4 0:4))
+    g_p = g_rect->toPath()
+    _Assert(g_p  "polygon: rectangle toPath")
+    _Assert(g_p->width() == 4.0  "polygon: rectangle horizontal width")
+    _Assert(g_p->route()->toSkill() == list(list(0.0 2.0) list(10.0 2.0))
+        "polygon: rectangle horizontal route")
+    _Assert(g_rect->xor(g_p->toRegion())->area() <= 1e-9
+        "polygon: rectangle horizontal overlaps")
+
+    g_p = g_rect->toPath(?orient 'v)
+    _Assert(g_p->width() == 10.0  "polygon: rectangle vertical width")
+    _Assert(g_p->route()->toSkill() == list(list(5.0 0.0) list(5.0 4.0))
+        "polygon: rectangle vertical route")
+    _Assert(g_rect->xor(g_p->toRegion())->area() <= 1e-9
+        "polygon: rectangle vertical overlaps")
+
+    _Assert(g_rect->toPath(?orient 'h)->toSkill() == g_rect->toPath()->toSkill()
+        "polygon: h alias")
+    _Assert(g_rect->toPath(?orient 'horizontal)->toSkill()
+        == g_rect->toPath()->toSkill()  "polygon: horizontal alias")
+
+    g_sq = ycGeom::Polygon(list(0:0 4:0 4:4 0:4))
+    _Assert(g_sq->toPath()->width() == 4.0  "polygon: square horizontal")
+    _Assert(g_sq->toPath(?orient 'v)->width() == 4.0  "polygon: square vertical")
+)
+
+_Assert(ycGeom::Polygon(list(0:0 4:0 0:4))->toPath() == nil
+    "polygon: triangle not a stroke")
+_AssertError(lambda(() ycGeom::Polygon(list(0:0 4:0 4:4 0:4))->toPath(?orient 'diagonal) t)
+    "polygon: bad orient rejected")
+_AssertError(lambda(() ycGeom::Polygon(list(0:0 4:0 4:4 0:4))->toPath(?eps 0) t)
+    "polygon: bad eps rejected")
+
+let((g_src g_poly g_back)
+    g_src = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    g_poly = car(g_src->toRegion()->polygons())
+    g_back = g_poly->toPath()
+    _Assert(g_back  "polygon: open stroke toPath")
+    _Assert(g_back->width() == 2.0  "polygon: open stroke width")
+    _Assert(g_poly->xor(g_back->toRegion())->area() <= 1e-6
+        "polygon: open stroke overlaps")
+
+    g_src = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    g_poly = car(g_src->toRegion()->polygons())
+    g_back = g_poly->toPath()
+    _Assert(g_back  "polygon: closed ring toPath")
+    _Assert(g_back->isClosed()  "polygon: closed ring closed")
+    _Assert(g_back->width() == 2.0  "polygon: closed ring width")
+    _Assert(g_poly->xor(g_back->toRegion())->area() <= 1e-6
+        "polygon: closed ring overlaps")
+)
+
+let((g_rot g_p)
+    g_rot = ycGeom::Polygon(list(
+        ycGeom::Point(0:0)
+        ycGeom::Point(list(8.660254037844386 5))
+        ycGeom::Point(list(6.660254037844386 8.464101615137753))
+        ycGeom::Point(list(-2 3.4641016151377535))
+    ))
+    g_p = g_rot->toPath(?orient 'vertical)
+    _Assert(g_p  "polygon: rotated rectangle toPath")
+    _Assert(abs(g_rot->xor(g_p->toRegion())->area()) <= 1e-6
+        "polygon: rotated rectangle overlaps")
+)
+
+let((g_out g_in g_res g_poly)
+    g_out = ycGeom::Polygon(list(0:0 10:0 10:10 0:10))
+    g_in = ycGeom::Polygon(list(4:1 6:1 6:9 4:9))
+    g_res = g_out->not(g_in)
+    g_poly = car(g_res->polygons())
+    _Assert(g_poly->toPath() == nil  "polygon: non-offset ring not a stroke")
+)
+
 _TestPolygonDone = t
 
 ; END

@@ -45,6 +45,7 @@ defclass(Polygon () (
     and()
     not()
     xor()
+    toPath()
     toSkill()
 ))
 procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
@@ -453,6 +454,7 @@ defmethod(initializeInstance (self(Polygon) \@rest _args)
     ; **返回**
     ;   (t) - 安装完成
     _InstallPolygon(self)
+    _InstallPolygonToPath(self)
     t
 )
 )

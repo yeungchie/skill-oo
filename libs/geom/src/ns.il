@@ -110,6 +110,14 @@ addToNamespace("ycGeom"
         _StrokeCircle
         _StrokeJoin
         _StrokeCap
+        _PolyMid
+        _PolyLineDist
+        _PolyToPathVerify
+        _PolyToPathRect
+        _PolyToPathOpenAt
+        _PolyToPathOpen
+        _PolyToPathRing
+        _InstallPolygonToPath
         _SizeRingEdges
         _SizeOrientRings
         _SizeCheck
