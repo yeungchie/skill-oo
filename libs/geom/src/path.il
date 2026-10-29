@@ -25,7 +25,12 @@ defclass(Path () (
     isClosed()
     toRegion()
     area()
+    perimeter()
+    centroid()
     bBox()
+    toRect()
+    contains()
+    onBoundary()
 ))
 
 defmethod(printself (self(Path))  ; -> str
@@ -172,12 +177,64 @@ procedure(_InstallPath(self "g")  ; -> t
         ;   (float) - 默认 butt + miter 描边面积
         self->toRegion()->area()
     )
+    self->perimeter = lambda((\@key (includeSeams nil) (eps nil) "gg")  ; -> float
+        ; 返回描边周长。
+        ;
+        ; **参数**
+        ;   ?includeSeams  (t|nil)   - 是否计入切割线；默认 nil
+        ;   ?eps           (num|nil) - 容差；默认 nil（1e-9）
+        ;
+        ; **返回**
+        ;   (float) - 默认 butt + miter 描边周长
+        self->toRegion()->perimeter(
+            ?includeSeams includeSeams ?eps eps)
+    )
+    self->centroid = lambda(()  ; -> Point | nil
+        ; 返回描边质心。
+        ;
+        ; **返回**
+        ;   (Point|nil) - 默认描边的面积加权质心
+        self->toRegion()->centroid()
+    )
     self->bBox = lambda(()  ; -> list[list[float]] | nil
         ; 返回描边包围盒。
         ;
         ; **返回**
         ;   (list[list[float]]|nil) - 默认描边包围盒
         self->toRegion()->bBox()
+    )
+    self->toRect = lambda(()  ; -> Rect | nil
+        ; 返回描边包围盒矩形。
+        ;
+        ; **返回**
+        ;   (Rect|nil) - 默认描边的包围盒矩形
+        self->toRegion()->toRect()
+    )
+    self->contains = lambda((g_point \@key (boundary "inside") (eps nil) "ggg")  ; -> t | nil
+        ; 判断点是否属于描边区域。
+        ;
+        ; **参数**
+        ;   g_point   (Point)       - 查询点
+        ;   ?boundary (str)         - "inside" 或 "outside"；默认 "inside"
+        ;   ?eps      (num|nil)     - 容差；默认 nil（1e-9）
+        ;
+        ; **返回**
+        ;   (t|nil) - 属于默认描边区域为 t
+        self->toRegion()->contains(g_point
+            ?boundary boundary ?eps eps)
+    )
+    self->onBoundary = lambda((g_point \@key (includeSeams nil) (eps nil) "ggg")  ; -> t | nil
+        ; 判断点是否在描边边界上。
+        ;
+        ; **参数**
+        ;   g_point        (Point)   - 查询点
+        ;   ?includeSeams  (t|nil)   - 是否计入切割线；默认 nil
+        ;   ?eps           (num|nil) - 容差；默认 nil（1e-9）
+        ;
+        ; **返回**
+        ;   (t|nil) - 在默认描边边界上为 t
+        self->toRegion()->onBoundary(g_point
+            ?includeSeams includeSeams ?eps eps)
     )
     t
 )

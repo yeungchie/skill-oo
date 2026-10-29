@@ -62,6 +62,21 @@ _AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?eps 0) t
 _AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?grid 0) t)
     "path: bad grid rejected")
 
+let((g_p g_s)
+    g_p = ycGeom::Path(list(0:0 10:0) ?width 2)
+    _Assert(abs(g_p->perimeter() - 24.0) <= 1e-9  "path: butt perimeter")
+    _Assert(g_p->centroid()->toSkill() == list(5.0 0.0)  "path: butt centroid")
+    _Assert(g_p->toRect()->toSkill() == list(list(0.0 -1.0) list(10.0 1.0))
+        "path: butt toRect")
+    _Assert(g_p->contains(ycGeom::Point(5:0))  "path: contains center")
+    _Assert(!g_p->contains(ycGeom::Point(5:5))  "path: excludes outside")
+    _Assert(g_p->onBoundary(ycGeom::Point(5:1))  "path: boundary point")
+
+    g_s = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    _Assert(abs(g_s->perimeter() - 80.0) <= 1e-9  "path: ring perimeter")
+    _Assert(g_s->centroid()->toSkill() == list(5.0 5.0)  "path: ring centroid")
+)
+
 _TestPathDone = t
 
 ; END
