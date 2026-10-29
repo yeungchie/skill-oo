@@ -116,6 +116,36 @@ let((g_e g_o g_bad)
         "path: self-intersection rejected")
 )
 
+let((g_p g_s g_r l_s l_r)
+    g_p = ycGeom::Path(list(0:0 10:0) ?width 2)
+    l_s = g_p->toSkill()
+    _Assert(l_s == list(list(list(0.0 0.0) list(10.0 0.0)) 2.0)
+        "path: open toSkill")
+    g_r = ycGeom::Path(l_s)
+    _Assert(g_r->toSkill() == l_s  "path: open state round-trip")
+
+    g_s = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    l_s = g_s->toSkill()
+    _Assert(l_s == list(list(list(0.0 0.0) list(10.0 0.0)
+        list(10.0 10.0) list(0.0 10.0) list(0.0 0.0)) 2.0)
+        "path: closed toSkill")
+    g_r = ycGeom::Path(l_s)
+    _Assert(g_r->isClosed()  "path: closed state round-trip closed")
+    _Assert(g_r->toSkill() == l_s  "path: closed state round-trip")
+
+    g_r = ycGeom::Path(ycGeom::Route(list(0:0 10:0 10:10)) ?width 2)
+    _Assert(g_r->route()->toSkill() == list(list(0.0 0.0) list(10.0 0.0) list(10.0 10.0))
+        "path: Route input")
+
+    l_r = ycGeom::Route(g_s->route()->toSkill())
+    _Assert(l_r->isClosed()  "route: state round-trip closed")
+)
+
+let((l_s (ycGeom::Path(list(0:0 10:0) ?width 2)->toSkill()))
+    _AssertError(lambda(() ycGeom::Path(l_s ?width 3) t)
+        "path: duplicate width rejected")
+)
+
 _TestPathDone = t
 
 ; END

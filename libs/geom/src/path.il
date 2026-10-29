@@ -32,6 +32,7 @@ defclass(Path () (
     contains()
     onBoundary()
     toLegalPathPoints()
+    toSkill()
 ))
 
 defmethod(printself (self(Path))  ; -> str
@@ -332,6 +333,13 @@ procedure(_InstallPath(self "g")  ; -> t
             )
         )
     )
+    self->toSkill = lambda(()  ; -> list
+        ; 转换为 SKILL 原生状态列表。
+        ;
+        ; **返回**
+        ;   (list) - (点列 宽度)；闭合点列末尾重复首点
+        list(self->_data->route->toSkill() self->_data->width)
+    )
     t
 )
 )
@@ -361,6 +369,13 @@ procedure(Path(l_data \@key width (eps nil) "ggg")  ; -> Path
     ; **返回**
     ;   (Path) - 新描边对象；参数非法 error
     let((g_route n_width)
+        when(listp(l_data) && length(l_data) == 2 && numberp(cadr(l_data))
+            when(width != nil
+                error("ycGeom::Path: width given both in state list and ?width")
+            )
+            width = cadr(l_data)
+            l_data = car(l_data)
+        )
         cond(
             (classOf(l_data) == findClass('ycGeom::Route)
                 g_route = l_data)
