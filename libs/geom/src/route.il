@@ -201,6 +201,9 @@ procedure(Route(l_points \@key (eps nil) "lg")  ; -> Route
             error("ycGeom::Route: at least 2 points are required")
         )
         n_eps = _Eps(eps)
+        when(n_len == 1
+            error("ycGeom::Route: at least 2 points are required")
+        )
         g_closed = _SamePoint(car(l_pts) _Nth1(n_len l_pts) n_eps)
         when(g_closed
             for(n_i 1 n_len - 1

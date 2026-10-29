@@ -146,6 +146,38 @@ let((l_s (ycGeom::Path(list(0:0 10:0) ?width 2)->toSkill()))
         "path: duplicate width rejected")
 )
 
+let((g_l g_s g_t g_p)
+    g_l = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    _Assert(abs(g_l->toRegion(?miterLimit 1.4142135623730951)->area() - 40.0) <= 1e-9
+        "path: miter exactly at limit stays miter")
+    _Assert(abs(g_l->toRegion(?miterLimit 1.414)->area() - 39.5) <= 1e-9
+        "path: miter over limit falls back to bevel")
+
+    g_s = ycGeom::Path(list(0:0 10:0 5:0) ?width 2)
+    _Assert(abs(g_s->area() - 20.0) <= 1e-9  "path: reversal spike area")
+    _Assert(g_s->bBox() == list(list(0.0 -1.0) list(10.0 1.0))
+        "path: reversal spike bBox")
+
+    g_t = ycGeom::Path(list(0:0 1e-6:0 -0.5e-6:0.5e-6 0:0) ?width 1e-7)
+    _Assert(length(g_t->toLegalPathPoints()) == 5
+        "path: tiny scale seam is not treated as collinear")
+
+    g_p = ycGeom::Path(list(0:0 10:0) ?width 2)
+    _Assert(abs(g_p->toRegion(?cap 'round ?roundSegments 1)->area() - 22.0) <= 1e-9
+        "path: roundSegments changes cap polygon")
+)
+
+_AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?eps "x") t)
+    "path: string eps rejected")
+_AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?miterLimit "x") t)
+    "path: string miter limit rejected")
+_AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?roundSegments 1.5) t)
+    "path: float round segments rejected")
+_AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?grid "x") t)
+    "path: string grid rejected")
+_AssertError(lambda(() ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    ->toLegalPathPoints(?edge 1.5) t)  "path: float edge rejected")
+
 _TestPathDone = t
 
 ; END

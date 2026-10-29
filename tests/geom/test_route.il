@@ -41,6 +41,13 @@ let((g_r g_c)
         list(0.0 0.0) list(10.0 10.0))  "route: reverse points")
 )
 
+let((g_c)
+    g_c = ycGeom::Route(list(0:0 10:0 10:10 list(1e-10 1e-10)) ?eps 1e-9)
+    _Assert(g_c->isClosed()  "route: near-equal tail closes")
+    _Assert(car(g_c->toSkill()) == car(reverse(g_c->toSkill()))
+        "route: near-equal tail snaps to first point")
+)
+
 _TestRouteDone = t
 
 ; END

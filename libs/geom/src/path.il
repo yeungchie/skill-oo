@@ -147,7 +147,7 @@ procedure(_InstallPath(self "g")  ; -> t
                 n_dx = g_a->x() - g_b->x()
                 n_dy = g_a->y() - g_b->y()
                 n_dlen = sqrt(n_dx * n_dx + n_dy * n_dy)
-                when(n_dlen > n_eps
+                when(n_dlen > _Eps(nil)
                     g_dir = Point(list(n_dx / n_dlen n_dy / n_dlen))
                     g_piece = _StrokeCap(g_a g_dir n_half cap n_segments)
                     when(g_piece
@@ -160,7 +160,7 @@ procedure(_InstallPath(self "g")  ; -> t
                 n_dx = g_a->x() - g_b->x()
                 n_dy = g_a->y() - g_b->y()
                 n_dlen = sqrt(n_dx * n_dx + n_dy * n_dy)
-                when(n_dlen > n_eps
+                when(n_dlen > _Eps(nil)
                     g_dir = Point(list(n_dx / n_dlen n_dy / n_dlen))
                     g_piece = _StrokeCap(g_a g_dir n_half cap n_segments)
                     when(g_piece
@@ -169,6 +169,9 @@ procedure(_InstallPath(self "g")  ; -> t
                 )
             )
 
+            unless(l_pieces
+                error("ycGeom::Path->toRegion: stroke degraded to an empty region")
+            )
             Region(car(l_pieces) ?normalize t ?grid n_grid ?eps n_eps)
         )
     )
@@ -248,8 +251,8 @@ procedure(_InstallPath(self "g")  ; -> t
         ;
         ; **返回**
         ;   (list[list[float]]) - 闭合时首尾重复；无法单 path 表示 error
-        let((l_pts l_src l_res n_len n_eps g_closed n_i n_j g_a g_b g_c g_d
-                n_cross n_dot n_idx g_p n_edge)
+        let((l_pts l_src l_res n_len n_eps n_tol g_closed n_i n_j g_a g_b g_c g_d
+                n_cross n_dot n_l1 n_l2 n_idx g_p n_edge)
             unless(fixp(edge) && edge >= 1
                 error("ycGeom::Path->toLegalPathPoints: ?edge must be a positive integer, got %A"
                     edge)
@@ -259,6 +262,7 @@ procedure(_InstallPath(self "g")  ; -> t
                     ratio)
             )
             n_eps = _Eps(eps)
+            n_tol = max(_AngleTol() n_eps)
             l_pts = self->_data->route->points()
             n_len = length(l_pts)
             g_closed = self->_data->route->isClosed()
@@ -292,7 +296,13 @@ procedure(_InstallPath(self "g")  ; -> t
                     - (g_b->y() - g_a->y()) * (g_c->x() - g_b->x())
                 n_dot = (g_b->x() - g_a->x()) * (g_c->x() - g_b->x())
                     + (g_b->y() - g_a->y()) * (g_c->y() - g_b->y())
-                when(abs(n_cross) <= _AngleTol() && n_dot < 0.0
+                n_l1 = sqrt((g_b->x() - g_a->x()) * (g_b->x() - g_a->x())
+                    + (g_b->y() - g_a->y()) * (g_b->y() - g_a->y()))
+                n_l2 = sqrt((g_c->x() - g_b->x()) * (g_c->x() - g_b->x())
+                    + (g_c->y() - g_b->y()) * (g_c->y() - g_b->y()))
+                when(n_l1 > 0.0 && n_l2 > 0.0
+                    && abs(n_cross / (n_l1 * n_l2)) <= n_tol
+                    && n_dot < 0.0
                     error("ycGeom::Path->toLegalPathPoints: path doubles back at a vertex; use toRegion()")
                 )
             )
@@ -308,7 +318,13 @@ procedure(_InstallPath(self "g")  ; -> t
                     - (g_b->y() - g_a->y()) * (g_c->x() - g_b->x())
                 n_dot = (g_b->x() - g_a->x()) * (g_c->x() - g_b->x())
                     + (g_b->y() - g_a->y()) * (g_c->y() - g_b->y())
-                if(abs(n_cross) <= _AngleTol() && n_dot > 0.0
+                n_l1 = sqrt((g_b->x() - g_a->x()) * (g_b->x() - g_a->x())
+                    + (g_b->y() - g_a->y()) * (g_b->y() - g_a->y()))
+                n_l2 = sqrt((g_c->x() - g_b->x()) * (g_c->x() - g_b->x())
+                    + (g_c->y() - g_b->y()) * (g_c->y() - g_b->y()))
+                if(n_l1 > 0.0 && n_l2 > 0.0
+                    && abs(n_cross / (n_l1 * n_l2)) <= n_tol
+                    && n_dot > 0.0
                 then
                     self->_data->route->toSkill()
                 else

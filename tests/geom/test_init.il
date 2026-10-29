@@ -191,8 +191,7 @@ let((l_res t_self t_dir)
     unless(_TestPathDone
         _TestCount = _TestCount + 1
         _TestFail = _TestFail + 1
-        printf("TEST FAILED - test_path.il did not run to completion%s
-"
+        printf("TEST FAILED - test_path.il did not run to completion%s\n"
             if(l_res "" " (load raised an error)")
         )
     )

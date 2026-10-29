@@ -104,7 +104,7 @@ procedure(_PolyToPathRect(g_poly l_ring n_eps g_horiz "glng")  ; -> Path | nil
                         n_l0 >= n_l1
                         n_a0 < n_a1)
                     if(abs(n_a0 - n_a1) <= 1e-12
-                        nil
+                        n_l0 >= n_l1
                         n_a0 > n_a1)
                 )
                 if(g_use0
