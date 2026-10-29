@@ -282,6 +282,30 @@ let((l_tiny l_large)
         "polygon: very large offset area stable")
 )
 
+let((g_a g_b l_res g_r)
+    g_a = ycGeom::Polygon(list(
+        ycGeom::Point(10000000:0)
+        ycGeom::Point(10000010:0)
+        ycGeom::Point(10000010:10)
+        ycGeom::Point(10000000:10)
+    ))
+    g_b = ycGeom::Polygon(list(
+        ycGeom::Point(10000005:0)
+        ycGeom::Point(10000015:0)
+        ycGeom::Point(10000015:10)
+        ycGeom::Point(10000005:10)
+    ))
+    l_res = errset(g_a->or(g_b ?grid 0.001) nil)
+    _Assert(l_res  "polygon: large-coordinate grid union succeeds")
+    when(l_res
+        g_r = car(l_res)
+        _Assert(abs(g_r->area() - 150.0) <= 1e-6
+            "polygon: large-coordinate grid union area")
+        _Assert(g_r->bBox() == list(list(10000000.0 0.0) list(10000015.0 10.0))
+            "polygon: large-coordinate grid union bbox")
+    )
+)
+
 _TestPolygonDone = t
 
 ; END

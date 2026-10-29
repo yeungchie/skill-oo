@@ -49,7 +49,9 @@ procedure(_Snap(n_val n_grid "ng")  ; -> float
     ;   (float) - 吸附后的 flonum
     if(n_grid == nil
         float(n_val)
-        float(round(float(n_val) / n_grid) * n_grid)
+        ; round 返回 fixnum，商超过 INT32 会被截到边界；改用文本
+        ; 取整再 atof 回 double，与 _CanonPoint 的格号处理一致。
+        float(atof(_CellNumKey(float(n_val) / n_grid)) * n_grid)
     )
 )
 
