@@ -22,6 +22,25 @@ _AssertError(lambda(() ycGeom::Route(list(0:0 10:0 0:0)) t)
 _AssertError(lambda(() ycGeom::Route(list(0 0 10 0)) t)  "route: flat coords rejected")
 _AssertError(lambda(() ycGeom::Route(list(0:0 1)) t)  "route: non-point element rejected")
 
+
+let((g_r g_c)
+    g_r = ycGeom::Route(list(0:0 10:0 10:10))
+    _Assert(length(g_r->segments()) == 2  "route: open segment count")
+    _Assert(g_r->length() == 20.0  "route: open length")
+    _Assert(g_r->bBox() == list(list(0.0 0.0) list(10.0 10.0))  "route: open bBox")
+    _Assert(g_r->toRect()->toSkill() == list(list(0.0 0.0) list(10.0 10.0))
+        "route: open toRect")
+    _AssertError(lambda(() g_r->toPolygon() t)  "route: open toPolygon rejected")
+
+    g_c = ycGeom::Route(list(0:0 10:0 10:10 0:0))
+    _Assert(length(g_c->segments()) == 3  "route: closed segment count")
+    _Assert(abs(g_c->length() - (20.0 + sqrt(200.0))) <= 1e-9  "route: closed length")
+    _Assert(abs(g_c->toPolygon()->area() - 50.0) <= 1e-9  "route: closed toPolygon area")
+    _Assert(g_c->reverse()->isClosed()  "route: reverse keeps closed")
+    _Assert(g_c->reverse()->toSkill() == list(list(10.0 10.0) list(10.0 0.0)
+        list(0.0 0.0) list(10.0 10.0))  "route: reverse points")
+)
+
 _TestRouteDone = t
 
 ; END

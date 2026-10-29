@@ -22,6 +22,12 @@ defclass(Route () (
 
     points()
     isClosed()
+    segments()
+    length()
+    bBox()
+    toRect()
+    toPolygon()
+    reverse()
     toSkill()
 ))
 
@@ -56,6 +62,95 @@ procedure(_InstallRoute(self "g")  ; -> t
         ; **返回**
         ;   (t|nil) - 闭合为 t
         self->_data->closed
+    )
+    self->segments = lambda(()  ; -> list[Segment]
+        ; 返回逐段线段列表。
+        ;
+        ; **返回**
+        ;   (list[Segment]) - 开放 n-1 段，闭合 n 段
+        let((l_res n_len n_i g_a g_b)
+            n_len = length(self->_data->points)
+            for(n_i 1 if(self->_data->closed n_len (n_len - 1))
+                g_a = _Nth1(n_i self->_data->points)
+                g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
+                l_res = tconc(l_res Segment(list(g_a g_b)))
+            )
+            car(l_res)
+        )
+    )
+    self->length = lambda(()  ; -> float
+        ; 返回中心线总长。
+        ;
+        ; **返回**
+        ;   (float) - 各段长度之和（补偿求和）
+        let((n_sum n_comp n_term n_next)
+            n_sum = 0.0
+            n_comp = 0.0
+            foreach(g_seg self->segments()
+                n_term = g_seg->length()
+                n_next = n_sum + n_term
+                if(abs(n_sum) >= abs(n_term)
+                then
+                    n_comp = n_comp + ((n_sum - n_next) + n_term)
+                else
+                    n_comp = n_comp + ((n_term - n_next) + n_sum)
+                )
+                n_sum = n_next
+            )
+            n_sum + n_comp
+        )
+    )
+    self->bBox = lambda(()  ; -> list[list[float]]
+        ; 返回包围盒。
+        ;
+        ; **返回**
+        ;   (list[list[float]]) - ((xmin ymin) (xmax ymax))
+        let((n_xmin n_ymin n_xmax n_ymax)
+            n_xmin = car(self->_data->points)->x()
+            n_xmax = n_xmin
+            n_ymin = car(self->_data->points)->y()
+            n_ymax = n_ymin
+            foreach(g_p self->_data->points
+                n_xmin = min(n_xmin g_p->x())
+                n_xmax = max(n_xmax g_p->x())
+                n_ymin = min(n_ymin g_p->y())
+                n_ymax = max(n_ymax g_p->y())
+            )
+            list(list(n_xmin n_ymin) list(n_xmax n_ymax))
+        )
+    )
+    self->toRect = lambda(()  ; -> Rect
+        ; 返回包围盒对应的矩形。
+        ;
+        ; **返回**
+        ;   (Rect) - 零宽或零高合法
+        Rect(self->bBox())
+    )
+    self->toPolygon = lambda(()  ; -> Polygon
+        ; 把闭合折线转为多边形。
+        ;
+        ; **返回**
+        ;   (Polygon) - 仅闭合折线；开放或非法自交 error
+        unless(self->_data->closed
+            error("ycGeom::Route->toPolygon: open route cannot become a Polygon")
+        )
+        Polygon(self->_data->points)
+    )
+    self->reverse = lambda(()  ; -> Route
+        ; 返回反向折线。
+        ;
+        ; **返回**
+        ;   (Route) - 闭合状态不变
+        let((l_acc n_len n_i)
+            n_len = length(self->_data->points)
+            for(n_i 1 n_len
+                l_acc = tconc(l_acc _Nth1((n_len - n_i + 1) self->_data->points))
+            )
+            when(self->_data->closed
+                l_acc = tconc(l_acc car(car(l_acc)))
+            )
+            Route(car(l_acc))
+        )
     )
     self->toSkill = lambda(()  ; -> list[list[float]]
         ; 转换为 SKILL 原生坐标列表。
