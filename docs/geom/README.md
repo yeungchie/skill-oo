@@ -1585,6 +1585,43 @@ a->not(b)->area()
 ; => 12.0
 ```
 
+#### toPath <sub>`method`</sub>
+
+```text
+Polygon->toPath(
+    [ ?orient g_orient ]
+    [ ?eps n_eps ]
+)
+=> ycGeom::Path / nil
+```
+
+尝试把多边形逆推为等宽描边路径；成功时 `path->toRegion()` 与原多边形重合，无法还原或候选不唯一时返回 `nil`。支持矩形（含旋转矩形与正方形）、开放等宽折线与闭合等距环；多洞、变宽、圆角/bevel 描边、自交重叠等返回 `nil`。宽度由多边形推断，不接受宽度参数。
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?orient g_orient | sym | 'horizontal | 矩形候选方向；其他形状忽略该值 |
+| ?eps n_eps | num / nil | nil | 容差，省略为 1e-9 |
+
+`g_orient` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'horizontal` / `'h` | 水平中心线；旋转矩形取更接近水平的一对边 |
+| `'vertical` / `'v` | 垂直中心线；旋转矩形取更接近垂直的一对边 |
+
+```lisp
+g_rect = ycGeom::Polygon(list(0:0 10:0 10:4 0:4))
+g_p = g_rect->toPath()
+g_p->route()->toSkill()
+; => ((0.0 2.0) (10.0 2.0))
+g_p->width()
+; => 4.0
+g_rect->toPath(?orient 'v)->route()->toSkill()
+; => ((5.0 0.0) (5.0 4.0))
+g_rect->toPath(?orient 'h)->width()
+; => 4.0
+```
+
 #### toSkill <sub>`method`</sub>
 
 ```text
@@ -1970,6 +2007,432 @@ Region->toSkill()
 ```
 
 返回每个 Polygon 一个坐标点列；空区域返回 nil。
+
+### ycGeom::Route <sub>`function`</sub> <sub>`class`</sub>
+
+```text
+ycGeom::Route(
+    l_points
+    [ ?eps n_eps ]
+)
+=> ycGeom::Route
+```
+
+构造不可变零宽度折线。首尾点重合时视为闭合，内部去掉重复尾点；闭合折线至少需要 3 个不同点，开放折线至少需要 2 个点。除末点重复首点外，相邻重复点会以 `error()` 中断。
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| l_points | list | | `Point` 或 `(x y)` 列表；不接受扁平数值坐标 |
+| ?eps n_eps | num / nil | nil | 闭合与重复点判定容差，省略为 1e-9 |
+
+```lisp
+g_r = ycGeom::Route(list(0:0 10:0 10:10))
+g_r->toSkill()
+; => ((0.0 0.0) (10.0 0.0) (10.0 10.0))
+```
+
+**方法**
+
+> 必须使用 `->` 符号调用方法。
+
+#### points <sub>`method`</sub>
+
+```text
+Route->points()
+=> list[Point]
+```
+
+返回内部点列；闭合折线不含重复首点，调用方不得原地修改。
+
+```lisp
+length(ycGeom::Route(list(0:0 10:0 10:10))->points())
+; => 3
+```
+
+#### isClosed <sub>`method`</sub>
+
+```text
+Route->isClosed()
+=> t / nil
+```
+
+判断折线是否闭合。
+
+```lisp
+ycGeom::Route(list(0:0 10:0 10:10 0:0))->isClosed()
+; => t
+```
+
+#### segments <sub>`method`</sub>
+
+```text
+Route->segments()
+=> list[ycGeom::Segment]
+```
+
+返回逐段线段；开放折线 n-1 段，闭合折线 n 段（含末点到首点）。
+
+```lisp
+length(ycGeom::Route(list(0:0 10:0 10:10))->segments())
+; => 2
+```
+
+#### length <sub>`method`</sub>
+
+```text
+Route->length()
+=> float
+```
+
+返回中心线总长，使用补偿求和。
+
+```lisp
+ycGeom::Route(list(0:0 10:0 10:10))->length()
+; => 20.0
+```
+
+#### bBox <sub>`method`</sub>
+
+```text
+Route->bBox()
+=> list[list[float]]
+```
+
+返回 `((xmin ymin) (xmax ymax))`。
+
+```lisp
+ycGeom::Route(list(0:0 10:0 10:10))->bBox()
+; => ((0.0 0.0) (10.0 10.0))
+```
+
+#### toRect <sub>`method`</sub>
+
+```text
+Route->toRect()
+=> ycGeom::Rect
+```
+
+返回包围盒对应的矩形；零宽或零高合法。
+
+```lisp
+ycGeom::Route(list(0:0 10:0 10:10))->toRect()->toSkill()
+; => ((0.0 0.0) (10.0 10.0))
+```
+
+#### toPolygon <sub>`method`</sub>
+
+```text
+Route->toPolygon()
+=> ycGeom::Polygon
+```
+
+把闭合折线转为多边形；开放折线或无法构成合法多边形的点列以 `error()` 中断。
+
+```lisp
+ycGeom::Route(list(0:0 10:0 10:10 0:0))->toPolygon()->area()
+; => 50.0
+```
+
+#### reverse <sub>`method`</sub>
+
+```text
+Route->reverse()
+=> ycGeom::Route
+```
+
+返回反向折线，闭合状态不变。
+
+```lisp
+ycGeom::Route(list(0:0 10:0 10:10 0:0))->reverse()->toSkill()
+; => ((10.0 10.0) (10.0 0.0) (0.0 0.0) (10.0 10.0))
+```
+
+#### toSkill <sub>`method`</sub>
+
+```text
+Route->toSkill()
+=> list[list[float]]
+```
+
+转换为原生坐标列表；闭合时末尾补回首点。
+
+```lisp
+ycGeom::Route(list(0:0 10:0 10:10 0:0))->toSkill()
+; => ((0.0 0.0) (10.0 0.0) (10.0 10.0) (0.0 0.0))
+```
+
+### ycGeom::Path <sub>`function`</sub> <sub>`class`</sub>
+
+![Route 与 Path](img/route-path.svg)
+
+```text
+ycGeom::Path(
+    l_data
+    ?width n_width
+    [ ?eps n_eps ]
+)
+=> ycGeom::Path
+```
+
+构造不可变带宽度描边。`l_data` 可为点列、`Route` 或 `toSkill()` 返回的 `(点列 宽度)` 状态列表；`?width` 为总宽度，向中心线两侧各偏移一半。默认描边为 `butt` 端帽与 `miter` 拐角。
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| l_data | Route / list | | 中心线、点列或 `(点列 宽度)` 状态列表 |
+| ?width n_width | num | | 总宽度，必须大于 0；状态列表形式下省略 |
+| ?eps n_eps | num / nil | nil | 点列容差，省略为 1e-9 |
+
+```lisp
+g_p = ycGeom::Path(list(0:0 10:0) ?width 2)
+g_p->area()
+; => 20.0
+g_p->toRegion()->bBox()
+; => ((0.0 -1.0) (10.0 1.0))
+```
+
+**方法**
+
+> 必须使用 `->` 符号调用方法。
+
+#### route <sub>`method`</sub>
+
+```text
+Path->route()
+=> ycGeom::Route
+```
+
+返回中心线折线；调用方不得原地修改。
+
+```lisp
+ycGeom::Path(list(0:0 10:0) ?width 2)->route()->toSkill()
+; => ((0.0 0.0) (10.0 0.0))
+```
+
+#### width <sub>`method`</sub>
+
+```text
+Path->width()
+=> float
+```
+
+返回总宽度。
+
+```lisp
+ycGeom::Path(list(0:0 10:0) ?width 2)->width()
+; => 2.0
+```
+
+#### isClosed <sub>`method`</sub>
+
+```text
+Path->isClosed()
+=> t / nil
+```
+
+判断中心线是否闭合。
+
+```lisp
+ycGeom::Path(list(0:0 10:0 10:10 0:0) ?width 2)->isClosed()
+; => t
+```
+
+#### toRegion <sub>`method`</sub>
+
+```text
+Path->toRegion(
+    [ ?cap g_cap ]
+    [ ?join g_join ]
+    [ ?miterLimit n_miterLimit ]
+    [ ?roundSegments n_roundSegments ]
+    [ ?eps n_eps ]
+    [ ?grid n_grid ]
+)
+=> ycGeom::Region
+```
+
+生成描边区域；边带、拐角帽与端帽通过 `Region` 并集合并。
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?cap g_cap | sym | 'butt | 端帽风格；闭合路径忽略 |
+| ?join g_join | sym | 'miter | 拐角风格 |
+| ?miterLimit n_miterLimit | num / nil | nil | miter 限制，省略为 4.0 |
+| ?roundSegments n_roundSegments | int / nil | nil | 每 90 度圆角段数，省略为 8 |
+| ?eps n_eps | num / nil | nil | 并集容差，省略为 1e-9 |
+| ?grid n_grid | num / nil | nil | 网格；省略不吸附 |
+
+`g_cap` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'butt` | 端帽与中心线截面齐平 |
+| `'square` | 端帽沿外向延伸半个宽度 |
+| `'round` | 端帽为离散半圆 |
+
+`g_join` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'miter` | 外侧延伸到两条偏移线交点；超过 miter 限制时退化为 bevel |
+| `'round` | 外侧为离散圆角 |
+| `'bevel` | 外侧以直线切角 |
+
+```lisp
+g_p = ycGeom::Path(list(0:0 10:0) ?width 2)
+g_p->toRegion(?cap 'round)->area()
+; => 23.121445152258051
+g_p->toRegion(?cap 'square)->bBox()
+; => ((-1.0 -1.0) (11.0 1.0))
+```
+
+#### area <sub>`method`</sub>
+
+```text
+Path->area()
+=> float
+```
+
+返回默认 `butt + miter` 描边的面积。
+
+```lisp
+ycGeom::Path(list(0:0 10:0) ?width 2)->area()
+; => 20.0
+```
+
+#### perimeter <sub>`method`</sub>
+
+```text
+Path->perimeter(
+    [ ?includeSeams g_includeSeams ]
+    [ ?eps n_eps ]
+)
+=> float
+```
+
+返回默认描边的周长；`?includeSeams` 控制是否计入切割线。
+
+```lisp
+ycGeom::Path(list(0:0 10:0) ?width 2)->perimeter()
+; => 24.0
+```
+
+#### centroid <sub>`method`</sub>
+
+```text
+Path->centroid()
+=> ycGeom::Point / nil
+```
+
+返回默认描边的面积加权质心。
+
+```lisp
+ycGeom::Path(list(0:0 10:0) ?width 2)->centroid()->toSkill()
+; => (5.0 0.0)
+```
+
+#### bBox <sub>`method`</sub>
+
+```text
+Path->bBox()
+=> list[list[float]] / nil
+```
+
+返回默认描边的包围盒。
+
+```lisp
+ycGeom::Path(list(0:0 10:0) ?width 2)->bBox()
+; => ((0.0 -1.0) (10.0 1.0))
+```
+
+#### toRect <sub>`method`</sub>
+
+```text
+Path->toRect()
+=> ycGeom::Rect / nil
+```
+
+返回默认描边包围盒对应的矩形。
+
+```lisp
+ycGeom::Path(list(0:0 10:0) ?width 2)->toRect()->toSkill()
+; => ((0.0 -1.0) (10.0 1.0))
+```
+
+#### contains <sub>`method`</sub>
+
+```text
+Path->contains(
+    g_point
+    [ ?boundary t_boundary ]
+    [ ?eps n_eps ]
+)
+=> t / nil
+```
+
+判断点是否属于默认描边区域；`?boundary` 取 `"inside"` 或 `"outside"`。
+
+```lisp
+ycGeom::Path(list(0:0 10:0) ?width 2)->contains(ycGeom::Point(5:0))
+; => t
+```
+
+#### onBoundary <sub>`method`</sub>
+
+```text
+Path->onBoundary(
+    g_point
+    [ ?includeSeams g_includeSeams ]
+    [ ?eps n_eps ]
+)
+=> t / nil
+```
+
+判断点是否在默认描边边界上。
+
+```lisp
+ycGeom::Path(list(0:0 10:0) ?width 2)->onBoundary(ycGeom::Point(5:1))
+; => t
+```
+
+#### toLegalPathPoints <sub>`method`</sub>
+
+```text
+Path->toLegalPathPoints(
+    [ ?edge x_edge ]
+    [ ?ratio n_ratio ]
+    [ ?eps n_eps ]
+)
+=> list[list[float]]
+```
+
+返回本机可创建为单个 path 图形的点列。闭合路径的接缝落在拐角时，把接缝移到指定边的内部，使首末两段共线同向；结果仍是单个图形，但多一个共线点。开放路径或接缝已经共线时原样返回。该方法只保证点列本身不自交；应配 `butt` 端帽与 `miter` 拐角创建，使用圆帽/方帽时形状不再等价。中心线仍有其他自交或反向折返时以 `error()` 中断。
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?edge x_edge | int | 1 | 切开接缝的边序号，1-based |
+| ?ratio n_ratio | num | 0.5 | 切点在边上的比例，(0,1) |
+| ?eps n_eps | num / nil | nil | 共线与自交检查容差，省略为 1e-9 |
+
+```lisp
+g_s = ycGeom::Path(list(0:0 2:0 2:1 0:1 0:0) ?width 0.2)
+g_s->toLegalPathPoints()
+; => ((1.0 0.0) (2.0 0.0) (2.0 1.0) (0.0 1.0) (0.0 0.0) (1.0 0.0))
+```
+
+#### toSkill <sub>`method`</sub>
+
+```text
+Path->toSkill()
+=> list
+```
+
+返回 `(点列 宽度)` 状态列表；闭合点列末尾重复首点。可直接传回 `ycGeom::Path(...)` 回构。
+
+```lisp
+g_p = ycGeom::Path(list(0:0 10:0) ?width 2)
+ycGeom::Path(g_p->toSkill())->width()
+; => 2.0
+```
 
 ### ycGeom::ConvertToGeomObject <sub>`function`</sub>
 

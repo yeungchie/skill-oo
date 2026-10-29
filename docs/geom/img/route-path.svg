@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="260" viewBox="0 0 640 260">
+  <rect x="0" y="0" width="640" height="260" fill="#ffffff"/>
+  <text x="20" y="28" font-family="sans-serif" font-size="18" fill="#222">Route 是零宽度中心线，Path 是带宽度描边</text>
+
+  <g transform="translate(20 55)">
+    <text x="0" y="0" font-family="sans-serif" font-size="14" fill="#444">Route：开放折线</text>
+    <polyline points="10,90 110,20 210,90" fill="none" stroke="#1f6feb" stroke-width="2"/>
+    <circle cx="10" cy="90" r="4" fill="#1f6feb"/>
+    <circle cx="110" cy="20" r="4" fill="#1f6feb"/>
+    <circle cx="210" cy="90" r="4" fill="#1f6feb"/>
+    <text x="88" y="112" font-family="sans-serif" font-size="12" fill="#666">Point 序列</text>
+  </g>
+
+  <g transform="translate(330 55)">
+    <text x="0" y="0" font-family="sans-serif" font-size="14" fill="#444">Path：总宽度 20 的描边</text>
+    <polyline points="10,90 110,20 210,90" fill="none" stroke="#d29922" stroke-width="20"
+      stroke-linecap="butt" stroke-linejoin="miter" opacity="0.35"/>
+    <polyline points="10,90 110,20 210,90" fill="none" stroke="#d29922" stroke-width="2"/>
+    <text x="88" y="112" font-family="sans-serif" font-size="12" fill="#666">中心线 + 宽度</text>
+  </g>
+</svg>
