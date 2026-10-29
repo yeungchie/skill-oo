@@ -176,6 +176,16 @@ let((l_res t_self t_dir)
         )
     )
 
+    _TestRouteDone = nil
+    l_res = errset(load(strcat(t_dir "test_route.il")) t)
+    unless(_TestRouteDone
+        _TestCount = _TestCount + 1
+        _TestFail = _TestFail + 1
+        printf("TEST FAILED - test_route.il did not run to completion%s\n"
+            if(l_res "" " (load raised an error)")
+        )
+    )
+
     _TestConvertDone = nil
     l_res = errset(load(strcat(t_dir "test_convert.il")) t)
     unless(_TestConvertDone

@@ -11,6 +11,8 @@ addToNamespace("ycGeom"
         LineData
         Rect
         RectData
+        Route
+        RouteData
         Polygon
         PolygonData
         Region
