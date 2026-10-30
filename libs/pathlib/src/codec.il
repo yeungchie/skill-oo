@@ -18,7 +18,7 @@ procedure(_InstallCodec(self "g")  ; -> any
     ; **返回**
     ;   (any) - 返回最后一条安装赋值的结果，调用方忽略
 
-procedure(_Error(t_method t_formatString \@rest l_args "ttg")  ; -> never
+procedure(_error(t_method t_formatString \@rest l_args "ttg")  ; -> never
     ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
     ;
     ; **参数**
@@ -40,7 +40,7 @@ self->readJson = lambda((\@rest l_args "g")  ; -> any | list
     ; **返回**
     ;   (any|list) - ycJson::Decode 的返回值（jsonl 为 list）；ycJson 未加载、文件错误、解码失败均以 error() 中断
     unless(fboundp('ycJson:::Decode)
-        _Error("readJson" "ycJson is not loaded - load it first")
+        _error("readJson" "ycJson is not loaded - load it first")
     )
     apply('ycJson:::Decode self->readText() l_args)
 )
@@ -54,7 +54,7 @@ self->readYaml = lambda((\@rest l_args "g")  ; -> any | list
     ; **返回**
     ;   (any|list) - ycYaml::Decode 的返回值（yaml-stream 为 list）；ycYaml 未加载、文件错误、解码失败均以 error() 中断
     unless(fboundp('ycYaml:::Decode)
-        _Error("readYaml" "ycYaml is not loaded - load it first")
+        _error("readYaml" "ycYaml is not loaded - load it first")
     )
     apply('ycYaml:::Decode self->readText() l_args)
 )
@@ -68,7 +68,7 @@ self->readCsv = lambda((\@rest l_args "g")  ; -> Table
     ; **返回**
     ;   (Table) - ycCsv::Table；ycCsv 未加载、文件错误、解码失败均以 error() 中断
     unless(fboundp('ycCsv:::Decode)
-        _Error("readCsv" "ycCsv is not loaded - load it first")
+        _error("readCsv" "ycCsv is not loaded - load it first")
     )
     apply('ycCsv:::Decode self->readText() l_args)
 )
@@ -82,7 +82,7 @@ self->readToml = lambda((\@rest l_args "g")  ; -> table
     ; **返回**
     ;   (table) - ycToml::Decode 的根 table；ycToml 未加载、文件错误、解码失败均以 error() 中断
     unless(fboundp('ycToml:::Decode)
-        _Error("readToml" "ycToml is not loaded - load it first")
+        _error("readToml" "ycToml is not loaded - load it first")
     )
     apply('ycToml:::Decode self->readText() l_args)
 )
@@ -96,7 +96,7 @@ self->readIni = lambda((\@rest l_args "g")  ; -> table
     ; **返回**
     ;   (table) - ycIni::Decode 的根 table；ycIni 未加载、文件错误、解码失败均以 error() 中断
     unless(fboundp('ycIni:::Decode)
-        _Error("readIni" "ycIni is not loaded - load it first")
+        _error("readIni" "ycIni is not loaded - load it first")
     )
     apply('ycIni:::Decode self->readText() l_args)
 )

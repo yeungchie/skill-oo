@@ -673,7 +673,7 @@ procedure(_InstallMatch(self "g")  ; -> t
     ; **返回**
     ;   (t) - 安装完成；调用方忽略
 
-procedure(_Error(t_method t_formatString \@rest l_args "ttg")  ; -> never
+procedure(_error(t_method t_formatString \@rest l_args "ttg")  ; -> never
     ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
     ;
     ; **参数**
@@ -690,14 +690,14 @@ self->span = lambda((\@rest l_args "g")  ; -> (int, int)
     ; 返回匹配区间 (start end) 的 0-based 字节位（end 开区间）。
     ;
     ; **参数**
-    ;   l_args  (list) - 变参：组选择参数（span(g) 预留），传入任意参数即 _Error() 中断
+    ;   l_args  (list) - 变参：组选择参数（span(g) 预留），传入任意参数即 _error() 中断
     ;
     ; **返回**
     ;   (int, int) - (start end) 字节位；位置由构造方给出，缺失时走慢路径回填
-    ;                无命中走 _Error() 中断
+    ;                无命中走 _error() 中断
     let((l_rec)
         when(l_args
-            _Error("span" "group arguments are not supported yet (reserved)")
+            _error("span" "group arguments are not supported yet (reserved)")
         )
         when(self->_data->start == nil
             l_rec = _NextMatch(self->_data->pattern self->_data->subject 0 self->_data->execOpts)
@@ -707,7 +707,7 @@ self->span = lambda((\@rest l_args "g")  ; -> (int, int)
             )
         )
         when(self->_data->start == nil
-            _Error("span" "position walk failed unexpectedly")
+            _error("span" "position walk failed unexpectedly")
         )
         list(self->_data->start self->_data->end)
     )
@@ -717,12 +717,12 @@ self->start = lambda((\@rest l_args "g")  ; -> int
     ; 返回匹配起始字节位（0-based）。
     ;
     ; **参数**
-    ;   l_args  (list) - 变参：组选择参数（start(g) 预留），传入任意参数即 _Error() 中断
+    ;   l_args  (list) - 变参：组选择参数（start(g) 预留），传入任意参数即 _error() 中断
     ;
     ; **返回**
     ;   (int) - span() 的 start；位置惰性时首次调用走慢路径回填
     when(l_args
-        _Error("start" "group arguments are not supported yet (reserved)")
+        _error("start" "group arguments are not supported yet (reserved)")
     )
     car(self->span())
 )
@@ -731,12 +731,12 @@ self->end = lambda((\@rest l_args "g")  ; -> int
     ; 返回匹配结束字节位（0-based，开区间）。
     ;
     ; **参数**
-    ;   l_args  (list) - 变参：组选择参数（end(g) 预留），传入任意参数即 _Error() 中断
+    ;   l_args  (list) - 变参：组选择参数（end(g) 预留），传入任意参数即 _error() 中断
     ;
     ; **返回**
     ;   (int) - span() 的 end（start + 整体串字节长）；位置惰性时首次调用走慢路径回填
     when(l_args
-        _Error("end" "group arguments are not supported yet (reserved)")
+        _error("end" "group arguments are not supported yet (reserved)")
     )
     car(cdr(self->span()))
 )
@@ -751,13 +751,13 @@ self->group = lambda((\@rest l_args "g")  ; -> str | list[str]
     ; **返回**
     ;   (str|list[str]) - 无参返回整体串，单参返回该组串，多参返回组值列表；
     ;                     非参与组为 ""；序号越界走 error()（_GroupAt 直调）；
-    ;                     非数字或按名参数走 _Error() 中断
+    ;                     非数字或按名参数走 _error() 中断
     let((n_g)
         foreach(g l_args
             unless(fixp(g)
                 if(stringp(g)
-                    _Error("group" "group by name is not supported yet (reserved)")
-                    _Error("group" "expected group number, got %A" g)
+                    _error("group" "group by name is not supported yet (reserved)")
+                    _error("group" "expected group number, got %A" g)
                 )
             )
         )
@@ -802,8 +802,8 @@ self->groupdict = lambda(()  ; -> never
     ; 返回组名到组值的字典（按名取组预留），本实现调用即 error() 中断。
     ;
     ; **返回**
-    ;   (never) - 总是走 _Error() 中断（按名取组预留），不返回
-    _Error("groupdict" "not supported yet (reserved)")
+    ;   (never) - 总是走 _error() 中断（按名取组预留），不返回
+    _error("groupdict" "not supported yet (reserved)")
 )
 
 self->expand = lambda((t_tpl "t")  ; -> str
@@ -814,10 +814,10 @@ self->expand = lambda((t_tpl "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 在全主题串上按匹配偏移重挂锚状态后由 pcreSubstitute 展开的结果；
-    ;           t_tpl 非串、状态重挂失败或模板非法走 _Error() 中断
+    ;           t_tpl 非串、状态重挂失败或模板非法走 _error() 中断
     let((l_sp g_ok g_obj l_res)
         unless(stringp(t_tpl)
-            _Error("expand" "expected string template, got %A" t_tpl)
+            _error("expand" "expected string template, got %A" t_tpl)
         )
         l_sp = self->span()
         g_obj = if(car(l_sp) == 0
@@ -826,11 +826,11 @@ self->expand = lambda((t_tpl "t")  ; -> str
         )
         g_ok = errset(pcreMatchp(g_obj self->_data->subject 0 self->_data->execOpts) nil)
         unless(g_ok && car(g_ok)
-            _Error("expand" "cannot re-establish match state")
+            _error("expand" "cannot re-establish match state")
         )
         l_res = errset(pcreSubstitute(g_obj t_tpl) nil)
         unless(l_res && stringp(car(l_res))
-            _Error("expand" "bad template: %s" t_tpl)
+            _error("expand" "bad template: %s" t_tpl)
         )
         car(l_res)
     )

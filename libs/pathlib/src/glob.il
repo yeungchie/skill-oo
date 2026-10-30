@@ -158,7 +158,7 @@ procedure(_InstallGlob(self "g")  ; -> any
     ; **返回**
     ;   (any) - 返回最后一条安装赋值的结果，调用方忽略
 
-procedure(_Error(t_method t_formatString \@rest l_args "ttg")  ; -> never
+procedure(_error(t_method t_formatString \@rest l_args "ttg")  ; -> never
     ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
     ;
     ; **参数**
@@ -175,11 +175,11 @@ self->iterdir = lambda(()  ; -> list[Path] | nil
     ; 列出直接子项的 Path 列表（不含 "."/".."）。
     ;
     ; **返回**
-    ;   (list[Path]|nil) - 空目录返回 nil；非目录走 _Error() 中断；含点开头名与子目录，顺序未定义
+    ;   (list[Path]|nil) - 空目录返回 nil；非目录走 _error() 中断；含点开头名与子目录，顺序未定义
     let((t_str)
         t_str = self->str()
         unless(self->isDir()
-            _Error("iterdir" "not a directory: '%s'" t_str)
+            _error("iterdir" "not a directory: '%s'" t_str)
         )
         mapcar(lambda((t_s "t") self->join(t_s))
             _DirNames(t_str)
@@ -207,7 +207,7 @@ self->rglob = lambda((t_pattern "t")  ; -> list[Path] | nil
     ; **返回**
     ;   (list[Path]|nil) - 同 glob；绝对 pattern 在拼接 "**/" 之前检查并 error() 中断
     when(pcreMatchp("^/" t_pattern)
-        _Error("rglob" "non-relative patterns are unsupported")
+        _error("rglob" "non-relative patterns are unsupported")
     )
     _GlobPattern(self strcat("**/" t_pattern))
 )

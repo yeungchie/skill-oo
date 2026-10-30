@@ -76,7 +76,7 @@ procedure(_InstallPattern(self "g")  ; -> any
     ; **返回**
     ;   (any) - 返回最后一条安装赋值的结果，调用方忽略
 
-procedure(_Error(t_method t_formatString \@rest l_args "ttg")  ; -> never
+procedure(_error(t_method t_formatString \@rest l_args "ttg")  ; -> never
     ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
     ;
     ; **参数**

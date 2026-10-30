@@ -217,7 +217,7 @@ inScheme(let((_rsrec)
 
 _rsrec = pcreCompile("[\"\\\\$]")
 
-procedure(_Rstring(t_s "t")  ; -> str
+procedure(_rstring(t_s "t")  ; -> str
     ; 将命令串转为原始字符串：转义 " 与 $，阻止 shell 展开。
     ;
     ; **参数**
@@ -236,7 +236,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
-    procedure(_Error(t_method t_formatString \@rest l_args "ttg")  ; -> never
+    procedure(_error(t_method t_formatString \@rest l_args "ttg")  ; -> never
         ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
         ;
         ; **参数**
@@ -248,8 +248,8 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         ;   (never) - 总是调用 error()，不返回
         error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString l_args))
     )
-    procedure(_CheckStarted(t_method "t")
-        ; 前置校验：任务未启动（ipcId 为 nil）时以 _Error 中断。
+    procedure(_checkStarted(t_method "t")
+        ; 前置校验：任务未启动（ipcId 为 nil）时以 _error 中断。
         ;
         ; **参数**
         ;   t_method  (str) - 归属的方法名，并入错误消息
@@ -257,7 +257,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         ; **返回**
         ;   (t) - 已启动时返回 t
         unless(self->ipcId
-            _Error(t_method "job has not started, current status is '%s'" self->state())
+            _error(t_method "job has not started, current status is '%s'" self->state())
         )
     )
     self->start = lambda(()  ; -> self
@@ -268,12 +268,12 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         ; **返回**
         ;   (AsyncJob) - self
         when(self->ipcId
-            _Error("start" "job already started, current status is '%s'" self->state())
+            _error("start" "job already started, current status is '%s'" self->state())
         )
         when(self->callback
             errset(funcall(self->callback 'beforeBegin self) t)
         )
-        self->ipcId = ipcBeginProcess(_Rstring(self->cmd) ""
+        self->ipcId = ipcBeginProcess(_rstring(self->cmd) ""
             lambda((g_cid t_data)
                 self->stdout->push(t_data)
                 when(self->verbose
@@ -316,7 +316,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         ;
         ; **返回**
         ;   (AsyncJob) - self
-        _CheckStarted("wait")
+        _checkStarted("wait")
         ipcWait(self->ipcId wait_interval n_timeout)
         self
     )
@@ -335,7 +335,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         )
         while(!self->returncode
             when(self->state() == 'Stopped
-                _Error("await" "job is stopped and cannot finish; continue() or kill() it first")
+                _error("await" "job is stopped and cannot finish; continue() or kill() it first")
             )
             self->wait(1)
         )
@@ -345,7 +345,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
                     fprintf(inSkill(IL::stderr) "%s" info)
                 )
             )
-            _Error("await" "job failed, returncode is %d" self->returncode)
+            _error("await" "job failed, returncode is %d" self->returncode)
         )
         self->stdout->text()
     )
@@ -354,7 +354,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         ;
         ; **返回**
         ;   (t|nil) - 成功返回 t
-        _CheckStarted("kill")
+        _checkStarted("kill")
         ipcKillProcess(self->ipcId)
     )
     self->state = lambda(()  ; -> sym
@@ -369,7 +369,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         ;
         ; **返回**
         ;   (t|nil) - 成功返回 t
-        _CheckStarted("stop")
+        _checkStarted("stop")
         ipcStopProcess(self->ipcId)
     )
     self->continue = lambda(()  ; -> t | nil
@@ -377,7 +377,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         ;
         ; **返回**
         ;   (t|nil) - 成功返回 t
-        _CheckStarted("continue")
+        _checkStarted("continue")
         ipcContProcess(self->ipcId)
     )
     self->print = lambda((t_formatString \@key end("\n") \@rest l_args "ttg")  ; -> self
@@ -390,10 +390,10 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         ;
         ; **返回**
         ;   (AsyncJob) - self；写入失败（进程已退出）时 error() 中断
-        _CheckStarted("print")
+        _checkStarted("print")
         ipcWriteProcess(self->ipcId
             strcat(apply('lsprintf t_formatString l_args) end)
-        ) || _Error("print" "job process has expired, current status is '%s'" self->state())
+        ) || _error("print" "job process has expired, current status is '%s'" self->state())
         self
     )
     self->close = lambda(()  ; -> t | nil
@@ -401,7 +401,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         ;
         ; **返回**
         ;   (t|nil) - 成功返回 t
-        _CheckStarted("close")
+        _checkStarted("close")
         ipcCloseProcess(self->ipcId)
     )
     self->signal = lambda((s_signal "s")  ; -> t | nil
@@ -412,7 +412,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         ;
         ; **返回**
         ;   (t|nil) - 成功返回 t
-        _CheckStarted("signal")
+        _checkStarted("signal")
         ipcSignalProcess(self->ipcId s_signal)
     )
     self->sleep = lambda((\@optional n_second(0) "n")  ; -> self

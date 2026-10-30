@@ -10,7 +10,7 @@ procedure(_InstallPure(self "g")  ; -> any
     ; **返回**
     ;   (any) - 返回最后一条安装赋值的结果，调用方忽略
 
-procedure(_Error(t_method t_formatString \@rest l_args "ttg")  ; -> never
+procedure(_error(t_method t_formatString \@rest l_args "ttg")  ; -> never
     ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
     ;
     ; **参数**
@@ -136,7 +136,7 @@ self->join = lambda((\@rest l_args "g")  ; -> Path
     ; 逐段拼接路径：绝对段丢弃此前拼接，"." 丢弃，".." 保留不折叠。
     ;
     ; **参数**
-    ;   l_args  (list) - 变参：每段 string 或 Path（取 str() 再解析），其他类型走 _Error() 中断
+    ;   l_args  (list) - 变参：每段 string 或 Path（取 str() 再解析），其他类型走 _error() 中断
     ;
     ; **返回**
     ;   (Path) - 拼接结果（按规范串驻留）；零段返回按驻留规则复用的等价实例
@@ -146,7 +146,7 @@ self->join = lambda((\@rest l_args "g")  ; -> Path
         foreach(g_seg l_args
             p_seg = _AsPath(g_seg)
             unless(p_seg
-                _Error("join" "expected string or Path, got %A" g_seg)
+                _error("join" "expected string or Path, got %A" g_seg)
             )
             l_parse = _ParsePath(p_seg->str())
             when(car(l_parse) == "/"
@@ -165,14 +165,14 @@ self->isRelativeTo = lambda((g_other "g")  ; -> t | nil
     ; 判断本路径是否等于 g_other 或位于其之下（relativeTo 的布尔版）。
     ;
     ; **参数**
-    ;   g_other  (any) - 前缀路径，string 或 Path；其他类型走 _Error() 中断
+    ;   g_other  (any) - 前缀路径，string 或 Path；其他类型走 _error() 中断
     ;
     ; **返回**
     ;   (t|nil) - 相等或前缀匹配返回 t，不匹配返回 nil（不匹配不报错）
     let((p_o)
         p_o = _AsPath(g_other)
         unless(p_o
-            _Error("isRelativeTo" "expected string or Path, got %A" g_other)
+            _error("isRelativeTo" "expected string or Path, got %A" g_other)
         )
         if(self->str() == p_o->str()
             t
@@ -187,17 +187,17 @@ self->relativeTo = lambda((g_other "g")  ; -> Path
     ; 返回去掉前缀 g_other 后的相对路径。
     ;
     ; **参数**
-    ;   g_other  (any) - 前缀路径，string 或 Path；其他类型走 _Error() 中断
+    ;   g_other  (any) - 前缀路径，string 或 Path；其他类型走 _error() 中断
     ;
     ; **返回**
-    ;   (Path) - 相等时为 "."；前缀不匹配（含绝对/相对混用）走 _Error() 中断
+    ;   (Path) - 相等时为 "."；前缀不匹配（含绝对/相对混用）走 _error() 中断
     let((p_o)
         p_o = _AsPath(g_other)
         unless(p_o
-            _Error("relativeTo" "expected string or Path, got %A" g_other)
+            _error("relativeTo" "expected string or Path, got %A" g_other)
         )
         unless(self->isRelativeTo(p_o)
-            _Error("relativeTo" "'%s' is not in the subpath of '%s'"
+            _error("relativeTo" "'%s' is not in the subpath of '%s'"
                 self->str()
                 p_o->str()
             )
@@ -214,14 +214,14 @@ self->withName = lambda((t_name "t")  ; -> Path
     ;
     ; **返回**
     ;   (Path) - 替换后的路径；新名为空、含 "/"、等于 "."，或 self 无名
-    ;            （"."、"/"），均走 _Error() 中断
+    ;            （"."、"/"），均走 _error() 中断
     let((t_old)
         t_old = self->name()
         when(t_old == ""
-            _Error("withName" "%s has an empty name" self->str())
+            _error("withName" "%s has an empty name" self->str())
         )
         unless(t_name != "" && index(t_name "/") == nil && t_name != "."
-            _Error("withName" "Invalid name '%s'" t_name)
+            _error("withName" "Invalid name '%s'" t_name)
         )
         _MkPath(self->_data->anchor
             append(_DropLast(self->_data->parts) list(t_name))
@@ -237,15 +237,15 @@ self->withSuffix = lambda((t_suffix "t")  ; -> Path
     ;
     ; **返回**
     ;   (Path) - 替换后的路径；self 无名，或非空且不以 "." 开头、等于 "."、
-    ;            含 "/"，均走 _Error() 中断
+    ;            含 "/"，均走 _error() 中断
     let((t_name)
         t_name = self->name()
         when(t_name == ""
-            _Error("withSuffix" "%s has an empty name" self->str())
+            _error("withSuffix" "%s has an empty name" self->str())
         )
         unless(t_suffix == ""
             unless(substring(t_suffix 1 1) == "." && t_suffix != "." && index(t_suffix "/") == nil
-                _Error("withSuffix" "Invalid suffix '%s'" t_suffix)
+                _error("withSuffix" "Invalid suffix '%s'" t_suffix)
             )
         )
         self->withName(strcat(self->stem() t_suffix))
@@ -261,13 +261,13 @@ self->match = lambda((t_pattern "t")  ; -> t | nil
     ; **返回**
     ;   (t|nil) - 以 "/" 开头要求锚相等并整路径部件比较（root-only 路径例外，
     ;             "/" 可与 "**" 对齐），否则右对齐到部件边界比较；匹配返回 t、不匹配返回 nil；
-    ;             pattern 相对（锚为空）且解析后无部件（"."、""）时走 _Error() 中断（"/" 有锚不触发）
+    ;             pattern 相对（锚为空）且解析后无部件（"."、""）时走 _error() 中断（"/" 有锚不触发）
     let((l_parse t_anchor l_parts g_ok)
         l_parse = _ParsePath(t_pattern)
         t_anchor = car(l_parse)
         l_parts = cdr(l_parse)
         when(t_anchor == "" && l_parts == nil
-            _Error("match" "empty pattern")
+            _error("match" "empty pattern")
         )
         if(t_anchor == "/"
             when(self->_data->anchor == t_anchor
@@ -298,7 +298,7 @@ self->expandUser = lambda(()  ; -> Path
     ;
     ; **返回**
     ;   (Path) - "~" 与 "~/..." 展开为 HOME；绝对路径、"." 及普通路径返回自身；
-    ;            "~other" 形式、HOME 未设置或为空串，走 _Error() 中断
+    ;            "~other" 形式、HOME 未设置或为空串，走 _error() 中断
     let((t_first)
         t_first = self->_data->parts && car(self->_data->parts)
         cond(
@@ -309,7 +309,7 @@ self->expandUser = lambda(()  ; -> Path
                 let((t_home l_rest)
                     t_home = getShellEnvVar("HOME")
                     when(t_home == nil || t_home == ""
-                        _Error("expandUser" "home directory is not known")
+                        _error("expandUser" "home directory is not known")
                     )
                     l_rest = cdr(self->_data->parts)
                     if(l_rest == nil
@@ -319,7 +319,7 @@ self->expandUser = lambda(()  ; -> Path
                 )
             )
             (t_first && substring(t_first 1 1) == "~"
-                _Error("expandUser" "user home directories are not supported: '%s'" t_first)
+                _error("expandUser" "user home directories are not supported: '%s'" t_first)
             )
             (t
                 self

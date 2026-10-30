@@ -87,7 +87,7 @@ defmethod(initializeInstance (self(Elapsed) \@rest l_args)
     ; **返回**
     ;   (t) - 安装完成后返回 t
     let((_start_ts _end_ts _second _humanReadable)
-        procedure(_Error(t_method t_formatString \@rest l_args "ttg")  ; -> never
+        procedure(_error(t_method t_formatString \@rest l_args "ttg")  ; -> never
             ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
             ;
             ; **参数**
@@ -134,10 +134,10 @@ defmethod(initializeInstance (self(Elapsed) \@rest l_args)
             ;   (int) - compareTime(_end_ts _start_ts)
             unless(_second
                 unless(_start_ts
-                    _Error("getSeconds" "elapsed time has not been started")
+                    _error("getSeconds" "elapsed time has not been started")
                 )
                 unless(_end_ts
-                    _Error("getSeconds" "elapsed time has not been ended")
+                    _error("getSeconds" "elapsed time has not been ended")
                 )
                 _second = compareTime(_end_ts _start_ts)
             )
