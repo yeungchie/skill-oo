@@ -30,7 +30,7 @@ procedure(Run(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; 
         g_job->wait(n_wait n_interval)
         ; ipcWait 永远返回 t，超时只能靠 returncode 还是 nil 来观察；
         ; 退出码由 post 回调写入，wait 返回时可能尚未送达。
-        when(timeout != nil && g_job->returncode == nil
+        when(timeout && g_job->returncode == nil
             let((g_alive)
                 ; 仍非 'Dead 说明进程还在跑，必须 kill；'Dead 则等回调收尾。
                 g_alive = g_job->state() != 'Dead
@@ -77,7 +77,7 @@ procedure(RunWithRead(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gg
         g_job->wait(n_wait n_interval)
         ; ipcWait 永远返回 t，超时只能靠 returncode 还是 nil 来观察；
         ; 退出码由 post 回调写入，wait 返回时可能尚未送达。
-        when(timeout != nil && g_job->returncode == nil
+        when(timeout && g_job->returncode == nil
             let((g_alive)
                 ; 仍非 'Dead 说明进程还在跑，必须 kill；'Dead 则等回调收尾。
                 g_alive = g_job->state() != 'Dead
