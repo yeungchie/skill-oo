@@ -62,6 +62,8 @@ ycSubProcess::Run(
 | ?interval x_interval | int / nil | nil | 等待提示打印间隔（秒）；nil 取 30；须为正整数 |
 | l_args | any | | 命令的其余部分；多个参数以空格拼接 |
 
+命令参数中形如 `?xxx` 的裸符号会被当作关键字参数解析；需要原样传给命令时写成字符串 `"?xxx"`。
+
 **返回值**
 
 `t | nil` — `t` 表示任务进程正常结束；`nil` 表示执行失败，即进程返回状态码非零；超时以 `error()` 中断。
@@ -115,6 +117,8 @@ ycSubProcess::RunWithRead(
 | ?timeout x_timeout | int / nil | nil | 等待上限（秒）；nil 表示不限；须为正整数 |
 | ?interval x_interval | int / nil | nil | 等待提示打印间隔（秒）；nil 取 30；须为正整数 |
 | l_args | any | | 命令的其余部分；多个参数以空格拼接 |
+
+命令参数中形如 `?xxx` 的裸符号会被当作关键字参数解析；需要原样传给命令时写成字符串 `"?xxx"`。
 
 **返回值**
 

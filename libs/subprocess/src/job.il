@@ -27,13 +27,18 @@ procedure(Run(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; 
         n_interval = if(interval interval 30)
         g_job = apply('CreateJob g_arg ?verbose t l_args)->start()
         g_job->wait(n_wait n_interval)
-        when(timeout != nil
-            && g_job->returncode == nil
-            && g_job->state() != 'Dead
-            g_job->kill()
-            g_job->wait(5)
-            error("ycSubProcess::Run: command timed out after %ds: %s"
-                timeout g_job->cmd)
+        when(timeout != nil && g_job->returncode == nil
+            let((g_alive)
+                g_alive = g_job->state() != 'Dead
+                when(g_alive
+                    g_job->kill()
+                )
+                g_job->wait(5)
+                when(g_alive || g_job->returncode == nil
+                    error("ycSubProcess::Run: command timed out after %ds: %s"
+                        timeout g_job->cmd)
+                )
+            )
         )
         g_job->returncode == 0
     )
@@ -64,13 +69,18 @@ procedure(RunWithRead(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gg
         n_interval = if(interval interval 30)
         g_job = apply('CreateJob g_arg l_args)->start()
         g_job->wait(n_wait n_interval)
-        when(timeout != nil
-            && g_job->returncode == nil
-            && g_job->state() != 'Dead
-            g_job->kill()
-            g_job->wait(5)
-            error("ycSubProcess::RunWithRead: command timed out after %ds: %s"
-                timeout g_job->cmd)
+        when(timeout != nil && g_job->returncode == nil
+            let((g_alive)
+                g_alive = g_job->state() != 'Dead
+                when(g_alive
+                    g_job->kill()
+                )
+                g_job->wait(5)
+                when(g_alive || g_job->returncode == nil
+                    error("ycSubProcess::RunWithRead: command timed out after %ds: %s"
+                        timeout g_job->cmd)
+                )
+            )
         )
         list(
             g_job->returncode

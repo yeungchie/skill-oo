@@ -71,6 +71,15 @@ let((l_res)
     _Assert(cadr(l_res) == "after\n" "a timed-out job does not block the next command")
 )
 
+let((l_res t_start)
+    t_start = getCurrentTime()
+    l_res = ycSubProcess::RunWithRead("sleep" 0 ?timeout 1)
+    _Assert(car(l_res) == 0
+        "a command that ends inside ?timeout is not reported as a timeout")
+    _Assert(compareTime(getCurrentTime() t_start) < 3
+        "a fast command does not wait for ?timeout")
+)
+
 _TestRunDone = t
 
 ; END
