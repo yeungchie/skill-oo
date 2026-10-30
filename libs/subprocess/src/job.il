@@ -23,17 +23,22 @@ procedure(Run(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; 
             error("ycSubProcess::Run: ?interval must be a positive integer, got %A"
                 interval)
         )
+        ; 省略 ?timeout 时沿用 wait() 的默认上限，保持旧行为不变。
         n_wait = if(timeout timeout 1000000)
         n_interval = if(interval interval 30)
         g_job = apply('CreateJob g_arg ?verbose t l_args)->start()
         g_job->wait(n_wait n_interval)
+        ; ipcWait 永远返回 t，超时只能靠 returncode 还是 nil 来观察；
+        ; 退出码由 post 回调写入，wait 返回时可能尚未送达。
         when(timeout != nil && g_job->returncode == nil
             let((g_alive)
+                ; 仍非 'Dead 说明进程还在跑，必须 kill；'Dead 则等回调收尾。
                 g_alive = g_job->state() != 'Dead
                 when(g_alive
                     g_job->kill()
                 )
                 g_job->wait(5)
+                ; 超时，或退出码始终没有落地：一律报错，绝不返回 nil 或半截结果。
                 when(g_alive || g_job->returncode == nil
                     error("ycSubProcess::Run: command timed out after %ds: %s"
                         timeout g_job->cmd)
@@ -65,17 +70,22 @@ procedure(RunWithRead(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gg
             error("ycSubProcess::RunWithRead: ?interval must be a positive integer, got %A"
                 interval)
         )
+        ; 省略 ?timeout 时沿用 wait() 的默认上限，保持旧行为不变。
         n_wait = if(timeout timeout 1000000)
         n_interval = if(interval interval 30)
         g_job = apply('CreateJob g_arg l_args)->start()
         g_job->wait(n_wait n_interval)
+        ; ipcWait 永远返回 t，超时只能靠 returncode 还是 nil 来观察；
+        ; 退出码由 post 回调写入，wait 返回时可能尚未送达。
         when(timeout != nil && g_job->returncode == nil
             let((g_alive)
+                ; 仍非 'Dead 说明进程还在跑，必须 kill；'Dead 则等回调收尾。
                 g_alive = g_job->state() != 'Dead
                 when(g_alive
                     g_job->kill()
                 )
                 g_job->wait(5)
+                ; 超时，或退出码始终没有落地：一律报错，绝不返回半截三元结果。
                 when(g_alive || g_job->returncode == nil
                     error("ycSubProcess::RunWithRead: command timed out after %ds: %s"
                         timeout g_job->cmd)

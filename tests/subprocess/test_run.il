@@ -76,6 +76,7 @@ let((l_res t_start)
     l_res = ycSubProcess::RunWithRead("sleep" 0 ?timeout 1)
     _Assert(car(l_res) == 0
         "a command that ends inside ?timeout is not reported as a timeout")
+    ; 3 秒是宽松上限：只排除「一直等到 ?timeout 才返回」的实现。
     _Assert(compareTime(getCurrentTime() t_start) < 3
         "a fast command does not wait for ?timeout")
 )
