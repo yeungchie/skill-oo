@@ -14,7 +14,7 @@ procedure(Run(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; 
     ;
     ; **返回**
     ;   (t|nil) - 正常结束（退出码 0）返回 t；退出码非零返回 nil；超时 error
-    let((g_job n_wait n_interval)
+    let((job wait_timeout wait_interval)
         unless(timeout == nil || (fixp(timeout) && timeout > 0)
             error("ycSubProcess::Run: ?timeout must be a positive integer, got %A"
                 timeout)
@@ -24,28 +24,28 @@ procedure(Run(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; 
                 interval)
         )
         ; 省略 ?timeout 时沿用 wait() 的默认上限，保持旧行为不变。
-        n_wait = if(timeout timeout 1000000)
-        n_interval = if(interval interval 30)
-        g_job = apply('CreateJob g_arg ?verbose t l_args)->start()
-        g_job->wait(n_wait n_interval)
+        wait_timeout = if(timeout timeout 1000000)
+        wait_interval = if(interval interval 30)
+        job = apply('CreateJob g_arg ?verbose t l_args)->start()
+        job->wait(wait_timeout wait_interval)
         ; ipcWait 永远返回 t，超时只能靠 returncode 还是 nil 来观察；
         ; 退出码由 post 回调写入，wait 返回时可能尚未送达。
-        when(timeout && g_job->returncode == nil
-            let((g_alive)
+        when(timeout && job->returncode == nil
+            let((alive)
                 ; 仍非 'Dead 说明进程还在跑，必须 kill；'Dead 则等回调收尾。
-                g_alive = g_job->state() != 'Dead
-                when(g_alive
-                    g_job->kill()
+                alive = job->state() != 'Dead
+                when(alive
+                    job->kill()
                 )
-                g_job->wait(5)
+                job->wait(5)
                 ; 超时，或退出码始终没有落地：一律报错，绝不返回 nil 或半截结果。
-                when(g_alive || g_job->returncode == nil
+                when(alive || job->returncode == nil
                     error("ycSubProcess::Run: command timed out after %ds: %s"
-                        timeout g_job->cmd)
+                        timeout job->cmd)
                 )
             )
         )
-        g_job->returncode == 0
+        job->returncode == 0
     )
 )
 
@@ -61,7 +61,7 @@ procedure(RunWithRead(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gg
     ;
     ; **返回**
     ;   (returncode:int, stdout:str, stderr:str) - 固定三元列表：退出码、标准输出、标准错误；超时 error
-    let((g_job n_wait n_interval)
+    let((job wait_timeout wait_interval)
         unless(timeout == nil || (fixp(timeout) && timeout > 0)
             error("ycSubProcess::RunWithRead: ?timeout must be a positive integer, got %A"
                 timeout)
@@ -71,31 +71,31 @@ procedure(RunWithRead(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gg
                 interval)
         )
         ; 省略 ?timeout 时沿用 wait() 的默认上限，保持旧行为不变。
-        n_wait = if(timeout timeout 1000000)
-        n_interval = if(interval interval 30)
-        g_job = apply('CreateJob g_arg l_args)->start()
-        g_job->wait(n_wait n_interval)
+        wait_timeout = if(timeout timeout 1000000)
+        wait_interval = if(interval interval 30)
+        job = apply('CreateJob g_arg l_args)->start()
+        job->wait(wait_timeout wait_interval)
         ; ipcWait 永远返回 t，超时只能靠 returncode 还是 nil 来观察；
         ; 退出码由 post 回调写入，wait 返回时可能尚未送达。
-        when(timeout && g_job->returncode == nil
-            let((g_alive)
+        when(timeout && job->returncode == nil
+            let((alive)
                 ; 仍非 'Dead 说明进程还在跑，必须 kill；'Dead 则等回调收尾。
-                g_alive = g_job->state() != 'Dead
-                when(g_alive
-                    g_job->kill()
+                alive = job->state() != 'Dead
+                when(alive
+                    job->kill()
                 )
-                g_job->wait(5)
+                job->wait(5)
                 ; 超时，或退出码始终没有落地：一律报错，绝不返回半截三元结果。
-                when(g_alive || g_job->returncode == nil
+                when(alive || job->returncode == nil
                     error("ycSubProcess::RunWithRead: command timed out after %ds: %s"
-                        timeout g_job->cmd)
+                        timeout job->cmd)
                 )
             )
         )
         list(
-            g_job->returncode
-            g_job->stdout->text()
-            g_job->stderr->text()
+            job->returncode
+            job->stdout->text()
+            job->stderr->text()
         )
     )
 )
@@ -107,7 +107,7 @@ procedure(CreateJob(g_arg \@key callback userData verbose \@rest l_args "ggggg")
     ; **参数**
     ;   g_arg      (any) - 命令；非字符串按 %A 自动转换
     ;   l_args     (list) - 命令的其余部分；非字符串同样自动转换
-    ;   ?callback  (any) - 事件回调函数 callback(s_event g_job)；默认 nil
+    ;   ?callback  (any) - 事件回调函数 callback(s_event job)；默认 nil
     ;   ?userData  (any) - 随对象携带的任意数据；默认 nil
     ;   ?verbose   (t|nil) - 是否实时打印子进程输出；默认 nil
     ;
@@ -129,7 +129,7 @@ procedure(AsyncJob(t_cmd \@key callback userData verbose "tggg")  ; -> AsyncJob
     ;
     ; **参数**
     ;   t_cmd      (str) - 完整命令串
-    ;   ?callback  (any) - 事件回调函数 callback(s_event g_job)；默认 nil
+    ;   ?callback  (any) - 事件回调函数 callback(s_event job)；默认 nil
     ;   ?userData  (any) - 随对象携带的任意数据；默认 nil
     ;   ?verbose   (t|nil) - 是否实时打印子进程输出；默认 nil
     ;
@@ -154,7 +154,7 @@ defclass(AsyncJob () (
     )
     callback(
         \@initarg callback
-        \@initform lambda((s_event g_job "sg") nil)
+        \@initform lambda((s_event job "sg") nil)
     )
     userData(
         \@initarg userData
@@ -307,17 +307,17 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         )
         self
     )
-    self->wait = lambda((\@optional n_timeout(1000000) n_interval(30) "xx")  ; -> self
-        ; 等待进程结束或超时；间隔 n_interval 提示一次（单位与默认值见 README）。
+    self->wait = lambda((\@optional n_timeout(1000000) wait_interval(30) "xx")  ; -> self
+        ; 等待进程结束或超时；间隔 wait_interval 提示一次（单位与默认值见 README）。
         ;
         ; **参数**
         ;   n_timeout   (int) - 等待超时（默认 1000000）
-        ;   n_interval  (int) - 提示打印间隔（默认 30）
+        ;   wait_interval  (int) - 提示打印间隔（默认 30）
         ;
         ; **返回**
         ;   (AsyncJob) - self
         _CheckStarted("wait")
-        ipcWait(self->ipcId n_interval n_timeout)
+        ipcWait(self->ipcId wait_interval n_timeout)
         self
     )
     self->await = lambda((\@key check "g")  ; -> str
