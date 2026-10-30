@@ -9,7 +9,6 @@ addToNamespace("ycSubProcess"
         RunWithRead
         CreateJob
         Elapsed
-        _Rstring
         _FormatSeconds
     ))
 )
