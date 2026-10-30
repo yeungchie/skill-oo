@@ -20,7 +20,7 @@ addToNamespace("ycUtf8"
         _InRanges  ; proc
         _WidthOf  ; proc
 
-        ; width-data.il
+        ; width_data.il
         _WfRanges  ; var
         _ARanges  ; var
         _ZeroRanges  ; var
