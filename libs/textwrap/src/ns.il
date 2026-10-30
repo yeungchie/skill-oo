@@ -3,34 +3,39 @@ unless(findNamespace("ycTextwrap")
 )
 addToNamespace("ycTextwrap"
     mapcar('symbolToString '(
-        Wrap
-        Fill
-        Dedent
-        Indent
-        Shorten
-        _IsSpaceCp
-        _CheckUnit
-        _CpWidth
-        _WidthText
-        _WidthCps
-        _TakeCps
-        _DropCps
-        _FitCount
-        _CutCount
-        _FirstChunk
-        _WordsFromCps
-        _JoinWordsCps
-        _NormalizeNewlines
-        _LogicalLines
-        _PackCps
-        _WrapCps
-        _TrimTrailingSpaces
-        _CutAtSpace
-        _FitPlaceholder
-        _ShortenCps
-        _SplitAll
-        _WsPrefix
-        _CommonPrefix
+        ; wrap.il
+        Wrap  ; proc
+        Fill  ; proc
+        _PackCps  ; proc
+        _WrapCps  ; proc
+        _TrimTrailingSpaces  ; proc
+        _CutAtSpace  ; proc
+        _FitPlaceholder  ; proc
+        _ShortenCps  ; proc
+
+        ; block.il
+        Dedent  ; proc
+        Indent  ; proc
+        Shorten  ; proc
+        _SplitAll  ; proc
+        _WsPrefix  ; proc
+        _CommonPrefix  ; proc
+
+        ; measure.il
+        _IsSpaceCp  ; proc
+        _CheckUnit  ; proc
+        _CpWidth  ; proc
+        _WidthText  ; proc
+        _WidthCps  ; proc
+        _TakeCps  ; proc
+        _DropCps  ; proc
+        _FitCount  ; proc
+        _CutCount  ; proc
+        _FirstChunk  ; proc
+        _WordsFromCps  ; proc
+        _JoinWordsCps  ; proc
+        _NormalizeNewlines  ; proc
+        _LogicalLines  ; proc
     ))
 )
 unuseNamespace("ycTextwrap")

@@ -3,13 +3,14 @@ unless(findNamespace("ycRadix")
 )
 addToNamespace("ycRadix"
     mapcar('symbolToString '(
-        Parse
-        Format
-        Mask
-        ApplyMask
-        _DigitValue
-        _PrefixBase
-        _Mask
+        ; radix.il
+        Parse  ; proc
+        Format  ; proc
+        Mask  ; proc
+        ApplyMask  ; proc
+        _DigitValue  ; proc
+        _PrefixBase  ; proc
+        _Mask  ; proc
     ))
 )
 unuseNamespace("ycRadix")

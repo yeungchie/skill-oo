@@ -3,22 +3,27 @@ unless(findNamespace("ycUtf8")
 )
 addToNamespace("ycUtf8"
     mapcar('symbolToString '(
-        Decode
-        Encode
-        CharCount
-        Slice
-        Width
-        CharWidth
-        IsValid
-        _Next
-        _Read
-        _EncCp
-        _Build
-        _InRanges
-        _WidthOf
-        _WfRanges
-        _ARanges
-        _ZeroRanges
+        ; utf8.il
+        Decode  ; proc
+        Encode  ; proc
+        CharCount  ; proc
+        Slice  ; proc
+        IsValid  ; proc
+        _Next  ; proc
+        _Read  ; proc
+        _EncCp  ; proc
+        _Build  ; proc
+
+        ; width.il
+        Width  ; proc
+        CharWidth  ; proc
+        _InRanges  ; proc
+        _WidthOf  ; proc
+
+        ; width-data.il
+        _WfRanges  ; var
+        _ARanges  ; var
+        _ZeroRanges  ; var
     ))
 )
 unuseNamespace("ycUtf8")

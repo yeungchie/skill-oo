@@ -3,37 +3,42 @@ unless(findNamespace("ycString")
 )
 addToNamespace("ycString"
     mapcar('symbolToString '(
-        Trim
-        TrimStart
-        TrimEnd
-        Pad
-        Width
-        Split
-        Join
-        StartsWith
-        EndsWith
-        Replace
-        Count
-        Escape
-        Unescape
-        Words
-        JoinWords
-        Sanitize
-        ToSnake
-        ToKebab
-        ToCamel
-        ToPascal
-        _TrimSide
-        _Repeat
-        _IsWhitespace
-        _SplitWhitespace
-        _SplitLiteral
-        _KeepNonEmpty
-        _IsUpperChar
-        _IsLowerChar
-        _IsDigitChar
-        _IsWordChar
-        _CapWord
+        ; core.il
+        Trim  ; proc
+        TrimStart  ; proc
+        TrimEnd  ; proc
+        Pad  ; proc
+        Width  ; proc
+        Split  ; proc
+        Join  ; proc
+        StartsWith  ; proc
+        EndsWith  ; proc
+        Replace  ; proc
+        Count  ; proc
+        _TrimSide  ; proc
+        _Repeat  ; proc
+        _IsWhitespace  ; proc
+        _SplitWhitespace  ; proc
+        _SplitLiteral  ; proc
+        _KeepNonEmpty  ; proc
+
+        ; escape.il
+        Escape  ; proc
+        Unescape  ; proc
+
+        ; naming.il
+        Words  ; proc
+        JoinWords  ; proc
+        Sanitize  ; proc
+        ToSnake  ; proc
+        ToKebab  ; proc
+        ToCamel  ; proc
+        ToPascal  ; proc
+        _IsUpperChar  ; proc
+        _IsLowerChar  ; proc
+        _IsDigitChar  ; proc
+        _IsWordChar  ; proc
+        _CapWord  ; proc
     ))
 )
 unuseNamespace("ycString")

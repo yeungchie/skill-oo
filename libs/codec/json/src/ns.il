@@ -3,35 +3,44 @@ unless(findNamespace("ycJson")
 )
 addToNamespace("ycJson"
     mapcar('symbolToString '(
-        Decode
-        Encode
-        _MaxDecodeDepth
-        _MaxEncodeDepth
-        _Code
-        _Digitp
-        _LineCol
-        _Error
-        _Build
-        _SkipWs
-        _Hex4
-        _Utf8Str
-        _Literal
-        _Number
-        _String
-        _Value
-        _Object
-        _Array
-        _DecodeText
-        _LineSplit
-        _LineBlankp
-        _Newlines
-        _KeyStr
-        _IndentStr
-        _EncodeString
-        _EncodeNumber
-        _EncodeValue
-        _EncodeList
-        _EncodeTable
+        ; decode.il
+        Decode  ; proc
+        _MaxDecodeDepth  ; var
+        _SkipWs  ; proc
+        _Value  ; proc
+        _Object  ; proc
+        _Array  ; proc
+        _DecodeText  ; proc
+
+        ; encode.il
+        Encode  ; proc
+        _MaxEncodeDepth  ; var
+        _KeyStr  ; proc
+        _IndentStr  ; proc
+        _EncodeString  ; proc
+        _EncodeNumber  ; proc
+        _EncodeValue  ; proc
+        _EncodeList  ; proc
+        _EncodeTable  ; proc
+
+        ; core.il
+        _Code  ; proc
+        _Digitp  ; proc
+        _LineCol  ; proc
+        _Error  ; proc
+        _Build  ; proc
+
+        ; scalar.il
+        _Hex4  ; proc
+        _Utf8Str  ; proc
+        _Literal  ; proc
+        _Number  ; proc
+        _String  ; proc
+
+        ; jsonl.il
+        _LineSplit  ; proc
+        _LineBlankp  ; proc
+        _Newlines  ; proc
     ))
 )
 unuseNamespace("ycJson")

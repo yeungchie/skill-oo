@@ -3,13 +3,18 @@ unless(findNamespace("ycSubProcess")
 )
 addToNamespace("ycSubProcess"
     mapcar('symbolToString '(
-        Stream
-        AsyncJob
-        Run
-        RunWithRead
-        CreateJob
-        Elapsed
-        _FormatSeconds
+        ; stream.il
+        Stream  ; class
+
+        ; job.il
+        AsyncJob  ; proc, class
+        Run  ; proc
+        RunWithRead  ; proc
+        CreateJob  ; proc
+
+        ; time.il
+        Elapsed  ; class
+        _FormatSeconds  ; proc
     ))
 )
 unuseNamespace("ycSubProcess")

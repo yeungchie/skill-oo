@@ -3,58 +3,63 @@ unless(findNamespace("ycRegEx")
 )
 addToNamespace("ycRegEx"
     mapcar('symbolToString '(
-        Compile
-        Match
-        Search
-        Fullmatch
-        Findall
-        Finditer
-        Partialp
-        Split
-        Sub
-        Subn
-        GetRecursionLimit
-        SetRecursionLimit
-        Pattern
-        PatternData
-        Matched
-        MatchedData
-        _MkPattern
-        _OptsList
-        _CompileOptsBits
-        _ExecOptsBits
-        _CompileChecked
-        _AsPat
-        _FlagsFromValue
-        _Suffix
-        _Prefix
-        _SplitBy
-        _CountSub
-        _Nth1
-        _Backref
-        _FoldCat
-        _WholeTemplate
-        _SplitTemplate
-        _ExtractParts
-        _PosMarker
-        _ExportMarkers
-        _ExportTemplate
-        _ExportRecords
-        _HasBit
-        _HasNumericGroupRef
-        _ShiftNumericRefs
-        _ZeroAtStart
-        _ZeroWidthRecords
-        _WalkRecords
-        _MatchStart
-        _NextMatch
-        _AnchorAt
-        _FindAllItem
-        _MkMatch
-        _GroupWhole
-        _GroupAt
-        _InstallPattern
-        _InstallMatch
+        ; core.il
+        Compile  ; proc
+        Match  ; proc
+        Search  ; proc
+        Fullmatch  ; proc
+        Findall  ; proc
+        Finditer  ; proc
+        Partialp  ; proc
+        Split  ; proc
+        Sub  ; proc
+        Subn  ; proc
+        GetRecursionLimit  ; proc
+        SetRecursionLimit  ; proc
+        _MkPattern  ; proc
+        _OptsList  ; proc
+        _CompileOptsBits  ; proc
+        _ExecOptsBits  ; proc
+        _CompileChecked  ; proc
+        _AsPat  ; proc
+        _FlagsFromValue  ; proc
+        _Suffix  ; proc
+        _Prefix  ; proc
+        _SplitBy  ; proc
+        _CountSub  ; proc
+        _Nth1  ; proc
+        _Backref  ; proc
+        _FoldCat  ; proc
+
+        ; pattern.il
+        Pattern  ; class
+        PatternData  ; class
+        _InstallPattern  ; proc
+
+        ; match.il
+        Matched  ; class
+        MatchedData  ; class
+        _WholeTemplate  ; proc
+        _SplitTemplate  ; proc
+        _ExtractParts  ; proc
+        _PosMarker  ; proc
+        _ExportMarkers  ; proc
+        _ExportTemplate  ; proc
+        _ExportRecords  ; proc
+        _HasBit  ; proc
+        _HasNumericGroupRef  ; proc
+        _ShiftNumericRefs  ; proc
+        _ZeroAtStart  ; proc
+        _ZeroWidthRecords  ; proc
+        _WalkRecords  ; proc
+        _MatchStart  ; proc
+        _NextMatch  ; proc
+        _AnchorAt  ; proc
+        _FindAllItem  ; proc
+        _MkMatch  ; proc
+        _GroupWhole  ; proc
+        _GroupAt  ; proc
+        _InstallMatch  ; proc
     ))
 )
 unuseNamespace("ycRegEx")

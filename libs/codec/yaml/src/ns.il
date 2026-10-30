@@ -3,66 +3,75 @@ unless(findNamespace("ycYaml")
 )
 addToNamespace("ycYaml"
     mapcar('symbolToString '(
-        Decode
-        Encode
-        _MaxDecodeDepth
-        _MaxEncodeDepth
-        _Anchors
-        _ActiveAnchors
-        _AliasValue
-        _Blankp
-        _BlockLines
-        _Build
-        _ChompCr
-        _Code
-        _DecodeStream
-        _DecodeText
-        _EncodeFlow
-        _EncodeKey
-        _EncodeScalar
-        _EncodeString
-        _ErrorLine
-        _FindKeyColon
-        _FlowKey
-        _FlowMap
-        _FlowPrefix
-        _FlowSeq
-        _FlowSkip
-        _FlowTokenEnd
-        _FlowValue
-        _HexVal
-        _IndentStr
-        _JoinBuild
-        _LineCol
-        _LineIndent
-        _Ltrim
-        _MergeInto
-        _Nth1
-        _NumText
-        _ParseBlock
-        _ParseBlockScalar
-        _ParseChild
-        _ParseIntText
-        _ParseKeyText
-        _ParseMap
-        _ParseMapInto
-        _ParseQuoted
-        _ParseScalarText
-        _ParseSeq
-        _ParseSeqNested
-        _ParseValueText
-        _PlainSafe
-        _ResolvePlain
-        _Rtrim
-        _ScalarText
-        _SkipIgnorable
-        _SpecialStart
-        _SplitDocuments
-        _SplitLines
-        _StripComment
-        _TagValue
-        _Tail
-        _Utf8Str
+        ; decode.il
+        Decode  ; proc
+        _DecodeStream  ; proc
+        _DecodeText  ; proc
+        _FindKeyColon  ; proc
+        _MergeInto  ; proc
+        _ParseBlock  ; proc
+        _ParseChild  ; proc
+        _ParseMap  ; proc
+        _ParseMapInto  ; proc
+        _ParseSeq  ; proc
+        _ParseSeqNested  ; proc
+        _ParseValueText  ; proc
+        _SkipIgnorable  ; proc
+        _SplitDocuments  ; proc
+
+        ; encode.il
+        Encode  ; proc
+        _BlockLines  ; proc
+        _EncodeFlow  ; proc
+        _EncodeKey  ; proc
+        _EncodeScalar  ; proc
+        _EncodeString  ; proc
+        _IndentStr  ; proc
+        _NumText  ; proc
+        _PlainSafe  ; proc
+        _SpecialStart  ; proc
+
+        ; core.il
+        _MaxDecodeDepth  ; var
+        _MaxEncodeDepth  ; var
+        _Anchors  ; var
+        _ActiveAnchors  ; var
+        _Blankp  ; proc
+        _Build  ; proc
+        _ChompCr  ; proc
+        _Code  ; proc
+        _ErrorLine  ; proc
+        _JoinBuild  ; proc
+        _LineCol  ; proc
+        _LineIndent  ; proc
+        _Ltrim  ; proc
+        _Nth1  ; proc
+        _Rtrim  ; proc
+        _SplitLines  ; proc
+        _StripComment  ; proc
+        _Tail  ; proc
+        _Utf8Str  ; proc
+
+        ; flow.il
+        _AliasValue  ; proc
+        _FlowKey  ; proc
+        _FlowMap  ; proc
+        _FlowPrefix  ; proc
+        _FlowSeq  ; proc
+        _FlowSkip  ; proc
+        _FlowTokenEnd  ; proc
+        _FlowValue  ; proc
+        _ParseKeyText  ; proc
+
+        ; scalar.il
+        _HexVal  ; proc
+        _ParseBlockScalar  ; proc
+        _ParseIntText  ; proc
+        _ParseQuoted  ; proc
+        _ParseScalarText  ; proc
+        _ResolvePlain  ; proc
+        _ScalarText  ; proc
+        _TagValue  ; proc
     ))
 )
 unuseNamespace("ycYaml")

@@ -1,20 +1,16 @@
-;--------------------------
-; Program  : codec/core(ns.il)
-; Language : Cadence Skill
-;--------------------------
-
 unless(findNamespace("ycCodec")
     makeNamespace("ycCodec")
 )
 addToNamespace("ycCodec"
     mapcar('symbolToString '(
-        Type
-        TypeData
-        True
-        False
-        Null
-        Missing
-        _TypeCache
+        ; sentinel.il
+        Type  ; proc, class
+        TypeData  ; class
+        True  ; var
+        False  ; var
+        Null  ; var
+        Missing  ; var
+        _TypeCache  ; var
     ))
 )
 unuseNamespace("ycCodec")
