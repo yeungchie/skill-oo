@@ -378,7 +378,7 @@ procedure(Replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
             when(t_old == ""
                 error("ycString::Replace: pattern must not be empty")
             )
-            ycRegEx::Sub(t_old t_new t_s ?all t)
+            ycRegEx::Sub(t_old t_new t_s)
         )
         (t
             when(t_old == ""
