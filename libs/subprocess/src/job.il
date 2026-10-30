@@ -3,34 +3,79 @@ useNamespace("ycSubProcess")
 
 ; ---------- 函数 ----------
 
-procedure(Run(g_arg \@rest l_args "gg")  ; -> t | nil
+procedure(Run(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; -> t | nil
     ; 执行命令并等待任务完成，子进程输出实时打印到终端。
     ;
     ; **参数**
-    ;   g_arg   (any) - 命令；非字符串按 %A 自动转换
-    ;   l_args  (list) - 命令的其余部分；非字符串同样自动转换
+    ;   g_arg     (any)     - 命令；非字符串按 %A 自动转换
+    ;   ?timeout  (int|nil) - 等待上限（秒）；默认 nil（不限），须为正整数
+    ;   ?interval (int|nil) - 等待提示间隔（秒）；默认 nil（30），须为正整数
+    ;   l_args    (list)    - 命令的其余部分；非字符串同样自动转换
     ;
     ; **返回**
-    ;   (t|nil) - 正常结束（退出码 0）返回 t；退出码非零返回 nil
-    apply('CreateJob g_arg ?verbose t l_args)->start()->wait()->returncode == 0
+    ;   (t|nil) - 正常结束（退出码 0）返回 t；退出码非零返回 nil；超时 error
+    let((g_job n_wait n_interval)
+        unless(timeout == nil || (fixp(timeout) && timeout > 0)
+            error("ycSubProcess::Run: ?timeout must be a positive integer, got %A"
+                timeout)
+        )
+        unless(interval == nil || (fixp(interval) && interval > 0)
+            error("ycSubProcess::Run: ?interval must be a positive integer, got %A"
+                interval)
+        )
+        n_wait = if(timeout timeout 1000000)
+        n_interval = if(interval interval 30)
+        g_job = apply('CreateJob g_arg ?verbose t l_args)->start()
+        g_job->wait(n_wait n_interval)
+        when(timeout != nil
+            && g_job->returncode == nil
+            && g_job->state() != 'Dead
+            g_job->kill()
+            g_job->wait(5)
+            error("ycSubProcess::Run: command timed out after %ds: %s"
+                timeout g_job->cmd)
+        )
+        g_job->returncode == 0
+    )
 )
 
 
-procedure(RunWithRead(g_arg \@rest l_args "gg")  ; -> (returncode:int, stdout:str, stderr:str)
+procedure(RunWithRead(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; -> (returncode:int, stdout:str, stderr:str)
     ; 执行命令并等待完成，分别读取标准输出与标准错误，不向终端打印。
     ;
     ; **参数**
-    ;   g_arg   (any) - 命令；非字符串按 %A 自动转换
-    ;   l_args  (list) - 命令的其余部分；非字符串同样自动转换
+    ;   g_arg     (any)     - 命令；非字符串按 %A 自动转换
+    ;   ?timeout  (int|nil) - 等待上限（秒）；默认 nil（不限），须为正整数
+    ;   ?interval (int|nil) - 等待提示间隔（秒）；默认 nil（30），须为正整数
+    ;   l_args    (list)    - 命令的其余部分；非字符串同样自动转换
     ;
     ; **返回**
-    ;   (returncode:int, stdout:str, stderr:str) - 固定三元列表：退出码、标准输出、标准错误
-    let((aj)
-        aj = apply('CreateJob g_arg l_args)->start()->wait()
+    ;   (returncode:int, stdout:str, stderr:str) - 固定三元列表：退出码、标准输出、标准错误；超时 error
+    let((g_job n_wait n_interval)
+        unless(timeout == nil || (fixp(timeout) && timeout > 0)
+            error("ycSubProcess::RunWithRead: ?timeout must be a positive integer, got %A"
+                timeout)
+        )
+        unless(interval == nil || (fixp(interval) && interval > 0)
+            error("ycSubProcess::RunWithRead: ?interval must be a positive integer, got %A"
+                interval)
+        )
+        n_wait = if(timeout timeout 1000000)
+        n_interval = if(interval interval 30)
+        g_job = apply('CreateJob g_arg l_args)->start()
+        g_job->wait(n_wait n_interval)
+        when(timeout != nil
+            && g_job->returncode == nil
+            && g_job->state() != 'Dead
+            g_job->kill()
+            g_job->wait(5)
+            error("ycSubProcess::RunWithRead: command timed out after %ds: %s"
+                timeout g_job->cmd)
+        )
         list(
-            aj->returncode
-            aj->stdout->text()
-            aj->stderr->text()
+            g_job->returncode
+            g_job->stdout->text()
+            g_job->stderr->text()
         )
     )
 )

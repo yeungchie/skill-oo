@@ -22,6 +22,21 @@ let((aj)
     _Assert(aj->kill() == nil "kill on an exited process returns nil")
 )
 
+let((aj)
+    aj = ycSubProcess::CreateJob("sleep 3")
+    aj->start()->wait(1)
+    _Assert(aj->returncode == nil "wait leaves returncode nil when it times out")
+    _Assert(aj->state() == 'Active "wait leaves the job active when it times out")
+    aj->kill()
+    aj->wait(5)
+    _Assert(aj->state() == 'Dead "kill after a timed-out wait reaps the job")
+)
+
+let((aj)
+    aj = ycSubProcess::CreateJob("echo" "hi")
+    _Assert(aj->await() == "hi\n" "await still waits without a timeout")
+)
+
 _TestControlDone = t
 
 ; END

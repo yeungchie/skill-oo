@@ -31,6 +31,46 @@ let((l_res)
 
 _Assert(errset(ycSubProcess::RunWithRead() nil) == nil "RunWithRead requires a command")
 
+_Assert(ycSubProcess::Run("true" ?timeout 5) == t
+    "Run accepts ?timeout and still returns t")
+
+let((l_res)
+    l_res = ycSubProcess::RunWithRead("echo" "hi" ?timeout 5)
+    _Assert(car(l_res) == 0 "RunWithRead with ?timeout returns the exit code")
+    _Assert(cadr(l_res) == "hi\n" "RunWithRead with ?timeout captures stdout")
+)
+
+_Assert(car(ycSubProcess::RunWithRead("sleep" 0 ?timeout 5 ?interval 1)) == 0
+    "?interval without a short ?timeout is accepted")
+
+_Assert(errset(ycSubProcess::Run("sleep" 3 ?timeout 1) nil) == nil
+    && pcreMatchp("timed out" sprintf(nil "%A" errset.errset))
+    "Run raises a timeout error")
+
+_Assert(errset(ycSubProcess::RunWithRead("sleep" 3 ?timeout 1) nil) == nil
+    && pcreMatchp("timed out" sprintf(nil "%A" errset.errset))
+    "RunWithRead raises a timeout error instead of returning partial output")
+
+_Assert(errset(ycSubProcess::Run("true" ?timeout 0) nil) == nil
+    "Run rejects a zero ?timeout")
+_Assert(errset(ycSubProcess::Run("true" ?timeout -1) nil) == nil
+    "Run rejects a negative ?timeout")
+_Assert(errset(ycSubProcess::Run("true" ?timeout 1.5) nil) == nil
+    "Run rejects a float ?timeout")
+_Assert(errset(ycSubProcess::Run("true" ?timeout "5") nil) == nil
+    "Run rejects a string ?timeout")
+_Assert(errset(ycSubProcess::RunWithRead("true" ?timeout 0) nil) == nil
+    "RunWithRead rejects a zero ?timeout")
+_Assert(errset(ycSubProcess::RunWithRead("true" ?interval 0) nil) == nil
+    "RunWithRead rejects a zero ?interval")
+_Assert(errset(ycSubProcess::Run("true" ?interval "x") nil) == nil
+    "Run rejects a string ?interval")
+
+let((l_res)
+    l_res = ycSubProcess::RunWithRead("echo" "after" ?timeout 5)
+    _Assert(cadr(l_res) == "after\n" "a timed-out job does not block the next command")
+)
+
 _TestRunDone = t
 
 ; END

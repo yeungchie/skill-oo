@@ -40,6 +40,8 @@ aj->await()
 ```text
 ycSubProcess::Run(
     g_arg
+    [ ?timeout x_timeout ]
+    [ ?interval x_interval ]
     [ l_args ... ]
 )
 => t | nil
@@ -47,18 +49,22 @@ ycSubProcess::Run(
 
 **描述**
 
-执行给定命令并等待任务完成，子进程输出内容将实时打印。
+执行给定命令并等待任务完成，子进程输出内容将实时打印。`?timeout` 指定等待上限：超时后终止子进程、回收句柄并以 `error()` 中断，不会返回 `nil`，也不会把超时与退出码非零混为一谈。超时错误不附带已捕获的部分输出；需要读取部分输出或自行收尾时改用 `CreateJob` 与 `wait`。
+
+只终止直接子进程。经 shell 启动的命令如需连同孙进程一起结束，写成 `sh -c 'exec ...'`，让 shell 自己被执行目标替换。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_arg | any | | 命令，非字符串会自动转换 |
+| ?timeout x_timeout | int / nil | nil | 等待上限（秒）；nil 表示不限；须为正整数 |
+| ?interval x_interval | int / nil | nil | 等待提示打印间隔（秒）；nil 取 30；须为正整数 |
 | l_args | any | | 命令的其余部分；多个参数以空格拼接 |
 
 **返回值**
 
-`t | nil` — `t` 表示任务进程正常结束；`nil` 表示执行失败，即进程返回状态码非零。
+`t | nil` — `t` 表示任务进程正常结束；`nil` 表示执行失败，即进程返回状态码非零；超时以 `error()` 中断。
 
 **例程**
 
@@ -80,11 +86,18 @@ ycSubProcess::Run("bad cmd")
 ; => nil
 ```
 
+```lisp
+ycSubProcess::Run("sleep" 5 ?timeout 2)
+; *Error* ycSubProcess::Run: command timed out after 2s: sleep 5
+```
+
 ### ycSubProcess::RunWithRead <sub>`function`</sub>
 
 ```text
 ycSubProcess::RunWithRead(
     g_arg
+    [ ?timeout x_timeout ]
+    [ ?interval x_interval ]
     [ l_args ... ]
 )
 => (returncode:int, stdout:str, stderr:str)
@@ -92,18 +105,20 @@ ycSubProcess::RunWithRead(
 
 **描述**
 
-执行给定命令并等待完成，分别读取标准输出与标准错误；输出不实时打印到终端。返回码非零不触发错误，由调用方检查。
+执行给定命令并等待完成，分别读取标准输出与标准错误；输出不实时打印到终端。返回码非零不触发错误，由调用方检查。`?timeout` 超时后终止、回收并以 `error()` 中断，不返回部分输出；子进程清理规则同 `Run`。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | g_arg | any | | 命令，非字符串会自动转换 |
+| ?timeout x_timeout | int / nil | nil | 等待上限（秒）；nil 表示不限；须为正整数 |
+| ?interval x_interval | int / nil | nil | 等待提示打印间隔（秒）；nil 取 30；须为正整数 |
 | l_args | any | | 命令的其余部分；多个参数以空格拼接 |
 
 **返回值**
 
-`(returncode:int, stdout:str, stderr:str)` — 固定长度 3 的列表，依次为退出码、标准输出与标准错误；两路输出分别完整收集，不保证交错顺序。
+`(returncode:int, stdout:str, stderr:str)` — 固定长度 3 的列表，依次为退出码、标准输出与标准错误；两路输出分别完整收集，不保证交错顺序；超时以 `error()` 中断。
 
 **例程**
 
@@ -121,6 +136,11 @@ caddr(res)
 res = ycSubProcess::RunWithRead("printf 'hello'")
 cadr(res)
 ; => "hello"
+```
+
+```lisp
+res = ycSubProcess::RunWithRead("sleep" 5 ?timeout 2)
+; *Error* ycSubProcess::RunWithRead: command timed out after 2s: sleep 5
 ```
 
 ### ycSubProcess::CreateJob <sub>`function`</sub>
@@ -265,7 +285,7 @@ aj->wait(
 => ycSubProcess::AsyncJob
 ```
 
-等待任务完成；任务未启动时以 `error()` 中断。
+等待任务完成；任务未启动时以 `error()` 中断。超时返回后任务并未结束：`returncode` 仍为 `nil`，`state()` 也不会是 `'Dead`；该方法不终止进程，需要终止请调用 `kill()`。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -286,7 +306,7 @@ aj->await(
 => str
 ```
 
-自动启动并等待完成，返回标准输出内容。
+自动启动并等待完成，返回标准输出内容。永不超时：任务未结束就一直等待下去。
 
 任务处于 `'Stopped` 时无法等到结束，会以 `error()` 中断，需先 `continue()` 继续或 `kill()` 终止。
 
