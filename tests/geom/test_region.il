@@ -120,15 +120,16 @@ let((l_polys g_big g_tiny g_r n_i n_tiny n_exact)
 )
 
 ; 质心的三个加权和各自量级差别极大，必须独立补偿
-let((l_polys g_big g_tiny g_r g_c n_i n_tiny n_exact)
+let((l_polys g_big g_tiny g_r g_c n_i n_tiny n_exact n_exact_y)
     g_big = ycGeom::Polygon(list(
         ycGeom::Point(984000:984000) ycGeom::Point(1016000:984000)
         ycGeom::Point(1016000:1016000) ycGeom::Point(984000:1016000)
     ))
+    ; 小方形放在与大方形的 y 不同的位置，让 Σa·y 那一路也产生可见位移
     g_tiny = ycGeom::Polygon(list(
-        ycGeom::Point(3000000:1000000) ycGeom::Point(3000000.0001:1000000)
-        ycGeom::Point(3000000.0001:1000000.0001)
-        ycGeom::Point(3000000:1000000.0001)
+        ycGeom::Point(3000000:2000000) ycGeom::Point(3000000.0001:2000000)
+        ycGeom::Point(3000000.0001:2000000.0001)
+        ycGeom::Point(3000000:2000000.0001)
     ))
     n_tiny = g_tiny->area()
     l_polys = tconc(nil g_big)
@@ -138,10 +139,13 @@ let((l_polys g_big g_tiny g_r g_c n_i n_tiny n_exact)
     g_r = ycGeom::Region(car(l_polys) ?normalize nil)
     n_exact = (1024000000.0 * 1.0e6 + 1000.0 * n_tiny * 3.0e6)
         / (1024000000.0 + 1000.0 * n_tiny)
+    n_exact_y = (1024000000.0 * 1.0e6 + 1000.0 * n_tiny * 2.0e6)
+        / (1024000000.0 + 1000.0 * n_tiny)
     g_c = g_r->centroid()
     _Assert(abs(g_c->x() - n_exact) <= 1e-9
         "region: centroid keeps small weights")
-    _Assert(abs(g_c->y() - 1.0e6) <= 1e-9  "region: centroid y unchanged")
+    _Assert(abs(g_c->y() - n_exact_y) <= 1e-9
+        "region: centroid y keeps small weights")
 )
 
 _TestRegionDone = t
