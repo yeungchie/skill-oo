@@ -221,6 +221,10 @@ let((l_a l_b l_r g_poly)
         "boolean: native not area")
     _Assert(ycGeom::Region(ycGeom::Boolean('xor l_a l_b))->area() == 24.0
         "boolean: native xor area")
+    _Assert(equal(ycGeom::Boolean("or" l_a l_b) l_r)
+        "boolean: native accepts string operation")
+    _AssertError(lambda(() ycGeom::Boolean("union" l_a l_b))
+        "boolean: native rejects string union spelling")
     ; 结果形态固定为 Region->toSkill()：点列列表，可直接回构 Polygon
     _Assert(length(l_r) == 1 && listp(car(l_r)) && listp(car(car(l_r)))
         "boolean: native result is polygon list")
@@ -262,10 +266,12 @@ let((l_a l_r)
         "boolean: native or with nil l_b merges overlap")
     _Assert(abs(ycGeom::Region(l_r)->area() - 28.0) <= 1e-9
         "boolean: native or with nil l_b area")
-    _Assert(ycGeom::Boolean('and l_a nil) == nil
-        "boolean: native and with nil l_b is empty")
-    _Assert(abs(ycGeom::Region(ycGeom::Boolean('not l_a nil))->area() - 28.0) <= 1e-9
-        "boolean: native not with nil l_b keeps l_a")
+    _AssertError(lambda(() ycGeom::Boolean('and l_a nil))
+        "boolean: native and rejects nil l_b")
+    _AssertError(lambda(() ycGeom::Boolean('not l_a nil))
+        "boolean: native not rejects nil l_b")
+    _AssertErrorMsg(lambda(() ycGeom::Boolean('xor l_a nil))
+        "only when the operation is or" "boolean: native reports nil l_b on xor")
 )
 
 let((l_r)
