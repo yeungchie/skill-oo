@@ -101,6 +101,53 @@ let((l_polys g_p g_r n_i n_size n_step n_x n_y n_one)
         "region: perimeter accumulation stable")
 )
 
+; 大面积 + 大量小面积混合时，小项不得被朴素累加吞掉
+let((l_polys g_big g_tiny g_r n_i n_tiny n_exact)
+    g_big = ycGeom::Polygon(list(0:0 32000:0 32000:32000 0:32000))
+    g_tiny = ycGeom::Polygon(list(
+        ycGeom::Point(40000:0) ycGeom::Point(40000.0001:0)
+        ycGeom::Point(40000.0001:0.0001) ycGeom::Point(40000:0.0001)
+    ))
+    n_tiny = g_tiny->area()
+    l_polys = tconc(nil g_big)
+    for(n_i 1 1000
+        l_polys = tconc(l_polys g_tiny)
+    )
+    g_r = ycGeom::Region(car(l_polys) ?normalize nil)
+    n_exact = 1024000000.0 + 1000.0 * n_tiny
+    _Assert(abs(g_r->area() - n_exact) <= 1e-6
+        "region: area keeps small terms")
+)
+
+; 质心的三个加权和各自量级差别极大，必须独立补偿
+let((l_polys g_big g_tiny g_r g_c n_i n_tiny n_exact n_exact_y)
+    g_big = ycGeom::Polygon(list(
+        ycGeom::Point(984000:984000) ycGeom::Point(1016000:984000)
+        ycGeom::Point(1016000:1016000) ycGeom::Point(984000:1016000)
+    ))
+    ; 小方形放在与大方形的 y 不同的位置，让 Σa·y 那一路也产生可见位移
+    g_tiny = ycGeom::Polygon(list(
+        ycGeom::Point(3000000:2000000) ycGeom::Point(3000000.0001:2000000)
+        ycGeom::Point(3000000.0001:2000000.0001)
+        ycGeom::Point(3000000:2000000.0001)
+    ))
+    n_tiny = g_tiny->area()
+    l_polys = tconc(nil g_big)
+    for(n_i 1 1000
+        l_polys = tconc(l_polys g_tiny)
+    )
+    g_r = ycGeom::Region(car(l_polys) ?normalize nil)
+    n_exact = (1024000000.0 * 1.0e6 + 1000.0 * n_tiny * 3.0e6)
+        / (1024000000.0 + 1000.0 * n_tiny)
+    n_exact_y = (1024000000.0 * 1.0e6 + 1000.0 * n_tiny * 2.0e6)
+        / (1024000000.0 + 1000.0 * n_tiny)
+    g_c = g_r->centroid()
+    _Assert(abs(g_c->x() - n_exact) <= 1e-9
+        "region: centroid keeps small weights")
+    _Assert(abs(g_c->y() - n_exact_y) <= 1e-9
+        "region: centroid y keeps small weights")
+)
+
 _TestRegionDone = t
 
 ; END

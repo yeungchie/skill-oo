@@ -178,6 +178,17 @@ _AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?grid "x"
 _AssertError(lambda(() ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
     ->toLegalPathPoints(?edge 1.5) t)  "path: float edge rejected")
 
+; ?edge 上界在开放路径上同样校验
+let((g_two g_three)
+    g_two = ycGeom::Path(list(0:0 10:0) ?width 2)
+    g_three = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    _AssertError(lambda(() g_two->toLegalPathPoints(?edge 2) t)
+        "path: open path edge out of range")
+    _Assert(g_three->toLegalPathPoints(?edge 2)
+        == list(list(0.0 0.0) list(10.0 0.0) list(10.0 10.0))
+        "path: open path edge in range")
+)
+
 _TestPathDone = t
 
 ; END

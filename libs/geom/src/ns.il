@@ -30,10 +30,12 @@ addToNamespace("ycGeom"
         ; route.il
         Route  ; proc, class
         RouteData  ; class
+        _InstallRoute  ; proc
 
         ; path.il
         Path  ; proc, class
         PathData  ; class
+        _InstallPath  ; proc
 
         ; polygon.il
         Polygon  ; proc, class
@@ -52,6 +54,7 @@ addToNamespace("ycGeom"
         _Eps  ; proc
         _AngleTol  ; proc
         _Grid  ; proc
+        _SnapRound  ; proc
         _Snap  ; proc
         _Near  ; proc
         _Nth1  ; proc
@@ -62,11 +65,13 @@ addToNamespace("ycGeom"
         _PolygonP  ; proc
         _RegionP  ; proc
         _PairP  ; proc
+        _PointAt  ; proc
         _AsPoint  ; proc
         _AsPointList  ; proc
         _TwoPoints  ; proc
         _AsSegment  ; proc
         _AsLine  ; proc
+        _AsLineOrSegment  ; proc
         _AsPolygon  ; proc
         _AsPolygonList  ; proc
         _AsRegion  ; proc
@@ -77,6 +82,7 @@ addToNamespace("ycGeom"
         _NumKey  ; proc
         _PtKey  ; proc
         _EdgeKey  ; proc
+        _CellNumKey  ; proc
         _CanonPoint  ; proc
         _CanonRing  ; proc
         _Cross  ; proc
