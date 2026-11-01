@@ -80,12 +80,23 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (float) - 面积
-        let((n_sum)
+        let((n_sum n_comp n_term n_next)
+            ; 与 perimeter 相同的 Kahan-Babuska-Neumaier 补偿求和：
+            ; 小面积多边形不会在大面积累加中被舍入吞掉。
             n_sum = 0.0
+            n_comp = 0.0
             foreach(g_p self->_data->polygons
-                n_sum = n_sum + g_p->area()
+                n_term = g_p->area()
+                n_next = n_sum + n_term
+                if(abs(n_sum) >= abs(n_term)
+                then
+                    n_comp = n_comp + ((n_sum - n_next) + n_term)
+                else
+                    n_comp = n_comp + ((n_term - n_next) + n_sum)
+                )
+                n_sum = n_next
             )
-            n_sum
+            n_sum + n_comp
         )
     )
     self->perimeter = lambda((\@key (includeSeams nil) (eps nil) "gg")  ; -> float
@@ -123,17 +134,48 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point|nil) - 质心；空区域为 nil
-        let((n_total n_sx n_sy g_c g_p n_a)
+        let((n_total n_totalc n_sx n_sxc n_sy n_syc g_c g_p n_a n_term n_next)
             n_total = 0.0
+            n_totalc = 0.0
             n_sx = 0.0
+            n_sxc = 0.0
             n_sy = 0.0
+            n_syc = 0.0
+            ; 面积、a*x、a*y 三者量级差极大，各自独立做补偿求和
             foreach(g_p self->_data->polygons
                 n_a = g_p->area()
                 g_c = g_p->centroid()
-                n_total = n_total + n_a
-                n_sx = n_sx + n_a * g_c->x()
-                n_sy = n_sy + n_a * g_c->y()
+                n_term = n_a
+                n_next = n_total + n_term
+                if(abs(n_total) >= abs(n_term)
+                then
+                    n_totalc = n_totalc + ((n_total - n_next) + n_term)
+                else
+                    n_totalc = n_totalc + ((n_term - n_next) + n_total)
+                )
+                n_total = n_next
+                n_term = n_a * g_c->x()
+                n_next = n_sx + n_term
+                if(abs(n_sx) >= abs(n_term)
+                then
+                    n_sxc = n_sxc + ((n_sx - n_next) + n_term)
+                else
+                    n_sxc = n_sxc + ((n_term - n_next) + n_sx)
+                )
+                n_sx = n_next
+                n_term = n_a * g_c->y()
+                n_next = n_sy + n_term
+                if(abs(n_sy) >= abs(n_term)
+                then
+                    n_syc = n_syc + ((n_sy - n_next) + n_term)
+                else
+                    n_syc = n_syc + ((n_term - n_next) + n_sy)
+                )
+                n_sy = n_next
             )
+            n_total = n_total + n_totalc
+            n_sx = n_sx + n_sxc
+            n_sy = n_sy + n_syc
             when(n_total > 0.0
                 Point(list(n_sx / n_total n_sy / n_total))
             )
