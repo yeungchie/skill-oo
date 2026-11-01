@@ -6,6 +6,9 @@ addToNamespace("ycPathLib"
         ; path.il
         Path  ; proc, class
         PathData  ; class
+        _PathCache  ; var
+        _PathCacheCap  ; var
+        _PathCacheN  ; var
         Cwd  ; proc
         Home  ; proc
         CurrentFile  ; proc
