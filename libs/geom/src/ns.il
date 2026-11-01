@@ -30,10 +30,12 @@ addToNamespace("ycGeom"
         ; route.il
         Route  ; proc, class
         RouteData  ; class
+        _InstallRoute  ; proc
 
         ; path.il
         Path  ; proc, class
         PathData  ; class
+        _InstallPath  ; proc
 
         ; polygon.il
         Polygon  ; proc, class
@@ -52,6 +54,7 @@ addToNamespace("ycGeom"
         _Eps  ; proc
         _AngleTol  ; proc
         _Grid  ; proc
+        _SnapRound  ; proc
         _Snap  ; proc
         _Near  ; proc
         _Nth1  ; proc
