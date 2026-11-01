@@ -7,14 +7,14 @@ ycNamespace:::Require("ycCodec")
 
 useNamespace("ycToml")
 
-procedure(_AssignValue(t_s t_meta l_base t_obj l_path g_val n_pos n_max "tglglgxx")  ; -> t
+procedure(_AssignValue(t_s g_meta l_base g_obj l_path g_val n_pos n_max "tglglgxx")  ; -> t
     ; 将点分键值写入当前表；自动创建中间表并检测重复/冲突。
     ;
     ; **参数**
     ;   t_s      (str) - 输入串（错误定位）
-    ;   t_meta   (table) - 路径元数据表
+    ;   g_meta   (table) - 路径元数据表
     ;   l_base   (list) - 当前表的规范路径
-    ;   t_obj    (table) - 当前表
+    ;   g_obj    (table) - 当前表
     ;   l_path   (list[str]) - 点分键路径
     ;   g_val    (any) - 待写入值
     ;   n_pos    (int) - 键起始位置
@@ -33,22 +33,22 @@ procedure(_AssignValue(t_s t_meta l_base t_obj l_path g_val n_pos n_max "tglglgx
             n_i++
             if(n_i < n_n
             then
-                if(!_HasKey(t_obj t_key)
+                if(!_HasKey(g_obj t_key)
                 then
                     t_tab = _NewTable()
-                    t_obj[t_key] = t_tab
-                    _MetaSet(t_meta append1(l_cur t_key) "dotted")
+                    g_obj[t_key] = t_tab
+                    _MetaSet(g_meta append1(l_cur t_key) "dotted")
                     l_cur = append1(l_cur t_key)
-                    t_obj = t_tab
+                    g_obj = t_tab
                 else
-                    g_next = t_obj[t_key]
+                    g_next = g_obj[t_key]
                     when(listp(g_next)
                         _Error(t_s n_pos "key path crosses an array")
                     )
                     unless(tablep(g_next)
                         _Error(t_s n_pos "key path crosses a value")
                     )
-                    t_kind = _MetaGet(t_meta append1(l_cur t_key))
+                    t_kind = _MetaGet(g_meta append1(l_cur t_key))
                     when(t_kind == "inline"
                         _Error(t_s n_pos "cannot extend an inline table")
                     )
@@ -56,27 +56,27 @@ procedure(_AssignValue(t_s t_meta l_base t_obj l_path g_val n_pos n_max "tglglgx
                         _Error(t_s n_pos "key path crosses an array")
                     )
                     l_cur = append1(l_cur t_key)
-                    t_obj = g_next
+                    g_obj = g_next
                 )
             else
-                when(_HasKey(t_obj t_key)
+                when(_HasKey(g_obj t_key)
                     _Error(t_s n_pos "duplicate key")
                 )
-                t_obj[t_key] = g_val
-                _MarkInline(t_meta append1(l_cur t_key) g_val)
+                g_obj[t_key] = g_val
+                _MarkInline(g_meta append1(l_cur t_key) g_val)
             )
         )
         t
     )
 )
 
-procedure(_HeaderTarget(t_s t_root t_meta l_path n_pos g_array n_max "tgglxgx")  ; -> list
+procedure(_HeaderTarget(t_s g_root g_meta l_path n_pos g_array n_max "tgglxgx")  ; -> list
     ; 按表头路径定位目标表；普通表头与表数组分别处理。
     ;
     ; **参数**
     ;   t_s      (str) - 输入串
-    ;   t_root   (table) - 文档根表
-    ;   t_meta   (table) - 路径元数据表
+    ;   g_root   (table) - 文档根表
+    ;   g_meta   (table) - 路径元数据表
     ;   l_path   (list[str]) - 表头键路径
     ;   n_pos    (int) - 表头起始位置
     ;   g_array  (t|nil) - t 时为 [[...]]
@@ -90,7 +90,7 @@ procedure(_HeaderTarget(t_s t_root t_meta l_path n_pos g_array n_max "tgglxgx") 
         )
         n_n = length(l_path)
         n_i = 0
-        t_obj = t_root
+        t_obj = g_root
         l_cur = nil
         foreach(t_key l_path
             n_i++
@@ -102,13 +102,13 @@ procedure(_HeaderTarget(t_s t_root t_meta l_path n_pos g_array n_max "tgglxgx") 
                 then
                     t_tab = _NewTable()
                     t_obj[t_key] = t_tab
-                    _MetaSet(t_meta append1(l_cur t_key) "implicit")
+                    _MetaSet(g_meta append1(l_cur t_key) "implicit")
                     l_cur = append1(l_cur t_key)
                     t_obj = t_tab
                 else
                     if(listp(g_val)
                     then
-                        t_kind = _MetaGet(t_meta append1(l_cur t_key))
+                        t_kind = _MetaGet(g_meta append1(l_cur t_key))
                         unless(t_kind == "array" && length(g_val) > 0
                             _Error(t_s n_pos "key path is not a table")
                         )
@@ -119,7 +119,7 @@ procedure(_HeaderTarget(t_s t_root t_meta l_path n_pos g_array n_max "tgglxgx") 
                         unless(tablep(g_val)
                             _Error(t_s n_pos "key path is not a table")
                         )
-                        t_kind = _MetaGet(t_meta append1(l_cur t_key))
+                        t_kind = _MetaGet(g_meta append1(l_cur t_key))
                         when(t_kind == "inline"
                             _Error(t_s n_pos "cannot extend an inline table")
                         )
@@ -136,21 +136,21 @@ procedure(_HeaderTarget(t_s t_root t_meta l_path n_pos g_array n_max "tgglxgx") 
                     then
                         t_tab = _NewTable()
                         t_obj[t_key] = list(t_tab)
-                        _MetaSet(t_meta append1(l_cur t_key) "array")
-                        _MetaSet(t_meta append1(append1(l_cur t_key) 1) "explicit")
+                        _MetaSet(g_meta append1(l_cur t_key) "array")
+                        _MetaSet(g_meta append1(append1(l_cur t_key) 1) "explicit")
                         l_cur = append1(append1(l_cur t_key) 1)
                         t_obj = t_tab
                     else
                         if(listp(g_val)
                         then
-                            t_kind = _MetaGet(t_meta append1(l_cur t_key))
+                            t_kind = _MetaGet(g_meta append1(l_cur t_key))
                             unless(t_kind == "array"
                                 _Error(t_s n_pos "key is not an array of tables")
                             )
                             t_tab = _NewTable()
                             t_obj[t_key] = append1(g_val t_tab)
                             n_last = length(t_obj[t_key])
-                            _MetaSet(t_meta append1(append1(l_cur t_key) n_last) "explicit")
+                            _MetaSet(g_meta append1(append1(l_cur t_key) n_last) "explicit")
                             l_cur = append1(append1(l_cur t_key) n_last)
                             t_obj = t_tab
                         else
@@ -161,17 +161,17 @@ procedure(_HeaderTarget(t_s t_root t_meta l_path n_pos g_array n_max "tgglxgx") 
                     then
                         t_tab = _NewTable()
                         t_obj[t_key] = t_tab
-                        _MetaSet(t_meta append1(l_cur t_key) "explicit")
+                        _MetaSet(g_meta append1(l_cur t_key) "explicit")
                         l_cur = append1(l_cur t_key)
                         t_obj = t_tab
                     else
                         unless(tablep(g_val)
                             _Error(t_s n_pos "key is not a table")
                         )
-                        t_kind = _MetaGet(t_meta append1(l_cur t_key))
+                        t_kind = _MetaGet(g_meta append1(l_cur t_key))
                         cond(
                             (t_kind == "implicit"
-                                _MetaSet(t_meta append1(l_cur t_key) "explicit")
+                                _MetaSet(g_meta append1(l_cur t_key) "explicit")
                             )
                             (t_kind == "explicit"
                                 _Error(t_s n_pos "table already defined")

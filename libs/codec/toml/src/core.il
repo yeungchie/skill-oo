@@ -221,30 +221,30 @@ procedure(_MetaNew()  ; -> table
     makeTable("ycTomlMeta" nil)
 )
 
-procedure(_MetaSet(t_meta l_path t_kind "glt")  ; -> t
+procedure(_MetaSet(g_meta l_path t_kind "glt")  ; -> t
     ; 写入路径的元数据种类。
     ;
     ; **参数**
-    ;   t_meta  (table) - 元数据表
+    ;   g_meta  (table) - 元数据表
     ;   l_path  (list) - 路径
     ;   t_kind  (str) - implicit/explicit/dotted/inline/array
     ;
     ; **返回**
     ;   (t) - 写入成功
-    t_meta[_PathKey(l_path)] = t_kind
+    g_meta[_PathKey(l_path)] = t_kind
     t
 )
 
-procedure(_MetaGet(t_meta l_path "gl")  ; -> str | nil
+procedure(_MetaGet(g_meta l_path "gl")  ; -> str | nil
     ; 读取路径的元数据种类。
     ;
     ; **参数**
-    ;   t_meta  (table) - 元数据表
+    ;   g_meta  (table) - 元数据表
     ;   l_path  (list) - 路径
     ;
     ; **返回**
     ;   (str|nil) - 种类；未登记时为 nil
-    t_meta[_PathKey(l_path)]
+    g_meta[_PathKey(l_path)]
 )
 
 procedure(_NewTable()  ; -> table
@@ -255,16 +255,16 @@ procedure(_NewTable()  ; -> table
     makeTable("ycTomlTable" ycCodec:::Missing)
 )
 
-procedure(_HasKey(t_obj t_key "gt")  ; -> t | nil
+procedure(_HasKey(g_obj t_key "gt")  ; -> t | nil
     ; 判断表是否已有该键；缺省哨兵不算存在。
     ;
     ; **参数**
-    ;   t_obj  (table) - 目标表
+    ;   g_obj  (table) - 目标表
     ;   t_key  (str) - 键名
     ;
     ; **返回**
     ;   (t|nil) - 存在时为 t
-    t_obj[t_key] != ycCodec:::Missing
+    g_obj[t_key] != ycCodec:::Missing
 )
 
 procedure(_IsTableList(g_val "g")  ; -> t | nil
@@ -288,11 +288,11 @@ procedure(_IsTableList(g_val "g")  ; -> t | nil
     )
 )
 
-procedure(_MarkInline(t_meta l_path g_val "glg")  ; -> t
+procedure(_MarkInline(g_meta l_path g_val "glg")  ; -> t
     ; 把内联表及其嵌套表递归标记为 inline，禁止后续继续扩展。
     ;
     ; **参数**
-    ;   t_meta  (table) - 元数据表
+    ;   g_meta  (table) - 元数据表
     ;   l_path  (list) - 当前路径
     ;   g_val   (any) - 值
     ;
@@ -300,9 +300,9 @@ procedure(_MarkInline(t_meta l_path g_val "glg")  ; -> t
     ;   (t) - 标记完成
     cond(
         (tablep(g_val)
-            _MetaSet(t_meta l_path "inline")
+            _MetaSet(g_meta l_path "inline")
             foreach(t_key g_val
-                _MarkInline(t_meta append1(l_path t_key) g_val[t_key])
+                _MarkInline(g_meta append1(l_path t_key) g_val[t_key])
             )
         )
         (listp(g_val)
@@ -310,7 +310,7 @@ procedure(_MarkInline(t_meta l_path g_val "glg")  ; -> t
                 n_i = 0
                 foreach(g_item g_val
                     n_i++
-                    _MarkInline(t_meta append1(l_path n_i) g_item)
+                    _MarkInline(g_meta append1(l_path n_i) g_item)
                 )
             )
         )
