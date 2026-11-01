@@ -417,6 +417,52 @@ let((g_out g_in g_res g_poly)
     _Assert(g_poly->toPath() == nil  "polygon: non-offset ring not a stroke")
 )
 
+; 大坐标偏移下 toPath 的容差必须随坐标量级放大
+let((n_rad n_cos n_sin l_acc g_src g_poly g_back g_tri)
+    n_rad = 37.0 * 3.14159265358979323846 / 180.0
+    n_cos = cos(n_rad)
+    n_sin = sin(n_rad)
+    foreach(l_p list(list(0.0 0.0) list(10.0 0.0) list(10.0 10.0))
+        l_acc = tconc(l_acc list(
+            n_cos * car(l_p) - n_sin * cadr(l_p) + 5.0e6
+            n_sin * car(l_p) + n_cos * cadr(l_p) + 5.0e6
+        ))
+    )
+    g_src = ycGeom::Path(car(l_acc) ?width 2)
+    g_poly = car(g_src->toRegion()->polygons())
+    g_back = g_poly->toPath()
+    _Assert(g_back  "polygon: open stroke toPath at 5e6 offset")
+    ; 用 && 短路而不是 when 包裹：断言数固定，失败时不会连带少跑用例
+    _Assert(g_back && abs(g_back->width() - 2.0) <= 1e-8
+        "polygon: large offset stroke width")
+    _Assert(g_back && g_poly->xor(g_back->toRegion())->area() <= 1e-6
+        "polygon: large offset stroke roundtrip")
+    ; 同量级下非描边图形必须仍然返回 nil
+    g_tri = ycGeom::Polygon(list(
+        ycGeom::Point(list(5.0e6 5.0e6))
+        ycGeom::Point(list(5.0e6 + 10.0 5.0e6))
+        ycGeom::Point(list(5.0e6 5.0e6 + 10.0))
+    ))
+    _Assert(g_tri->toPath() == nil  "polygon: triangle at 5e6 not a stroke")
+)
+
+; 闭合描边环走的是 _PolyToPathRing 分支，失效门槛比开放描边更高
+let((n_rad n_cos n_sin l_acc g_poly g_back)
+    n_rad = 37.0 * 3.14159265358979323846 / 180.0
+    n_cos = cos(n_rad)
+    n_sin = sin(n_rad)
+    foreach(l_p list(list(0.0 0.0) list(10.0 0.0)
+                     list(10.0 10.0) list(0.0 10.0) list(0.0 0.0))
+        l_acc = tconc(l_acc list(
+            n_cos * car(l_p) - n_sin * cadr(l_p) + 1.0e8
+            n_sin * car(l_p) + n_cos * cadr(l_p) + 1.0e8
+        ))
+    )
+    g_poly = car(ycGeom::Path(car(l_acc) ?width 2)->toRegion()->polygons())
+    g_back = g_poly->toPath()
+    _Assert(g_back  "polygon: closed ring toPath at 1e8 offset")
+)
+
 _TestPolygonDone = t
 
 ; END

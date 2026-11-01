@@ -443,8 +443,16 @@ procedure(_InstallPolygonToPath(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Path|nil) - 描边区域与原多边形重合的路径；无法还原 nil
-        let((n_eps g_horiz l_rings g_path)
+        let((n_eps g_horiz l_rings g_path n_mag)
             n_eps = _Eps(eps)
+            ; 逆推宽度由坐标差得出，绝对误差随坐标量级增长（≈ ulp(坐标)）；
+            ; 与 _CanonRing 的 _canonScale 一致地把容差下限抬到量级相关值，
+            ; 否则大偏移处两次垂距测量之差的符号会翻转，配对失败返回 nil。
+            n_mag = 0.0
+            foreach(l_p self->toSkill()
+                n_mag = max(n_mag abs(car(l_p)) abs(cadr(l_p)))
+            )
+            n_eps = max(n_eps 1e-15 * n_mag)
             cond(
                 ((orient == 'horizontal || orient == 'h)
                     g_horiz = t)
