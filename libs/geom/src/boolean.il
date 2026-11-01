@@ -815,24 +815,24 @@ procedure(_BuildPolygons(l_groups n_grid n_eps "lgg")  ; -> list[Polygon]
     )
 )
 
-procedure(Boolean(l_a l_b g_op \@key (grid nil) (eps nil) "llggg")  ; -> list | nil
+procedure(Boolean(g_op l_a l_b \@key (grid nil) (eps nil) "gllgg")  ; -> list | nil
     ; 纯数据布尔运算：两侧输入与结果都是 toSkill() 形式的点列。
     ;
-    ; 与类方法同一引擎与同一结果契约，只是不做对象包装：
-    ; 输入接受单个多边形的点列、两点矩形对角、或点列列表（Region 形式），
-    ; 输出固定为 Region->toSkill() 形式（每个多边形一个点列，空结果为 nil）。
-    ; 带宽度对象（Path）没有点列形式，需先 ->toRegion()->toSkill() 再参与运算。
+    ; 运算名在首位。操作数若是点列列表（Region 形式），其成员先按 or 合并成
+    ; 一个整体再参与运算，因此成员重叠不会退化成奇偶规则。
+    ; l_b 传 nil 表示 B 为空集：or 时结果就是 l_a 自身求并。
+    ; 带宽度对象没有点列形式，Path 需先 ->toRegion()->toSkill()。
     ;
     ; **参数**
-    ;   l_a    (list)       - A 的点列：单个多边形、两点矩形对角、或点列列表
-    ;   l_b    (list)       - B，同上
-    ;   g_op   (sym)        - or / and / not / xor
-    ;   ?grid  (num|nil)    - 网格；默认 nil
-    ;   ?eps   (num|nil)    - 容差；默认 nil（1e-9）
+    ;   g_op    (sym)       - or / and / not / xor
+    ;   l_a     (list)      - A 的点列：单个多边形、两点矩形对角、或点列列表
+    ;   l_b     (list)      - B，同上；nil 表示空集（or 时即只对 A 求并）
+    ;   ?grid   (num|nil)   - 网格；默认 nil
+    ;   ?eps    (num|nil)   - 容差；默认 nil（1e-9）
     ;
     ; **返回**
     ;   (list|nil) - 结果点列列表；空结果为 nil
-    let((op polys)
+    let((op a b polys)
         op = case(g_op
             (or     'union)
             (and    'intersection)
@@ -842,7 +842,9 @@ procedure(Boolean(l_a l_b g_op \@key (grid nil) (eps nil) "llggg")  ; -> list | 
                 error("ycGeom::Boolean: unknown operation %A; expected or, and, not, or xor" g_op)
             )
         )
-        polys = _ShapePolys(l_a l_b op grid eps "ycGeom::Boolean")
+        a = _UnionAll(_AsPolygons(l_a "ycGeom::Boolean") grid eps)
+        b = _UnionAll(_AsPolygons(l_b "ycGeom::Boolean") grid eps)
+        polys = _ShapePolys(a b op grid eps "ycGeom::Boolean")
         foreach(mapcar x polys x->toSkill())
     )
 )

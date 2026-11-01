@@ -209,17 +209,17 @@ _Assert(ycGeom::_PointInRing(
     "point: point-in-ring boundary is deterministic")
 
 let((l_a l_b l_r g_poly)
-    ; 纯数据入口：单多边形点列（Polygon->toSkill() 形式）
+    ; 纯数据入口：单多边形点列（Polygon->toSkill() 形式），运算名在首位
     l_a = '((0.0 0.0) (4.0 0.0) (4.0 4.0) (0.0 4.0))
     l_b = '((2.0 2.0) (6.0 2.0) (6.0 6.0) (2.0 6.0))
-    l_r = ycGeom::Boolean(l_a l_b 'or)
+    l_r = ycGeom::Boolean('or l_a l_b)
     _Assert(ycGeom::Region(l_r)->area() == 28.0
         "boolean: native or area")
-    _Assert(ycGeom::Region(ycGeom::Boolean(l_a l_b 'and))->area() == 4.0
+    _Assert(ycGeom::Region(ycGeom::Boolean('and l_a l_b))->area() == 4.0
         "boolean: native and area")
-    _Assert(ycGeom::Region(ycGeom::Boolean(l_a l_b 'not))->area() == 12.0
+    _Assert(ycGeom::Region(ycGeom::Boolean('not l_a l_b))->area() == 12.0
         "boolean: native not area")
-    _Assert(ycGeom::Region(ycGeom::Boolean(l_a l_b 'xor))->area() == 24.0
+    _Assert(ycGeom::Region(ycGeom::Boolean('xor l_a l_b))->area() == 24.0
         "boolean: native xor area")
     ; 结果形态固定为 Region->toSkill()：点列列表，可直接回构 Polygon
     _Assert(length(l_r) == 1 && listp(car(l_r)) && listp(car(car(l_r)))
@@ -234,41 +234,67 @@ let((l_a l_b l_r)
     l_a = '(((0.0 0.0) (2.0 0.0) (2.0 2.0) (0.0 2.0))
            ((10.0 0.0) (12.0 0.0) (12.0 2.0) (10.0 2.0)))
     l_b = '((1.0 0.0) (11.0 0.0) (11.0 2.0) (1.0 2.0))
-    l_r = ycGeom::Boolean(l_a l_b 'or)
+    l_r = ycGeom::Boolean('or l_a l_b)
     _Assert(length(l_r) == 1
         "boolean: native region input merges to one polygon")
     _Assert(abs(ycGeom::Region(l_r)->area() - 24.0) <= 1e-9
         "boolean: native region input area")
 )
 
+let((l_a l_b l_r)
+    ; Region 成员先按 or 合并：两个重叠方块整体面积 28，不与奇偶规则纠缠
+    l_a = '(((0.0 0.0) (4.0 0.0) (4.0 4.0) (0.0 4.0))
+           ((2.0 2.0) (6.0 2.0) (6.0 6.0) (2.0 6.0)))
+    l_b = '((-1.0 -1.0) (7.0 -1.0) (7.0 7.0) (-1.0 7.0))
+    l_r = ycGeom::Boolean('and l_a l_b)
+    _Assert(length(l_r) == 1
+        "boolean: native operands are unioned before the op")
+    _Assert(abs(ycGeom::Region(l_r)->area() - 28.0) <= 1e-9
+        "boolean: native merged operand area")
+)
+
+let((l_a l_r)
+    ; l_b 传 nil 表示空集：or 时结果就是 l_a 自身求并
+    l_a = '(((0.0 0.0) (4.0 0.0) (4.0 4.0) (0.0 4.0))
+           ((2.0 2.0) (6.0 2.0) (6.0 6.0) (2.0 6.0)))
+    l_r = ycGeom::Boolean('or l_a nil)
+    _Assert(length(l_r) == 1
+        "boolean: native or with nil l_b merges overlap")
+    _Assert(abs(ycGeom::Region(l_r)->area() - 28.0) <= 1e-9
+        "boolean: native or with nil l_b area")
+    _Assert(ycGeom::Boolean('and l_a nil) == nil
+        "boolean: native and with nil l_b is empty")
+    _Assert(abs(ycGeom::Region(ycGeom::Boolean('not l_a nil))->area() - 28.0) <= 1e-9
+        "boolean: native not with nil l_b keeps l_a")
+)
+
 let((l_r)
     ; 两点矩形对角（Rect->toSkill() 形式）输入
-    l_r = ycGeom::Boolean('((0.0 0.0) (4.0 4.0))
-        '((2.0 2.0) (6.0 6.0)) 'and)
+    l_r = ycGeom::Boolean('and '((0.0 0.0) (4.0 4.0)) '((2.0 2.0) (6.0 6.0)))
     _Assert(abs(ycGeom::Region(l_r)->area() - 4.0) <= 1e-9
         "boolean: native rect diagonal input")
 )
 
-_Assert(ycGeom::Boolean(
+_Assert(ycGeom::Boolean('and
     '((0.0 0.0) (1.0 0.0) (1.0 1.0))
-    '((5.0 5.0) (6.0 5.0) (6.0 6.0)) 'and) == nil
+    '((5.0 5.0) (6.0 5.0) (6.0 6.0))) == nil
     "boolean: native empty result is nil")
 
-_Assert(abs(ycGeom::Region(ycGeom::Boolean(nil
-        '((2.0 2.0) (6.0 2.0) (6.0 6.0) (2.0 6.0)) 'or))->area() - 16.0) <= 1e-9
+_Assert(abs(ycGeom::Region(ycGeom::Boolean('or nil
+        '((2.0 2.0) (6.0 2.0) (6.0 6.0) (2.0 6.0))))->area() - 16.0) <= 1e-9
     "boolean: native nil operand passes the other side")
 
-_Assert(abs(ycGeom::Region(ycGeom::Boolean(
+_Assert(abs(ycGeom::Region(ycGeom::Boolean('or
         '((0.0 0.0) (4.0 0.0) (4.0 4.0) (0.0 4.0))
-        '((2.0 2.0) (6.0 2.0) (6.0 6.0) (2.0 6.0)) 'or
+        '((2.0 2.0) (6.0 2.0) (6.0 6.0) (2.0 6.0))
         ?grid 0.5 ?eps 1e-6))->area() - 28.0) <= 1e-6
     "boolean: native accepts grid and eps options")
 
 let((g_path l_r)
     ; 带宽度对象没有点列形式：Path 走 toRegion()->toSkill() 后参与运算
     g_path = ycGeom::Path('((0.0 0.0) (10.0 0.0)) ?width 2.0)
-    l_r = ycGeom::Boolean(g_path->toRegion()->toSkill()
-        '((0.0 -1.0) (1.0 -1.0) (1.0 1.0) (0.0 1.0)) 'and)
+    l_r = ycGeom::Boolean('and g_path->toRegion()->toSkill()
+        '((0.0 -1.0) (1.0 -1.0) (1.0 1.0) (0.0 1.0)))
     _Assert(abs(ycGeom::Region(l_r)->area() - 2.0) <= 1e-9
         "boolean: path region participates")
 )
@@ -276,16 +302,16 @@ let((g_path l_r)
 let((l_a l_b)
     l_a = '((0.0 0.0) (4.0 0.0) (4.0 4.0) (0.0 4.0))
     l_b = '((2.0 2.0) (6.0 2.0) (6.0 6.0) (2.0 6.0))
-    _AssertError(lambda(() ycGeom::Boolean(l_a l_b 'union))
+    _AssertError(lambda(() ycGeom::Boolean('union l_a l_b))
         "boolean: native rejects union spelling")
-    _AssertErrorMsg(lambda(() ycGeom::Boolean(l_a l_b 'union))
+    _AssertErrorMsg(lambda(() ycGeom::Boolean('union l_a l_b))
         "unknown operation" "boolean: native reports unknown operation")
-    _AssertError(lambda(() ycGeom::Boolean("abc" l_b 'or))
+    _AssertError(lambda(() ycGeom::Boolean('or "abc" l_b))
         "boolean: native rejects string operand")
-    _AssertError(lambda(() ycGeom::Boolean(l_a 42 'or))
+    _AssertError(lambda(() ycGeom::Boolean('or l_a 42))
         "boolean: native rejects number operand")
-    _AssertError(lambda(() ycGeom::Boolean(
-            '((0.0 0.0) (1.0 0.0) ("x" 1.0)) l_b 'or))
+    _AssertError(lambda(() ycGeom::Boolean('or
+            '((0.0 0.0) (1.0 0.0) ("x" 1.0)) l_b))
         "boolean: native rejects malformed point array")
 )
 
