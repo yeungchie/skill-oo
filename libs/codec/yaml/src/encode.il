@@ -155,24 +155,24 @@ procedure(_EncodeKey(g_key g_opt "gg")  ; -> str
     )
 )
 
-procedure(_NumText(g_n "n")  ; -> str
+procedure(_NumText(n_num "n")  ; -> str
     ; 输出 YAML 数字文本；非有限浮点输出 .inf/-.inf/.nan。
     ;
     ; **参数**
-    ;   g_n  (num) - fixnum 或 flonum
+    ;   n_num  (num) - fixnum 或 flonum
     ;
     ; **返回**
     ;   (str) - 数字文本
-    if(fixp(g_n)
-        sprintf(nil "%d" g_n)
+    if(fixp(n_num)
+        sprintf(nil "%d" n_num)
         cond(
-            (isNaN(g_n) ".nan")
-            (isInfinity(g_n) if(g_n > 0 ".inf" "-.inf"))
+            (isNaN(n_num) ".nan")
+            (isInfinity(n_num) if(n_num > 0 ".inf" "-.inf"))
             (t
                 let((t_s)
-                    t_s = sprintf(nil "%.15g" g_n)
-                    unless(atof(t_s) == g_n
-                        t_s = sprintf(nil "%.17g" g_n)
+                    t_s = sprintf(nil "%.15g" n_num)
+                    unless(atof(t_s) == n_num
+                        t_s = sprintf(nil "%.17g" n_num)
                     )
                     unless(pcreMatchp("[.eE]" t_s)
                         t_s = strcat(t_s ".0")

@@ -61,11 +61,11 @@ procedure(_FindKeyColon(t_s "t")  ; -> int | nil
         return(nil)
     )
 )
-procedure(_MergeInto(t_map g_src "gg")  ; -> t
+procedure(_MergeInto(g_map g_src "gg")  ; -> t
     ; 将源映射中当前表缺少的键并入（显式键优先）。
     ;
     ; **参数**
-    ;   t_map  (table) - 目标映射
+    ;   g_map  (table) - 目标映射
     ;   g_src  (table|list) - 源映射或映射列表
     ;
     ; **返回**
@@ -75,8 +75,8 @@ procedure(_MergeInto(t_map g_src "gg")  ; -> t
             error("ycYaml::Decode: merge value must be a mapping or a sequence of mappings")
         )
         foreach(g_key g_item
-            when(t_map[g_key] == ycCodec:::Missing
-                t_map[g_key] = g_item[g_key]
+            when(g_map[g_key] == ycCodec:::Missing
+                g_map[g_key] = g_item[g_key]
             )
         )
     )
@@ -208,16 +208,16 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
         return(list(g_val cadr(l_v)))
     )
 )
-procedure(_ParseMapInto(t_map l_lines n_pos n_indent n_max t_first n_line n_col "glxnngnn")  ; -> list
-    ; 解析映射条目并写入目标 table；t_first 用于序列内联映射的首条。
+procedure(_ParseMapInto(g_map l_lines n_pos n_indent n_max g_inline n_line n_col "glxnngnn")  ; -> list
+    ; 解析映射条目并写入目标 table；g_inline 用于序列内联映射的首条。
     ;
     ; **参数**
-    ;   t_map    (table) - 目标映射
+    ;   g_map    (table) - 目标映射
     ;   l_lines  (list[str]) - 行列表
     ;   n_pos    (int) - 下一行号
     ;   n_indent (int) - 映射缩进
     ;   n_max    (int) - 最大嵌套深度
-    ;   t_first  (str|nil) - 内联首条文本
+    ;   g_inline (str|nil) - 内联首条文本
     ;   n_line   (int) - 首条行号
     ;   n_col    (int) - 首条列号
     ;
@@ -225,7 +225,7 @@ procedure(_ParseMapInto(t_map l_lines n_pos n_indent n_max t_first n_line n_col 
     ;   (list) - (table 下一行号)
     let((n_len t_line t_content n_ind n_colon t_key t_rest l_v g_key g_first g_stop)
         n_len = length(l_lines)
-        g_first = t_first
+        g_first = g_inline
         g_stop = nil
         while(!g_stop && (g_first || n_pos <= n_len)
             t_content = nil
@@ -270,15 +270,15 @@ procedure(_ParseMapInto(t_map l_lines n_pos n_indent n_max t_first n_line n_col 
                 n_pos = cadr(l_v)
                 cond(
                     (t_key == "<<" && (tablep(car(l_v)) || listp(car(l_v)))
-                        _MergeInto(t_map car(l_v))
+                        _MergeInto(g_map car(l_v))
                     )
                     (t
-                        t_map[t_key] = car(l_v)
+                        g_map[t_key] = car(l_v)
                     )
                 )
             )
         )
-        list(t_map n_pos)
+        list(g_map n_pos)
     )
 )
 procedure(_ParseMap(l_lines n_pos n_indent n_max "lxnn")  ; -> list
