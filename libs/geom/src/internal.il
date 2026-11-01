@@ -11,7 +11,7 @@ procedure(_Eps(g_eps "g")  ; -> float
     cond(
         (g_eps == nil 1e-9)
         (numberp(g_eps) && g_eps > 0.0 float(g_eps))
-        (t error("ycGeom::_Eps: ?eps must be a positive number, got %A" g_eps))
+        (t error("ycGeom: ?eps must be a positive number, got %A" g_eps))
     )
 )
 
@@ -34,7 +34,7 @@ procedure(_Grid(g_grid "g")  ; -> float | nil
     cond(
         (g_grid == nil nil)
         (numberp(g_grid) && g_grid > 0.0 float(g_grid))
-        (t error("ycGeom::_Grid: ?grid must be a positive number, got %A" g_grid))
+        (t error("ycGeom: ?grid must be a positive number, got %A" g_grid))
     )
 )
 
