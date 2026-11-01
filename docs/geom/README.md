@@ -2,7 +2,7 @@
 
 [返回首页](../../README.md)
 
-Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole 多边形、区域布尔运算，以及带宽度描边的 Route 与 Path。
+Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole 多边形、区域布尔运算，以及折线 `Route` 与带宽度描边的 `Path`。
 
 ## 概要
 
@@ -21,7 +21,7 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole �
 
 ![ycGeom 基础对象概览](img/overview.svg)
 
-*图中为点、线段、直线、矩形、多边形与区域；带宽度描边的 `Route` 与 `Path` 见 API 参考。*
+*图中为点、线段、直线、矩形、多边形与区域；`Route` 与 `Path` 见 API 参考。*
 
 ## 快速上手
 

@@ -439,7 +439,7 @@ procedure(_InstallPolygonToPath(self "g")  ; -> t
         ;
         ; **参数**
         ;   ?orient  (sym)     - horizontal/h 或 vertical/v；默认 horizontal
-        ;   ?eps     (num|nil) - 容差；默认 nil（1e-9）
+        ;   ?eps     (num|nil) - 容差下限，实际比较值随坐标量级放大；默认 nil（1e-9）
         ;
         ; **返回**
         ;   (Path|nil) - 描边区域与原多边形重合的路径；无法还原 nil
