@@ -7,6 +7,8 @@ addToNamespace("ycCsv"
         Table  ; proc, class
         TableData  ; class
         _Missing  ; proc
+        _InstallRender  ; proc
+        _RenderRows  ; proc
         _MaxWidth  ; proc
 
         ; decode.il

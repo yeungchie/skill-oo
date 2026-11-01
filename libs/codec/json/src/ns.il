@@ -41,6 +41,7 @@ addToNamespace("ycJson"
         _LineSplit  ; proc
         _LineBlankp  ; proc
         _Newlines  ; proc
+        _DecodeLines  ; proc
     ))
 )
 unuseNamespace("ycJson")

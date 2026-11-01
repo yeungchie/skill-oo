@@ -21,8 +21,13 @@ addToNamespace("ycToml"
         _EncodeString  ; proc
         _EncodeNumber  ; proc
         _EncodeValue  ; proc
+        _EncodeArray  ; proc
         _EncodeTable  ; proc
         _TableKeys  ; proc
+        _EmitHeader  ; proc
+        _EmitElement  ; proc
+        _EmitTable  ; proc
+        _EmitBody  ; proc
 
         ; core.il
         _Code  ; proc
@@ -44,17 +49,21 @@ addToNamespace("ycToml"
         _Utf8Str  ; proc
         _ValidUtf8  ; proc
         _HexVal  ; proc
+        _ContByte  ; proc
 
         ; scalar.il
         _ReadHex  ; proc
         _ParseBasicString  ; proc
         _ParseLiteralString  ; proc
+        _IntValue  ; proc
         _ParseNumber  ; proc
 
         ; datetime.il
         _ReadDigits  ; proc
         _LooksDate  ; proc
         _LooksTime  ; proc
+        _DaysInMonth  ; proc
+        _ParseTimeAt  ; proc
         _ParseDateTime  ; proc
 
         ; key.il
