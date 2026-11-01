@@ -131,6 +131,7 @@ addToNamespace("ycGeom"
         _InResult  ; proc
         _Boolean  ; proc
         _CleanPolygons  ; proc
+        Boolean  ; proc
 
         ; size.il
         _SizeRegion  ; proc

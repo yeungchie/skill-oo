@@ -299,12 +299,7 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Region) - 新区域
-        let((g_o l_res)
-            g_o = _AsRegion(g_other "ycGeom::Region->or")
-            l_res = _Boolean(self->_data->polygons g_o->polygons()
-                'union _Grid(grid) _Eps(eps))
-            Region(_CleanPolygons(l_res _Eps(eps)) ?normalize nil)
-        )
+        _ShapeOp(self g_other 'union grid eps "ycGeom::Region->or")
     )
     self->and = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
         ; 返回交集。
@@ -316,12 +311,7 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Region) - 新区域
-        let((g_o l_res)
-            g_o = _AsRegion(g_other "ycGeom::Region->and")
-            l_res = _Boolean(self->_data->polygons g_o->polygons()
-                'intersection _Grid(grid) _Eps(eps))
-            Region(_CleanPolygons(l_res _Eps(eps)) ?normalize nil)
-        )
+        _ShapeOp(self g_other 'intersection grid eps "ycGeom::Region->and")
     )
     self->not = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
         ; 返回 A-B。
@@ -333,12 +323,7 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Region) - 新区域
-        let((g_o l_res)
-            g_o = _AsRegion(g_other "ycGeom::Region->not")
-            l_res = _Boolean(self->_data->polygons g_o->polygons()
-                'difference _Grid(grid) _Eps(eps))
-            Region(_CleanPolygons(l_res _Eps(eps)) ?normalize nil)
-        )
+        _ShapeOp(self g_other 'difference grid eps "ycGeom::Region->not")
     )
     self->xor = lambda((g_other \@key (grid nil) (eps nil) "ggg")  ; -> Region
         ; 返回对称差。
@@ -350,12 +335,7 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Region) - 新区域
-        let((g_o l_res)
-            g_o = _AsRegion(g_other "ycGeom::Region->xor")
-            l_res = _Boolean(self->_data->polygons g_o->polygons()
-                'xor _Grid(grid) _Eps(eps))
-            Region(_CleanPolygons(l_res _Eps(eps)) ?normalize nil)
-        )
+        _ShapeOp(self g_other 'xor grid eps "ycGeom::Region->xor")
     )
     self->toSkill = lambda(()  ; -> list | nil
         ; 转换为 SKILL 原生区域列表。

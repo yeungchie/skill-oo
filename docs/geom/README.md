@@ -15,6 +15,7 @@ Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole �
 - `ConvertToGeomObject` 统一接收已有图形对象或坐标数组；已有对象按其 `toSkill()` 重建新对象返回，两点数组有歧义时必须用 `?as` 指定类型。
 - 对象按不可变值使用；运算返回新对象，不修改输入。
 - `Polygon`、`Rect`、`Region` 可互相作为布尔运算的右操作数；结果统一为 `Region`。
+- 不想建对象时用 `ycGeom::Boolean()`：两侧与结果都是 `toSkill()` 点列，与同名方法同一引擎、同一结果。
 - 非退化 `Rect` 与 `Polygon` 可通过 `toPolygon()`/`toRect()` 互转；退化 `Rect` 无对应 `Polygon`。
 - `Polygon->removeCollinear()` 可显式获取去除共线点后的多边形。
 - 例程中 `; =>` 表示返回值；所有几何对象都提供 `toSkill()`，输出只含 list 与 float 的原生数据。
@@ -2488,6 +2489,85 @@ ycGeom::ConvertToGeomObject(list(0:0 1:1))
 ; => 以 error() 中断（两点数组有歧义，需指定 ?as）
 ```
 
+### ycGeom::Boolean <sub>`function`</sub>
+
+```text
+ycGeom::Boolean(
+    l_a
+    l_b
+    g_op
+    [ ?grid n_grid ]
+    [ ?eps n_eps ]
+)
+=> list / nil
+```
+
+**描述**
+
+纯数据布尔运算。与 `Polygon`、`Rect`、`Region` 的同名方法共用同一引擎与同一结果，只是不做对象包装：两侧参数都是点列，返回值也是点列，可直接落盘、传出或再交给 `ycGeom::Region()` 回构。输入接受单个多边形的点列、两点矩形对角，以及点列列表（`Region->toSkill()` 形式）；两点按对角矩形解释，三点及以上按多边形解释。带宽度对象没有点列形式，`Path` 需先经 `->toRegion()->toSkill()` 转换。运算类型非法、点列结构非法或参数类型不符时以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| l_a | list | | A 的点列 |
+| l_b | list | | B 的点列，结构要求与 `l_a` 相同 |
+| g_op | sym | | 布尔运算类型 |
+| ?grid n_grid | num / nil | nil | 可选，顶点吸附网格；吸附导致拓扑塌缩时以 `error()` 中断 |
+| ?eps n_eps | num / nil | 1e-9 | 可选，几何容差 |
+
+`g_op` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `'or` | A 与 B 的并集 |
+| `'and` | A 与 B 的交集 |
+| `'not` | A 减去 B |
+| `'xor` | 对称差，即二者各自不被对方覆盖的部分 |
+
+**返回值**
+
+`list / nil` — `Region->toSkill()` 形式：每个结果多边形一个点列；空结果为 `nil`。
+
+**例程**
+
+```lisp
+a = '((0.0 0.0) (4.0 0.0) (4.0 4.0) (0.0 4.0))
+b = '((2.0 2.0) (6.0 2.0) (6.0 6.0) (2.0 6.0))
+
+ycGeom::Boolean(a b 'or)
+; => (((0.0 4.0) (0.0 0.0) (4.0 0.0) (4.0 2.0) (6.0 2.0) (6.0 6.0) (2.0 6.0) (2.0 4.0)))
+
+ycGeom::Boolean(a b 'and)
+; => (((4.0 2.0) (4.0 4.0) (2.0 4.0) (2.0 2.0)))
+
+; 对称差可以返回多块
+ycGeom::Boolean(a b 'xor)
+; => (((0.0 4.0) (0.0 0.0) (4.0 0.0) (4.0 2.0) (2.0 2.0) (2.0 4.0)) ((4.0 4.0) (4.0 2.0) (6.0 2.0) (6.0 6.0) (2.0 6.0) (2.0 4.0)))
+
+; 结果直接回构区域
+ycGeom::Region(ycGeom::Boolean(a b 'and))->area()
+; => 4.0
+
+; 两点矩形对角输入
+ycGeom::Boolean('((0.0 0.0) (4.0 4.0)) '((2.0 2.0) (6.0 6.0)) 'and)
+; => (((4.0 2.0) (4.0 4.0) (2.0 4.0) (2.0 2.0)))
+
+; 不相交时结果为空
+ycGeom::Boolean('((0.0 0.0) (1.0 0.0) (1.0 1.0))
+    '((5.0 5.0) (6.0 5.0) (6.0 6.0)) 'and)
+; => nil
+
+; 带宽度对象先转成区域的点列
+p = ycGeom::Path('((0.0 0.0) (10.0 0.0)) ?width 2.0)
+ycGeom::Boolean(p->toRegion()->toSkill()
+    '((0.0 -1.0) (1.0 -1.0) (1.0 1.0) (0.0 1.0)) 'and)
+; => (((0.0 1.0) (0.0 -1.0) (1.0 -1.0) (1.0 1.0)))
+
+ycGeom::Boolean(a b 'union)
+; *Error* ycGeom::Boolean: unknown operation union; expected or, and, not, or xor
+```
+
 ## 几何约定
 
 ```lisp
@@ -2534,7 +2614,7 @@ hole->perimeter()
 - 默认 `?normalize t` 会把输入合并、裁剪为互不重叠的多边形集合。
 - `?normalize nil` 信任输入已互不重叠，跳过归一化；此时面积按各块面积求和。
 - `?grid` 把输入和输出顶点吸附到网格；吸附导致拓扑塌缩时以 `error()` 中断。
-- `Polygon`、`Rect`、`Region` 可互相参与 `or`/`and`/`not`/`xor`；右操作数也接受点列，结果统一为 `Region`。布尔上下文中的两点列表按对角矩形解释，三点及以上按多边形解释。退化 `Rect`（宽/高为 0 或面积低于按尺度计算的退化阈值）与空 `Region` 按空集处理。
+- `Polygon`、`Rect`、`Region` 可互相参与 `or`/`and`/`not`/`xor`；右操作数也接受点列，结果统一为 `Region`。纯数据场景用 `ycGeom::Boolean()`，参数与结果都是点列。布尔上下文中的两点列表按对角矩形解释，三点及以上按多边形解释。退化 `Rect`（宽/高为 0 或面积低于按尺度计算的退化阈值）与空 `Region` 按空集处理。
 - 默认归一化、布尔与 `size` 输出的多边形均已去除共线中间点；切割边端点保留。
 
 ![区域布尔运算：并、交、差、对称差](img/boolean.svg)

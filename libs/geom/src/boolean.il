@@ -815,6 +815,36 @@ procedure(_BuildPolygons(l_groups n_grid n_eps "lgg")  ; -> list[Polygon]
     )
 )
 
+procedure(Boolean(l_a l_b g_op \@key (grid nil) (eps nil) "llggg")  ; -> list | nil
+    ; 纯数据布尔运算：两侧输入与结果都是 toSkill() 形式的点列。
+    ;
+    ; 与类方法同一引擎与同一结果契约，只是不做对象包装：
+    ; 输入接受单个多边形的点列、两点矩形对角、或点列列表（Region 形式），
+    ; 输出固定为 Region->toSkill() 形式（每个多边形一个点列，空结果为 nil）。
+    ; 带宽度对象（Path）没有点列形式，需先 ->toRegion()->toSkill() 再参与运算。
+    ;
+    ; **参数**
+    ;   l_a    (list)       - A 的点列：单个多边形、两点矩形对角、或点列列表
+    ;   l_b    (list)       - B，同上
+    ;   g_op   (sym)        - or / and / not / xor
+    ;   ?grid  (num|nil)    - 网格；默认 nil
+    ;   ?eps   (num|nil)    - 容差；默认 nil（1e-9）
+    ;
+    ; **返回**
+    ;   (list|nil) - 结果点列列表；空结果为 nil
+    _ShapeOp(l_a l_b
+        cond(
+            (g_op == 'or 'union)
+            (g_op == 'and 'intersection)
+            (g_op == 'not 'difference)
+            (g_op == 'xor 'xor)
+            (t error(
+                "ycGeom::Boolean: unknown operation %A; expected or, and, not, or xor"
+                g_op))
+        )
+        grid eps "ycGeom::Boolean")->toSkill()
+)
+
 unuseNamespace("ycGeom")
 
 ; END
