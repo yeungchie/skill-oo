@@ -96,23 +96,23 @@ procedure(_EncodeString(t_s "t")  ; -> str
     )
 )
 
-procedure(_EncodeNumber(g_n "n")  ; -> str
+procedure(_EncodeNumber(n_num "n")  ; -> str
     ; 数字输出：fixnum 直出；flonum 用 %.15g、不可回环时回退 %.17g，缺小数点/指数时补 .0。
     ;
     ; **参数**
-    ;   g_n  (num) - fixnum 或 flonum
+    ;   n_num  (num) - fixnum 或 flonum
     ;
     ; **返回**
     ;   (str) - JSON 数字文本；inf/nan 报错
-    if(fixp(g_n)
-        sprintf(nil "%d" g_n)
+    if(fixp(n_num)
+        sprintf(nil "%d" n_num)
         let((t_s)
-            when(isNaN(g_n) || isInfinity(g_n)
+            when(isNaN(n_num) || isInfinity(n_num)
                 error("ycJson::Encode: cannot dump non-finite float")
             )
-            t_s = sprintf(nil "%.15g" g_n)
-            unless(atof(t_s) == g_n
-                t_s = sprintf(nil "%.17g" g_n)
+            t_s = sprintf(nil "%.15g" n_num)
+            unless(atof(t_s) == n_num
+                t_s = sprintf(nil "%.17g" n_num)
             )
             unless(pcreMatchp("[.eE]" t_s)
                 t_s = strcat(t_s ".0")
@@ -196,22 +196,22 @@ procedure(_EncodeList(l_arr n_depth g_opt "lxg")  ; -> str
     )
 )
 
-procedure(_EncodeTable(t_obj n_depth g_opt "gxg")  ; -> str
+procedure(_EncodeTable(g_obj n_depth g_opt "gxg")  ; -> str
     ; 输出 table 为 JSON 对象；键限字符串/符号/fixnum，sortKeys 非 nil 时按 alphalessp 排序。
     ;
     ; **参数**
-    ;   t_obj     (table) - 待输出表
+    ;   g_obj     (table) - 待输出表
     ;   n_depth   (int) - 当前嵌套深度
     ;   g_opt     (table) - 编码选项表
     ;
     ; **返回**
     ;   (str) - JSON 对象文本
-    if(length(t_obj) == 0
+    if(length(g_obj) == 0
         "{}"
         let((l_keys t_orig l_strs l_p t_pad t_padIn t_ks n_indent)
             n_indent = g_opt["indent"]
             l_keys = nil
-            foreach(g_k t_obj
+            foreach(g_k g_obj
                 l_keys = tconc(l_keys g_k)
             )
             l_keys = car(l_keys)
@@ -240,11 +240,11 @@ procedure(_EncodeTable(t_obj n_depth g_opt "gxg")  ; -> str
                         lsprintf("%s%s: %s"
                             t_padIn
                             _EncodeString(t_ks)
-                            _EncodeValue(t_obj[t_orig[t_ks]] n_depth + 1 g_opt)
+                            _EncodeValue(g_obj[t_orig[t_ks]] n_depth + 1 g_opt)
                         )
                         lsprintf("%s:%s"
                             _EncodeString(t_ks)
-                            _EncodeValue(t_obj[t_orig[t_ks]] n_depth + 1 g_opt)
+                            _EncodeValue(g_obj[t_orig[t_ks]] n_depth + 1 g_opt)
                         )
                     )
                 )
