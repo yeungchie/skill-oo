@@ -7,12 +7,12 @@ ycNamespace:::Require("ycCodec")
 
 useNamespace("ycIni")
 
-procedure(_EmitScalar(l_p t_obj g_key g_opt t_ctx "lgggt")  ; -> list
+procedure(_EmitScalar(l_p g_obj g_key g_opt t_ctx "lgggt")  ; -> list
     ; 在行容器后追加一个 key = value 行。
     ;
     ; **参数**
     ;   l_p     (list) - tconc 行容器
-    ;   t_obj   (table) - 键所在表
+    ;   g_obj   (table) - 键所在表
     ;   g_key   (any) - 键
     ;   g_opt   (table) - 编码选项
     ;   t_ctx   (str) - 错误前缀
@@ -23,17 +23,17 @@ procedure(_EmitScalar(l_p t_obj g_key g_opt t_ctx "lgggt")  ; -> list
         lsprintf("%s %s %s"
             _KeyText(g_key g_opt)
             g_opt["delimiter"]
-            _ValueText(t_obj[g_key] t_ctx)
+            _ValueText(g_obj[g_key] t_ctx)
         )
     )
 )
 
-procedure(_EmitSection(l_p t_obj g_key g_opt "lggg")  ; -> list
+procedure(_EmitSection(l_p g_obj g_key g_opt "lggg")  ; -> list
     ; 输出一个 INI 段：段头、空行分隔与段内标量键值。
     ;
     ; **参数**
     ;   l_p    (list) - tconc 行容器
-    ;   t_obj  (table) - 根表
+    ;   g_obj  (table) - 根表
     ;   g_key  (any) - 段名键
     ;   g_opt  (table) - 编码选项
     ;
@@ -45,7 +45,7 @@ procedure(_EmitSection(l_p t_obj g_key g_opt "lggg")  ; -> list
             l_p = tconc(l_p "")
         )
         l_p = tconc(l_p lsprintf("[%s]" t_name))
-        t_sec = t_obj[g_key]
+        t_sec = g_obj[g_key]
         l_keys = _TableKeys(t_sec g_opt "section")
         foreach(t_key l_keys
             g_val = t_sec[t_key]

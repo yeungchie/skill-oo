@@ -273,16 +273,16 @@ procedure(_NewTable()  ; -> table
     makeTable("ycIniTable" ycCodec:::Missing)
 )
 
-procedure(_HasKey(t_obj t_key "gt")  ; -> t | nil
+procedure(_HasKey(g_obj t_key "gt")  ; -> t | nil
     ; 判断表是否已有该键；缺省哨兵不算存在。
     ;
     ; **参数**
-    ;   t_obj  (table) - 目标表
+    ;   g_obj  (table) - 目标表
     ;   t_key  (str) - 键名
     ;
     ; **返回**
     ;   (t|nil) - 存在时为 t
-    t_obj[t_key] != ycCodec:::Missing
+    g_obj[t_key] != ycCodec:::Missing
 )
 
 procedure(_KeyText(g_key g_opt "gg")  ; -> str
@@ -380,27 +380,27 @@ procedure(_NameText(g_key g_val g_opt t_mode "gggt")  ; -> str
     )
 )
 
-procedure(_NumText(g_n t_ctx "nt")  ; -> str
+procedure(_NumText(n_num t_ctx "nt")  ; -> str
     ; 把有限数值转为最短可回读文本。
     ;
     ; **参数**
-    ;   g_n    (num) - fixnum 或 flonum
+    ;   n_num    (num) - fixnum 或 flonum
     ;   t_ctx  (str) - 错误前缀
     ;
     ; **返回**
     ;   (str) - 数字文本；inf / nan 报错
     cond(
-        (fixp(g_n)
-            sprintf(nil "%d" g_n)
+        (fixp(n_num)
+            sprintf(nil "%d" n_num)
         )
-        (isNaN(g_n) || isInfinity(g_n)
+        (isNaN(n_num) || isInfinity(n_num)
             error("%s: cannot represent non-finite numbers" t_ctx)
         )
         (t
             let((t_s)
-                t_s = sprintf(nil "%.15g" g_n)
-                unless(atof(t_s) == g_n
-                    t_s = sprintf(nil "%.17g" g_n)
+                t_s = sprintf(nil "%.15g" n_num)
+                unless(atof(t_s) == n_num
+                    t_s = sprintf(nil "%.17g" n_num)
                 )
                 t_s
             )
@@ -451,11 +451,11 @@ procedure(_ValueText(g_val t_ctx "gt")  ; -> str
     )
 )
 
-procedure(_TableKeys(t_obj g_opt t_mode "ggt")  ; -> list
+procedure(_TableKeys(g_obj g_opt t_mode "ggt")  ; -> list
     ; 校验并取出表键；检测字符串化碰撞，并按选项排序。
     ;
     ; **参数**
-    ;   t_obj   (table) - 待处理表
+    ;   g_obj   (table) - 待处理表
     ;   g_opt   (table) - 编码选项
     ;   t_mode  (str) - "root" 或 "section"
     ;
@@ -463,8 +463,8 @@ procedure(_TableKeys(t_obj g_opt t_mode "ggt")  ; -> list
     ;   (list) - 原始键列表；键非法或文本碰撞时报错
     let((t_byText l_texts t_text g_key)
         t_byText = makeTable("ycIniKeys" ycCodec:::Missing)
-        foreach(g_key t_obj
-            t_text = _NameText(g_key t_obj[g_key] g_opt t_mode)
+        foreach(g_key g_obj
+            t_text = _NameText(g_key g_obj[g_key] g_opt t_mode)
             when(t_byText[t_text] != ycCodec:::Missing
                 error("ycIni::Encode: duplicate key %A after string conversion" t_text)
             )
@@ -480,7 +480,7 @@ procedure(_TableKeys(t_obj g_opt t_mode "ggt")  ; -> list
                 foreach(t_text l_texts
                     l_res = tconc(l_res t_byText[t_text])
                 )
-                foreach(g_key t_obj
+                foreach(g_key g_obj
                     l_res = tconc(l_res g_key)
                 )
             )
