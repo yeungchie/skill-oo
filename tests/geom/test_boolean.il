@@ -296,6 +296,20 @@ _Assert(abs(ycGeom::Region(ycGeom::Boolean('or
         ?grid 0.5 ?eps 1e-6))->area() - 28.0) <= 1e-6
     "boolean: native accepts grid and eps options")
 
+let((a b)
+    a = '((0.0 0.0) (4.0 0.0) (4.0 4.0) (0.0 4.0))
+    b = '((2.0 2.0) (6.0 2.0) (6.0 6.0) (2.0 6.0))
+    ; ?grid / ?eps 非 nil 时必须是正数，由 _Grid/_Eps 统一校验
+    _AssertError(lambda(() ycGeom::Boolean('and a b ?grid "0.5"))
+        "boolean: native rejects string grid")
+    _AssertError(lambda(() ycGeom::Boolean('and a b ?grid 0))
+        "boolean: native rejects zero grid")
+    _AssertError(lambda(() ycGeom::Boolean('and a b ?eps "1e-6"))
+        "boolean: native rejects string eps")
+    _AssertErrorMsg(lambda(() ycGeom::Boolean('and a b ?eps -1e-9))
+        "must be a positive number" "boolean: native reports negative eps")
+)
+
 let((g_path l_r)
     ; 带宽度对象没有点列形式：Path 走 toRegion()->toSkill() 后参与运算
     g_path = ycGeom::Path('((0.0 0.0) (10.0 0.0)) ?width 2.0)
