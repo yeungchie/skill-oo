@@ -44,6 +44,7 @@ addToNamespace("ycGeom"
         Polygon  ; proc, class
         PolygonData  ; class
         _CheckPolygon  ; proc
+        _ShapePolys  ; proc
         _ShapeOp  ; proc
         _InstallPolygon  ; proc
 
@@ -77,6 +78,7 @@ addToNamespace("ycGeom"
         _AsLineOrSegment  ; proc
         _AsPolygon  ; proc
         _AsPolygonList  ; proc
+        _AsPolygons  ; proc
         _AsRegion  ; proc
         _GeomKind  ; proc
         _ConvertToGeomObject  ; proc

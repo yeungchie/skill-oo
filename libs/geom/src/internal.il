@@ -499,25 +499,25 @@ procedure(_AsPolygon(g_x t_ctx "gt")  ; -> Polygon
     )
 )
 
-procedure(_AsRegion(g_x t_ctx "gt")  ; -> Region
-    ; 归一化为 Region：接受 Region、Polygon、Rect 或点列。
+procedure(_AsPolygons(g_x t_ctx "gt")  ; -> list[Polygon]
+    ; 归一化为多边形列表：接受 Region、Polygon、Rect、点列或点列列表。
+    ;
+    ; 「任意二维图形 → 多边形列表」只在本函数派发一次：_AsRegion 在其上包一层
+    ; Region，布尔管线 _ShapePolys 直接取用，两处不会各写一份转换逻辑。
     ;
     ; **参数**
     ;   g_x    (any) - 待归一化对象
     ;   t_ctx  (str) - 错误上下文
     ;
     ; **返回**
-    ;   (Region) - 原 Region，或由二维图形/点列构造的 Region；非法时 error
-    let((l_pts g_poly l_res)
+    ;   (list[Polygon]) - 多边形列表；空集 nil；非法时 error
+    let((l_pts l_res g_poly)
         cond(
-            (_RegionP(g_x) g_x)
-            (_PolygonP(g_x) Region(list(g_x) ?normalize nil))
+            (_RegionP(g_x) g_x->polygons())
+            (_PolygonP(g_x) list(g_x))
             (_RectP(g_x)
                 g_poly = _RectPolygon(g_x)
-                if(g_poly
-                    Region(list(g_poly) ?normalize nil)
-                    Region(nil)
-                )
+                when(g_poly list(g_poly))
             )
             (listp(g_x)
                 l_pts = errset(_AsPointList(g_x t_ctx) nil)
@@ -527,14 +527,9 @@ procedure(_AsRegion(g_x t_ctx "gt")  ; -> Region
                         cond(
                             ((length(l_pts) == 2)
                                 g_poly = _RectPolygon(Rect(l_pts))
-                                if(g_poly
-                                    Region(list(g_poly) ?normalize nil)
-                                    Region(nil)
-                                )
+                                when(g_poly list(g_poly))
                             )
-                            ((length(l_pts) >= 3)
-                                Region(list(Polygon(l_pts)) ?normalize nil)
-                            )
+                            ((length(l_pts) >= 3) list(Polygon(l_pts)))
                             (t
                                 error("%s: expected a Region, Polygon, Rect, or point list, got %A"
                                     t_ctx g_x)
@@ -542,7 +537,7 @@ procedure(_AsRegion(g_x t_ctx "gt")  ; -> Region
                         )
                     )
                     (t
-                        l_res = errset(Region(g_x ?normalize nil) nil)
+                        l_res = errset(_AsPolygonList(g_x t_ctx) nil)
                         if(l_res
                         then
                             car(l_res)
@@ -553,9 +548,27 @@ procedure(_AsRegion(g_x t_ctx "gt")  ; -> Region
                     )
                 )
             )
-            (t error("%s: expected a Region, Polygon, Rect, or point list, got %A"
-                t_ctx g_x))
+            (t error("%s: expected a Region, Polygon, Rect, or point list, got %A" t_ctx g_x))
         )
+    )
+)
+
+procedure(_AsRegion(g_x t_ctx "gt")  ; -> Region
+    ; 归一化为 Region：接受 Region、Polygon、Rect 或点列。
+    ;
+    ; 派发统一走 _AsPolygons；Region 输入原样返回，不复制。
+    ;
+    ; **参数**
+    ;   g_x    (any) - 待归一化对象
+    ;   t_ctx  (str) - 错误上下文
+    ;
+    ; **返回**
+    ;   (Region) - 原 Region，或由二维图形/点列构造的 Region；非法时 error
+    if(_RegionP(g_x)
+    then
+        g_x
+    else
+        Region(_AsPolygons(g_x t_ctx) ?normalize nil)
     )
 )
 
