@@ -250,14 +250,14 @@ procedure(_InsideRings(l_rings g_p n_eps "lgg")  ; -> t | nil
     )
 )
 
-procedure(_ClassifyEdges(l_edges l_ra l_rb g_op n_eps "lllgg")  ; -> list[list[Point]]
+procedure(_ClassifyEdges(l_edges l_ra l_rb s_op n_eps "lllgg")  ; -> list[list[Point]]
     ; 按两侧采样结果保留结果边界的有向边。
     ;
     ; **参数**
     ;   l_edges  (list[list[Point]]) - 拆分后的无向边
     ;   l_ra     (list[list[Point]]) - A 环
     ;   l_rb     (list[list[Point]]) - B 环
-    ;   g_op     (sym)               - union/intersection/difference/xor
+    ;   s_op     (sym)               - union/intersection/difference/xor
     ;   n_eps    (float)             - 容差
     ;
     ; **返回**
@@ -290,8 +290,8 @@ procedure(_ClassifyEdges(l_edges l_ra l_rb g_op n_eps "lllgg")  ; -> list[list[P
                 g_lb = _InsideRings(l_rb g_left n_eps)
                 g_ra = _InsideRings(l_ra g_right n_eps)
                 g_rb = _InsideRings(l_rb g_right n_eps)
-                g_lkeep = _InResult(g_op g_la g_lb)
-                g_rkeep = _InResult(g_op g_ra g_rb)
+                g_lkeep = _InResult(s_op g_la g_lb)
+                g_rkeep = _InResult(s_op g_ra g_rb)
                 when(g_lkeep != g_rkeep
                     l_res = tconc(l_res
                         if(g_lkeep list(g_a g_b) list(g_b g_a)))
@@ -416,21 +416,21 @@ procedure(_TraceLoops(l_edges n_eps "lg")  ; -> list[list[Point]]
     )
 )
 
-procedure(_InResult(g_op g_inA g_inB "ggg")  ; -> t | nil
+procedure(_InResult(s_op g_inA g_inB "ggg")  ; -> t | nil
     ; 判断采样点是否属于布尔结果。
     ;
     ; **参数**
-    ;   g_op   (sym)   - union/intersection/difference/xor
+    ;   s_op   (sym)   - union/intersection/difference/xor
     ;   g_inA  (t|nil) - 点在 A 内
     ;   g_inB  (t|nil) - 点在 B 内
     ;
     ; **返回**
     ;   (t|nil) - 属于结果为 t
     cond(
-        (g_op == 'union g_inA || g_inB)
-        (g_op == 'intersection g_inA && g_inB)
-        (g_op == 'difference g_inA && !g_inB)
-        (g_op == 'xor g_inA != g_inB)
+        (s_op == 'union g_inA || g_inB)
+        (s_op == 'intersection g_inA && g_inB)
+        (s_op == 'difference g_inA && !g_inB)
+        (s_op == 'xor g_inA != g_inB)
     )
 )
 
@@ -451,21 +451,21 @@ procedure(_CleanPolygons(l_polys n_eps "lg")  ; -> list[Polygon]
     )
 )
 
-procedure(_Boolean(l_a l_b g_op n_grid n_eps "llggg")  ; -> list[Polygon]
+procedure(_Boolean(l_a l_b s_op n_grid n_eps "llggg")  ; -> list[Polygon]
     ; 计算两个多边形集合的布尔结果。
     ;
     ; **参数**
     ;   l_a     (list[Polygon]) - A
     ;   l_b     (list[Polygon]) - B
-    ;   g_op    (sym)           - union/intersection/difference/xor
+    ;   s_op    (sym)           - union/intersection/difference/xor
     ;   n_grid  (float|nil)     - 网格
     ;   n_eps   (float)         - 容差
     ;
     ; **返回**
     ;   (list[Polygon]) - 结果多边形；空结果 nil
     let((n_gridv n_epsv l_ra l_rb l_edges l_kept l_loops l_res t_reg)
-        unless(g_op == 'union || g_op == 'intersection || g_op == 'difference || g_op == 'xor
-            error("ycGeom::_Boolean: unknown operation %A" g_op)
+        unless(s_op == 'union || s_op == 'intersection || s_op == 'difference || s_op == 'xor
+            error("ycGeom::_Boolean: unknown operation %A" s_op)
         )
         foreach(g_p l_a
             _AsPolygon(g_p "ycGeom::_Boolean")
@@ -477,10 +477,10 @@ procedure(_Boolean(l_a l_b g_op n_grid n_eps "llggg")  ; -> list[Polygon]
         n_epsv = _Eps(n_eps)
         cond(
             (l_a == nil && l_b == nil l_res = nil)
-            (l_a == nil && (g_op == 'union || g_op == 'xor) l_res = l_b)
+            (l_a == nil && (s_op == 'union || s_op == 'xor) l_res = l_b)
             (l_a == nil l_res = nil)
-            (l_b == nil && g_op == 'union l_res = l_a)
-            (l_b == nil && (g_op == 'difference || g_op == 'xor)
+            (l_b == nil && s_op == 'union l_res = l_a)
+            (l_b == nil && (s_op == 'difference || s_op == 'xor)
                 l_res = l_a)
             (l_b == nil l_res = nil)
             (t
@@ -490,7 +490,7 @@ procedure(_Boolean(l_a l_b g_op n_grid n_eps "llggg")  ; -> list[Polygon]
                 l_edges = _SplitEdges(
                     append(_RingEdgeList(l_ra) _RingEdgeList(l_rb))
                     n_epsv t_reg)
-                l_kept = _ClassifyEdges(l_edges l_ra l_rb g_op n_epsv)
+                l_kept = _ClassifyEdges(l_edges l_ra l_rb s_op n_epsv)
                 l_loops = _TraceLoops(l_kept n_epsv)
                 when(l_loops
                     l_res = _BuildPolygons(
@@ -815,7 +815,7 @@ procedure(_BuildPolygons(l_groups n_grid n_eps "lgg")  ; -> list[Polygon]
     )
 )
 
-procedure(Boolean(g_op l_a l_b \@key (grid nil) (eps nil) "Sllgg")  ; -> list | nil
+procedure(Boolean(S_op l_a l_b \@key (grid nil) (eps nil) "Sllgg")  ; -> list | nil
     ; 纯数据布尔运算：两侧输入与结果都是 toSkill() 形式的点列。
     ;
     ; 运算名在首位，符号或字符串均可，且不分大小写。操作数若是点列列表（Region 形式），
@@ -824,7 +824,7 @@ procedure(Boolean(g_op l_a l_b \@key (grid nil) (eps nil) "Sllgg")  ; -> list | 
     ; 带宽度对象没有点列形式，Path 需先 ->toRegion()->toSkill()。
     ;
     ; **参数**
-    ;   g_op    (sym|str)   - or / and / not / xor
+    ;   S_op    (sym|str)   - or / and / not / xor
     ;   l_a     (list)      - A 的点列：单个多边形、两点矩形对角、或点列列表
     ;   l_b     (list)      - B，同上；nil 只有 or 允许（即只对 A 求并）
     ;   ?grid   (num|nil)   - 网格；默认 nil
@@ -833,13 +833,13 @@ procedure(Boolean(g_op l_a l_b \@key (grid nil) (eps nil) "Sllgg")  ; -> list | 
     ; **返回**
     ;   (list|nil) - 结果点列列表；空结果为 nil
     let((op a b polys)
-        op = case(lowerCase(g_op)
+        op = case(lowerCase(S_op)
             ("or"   'union)
             ("and"  'intersection)
             ("not"  'difference)
             ("xor"  'xor)
             (t
-                error("ycGeom::Boolean: unknown operation %A; expected or, and, not, or xor" g_op)
+                error("ycGeom::Boolean: unknown operation %A; expected or, and, not, or xor" S_op)
             )
         )
         unless(l_b || op == 'union

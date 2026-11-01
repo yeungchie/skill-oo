@@ -121,7 +121,7 @@ defmethod(printself (self(Polygon))  ; -> str
         length(self->_data->points) abs(_SignedArea(self->_data->points)))
 )
 
-procedure(_ShapePolys(g_left g_other g_op n_grid n_eps t_ctx "gggggt")  ; -> list[Polygon]
+procedure(_ShapePolys(g_left g_other s_op n_grid n_eps t_ctx "gggggt")  ; -> list[Polygon]
     ; 布尔运算的公共管线：归一化两侧、计算、清理共线点（内部实现）。
     ;
     ; 方法层 _ShapeOp 与纯数据层 ycGeom::Boolean 都从这里取结果，
@@ -130,7 +130,7 @@ procedure(_ShapePolys(g_left g_other g_op n_grid n_eps t_ctx "gggggt")  ; -> lis
     ; **参数**
     ;   g_left   (any)       - 左操作数：Polygon/Rect/Region/点列
     ;   g_other  (any)       - 右操作数：Polygon/Rect/Region/点列
-    ;   g_op     (sym)       - union/intersection/difference/xor
+    ;   s_op     (sym)       - union/intersection/difference/xor
     ;   n_grid   (float|nil) - 网格
     ;   n_eps    (float|nil) - 容差
     ;   t_ctx    (str)       - 错误上下文
@@ -139,25 +139,25 @@ procedure(_ShapePolys(g_left g_other g_op n_grid n_eps t_ctx "gggggt")  ; -> lis
     ;   (list[Polygon]) - 结果多边形；空结果 nil
     _CleanPolygons(
         _Boolean(_AsPolygons(g_left t_ctx) _AsPolygons(g_other t_ctx)
-            g_op n_grid n_eps)
+            s_op n_grid n_eps)
         _Eps(n_eps)
     )
 )
 
-procedure(_ShapeOp(g_left g_other g_op n_grid n_eps t_ctx "gggggt")  ; -> Region
+procedure(_ShapeOp(g_left g_other s_op n_grid n_eps t_ctx "gggggt")  ; -> Region
     ; 把布尔结果包成 Region（内部实现）。
     ;
     ; **参数**
     ;   g_left   (any)       - 左操作数：Polygon/Rect/Region/点列
     ;   g_other  (any)       - 右操作数：Polygon/Rect/Region/点列
-    ;   g_op     (sym)       - union/intersection/difference/xor
+    ;   s_op     (sym)       - union/intersection/difference/xor
     ;   n_grid   (float|nil) - 网格
     ;   n_eps    (float|nil) - 容差
     ;   t_ctx    (str)       - 错误上下文
     ;
     ; **返回**
     ;   (Region) - 结果区域
-    Region(_ShapePolys(g_left g_other g_op n_grid n_eps t_ctx)
+    Region(_ShapePolys(g_left g_other s_op n_grid n_eps t_ctx)
         ?normalize nil)
 )
 

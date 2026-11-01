@@ -2493,7 +2493,7 @@ ycGeom::ConvertToGeomObject(list(0:0 1:1))
 
 ```text
 ycGeom::Boolean(
-    g_op
+    S_op
     l_a
     l_b
     [ ?grid n_grid ]
@@ -2510,13 +2510,13 @@ ycGeom::Boolean(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_op | sym / str | | 布尔运算类型 |
+| S_op | sym / str | | 布尔运算类型 |
 | l_a | list | | A 的点列 |
 | l_b | list | | B 的点列，结构要求与 `l_a` 相同；`nil` 只在 `or` 时表示空集 |
 | ?grid n_grid | num / nil | nil | 可选，顶点吸附网格；吸附导致拓扑塌缩时以 `error()` 中断 |
 | ?eps n_eps | num / nil | 1e-9 | 可选，几何容差 |
 
-`g_op` 的有效值：
+`S_op` 的有效值：
 
 | 有效值 | 结果 |
 | --- | --- |
