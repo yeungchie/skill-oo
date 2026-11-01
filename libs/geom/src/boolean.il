@@ -818,7 +818,7 @@ procedure(_BuildPolygons(l_groups n_grid n_eps "lgg")  ; -> list[Polygon]
 procedure(Boolean(g_op l_a l_b \@key (grid nil) (eps nil) "Sllgg")  ; -> list | nil
     ; 纯数据布尔运算：两侧输入与结果都是 toSkill() 形式的点列。
     ;
-    ; 运算名在首位，符号或字符串均可。操作数若是点列列表（Region 形式），
+    ; 运算名在首位，符号或字符串均可，且不分大小写。操作数若是点列列表（Region 形式），
     ; 其成员先按 or 合并成一个整体再参与运算，因此成员重叠不会退化成奇偶规则。
     ; l_b 传 nil 表示 B 为空集，只有 or 允许（结果就是 l_a 自身求并）。
     ; 带宽度对象没有点列形式，Path 需先 ->toRegion()->toSkill()。
@@ -833,11 +833,11 @@ procedure(Boolean(g_op l_a l_b \@key (grid nil) (eps nil) "Sllgg")  ; -> list | 
     ; **返回**
     ;   (list|nil) - 结果点列列表；空结果为 nil
     let((op a b polys)
-        op = case(if(stringp(g_op) stringToSymbol(g_op) g_op)
-            (or     'union)
-            (and    'intersection)
-            (not    'difference)
-            (xor    'xor)
+        op = case(lowerCase(g_op)
+            ("or"   'union)
+            ("and"  'intersection)
+            ("not"  'difference)
+            ("xor"  'xor)
             (t
                 error("ycGeom::Boolean: unknown operation %A; expected or, and, not, or xor" g_op)
             )
