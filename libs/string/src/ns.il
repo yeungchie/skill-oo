@@ -39,6 +39,12 @@ addToNamespace("ycString"
         _IsDigitChar  ; proc
         _IsWordChar  ; proc
         _CapWord  ; proc
+
+        ; sort.il
+        NaturalLess  ; proc
+        NaturalSort  ; proc
+        _DigitRunEnd  ; proc
+        _StripZeros  ; proc
     ))
 )
 unuseNamespace("ycString")

@@ -9,6 +9,7 @@ Cadence SKILL++ 的字符串工具库：常用操作、转义与标识符转换�
 + 字符级操作按 UTF-8 码点处理；显示宽度与 `ycUtf8` 的宽度规则一致。
 + 字面量接口（`ycString::Replace` / `ycString::Count` / `ycString::Split`）默认区分大小写、按字面量匹配；`?regex t` 时按 `ycRegEx` 的模式与替换模板语义。
 + 命名风格转换（`ycString::Words` / `ycString::JoinWords` / `ycString::Sanitize`）按大小写与数字边界切词；ASCII 字母数字以外的码点算词内字符。
++ 自然序比较（`ycString::NaturalLess` / `ycString::NaturalSort`）把连续数字段按数值比较，其余按大小写不敏感比较；数字段任意长度都不丢精度。
 + 记法约定：例程注释中 `; =>` 标记返回值，`; *Error*` 标记错误消息。
 + 库内校验触发的错误消息以 `ycString::<过程>:` 为前缀，可用 `errset` 捕获。
 
@@ -33,6 +34,9 @@ ycString::Unescape("a\\nb")                    ; => "a\nb"
 ; 标识符转换
 ycString::ToSnake("HTMLParser")                ; => "html_parser"
 ycString::ToPascal("html_parser")              ; => "HtmlParser"
+
+; 自然序排序
+ycString::NaturalSort(list("VDD10" "VDD2" "VDD1"))  ; => ("VDD1" "VDD2" "VDD10")
 ```
 
 ## API 参考
@@ -783,6 +787,99 @@ ycString::ToPascal(t_s)
 
 ```lisp
 ycString::ToPascal("html_parser") ; => "HtmlParser"
+```
+
+### ycString::NaturalLess <sub>`function`</sub>
+
+```text
+ycString::NaturalLess(
+    t_a
+    t_b
+)
+=> t / nil
+```
+
+**描述**
+
+按自然序比较两个串：连续数字段按数值大小比（`VDD2` 在 `VDD10` 之前），其余字符按大小写不敏感比；两串在不敏感比较下完全相同时，回落到原串比较定序（大写在前），保证顺序可复现。数字段按「有效位数 → 数字串 → 前导零个数」比较，任意长度都不丢精度；数值相等时前导零少的在前（`a1` 在 `a02` 之前）。可直接交给 `sort` 使用；`sort` 会改动入参列表，排序副本用 `ycString::NaturalSort` 或先 `copy`。非字符串实参以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| t_a | str | | 左串 |
+| t_b | str | | 右串 |
+
+**返回值**
+
+`t / nil` — `t` 表示 `t_a` 排在 `t_b` 之前；相等或 `t_a` 在后为 `nil`。
+
+**例程**
+
+```lisp
+ycString::NaturalLess("VDD1" "VDD2")   ; => t
+ycString::NaturalLess("VDD2" "VDD10")  ; => t
+ycString::NaturalLess("VDD10" "VDD2")  ; => nil
+ycString::NaturalLess("file2" "file10") ; => t
+
+; 大小写不敏感；不敏感比较相等时大写在前
+ycString::NaturalLess("abc" "ABD")     ; => t
+ycString::NaturalLess("A" "a")         ; => t
+ycString::NaturalLess("a" "A")         ; => nil
+
+; 前导零：数值相同，零少的在前
+ycString::NaturalLess("a1" "a01")      ; => t
+ycString::NaturalLess("a01" "a1")      ; => nil
+
+; 超长数字不丢精度
+ycString::NaturalLess("n123456789012345678901" "n123456789012345678902") ; => t
+
+ycString::NaturalLess(1 "a")
+; *Error* NaturalLess: argument #1 should be a string (type template = "tt") - 1
+```
+
+### ycString::NaturalSort <sub>`function`</sub>
+
+```text
+ycString::NaturalSort(
+    l_items
+    [ ?reverse g_reverse ]
+)
+=> list / nil
+```
+
+**描述**
+
+返回按自然序排序的新列表，比较规则同 `ycString::NaturalLess`；入参列表保持原样。`?reverse` 非 `nil` 时降序。列表内出现非字符串元素、或实参不是列表时以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| l_items | list[str] | | 待排序的字符串列表 |
+| ?reverse g_reverse | t / nil | nil | 可选，非 `nil` 时降序 |
+
+**返回值**
+
+`list[str] / nil` — 排好序的新列表；空输入回 `nil`。
+
+**例程**
+
+```lisp
+l_names = list("VDD10" "VDD2" "VDD1")
+ycString::NaturalSort(l_names)             ; => ("VDD1" "VDD2" "VDD10")
+l_names                                    ; => ("VDD10" "VDD2" "VDD1")
+
+ycString::NaturalSort(l_names ?reverse t)  ; => ("VDD10" "VDD2" "VDD1")
+
+; 大小写混排按不敏感序，数字段按数值
+ycString::NaturalSort(list("f10" "F2" "f1"))  ; => ("f1" "F2" "f10")
+
+; 数值相同按前导零多少
+ycString::NaturalSort(list("a02" "a2" "a1"))  ; => ("a1" "a2" "a02")
+
+ycString::NaturalSort(list("a" 1))
+; *Error* ycString::NaturalSort: item #2 must be a string, got 1
 ```
 
 ## 显示宽度
