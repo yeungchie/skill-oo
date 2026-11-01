@@ -60,7 +60,7 @@ procedure(_SegPointAt(g_a g_b n_t "ggn")  ; -> Point
         g_a->y() + (g_b->y() - g_a->y()) * n_t))
 )
 
-procedure(_LineSegmentIntersection(g_line g_seg n_eps "ggg")  ; -> Point | Segment | nil
+procedure(_LineSegmentIntersection(g_line g_seg n_eps "ggn")  ; -> Point | Segment | nil
     ; 计算直线与线段交点。
     ;
     ; **参数**
@@ -105,7 +105,7 @@ procedure(_LineSegmentIntersection(g_line g_seg n_eps "ggg")  ; -> Point | Segme
     )
 )
 
-procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggg")  ; -> Point | Segment | nil
+procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggn")  ; -> Point | Segment | nil
     ; 计算两条线段交点。
     ;
     ; **参数**

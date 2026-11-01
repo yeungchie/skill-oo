@@ -41,12 +41,12 @@ defmethod(printself (self(Region))  ; -> str
     lsprintf("<%A polygons=%d>" className(self) length(self->_data->polygons))
 )
 
-procedure(_UnionAll(l_polys n_grid n_eps "lgg")  ; -> list[Polygon]
+procedure(_UnionAll(l_polys g_grid n_eps "lgn")  ; -> list[Polygon]
     ; 逐块合并多边形集合。
     ;
     ; **参数**
     ;   l_polys  (list[Polygon]) - 输入
-    ;   n_grid   (float|nil)     - 网格
+    ;   g_grid   (float|nil)     - 网格
     ;   n_eps    (float)         - 容差
     ;
     ; **返回**
@@ -55,7 +55,7 @@ procedure(_UnionAll(l_polys n_grid n_eps "lgg")  ; -> list[Polygon]
         when(l_polys
             l_res = list(car(l_polys))
             foreach(g_p cdr(l_polys)
-                l_res = _Boolean(l_res list(g_p) 'union n_grid n_eps)
+                l_res = _Boolean(l_res list(g_p) 'union g_grid n_eps)
             )
         )
         l_res

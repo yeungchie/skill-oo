@@ -28,7 +28,7 @@ procedure(_PolyLineDist(g_p g_q n_ux n_uy "ggnn")  ; -> float
         - (g_q->y() - g_p->y()) * n_ux)
 )
 
-procedure(_PolyToPathVerify(g_poly g_path n_eps "ggg")  ; -> t | nil
+procedure(_PolyToPathVerify(g_poly g_path n_eps "ggn")  ; -> t | nil
     ; 校验 Path 描边区域与原 Polygon 是否重合。
     ;
     ; **参数**
@@ -127,7 +127,7 @@ procedure(_PolyToPathRect(g_poly l_ring n_eps g_horiz "glng")  ; -> Path | nil
     )
 )
 
-procedure(_PolyToPathOpenAt(g_poly l_ring l_edges n_w n_eps "gllng")  ; -> Path | nil
+procedure(_PolyToPathOpenAt(g_poly l_ring l_edges n_w n_eps "gllnn")  ; -> Path | nil
     ; 在给定候选宽度下尝试还原开放等宽折线。
     ;
     ; **参数**
@@ -262,7 +262,7 @@ procedure(_PolyToPathOpenAt(g_poly l_ring l_edges n_w n_eps "gllng")  ; -> Path 
     )
 )
 
-procedure(_PolyToPathOpen(g_poly l_ring n_eps "glg")  ; -> Path | nil
+procedure(_PolyToPathOpen(g_poly l_ring n_eps "gln")  ; -> Path | nil
     ; 尝试把开放等宽折线环还原为 Path。
     ;
     ; **参数**
@@ -341,7 +341,7 @@ procedure(_PolyToPathOpen(g_poly l_ring n_eps "glg")  ; -> Path | nil
     )
 )
 
-procedure(_PolyToPathRing(g_poly l_outer l_inner n_eps "gllg")  ; -> Path | nil
+procedure(_PolyToPathRing(g_poly l_outer l_inner n_eps "glln")  ; -> Path | nil
     ; 尝试把闭合等距环还原为 Path。
     ;
     ; **参数**

@@ -376,30 +376,30 @@ defmethod(initializeInstance (self(Path) \@rest _args)
 )
 )
 
-procedure(Path(l_data \@key width (eps nil) "ggg")  ; -> Path
+procedure(Path(g_data \@key width (eps nil) "ggg")  ; -> Path
     ; 构造不可变带宽度描边。
     ;
     ; **参数**
-    ;   l_data  (Route|list) - 中心线折线或点列
+    ;   g_data  (Route|list) - 中心线折线或点列
     ;   ?width  (num)        - 总宽度，必须为正
     ;   ?eps    (num|nil)    - 点列容差；默认 nil（1e-9）
     ;
     ; **返回**
     ;   (Path) - 新描边对象；参数非法 error
     let((g_route n_width)
-        when(listp(l_data) && length(l_data) == 2 && numberp(cadr(l_data))
+        when(listp(g_data) && length(g_data) == 2 && numberp(cadr(g_data))
             when(width != nil
                 error("ycGeom::Path: width given both in state list and ?width")
             )
-            width = cadr(l_data)
-            l_data = car(l_data)
+            width = cadr(g_data)
+            g_data = car(g_data)
         )
         cond(
-            (classOf(l_data) == findClass('ycGeom::Route)
-                g_route = l_data)
-            (listp(l_data)
-                g_route = Route(l_data ?eps eps))
-            (t error("ycGeom::Path: expected a Route or point list, got %A" l_data))
+            (classOf(g_data) == findClass('ycGeom::Route)
+                g_route = g_data)
+            (listp(g_data)
+                g_route = Route(g_data ?eps eps))
+            (t error("ycGeom::Path: expected a Route or point list, got %A" g_data))
         )
         unless(numberp(width) && width > 0.0
             error("ycGeom::Path: ?width must be a positive number, got %A" width)

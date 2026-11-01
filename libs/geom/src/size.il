@@ -199,7 +199,7 @@ procedure(_SizeRingEdges(l_ring "l")  ; -> list
     )
 )
 
-procedure(_SizeEdgeSelected(n_nx n_ny l_dirs n_eps "nnlg")  ; -> t | nil
+procedure(_SizeEdgeSelected(n_nx n_ny l_dirs n_eps "nnln")  ; -> t | nil
     ; 判断边是否被方向选中。
     ;
     ; **参数**
@@ -271,7 +271,7 @@ procedure(_SizeLinePoint(g_p g_u g_q g_v "gggg")  ; -> Point | nil
     )
 )
 
-procedure(_SizeStrip(g_a g_b n_nx n_ny n_d "ggggn")  ; -> Polygon | nil
+procedure(_SizeStrip(g_a g_b n_nx n_ny n_d "ggnnn")  ; -> Polygon | nil
     ; 生成一条选中边的矩形带。
     ;
     ; **参数**
@@ -335,7 +335,7 @@ procedure(_SizeRoundCap(g_v g_v1 g_v2 n_d1 n_d2 n_segments "gggnnx")  ; -> Polyg
     )
 )
 
-procedure(_SizeCapSelected(g_v g_pa g_nb l_e1 l_e2 n_limit n_segments g_corner "gggllnxs")  ; -> Polygon | nil
+procedure(_SizeCapSelected(g_v g_pa g_nb l_e1 l_e2 n_limit n_segments s_corner "gggllnxs")  ; -> Polygon | nil
     ; 生成两条选中边的拐角帽。
     ;
     ; **参数**
@@ -346,7 +346,7 @@ procedure(_SizeCapSelected(g_v g_pa g_nb l_e1 l_e2 n_limit n_segments g_corner "
     ;   l_e2        (list)  - 后一边记录
     ;   n_limit     (float) - miter 限制
     ;   n_segments  (int)   - 圆角段数
-    ;   g_corner    (sym)   - 拐角风格
+    ;   s_corner    (sym)   - 拐角风格
     ;
     ; **返回**
     ;   (Polygon|nil) - 拐角帽
@@ -362,11 +362,11 @@ procedure(_SizeCapSelected(g_v g_pa g_nb l_e1 l_e2 n_limit n_segments g_corner "
         g_v2 = Point(list(g_v->x() + n_nx2 * n_d2
             g_v->y() + n_ny2 * n_d2))
         cond(
-            (g_corner == 'none nil)
-            (g_corner == 'bevel Polygon(list(g_v1 g_v g_v2)))
-            (g_corner == 'round
+            (s_corner == 'none nil)
+            (s_corner == 'bevel Polygon(list(g_v1 g_v g_v2)))
+            (s_corner == 'round
                 _SizeRoundCap(g_v g_v1 g_v2 n_d1 n_d2 n_segments))
-            (g_corner == 'miter
+            (s_corner == 'miter
                 g_m = _SizeLinePoint(g_v1
                     list(g_v->x() - g_pa->x() g_v->y() - g_pa->y())
                     g_v2

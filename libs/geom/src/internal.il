@@ -64,18 +64,18 @@ procedure(_SnapRound(n_q "n")  ; -> float
     )
 )
 
-procedure(_Snap(n_val n_grid "ng")  ; -> float
+procedure(_Snap(n_val g_grid "ng")  ; -> float
     ; 将数值吸附到网格。
     ;
     ; **参数**
     ;   n_val   (num)        - 原值
-    ;   n_grid  (float|nil)  - 网格间距；nil 原样转 float
+    ;   g_grid  (float|nil)  - 网格间距；nil 原样转 float
     ;
     ; **返回**
     ;   (float) - 吸附后的 flonum
-    if(n_grid == nil
+    if(g_grid == nil
         float(n_val)
-        float(_SnapRound(float(n_val) / n_grid) * n_grid)
+        float(_SnapRound(float(n_val) / g_grid) * g_grid)
     )
 )
 
@@ -110,7 +110,7 @@ procedure(_Near(n_a n_b n_eps "nnn")  ; -> t | nil
     )
 )
 
-procedure(_SamePoint(g_a g_b n_eps "ggg")  ; -> t | nil
+procedure(_SamePoint(g_a g_b n_eps "ggn")  ; -> t | nil
     ; 判断两个点是否在容差内重合。
     ;
     ; **参数**
@@ -749,21 +749,21 @@ procedure(_CellNumKey(n_q "n")  ; -> str
     )
 )
 
-procedure(_CanonPoint(g_p n_eps t_reg "ggg")  ; -> Point
+procedure(_CanonPoint(g_p n_eps g_reg "gng")  ; -> Point
     ; 在容差网格中查找或登记点的规范代表。
     ;
     ; **参数**
     ;   g_p      (Point) - 输入点
     ;   n_eps    (float) - 容差
-    ;   t_reg    (table) - 单元键到规范点列表的登记表
+    ;   g_reg    (table) - 单元键到规范点列表的登记表
     ;
     ; **返回**
     ;   (Point) - 容差内已登记的规范点，或新登记的原点
     let((n_eff n_cx n_cy n_dx n_dy t_key g_found g_q)
-        n_eff = t_reg["_canonScale"]
+        n_eff = g_reg["_canonScale"]
         unless(n_eff
             n_eff = max(n_eps 1e-15 * max(abs(g_p->x()) abs(g_p->y())))
-            t_reg["_canonScale"] = n_eff
+            g_reg["_canonScale"] = n_eff
         )
         ; 先取整格号，再在整数格号上做 ±2 探测；直接对未取整
         ; 商偏移会让 round-half-even 跳过一格。两个 _SamePoint
@@ -776,7 +776,7 @@ procedure(_CanonPoint(g_p n_eps t_reg "ggg")  ; -> Point
                 t_key = lsprintf("%s|%s"
                     _CellNumKey(n_cx + n_dx)
                     _CellNumKey(n_cy + n_dy))
-                foreach(g_q t_reg[t_key]
+                foreach(g_q g_reg[t_key]
                     when(!g_found && _SamePoint(g_p g_q n_eps)
                         g_found = g_q
                     )
@@ -786,33 +786,33 @@ procedure(_CanonPoint(g_p n_eps t_reg "ggg")  ; -> Point
         unless(g_found
             t_key = lsprintf("%s|%s"
                 _CellNumKey(n_cx) _CellNumKey(n_cy))
-            t_reg[t_key] = cons(g_p t_reg[t_key])
+            g_reg[t_key] = cons(g_p g_reg[t_key])
             g_found = g_p
         )
         g_found
     )
 )
 
-procedure(_CanonRing(l_pts n_eps t_reg "lgg")  ; -> list[Point]
+procedure(_CanonRing(l_pts n_eps g_reg "lng")  ; -> list[Point]
     ; 把点列中的点替换为容差登记表中的规范代表。
     ;
     ; **参数**
     ;   l_pts    (list[Point]) - 源点列
     ;   n_eps    (float)       - 容差
-    ;   t_reg    (table)       - 规范点登记表
+    ;   g_reg    (table)       - 规范点登记表
     ;
     ; **返回**
     ;   (list[Point]) - 规范化并去除连续重复后的点列
     let((l_res n_mag)
-        unless(t_reg["_canonScale"]
+        unless(g_reg["_canonScale"]
             n_mag = 0.0
             foreach(g_p l_pts
                 n_mag = max(n_mag max(abs(g_p->x()) abs(g_p->y())))
             )
-            t_reg["_canonScale"] = max(n_eps 1e-15 * n_mag)
+            g_reg["_canonScale"] = max(n_eps 1e-15 * n_mag)
         )
         foreach(g_p l_pts
-            l_res = tconc(l_res _CanonPoint(g_p n_eps t_reg))
+            l_res = tconc(l_res _CanonPoint(g_p n_eps g_reg))
         )
         _RingPointsClean(car(l_res) n_eps)
     )
@@ -832,7 +832,7 @@ procedure(_Cross(g_a g_b g_c "ggg")  ; -> float
         - (g_b->y() - g_a->y()) * (g_c->x() - g_a->x())
 )
 
-procedure(_AreaTol(l_pts n_eps "lg")  ; -> float
+procedure(_AreaTol(l_pts n_eps "ln")  ; -> float
     ; 计算与坐标尺度相关的面积容差。
     ;
     ; **参数**
@@ -880,7 +880,7 @@ procedure(_SignedArea(l_pts "l")  ; -> float
     )
 )
 
-procedure(_PointInRing(l_pts g_p n_eps "lgg")  ; -> t | nil
+procedure(_PointInRing(l_pts g_p n_eps "lgn")  ; -> t | nil
     ; 奇偶规则判断点是否在环内；边界点按内部处理。
     ;
     ; **参数**
@@ -913,7 +913,7 @@ procedure(_PointInRing(l_pts g_p n_eps "lgg")  ; -> t | nil
     )
 )
 
-procedure(_OnSegment(g_a g_b g_p n_eps "gggg")  ; -> t | nil
+procedure(_OnSegment(g_a g_b g_p n_eps "gggn")  ; -> t | nil
     ; 判断点是否在线段上（含端点）。
     ;
     ; **参数**
@@ -961,7 +961,7 @@ procedure(_Orient(g_a g_b g_c "ggg")  ; -> float
     _Cross(g_a g_b g_c)
 )
 
-procedure(_SegmentsCross(g_a g_b g_c g_d n_eps "ggggg")  ; -> t | nil
+procedure(_SegmentsCross(g_a g_b g_c g_d n_eps "ggggn")  ; -> t | nil
     ; 判断两条线段是否相交或接触（内部实现）。
     ;
     ; **参数**
@@ -1020,7 +1020,7 @@ procedure(_SeamKeys(l_pts "l")  ; -> table
     )
 )
 
-procedure(_CollinearClean(l_pts n_eps "lg")  ; -> list[Point]
+procedure(_CollinearClean(l_pts n_eps "ln")  ; -> list[Point]
     ; 删除非切割边上的共线中间点（内部实现）。
     ;
     ; **参数**
@@ -1095,19 +1095,19 @@ procedure(_RemovePoint(l_list g_p "lg")  ; -> list
     )
 )
 
-procedure(_FirstAdjPoint(t_adj l_order "gl")  ; -> Point | nil
+procedure(_FirstAdjPoint(g_adj l_order "gl")  ; -> Point | nil
     ; 返回邻接表中第一个尚有余边的点。
     ;
     ; **参数**
-    ;   t_adj   (table) - 点键 → 邻接点列表
+    ;   g_adj   (table) - 点键 → 邻接点列表
     ;   l_order (list)  - 点键的首次出现顺序
     ;
     ; **返回**
     ;   (Point|nil) - 仍有边的点；没有时为 nil
     let((g_found)
         foreach(t_key l_order
-            when(t_adj[t_key] && !g_found
-                g_found = car(t_adj[t_key])
+            when(g_adj[t_key] && !g_found
+                g_found = car(g_adj[t_key])
             )
         )
         g_found
@@ -1171,7 +1171,7 @@ procedure(_Rings(l_pts "l")  ; -> list[list[Point]]
     )
 )
 
-procedure(_RingPointsClean(l_pts n_eps "lg")  ; -> list[Point]
+procedure(_RingPointsClean(l_pts n_eps "ln")  ; -> list[Point]
     ; 删除连续重复点。
     ;
     ; **参数**

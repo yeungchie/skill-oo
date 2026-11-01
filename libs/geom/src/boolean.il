@@ -1,18 +1,18 @@
 useNamespace("ycGeom")
 
-procedure(_SnapRing(l_pts n_grid n_eps "lgg")  ; -> list[Point]
+procedure(_SnapRing(l_pts g_grid n_eps "lgn")  ; -> list[Point]
     ; 吸附、合并并清理一个环。
     ;
     ; **参数**
     ;   l_pts   (list[Point]) - 源点列
-    ;   n_grid  (float|nil)   - 网格
+    ;   g_grid  (float|nil)   - 网格
     ;   n_eps   (float)       - 容差
     ;
     ; **返回**
     ;   (list[Point]) - 清理后的点列
     let((l_res g_prev g_snap l_clean)
         foreach(g_p l_pts
-            g_snap = Point(list(_Snap(g_p->x() n_grid) _Snap(g_p->y() n_grid)))
+            g_snap = Point(list(_Snap(g_p->x() g_grid) _Snap(g_p->y() g_grid)))
             unless(g_prev && _Near(g_prev->x() g_snap->x() n_eps)
                 && _Near(g_prev->y() g_snap->y() n_eps)
                 l_res = tconc(l_res g_snap)
@@ -28,19 +28,19 @@ procedure(_SnapRing(l_pts n_grid n_eps "lgg")  ; -> list[Point]
     )
 )
 
-procedure(_CollectRings(l_polys n_grid n_eps t_reg "lggg")  ; -> list[list[Point]]
+procedure(_CollectRings(l_polys g_grid n_eps g_reg "lgng")  ; -> list[list[Point]]
     ; 收集多个多边形的所有环。
     ;
     ; **参数**
     ;   l_polys  (list[Polygon]) - 多边形列表
-    ;   n_grid   (float|nil)     - 网格
+    ;   g_grid   (float|nil)     - 网格
     ;   n_eps    (float)         - 容差
-    ;   t_reg    (table)         - 点规范登记表
+    ;   g_reg    (table)         - 点规范登记表
     ;
     ; **返回**
     ;   (list[list[Point]]) - 环列表
     let((l_res n_mag g_pt)
-        unless(t_reg["_canonScale"]
+        unless(g_reg["_canonScale"]
             n_mag = 0.0
             foreach(g_p l_polys
                 _AsPolygon(g_p "ycGeom::_Boolean")
@@ -48,12 +48,12 @@ procedure(_CollectRings(l_polys n_grid n_eps t_reg "lggg")  ; -> list[list[Point
                     n_mag = max(n_mag max(abs(g_pt->x()) abs(g_pt->y())))
                 )
             )
-            t_reg["_canonScale"] = max(n_eps 1e-15 * n_mag)
+            g_reg["_canonScale"] = max(n_eps 1e-15 * n_mag)
         )
         foreach(g_p l_polys
             _AsPolygon(g_p "ycGeom::_Boolean")
             foreach(l_r _Rings(_CanonRing(
-                    _SnapRing(g_p->points() n_grid n_eps) n_eps t_reg))
+                    _SnapRing(g_p->points() g_grid n_eps) n_eps g_reg))
                 l_res = tconc(l_res l_r)
             )
         )
@@ -109,7 +109,7 @@ procedure(_EdgeT(g_a g_b g_p n_eps "gggn")  ; -> float
     )
 )
 
-procedure(_AddCut(g_a g_b g_c g_d n_eps l_t "gggggl")  ; -> list[float]
+procedure(_AddCut(g_a g_b g_c g_d n_eps l_t "ggggnl")  ; -> list[float]
     ; 把两条边的交点参数追加到 t 列表。
     ;
     ; **参数**
@@ -151,7 +151,7 @@ procedure(_InsertNum(l_vals n_v "ln")  ; -> list[float]
     )
 )
 
-procedure(_SortUniqueNums(l_vals n_eps "lg")  ; -> list[float]
+procedure(_SortUniqueNums(l_vals n_eps "ln")  ; -> list[float]
     ; 升序排序并删除容差内重复值。
     ;
     ; **参数**
@@ -188,13 +188,13 @@ procedure(_Lerp(g_a g_b n_t "ggn")  ; -> Point
         g_a->y() + (g_b->y() - g_a->y()) * n_t))
 )
 
-procedure(_SplitEdges(l_edges n_eps t_reg "lgg")  ; -> list[list[Point]]
+procedure(_SplitEdges(l_edges n_eps g_reg "lng")  ; -> list[list[Point]]
     ; 在所有交点处拆分边并去重。
     ;
     ; **参数**
     ;   l_edges  (list[list[Point]]) - 无向边
     ;   n_eps    (float)             - 容差
-    ;   t_reg    (table)         - 点规范登记表
+    ;   g_reg    (table)         - 点规范登记表
     ;
     ; **返回**
     ;   (list[list[Point]]) - 拆分后的无向边
@@ -216,9 +216,9 @@ procedure(_SplitEdges(l_edges n_eps t_reg "lgg")  ; -> list[list[Point]]
             n_len = length(l_t)
             for(n_i 1 n_len - 1
                 g_prev = _CanonPoint(
-                    _Lerp(g_a g_b _Nth1(n_i l_t)) n_eps t_reg)
+                    _Lerp(g_a g_b _Nth1(n_i l_t)) n_eps g_reg)
                 g_cur = _CanonPoint(
-                    _Lerp(g_a g_b _Nth1(n_i + 1 l_t)) n_eps t_reg)
+                    _Lerp(g_a g_b _Nth1(n_i + 1 l_t)) n_eps g_reg)
                 t_key = _EdgeKey(g_prev g_cur)
                 unless(t_seen[t_key]
                     t_seen[t_key] = t
@@ -230,7 +230,7 @@ procedure(_SplitEdges(l_edges n_eps t_reg "lgg")  ; -> list[list[Point]]
     )
 )
 
-procedure(_InsideRings(l_rings g_p n_eps "lgg")  ; -> t | nil
+procedure(_InsideRings(l_rings g_p n_eps "lgn")  ; -> t | nil
     ; 奇偶判断点是否在环集合内部。
     ;
     ; **参数**
@@ -250,7 +250,7 @@ procedure(_InsideRings(l_rings g_p n_eps "lgg")  ; -> t | nil
     )
 )
 
-procedure(_ClassifyEdges(l_edges l_ra l_rb s_op n_eps "lllgg")  ; -> list[list[Point]]
+procedure(_ClassifyEdges(l_edges l_ra l_rb s_op n_eps "lllsn")  ; -> list[list[Point]]
     ; 按两侧采样结果保留结果边界的有向边。
     ;
     ; **参数**
@@ -302,19 +302,19 @@ procedure(_ClassifyEdges(l_edges l_ra l_rb s_op n_eps "lllgg")  ; -> list[list[P
     )
 )
 
-procedure(_FirstTraceEdge(t_adj l_order "gl")  ; -> list[Point] | nil
+procedure(_FirstTraceEdge(g_adj l_order "gl")  ; -> list[Point] | nil
     ; 返回第一条未使用的有向边。
     ;
     ; **参数**
-    ;   t_adj   (table) - 起点键 → 有向边列表
+    ;   g_adj   (table) - 起点键 → 有向边列表
     ;   l_order (list)  - 起点键顺序
     ;
     ; **返回**
     ;   (list[Point]|nil) - 有向边；用完为 nil
     let((l_found)
         foreach(t_key l_order
-            when(t_adj[t_key] && !l_found
-                l_found = car(t_adj[t_key])
+            when(g_adj[t_key] && !l_found
+                l_found = car(g_adj[t_key])
             )
         )
         l_found
@@ -342,7 +342,7 @@ procedure(_RemoveEdge(l_edges g_from g_to "lgg")  ; -> list[list[Point]]
     )
 )
 
-procedure(_ChooseNext(g_prev g_cur l_cands n_eps "gglg")  ; -> Point
+procedure(_ChooseNext(g_prev g_cur l_cands n_eps "ggln")  ; -> Point
     ; 从多条出边中选择最顺时针的一条。
     ;
     ; **参数**
@@ -372,7 +372,7 @@ procedure(_ChooseNext(g_prev g_cur l_cands n_eps "gglg")  ; -> Point
     )
 )
 
-procedure(_TraceLoops(l_edges n_eps "lg")  ; -> list[list[Point]]
+procedure(_TraceLoops(l_edges n_eps "ln")  ; -> list[list[Point]]
     ; 追踪结果边界闭环。
     ;
     ; **参数**
@@ -416,7 +416,7 @@ procedure(_TraceLoops(l_edges n_eps "lg")  ; -> list[list[Point]]
     )
 )
 
-procedure(_InResult(s_op g_inA g_inB "ggg")  ; -> t | nil
+procedure(_InResult(s_op g_inA g_inB "sgg")  ; -> t | nil
     ; 判断采样点是否属于布尔结果。
     ;
     ; **参数**
@@ -434,7 +434,7 @@ procedure(_InResult(s_op g_inA g_inB "ggg")  ; -> t | nil
     )
 )
 
-procedure(_CleanPolygons(l_polys n_eps "lg")  ; -> list[Polygon]
+procedure(_CleanPolygons(l_polys n_eps "ln")  ; -> list[Polygon]
     ; 去除结果多边形的共线点（内部实现）。
     ;
     ; **参数**
@@ -451,14 +451,14 @@ procedure(_CleanPolygons(l_polys n_eps "lg")  ; -> list[Polygon]
     )
 )
 
-procedure(_Boolean(l_a l_b s_op n_grid n_eps "llggg")  ; -> list[Polygon]
+procedure(_Boolean(l_a l_b s_op g_grid n_eps "llsgn")  ; -> list[Polygon]
     ; 计算两个多边形集合的布尔结果。
     ;
     ; **参数**
     ;   l_a     (list[Polygon]) - A
     ;   l_b     (list[Polygon]) - B
     ;   s_op    (sym)           - union/intersection/difference/xor
-    ;   n_grid  (float|nil)     - 网格
+    ;   g_grid  (float|nil)     - 网格
     ;   n_eps   (float)         - 容差
     ;
     ; **返回**
@@ -473,7 +473,7 @@ procedure(_Boolean(l_a l_b s_op n_grid n_eps "llggg")  ; -> list[Polygon]
         foreach(g_p l_b
             _AsPolygon(g_p "ycGeom::_Boolean")
         )
-        n_gridv = _Grid(n_grid)
+        n_gridv = _Grid(g_grid)
         n_epsv = _Eps(n_eps)
         cond(
             (l_a == nil && l_b == nil l_res = nil)
@@ -514,7 +514,7 @@ procedure(_EvenDepth(n_depth "x")  ; -> t | nil
     int(n_depth / 2) * 2 == n_depth
 )
 
-procedure(_LoopDepth(l_loops n_idx n_eps "lng")  ; -> int
+procedure(_LoopDepth(l_loops n_idx n_eps "lnn")  ; -> int
     ; 计算环被多少个更大的环包含。
     ;
     ; **参数**
@@ -543,7 +543,7 @@ procedure(_LoopDepth(l_loops n_idx n_eps "lng")  ; -> int
     )
 )
 
-procedure(_NestLoops(l_loops n_eps "lg")  ; -> list
+procedure(_NestLoops(l_loops n_eps "ln")  ; -> list
     ; 按包含关系区分外环和洞环，并归组。
     ;
     ; **参数**
@@ -608,7 +608,7 @@ procedure(_NestLoops(l_loops n_eps "lg")  ; -> list
     )
 )
 
-procedure(_RightmostIndex(l_ring n_eps "lg")  ; -> int
+procedure(_RightmostIndex(l_ring n_eps "ln")  ; -> int
     ; 返回点列最右点的 1-based 下标。
     ;
     ; **参数**
@@ -657,14 +657,14 @@ procedure(_Rotate(l_ring n_start "lx")  ; -> list[Point]
     )
 )
 
-procedure(_AxisHit(l_outer g_h n_eps t_blocked "lggg")  ; -> list | nil
+procedure(_AxisHit(l_outer g_h n_eps g_blocked "lgng")  ; -> list | nil
     ; 从洞右点向右投射水平线，找最近的实际边界交点。
     ;
     ; **参数**
     ;   l_outer   (list[Point]) - 当前 keyhole 点列
     ;   g_h       (Point)       - 洞的最右点
     ;   n_eps     (float)       - 容差
-    ;   t_blocked (table)       - 已拼接洞的顶点表，这些边不参与桥接
+    ;   g_blocked (table)       - 已拼接洞的顶点表，这些边不参与桥接
     ;
     ; **返回**
     ;   (list(num int)|nil) - 交点 x 与所在边下标；无交点为 nil
@@ -675,7 +675,7 @@ procedure(_AxisHit(l_outer g_h n_eps t_blocked "lggg")  ; -> list | nil
             g_a = _Nth1(n_i l_outer)
             g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_outer)
             unless(t_seams[_EdgeKey(g_a g_b)] == 2
-                    || (t_blocked[_PtKey(g_a)] || t_blocked[_PtKey(g_b)])
+                    || (g_blocked[_PtKey(g_a)] || g_blocked[_PtKey(g_b)])
                 n_ay = g_a->y()
                 n_by = g_b->y()
                 cond(
@@ -728,14 +728,14 @@ procedure(_AxisHit(l_outer g_h n_eps t_blocked "lggg")  ; -> list | nil
     )
 )
 
-procedure(_SpliceHole(l_outer l_hole n_eps t_blocked "llgg")  ; -> list[Point]
+procedure(_SpliceHole(l_outer l_hole n_eps g_blocked "llng")  ; -> list[Point]
     ; 把洞环用水平切割线接回当前 keyhole 点列。
     ;
     ; **参数**
     ;   l_outer   (list[Point]) - 外环或已拼接的 keyhole 点列
     ;   l_hole    (list[Point]) - 洞环
     ;   n_eps     (float)       - 容差
-    ;   t_blocked (table)       - 已拼接洞的顶点表，这些边不参与桥接
+    ;   g_blocked (table)       - 已拼接洞的顶点表，这些边不参与桥接
     ;
     ; **返回**
     ;   (list[Point]) - 新增水平切割线的 keyhole 点列
@@ -743,7 +743,7 @@ procedure(_SpliceHole(l_outer l_hole n_eps t_blocked "llgg")  ; -> list[Point]
         n_hi = _RightmostIndex(l_hole n_eps)
         l_h = _Rotate(l_hole n_hi)
         g_h = car(l_h)
-        l_hit = _AxisHit(l_outer g_h n_eps t_blocked)
+        l_hit = _AxisHit(l_outer g_h n_eps g_blocked)
         unless(l_hit
             error("ycGeom::_SpliceHole: no axis-aligned bridge for hole")
         )
@@ -787,12 +787,12 @@ procedure(_SpliceHole(l_outer l_hole n_eps t_blocked "llgg")  ; -> list[Point]
     )
 )
 
-procedure(_BuildPolygons(l_groups n_grid n_eps "lgg")  ; -> list[Polygon]
+procedure(_BuildPolygons(l_groups g_grid n_eps "lgn")  ; -> list[Polygon]
     ; 把分组环转换为 keyhole Polygon。
     ;
     ; **参数**
     ;   l_groups  (list)       - 每组 (外环 洞环列表)
-    ;   n_grid    (float|nil)  - 网格
+    ;   g_grid    (float|nil)  - 网格
     ;   n_eps     (float)      - 容差
     ;
     ; **返回**
@@ -808,7 +808,7 @@ procedure(_BuildPolygons(l_groups n_grid n_eps "lgg")  ; -> list[Polygon]
                     t_blocked[_PtKey(g_p)] = t
                 )
             )
-            l_outer = _SnapRing(l_outer n_grid n_eps)
+            l_outer = _SnapRing(l_outer g_grid n_eps)
             l_res = tconc(l_res Polygon(l_outer))
         )
         car(l_res)
@@ -845,6 +845,8 @@ procedure(Boolean(S_op l_a l_b \@key (grid nil) (eps nil) "Sllgg")  ; -> list | 
         unless(l_b || op == 'union
             error("ycGeom::Boolean: l_b may be nil only when the operation is or")
         )
+        grid = _Grid(grid)
+        eps = _Eps(eps)
         a = _UnionAll(_AsPolygons(l_a "ycGeom::Boolean") grid eps)
         b = _UnionAll(_AsPolygons(l_b "ycGeom::Boolean") grid eps)
         polys = _ShapePolys(a b op grid eps "ycGeom::Boolean")
