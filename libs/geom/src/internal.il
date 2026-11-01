@@ -511,25 +511,25 @@ procedure(_AsPolygons(g_x t_ctx "gt")  ; -> list[Polygon]
     ;
     ; **返回**
     ;   (list[Polygon]) - 多边形列表；空集 nil；非法时 error
-    let((l_pts l_res g_poly)
+    let((pts res poly)
         cond(
             (_RegionP(g_x) g_x->polygons())
             (_PolygonP(g_x) list(g_x))
             (_RectP(g_x)
-                g_poly = _RectPolygon(g_x)
-                when(g_poly list(g_poly))
+                poly = _RectPolygon(g_x)
+                when(poly list(poly))
             )
             (listp(g_x)
-                l_pts = errset(_AsPointList(g_x t_ctx) nil)
+                pts = errset(_AsPointList(g_x t_ctx) nil)
                 cond(
-                    ((l_pts && car(l_pts))
-                        l_pts = car(l_pts)
+                    ((pts && car(pts))
+                        pts = car(pts)
                         cond(
-                            ((length(l_pts) == 2)
-                                g_poly = _RectPolygon(Rect(l_pts))
-                                when(g_poly list(g_poly))
+                            ((length(pts) == 2)
+                                poly = _RectPolygon(Rect(pts))
+                                when(poly list(poly))
                             )
-                            ((length(l_pts) >= 3) list(Polygon(l_pts)))
+                            ((length(pts) >= 3) list(Polygon(pts)))
                             (t
                                 error("%s: expected a Region, Polygon, Rect, or point list, got %A"
                                     t_ctx g_x)
@@ -537,10 +537,10 @@ procedure(_AsPolygons(g_x t_ctx "gt")  ; -> list[Polygon]
                         )
                     )
                     (t
-                        l_res = errset(_AsPolygonList(g_x t_ctx) nil)
-                        if(l_res
+                        res = errset(_AsPolygonList(g_x t_ctx) nil)
+                        if(res
                         then
-                            car(l_res)
+                            car(res)
                         else
                             error("%s: expected a Region, Polygon, Rect, or point list, got %A"
                                 t_ctx g_x)
