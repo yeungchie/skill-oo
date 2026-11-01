@@ -832,21 +832,19 @@ procedure(Boolean(l_a l_b g_op \@key (grid nil) (eps nil) "llggg")  ; -> list | 
     ;
     ; **返回**
     ;   (list|nil) - 结果点列列表；空结果为 nil
-    let((l_res)
-        foreach(g_p _ShapePolys(l_a l_b
-                cond(
-                    (g_op == 'or 'union)
-                    (g_op == 'and 'intersection)
-                    (g_op == 'not 'difference)
-                    (g_op == 'xor 'xor)
-                    (t error(
-                        "ycGeom::Boolean: unknown operation %A; expected or, and, not, or xor"
-                        g_op))
-                )
-                grid eps "ycGeom::Boolean")
-            l_res = tconc(l_res g_p->toSkill())
+    let((g_opv l_polys)
+        g_opv = case(g_op
+            (or     'union)
+            (and    'intersection)
+            (not    'difference)
+            (xor    'xor)
+            (t
+                error("ycGeom::Boolean: unknown operation %A; expected or, and, not, or xor"
+                    g_op)
+            )
         )
-        car(l_res)
+        l_polys = _ShapePolys(l_a l_b g_opv grid eps "ycGeom::Boolean")
+        foreach(mapcar g_poly l_polys g_poly->toSkill())
     )
 )
 
