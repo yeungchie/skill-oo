@@ -448,6 +448,8 @@ procedure(_InstallPolygonToPath(self "g")  ; -> t
             ; 逆推宽度由坐标差得出，绝对误差随坐标量级增长（≈ ulp(坐标)）；
             ; 与 _CanonRing 的 _canonScale 一致地把容差下限抬到量级相关值，
             ; 否则大偏移处两次垂距测量之差的符号会翻转，配对失败返回 nil。
+            ; 量级取 toSkill() 的全体坐标（含内环点），覆盖整张图；
+            ; 只放大有量纲的距离判据，单位向量点积与叉积符号等无量纲判据不动。
             n_mag = 0.0
             foreach(l_p self->toSkill()
                 n_mag = max(n_mag abs(car(l_p)) abs(cadr(l_p)))

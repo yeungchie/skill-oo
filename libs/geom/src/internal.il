@@ -50,6 +50,8 @@ procedure(_SnapRound(n_q "n")  ; -> float
         n_qv = float(n_q)
         ; %.0f 先给出 double 整数（半偶）；只有落在向零一侧的
         ; 近半格值时，再用 round2(小数部分) 修正到远离零一侧。
+        ; 已知边界：round2 的半格判定窗口约 2e-7，表示误差使极靠近
+        ; 半格的值仍按较远一侧取整；double 下不可细分，故不加额外修正。
         n_base = atof(lsprintf("%.0f" n_qv))
         n_frac = n_qv - n_base
         when(abs(n_base) < abs(n_qv)

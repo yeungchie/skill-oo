@@ -1,6 +1,9 @@
 unless(findNamespace("ycGeom")
     makeNamespace("ycGeom")
 )
+; 收录规则：各来源文件的全部顶层 procedure、defclass 与顶层变量都列入，
+; 只排除定义在 inScheme/let/procedure 内、名字不外泄的闭包；不按「是否被
+; 外部引用」取舍，避免名单退化成随意子集。新增顶层符号须同步加进本表。
 addToNamespace("ycGeom"
     mapcar('symbolToString '(
         ; point.il

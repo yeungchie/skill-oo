@@ -141,7 +141,8 @@ procedure(_InstallRegion(self "g")  ; -> t
             n_sxc = 0.0
             n_sy = 0.0
             n_syc = 0.0
-            ; 面积、a*x、a*y 三者量级差极大，各自独立做补偿求和
+            ; 面积、a*x、a*y 三者量级差极大：共用同一个补偿量会把小项
+            ; 的残差混进别的量里，等于没补偿，因此三路各自独立累加与并回。
             foreach(g_p self->_data->polygons
                 n_a = g_p->area()
                 g_c = g_p->centroid()
