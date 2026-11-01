@@ -245,7 +245,7 @@ procedure(_InstallPath(self "g")  ; -> t
         ; 返回本机可创建的合法 path 点列。
         ;
         ; **参数**
-        ;   ?edge   (int)     - 切开接缝的边序号，1-based；默认 1
+        ;   ?edge   (int)     - 切开接缝的边序号，1-based；默认 1；开放路径只校验范围，不影响结果
         ;   ?ratio  (num)     - 切点在边上的比例；默认 0.5
         ;   ?eps    (num|nil) - 容差；默认 nil（1e-9）
         ;
@@ -266,12 +266,14 @@ procedure(_InstallPath(self "g")  ; -> t
             l_pts = self->_data->route->points()
             n_len = length(l_pts)
             g_closed = self->_data->route->isClosed()
-            when(g_closed && edge > n_len
+            ; 开放路径没有接缝，但 ?edge 仍按 1..边数 校验，
+            ; 避免同一个关键字在两类路径上给出不一致的契约。
+            n_edge = if(g_closed n_len (n_len - 1))
+            when(edge > n_edge
                 error("ycGeom::Path->toLegalPathPoints: ?edge %d out of range 1..%d"
-                    edge n_len)
+                    edge n_edge)
             )
 
-            n_edge = if(g_closed n_len (n_len - 1))
             for(n_i 1 n_edge
                 for(n_j 1 n_edge
                     when(n_j > n_i
