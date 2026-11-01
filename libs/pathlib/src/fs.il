@@ -342,7 +342,8 @@ self->writeText = lambda((t_text "t")  ; -> t
     ;   t_text  (str) - 写入内容
     ;
     ; **返回**
-    ;   (t) - 成功返回 t；目标为目录、父目录缺失、打开或写入失败，走 _error() 中断
+    ;   (t) - 成功返回 t；目标为目录、父目录缺失、打开或写入失败走 _error() 中断；
+    ;         刷盘失败由 close 以原生错误中断（消息带系统原因，如 No space left on device）
     let((t_str g_port g_ok)
         t_str = self->str()
         when(self->isDir()
