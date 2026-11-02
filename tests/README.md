@@ -57,6 +57,6 @@ TOTAL: <总耗时>
 --- END expected error output ---
 ```
 
-标记与窗口内的错误诊断都写到错误输出端口（`errport`），与库自身的 `*Error*` 同流；用例的最终结果行仍写标准输出端口（`poport`）。写开始标记前会 `drain` 标准输出，写结束标记前再 `drain` 一次，因此窗口内的结果行会按序落在结束标记之前，重定向或缓冲时两路内容也不会错位。`errset(expr nil)` 用于静默捕获预期错误；测试文件载入失败时也由这组标记包住诊断信息。
+标记与窗口内的错误诊断都写到错误输出端口（`errport`），与库自身的 `*Error*` 同流；窗口打开期间产生的用例结果行会先暂存，等 `_TestErrorEnd` 写完结束标记后再按序打印到标准输出端口（`poport`）。写开始标记前会 `drain` 标准输出，结束标记后也会刷新，重定向或缓冲时两路内容不会错位。`errset(expr nil)` 用于静默捕获预期错误；测试文件载入失败时也由这组标记包住诊断信息。
 
 有失败时以 `*Error* <模块名>: <m> test(s) failed` 终止（`ycPathLib` / `ycRegEx` / `ycSubProcess` / `ycCodec` / `ycJson` / `ycYaml` / `ycCsv` / `ycToml` / `ycIni` / `ycUtf8` / `ycString` / `ycUnits` / `ycRadix` / `ycTextwrap` / `ycTabulate` / `ycGeom`）。

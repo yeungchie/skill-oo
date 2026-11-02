@@ -16,7 +16,28 @@ _TestFileIndex = 0
 _TestFileTotal = 0
 _TestExpected = 0
 _TestChildDone = nil
+_TestErrWindow = nil
+_TestDeferred = nil
 _TestProgDigits = 3
+
+procedure(_TestPrint(t_kitFmt @rest l_kitArgs "tg")  ; -> t
+    ; 普通输出写 poport；错误窗口打开时先暂存，窗口结束后再按序打印。
+    ;
+    ; **参数**
+    ;   t_kitFmt   (str) - 格式串
+    ;   l_kitArgs  (list) - 格式参数
+    ;
+    ; **返回**
+    ;   (t) - 恒为 t
+    let(((t_kitText nil))
+        t_kitText = apply('sprintf (cons nil (cons t_kitFmt l_kitArgs)))
+        if(_TestErrWindow
+            _TestDeferred = tconc(_TestDeferred t_kitText)
+            printf("%s" t_kitText)
+        )
+        t
+    )
+)
 
 procedure(_TestFmtTime(n_kitSec "n")  ; -> str
     ; 把秒数格式化成易读的耗时串。
@@ -67,19 +88,27 @@ procedure(_TestErrorBegin(t_kitWhat "t")  ; -> t
     ; **返回**
     ;   (t) - 恒为 t
     drain(poport)
+    _TestErrWindow = t
     fprintf(errport "\n--- BEGIN expected error output: %s ---\n" t_kitWhat)
     drain(errport)
     t
 )
 
 procedure(_TestErrorEnd()  ; -> t
-    ; 标记一段有意产生的错误输出结束。
+    ; 标记一段有意产生的错误输出结束，并补打窗口内暂存的用例结果。
     ;
     ; **返回**
     ;   (t) - 恒为 t
-    drain(poport)
     fprintf(errport "--- END expected error output ---\n\n")
     drain(errport)
+    _TestErrWindow = nil
+    when(_TestDeferred
+        foreach(t_kitText car(_TestDeferred)
+            printf("%s" t_kitText)
+        )
+        _TestDeferred = nil
+    )
+    drain(poport)
     t
 )
 
@@ -97,7 +126,7 @@ procedure(_TestReport(g_kitOk t_kitName n_kitSec "gtn")  ; -> t | nil
     unless(g_kitOk
         _TestFail++
     )
-    printf("%s %7s TEST %s - %s\n"
+    _TestPrint("%s %7s TEST %s - %s\n"
         lsprintf("[%s/%s]"
             _TestPadLeft(lsprintf("%d" _TestCount) _TestProgDigits)
             lsprintf("%d" _TestExpected))
@@ -183,8 +212,8 @@ procedure(_AssertErrorMsg(g_kitThunk t_kitSub t_kitName "gtt")  ; -> t | nil
         g_kitOk = !g_kitRes && t_kitText && index(t_kitText t_kitSub)
         _TestReport(g_kitOk t_kitName caddr(l_kitPerf))
         unless(g_kitOk
-            printf("  expected message containing: %A\n" t_kitSub)
-            printf("  actual: %A\n" if(t_kitText t_kitText "no error detail"))
+            _TestPrint("  expected message containing: %A\n" t_kitSub)
+            _TestPrint("  actual: %A\n" if(t_kitText t_kitText "no error detail"))
         )
         g_kitOk
     )
@@ -318,8 +347,8 @@ procedure(_TestSameSeqVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; -> 
     let(((g_kitOk nil))
         g_kitOk = _TestSeqEq(l_actual l_expected)
         unless(g_kitOk
-            printf("  expected (%d): %A\n" length(l_expected) l_expected)
-            printf("  actual (%d): %A\n" length(l_actual) l_actual)
+            _TestPrint("  expected (%d): %A\n" length(l_expected) l_expected)
+            _TestPrint("  actual (%d): %A\n" length(l_actual) l_actual)
         )
         _TestReport(g_kitOk t_kitName n_kitSec)
     )
@@ -339,13 +368,13 @@ procedure(_TestSameStrsVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; ->
     let(((g_kitOk nil))
         g_kitOk = _TestStrMultisetEq(l_actual l_expected)
         unless(g_kitOk
-            printf("  expected (%d):\n" length(l_expected))
+            _TestPrint("  expected (%d):\n" length(l_expected))
             foreach(t_s l_expected
-                printf("    %s\n" t_s)
+                _TestPrint("    %s\n" t_s)
             )
-            printf("  actual (%d):\n" length(l_actual))
+            _TestPrint("  actual (%d):\n" length(l_actual))
             foreach(t_s l_actual
-                printf("    %s\n" t_s)
+                _TestPrint("    %s\n" t_s)
             )
         )
         _TestReport(g_kitOk t_kitName n_kitSec)
@@ -368,9 +397,9 @@ procedure(_TestSameTuplesVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; 
         l_kitB = mapcar('_TestTupKey l_expected)
         g_kitOk = _TestSeqEq(l_kitA l_kitB)
         unless(g_kitOk
-            printf("  expected (%d): [%s]\n"
+            _TestPrint("  expected (%d): [%s]\n"
                 length(l_expected) buildString(l_kitB "; "))
-            printf("  actual (%d): [%s]\n"
+            _TestPrint("  actual (%d): [%s]\n"
                 length(l_actual) buildString(l_kitA "; "))
         )
         _TestReport(g_kitOk t_kitName n_kitSec)
@@ -391,9 +420,9 @@ procedure(_TestSameIntsVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; ->
     let(((g_kitOk nil))
         g_kitOk = _TestSeqEq(l_actual l_expected)
         unless(g_kitOk
-            printf("  expected ints (%d): %s\n"
+            _TestPrint("  expected ints (%d): %s\n"
                 length(l_expected) _TestIntKey(l_expected))
-            printf("  actual ints (%d): %s\n"
+            _TestPrint("  actual ints (%d): %s\n"
                 length(l_actual) _TestIntKey(l_actual))
         )
         _TestReport(g_kitOk t_kitName n_kitSec)
@@ -420,9 +449,9 @@ procedure(_TestSameSpanVals(g_match n_start n_end t_kitName n_kitSec "gnntn")  ;
             && car(l_kitSpan) == n_start
             && car(cdr(l_kitSpan)) == n_end
         unless(g_kitOk
-            printf("  expected span (%d, %d)\n" n_start n_end)
+            _TestPrint("  expected span (%d, %d)\n" n_start n_end)
             when(l_kitSpan
-                printf("  actual span (%d, %d)\n" car(l_kitSpan) car(cdr(l_kitSpan)))
+                _TestPrint("  actual span (%d, %d)\n" car(l_kitSpan) car(cdr(l_kitSpan)))
             )
         )
         _TestReport(g_kitOk t_kitName n_kitSec)
@@ -443,8 +472,8 @@ procedure(_TestSameRowsVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; ->
     let(((g_kitOk nil))
         g_kitOk = _TestRowsEq(l_actual l_expected)
         unless(g_kitOk
-            printf("  expected (%d): %A\n" length(l_expected) l_expected)
-            printf("  actual (%d): %A\n" length(l_actual) l_actual)
+            _TestPrint("  expected (%d): %A\n" length(l_expected) l_expected)
+            _TestPrint("  actual (%d): %A\n" length(l_actual) l_actual)
         )
         _TestReport(g_kitOk t_kitName n_kitSec)
     )
@@ -531,12 +560,15 @@ procedure(_TestLoadFile(t_kitFile "t")  ; -> t
         _TestFileIndex++
         n_kitBefore = _TestCount
         _TestChildDone = nil
-        printf("\n[%d/%d] %s\n" _TestFileIndex _TestFileTotal t_kitFile)
+        _TestPrint("\n[%d/%d] %s\n" _TestFileIndex _TestFileTotal t_kitFile)
         l_kitPerf = measureTime(l_kitRes = errset(load(strcat(_TestDir t_kitFile)) nil))
+        when(_TestErrWindow
+            _TestErrorEnd()
+        )
         unless(_TestChildDone
             _TestCount++
             _TestFail++
-            printf("[%d/%d] %s TEST FAILED - %s did not run to completion\n"
+            _TestPrint("[%d/%d] %s TEST FAILED - %s did not run to completion\n"
                 _TestCount _TestExpected _TestFmtTime(caddr(l_kitPerf)) t_kitFile)
             when(l_kitRes == nil
                 _TestErrorBegin(t_kitFile)
@@ -544,7 +576,7 @@ procedure(_TestLoadFile(t_kitFile "t")  ; -> t
                 _TestErrorEnd()
             )
         )
-        printf("[%d/%d] %s done in %s (%d tests)\n"
+        _TestPrint("[%d/%d] %s done in %s (%d tests)\n"
             _TestFileIndex
             _TestFileTotal
             t_kitFile
@@ -571,17 +603,17 @@ procedure(_TestRun(t_kitModule n_kitExpected @rest l_kitFiles "tng")  ; -> t
         _TestFileTotal = length(l_kitFiles)
         _TestExpected = n_kitExpected
         _TestProgDigits = length(lsprintf("%d" n_kitExpected))
-        printf("\n=== %s ===\n" t_kitModule)
+        _TestPrint("\n=== %s ===\n" t_kitModule)
         l_kitPerf = measureTime(
             foreach(t_kitFile l_kitFiles
                 _TestLoadFile(t_kitFile)
             )
         )
-        printf("\nPASS: %d / FAIL: %d\n" _TestCount - _TestFail _TestFail)
-        printf("TOTAL: %s\n" _TestFmtTime(caddr(l_kitPerf)))
+        _TestPrint("\nPASS: %d / FAIL: %d\n" _TestCount - _TestFail _TestFail)
+        _TestPrint("TOTAL: %s\n" _TestFmtTime(caddr(l_kitPerf)))
         drain(poport)
         unless(_TestCount == n_kitExpected
-            printf("NOTE: expected %d tests, ran %d\n"
+            _TestPrint("NOTE: expected %d tests, ran %d\n"
                 n_kitExpected _TestCount)
         )
         when(_TestFail > 0
