@@ -16,7 +16,6 @@ _TestFileIndex = 0
 _TestFileTotal = 0
 _TestExpected = 0
 _TestChildDone = nil
-_TestCurrentFile = ""
 _TestErrWindow = nil
 
 procedure(_TestPrint(t_kitFmt @rest l_kitArgs "tg")  ; -> t
@@ -89,13 +88,12 @@ procedure(_TestReport(g_kitOk t_kitName n_kitSec "gtn")  ; -> t | nil
     unless(g_kitOk
         _TestFail++
     )
-    _TestPrint("[%d/%d] %s TEST %s - %s%s\n"
+    _TestPrint("[%d/%d] %s TEST %s - %s\n"
         _TestCount
         _TestExpected
         _TestFmtTime(n_kitSec)
         if(g_kitOk "PASSED" "FAILED")
-        t_kitName
-        if(_TestCurrentFile == "" "" lsprintf(" (%s)" _TestCurrentFile)))
+        t_kitName)
     g_kitOk
 )
 
@@ -523,7 +521,6 @@ procedure(_TestLoadFile(t_kitFile "t")  ; -> t
         _TestFileIndex++
         n_kitBefore = _TestCount
         _TestChildDone = nil
-        _TestCurrentFile = t_kitFile
         _TestPrint("\n[%d/%d] %s\n" _TestFileIndex _TestFileTotal t_kitFile)
         l_kitPerf = measureTime(l_kitRes = errset(load(strcat(_TestDir t_kitFile)) nil))
         unless(_TestChildDone
