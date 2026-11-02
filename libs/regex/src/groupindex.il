@@ -17,27 +17,21 @@ _GroupIndexProbe = makeTable("regexGroupIndexTool" nil)
 
 
 procedure(_GroupIndexPython(t_ctx "t")  ; -> str
-    ; 返回可用的辅助解释器命令名（python3 优先，回退 python），探测结果缓存。
+    ; 返回辅助解释器命令名（python3），探测结果缓存。
     ;
     ; **参数**
     ;   t_ctx  (str) - 出错上下文名（拼入错误消息）
     ;
     ; **返回**
-    ;   (str) - 命令名；两者都不可用时 error() 中断
-    let((hit res try)
+    ;   (str) - 命令名；不可用时 error() 中断
+    let((hit res)
         hit = _GroupIndexProbe["python"]
         unless(hit
-            foreach(try list("python3" "python")
-                when(hit == nil
-                    res = ycSubProcess:::RunWithRead(lsprintf("command -v %s" try))
-                    when(car(res) == 0 && cadr(res) != ""
-                        hit = try
-                    )
-                )
+            res = ycSubProcess:::RunWithRead("command -v python3")
+            unless(car(res) == 0 && cadr(res) != ""
+                error("%A: group name resolution needs python3 on PATH" t_ctx)
             )
-            unless(hit
-                error("%A: group name resolution needs a helper interpreter (python3 or python) on PATH" t_ctx)
-            )
+            hit = "python3"
             _GroupIndexProbe["python"] = hit
         )
         hit

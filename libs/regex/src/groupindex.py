@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # 组名 -> 组号映射：从标准输入读模式串，向标准输出写 JSON 对象。
 #
@@ -11,16 +11,10 @@ import re
 import sys
 
 
-def read_pattern():
-    if hasattr(sys.stdin, "buffer"):
-        # 按字节读再按 UTF-8 解码：不依赖进程 locale，非 ASCII 模式不会解码失败。
-        return sys.stdin.buffer.read().decode("utf-8", "replace")
-    return sys.stdin.read()
-
-
 def main(argv):
     named_only = "--no-auto-capture" in argv
-    pattern = read_pattern()[:-1]
+    # 按字节读再按 UTF-8 解码：不依赖进程 locale，非 ASCII 模式不会解码失败。
+    pattern = sys.stdin.buffer.read().decode("utf-8", "replace")[:-1]
     rec = re.compile(pattern)
     index = dict(rec.groupindex)
     if named_only:
