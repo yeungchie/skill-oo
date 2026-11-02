@@ -10,13 +10,13 @@ import argparse
 import json
 import re
 import sys
-from typing import Dict, List
+from typing import Dict, List, NoReturn
 
 
 class UsageParser(argparse.ArgumentParser):
     """Report contract violations as a usage line on stdout plus exit 1."""
 
-    def error(self, message: str) -> None:
+    def error(self, message: str) -> NoReturn:
         self.print_usage(sys.stdout)
         raise SystemExit(1)
 
@@ -42,7 +42,8 @@ def main(argv: List[str]) -> int:
     index: Dict[str, int] = dict(rec.groupindex)
     if args.no_auto_capture:
         index = {
-            name: rank for rank, name in enumerate(sorted(index, key=index.get), 1)
+            name: rank
+            for rank, name in enumerate(sorted(index, key=lambda item: index[item]), 1)
         }
     sys.stdout.write(json.dumps(index))
     return 0
