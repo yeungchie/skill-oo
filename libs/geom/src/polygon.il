@@ -124,6 +124,7 @@ defmethod(printself (self(Polygon))  ; -> str
 procedure(_ShapePolys(g_left g_other s_op g_grid n_eps t_ctx "ggsgnt")  ; -> list[Polygon]
     ; 布尔运算的公共管线：归一化两侧、计算、清理共线点（内部实现）。
     ;
+    ; 两侧各自先按 or 合并（成员重叠时不会退化成奇偶规则），
     ; 方法层 _ShapeOp 与纯数据层 ycGeom::Boolean 都从这里取结果，
     ; 「归一化 + _Boolean + 清理」只有这一份实现。
     ;
@@ -138,7 +139,9 @@ procedure(_ShapePolys(g_left g_other s_op g_grid n_eps t_ctx "ggsgnt")  ; -> lis
     ; **返回**
     ;   (list[Polygon]) - 结果多边形；空结果 nil
     _CleanPolygons(
-        _Boolean(_AsPolygons(g_left t_ctx) _AsPolygons(g_other t_ctx)
+        _Boolean(
+            _UnionAll(_AsPolygons(g_left t_ctx) g_grid n_eps)
+            _UnionAll(_AsPolygons(g_other t_ctx) g_grid n_eps)
             s_op g_grid n_eps)
         _Eps(n_eps)
     )

@@ -370,6 +370,9 @@ defmethod(initializeInstance (self(Region) \@rest _args)
 procedure(Region(l_polygons \@key (normalize t) (grid nil) (eps nil) "lggg")  ; -> Region
     ; 构造不可变区域。
     ;
+    ; ?normalize nil 时成员原样保留，面积按各块求和；布尔运算不受影响，
+    ; 两侧成员在运算前一律按 or 合并。
+    ;
     ; **参数**
     ;   l_polygons  (list[Polygon]|nil) - 多边形列表或点列；nil 表示空区域
     ;   ?normalize  (t|nil)             - 是否归一化为互不重叠；默认 t

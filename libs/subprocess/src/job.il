@@ -1,3 +1,5 @@
+ycNamespace:::Require("ycPathLib")
+
 useNamespace("ycSubProcess")
 
 
@@ -104,6 +106,10 @@ procedure(RunWithRead(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gg
 procedure(CreateJob(g_arg \@key callback userData verbose \@rest l_args "ggggg")  ; -> AsyncJob
     ; 创建异步任务对象：命令各段拼接后构造 AsyncJob（未启动）。
     ;
+    ; 只有一个实参时它是完整命令串，原样交给 shell（可用管道、重定向、变量）；
+    ; 给了后续参数时按参数列表拼接，每个参数单独加引号保护，空格与
+    ; `;` `|` `&` `>` 等元字符不再被 shell 解释。
+    ;
     ; **参数**
     ;   g_arg      (any) - 命令；非字符串按 %A 自动转换
     ;   l_args     (list) - 命令的其余部分；非字符串同样自动转换
@@ -113,13 +119,20 @@ procedure(CreateJob(g_arg \@key callback userData verbose \@rest l_args "ggggg")
     ;
     ; **返回**
     ;   (AsyncJob) - 未启动的任务对象，需再调用 start() 启动
-    AsyncJob(
-        buildString(foreach(mapcar x cons(g_arg l_args)
-            stringp(x) && x || lsprintf("%A" x)
-        ))
-        ?callback   callback
-        ?userData   userData
-        ?verbose    verbose
+    let((t_cmd)
+        t_cmd = if(l_args
+        then
+            buildString(foreach(mapcar x cons(g_arg l_args)
+                ycPathLib::_ShellQuote(stringp(x) && x || lsprintf("%A" x))
+            ))
+        else
+            stringp(g_arg) && g_arg || lsprintf("%A" g_arg)
+        )
+        AsyncJob(t_cmd
+            ?callback   callback
+            ?userData   userData
+            ?verbose    verbose
+        )
     )
 )
 

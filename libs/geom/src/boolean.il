@@ -832,7 +832,7 @@ procedure(Boolean(S_op l_a l_b \@key (grid nil) (eps nil) "Sllgg")  ; -> list | 
     ;
     ; **返回**
     ;   (list|nil) - 结果点列列表；空结果为 nil
-    let((op a b polys)
+    let((op polys)
         op = case(lowerCase(S_op)
             ("or"   'union)
             ("and"  'intersection)
@@ -847,9 +847,7 @@ procedure(Boolean(S_op l_a l_b \@key (grid nil) (eps nil) "Sllgg")  ; -> list | 
         )
         grid = _Grid(grid)
         eps = _Eps(eps)
-        a = _UnionAll(_AsPolygons(l_a "ycGeom::Boolean") grid eps)
-        b = _UnionAll(_AsPolygons(l_b "ycGeom::Boolean") grid eps)
-        polys = _ShapePolys(a b op grid eps "ycGeom::Boolean")
+        polys = _ShapePolys(l_a l_b op grid eps "ycGeom::Boolean")
         foreach(mapcar x polys x->toSkill())
     )
 )

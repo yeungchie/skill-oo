@@ -346,6 +346,49 @@ let((l_a l_b)
         "boolean: native rejects malformed point array")
 )
 
+let((g_raw g_norm g_hole l_nat)
+    ; Region 成员重叠：两条入口都必须按「成员先并集」参与运算，结果一致
+    g_raw = ycGeom::Region(list(
+        ycGeom::Rect(list(0:0 4:4))
+        ycGeom::Rect(list(2:2 6:6))) ?normalize nil)
+    g_norm = ycGeom::Region(list(
+        ycGeom::Rect(list(0:0 4:4))
+        ycGeom::Rect(list(2:2 6:6))))
+    g_hole = ycGeom::Rect(list(3:3 4:4))
+    l_nat = list(
+        ycGeom::Rect(list(0:0 4:4))->toSkill()
+        ycGeom::Rect(list(2:2 6:6))->toSkill())
+    ; ?normalize nil 只保留成员分块，面积仍是各块之和
+    _Assert(g_raw->area() == 32.0
+        "boolean: unnormalized region keeps both members")
+    _Assert(g_norm->area() == 28.0
+        "boolean: normalized region merges members")
+    ; 正确值：并集 28、交集 1、差 27、对称差 27
+    _Assert(g_raw->and(g_hole)->area() == 1.0
+        "boolean: raw region intersection uses the union")
+    _Assert(g_raw->or(g_hole)->area() == 28.0
+        "boolean: raw region union ignores member overlap")
+    _Assert(g_raw->not(g_hole)->area() == 27.0
+        "boolean: raw region difference uses the union")
+    _Assert(g_raw->xor(g_hole)->area() == 27.0
+        "boolean: raw region xor uses the union")
+    _Assert(g_raw->and(g_hole)->area() == g_norm->and(g_hole)->area()
+        "boolean: raw and normalized regions agree")
+    ; 原生入口对同一操作数给同一结果
+    _Assert(ycGeom::Region(ycGeom::Boolean('and l_nat g_hole->toSkill())
+            ?normalize nil)->area() == 1.0
+        "boolean: native and matches the method result")
+    _Assert(ycGeom::Region(ycGeom::Boolean('or l_nat g_hole->toSkill())
+            ?normalize nil)->area() == 28.0
+        "boolean: native or matches the method result")
+    _Assert(ycGeom::Region(ycGeom::Boolean('not l_nat g_hole->toSkill())
+            ?normalize nil)->area() == 27.0
+        "boolean: native not matches the method result")
+    _Assert(ycGeom::Region(ycGeom::Boolean('xor l_nat g_hole->toSkill())
+            ?normalize nil)->area() == 27.0
+        "boolean: native xor matches the method result")
+)
+
 _TestBooleanDone = t
 
 ; END

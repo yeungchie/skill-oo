@@ -242,28 +242,35 @@ procedure(_StrMember(t_str l_list "tl")  ; -> t | nil
 )
 
 procedure(_ShellQuote(t_str "t")  ; -> str
-    ; 用单引号包裹串，转义为 shell 安全形式。
+    ; 把串转成可安全拼进 shell 命令的形式。
+    ;
+    ; 仅含安全字符（字母、数字与 `_ . / : = @ % + , ^ -`）时原样返回；
+    ; 其余一律单引号包裹（内部单引号写成 '\''），空串得到 ''。
     ;
     ; **参数**
     ;   t_str  (str) - 原始串
     ;
     ; **返回**
-    ;   (str) - 形如 '...'；内部单引号替换为 '\''
-    let((t_res n_i n_len t_c)
-        t_res = "'"
-        n_i = 1
-        n_len = length(t_str)
-        while(n_i <= n_len
-            t_c = substring(t_str n_i 1)
-            when(t_c == "'"
-                t_res = strcat(t_res "'\\''")
+    ;   (str) - 可直接拼进命令串的形式
+    if(pcreMatchp("^[A-Za-z0-9_./:=@%+,^-]+$" t_str)
+        t_str
+        let((l_parts n_i n_len t_c)
+            l_parts = tconc(l_parts "'")
+            n_i = 1
+            n_len = length(t_str)
+            while(n_i <= n_len
+                t_c = substring(t_str n_i 1)
+                if(t_c == "'"
+                then
+                    l_parts = tconc(l_parts "'\\''")
+                else
+                    l_parts = tconc(l_parts t_c)
+                )
+                n_i++
             )
-            unless(t_c == "'"
-                t_res = strcat(t_res t_c)
-            )
-            n_i++
+            l_parts = tconc(l_parts "'")
+            buildString(car(l_parts) "")
         )
-        strcat(t_res "'")
     )
 )
 

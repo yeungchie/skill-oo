@@ -81,6 +81,39 @@ let((l_res t_start)
         "a fast command does not wait for ?timeout")
 )
 
+; 多参数形式按参数列表拼接：空格与 shell 元字符不再被解释
+let((l_res)
+    l_res = ycSubProcess::RunWithRead("printf" "<%s>" "a b")
+    _Assert(car(l_res) == 0 && cadr(l_res) == "<a b>"
+        "argument with a space reaches the command intact")
+    l_res = ycSubProcess::RunWithRead("echo" "a;b")
+    _Assert(cadr(l_res) == "a;b\n" "semicolon stays inside one argument")
+    l_res = ycSubProcess::RunWithRead("echo" "a|b")
+    _Assert(cadr(l_res) == "a|b\n" "pipe stays inside one argument")
+    l_res = ycSubProcess::RunWithRead("printf" "%s" "it's")
+    _Assert(cadr(l_res) == "it's" "an embedded single quote survives quoting")
+    l_res = ycSubProcess::RunWithRead("printf" "[%s]" "")
+    _Assert(cadr(l_res) == "[]" "an empty argument is kept")
+)
+
+let((l_res)
+    ; 单参数形式是完整命令串，shell 语法照旧可用
+    l_res = ycSubProcess::RunWithRead("sh -c 'printf hi'")
+    _Assert(cadr(l_res) == "hi" "single argument stays a full command line")
+)
+
+let((l_res t_dir)
+    t_dir = "./ycSubProcessTmpSpace"
+    when(isDir(t_dir)
+        deleteDir(t_dir)
+    )
+    createDir(t_dir)
+    l_res = ycSubProcess::RunWithRead("ls" t_dir)
+    _Assert(car(l_res) == 0 && cadr(l_res) == ""
+        "a path with a space is passed as one argument")
+    deleteDir(t_dir)
+)
+
 _TestRunDone = t
 
 ; END
