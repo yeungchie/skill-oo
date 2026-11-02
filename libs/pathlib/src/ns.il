@@ -24,7 +24,7 @@ addToNamespace("ycPathLib"
         _SplitKeep  ; proc
         _EndsWith  ; proc
         _StrMember  ; proc
-        ShellQuote  ; proc
+        ShellQuote  ; proc, plist
 
         ; fnmatch.il
         _FnmatchBracket  ; proc
