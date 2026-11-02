@@ -674,7 +674,7 @@ procedure(_BoundaryMode(g_boundary "g")  ; -> str
     ; **返回**
     ;   (str) - 规范值；非法值 error
     unless(stringp(g_boundary) && (g_boundary == "inside" || g_boundary == "outside")
-        error("ycGeom::_BoundaryMode: ?boundary must be \"inside\" or \"outside\", got %A" g_boundary)
+        error("ycGeom: ?boundary must be \"inside\" or \"outside\", got %A" g_boundary)
     )
     g_boundary
 )
@@ -689,7 +689,7 @@ procedure(_Flag(g_value t_name "gt")  ; -> t | nil
     ; **返回**
     ;   (t|nil) - 原值；非 t/nil 时 error
     unless(g_value == t || g_value == nil
-        error("ycGeom::_Flag: ?%s must be t or nil, got %A" t_name g_value)
+        error("ycGeom: ?%s must be t or nil, got %A" t_name g_value)
     )
     g_value
 )
@@ -1151,7 +1151,7 @@ procedure(_Rings(l_pts "l")  ; -> list[list[Point]]
             while(g_cur
                 l_nei = t_adj[_PtKey(g_cur)]
                 unless(l_nei
-                    error("ycGeom::_Rings: cannot close polygon ring")
+                    error("ycGeom: cannot close polygon ring")
                 )
                 g_next = car(l_nei)
                 t_adj[_PtKey(g_cur)] = cdr(l_nei)

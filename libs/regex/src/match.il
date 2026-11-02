@@ -106,14 +106,14 @@ procedure(_AnchorAt(g_pat n_off "gx")  ; -> compiled
     ;   (compiled) - n_off 为 0 时复用 span 对象；否则以 (?<=\A[\s\S]{n_off})(?:…) 编译；
     ;                n_off > 65535 或编译失败时 error() 中断
     when(n_off > 65535
-        error("ycRegEx::_AnchorAt: anchor offset %d exceeds the 65535-byte limit" n_off)
+        error("ycRegEx: anchor offset %d exceeds the 65535-byte limit" n_off)
     )
     if(n_off == 0
         g_pat->_data->span
         let((g_obj)
             g_obj = _CompileChecked(
                 lsprintf("%s(?<=\\A[\\s\\S]{%d})(?:%s)" g_pat->_data->flags n_off g_pat->_data->pattern)
-                lsprintf("ycRegEx::_AnchorAt: anchor at offset %d" n_off)
+                lsprintf("ycRegEx: anchor at offset %d" n_off)
                 g_pat->_data->compileOpts
             )
             g_obj

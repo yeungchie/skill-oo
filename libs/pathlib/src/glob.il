@@ -122,15 +122,15 @@ procedure(_GlobPattern(g_base t_pattern "gt")  ; -> list[Path] | nil
     ;
     ; **返回**
     ;   (list[Path]|nil) - 按字符串去重的匹配列表（顺序未定义）；g_base 非目录或无匹配返回 nil；绝对 pattern 抛
-    ;                      "ycPathLib::_GlobPattern: non-relative patterns are unsupported"；解析后无有效段（如 ""、"."）抛 "ycPathLib::_GlobPattern: unacceptable pattern"
+    ;                      "ycPathLib: non-relative patterns are unsupported"；解析后无有效段（如 ""、"."）抛 "ycPathLib: unacceptable pattern"
     let((l_parse l_segs)
         when(pcreMatchp("^/" t_pattern)
-            error("ycPathLib::_GlobPattern: non-relative patterns are unsupported")
+            error("ycPathLib: non-relative patterns are unsupported")
         )
         l_parse = _ParsePath(t_pattern)
         l_segs = cdr(l_parse)
         when(l_segs == nil
-            error("ycPathLib::_GlobPattern: unacceptable pattern: '%s'" t_pattern)
+            error("ycPathLib: unacceptable pattern: '%s'" t_pattern)
         )
         when(_EndsWith(t_pattern "/")
             l_segs = append(l_segs list(""))

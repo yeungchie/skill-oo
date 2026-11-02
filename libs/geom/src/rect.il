@@ -69,7 +69,7 @@ procedure(_RectPolygon(g_rect "g")  ; -> Polygon | nil
     ; **返回**
     ;   (Polygon|nil) - 逆时针四角 Polygon；退化时 nil；非法对象 error
     unless(_RectP(g_rect)
-        error("ycGeom::_RectPolygon: expected a Rect, got %A" g_rect)
+        error("ycGeom: expected a Rect, got %A" g_rect)
     )
     let((n_eps n_scale)
         n_eps = _Eps(nil)

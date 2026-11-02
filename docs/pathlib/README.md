@@ -8,6 +8,7 @@ Cadence SKILL++ 的路径处理库：纯路径操作与文件系统操作。
 
 + 方法名采用小驼峰命名（如 `withSuffix`、`relativeTo`、`expandUser`）。
 + 纯路径操作按词法解析，不访问磁盘；`..` 部件保留不折叠，仅 `resolve()` 规范化。
++ 拼 shell 命令时用 `ycPathLib::ShellQuote` 包住路径与参数，空格与 `;` `|` `&` `>` 等字符不会被解释。
 + 例程中 `; =>` 表示返回值，`(...)` 为省略的输出、括注「示例值」「本地时间字符串」者为示意；`Path` 返回值常缩写为字符串形式，`$PWD` 与 `$HOME` 分别表示当前工作目录与 HOME 环境变量。类型标记沿用源码中的轻量类型词表（`str`/`int`/`list[T]`/`A | nil` 等）。
 
 ## 快速上手
@@ -1455,7 +1456,7 @@ p->glob(t_pattern)
 + `**` 段匹配零级或多级目录；非整段 `**`（如 `a**b`、`**txt`）按单个 `*` 处理；递归不跟随目录符号链接；终端 `**` 产出自身与全部条目（文件、目录、链接目录条目——链接目录只产出不进入）。
 + 点开头的隐藏名与普通名同等待遇：`*`、`**` 均可匹配、可进入。
 + 尾部 `/` 要求匹配项为目录；`..` 段按字面拼接（`p->glob("..")` 产出 `dir/..`）。
-+ 绝对 pattern → 以 `error()` 中断，消息 `ycPathLib::_GlobPattern: non-relative patterns are unsupported`；解析后无有效段（如空、`.`、`./`）→ 以 `error()` 中断，消息 `ycPathLib::_GlobPattern: unacceptable pattern: ...`。
++ 绝对 pattern → 以 `error()` 中断，消息 `ycPathLib: non-relative patterns are unsupported`；解析后无有效段（如空、`.`、`./`）→ 以 `error()` 中断，消息 `ycPathLib: unacceptable pattern: ...`。
 + 结果按字符串去重；顺序未定义（确定性但非文件系统返回顺序），比较请按集合。
 
 **参数**
@@ -1590,5 +1591,38 @@ here = ycPathLib::CurrentFile()->parent()
 ```
 
 > 注：`get_filename` 在文件最后一个表达式处取值存在已知异常，避免在文件末行调用本函数。
+
+### ycPathLib::ShellQuote <sub>`function`</sub>
+
+```text
+ycPathLib::ShellQuote(
+    t_str
+)
+=> str
+```
+
+**描述**
+
+把串转成可安全拼进 shell 命令的形式。只含安全字符（字母、数字与 `_ . / : = @ % + , ^ -`）时原样返回；其余一律用单引号包裹，内部单引号转义为 `'\''`，空串得到 `''`。拼 `system()` 命令时逐参数套一层，路径里的空格与 `;` `|` `&` `>` 等元字符就不会被解释。非字符串实参以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| t_str | str | | 原始参数串 |
+
+**返回值**
+
+`str` — 可直接拼进命令串的形式。
+
+**例程**
+
+```lisp
+ycPathLib::ShellQuote("a-b_c.d/e")   ; => "a-b_c.d/e"
+ycPathLib::ShellQuote("my file")     ; => "'my file'"
+ycPathLib::ShellQuote("it's")        ; => "'it'\\''s'"
+ycPathLib::ShellQuote("")            ; => "''"
+ycPathLib::ShellQuote("a;b|&>")      ; => "'a;b|&>'"
+```
 
 [返回首页](../../README.md)

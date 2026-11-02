@@ -241,7 +241,7 @@ procedure(_StrMember(t_str l_list "tl")  ; -> t | nil
     )
 )
 
-procedure(_ShellQuote(t_str "t")  ; -> str
+procedure(ShellQuote(t_str "t")  ; -> str
     ; 把串转成可安全拼进 shell 命令的形式。
     ;
     ; 仅含安全字符（字母、数字与 `_ . / : = @ % + , ^ -`）时原样返回；

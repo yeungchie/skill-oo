@@ -123,7 +123,7 @@ procedure(CreateJob(g_arg \@key callback userData verbose \@rest l_args "ggggg")
         t_cmd = if(l_args
         then
             buildString(foreach(mapcar x cons(g_arg l_args)
-                ycPathLib::_ShellQuote(stringp(x) && x || lsprintf("%A" x))
+                ycPathLib::ShellQuote(stringp(x) && x || lsprintf("%A" x))
             ))
         else
             stringp(g_arg) && g_arg || lsprintf("%A" g_arg)

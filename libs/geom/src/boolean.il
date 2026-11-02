@@ -22,7 +22,7 @@ procedure(_SnapRing(l_pts g_grid n_eps "lgn")  ; -> list[Point]
         l_clean = _RingPointsClean(car(l_res) n_eps)
         unless(length(l_clean) >= 3
                 && abs(_SignedArea(l_clean)) > _AreaTol(l_clean n_eps)
-            error("ycGeom::_SnapRing: grid snapping collapsed polygon topology")
+            error("ycGeom: grid snapping collapsed polygon topology")
         )
         l_clean
     )
@@ -43,7 +43,7 @@ procedure(_CollectRings(l_polys g_grid n_eps g_reg "lgng")  ; -> list[list[Point
         unless(g_reg["_canonScale"]
             n_mag = 0.0
             foreach(g_p l_polys
-                _AsPolygon(g_p "ycGeom::_Boolean")
+                _AsPolygon(g_p "ycGeom::Boolean")
                 foreach(g_pt g_p->points()
                     n_mag = max(n_mag max(abs(g_pt->x()) abs(g_pt->y())))
                 )
@@ -51,7 +51,7 @@ procedure(_CollectRings(l_polys g_grid n_eps g_reg "lgng")  ; -> list[list[Point
             g_reg["_canonScale"] = max(n_eps 1e-15 * n_mag)
         )
         foreach(g_p l_polys
-            _AsPolygon(g_p "ycGeom::_Boolean")
+            _AsPolygon(g_p "ycGeom::Boolean")
             foreach(l_r _Rings(_CanonRing(
                     _SnapRing(g_p->points() g_grid n_eps) n_eps g_reg))
                 l_res = tconc(l_res l_r)
@@ -403,7 +403,7 @@ procedure(_TraceLoops(l_edges n_eps "ln")  ; -> list[list[Point]]
                 l_ring = tconc(l_ring g_cur)
                 l_cands = t_adj[_PtKey(g_cur)]
                 unless(l_cands
-                    error("ycGeom::_TraceLoops: boolean trace lost its boundary")
+                    error("ycGeom: boolean trace lost its boundary")
                 )
                 g_next = _ChooseNext(g_prev g_cur l_cands n_eps)
                 t_adj[_PtKey(g_cur)] = _RemoveEdge(l_cands g_cur g_next)
@@ -465,13 +465,13 @@ procedure(_Boolean(l_a l_b s_op g_grid n_eps "llsgn")  ; -> list[Polygon]
     ;   (list[Polygon]) - 结果多边形；空结果 nil
     let((n_gridv n_epsv l_ra l_rb l_edges l_kept l_loops l_res t_reg)
         unless(s_op == 'union || s_op == 'intersection || s_op == 'difference || s_op == 'xor
-            error("ycGeom::_Boolean: unknown operation %A" s_op)
+            error("ycGeom: unknown operation %A" s_op)
         )
         foreach(g_p l_a
-            _AsPolygon(g_p "ycGeom::_Boolean")
+            _AsPolygon(g_p "ycGeom::Boolean")
         )
         foreach(g_p l_b
-            _AsPolygon(g_p "ycGeom::_Boolean")
+            _AsPolygon(g_p "ycGeom::Boolean")
         )
         n_gridv = _Grid(g_grid)
         n_epsv = _Eps(n_eps)
@@ -585,7 +585,7 @@ procedure(_NestLoops(l_loops n_eps "ln")  ; -> list
                     )
                 )
                 unless(n_owner
-                    error("ycGeom::_NestLoops: hole has no containing outer loop")
+                    error("ycGeom: hole has no containing outer loop")
                 )
                 l_new = nil
                 for(n_k 1 length(l_groups)
@@ -745,7 +745,7 @@ procedure(_SpliceHole(l_outer l_hole n_eps g_blocked "llng")  ; -> list[Point]
         g_h = car(l_h)
         l_hit = _AxisHit(l_outer g_h n_eps g_blocked)
         unless(l_hit
-            error("ycGeom::_SpliceHole: no axis-aligned bridge for hole")
+            error("ycGeom: no axis-aligned bridge for hole")
         )
         n_x = car(l_hit)
         n_ei = cadr(l_hit)

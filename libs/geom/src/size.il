@@ -36,15 +36,15 @@ procedure(_SizeDirs(g_dir "g")  ; -> list[sym]
             (_SizeDirP(g_dir) list(g_dir))
             (listp(g_dir)
                 unless(g_dir
-                    error("ycGeom::_SizeDirs: ?dir must not be an empty list")
+                    error("ycGeom: ?dir must not be an empty list")
                 )
                 foreach(g_item g_dir
                     unless(_SizeDirP(g_item)
-                        error("ycGeom::_SizeDirs: invalid ?dir element %A" g_item)
+                        error("ycGeom: invalid ?dir element %A" g_item)
                     )
                 )
                 when(member('all g_dir) && length(g_dir) > 1
-                    error("ycGeom::_SizeDirs: ?dir 'all cannot be combined with other directions")
+                    error("ycGeom: ?dir 'all cannot be combined with other directions")
                 )
                 foreach(g_item g_dir
                     unless(member(g_item l_res)
@@ -53,7 +53,7 @@ procedure(_SizeDirs(g_dir "g")  ; -> list[sym]
                 )
                 car(l_res)
             )
-            (t error("ycGeom::_SizeDirs: ?dir must be a direction or list, got %A" g_dir))
+            (t error("ycGeom: ?dir must be a direction or list, got %A" g_dir))
         )
     )
 )
@@ -67,7 +67,7 @@ procedure(_SizeCorner(g_corner "g")  ; -> sym
     ; **返回**
     ;   (sym) - miter/round/bevel/none
     unless(symbolp(g_corner) && member(g_corner '(miter round bevel none))
-        error("ycGeom::_SizeCorner: ?corner must be miter, round, bevel, or none, got %A"
+        error("ycGeom: ?corner must be miter, round, bevel, or none, got %A"
             g_corner)
     )
     g_corner
@@ -84,7 +84,7 @@ procedure(_SizeMiterLimit(g_value "g")  ; -> float
     cond(
         (g_value == nil 4.0)
         (numberp(g_value) && g_value > 0.0 float(g_value))
-        (t error("ycGeom::_SizeMiterLimit: ?miterLimit must be a positive number, got %A"
+        (t error("ycGeom: ?miterLimit must be a positive number, got %A"
             g_value))
     )
 )
@@ -100,7 +100,7 @@ procedure(_SizeRoundSegments(g_value "g")  ; -> int
     cond(
         (g_value == nil 8)
         (fixp(g_value) && g_value > 0 g_value)
-        (t error("ycGeom::_SizeRoundSegments: ?roundSegments must be a positive integer, got %A"
+        (t error("ycGeom: ?roundSegments must be a positive integer, got %A"
             g_value))
     )
 )
