@@ -17,6 +17,7 @@ _TestFileTotal = 0
 _TestExpected = 0
 _TestChildDone = nil
 _TestErrWindow = nil
+_TestProgWidth = 9
 
 procedure(_TestPrint(t_kitFmt @rest l_kitArgs "tg")  ; -> t
     ; 按当前是否处于错误窗口选择输出端口。
@@ -39,13 +40,37 @@ procedure(_TestFmtTime(n_kitSec "n")  ; -> str
     ;   n_kitSec  (num) - 秒数
     ;
     ; **返回**
-    ;   (str) - 不足 1 秒用 ms，不足 1 分钟用 s，不足 1 小时用 m，其余用 h
-    cond(
-        (n_kitSec < 1.0 sprintf(nil "%.3fms" n_kitSec * 1000))
-        (n_kitSec < 60.0 sprintf(nil "%.3fs" n_kitSec))
-        (n_kitSec < 3600.0 sprintf(nil "%.3fm" n_kitSec / 60))
-        (t sprintf(nil "%.3fh" n_kitSec / 3600))
+    ;   (str) - 不足 1 秒用 ms，不足 1 分钟用 s，不足 1 小时用 m，其余用 h；
+    ;           小数位随量级收缩，使同单位下的字符串宽度一致（如 0.088ms 与 184.4ms）
+    let((n_kitMs)
+        n_kitSec = n_kitSec * 1.0
+        n_kitMs = n_kitSec * 1000.0
+        cond(
+            (n_kitMs < 9.9995 sprintf(nil "%.3fms" n_kitMs))
+            (n_kitMs < 99.995 sprintf(nil "%.2fms" n_kitMs))
+            (n_kitMs < 999.995 sprintf(nil "%.1fms" n_kitMs))
+            (n_kitSec < 9.9995 sprintf(nil "%.3fs" n_kitSec))
+            (n_kitSec < 59.995 sprintf(nil "%.2fs" n_kitSec))
+            (n_kitSec < 599.995 sprintf(nil "%.3fm" n_kitSec / 60.0))
+            (n_kitSec < 3599.95 sprintf(nil "%.2fm" n_kitSec / 60.0))
+            (t sprintf(nil "%.2fh" n_kitSec / 3600.0))
+        )
     )
+)
+
+procedure(_TestPadRight(t_kitText n_kitWidth "tn")  ; -> str
+    ; 在右侧补空格到指定宽度。
+    ;
+    ; **参数**
+    ;   t_kitText   (str) - 原串
+    ;   n_kitWidth  (int) - 目标宽度
+    ;
+    ; **返回**
+    ;   (str) - 补空格后的串（原串更宽时原样返回）
+    while(length(t_kitText) < n_kitWidth
+        t_kitText = strcat(t_kitText " ")
+    )
+    t_kitText
 )
 
 procedure(_TestErrorBegin(t_kitWhat "t")  ; -> t
@@ -88,9 +113,10 @@ procedure(_TestReport(g_kitOk t_kitName n_kitSec "gtn")  ; -> t | nil
     unless(g_kitOk
         _TestFail++
     )
-    _TestPrint("[%d/%d] %s TEST %s - %s\n"
-        _TestCount
-        _TestExpected
+    _TestPrint("%s %7s TEST %s - %s\n"
+        _TestPadRight(
+            lsprintf("[%d/%d]" _TestCount _TestExpected)
+            _TestProgWidth)
         _TestFmtTime(n_kitSec)
         if(g_kitOk "PASSED" "FAILED")
         t_kitName)
@@ -560,6 +586,7 @@ procedure(_TestRun(t_kitModule n_kitExpected @rest l_kitFiles "tng")  ; -> t
         _TestFileIndex = 0
         _TestFileTotal = length(l_kitFiles)
         _TestExpected = n_kitExpected
+        _TestProgWidth = max(9 length(lsprintf("%d" n_kitExpected)) * 2 + 3)
         _TestPrint("\n=== %s ===\n" t_kitModule)
         l_kitPerf = measureTime(
             foreach(t_kitFile l_kitFiles

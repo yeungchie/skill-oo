@@ -321,7 +321,9 @@ let((p_t t_before t_after)
     _Assert(p_t->readText() == "keep"  "touch: content preserved after mtime bump")
 )
 when(isFileName("/proc/version")
+    _TestErrorBegin("touch on an unwritable target")
     _AssertError(lambda(() _P("/proc/version")->touch() t)  "touch: unwritable target errors")
+    _TestErrorEnd()
 )
 
 ; --- open ---
