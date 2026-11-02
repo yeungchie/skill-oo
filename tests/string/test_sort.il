@@ -54,6 +54,6 @@ _AssertErrorMsg(lambda(() ycString::NaturalSort(list("a" 1)))
     "must be a string" "nsort: reports non-string item"
 )
 
-_TestSortDone = t
+_TestChildDone = t
 
 ; END

@@ -121,6 +121,6 @@ _Assert(ycGeom::Rect(list(0:0 5:5))->or(list(0:0 1:1))->area() == 25.0
 _Assert(ycGeom::Polygon('((0 0) (5 0) (5 5) (0 5)))->or(list(0:0 1:1))->area() == 25.0
     "convert: Polygon union two-point array as Rect")
 
-_TestConvertDone = t
+_TestChildDone = t
 
 ; END

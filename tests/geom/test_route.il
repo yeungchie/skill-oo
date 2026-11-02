@@ -48,6 +48,6 @@ let((g_c)
         "route: near-equal tail snaps to first point")
 )
 
-_TestRouteDone = t
+_TestChildDone = t
 
 ; END

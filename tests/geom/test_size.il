@@ -95,6 +95,6 @@ let((g_tri g_l)
     _Assert(g_l->size(-1)->area() < 64.0  "size: concave shrink")
 )
 
-_TestSizeDone = t
+_TestChildDone = t
 
 ; END

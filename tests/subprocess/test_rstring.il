@@ -16,6 +16,6 @@ let((aj)
     _Assert(aj->await() == "$HOME\n" "print data reaches the child without shell expansion")
 )
 
-_TestRstringDone = t
+_TestChildDone = t
 
 ; END

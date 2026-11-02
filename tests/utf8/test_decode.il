@@ -75,6 +75,6 @@ _Assert(!ycUtf8::IsValid(strcat(intToChar(192) intToChar(128)))  "isValid: overl
 _Assert(!ycUtf8::IsValid(strcat(intToChar(237) intToChar(160) intToChar(128)))  "isValid: surrogate")
 _AssertErrorMsg(lambda(() ycUtf8::IsValid(123)) "argument #1 should be a string"  "isValid: non-string")
 
-_TestDecodeDone = t
+_TestChildDone = t
 
 ; END

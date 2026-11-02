@@ -134,7 +134,7 @@ let((p_f p_sub)
     _AssertError(lambda(() p_base->glob("") t)  "glob: empty pattern errors")
     _AssertError(lambda(() p_base->glob("/abs/*") t)  "glob: absolute pattern errors")
     let((l_r)
-        l_r = errset(_Sl(p_base->glob("a**")) t)
+        l_r = errset(_Sl(p_base->glob("a**")) nil)
         _Assert(l_r  "glob: partial ** does not error")
         when(l_r
             _AssertSameStrs(car(l_r)
@@ -143,7 +143,7 @@ let((p_f p_sub)
         )
     )
     let((l_r)
-        l_r = errset(_Sl(p_base->glob("**txt")) t)
+        l_r = errset(_Sl(p_base->glob("**txt")) nil)
         _Assert(l_r  "glob: leading partial ** does not error")
         when(l_r
             _AssertSameStrs(car(l_r)
@@ -429,7 +429,7 @@ let((p_tfile p_tdir p_link p_moved p_dirlnk p_broken)
 ; size() only checks exists(), which is also true for directories, so the
 ; call returns the directory's real byte size (a number).
 let((l_r)
-    l_r = errset(p_base->size() t)
+    l_r = errset(p_base->size() nil)
     _Assert(l_r && numberp(car(l_r))  "size: directory returns a number (CPython stat().st_size)")
 )
 
@@ -439,6 +439,6 @@ _Assert(!p_base->exists()  "fixture: cleanup")
 
 )  ; end let
 
-_TestFsDone = t
+_TestChildDone = t
 
 ; END

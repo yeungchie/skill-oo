@@ -100,6 +100,6 @@ _AssertError(lambda(() ycCsv::Table(nil ?header list(1)) t)  "table: header fixn
 _AssertError(lambda(() ycCsv::Table(nil ?header list("a" "a")) t)  "table: duplicate header errors")
 _AssertError(lambda(() ycCsv::Table(list(list("1" "2")) ?header list("a")) t)  "table: row wider than header errors")
 
-_TestTableDone = t
+_TestChildDone = t
 
 ; END

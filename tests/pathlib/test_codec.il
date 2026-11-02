@@ -181,6 +181,6 @@ _Assert(!p_base->exists()  "fixture: cleanup")
 
 )  ; end let
 
-_TestCodecDone = t
+_TestChildDone = t
 
 ; END

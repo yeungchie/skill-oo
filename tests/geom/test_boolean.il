@@ -389,6 +389,6 @@ let((g_raw g_norm g_hole l_nat)
         "boolean: native xor matches the method result")
 )
 
-_TestBooleanDone = t
+_TestChildDone = t
 
 ; END

@@ -49,6 +49,6 @@ _AssertError(lambda(() ycUtf8::CharWidth(1114112))  "charWidth: above max")
 _AssertError(lambda(() ycUtf8::CharWidth(97 ?ambiguous 3))  "charWidth: invalid ambiguous")
 _AssertErrorMsg(lambda(() ycUtf8::CharWidth("x")) "argument #1 should be an integer"  "charWidth: non-fixnum")
 
-_TestWidthDone = t
+_TestChildDone = t
 
 ; END

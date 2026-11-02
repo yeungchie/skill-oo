@@ -50,6 +50,10 @@ ycNamespace:::Require("ycIni")
 unless(fboundp('ycIni:::Decode)
     loadi(strcat(_TestPathlibDir "../../libs/codec/ini/load.il"))
 )
-loadi(strcat(_TestPathlibDir "test_init.il"))
+_TestDir = _TestPathlibDir
+unless(fboundp('_TestRun)
+    loadi(strcat(_TestDir "../kit.il"))
+)
+loadi(strcat(_TestDir "test_init.il"))
 
 ; END

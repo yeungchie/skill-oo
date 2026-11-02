@@ -1,70 +1,15 @@
-_TestCount = 0
-_TestFail = 0
-
-procedure(_Assert(g_cond t_msg "gt")  ; -> t | nil
-    _TestCount = _TestCount + 1
-    unless(g_cond
-        _TestFail = _TestFail + 1
-    )
-    if(g_cond
-        printf("TEST PASSED - %s\n" t_msg)
-        printf("TEST FAILED - %s\n" t_msg)
-    )
-    g_cond
-)
-
-procedure(_AssertError(g_funobj t_msg "gt")  ; -> t | nil
-    let((g_ok)
-        _TestCount = _TestCount + 1
-        g_ok = errset(funcall(g_funobj) nil)
-        when(g_ok
-            _TestFail = _TestFail + 1
-        )
-        if(g_ok
-            printf("TEST FAILED - %s\n" t_msg)
-            printf("TEST PASSED - %s\n" t_msg)
-        )
-        !g_ok
-    )
-)
-
-procedure(_AssertErrorMsg(g_funobj t_sub t_msg "gtt")  ; -> t | nil（错误消息须包含 t_sub）
-    let((g_ok t_text t_tail g_pass)
-        _TestCount = _TestCount + 1
-        g_ok = errset(funcall(g_funobj) nil)
-        when(!g_ok
-            ; errset.errset 为 ("error" 序号 t nil ("*Error* 消息"))，取末元素首字符串
-            t_tail = errset.errset
-            when(t_tail && 4 <= length(t_tail)
-                t_text = car(car(cdr(cdr(cdr(cdr(t_tail))))))
-            )
-        )
-        g_pass = !g_ok && t_text && index(t_text t_sub)
-        unless(g_pass
-            _TestFail = _TestFail + 1
-        )
-        if(g_pass
-            printf("TEST PASSED - %s\n" t_msg)
-            printf("TEST FAILED - %s\n" t_msg)
-        )
-        unless(g_pass
-            printf("  expected message containing: %A\n" t_sub)
-            printf("  actual: %A\n" if(t_text t_text "no error detail"))
-        )
-        g_pass
-    )
-)
-
 procedure(_AssertDumpEq(g_actual g_expected t_msg "ggt")  ; -> t | nil（经 encode 规范化串比较结构）
-    let((t_a t_b g_ok)
-        t_a = ycJson::Encode(g_actual ?sortKeys t)
-        t_b = ycJson::Encode(g_expected ?sortKeys t)
-        g_ok = t_a == t_b
+    let(((t_a nil) (t_b nil) (g_ok nil) (l_perf nil))
+        l_perf = measureTime(
+            t_a = ycJson::Encode(g_actual ?sortKeys t)
+            t_b = ycJson::Encode(g_expected ?sortKeys t)
+            g_ok = t_a == t_b
+        )
         unless(g_ok
             printf("  expected: %s\n" t_b)
             printf("  actual: %s\n" t_a)
         )
-        _Assert(g_ok t_msg)
+        _TestReport(g_ok t_msg caddr(l_perf))
     )
 )
 
@@ -92,60 +37,10 @@ procedure(_NestArrayValue(n_n "n")  ; -> any（n 层嵌套 list 包裹 1）
     )
 )
 
-let((l_res t_self t_dir)
-    l_res = errset(get_filename(piport) nil)
-    t_self = when(l_res && car(l_res) && stringp(car(l_res)) && car(l_res) != ""
-        car(l_res)
-    )
-    unless(t_self
-        error("ycJson: can't determine the current file - load this file with an explicit path")
-    )
-    unless(pcreMatchp("^[~/]|^\\.{1,2}/" t_self)
-        t_self = strcat("./" t_self)
-    )
-    t_dir = simplifyFilename(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") t_self "" 0) t)
-    unless(pcreMatchp("/$" t_dir)
-        t_dir = strcat(t_dir "/")
-    )
-
-    _TestDecodeDone = nil
-    l_res = errset(load(strcat(t_dir "test_decode.il")) t)
-    unless(_TestDecodeDone
-        _TestCount = _TestCount + 1
-        _TestFail = _TestFail + 1
-        printf("TEST FAILED - test_decode.il did not run to completion%s\n"
-            if(l_res "" " (load raised an error)")
-        )
-    )
-
-    _TestEncodeDone = nil
-    l_res = errset(load(strcat(t_dir "test_encode.il")) t)
-    unless(_TestEncodeDone
-        _TestCount = _TestCount + 1
-        _TestFail = _TestFail + 1
-        printf("TEST FAILED - test_encode.il did not run to completion%s\n"
-            if(l_res "" " (load raised an error)")
-        )
-    )
-
-    _TestVariantsDone = nil
-    l_res = errset(load(strcat(t_dir "test_variants.il")) t)
-    unless(_TestVariantsDone
-        _TestCount = _TestCount + 1
-        _TestFail = _TestFail + 1
-        printf("TEST FAILED - test_variants.il did not run to completion%s\n"
-            if(l_res "" " (load raised an error)")
-        )
-    )
-
-    printf("\nPASS: %d / FAIL: %d\n"
-        _TestCount - _TestFail
-        _TestFail
-    )
-
-    when(_TestFail > 0
-        error("ycJson: %d test(s) failed" _TestFail)
-    )
+_TestRun("ycJson" 230
+    "test_decode.il"
+    "test_encode.il"
+    "test_variants.il"
 )
 
 ; END

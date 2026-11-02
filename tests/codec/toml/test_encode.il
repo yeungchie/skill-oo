@@ -174,6 +174,6 @@ let((t_v t_a t_b t_out)
     _AssertErrorMsg(lambda(() ycToml::Encode("x")) "root value must be a table"  "encode: root error message")
     _AssertErrorMsg(lambda(() ycToml::Encode(t_v ?maxDepth 0)) "maxDepth"  "encode: maxDepth error message")
 )
-_TestEncodeDone = t
+_TestChildDone = t
 
 ; END

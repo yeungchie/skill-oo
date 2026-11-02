@@ -61,4 +61,4 @@ _AssertError(lambda(() ycRadix::Format(1.5))  "format error: float value")
 _AssertError(lambda(() ycRadix::Format("10"))  "format error: string value")
 _AssertError(lambda(() ycRadix::Format(nil))  "format error: nil value")
 
-_TestFormatDone = t
+_TestChildDone = t

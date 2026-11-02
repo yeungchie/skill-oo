@@ -146,6 +146,6 @@ _AssertErrorMsg(
     "render: missingVal type"
 )
 
-_TestRenderDone = t
+_TestChildDone = t
 
 ; END

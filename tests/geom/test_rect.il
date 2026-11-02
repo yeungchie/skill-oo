@@ -118,6 +118,6 @@ _AssertError(lambda(() ycGeom::Rect(list(0:0 1:1))->or(ycGeom::Segment(list(0:0 
 _AssertError(lambda(() ycGeom::Polygon('((0 0) (1 0) (0 1)))->or(ycGeom::Line(list(0:0 1:0))) t)  "polygon: booleans reject Line")
 _AssertError(lambda(() ycGeom::Region(nil)->and(ycGeom::Segment(list(0:0 1:1))) t)  "region: booleans reject Segment")
 
-_TestRectDone = t
+_TestChildDone = t
 
 ; END

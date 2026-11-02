@@ -211,6 +211,6 @@ _AssertError(lambda(() ycYaml::Decode("1" ?format 1))  "error: format type")
 _AssertError(lambda(() ycYaml::Decode("1" ?maxDepth "x"))  "limit: maxDepth type")
 _AssertError(lambda(() ycYaml::Decode("1" ?maxDepth 1.5))  "limit: maxDepth float")
 _Assert(ycYaml::Decode("[]" ?format "yaml") == nil  "format: yaml alias is default")
-_TestDecodeDone = t
+_TestChildDone = t
 
 ; END

@@ -2,6 +2,8 @@
 ; Program  : ycCodec tests(load.il)
 ; Language : Cadence Skill
 ;--------------------------
+; 子套件在 let 之外加载：测试执行期间少一层局部作用域，
+; 给深层嵌套用例留出调用栈余量。
 
 let((t_res t_self t_dir)
     t_res = errset(get_filename(piport) nil)
@@ -18,12 +20,14 @@ let((t_res t_self t_dir)
     unless(pcreMatchp("/$" t_dir)
         t_dir = strcat(t_dir "/")
     )
-    loadi(strcat(t_dir "core/load.il"))
-    loadi(strcat(t_dir "json/load.il"))
-    loadi(strcat(t_dir "yaml/load.il"))
-    loadi(strcat(t_dir "csv/load.il"))
-    loadi(strcat(t_dir "toml/load.il"))
-    loadi(strcat(t_dir "ini/load.il"))
+    _CodecTestDir = t_dir
 )
+
+loadi(strcat(_CodecTestDir "core/load.il"))
+loadi(strcat(_CodecTestDir "json/load.il"))
+loadi(strcat(_CodecTestDir "yaml/load.il"))
+loadi(strcat(_CodecTestDir "csv/load.il"))
+loadi(strcat(_CodecTestDir "toml/load.il"))
+loadi(strcat(_CodecTestDir "ini/load.il"))
 
 ; END

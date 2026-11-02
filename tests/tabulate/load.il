@@ -33,7 +33,11 @@ let((t_res t_self t_dir)
     when(findNamespace("ycTabulate") == nil || findSymbol("Render" ?namespace "ycTabulate") == nil || !fboundp(findSymbol("Render" ?namespace "ycTabulate"))
         loadi(strcat(t_dir "../../libs/tabulate/load.il"))
     )
-    loadi(strcat(t_dir "test_init.il"))
+    _TestDir = t_dir
+    unless(fboundp('_TestRun)
+        loadi(strcat(_TestDir "../kit.il"))
+    )
+    loadi(strcat(_TestDir "test_init.il"))
 )
 
 ; END

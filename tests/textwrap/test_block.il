@@ -69,6 +69,6 @@ _AssertErrorMsg(
     "shorten: unit"
 )
 
-_TestBlockDone = t
+_TestChildDone = t
 
 ; END

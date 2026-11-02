@@ -90,6 +90,6 @@ let((l_v t_s)
     _AssertDumpEq(ycJson::Decode(t_s ?format "jsonl") l_v  "jsonl: dump/parse roundtrip")
 )
 
-_TestVariantsDone = t
+_TestChildDone = t
 
 ; END

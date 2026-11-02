@@ -464,6 +464,6 @@ let((n_rad n_cos n_sin l_acc g_poly g_back)
     _Assert(g_back  "polygon: closed ring toPath at 1e8 offset")
 )
 
-_TestPolygonDone = t
+_TestChildDone = t
 
 ; END

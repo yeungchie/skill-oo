@@ -182,6 +182,6 @@ let((t_v t_tbl t_out)
     _AssertErrorMsg(lambda(() ycIni::Encode("x")) "root value must be a table"  "encode: root error message")
     _AssertErrorMsg(lambda(() ycIni::Encode(_Table() ?delimiter " ")) "delimiter"  "encode: delimiter error message")
 )
-_TestEncodeDone = t
+_TestChildDone = t
 
 ; END

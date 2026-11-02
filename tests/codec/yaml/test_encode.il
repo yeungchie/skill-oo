@@ -145,6 +145,6 @@ let((g_v t_s)
     t_s = ycYaml::Encode(g_v ?sortKeys t)
     _AssertDumpEq(ycYaml::Decode(t_s) g_v  "encode: roundtrip nested")
 )
-_TestEncodeDone = t
+_TestChildDone = t
 
 ; END

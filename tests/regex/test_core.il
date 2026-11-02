@@ -188,8 +188,10 @@ let((m)
 )
 
 ; --- 7. error contracts (free functions) ---
+_TestErrorBegin("pcreCompile prints the compile diagnostic itself")
 _AssertError(lambda(() ycRegEx::Compile("(") t)  "compile: unbalanced paren raises")
 _AssertError(lambda(() ycRegEx::Compile("*") t)  "compile: nothing to repeat raises")
+_TestErrorEnd()
 _AssertError(lambda(() ycRegEx::Compile(42) t)  "compile: non-string pattern raises")
 _AssertError(lambda(() ycRegEx::Search(42 "a") t)  "search: non-string pattern raises")
 _AssertError(lambda(() ycRegEx::Search("a" 42) t)  "search: non-string subject raises")
@@ -352,5 +354,5 @@ let((n_orig)
     _AssertError(lambda(() ycRegEx::SetRecursionLimit(1.5) t)  "recursion: float rejected")
 )
 
-_TestCoreDone = t
+_TestChildDone = t
 ; END

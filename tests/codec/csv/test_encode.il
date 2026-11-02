@@ -189,6 +189,6 @@ let((t_tab t_out)
     _AssertRows(t_out->rows() t_tab->rows()  "roundtrip: quote-only field")
 )
 
-_TestEncodeDone = t
+_TestChildDone = t
 
 ; END

@@ -200,6 +200,6 @@ _AssertError(lambda(() ycCsv::Decode("" ?header list("a" 1)))  "decode: header l
 _AssertError(lambda(() ycCsv::Decode("" ?header list("a" 1.5)))  "decode: header list flonum errors")
 _AssertError(lambda(() ycCsv::Decode("" ?header list("a" 'b)))  "decode: header list symbol errors")
 
-_TestDecodeDone = t
+_TestChildDone = t
 
 ; END

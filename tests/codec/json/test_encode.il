@@ -134,6 +134,6 @@ _Assert(ycJson::Encode(ycCodec::True) == "true"  "encode: True -> true")
 _Assert(ycJson::Encode("x" ?format "jsonc") == "\"x\""  "encode: jsonc format behaves as json")
 _Assert(ycJson::Encode(list(1) ?format "jsonl") == "1\n"  "encode: jsonl format dispatch")
 _AssertErrorMsg(lambda(() ycJson::Encode(1 ?format "xml")) "unknown format"  "encode: unknown format errors")
-_TestEncodeDone = t
+_TestChildDone = t
 
 ; END

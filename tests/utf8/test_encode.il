@@ -43,6 +43,6 @@ _Assert(
     "encode: roundtrip"
 )
 
-_TestEncodeDone = t
+_TestChildDone = t
 
 ; END

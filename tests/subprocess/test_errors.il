@@ -41,6 +41,6 @@ let((aj)
     _Assert(errset(aj->print("x") nil) == nil "print raises when the job has exited")
 )
 
-_TestErrorsDone = t
+_TestChildDone = t
 
 ; END

@@ -114,6 +114,6 @@ let((l_res t_dir)
     deleteDir(t_dir)
 )
 
-_TestRunDone = t
+_TestChildDone = t
 
 ; END

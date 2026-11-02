@@ -271,11 +271,11 @@ _Assert(_P("/a")->join("b") == _P("/a/b")  "intern: join shares with fresh")
 _Assert(_P("/a") != _P("/b")  "intern: distinct strings stay distinct")
 
 ; --- Path 构造：零参与多段 ---
-_AssertOk(errset(ycPathLib::Path()->str() == "." t)  "Path: zero arg defaults to dot")
+_AssertOk(errset(ycPathLib::Path()->str() == "." nil)  "Path: zero arg defaults to dot")
 _Assert(_P("")->str() == "."  "Path: empty string is dot")
-_AssertOk(errset(ycPathLib::Path("a" "b")->str() == "a/b" t)  "Path: two segments join")
-_AssertOk(errset(ycPathLib::Path("a" "/b" "c")->str() == "/b/c" t)  "Path: absolute segment resets")
-_AssertOk(errset(ycPathLib::Path(_P("a") "b")->str() == "a/b" t)  "Path: Path segment accepted")
+_AssertOk(errset(ycPathLib::Path("a" "b")->str() == "a/b" nil)  "Path: two segments join")
+_AssertOk(errset(ycPathLib::Path("a" "/b" "c")->str() == "/b/c" nil)  "Path: absolute segment resets")
+_AssertOk(errset(ycPathLib::Path(_P("a") "b")->str() == "a/b" nil)  "Path: Path segment accepted")
 _AssertError(lambda(() ycPathLib::Path("a" 5) t)  "Path: bad segment errors")
 
 ; --- ShellQuote：拼 shell 命令时的参数保护 ---
@@ -298,6 +298,6 @@ _AssertError(lambda(() ycPathLib::ShellQuote(1) t)
 _AssertError(lambda(() ycPathLib::ShellQuote(nil) t)
     "ShellQuote: rejects nil")
 
-_TestPureDone = t
+_TestChildDone = t
 
 ; END

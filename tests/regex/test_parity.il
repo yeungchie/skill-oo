@@ -161,5 +161,5 @@ _Assert(ycRegEx::Search("a.b" "a\nb") == nil  "flags: dot without S skips newlin
 _AssertSameSpan(ycRegEx::Search("^b" "a\nb" ?flags 'M) 2 3  "flags: M ^ matches line start")
 _Assert(ycRegEx::Search("^b" "a\nb") == nil  "flags: ^ without M only string start")
 
-_TestParityDone = t
+_TestChildDone = t
 ; END

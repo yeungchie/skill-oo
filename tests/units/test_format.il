@@ -58,6 +58,6 @@ _AssertErrorMsg(
     "format: precision float"
 )
 
-_TestFormatDone = t
+_TestChildDone = t
 
 ; END

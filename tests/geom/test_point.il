@@ -43,6 +43,6 @@ _AssertError(lambda(() ycGeom::Point(1) t)  "point: one number rejected")
 _AssertError(lambda(() ycGeom::Point(list(1 2 3)) t)  "point: long list rejected")
 _AssertError(lambda(() ycGeom::Point(list("a" 2)) t)  "point: non-number pair rejected")
 
-_TestPointDone = t
+_TestChildDone = t
 
 ; END

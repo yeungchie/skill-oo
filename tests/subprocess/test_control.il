@@ -37,6 +37,6 @@ let((aj)
     _Assert(aj->await() == "hi\n" "await still waits without a timeout")
 )
 
-_TestControlDone = t
+_TestChildDone = t
 
 ; END

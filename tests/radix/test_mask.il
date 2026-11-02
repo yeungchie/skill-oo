@@ -37,4 +37,4 @@ _AssertError(lambda(() ycRadix::ApplyMask(1.0 8))  "apply error: float value")
 _AssertError(lambda(() ycRadix::ApplyMask(1 8.0))  "apply error: float bits")
 _AssertError(lambda(() ycRadix::ApplyMask(1))  "apply error: missing bits")
 
-_TestMaskDone = t
+_TestChildDone = t

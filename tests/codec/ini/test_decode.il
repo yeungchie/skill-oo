@@ -139,6 +139,6 @@ let((t_v t_s)
     _AssertErrorMsg(lambda(() ycIni::Decode("a = 1\nbad\n")) "ycIni::Decode:"  "decode: error context")
     _AssertErrorMsg(lambda(() ycIni::Decode("a = 1" ?delimiter "::")) "delimiter"  "decode: delimiter error message")
 )
-_TestDecodeDone = t
+_TestChildDone = t
 
 ; END

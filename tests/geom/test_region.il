@@ -148,6 +148,6 @@ let((l_polys g_big g_tiny g_r g_c n_i n_tiny n_exact n_exact_y)
         "region: centroid y keeps small weights")
 )
 
-_TestRegionDone = t
+_TestChildDone = t
 
 ; END

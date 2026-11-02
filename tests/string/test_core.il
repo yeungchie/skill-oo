@@ -116,6 +116,6 @@ _AssertErrorMsg(
     "count: empty search"
 )
 
-_TestCoreDone = t
+_TestChildDone = t
 
 ; END

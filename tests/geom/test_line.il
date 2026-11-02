@@ -60,6 +60,6 @@ let((g_l g_o)
 _AssertError(lambda(() ycGeom::Line(list(1 2)) t)  "line: two numbers rejected")
 _AssertError(lambda(() ycGeom::Line(list(list(1 2))) t)  "line: one-point list rejected")
 
-_TestLineDone = t
+_TestChildDone = t
 
 ; END

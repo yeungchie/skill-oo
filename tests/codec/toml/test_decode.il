@@ -191,6 +191,6 @@ let((t_v t_arr t_a t_b)
     _AssertErrorMsg(lambda(() ycToml::Decode("a = 1\na = 2\n")) "duplicate key"  "decode: duplicate key message")
     _AssertErrorMsg(lambda(() ycToml::Decode("a = 1\ntrailing\n")) "line 2"  "decode: error line number")
 )
-_TestDecodeDone = t
+_TestChildDone = t
 
 ; END

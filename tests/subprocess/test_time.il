@@ -67,6 +67,6 @@ _Assert(ycSubProcess::_FormatSeconds(3660) == "1h1m" "FormatSeconds: one hour an
 _Assert(ycSubProcess::_FormatSeconds(3661) == "1h1m1s" "FormatSeconds: one hour, one minute, one second")
 _Assert(ycSubProcess::_FormatSeconds(7325) == "2h2m5s" "FormatSeconds: mixed multi-hour duration")
 
-_TestTimeDone = t
+_TestChildDone = t
 
 ; END

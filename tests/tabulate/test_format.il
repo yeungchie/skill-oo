@@ -102,6 +102,6 @@ _Assert(
     "format: pipe no header"
 )
 
-_TestFormatDone = t
+_TestChildDone = t
 
 ; END

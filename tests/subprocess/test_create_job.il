@@ -2,9 +2,9 @@ _Assert(ycSubProcess::CreateJob("echo 123")->await() == "123\n" "await returns c
 _Assert(ycSubProcess::CreateJob("echo" "-n" "AB")->await() == "AB" "multiple arguments are joined with spaces")
 _Assert(ycSubProcess::CreateJob("echo" 123)->await() == "123\n" "non-string arguments are converted to text")
 
-let((aj)
+let((aj l_res)
     aj = ycSubProcess::CreateJob("cat")
-    errset({
+    l_res = errset({
         _Assert(aj->state() == 'None "state is 'None before start")
         _Assert(aj->start() == aj "start returns the job itself")
         _Assert(aj->state() == 'Active "state is 'Active after start")
@@ -31,7 +31,12 @@ let((aj)
         _Assert(aj->stdout->text() == "" "text is empty after shifting every line")
 
         _Assert(aj->stdout->isEmpty() == t "stdout is empty after shifting every line")
-    } t)
+    } nil)
+    when(l_res == nil
+        _TestErrorBegin("create-job block")
+        printf("%A\n" errset.errset)
+        _TestErrorEnd()
+    )
     when(aj->state() == 'Active
         aj->kill()
     )
@@ -89,6 +94,6 @@ let((st)
     _Assert(st->isEmpty() == t "a drained directly built Stream is empty")
 )
 
-_TestCreateJobDone = t
+_TestChildDone = t
 
 ; END

@@ -21,6 +21,6 @@ _Assert(printself(ycCodec::True) == "ycCodec::Type(\"True\")"  "sentinel: True p
 _Assert(printself(ycCodec::False) == "ycCodec::Type(\"False\")"  "sentinel: False printself format")
 _Assert(printself(ycCodec::Missing) == "ycCodec::Type(\"Missing\")"  "sentinel: Missing printself format")
 _Assert(car(errset(evalstring(printself(ycCodec::Null)) nil)) == ycCodec::Null  "sentinel: evalstring roundtrip")
-_TestSentinelDone = t
+_TestChildDone = t
 
 ; END

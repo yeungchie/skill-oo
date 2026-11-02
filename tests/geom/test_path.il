@@ -189,6 +189,6 @@ let((g_two g_three)
         "path: open path edge in range")
 )
 
-_TestPathDone = t
+_TestChildDone = t
 
 ; END

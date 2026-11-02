@@ -27,6 +27,6 @@ _AssertErrorMsg(
 )
 _Assert(ycString::Unescape(ycString::Escape("x\"y\\z")) == "x\"y\\z"  "unescape: escape roundtrip")
 
-_TestEscapeDone = t
+_TestChildDone = t
 
 ; END

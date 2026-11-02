@@ -27,7 +27,11 @@ let((t_res t_self t_dir)
     when(findNamespace("ycGeom") == nil
         loadi(strcat(t_dir "../../libs/geom/load.il"))
     )
-    loadi(strcat(t_dir "test_init.il"))
+    _TestDir = t_dir
+    unless(fboundp('_TestRun)
+        loadi(strcat(_TestDir "../kit.il"))
+    )
+    loadi(strcat(_TestDir "test_init.il"))
 )
 
 ; END

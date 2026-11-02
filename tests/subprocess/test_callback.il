@@ -46,10 +46,12 @@ _TestCallbackThrow = lambda((s_event g_job "sg")
 
 let((aj)
     aj = ycSubProcess::CreateJob("echo hi" ?callback _TestCallbackThrow)
+    _TestErrorBegin("the failing stdout callback is expected")
     _Assert(aj->await() == "hi\n" "a failing stdout callback does not interrupt the job")
+    _TestErrorEnd()
     _Assert(aj->returncode == 0 "the job finishes with returncode 0 despite the callback error")
 )
 
-_TestCallbackDone = t
+_TestChildDone = t
 
 ; END

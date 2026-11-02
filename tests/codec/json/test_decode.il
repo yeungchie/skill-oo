@@ -146,6 +146,6 @@ _AssertError(lambda(() ycJson::Decode(nil))  "decode: rejects nil input")
 
 _Assert(ycJson::Decode("1 // c" ?format "jsonc") == 1  "decode: jsonc format dispatch")
 _AssertErrorMsg(lambda(() ycJson::Decode("1" ?format "xml")) "unknown format"  "decode: unknown format errors")
-_TestDecodeDone = t
+_TestChildDone = t
 
 ; END

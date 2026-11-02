@@ -104,6 +104,6 @@ _AssertErrorMsg(
     "toUnit: non-string"
 )
 
-_TestParseDone = t
+_TestChildDone = t
 
 ; END

@@ -139,6 +139,6 @@ _AssertErrorMsg(
     "fill: sep type"
 )
 
-_TestWrapDone = t
+_TestChildDone = t
 
 ; END

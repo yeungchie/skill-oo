@@ -98,6 +98,6 @@ let((g_s)
         "segment: endpoint tolerance is scale independent")
 )
 
-_TestSegmentDone = t
+_TestChildDone = t
 
 ; END

@@ -28,6 +28,6 @@ _AssertErrorMsg(
     "sanitize: no valid chars"
 )
 
-_TestNamingDone = t
+_TestChildDone = t
 
 ; END

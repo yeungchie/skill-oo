@@ -2,6 +2,8 @@
 ; Program  : codec load-order regression
 ; Language : Cadence Skill
 ;--------------------------
+; 子套件在 let 之外加载：测试执行期间少一层局部作用域，
+; 给深层嵌套用例留出调用栈余量。
 
 let((t_res t_self t_dir)
     t_res = errset(get_filename(piport) nil)
@@ -18,11 +20,13 @@ let((t_res t_self t_dir)
     unless(pcreMatchp("/$" t_dir)
         t_dir = strcat(t_dir "/")
     )
-    loadi(strcat(t_dir "../tabulate/load.il"))
-    loadi(strcat(t_dir "json/load.il"))
-    loadi(strcat(t_dir "csv/load.il"))
-    loadi(strcat(t_dir "../tabulate/load.il"))
-    printf("LOAD ORDER REGRESSION PASSED\n")
+    _OrderTestDir = t_dir
 )
+
+loadi(strcat(_OrderTestDir "../tabulate/load.il"))
+loadi(strcat(_OrderTestDir "json/load.il"))
+loadi(strcat(_OrderTestDir "csv/load.il"))
+loadi(strcat(_OrderTestDir "../tabulate/load.il"))
+printf("LOAD ORDER REGRESSION PASSED\n")
 
 ; END

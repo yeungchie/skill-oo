@@ -70,6 +70,6 @@ _AssertError(lambda(() ycCsv::Decode("a\n1\n" ?header t)->render(?format "xml"))
 _AssertError(lambda(() ycCsv::Decode("a\n1\n" ?header t)->print(?format "xml"))
     "print: options forward to render")
 
-_TestRenderDone = t
+_TestChildDone = t
 
 ; END

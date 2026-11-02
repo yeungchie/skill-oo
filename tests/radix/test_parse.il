@@ -97,4 +97,4 @@ _AssertError(lambda(() ycRadix::Parse("10" ?wrap 1))  "parse error: wrap int")
 _AssertError(lambda(() ycRadix::Parse(nil))  "parse error: nil text")
 _AssertError(lambda(() ycRadix::Parse(10))  "parse error: int text")
 
-_TestParseDone = t
+_TestChildDone = t

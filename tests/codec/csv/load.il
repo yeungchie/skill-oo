@@ -41,7 +41,11 @@ let((t_dir)
     unless(fboundp('ycTabulate:::Render)
         loadi(simplifyFilename(strcat(t_dir "../../../libs/tabulate/load.il") t))
     )
-    loadi(strcat(t_dir "test_init.il"))
+    _TestDir = t_dir
+    unless(fboundp('_TestRun)
+        loadi(strcat(_TestDir "../../kit.il"))
+    )
+    loadi(strcat(_TestDir "test_init.il"))
 )
 
 ; END
