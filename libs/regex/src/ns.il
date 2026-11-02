@@ -60,6 +60,15 @@ addToNamespace("ycRegEx"
         _GroupWhole  ; proc
         _GroupAt  ; proc
         _InstallMatch  ; proc
+
+        ; groupindex.il
+        _GroupIndexCache  ; var
+        _GroupIndexCacheCap  ; var
+        _GroupIndexCacheN  ; var
+        _GroupIndexProbe  ; var
+        _GroupIndexPython  ; proc
+        _GroupIndexFetch  ; proc
+        _GroupIndex  ; proc
     ))
 )
 unuseNamespace("ycRegEx")

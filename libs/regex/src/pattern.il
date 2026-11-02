@@ -53,6 +53,7 @@ defclass(Pattern () (
     sub()
     subn()
     groups()
+    groupindex()
     pattern()
 ))
 
@@ -260,6 +261,16 @@ self->groups = lambda(()  ; -> int
     ; **返回**
     ;   (int) - 捕获组数（不设自设上限）
     self->_data->nGroups
+)
+
+self->groupindex = lambda(()  ; -> table | nil
+    ; 返回组名到组号的映射（首次调用时解析并缓存）。
+    ;
+    ; **返回**
+    ;   (table|nil) - 组名 -> 组号；模式无命名组时 nil；
+    ;                 解析失败或组号越界以 error() 中断
+    _GroupIndex(self->_data->pattern self->_data->compileOpts self->_data->nGroups
+        "ycRegEx::Pattern->groupindex")
 )
 
 self->pattern = lambda(()  ; -> str

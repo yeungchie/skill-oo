@@ -742,37 +742,52 @@ self->end = lambda((\@rest l_args "g")  ; -> int
 )
 
 self->group = lambda((\@rest l_args "g")  ; -> str | list[str]
-    ; 按组序号取组值；按名取组预留，调用即 error() 中断。
+    ; 按组序号或组名取组值。
     ;
     ; **参数**
-    ;   l_args  (list) - 变参：组选择器——无参取整体；单参 0 = 整体、1..n_g = 对应捕获组；
-    ;                    多参逐个取值（0 可混入）；字符串参数（按名取组）预留
+    ;   l_args  (list) - 变参：组选择器——无参取整体；单参 0 = 整体、1..n_g = 对应捕获组、
+    ;                    字符串 = 组名；多参逐个取值（序号与组名可混用）
     ;
     ; **返回**
     ;   (str|list[str]) - 无参返回整体串，单参返回该组串，多参返回组值列表；
-    ;                     非参与组为 ""；序号越界走 error()（_GroupAt 直调）；
-    ;                     非数字或按名参数走 _error() 中断
-    let((n_g)
+    ;                     非参与组为 ""；序号越界或组名不存在走 error() 中断；
+    ;                     既非整数也非字符串的参数走 _error() 中断
+    let((n_g l_sel g_loaded names)
+        n_g = length(self->_data->groups)
+        l_sel = nil
         foreach(g l_args
-            unless(fixp(g)
-                if(stringp(g)
-                    _error("group" "group by name is not supported yet (reserved)")
-                    _error("group" "expected group number, got %A" g)
+            if(fixp(g)
+            then
+                l_sel = tconc(l_sel g)
+            else
+                unless(stringp(g)
+                    _error("group" "expected group number or name, got %A" g)
+                )
+                unless(g_loaded
+                    names = self->_data->pattern->groupindex()
+                    g_loaded = t
+                )
+                let((n_i)
+                    n_i = when(names names[g])
+                    unless(fixp(n_i)
+                        _error("group" "no such group name: %A" g)
+                    )
+                    l_sel = tconc(l_sel n_i)
                 )
             )
         )
-        n_g = length(self->_data->groups)
+        l_sel = car(l_sel)
         cond(
-            (l_args == nil
+            (l_sel == nil
                 _GroupWhole(self)
             )
-            (length(l_args) == 1
-                _GroupAt(self car(l_args) n_g)
+            (length(l_sel) == 1
+                _GroupAt(self car(l_sel) n_g)
             )
             (t
                 let((l_res)
-                    foreach(g l_args
-                        l_res = tconc(l_res _GroupAt(self g n_g))
+                    foreach(n l_sel
+                        l_res = tconc(l_res _GroupAt(self n n_g))
                     )
                     car(l_res)
                 )
@@ -798,12 +813,27 @@ self->groups = lambda((\@key empty("") "g")  ; -> list
     )
 )
 
-self->groupdict = lambda(()  ; -> never
-    ; 返回组名到组值的字典（按名取组预留），本实现调用即 error() 中断。
+self->groupdict = lambda((\@key empty("") "g")  ; -> table | nil
+    ; 返回组名到组值的字典，并用 ?empty 替换空结果。
+    ;
+    ; **参数**
+    ;   ?empty  (any) - 空结果替换值（默认 ""）
     ;
     ; **返回**
-    ;   (never) - 总是走 _error() 中断（按名取组预留），不返回
-    _error("groupdict" "not supported yet (reserved)")
+    ;   (table|nil) - 组名 -> 组值；模式无命名组时 nil；
+    ;                 组名映射不可用时以 error() 中断
+    let((names res n_g val name)
+        names = self->_data->pattern->groupindex()
+        when(names
+            n_g = length(self->_data->groups)
+            res = makeTable("ycRegExGroupDict" nil)
+            foreach(name names
+                val = _GroupAt(self names[name] n_g)
+                res[name] = if(val == "" empty val)
+            )
+        )
+        res
+    )
 )
 
 self->expand = lambda((t_tpl "t")  ; -> str

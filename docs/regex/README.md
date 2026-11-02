@@ -2,12 +2,13 @@
 
 [返回首页](../../README.md)
 
-Cadence SKILL++ 的正则表达式库：模块级自由函数与 `Compile()` 编译对象双套 API，提供 `Pattern`/`Matched` 两类对象，零第三方依赖。
+Cadence SKILL++ 的正则表达式库：模块级自由函数与 `Compile()` 编译对象双套 API，提供 `Pattern`/`Matched` 两类对象；除命名组解析需调用宿主环境的辅助程序外，不依赖外部组件。
 
 ## 概要
 
 - 正则引擎按字节工作：匹配位置、`.` 与字符类均按字节计，字面量按字节等值匹配。
-- 未提供的能力（按名取组、`groupdict()`、位置方法的组号参数等）在调用时以 `error()` 中断，API 参考各条目中逐一注明。
+- 命名组统一用 `(?P<name>...)` 写法；组名到组号的映射在首次按名取组时解析并缓存。解析依赖宿主环境提供的辅助程序（缺失时以 `error()` 中断，其余功能不受影响）；超出解析能力的构造（如 `\Q…\E`、`(?|…)`、`\K`、占有量词）同样以 `error()` 中断，绝不返回错误的组号；`?compileOpts 'no_auto_capture` 按该选项的口径重新编号。
+- 未提供的能力（`span`/`start`/`end` 的组号参数等）在调用时以 `error()` 中断，API 参考各条目中逐一注明。
 - 捕获组数不设上限。普通匹配、非空 `finditer`/`findall` 与可批量导出的零宽匹配不受 65535 字节偏移限制；复杂数字组引用（含字符类/`\g`/`\k`）或混合非空零宽模式无法安全批量，回退扫描仍以 65535 字节为上限。
 - 模板（`t_repl`/`expand`）按引擎方言展开：`\1`~`\9` 反向引用；`&`/`\0` 整体匹配；带编译对象时 `\{n}` 引用任意组，第 10 组以上必须用此形式；`\n` 是字面 `n`，换行请写真实换行字符；其他形式按字面处理。
 - flags 以关键字 `?flags` 传入（符号或字符串，如 `'I` 或 `"imsx"`）；`Split` 默认切分全部、`?first t` 只切首处；`Sub`/`Subn` 默认替换全部、`?first t` 只替换首处。详见「flags 参数」。
@@ -807,6 +808,33 @@ p->groups()
 ycRegEx::Compile("(\\d+)-(\\d+)")->groups()  ; => 2
 ```
 
+##### groupindex <sub>`method`</sub>
+
+```text
+p->groupindex()
+=> table | nil
+```
+
+**描述**
+
+返回组名到组号的映射，按编译时的编号口径给出：默认与 `groups()` 的组号一致；`?compileOpts 'no_auto_capture` 下只有命名组参与编号，因此按出现顺序记为 `1`～`k`。首次调用才解析，同一模式串复用同一结果。模式没有命名组时返回 `nil`。
+
+**参数**
+
+无
+
+**返回值**
+
+`table | nil` — 组名到组号的表；无命名组时为 `nil`；模式含无法解析的构造，或解析出的组号超出 `groups()`（如解析器不认该模式的实际组结构）时以 `error()` 中断。
+
+**例程**
+
+```lisp
+ycRegEx::Compile("(?P<a>x)(?P<b>y)")->groupindex()["b"]   ; => 2
+ycRegEx::Compile("(\\d+)")->groupindex()                  ; => nil
+ycRegEx::Compile("(a)(?P<x>b)" ?compileOpts 'no_auto_capture)->groupindex()["x"]  ; => 1
+```
+
 ##### pattern <sub>`method`</sub>
 
 ```text
@@ -844,59 +872,67 @@ ycRegEx::Compile("\\d+")->pattern()  ; => "\\d+"
 
 ```text
 m->group()
-m->group([ n_index ... ])
+m->group([ g_selector ... ])
 => str | list[str]
 ```
 
 **描述**
 
-取指定捕获组的值；按名取组与组号越界以 `error()` 中断。
+取指定捕获组的值。选择器可以是组号，也可以是组名（模式需用 `(?P<name>...)` 写法），两者可混用；省略全部参数取整体匹配串。组号越界、组名不存在、模式含无法解析的构造或选择器类型不符时以 `error()` 中断。
 
 **参数**
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| n_index ... | int | 组号，可省略 |
+| g_selector ... | int / str | 组号（`0` 为整体）或组名，可省略、可混用 |
 
 **返回值**
 
-`str | list[str]` — 无参为整体匹配串，单组号为该组串，多组号为组值列表（`0` 可混入）；未参与的组为 `""`。
+`str | list[str]` — 无参为整体匹配串，单个选择器为该组串，多个选择器为组值列表；未参与的组为 `""`。
 
 **例程**
 
 ```lisp
-m = ycRegEx::Search("(\\d+)-(\\d+)" "a10-20b")
-m->group()       ; => "10-20"
-m->group(1)      ; => "10"
-m->group(1 2)    ; => ("10" "20")
-m->group("x")    ; => 以 error() 中断（按名取组不提供）
-m->groupdict()   ; => 以 error() 中断（预留不提供）
+m = ycRegEx::Search("(?P<a>\\d+)-(?P<b>\\d+)" "a10-20b")
+m->group()        ; => "10-20"
+m->group(1)       ; => "10"
+m->group("b")     ; => "20"
+m->group(0 "a")   ; => ("10-20" "10")
+m->group(1 2)     ; => ("10" "20")
+m->group("x")     ; => 以 error() 中断（组名不存在）
 ```
 
 ##### groupdict <sub>`method`</sub>
 
 ```text
-m->groupdict()
-=> never
+m->groupdict([ ?empty g_empty ])
+=> table | nil
 ```
 
 **描述**
 
-预留的命名组字典接口，当前不提供；调用即以 `error()` 中断。
+按组名一次取回全部组值，并把所有空字符串结果替换为 `?empty` 的实参——口径与 `groups` 相同，既包括未参与匹配的组，也包括真正匹配到空串的组。模式没有命名组时返回 `nil`；组名解析失败时以 `error()` 中断。
 
 **参数**
 
-无
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?empty g_empty | any | `""` | 空结果替换值 |
 
 **返回值**
 
-`never` — 不会正常返回，始终以 `error()` 中断。
+`table | nil` — 组名到组值的表；无命名组时为 `nil`。
 
 **例程**
 
 ```lisp
-ycRegEx::Search("(?<year>\\d+)", "2026")->groupdict()
-; *Error* ycRegEx::Matched->groupdict: not supported yet (reserved)
+m = ycRegEx::Search("(?P<year>\\d+)-(?P<mon>\\d+)" "2026-11")
+m->groupdict()["year"]          ; => "2026"
+m->groupdict()["mon"]           ; => "11"
+
+ycRegEx::Search("(?P<a>a)?b" "b")->groupdict()["a"]            ; => ""
+ycRegEx::Search("(?P<a>a)?b" "b")->groupdict(?empty "NA")["a"] ; => "NA"
+ycRegEx::Search("(a)" "a")->groupdict()                        ; => nil
 ```
 
 ##### groups <sub>`method`</sub>
