@@ -9,7 +9,6 @@ addToNamespace("ycPathLib"
         _PathCache  ; var
         _PathCacheCap  ; var
         _PathCacheN  ; var
-        _ShellQuoteSafe  ; var
         Cwd  ; proc
         Home  ; proc
         CurrentFile  ; proc
