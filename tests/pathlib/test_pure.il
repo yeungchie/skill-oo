@@ -278,6 +278,26 @@ _AssertOk(errset(ycPathLib::Path("a" "/b" "c")->str() == "/b/c" t)  "Path: absol
 _AssertOk(errset(ycPathLib::Path(_P("a") "b")->str() == "a/b" t)  "Path: Path segment accepted")
 _AssertError(lambda(() ycPathLib::Path("a" 5) t)  "Path: bad segment errors")
 
+; --- ShellQuote：拼 shell 命令时的参数保护 ---
+_Assert(ycPathLib::ShellQuote("a-b_c.d/e") == "a-b_c.d/e"
+    "ShellQuote: safe word kept as is")
+_Assert(ycPathLib::ShellQuote("my file") == "'my file'"
+    "ShellQuote: space forces quoting")
+_Assert(ycPathLib::ShellQuote("a;b|&>") == "'a;b|&>'"
+    "ShellQuote: metacharacters are quoted")
+_Assert(ycPathLib::ShellQuote("it's") == "'it'\\''s'"
+    "ShellQuote: embedded single quote is escaped")
+_Assert(ycPathLib::ShellQuote("") == "''"
+    "ShellQuote: empty argument stays visible")
+_Assert(ycPathLib::ShellQuote("中文 x") == "'中文 x'"
+    "ShellQuote: multibyte text is preserved")
+_Assert(ycPathLib::ShellQuote("$HOME") == "'$HOME'"
+    "ShellQuote: variables are not expanded")
+_AssertError(lambda(() ycPathLib::ShellQuote(1) t)
+    "ShellQuote: rejects a number")
+_AssertError(lambda(() ycPathLib::ShellQuote(nil) t)
+    "ShellQuote: rejects nil")
+
 _TestPureDone = t
 
 ; END

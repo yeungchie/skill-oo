@@ -241,6 +241,8 @@ procedure(_StrMember(t_str l_list "tl")  ; -> t | nil
     )
 )
 
+_ShellQuoteSafe = pcreCompile("^[A-Za-z0-9_./:=@%+,^-]+$")
+
 procedure(ShellQuote(t_str "t")  ; -> str
     ; 把串转成可安全拼进 shell 命令的形式。
     ;
@@ -252,25 +254,15 @@ procedure(ShellQuote(t_str "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 可直接拼进命令串的形式
-    if(pcreMatchp("^[A-Za-z0-9_./:=@%+,^-]+$" t_str)
+    if(pcreExecute(_ShellQuoteSafe t_str)
         t_str
-        let((l_parts n_i n_len t_c)
-            l_parts = tconc(l_parts "'")
-            n_i = 1
-            n_len = length(t_str)
-            while(n_i <= n_len
-                t_c = substring(t_str n_i 1)
-                if(t_c == "'"
-                then
-                    l_parts = tconc(l_parts "'\\''")
-                else
-                    l_parts = tconc(l_parts t_c)
+        strcat("'"
+            buildString(
+                foreach(mapcar t_c parseString(t_str "" t)
+                    if(t_c == "'" "'\\''" t_c)
                 )
-                n_i++
-            )
-            l_parts = tconc(l_parts "'")
-            buildString(car(l_parts) "")
-        )
+                "")
+            "'")
     )
 )
 
