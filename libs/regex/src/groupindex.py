@@ -5,15 +5,17 @@
 # 引擎的组名表没有原生读取入口，这里借辅助解析得到映射；SKILL 侧懒加载并缓存。
 # --no-auto-capture：声明该模式以 no_auto_capture 编译——只有命名组参与编号，
 # 因此按出现顺序（即原组号大小）重排为 1..k。
+#
+# 目标机可能是较旧的 python3：签名注解写成字符串（运行期不求值），局部注解运行期本就
+# 不求值，`NoReturn` 自 3.6.2 才有、只在类型检查期导入。
 
 import argparse
 import json
 import re
 import sys
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    # NoReturn 自 3.6.2 才有，运行期不导入；字符串注解只供静态检查使用。
     from typing import NoReturn
 
 
@@ -38,12 +40,12 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: List[str]) -> int:
+def main(argv: "list[str]") -> int:
     args = build_parser().parse_args(argv)
     # 按字节读再按 UTF-8 解码：不依赖进程 locale，非 ASCII 模式不会解码失败。
     pattern: str = sys.stdin.buffer.read().decode("utf-8", "replace")[:-1]
     rec = re.compile(pattern)
-    index: Dict[str, int] = dict(rec.groupindex)
+    index: dict[str, int] = dict(rec.groupindex)
     if args.no_auto_capture:
         index = {
             name: rank
