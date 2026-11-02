@@ -10,13 +10,17 @@ import argparse
 import json
 import re
 import sys
-from typing import Dict, List, NoReturn
+from typing import TYPE_CHECKING, Dict, List
+
+if TYPE_CHECKING:
+    # NoReturn 自 3.6.2 才有，运行期不导入；字符串注解只供静态检查使用。
+    from typing import NoReturn
 
 
 class UsageParser(argparse.ArgumentParser):
     """Report contract violations as a usage line on stdout plus exit 1."""
 
-    def error(self, message: str) -> NoReturn:
+    def error(self, message: str) -> "NoReturn":
         self.print_usage(sys.stdout)
         raise SystemExit(1)
 
