@@ -5,7 +5,7 @@ addToNamespace("ycCsv"
     mapcar('symbolToString '(
         ; table.il
         Table  ; proc, class
-        TableData  ; class
+        _TableData  ; class
         _Missing  ; proc
         _InstallRender  ; proc
         _RenderRows  ; proc

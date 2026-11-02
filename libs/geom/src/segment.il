@@ -1,7 +1,7 @@
 useNamespace("ycGeom")
 
-defclass(SegmentData () (
-    ; SegmentData 数据桶：收纳线段起终点，构造后禁写。
+defclass(_SegmentData () (
+    ; _SegmentData 数据桶：收纳线段起终点，构造后禁写。
     start(
         \@initarg start
         \@initform nil
@@ -14,7 +14,7 @@ defclass(SegmentData () (
 
 defclass(Segment () (
     ; Segment 实例：不可变线段。
-    ; 状态桶（SegmentData：start + end），构造后禁写
+    ; 状态桶（_SegmentData：start + end），构造后禁写
     _data(
         \@initarg _data
         \@initform nil
@@ -396,7 +396,7 @@ procedure(Segment(l_data "l")  ; -> Segment
     let((l_pts)
         l_pts = _TwoPoints(l_data "ycGeom::Segment")
         makeInstance('Segment ?_data
-            makeInstance('SegmentData
+            makeInstance('_SegmentData
                 ?start _Nth1(1 l_pts)
                 ?end _Nth1(2 l_pts)))
     )

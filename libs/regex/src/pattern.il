@@ -4,8 +4,8 @@ useNamespace("ycRegEx")
 ; ---------- class definition ----------
 
 ; 数据桶：Pattern 状态（pattern flags compileOpts pcre span full nGroups）收敛为单一 _data 槽
-defclass(PatternData () (
-    ; PatternData 数据桶：收纳 Pattern 的 pattern/flags/compileOpts/pcre/span/full/nGroups 状态，构造后禁写。
+defclass(_PatternData () (
+    ; _PatternData 数据桶：收纳 Pattern 的 pattern/flags/compileOpts/pcre/span/full/nGroups 状态，构造后禁写。
     pattern(
         \@initarg pattern
         \@initform ""
@@ -38,7 +38,7 @@ defclass(PatternData () (
 
 defclass(Pattern () (
     ; Pattern 实例：Compile() 返回的已编译模式对象，方法语义同对应自由函数。
-    ; 状态桶（PatternData：pattern flags compileOpts pcre span full nGroups），构造后禁写
+    ; 状态桶（_PatternData：pattern flags compileOpts pcre span full nGroups），构造后禁写
     _data(
         \@initarg _data
         \@initform nil

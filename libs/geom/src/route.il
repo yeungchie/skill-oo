@@ -1,7 +1,7 @@
 useNamespace("ycGeom")
 
-defclass(RouteData () (
-    ; RouteData 数据桶：收纳折线点列与闭合标记，构造后禁写。
+defclass(_RouteData () (
+    ; _RouteData 数据桶：收纳折线点列与闭合标记，构造后禁写。
     points(
         \@initarg points
         \@initform nil
@@ -14,7 +14,7 @@ defclass(RouteData () (
 
 defclass(Route () (
     ; Route 实例：不可变零宽度折线。
-    ; 状态桶（RouteData：points + closed），构造后禁写
+    ; 状态桶（_RouteData：points + closed），构造后禁写
     _data(
         \@initarg _data
         \@initform nil
@@ -228,7 +228,7 @@ procedure(Route(l_points \@key (eps nil) "lg")  ; -> Route
                 error("ycGeom::Route: consecutive duplicate point at index %d" n_i)
             )
         )
-        makeInstance('Route ?_data makeInstance('RouteData
+        makeInstance('Route ?_data makeInstance('_RouteData
             ?points l_pts ?closed g_closed))
     )
 )

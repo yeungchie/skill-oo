@@ -33,12 +33,12 @@ addToNamespace("ycRegEx"
 
         ; pattern.il
         Pattern  ; class
-        PatternData  ; class
+        _PatternData  ; class
         _InstallPattern  ; proc
 
         ; match.il
         Matched  ; class
-        MatchedData  ; class
+        _MatchedData  ; class
         _WholeTemplate  ; proc
         _SplitTemplate  ; proc
         _ExtractParts  ; proc

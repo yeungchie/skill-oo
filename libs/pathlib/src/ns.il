@@ -5,7 +5,7 @@ addToNamespace("ycPathLib"
     mapcar('symbolToString '(
         ; path.il
         Path  ; proc, class
-        PathData  ; class
+        _PathData  ; class
         _PathCache  ; var
         _PathCacheCap  ; var
         _PathCacheN  ; var

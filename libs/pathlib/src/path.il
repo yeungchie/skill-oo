@@ -79,7 +79,7 @@ procedure(_MkPath(t_anchor l_parts "tl")  ; -> Path
         hit = _PathCache[t_key]
         when(hit == nil
             hit = makeInstance('Path ?_data
-                makeInstance('PathData ?anchor t_anchor ?parts l_parts))
+                makeInstance('_PathData ?anchor t_anchor ?parts l_parts))
             _PathCache[t_key] = hit
             _PathCacheN++
             when(_PathCacheN > _PathCacheCap
@@ -348,8 +348,8 @@ procedure(CurrentFile()  ; -> Path
 ; ---------- 类定义 ----------
 
 ; 数据桶：Path 状态（anchor + parts）收敛为单一 _data 槽，obj->? 不罗列 _ 字段
-defclass(PathData () (
-    ; PathData 数据桶：收纳 Path 的 anchor（锚）与 parts（部件列表），构造后禁写。
+defclass(_PathData () (
+    ; _PathData 数据桶：收纳 Path 的 anchor（锚）与 parts（部件列表），构造后禁写。
     anchor(
         \@initarg anchor
         \@initform ""
@@ -362,7 +362,7 @@ defclass(PathData () (
 
 defclass(Path () (
     ; Path 实例：不可变路径对象，同规范串驻留共享同一实例。
-    ; 状态桶（PathData：anchor + parts），构造后禁写
+    ; 状态桶（_PathData：anchor + parts），构造后禁写
     _data(
         \@initarg _data
         \@initform nil

@@ -212,7 +212,7 @@ procedure(_PointAt(n_x n_y "nn")  ; -> Point
     ; **返回**
     ;   (Point) - 新点
     makeInstance('Point ?_data
-        makeInstance('PointData ?x float(n_x) ?y float(n_y)))
+        makeInstance('_PointData ?x float(n_x) ?y float(n_y)))
 )
 
 procedure(_AsPoint(g_x t_ctx "gt")  ; -> Point

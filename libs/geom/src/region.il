@@ -1,7 +1,7 @@
 useNamespace("ycGeom")
 
-defclass(RegionData () (
-    ; RegionData 数据桶：收纳互不重叠的 Polygon 列表，构造后禁写。
+defclass(_RegionData () (
+    ; _RegionData 数据桶：收纳互不重叠的 Polygon 列表，构造后禁写。
     polygons(
         \@initarg polygons
         \@initform nil
@@ -10,7 +10,7 @@ defclass(RegionData () (
 
 defclass(Region () (
     ; Region 实例：0..n 个 Polygon 的并集。
-    ; 状态桶（RegionData：polygons），构造后禁写
+    ; 状态桶（_RegionData：polygons），构造后禁写
     _data(
         \@initarg _data
         \@initform nil
@@ -391,7 +391,7 @@ procedure(Region(l_polygons \@key (normalize t) (grid nil) (eps nil) "lggg")  ; 
             t_polys = _CleanPolygons(t_polys n_eps)
         )
         makeInstance('Region ?_data
-            makeInstance('RegionData ?polygons t_polys))
+            makeInstance('_RegionData ?polygons t_polys))
     )
 )
 

@@ -8,12 +8,12 @@ addToNamespace("ycGeom"
     mapcar('symbolToString '(
         ; point.il
         Point  ; proc, class
-        PointData  ; class
+        _PointData  ; class
         _InstallPoint  ; proc
 
         ; segment.il
         Segment  ; proc, class
-        SegmentData  ; class
+        _SegmentData  ; class
         _SegPointAt  ; proc
         _LineSegmentIntersection  ; proc
         _SegSegIntersection  ; proc
@@ -21,28 +21,28 @@ addToNamespace("ycGeom"
 
         ; line.il
         Line  ; proc, class
-        LineData  ; class
+        _LineData  ; class
         _InstallLine  ; proc
 
         ; rect.il
         Rect  ; proc, class
-        RectData  ; class
+        _RectData  ; class
         _RectPolygon  ; proc
         _InstallRect  ; proc
 
         ; route.il
         Route  ; proc, class
-        RouteData  ; class
+        _RouteData  ; class
         _InstallRoute  ; proc
 
         ; path.il
         Path  ; proc, class
-        PathData  ; class
+        _PathData  ; class
         _InstallPath  ; proc
 
         ; polygon.il
         Polygon  ; proc, class
-        PolygonData  ; class
+        _PolygonData  ; class
         _CheckPolygon  ; proc
         _ShapePolys  ; proc
         _ShapeOp  ; proc
@@ -50,7 +50,7 @@ addToNamespace("ycGeom"
 
         ; region.il
         Region  ; proc, class
-        RegionData  ; class
+        _RegionData  ; class
         _UnionAll  ; proc
         _InstallRegion  ; proc
 

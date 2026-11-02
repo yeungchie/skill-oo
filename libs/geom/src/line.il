@@ -1,7 +1,7 @@
 useNamespace("ycGeom")
 
-defclass(LineData () (
-    ; LineData 数据桶：收纳规范化直线方程 a/b/c，构造后禁写。
+defclass(_LineData () (
+    ; _LineData 数据桶：收纳规范化直线方程 a/b/c，构造后禁写。
     a(
         \@initarg a
         \@initform 0.0
@@ -18,7 +18,7 @@ defclass(LineData () (
 
 defclass(Line () (
     ; Line 实例：不可变无限直线。
-    ; 状态桶（LineData：a + b + c），构造后禁写
+    ; 状态桶（_LineData：a + b + c），构造后禁写
     _data(
         \@initarg _data
         \@initform nil
@@ -242,7 +242,7 @@ procedure(Line(l_data "l")  ; -> Line
         n_c = -(n_a * g_p1->x() + n_b * g_p1->y())
         n_norm = sqrt(n_a * n_a + n_b * n_b)
         makeInstance('Line ?_data
-            makeInstance('LineData
+            makeInstance('_LineData
                 ?a n_a / n_norm
                 ?b n_b / n_norm
                 ?c n_c / n_norm))

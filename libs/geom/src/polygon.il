@@ -12,8 +12,8 @@ useNamespace("ycGeom")
 ;
 ; The seam is an internal bridge, not part of the polygon boundary.
 
-defclass(PolygonData () (
-    ; PolygonData 数据桶：只收纳 keyhole 点列，构造后禁写。
+defclass(_PolygonData () (
+    ; _PolygonData 数据桶：只收纳 keyhole 点列，构造后禁写。
     points(
         \@initarg points
         \@initform nil
@@ -22,7 +22,7 @@ defclass(PolygonData () (
 
 defclass(Polygon () (
     ; Polygon 实例：不可变 keyhole 多边形。
-    ; 状态桶（PolygonData：points），构造后禁写
+    ; 状态桶（_PolygonData：points），构造后禁写
     _data(
         \@initarg _data
         \@initform nil
@@ -499,7 +499,7 @@ procedure(Polygon(l_points "l")  ; -> Polygon
         l_pts = _CanonRing(l_pts n_eps t_reg)
         _CheckPolygon(l_pts n_eps)
         makeInstance('Polygon ?_data
-            makeInstance('PolygonData ?points copy(l_pts)))
+            makeInstance('_PolygonData ?points copy(l_pts)))
     )
 )
 

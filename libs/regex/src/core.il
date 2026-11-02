@@ -321,7 +321,7 @@ procedure(_MkPattern(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
         g_span = _CompileChecked(lsprintf("%s\\A(?:%s)" t_flags g_pat) t_ctx n_opts)
         g_full = _CompileChecked(lsprintf("%s\\A(?:%s)\\z" t_flags g_pat) t_ctx n_opts)
         n_g = pcreSubpatCount(g_faithful)
-        makeInstance('Pattern ?_data makeInstance('PatternData
+        makeInstance('Pattern ?_data makeInstance('_PatternData
             ?pattern g_pat ?flags t_flags ?compileOpts n_opts ?pcre g_faithful
             ?span g_span ?full g_full ?nGroups n_g))
     )

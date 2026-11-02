@@ -5,7 +5,7 @@ addToNamespace("ycCodec"
     mapcar('symbolToString '(
         ; sentinel.il
         Type  ; proc, class
-        TypeData  ; class
+        _TypeData  ; class
         True  ; var
         False  ; var
         Null  ; var

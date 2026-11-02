@@ -449,7 +449,7 @@ procedure(_ZeroWidthRecords(g_pat t_subj n_exec "gtx")  ; -> list | sym
                     if(g_qobj
                     then
                         n_q = pcreSubpatCount(g_qobj)
-                        g_qpat = makeInstance('Pattern ?_data makeInstance('PatternData
+                        g_qpat = makeInstance('Pattern ?_data makeInstance('_PatternData
                             ?pcre g_qobj ?nGroups n_q))
                         l_q = _ExportRecords(g_qpat t_subj n_exec)
                         n_skip = 0
@@ -597,7 +597,7 @@ procedure(_MkMatch(g_pat t_subj g_start g_end l_groups g_anchor n_exec "gtgglgx"
     ;
     ; **返回**
     ;   (Matched) - 新 Matched 实例
-    makeInstance('Matched ?_data makeInstance('MatchedData
+    makeInstance('Matched ?_data makeInstance('_MatchedData
         ?pattern g_pat ?subject t_subj ?start g_start ?end g_end
         ?groups l_groups ?anchor g_anchor ?execOpts n_exec))
 )
@@ -606,8 +606,8 @@ procedure(_MkMatch(g_pat t_subj g_start g_end l_groups g_anchor n_exec "gtgglgx"
 ; ---------- class definition ----------
 
 ; 数据桶：Matched 状态（pattern subject start end groups anchor execOpts）收敛为单一 _data 槽
-defclass(MatchedData () (
-    ; MatchedData 数据桶：收纳 Matched 的 pattern/subject/start/end/groups/anchor/execOpts 状态，构造后禁写。
+defclass(_MatchedData () (
+    ; _MatchedData 数据桶：收纳 Matched 的 pattern/subject/start/end/groups/anchor/execOpts 状态，构造后禁写。
     pattern(
         \@initarg pattern
         \@initform nil
@@ -640,7 +640,7 @@ defclass(MatchedData () (
 
 defclass(Matched () (
     ; Matched 实例：re 系匹配/查找（Finditer、Pattern->match/search/fullmatch 等）返回的匹配对象，提供串值、组值、span 位置与模板展开等查询。
-    ; 状态桶（MatchedData：pattern subject start end groups anchor execOpts），构造后禁写
+    ; 状态桶（_MatchedData：pattern subject start end groups anchor execOpts），构造后禁写
     _data(
         \@initarg _data
         \@initform nil

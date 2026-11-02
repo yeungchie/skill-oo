@@ -1,7 +1,7 @@
 useNamespace("ycGeom")
 
-defclass(PathData () (
-    ; PathData 数据桶：收纳中心线与总宽度，构造后禁写。
+defclass(_PathData () (
+    ; _PathData 数据桶：收纳中心线与总宽度，构造后禁写。
     route(
         \@initarg route
         \@initform nil
@@ -14,7 +14,7 @@ defclass(PathData () (
 
 defclass(Path () (
     ; Path 实例：不可变带宽度描边。
-    ; 状态桶（PathData：route + width），构造后禁写
+    ; 状态桶（_PathData：route + width），构造后禁写
     _data(
         \@initarg _data
         \@initform nil
@@ -405,7 +405,7 @@ procedure(Path(g_data \@key width (eps nil) "ggg")  ; -> Path
             error("ycGeom::Path: ?width must be a positive number, got %A" width)
         )
         n_width = float(width)
-        makeInstance('Path ?_data makeInstance('PathData
+        makeInstance('Path ?_data makeInstance('_PathData
             ?route g_route ?width n_width))
     )
 )

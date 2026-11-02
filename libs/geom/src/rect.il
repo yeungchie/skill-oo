@@ -1,7 +1,7 @@
 useNamespace("ycGeom")
 
-defclass(RectData () (
-    ; RectData 数据桶：收纳轴对齐矩形的 xmin/ymin/xmax/ymax，构造后禁写。
+defclass(_RectData () (
+    ; _RectData 数据桶：收纳轴对齐矩形的 xmin/ymin/xmax/ymax，构造后禁写。
     xmin(
         \@initarg xmin
         \@initform 0.0
@@ -22,7 +22,7 @@ defclass(RectData () (
 
 defclass(Rect () (
     ; Rect 实例：不可变轴对齐矩形。
-    ; 状态桶（RectData：xmin + ymin + xmax + ymax），构造后禁写
+    ; 状态桶（_RectData：xmin + ymin + xmax + ymax），构造后禁写
     _data(
         \@initarg _data
         \@initform nil
@@ -347,7 +347,7 @@ procedure(Rect(l_data "l")  ; -> Rect
         n_xmax = max(g_p1->x() g_p2->x())
         n_ymax = max(g_p1->y() g_p2->y())
         makeInstance('Rect ?_data
-            makeInstance('RectData
+            makeInstance('_RectData
                 ?xmin n_xmin
                 ?ymin n_ymin
                 ?xmax n_xmax

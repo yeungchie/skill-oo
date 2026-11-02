@@ -7,8 +7,8 @@ useNamespace("ycCodec")
 
 ; ---------- 类型 ----------
 
-defclass(TypeData () (
-    ; TypeData 数据桶：收纳规范名（"True"/"False"/"Null"/"Missing"），构造后禁写。
+defclass(_TypeData () (
+    ; _TypeData 数据桶：收纳规范名（"True"/"False"/"Null"/"Missing"），构造后禁写。
     name(
         \@initarg name
         \@initform ""
@@ -87,7 +87,7 @@ procedure(Type(t_name "t")  ; -> Type
         )
         g_inst = _TypeCache[t_canon]
         unless(g_inst
-            g_inst = makeInstance('Type ?_data makeInstance('TypeData ?name t_canon))
+            g_inst = makeInstance('Type ?_data makeInstance('_TypeData ?name t_canon))
             _TypeCache[t_canon] = g_inst
         )
         g_inst

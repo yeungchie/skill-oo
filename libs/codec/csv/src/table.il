@@ -14,8 +14,8 @@ procedure(_Missing()  ; -> any
 
 ; ---------- Table 类型 ----------
 
-defclass(TableData () (
-    ; TableData 数据桶：收纳表头、行列表与列名索引，构造后禁写。
+defclass(_TableData () (
+    ; _TableData 数据桶：收纳表头、行列表与列名索引，构造后禁写。
     header(
         \@initarg header
         \@initform nil
@@ -32,7 +32,7 @@ defclass(TableData () (
 
 defclass(Table () (
     ; Table 实例：不可变 CSV 表格（可选表头 + 字符串行），行列均 1-based。
-    ; 状态桶（TableData：header + rows + index），构造后禁写。
+    ; 状态桶（_TableData：header + rows + index），构造后禁写。
     _data(
         \@initarg _data
         \@initform nil
@@ -330,7 +330,7 @@ procedure(Table(l_rows \@key (header nil) "lg")  ; -> Table
             )
         )
         t_obj = makeInstance('Table ?_data
-            makeInstance('TableData ?header l_names ?rows l_rows ?index l_index)
+            makeInstance('_TableData ?header l_names ?rows l_rows ?index l_index)
         )
         _InstallRender(t_obj)
         t_obj

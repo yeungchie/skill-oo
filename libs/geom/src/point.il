@@ -1,7 +1,7 @@
 useNamespace("ycGeom")
 
-defclass(PointData () (
-    ; PointData 数据桶：收纳 Point 的 x/y 坐标，构造后禁写。
+defclass(_PointData () (
+    ; _PointData 数据桶：收纳 Point 的 x/y 坐标，构造后禁写。
     x(
         \@initarg x
         \@initform 0.0
@@ -14,7 +14,7 @@ defclass(PointData () (
 
 defclass(Point () (
     ; Point 实例：不可变平面点。
-    ; 状态桶（PointData：x + y），构造后禁写
+    ; 状态桶（_PointData：x + y），构造后禁写
     _data(
         \@initarg _data
         \@initform nil
