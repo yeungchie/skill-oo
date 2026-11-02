@@ -34,7 +34,7 @@ let((aj l_res)
     } nil)
     when(l_res == nil
         _TestErrorBegin("create-job block")
-        printf("%A\n" errset.errset)
+        fprintf(errport "%A\n" errset.errset)
         _TestErrorEnd()
     )
     when(aj->state() == 'Active

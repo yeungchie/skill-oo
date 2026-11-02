@@ -55,6 +55,6 @@ TOTAL: <总耗时>
 --- END expected error output ---
 ```
 
-`errset(expr nil)` 用于静默捕获预期错误；测试文件载入失败时也由这组标记包住诊断信息。
+标记与窗口内的诊断都写到错误输出端口（`errport`），与库自身的 `*Error*` 同流；写标记前会先 `drain` 标准输出端口，重定向或缓冲时也不会与普通测试行错位。`errset(expr nil)` 用于静默捕获预期错误；测试文件载入失败时也由这组标记包住诊断信息。
 
 有失败时以 `*Error* <模块名>: <m> test(s) failed` 终止（`ycPathLib` / `ycRegEx` / `ycSubProcess` / `ycCodec` / `ycJson` / `ycYaml` / `ycCsv` / `ycToml` / `ycIni` / `ycUtf8` / `ycString` / `ycUnits` / `ycRadix` / `ycTextwrap` / `ycTabulate` / `ycGeom`）。
