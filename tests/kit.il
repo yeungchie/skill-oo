@@ -17,7 +17,7 @@ _TestFileTotal = 0
 _TestExpected = 0
 _TestChildDone = nil
 _TestErrWindow = nil
-_TestProgWidth = 9
+_TestProgDigits = 3
 
 procedure(_TestPrint(t_kitFmt @rest l_kitArgs "tg")  ; -> t
     ; 按当前是否处于错误窗口选择输出端口。
@@ -58,8 +58,8 @@ procedure(_TestFmtTime(n_kitSec "n")  ; -> str
     )
 )
 
-procedure(_TestPadRight(t_kitText n_kitWidth "tn")  ; -> str
-    ; 在右侧补空格到指定宽度。
+procedure(_TestPadLeft(t_kitText n_kitWidth "tn")  ; -> str
+    ; 在左侧补空格到指定宽度。
     ;
     ; **参数**
     ;   t_kitText   (str) - 原串
@@ -68,7 +68,7 @@ procedure(_TestPadRight(t_kitText n_kitWidth "tn")  ; -> str
     ; **返回**
     ;   (str) - 补空格后的串（原串更宽时原样返回）
     while(length(t_kitText) < n_kitWidth
-        t_kitText = strcat(t_kitText " ")
+        t_kitText = strcat(" " t_kitText)
     )
     t_kitText
 )
@@ -114,9 +114,9 @@ procedure(_TestReport(g_kitOk t_kitName n_kitSec "gtn")  ; -> t | nil
         _TestFail++
     )
     _TestPrint("%s %7s TEST %s - %s\n"
-        _TestPadRight(
-            lsprintf("[%d/%d]" _TestCount _TestExpected)
-            _TestProgWidth)
+        lsprintf("[%s/%s]"
+            _TestPadLeft(lsprintf("%d" _TestCount) _TestProgDigits)
+            lsprintf("%d" _TestExpected))
         _TestFmtTime(n_kitSec)
         if(g_kitOk "PASSED" "FAILED")
         t_kitName)
@@ -586,7 +586,7 @@ procedure(_TestRun(t_kitModule n_kitExpected @rest l_kitFiles "tng")  ; -> t
         _TestFileIndex = 0
         _TestFileTotal = length(l_kitFiles)
         _TestExpected = n_kitExpected
-        _TestProgWidth = max(9 length(lsprintf("%d" n_kitExpected)) * 2 + 3)
+        _TestProgDigits = length(lsprintf("%d" n_kitExpected))
         _TestPrint("\n=== %s ===\n" t_kitModule)
         l_kitPerf = measureTime(
             foreach(t_kitFile l_kitFiles
