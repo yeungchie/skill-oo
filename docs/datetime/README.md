@@ -66,42 +66,6 @@ ycDateTime::Current()->epoch()
 ; => 1793715057（示例值）
 ```
 
-### ycDateTime::Parse <sub>`function`</sub>
-
-```text
-ycDateTime::Parse(t_text [ t_pattern ])
-=> ycDateTime::DateTime
-```
-
-**描述**
-
-按模板把文本解析为 `DateTime`。模板默认 `"%F %T"`；支持 `format` 的全部基础令牌与复合令牌，但周序号类令牌（`%U %W %V %G %g`）与时区令牌（`%z %Z`）不支持，出现即以 `error()` 中断。`%s` 可直接读 Unix 秒，但只能单独使用，不能与其他日期时间令牌混用。
-
-日期必须由「年 + 月 + 日」或「年 + `%j`」给出，缺失的时间字段按 `0` 处理；`%I` 未配 `%p` 时按上午解释，`%p` 与 `%H` 冲突则报错。文本与模板不匹配、字段越界、日期不存在（如 2 月 30 日）、本地时间不存在（夏令时跳变）或明示的星期/序日与日期冲突时，以 `error()` 中断。
-
-**参数**
-
-| 名称 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| t_text | str | | 待解析文本 |
-| t_pattern | str | `"%F %T"` | 模板，可省略 |
-
-**返回值**
-
-`ycDateTime::DateTime` — 解析结果（与同秒实例共享）。
-
-**例程**
-
-```lisp
-ycDateTime::Parse("2026-11-03 22:10:57")->format()      ; => "2026-11-03 22:10:57"
-ycDateTime::Parse("2026-11-03", "%F")->hour()           ; => 0
-ycDateTime::Parse("03 Nov 2026 22:10", "%d %b %Y %H:%M")->format("%F %T")
-; => "2026-11-03 22:10:00"
-ycDateTime::Parse("1793715057", "%s")->epoch()          ; => 1793715057
-ycDateTime::Parse("2024 060", "%Y %j")->format("%F")    ; => "2024-02-29"
-ycDateTime::Parse("2026-02-30", "%F")                   ; *Error* ycDateTime::Parse: day 30 is invalid for 2026-02
-```
-
 ### ycDateTime::DateTime <sub>`function`</sub> <sub>`class`</sub>
 
 ```text
@@ -541,6 +505,42 @@ a->compare(b)     ; => -1
 b->compare(a)     ; => 1
 a->compare(1000)  ; => 0
 a->compare(nil)   ; *Error* ycDateTime::DateTime->compare: expected a DateTime or an integer time, got nil
+```
+
+### ycDateTime::Parse <sub>`function`</sub>
+
+```text
+ycDateTime::Parse(t_text [ t_pattern ])
+=> ycDateTime::DateTime
+```
+
+**描述**
+
+按模板把文本解析为 `DateTime`。模板默认 `"%F %T"`；支持 `format` 的全部基础令牌与复合令牌，但周序号类令牌（`%U %W %V %G %g`）与时区令牌（`%z %Z`）不支持，出现即以 `error()` 中断。`%s` 可直接读 Unix 秒，但只能单独使用，不能与其他日期时间令牌混用。
+
+日期必须由「年 + 月 + 日」或「年 + `%j`」给出，缺失的时间字段按 `0` 处理；`%I` 未配 `%p` 时按上午解释，`%p` 与 `%H` 冲突则报错。文本与模板不匹配、字段越界、日期不存在（如 2 月 30 日）、本地时间不存在（夏令时跳变）或明示的星期/序日与日期冲突时，以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| t_text | str | | 待解析文本 |
+| t_pattern | str | `"%F %T"` | 模板，可省略 |
+
+**返回值**
+
+`ycDateTime::DateTime` — 解析结果（与同秒实例共享）。
+
+**例程**
+
+```lisp
+ycDateTime::Parse("2026-11-03 22:10:57")->format()      ; => "2026-11-03 22:10:57"
+ycDateTime::Parse("2026-11-03", "%F")->hour()           ; => 0
+ycDateTime::Parse("03 Nov 2026 22:10", "%d %b %Y %H:%M")->format("%F %T")
+; => "2026-11-03 22:10:00"
+ycDateTime::Parse("1793715057", "%s")->epoch()          ; => 1793715057
+ycDateTime::Parse("2024 060", "%Y %j")->format("%F")    ; => "2024-02-29"
+ycDateTime::Parse("2026-02-30", "%F")                   ; *Error* ycDateTime::Parse: day 30 is invalid for 2026-02
 ```
 
 [返回首页](../../README.md)
