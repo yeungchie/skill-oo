@@ -73,15 +73,15 @@ procedure(_DateTimeParts(g_x "g")  ; -> list[int] | nil
     cond(
         (fixp(g_x) list(g_x 0))
         (t
-            let((l_sec l_ns)
-                l_sec = errset(g_x->epoch() nil)
-                unless(l_sec && car(l_sec) && fixp(car(l_sec))
+            let((sec ns)
+                sec = errset(g_x->epoch() nil)
+                unless(sec && car(sec) && fixp(car(sec))
                     return(nil)
                 )
-                l_ns = errset(g_x->nanos() nil)
+                ns = errset(g_x->nanos() nil)
                 list(
-                    car(l_sec)
-                    if(l_ns && car(l_ns) && fixp(car(l_ns)) car(l_ns) 0)
+                    car(sec)
+                    if(ns && car(ns) && fixp(car(ns)) car(ns) 0)
                 )
             )
         )
@@ -98,9 +98,9 @@ procedure(_MkDateTime(n_time n_nanos "xx")  ; -> DateTime
     ;
     ; **返回**
     ;   (DateTime) - 同一时刻共享同一实例；超过 _DateTimeCacheCap 条整表清空重计
-    let((t_key hit)
-        t_key = lsprintf("%d:%09d" n_time n_nanos)
-        hit = _DateTimeCache[t_key]
+    let((key hit)
+        key = lsprintf("%d:%09d" n_time n_nanos)
+        hit = _DateTimeCache[key]
         unless(hit
             ; 先清空再新建：让刚返回的实例留在新表里（清空后插入会把它丢掉）
             when(_DateTimeCacheCap <= _DateTimeCacheN
@@ -109,7 +109,7 @@ procedure(_MkDateTime(n_time n_nanos "xx")  ; -> DateTime
             )
             hit = makeInstance('DateTime ?_data
                 makeInstance('_DateTimeData ?time n_time ?nanos n_nanos))
-            _DateTimeCache[t_key] = hit
+            _DateTimeCache[key] = hit
             _DateTimeCacheN++
         )
         hit
@@ -142,14 +142,14 @@ procedure(DateTime(n_time \@optional n_nanos(0) "nx")  ; -> DateTime
     ;
     ; **返回**
     ;   (DateTime) - 该时刻的驻留实例；时间或纳秒越界、纳秒与浮点时间同用时 error() 中断
-    let((n_sec n_ns n_frac)
+    let((sec ns frac)
         if(fixp(n_time)
         then
             unless(0 <= n_nanos && n_nanos < fix(1e9)
                 error("ycDateTime::DateTime: nanos must be 0..999999999, got %A" n_nanos)
             )
-            n_sec = n_time
-            n_ns = n_nanos
+            sec = n_time
+            ns = n_nanos
         else
             when(n_nanos != 0
                 error("ycDateTime::DateTime: nanos cannot be combined with a fractional time")
@@ -158,20 +158,20 @@ procedure(DateTime(n_time \@optional n_nanos(0) "nx")  ; -> DateTime
             when(n_time < -2.147483648e9 || 2.147483647e9 < n_time
                 error("ycDateTime::DateTime: time %A is out of the representable range" n_time)
             )
-            n_sec = fix2(n_time)
-            n_frac = n_time - n_sec
-            when(n_frac < 0
+            sec = fix2(n_time)
+            frac = n_time - sec
+            when(frac < 0
                 ; fix2 的浮点修正可能把秒向上取整，小数部分随之略小于 0
-                n_frac = 0
+                frac = 0
             )
-            n_ns = round2(n_frac * fix(1e9))
-            when(n_ns == fix(1e9)
+            ns = round2(frac * fix(1e9))
+            when(ns == fix(1e9)
                 ; 小数部分舍入到整秒
-                n_ns = 0
-                n_sec++
+                ns = 0
+                sec++
             )
         )
-        _MkDateTime(n_sec n_ns)
+        _MkDateTime(sec ns)
     )
 )
 
@@ -181,12 +181,12 @@ procedure(Current()  ; -> DateTime
     ;
     ; **返回**
     ;   (DateTime) - 由 getCurrentTime() 换算的当前时刻；读取失败时 error() 中断
-    let((n_now)
-        n_now = stringToTime(getCurrentTime())
-        unless(fixp(n_now) && 0 <= n_now
+    let((now)
+        now = stringToTime(getCurrentTime())
+        unless(fixp(now) && 0 <= now
             error("ycDateTime::Current: cannot read the current time")
         )
-        _MkDateTime(n_now 0)
+        _MkDateTime(now 0)
     )
 )
 
@@ -367,32 +367,32 @@ self->add = lambda((\@key (seconds 0) (minutes 0) (hours 0) (days 0) (millis 0) 
     ; **返回**
     ;   (DateTime) - 新时刻；增量全为 0 且驻留命中时即 self 本身；
     ;                增量或结果超出 32 位秒值范围时 _err() 中断
-    let((n_mag n_dsec n_sec n_ns)
+    let((mag dsec sec ns)
         ; 整数是 32 位：先按浮点校验各增量的量级，避免乘积在溢出后静默回绕
-        n_mag = abs(seconds * 1.0) + abs(minutes * 1.0) * 60.0 + abs(hours * 1.0) * 3600.0
+        mag = abs(seconds * 1.0) + abs(minutes * 1.0) * 60.0 + abs(hours * 1.0) * 3600.0
             + abs(days * 1.0) * 86400.0
-        when(2.147483647e9 < n_mag
+        when(2.147483647e9 < mag
             _err("add" "the delta is too large to represent")
         )
-        n_dsec = seconds + minutes * 60 + hours * 3600 + days * 86400
-        n_sec = _AddSec(self->_data->time n_dsec)
-        n_sec = _AddSec(n_sec millis / 1000)
-        n_ns = self->_data->nanos + remainder(millis 1000) * fix(1e6)
-        n_sec = _AddSec(n_sec n_ns / fix(1e9))
-        n_ns = remainder(n_ns fix(1e9))
-        when(n_ns < 0
-            n_ns = n_ns + fix(1e9)
-            n_sec--
+        dsec = seconds + minutes * 60 + hours * 3600 + days * 86400
+        sec = _AddSec(self->_data->time dsec)
+        sec = _AddSec(sec millis / 1000)
+        ns = self->_data->nanos + remainder(millis 1000) * fix(1e6)
+        sec = _AddSec(sec ns / fix(1e9))
+        ns = remainder(ns fix(1e9))
+        when(ns < 0
+            ns = ns + fix(1e9)
+            sec--
         )
-        n_sec = _AddSec(n_sec nanos / fix(1e9))
-        n_ns = n_ns + remainder(nanos fix(1e9))
-        n_sec = _AddSec(n_sec n_ns / fix(1e9))
-        n_ns = remainder(n_ns fix(1e9))
-        when(n_ns < 0
-            n_ns = n_ns + fix(1e9)
-            n_sec--
+        sec = _AddSec(sec nanos / fix(1e9))
+        ns = ns + remainder(nanos fix(1e9))
+        sec = _AddSec(sec ns / fix(1e9))
+        ns = remainder(ns fix(1e9))
+        when(ns < 0
+            ns = ns + fix(1e9)
+            sec--
         )
-        _MkDateTime(n_sec n_ns)
+        _MkDateTime(sec ns)
     )
 )
 
@@ -404,19 +404,19 @@ self->diff = lambda((g_other "g")  ; -> float
     ;
     ; **返回**
     ;   (float) - self 减 g_other 的秒数（self 更晚为正）；参数不可识别时 _err() 中断
-    let((l_o n_sec n_ns)
-        l_o = _DateTimeParts(g_other)
-        unless(l_o
+    let((other sec ns)
+        other = _DateTimeParts(g_other)
+        unless(other
             _err("diff" "expected a DateTime or an integer time, got %A" g_other)
         )
         ; 两端秒值之差可能超过 32 位，先转浮点再算
-        n_sec = self->_data->time * 1.0 - car(l_o)
-        n_ns = self->_data->nanos - cadr(l_o)
-        when(n_ns < 0
-            n_ns = n_ns + fix(1e9)
-            n_sec--
+        sec = self->_data->time * 1.0 - car(other)
+        ns = self->_data->nanos - cadr(other)
+        when(ns < 0
+            ns = ns + fix(1e9)
+            sec--
         )
-        n_sec + n_ns / 1e9
+        sec + ns / 1e9
     )
 )
 
@@ -428,18 +428,18 @@ self->compare = lambda((g_other "g")  ; -> int
     ;
     ; **返回**
     ;   (int) - self 早于为 -1、相同为 0、晚于为 1；参数不可识别时 _err() 中断
-    let((l_o n_o_sec n_o_ns)
-        l_o = _DateTimeParts(g_other)
-        unless(l_o
+    let((other o_sec o_ns)
+        other = _DateTimeParts(g_other)
+        unless(other
             _err("compare" "expected a DateTime or an integer time, got %A" g_other)
         )
-        n_o_sec = car(l_o)
-        n_o_ns = cadr(l_o)
+        o_sec = car(other)
+        o_ns = cadr(other)
         cond(
-            (self->_data->time < n_o_sec -1)
-            (n_o_sec < self->_data->time 1)
-            (self->_data->nanos < n_o_ns -1)
-            (n_o_ns < self->_data->nanos 1)
+            (self->_data->time < o_sec -1)
+            (o_sec < self->_data->time 1)
+            (self->_data->nanos < o_ns -1)
+            (o_ns < self->_data->nanos 1)
             (t 0)
         )
     )

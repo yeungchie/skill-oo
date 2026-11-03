@@ -173,6 +173,11 @@ _AssertError(lambda(() ycDateTime::Parse("2026-11-03 8", "%F %u") t)
     "parse: %u out of range rejected")
 _Assert(ycDateTime::Parse("69-01-01", "%y-%m-%d")->format("%Y") == "1969"
     "parse: %y 69 maps below the pivot")
+_AssertErrorMsg(lambda(() ycDateTime::Parse("68-01-01" "%y-%m-%d") t)
+    "outside the representable time range"
+    "parse: %y 68 exceeds the 32-bit range and says so")
+_Assert(ycDateTime::Parse("2037-12-31" "%F")->format("%F") == "2037-12-31"
+    "parse: dates below 2038 are accepted")
 _Assert(ycDateTime::Parse("2026-11-03 04:10:57", "%F %I:%M:%S")->hour() == 4
     "parse: %I without %p reads the morning")
 _AssertError(lambda(() ycDateTime::Parse("2026 2026", "%Y %Y") t)

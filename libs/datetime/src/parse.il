@@ -15,17 +15,17 @@ procedure(_ParseDigits(t_text n_pos n_min n_max "txnn")  ; -> (int, int) | nil
     ;
     ; **返回**
     ;   ((int, int)|nil) - (数值, 下一位)；位数不足或位置越界时 nil
-    let((n_len n_i n_val)
-        n_len = length(t_text)
-        n_i = n_pos
-        n_val = 0
-        while(n_i <= n_len && (n_i - n_pos) < n_max
-                && pcreMatchp("^[0-9]$" substring(t_text n_i 1))
-            n_val = n_val * 10 + atoi(substring(t_text n_i 1))
-            n_i++
+    let((len i val)
+        len = length(t_text)
+        i = n_pos
+        val = 0
+        while(i <= len && (i - n_pos) < n_max
+                && pcreMatchp("^[0-9]$" substring(t_text i 1))
+            val = val * 10 + atoi(substring(t_text i 1))
+            i++
         )
-        if(n_min <= (n_i - n_pos)
-            list(n_val n_i)
+        if(n_min <= (i - n_pos)
+            list(val i)
             nil
         )
     )
@@ -41,19 +41,19 @@ procedure(_ParseSigned(t_text n_pos "tx")  ; -> (int, int) | nil
     ;
     ; **返回**
     ;   ((int, int)|nil) - (数值, 下一位)；无数字或超出 32 位秒值范围时 nil
-    let((n_sign n_start l_res n_val)
-        n_sign = 1
+    let((sign start res val)
+        sign = 1
         when(n_pos <= length(t_text) && substring(t_text n_pos 1) == "-"
-            n_sign = -1
+            sign = -1
             n_pos++
         )
-        n_start = n_pos
+        start = n_pos
         ; 最多 10 位；用浮点复核数值，避免整数累加在越界后静默回绕
-        l_res = _ParseDigits(t_text n_pos 1 10)
-        when(l_res
-            n_val = atof(substring(t_text n_start cadr(l_res) - n_start))
-            when(n_val <= if(n_sign < 0 2.147483648e9 2.147483647e9)
-                list(fix2(n_sign * n_val) cadr(l_res))
+        res = _ParseDigits(t_text n_pos 1 10)
+        when(res
+            val = atof(substring(t_text start cadr(res) - start))
+            when(val <= if(sign < 0 2.147483648e9 2.147483647e9)
+                list(fix2(sign * val) cadr(res))
             )
         )
     )
@@ -70,20 +70,20 @@ procedure(_ParseName(t_text n_pos l_names "txl")  ; -> (int, int) | nil
     ;
     ; **返回**
     ;   ((int, int)|nil) - (名称下标 0-based, 下一位)；无匹配时 nil
-    let((n_len n_i l_found t_name t_seg)
-        n_len = length(t_text)
-        n_i = 0
-        while(n_i < length(l_names) && l_found == nil
-            t_name = nth(n_i l_names)
-            when(n_pos + length(t_name) - 1 <= n_len
-                t_seg = substring(t_text n_pos length(t_name))
-                when(lowerCase(t_seg) == lowerCase(t_name)
-                    l_found = list(n_i n_pos + length(t_name))
+    let((len i found name seg)
+        len = length(t_text)
+        i = 0
+        while(i < length(l_names) && found == nil
+            name = nth(i l_names)
+            when(n_pos + length(name) - 1 <= len
+                seg = substring(t_text n_pos length(name))
+                when(lowerCase(seg) == lowerCase(name)
+                    found = list(i n_pos + length(name))
                 )
             )
-            n_i++
+            i++
         )
-        l_found
+        found
     )
 )
 
@@ -114,14 +114,14 @@ procedure(_MonthDayFromYday(n_year n_yday "xx")  ; -> (int, int)
     ;
     ; **返回**
     ;   (int, int) - (月份 1～12, 日 1～31)
-    let((n_month n_left)
-        n_month = 1
-        n_left = n_yday
-        while(_MonthLength(n_year n_month) < n_left
-            n_left = n_left - _MonthLength(n_year n_month)
-            n_month++
+    let((month left)
+        month = 1
+        left = n_yday
+        while(_MonthLength(n_year month) < left
+            left = left - _MonthLength(n_year month)
+            month++
         )
-        list(n_month n_left)
+        list(month left)
     )
 )
 
@@ -135,18 +135,18 @@ procedure(_ExpandPattern(t_pattern t_ctx "tt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 只含基础令牌的模板；末尾悬空 % 时 error() 中断
-    let((l_out n_i n_len t_ch t_tok t_rep)
-        n_len = length(t_pattern)
-        n_i = 1
-        while(n_i <= n_len
-            t_ch = substring(t_pattern n_i 1)
-            if(t_ch == "%"
+    let((out i len ch tok rep)
+        len = length(t_pattern)
+        i = 1
+        while(i <= len
+            ch = substring(t_pattern i 1)
+            if(ch == "%"
             then
-                when(n_len < n_i + 1
+                when(len < i + 1
                     error("%s: pattern ends with a dangling %%" t_ctx)
                 )
-                t_tok = substring(t_pattern n_i + 1 1)
-                t_rep = case(t_tok
+                tok = substring(t_pattern i + 1 1)
+                rep = case(tok
                     ("F" "%Y-%m-%d")
                     ("T" "%H:%M:%S")
                     ("R" "%H:%M")
@@ -157,18 +157,18 @@ procedure(_ExpandPattern(t_pattern t_ctx "tt")  ; -> str
                     ("X" "%H:%M:%S")
                     (t nil)
                 )
-                if(t_rep
-                    l_out = tconc(l_out t_rep)
-                    l_out = tconc(l_out strcat("%" t_tok))
+                if(rep
+                    out = tconc(out rep)
+                    out = tconc(out strcat("%" tok))
                 )
-                n_i = n_i + 2
+                i = i + 2
             else
-                l_out = tconc(l_out t_ch)
-                n_i++
+                out = tconc(out ch)
+                i++
             )
         )
-        if(l_out
-            buildString(car(l_out) "")
+        if(out
+            buildString(car(out) "")
             ""
         )
     )
@@ -186,452 +186,455 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> list[int]
     ; **返回**
     ;   (list[int]) - (Unix 秒, 纳秒)；文本与模板不匹配、字段越界、
     ;                 日期不存在（如 2 月 30 日）、DST 空洞或明示的星期/序日不一致时 error() 中断
-    let((t_pat n_plen n_pp n_tlen n_pos t_ch t_tok l_r
-         n_year n_short n_century n_month n_mday
-         n_hour n_hour12 n_minute n_second n_ampm
-         n_wday n_wdayISO n_yday n_epoch n_nanos n_millis tm l_md n_digits)
-        t_pat = _ExpandPattern(t_pattern t_ctx)
-        n_plen = length(t_pat)
-        n_tlen = length(t_text)
-        n_pp = 1
-        n_pos = 1
-        while(n_pp <= n_plen
-            t_ch = substring(t_pat n_pp 1)
-            if(t_ch == "%"
+    let((pat plen pp tlen pos ch tok res
+         year short century month mday
+         hour hour12 minute second ampm
+         wday wdayISO yday epoch nanos millis tm md digits)
+        pat = _ExpandPattern(t_pattern t_ctx)
+        plen = length(pat)
+        tlen = length(t_text)
+        pp = 1
+        pos = 1
+        while(pp <= plen
+            ch = substring(pat pp 1)
+            if(ch == "%"
             then
-                n_pp++
-                t_tok = substring(t_pat n_pp 1)
-                n_pp++
-                case(t_tok
+                pp++
+                tok = substring(pat pp 1)
+                pp++
+                case(tok
                     ("Y"
-                        l_r = _ParseDigits(t_text n_pos 1 4)
-                        unless(l_r
-                            error("%s: expected a year at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 4)
+                        unless(res
+                            error("%s: expected a year at position %d" t_ctx pos)
                         )
-                        when(n_year != nil
+                        when(year != nil
                             error("%s: duplicate %%Y" t_ctx)
                         )
-                        n_year = car(l_r)
-                        n_pos = cadr(l_r)
+                        year = car(res)
+                        pos = cadr(res)
                     )
                     ("y"
-                        l_r = _ParseDigits(t_text n_pos 1 2)
-                        unless(l_r
-                            error("%s: expected a two-digit year at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 2)
+                        unless(res
+                            error("%s: expected a two-digit year at position %d" t_ctx pos)
                         )
-                        when(n_short != nil
+                        when(short != nil
                             error("%s: duplicate %%y" t_ctx)
                         )
-                        n_short = car(l_r)
-                        n_pos = cadr(l_r)
+                        short = car(res)
+                        pos = cadr(res)
                     )
                     ("C"
-                        l_r = _ParseDigits(t_text n_pos 1 2)
-                        unless(l_r
-                            error("%s: expected a century at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 2)
+                        unless(res
+                            error("%s: expected a century at position %d" t_ctx pos)
                         )
-                        when(n_century != nil
+                        when(century != nil
                             error("%s: duplicate %%C" t_ctx)
                         )
-                        n_century = car(l_r)
-                        n_pos = cadr(l_r)
+                        century = car(res)
+                        pos = cadr(res)
                     )
                     ("m"
-                        l_r = _ParseDigits(t_text n_pos 1 2)
-                        unless(l_r
-                            error("%s: expected a month at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 2)
+                        unless(res
+                            error("%s: expected a month at position %d" t_ctx pos)
                         )
-                        when(n_month != nil
+                        when(month != nil
                             error("%s: duplicate month field" t_ctx)
                         )
-                        n_month = car(l_r)
-                        n_pos = cadr(l_r)
+                        month = car(res)
+                        pos = cadr(res)
                     )
                     ("d"
-                        l_r = _ParseDigits(t_text n_pos 1 2)
-                        unless(l_r
-                            error("%s: expected a day at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 2)
+                        unless(res
+                            error("%s: expected a day at position %d" t_ctx pos)
                         )
-                        when(n_mday != nil
+                        when(mday != nil
                             error("%s: duplicate day field" t_ctx)
                         )
-                        n_mday = car(l_r)
-                        n_pos = cadr(l_r)
+                        mday = car(res)
+                        pos = cadr(res)
                     )
                     ("e"
-                        when(n_pos <= n_tlen && substring(t_text n_pos 1) == " "
-                            n_pos++
+                        when(pos <= tlen && substring(t_text pos 1) == " "
+                            pos++
                         )
-                        l_r = _ParseDigits(t_text n_pos 1 2)
-                        unless(l_r
-                            error("%s: expected a day at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 2)
+                        unless(res
+                            error("%s: expected a day at position %d" t_ctx pos)
                         )
-                        when(n_mday != nil
+                        when(mday != nil
                             error("%s: duplicate day field" t_ctx)
                         )
-                        n_mday = car(l_r)
-                        n_pos = cadr(l_r)
+                        mday = car(res)
+                        pos = cadr(res)
                     )
                     ("H"
-                        l_r = _ParseDigits(t_text n_pos 1 2)
-                        unless(l_r
-                            error("%s: expected an hour at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 2)
+                        unless(res
+                            error("%s: expected an hour at position %d" t_ctx pos)
                         )
-                        when(n_hour != nil || n_hour12 != nil
+                        when(hour != nil || hour12 != nil
                             error("%s: duplicate hour field" t_ctx)
                         )
-                        n_hour = car(l_r)
-                        n_pos = cadr(l_r)
+                        hour = car(res)
+                        pos = cadr(res)
                     )
                     ("I"
-                        l_r = _ParseDigits(t_text n_pos 1 2)
-                        unless(l_r
-                            error("%s: expected an hour at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 2)
+                        unless(res
+                            error("%s: expected an hour at position %d" t_ctx pos)
                         )
-                        when(n_hour != nil || n_hour12 != nil
+                        when(hour != nil || hour12 != nil
                             error("%s: duplicate hour field" t_ctx)
                         )
-                        n_hour12 = car(l_r)
-                        n_pos = cadr(l_r)
+                        hour12 = car(res)
+                        pos = cadr(res)
                     )
                     ("M"
-                        l_r = _ParseDigits(t_text n_pos 1 2)
-                        unless(l_r
-                            error("%s: expected a minute at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 2)
+                        unless(res
+                            error("%s: expected a minute at position %d" t_ctx pos)
                         )
-                        when(n_minute != nil
+                        when(minute != nil
                             error("%s: duplicate minute field" t_ctx)
                         )
-                        n_minute = car(l_r)
-                        n_pos = cadr(l_r)
+                        minute = car(res)
+                        pos = cadr(res)
                     )
                     ("S"
-                        l_r = _ParseDigits(t_text n_pos 1 2)
-                        unless(l_r
-                            error("%s: expected a second at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 2)
+                        unless(res
+                            error("%s: expected a second at position %d" t_ctx pos)
                         )
-                        when(n_second != nil
+                        when(second != nil
                             error("%s: duplicate second field" t_ctx)
                         )
-                        n_second = car(l_r)
-                        n_pos = cadr(l_r)
+                        second = car(res)
+                        pos = cadr(res)
                     )
                     ("j"
-                        l_r = _ParseDigits(t_text n_pos 1 3)
-                        unless(l_r
-                            error("%s: expected a day-of-year at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 3)
+                        unless(res
+                            error("%s: expected a day-of-year at position %d" t_ctx pos)
                         )
-                        when(n_yday != nil
+                        when(yday != nil
                             error("%s: duplicate %%j" t_ctx)
                         )
-                        n_yday = car(l_r)
-                        n_pos = cadr(l_r)
+                        yday = car(res)
+                        pos = cadr(res)
                     )
                     ("w"
-                        l_r = _ParseDigits(t_text n_pos 1 1)
-                        unless(l_r
-                            error("%s: expected a weekday at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 1)
+                        unless(res
+                            error("%s: expected a weekday at position %d" t_ctx pos)
                         )
-                        when(n_wday != nil || n_wdayISO != nil
+                        when(wday != nil || wdayISO != nil
                             error("%s: duplicate weekday field" t_ctx)
                         )
-                        n_wday = car(l_r)
-                        n_pos = cadr(l_r)
+                        wday = car(res)
+                        pos = cadr(res)
                     )
                     ("u"
-                        l_r = _ParseDigits(t_text n_pos 1 1)
-                        unless(l_r
-                            error("%s: expected a weekday at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 1)
+                        unless(res
+                            error("%s: expected a weekday at position %d" t_ctx pos)
                         )
-                        when(n_wday != nil || n_wdayISO != nil
+                        when(wday != nil || wdayISO != nil
                             error("%s: duplicate weekday field" t_ctx)
                         )
-                        n_wdayISO = car(l_r)
-                        n_pos = cadr(l_r)
+                        wdayISO = car(res)
+                        pos = cadr(res)
                     )
                     ("p"
-                        l_r = _ParseName(t_text n_pos list("AM" "PM"))
-                        unless(l_r
-                            error("%s: expected AM or PM at position %d" t_ctx n_pos)
+                        res = _ParseName(t_text pos list("AM" "PM"))
+                        unless(res
+                            error("%s: expected AM or PM at position %d" t_ctx pos)
                         )
-                        when(n_ampm != nil
+                        when(ampm != nil
                             error("%s: duplicate %%p" t_ctx)
                         )
-                        n_ampm = car(l_r)
-                        n_pos = cadr(l_r)
+                        ampm = car(res)
+                        pos = cadr(res)
                     )
                     ("P"
-                        l_r = _ParseName(t_text n_pos list("AM" "PM"))
-                        unless(l_r
-                            error("%s: expected AM or PM at position %d" t_ctx n_pos)
+                        res = _ParseName(t_text pos list("AM" "PM"))
+                        unless(res
+                            error("%s: expected AM or PM at position %d" t_ctx pos)
                         )
-                        when(n_ampm != nil
+                        when(ampm != nil
                             error("%s: duplicate %%p" t_ctx)
                         )
-                        n_ampm = car(l_r)
-                        n_pos = cadr(l_r)
+                        ampm = car(res)
+                        pos = cadr(res)
                     )
                     ("a"
-                        l_r = _ParseName(t_text n_pos _DayShort)
-                        unless(l_r
-                            error("%s: expected a weekday name at position %d" t_ctx n_pos)
+                        res = _ParseName(t_text pos _DayShort)
+                        unless(res
+                            error("%s: expected a weekday name at position %d" t_ctx pos)
                         )
-                        when(n_wday != nil || n_wdayISO != nil
+                        when(wday != nil || wdayISO != nil
                             error("%s: duplicate weekday field" t_ctx)
                         )
-                        n_wday = car(l_r)
-                        n_pos = cadr(l_r)
+                        wday = car(res)
+                        pos = cadr(res)
                     )
                     ("A"
-                        l_r = _ParseName(t_text n_pos _DayLong)
-                        unless(l_r
-                            error("%s: expected a weekday name at position %d" t_ctx n_pos)
+                        res = _ParseName(t_text pos _DayLong)
+                        unless(res
+                            error("%s: expected a weekday name at position %d" t_ctx pos)
                         )
-                        when(n_wday != nil || n_wdayISO != nil
+                        when(wday != nil || wdayISO != nil
                             error("%s: duplicate weekday field" t_ctx)
                         )
-                        n_wday = car(l_r)
-                        n_pos = cadr(l_r)
+                        wday = car(res)
+                        pos = cadr(res)
                     )
                     ("b"
-                        l_r = _ParseName(t_text n_pos _MonthShort)
-                        unless(l_r
-                            error("%s: expected a month name at position %d" t_ctx n_pos)
+                        res = _ParseName(t_text pos _MonthShort)
+                        unless(res
+                            error("%s: expected a month name at position %d" t_ctx pos)
                         )
-                        when(n_month != nil
+                        when(month != nil
                             error("%s: duplicate month field" t_ctx)
                         )
-                        n_month = car(l_r) + 1
-                        n_pos = cadr(l_r)
+                        month = car(res) + 1
+                        pos = cadr(res)
                     )
                     ("h"
-                        l_r = _ParseName(t_text n_pos _MonthShort)
-                        unless(l_r
-                            error("%s: expected a month name at position %d" t_ctx n_pos)
+                        res = _ParseName(t_text pos _MonthShort)
+                        unless(res
+                            error("%s: expected a month name at position %d" t_ctx pos)
                         )
-                        when(n_month != nil
+                        when(month != nil
                             error("%s: duplicate month field" t_ctx)
                         )
-                        n_month = car(l_r) + 1
-                        n_pos = cadr(l_r)
+                        month = car(res) + 1
+                        pos = cadr(res)
                     )
                     ("B"
-                        l_r = _ParseName(t_text n_pos _MonthLong)
-                        unless(l_r
-                            error("%s: expected a month name at position %d" t_ctx n_pos)
+                        res = _ParseName(t_text pos _MonthLong)
+                        unless(res
+                            error("%s: expected a month name at position %d" t_ctx pos)
                         )
-                        when(n_month != nil
+                        when(month != nil
                             error("%s: duplicate month field" t_ctx)
                         )
-                        n_month = car(l_r) + 1
-                        n_pos = cadr(l_r)
+                        month = car(res) + 1
+                        pos = cadr(res)
                     )
                     ("s"
-                        l_r = _ParseSigned(t_text n_pos)
-                        unless(l_r
-                            error("%s: expected an integer time at position %d" t_ctx n_pos)
+                        res = _ParseSigned(t_text pos)
+                        unless(res
+                            error("%s: expected an integer time at position %d" t_ctx pos)
                         )
-                        when(n_epoch != nil
+                        when(epoch != nil
                             error("%s: duplicate %%s" t_ctx)
                         )
-                        n_epoch = car(l_r)
-                        n_pos = cadr(l_r)
+                        epoch = car(res)
+                        pos = cadr(res)
                     )
                     ("N"
-                        l_r = _ParseDigits(t_text n_pos 1 9)
-                        unless(l_r
-                            error("%s: expected fractional seconds at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 9)
+                        unless(res
+                            error("%s: expected fractional seconds at position %d" t_ctx pos)
                         )
-                        when(n_nanos != nil
+                        when(nanos != nil
                             error("%s: duplicate fractional seconds" t_ctx)
                         )
-                        n_digits = cadr(l_r) - n_pos
-                        n_nanos = car(l_r) * nth(9 - n_digits _Pow10)
-                        n_pos = cadr(l_r)
+                        digits = cadr(res) - pos
+                        nanos = car(res) * nth(9 - digits _Pow10)
+                        pos = cadr(res)
                     )
                     ("L"
-                        l_r = _ParseDigits(t_text n_pos 1 3)
-                        unless(l_r
-                            error("%s: expected milliseconds at position %d" t_ctx n_pos)
+                        res = _ParseDigits(t_text pos 1 3)
+                        unless(res
+                            error("%s: expected milliseconds at position %d" t_ctx pos)
                         )
-                        when(n_nanos != nil || n_millis != nil
+                        when(nanos != nil || millis != nil
                             error("%s: duplicate fractional seconds" t_ctx)
                         )
-                        n_digits = cadr(l_r) - n_pos
-                        n_millis = car(l_r) * nth(3 - n_digits _Pow10)
-                        n_pos = cadr(l_r)
+                        digits = cadr(res) - pos
+                        millis = car(res) * nth(3 - digits _Pow10)
+                        pos = cadr(res)
                     )
                     ("n"
-                        unless(substring(t_text n_pos 1) == "\n"
-                            error("%s: expected a newline at position %d" t_ctx n_pos)
+                        unless(substring(t_text pos 1) == "\n"
+                            error("%s: expected a newline at position %d" t_ctx pos)
                         )
-                        n_pos++
+                        pos++
                     )
                     ("t"
-                        unless(substring(t_text n_pos 1) == "\t"
-                            error("%s: expected a tab at position %d" t_ctx n_pos)
+                        unless(substring(t_text pos 1) == "\t"
+                            error("%s: expected a tab at position %d" t_ctx pos)
                         )
-                        n_pos++
+                        pos++
                     )
                     ("%"
-                        unless(substring(t_text n_pos 1) == "%"
-                            error("%s: expected %% at position %d" t_ctx n_pos)
+                        unless(substring(t_text pos 1) == "%"
+                            error("%s: expected %% at position %d" t_ctx pos)
                         )
-                        n_pos++
+                        pos++
                     )
                     (t
-                        error("%s: cannot parse token %%%s" t_ctx t_tok)
+                        error("%s: cannot parse token %%%s" t_ctx tok)
                     )
                 )
             else
-                unless(substring(t_text n_pos 1) == t_ch
-                    error("%s: expected %A at position %d" t_ctx t_ch n_pos)
+                unless(substring(t_text pos 1) == ch
+                    error("%s: expected %A at position %d" t_ctx ch pos)
                 )
-                n_pos++
-                n_pp++
+                pos++
+                pp++
             )
         )
-        unless(n_tlen + 1 == n_pos
-            error("%s: unexpected trailing text %A" t_ctx substring(t_text n_pos))
+        unless(tlen + 1 == pos
+            error("%s: unexpected trailing text %A" t_ctx substring(t_text pos))
         )
 
-        if(n_epoch != nil
+        if(epoch != nil
         then
-            when(n_year != nil || n_short != nil || n_century != nil || n_month != nil
-                    || n_mday != nil || n_hour != nil || n_hour12 != nil
-                    || n_minute != nil || n_second != nil || n_ampm != nil
-                    || n_wday != nil || n_wdayISO != nil || n_yday != nil
+            when(year != nil || short != nil || century != nil || month != nil
+                    || mday != nil || hour != nil || hour12 != nil
+                    || minute != nil || second != nil || ampm != nil
+                    || wday != nil || wdayISO != nil || yday != nil
                 error("%s: %%s cannot be combined with date/time tokens" t_ctx)
             )
-            when(n_nanos != nil && n_millis != nil
+            when(nanos != nil && millis != nil
                 error("%s: %%N cannot be combined with %%L" t_ctx)
             )
-            when(n_nanos == nil && n_millis != nil
-                n_nanos = n_millis * fix(1e6)
+            when(nanos == nil && millis != nil
+                nanos = millis * fix(1e6)
             )
-            when(n_nanos == nil
-                n_nanos = 0
+            when(nanos == nil
+                nanos = 0
             )
-            list(n_epoch n_nanos)
+            list(epoch nanos)
         else
             ; --- year ---
-            when(n_century != nil && n_short == nil
+            when(century != nil && short == nil
                 error("%s: %%C requires %%y" t_ctx)
             )
-            when(n_year != nil && (n_short != nil || n_century != nil)
+            when(year != nil && (short != nil || century != nil)
                 error("%s: %%Y cannot be combined with %%y or %%C" t_ctx)
             )
-            when(n_year == nil && n_short != nil
-                when(n_century == nil
-                    n_century = if(n_short < 69 20 19)
+            when(year == nil && short != nil
+                when(century == nil
+                    century = if(short < 69 20 19)
                 )
-                n_year = n_century * 100 + n_short
+                year = century * 100 + short
             )
-            unless(n_year != nil
+            unless(year != nil
                 error("%s: pattern has no year field" t_ctx)
             )
 
             ; --- month and day (or day-of-year) ---
-            when(n_yday != nil && (n_month == nil || n_mday == nil)
-                when(n_month != nil || n_mday != nil
+            when(yday != nil && (month == nil || mday == nil)
+                when(month != nil || mday != nil
                     error("%s: %%j cannot be combined with a partial month/day" t_ctx)
                 )
-                when(n_yday < 1 || 366 < n_yday
-                    error("%s: day-of-year %d is out of range" t_ctx n_yday)
+                when(yday < 1 || 366 < yday
+                    error("%s: day-of-year %d is out of range" t_ctx yday)
                 )
-                when(n_yday == 366 && !_IsLeapYear(n_year)
-                    error("%s: day-of-year 366 is invalid for %04d" t_ctx n_year)
+                when(yday == 366 && !_IsLeapYear(year)
+                    error("%s: day-of-year 366 is invalid for %04d" t_ctx year)
                 )
-                l_md = _MonthDayFromYday(n_year n_yday)
-                n_month = car(l_md)
-                n_mday = cadr(l_md)
+                md = _MonthDayFromYday(year yday)
+                month = car(md)
+                mday = cadr(md)
             )
-            unless(n_month != nil && n_mday != nil
+            unless(month != nil && mday != nil
                 error("%s: pattern needs month and day, or %%j" t_ctx)
             )
-            when(n_month < 1 || 12 < n_month
-                error("%s: month %d is out of range" t_ctx n_month)
+            when(month < 1 || 12 < month
+                error("%s: month %d is out of range" t_ctx month)
             )
-            when(n_mday < 1 || _MonthLength(n_year n_month) < n_mday
-                error("%s: day %d is invalid for %04d-%02d" t_ctx n_mday n_year n_month)
+            when(mday < 1 || _MonthLength(year month) < mday
+                error("%s: day %d is invalid for %04d-%02d" t_ctx mday year month)
             )
 
             ; --- time ---
-            when(n_hour12 != nil
-                when(n_hour12 < 1 || 12 < n_hour12
-                    error("%s: hour %d is out of range for %%I" t_ctx n_hour12)
+            when(hour12 != nil
+                when(hour12 < 1 || 12 < hour12
+                    error("%s: hour %d is out of range for %%I" t_ctx hour12)
                 )
-                n_hour = remainder(n_hour12 12) + if(n_ampm == 1 12 0)
+                hour = remainder(hour12 12) + if(ampm == 1 12 0)
             )
-            when(n_hour == nil
-                n_hour = 0
+            when(hour == nil
+                hour = 0
             )
-            when(n_hour < 0 || 23 < n_hour
-                error("%s: hour %d is out of range" t_ctx n_hour)
+            when(hour < 0 || 23 < hour
+                error("%s: hour %d is out of range" t_ctx hour)
             )
-            when(n_ampm != nil && n_hour12 == nil
-                when((n_hour < 12 && n_ampm == 1) || (12 <= n_hour && n_ampm == 0)
+            when(ampm != nil && hour12 == nil
+                when((hour < 12 && ampm == 1) || (12 <= hour && ampm == 0)
                     error("%s: %%p conflicts with %%H" t_ctx)
                 )
             )
-            when(n_minute == nil
-                n_minute = 0
+            when(minute == nil
+                minute = 0
             )
-            when(n_minute < 0 || 59 < n_minute
-                error("%s: minute %d is out of range" t_ctx n_minute)
+            when(minute < 0 || 59 < minute
+                error("%s: minute %d is out of range" t_ctx minute)
             )
-            when(n_second == nil
-                n_second = 0
+            when(second == nil
+                second = 0
             )
-            when(n_second < 0 || 59 < n_second
-                error("%s: second %d is out of range" t_ctx n_second)
+            when(second < 0 || 59 < second
+                error("%s: second %d is out of range" t_ctx second)
             )
-            when(n_wdayISO != nil
-                when(n_wdayISO < 1 || 7 < n_wdayISO
-                    error("%s: ISO weekday %d is out of range" t_ctx n_wdayISO)
+            when(wdayISO != nil
+                when(wdayISO < 1 || 7 < wdayISO
+                    error("%s: ISO weekday %d is out of range" t_ctx wdayISO)
                 )
-                n_wday = remainder(n_wdayISO 7)
+                wday = remainder(wdayISO 7)
             )
-            when(n_wday != nil && (n_wday < 0 || 6 < n_wday)
-                error("%s: weekday %d is out of range" t_ctx n_wday)
+            when(wday != nil && (wday < 0 || 6 < wday)
+                error("%s: weekday %d is out of range" t_ctx wday)
             )
 
             ; --- build and verify ---
             tm = timeToTm(0)
-            tm->tm_year = n_year - 1900
-            tm->tm_mon = n_month - 1
-            tm->tm_mday = n_mday
-            tm->tm_hour = n_hour
-            tm->tm_min = n_minute
-            tm->tm_sec = n_second
+            tm->tm_year = year - 1900
+            tm->tm_mon = month - 1
+            tm->tm_mday = mday
+            tm->tm_hour = hour
+            tm->tm_min = minute
+            tm->tm_sec = second
             tm->tm_isdst = -1
-            n_epoch = tmToTime(tm)
-            unless(fixp(n_epoch)
+            epoch = tmToTime(tm)
+            unless(fixp(epoch)
                 error("%s: cannot convert %A to a time value" t_ctx t_text)
             )
-            tm = timeToTm(n_epoch)
+            tm = timeToTm(epoch)
             unless(tm
-                    && tm->tm_year + 1900 == n_year && tm->tm_mon + 1 == n_month
-                    && tm->tm_mday == n_mday && tm->tm_hour == n_hour
-                    && tm->tm_min == n_minute && tm->tm_sec == n_second
+                    && tm->tm_year + 1900 == year && tm->tm_mon + 1 == month
+                    && tm->tm_mday == mday && tm->tm_hour == hour
+                    && tm->tm_min == minute && tm->tm_sec == second
+                when(year < 1902 || 2037 < year
+                    error("%s: year %d is outside the representable time range" t_ctx year)
+                )
                 error("%s: invalid local time %A" t_ctx t_text)
             )
-            when(n_wday != nil && tm->tm_wday != n_wday
+            when(wday != nil && tm->tm_wday != wday
                 error("%s: weekday does not match %A" t_ctx t_text)
             )
-            when(n_yday != nil && tm->tm_yday + 1 != n_yday
+            when(yday != nil && tm->tm_yday + 1 != yday
                 error("%s: day-of-year does not match %A" t_ctx t_text)
             )
-            when(n_nanos != nil && n_millis != nil
+            when(nanos != nil && millis != nil
                 error("%s: %%N cannot be combined with %%L" t_ctx)
             )
-            when(n_nanos == nil && n_millis != nil
-                n_nanos = n_millis * fix(1e6)
+            when(nanos == nil && millis != nil
+                nanos = millis * fix(1e6)
             )
-            when(n_nanos == nil
-                n_nanos = 0
+            when(nanos == nil
+                nanos = 0
             )
-            list(n_epoch n_nanos)
+            list(epoch nanos)
         )
     )
 )
@@ -647,9 +650,9 @@ procedure(Parse(t_text \@optional t_pattern("%F %T") "tt")  ; -> DateTime
     ; **返回**
     ;   (DateTime) - 解析结果（驻留实例）；文本与模板不匹配、字段越界、
     ;                 日期不存在或明示的星期/序日不一致时 error() 中断
-    let((l_res)
-        l_res = _ParseTime(t_text t_pattern "ycDateTime::Parse")
-        _MkDateTime(car(l_res) cadr(l_res))
+    let((res)
+        res = _ParseTime(t_text t_pattern "ycDateTime::Parse")
+        _MkDateTime(car(res) cadr(res))
     )
 )
 

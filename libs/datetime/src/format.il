@@ -52,10 +52,10 @@ procedure(_WeeksInYear(n_year "x")  ; -> int
     ;
     ; **返回**
     ;   (int) - 52 或 53（1 月 1 日为周四，或闰年时为周三，则 53 周）
-    let((n_jan1)
-        n_jan1 = _Jan1Weekday(n_year)
-        n_jan1 = if(n_jan1 == 0 7 n_jan1)
-        if(n_jan1 == 4 || (n_jan1 == 3 && _IsLeapYear(n_year)) 53 52)
+    let((jan1)
+        jan1 = _Jan1Weekday(n_year)
+        jan1 = if(jan1 == 0 7 jan1)
+        if(jan1 == 4 || (jan1 == 3 && _IsLeapYear(n_year)) 53 52)
     )
 )
 
@@ -68,22 +68,22 @@ procedure(_IsoWeek(g_tm "g")  ; -> list[int]
     ;
     ; **返回**
     ;   (list[int]) - (周序号 1～53, ISO 年份)
-    let((n_year n_yday0 n_isoWday n_week)
-        n_year = g_tm->tm_year + 1900
-        n_yday0 = g_tm->tm_yday
-        n_isoWday = if(g_tm->tm_wday == 0 7 g_tm->tm_wday)
-        n_week = (n_yday0 - n_isoWday + 11) / 7
+    let((year yday0 isoWday week)
+        year = g_tm->tm_year + 1900
+        yday0 = g_tm->tm_yday
+        isoWday = if(g_tm->tm_wday == 0 7 g_tm->tm_wday)
+        week = (yday0 - isoWday + 11) / 7
         cond(
-            (n_week < 1
-                n_year--
-                n_week = _WeeksInYear(n_year)
+            (week < 1
+                year--
+                week = _WeeksInYear(year)
             )
-            (_WeeksInYear(n_year) < n_week
-                n_week = 1
-                n_year++
+            (_WeeksInYear(year) < week
+                week = 1
+                year++
             )
         )
-        list(n_week n_year)
+        list(week year)
     )
 )
 
@@ -112,10 +112,10 @@ procedure(_FormatToken(t_tok n_time n_nanos g_tm t_ctx "txxgt")  ; -> str
         ("D" _FormatTime(n_time n_nanos "%m/%d/%y" t_ctx))
         ("e" sprintf(nil "%2d" g_tm->tm_mday))
         ("F" _FormatTime(n_time n_nanos "%Y-%m-%d" t_ctx))
-        ("g" let((l_iso) l_iso = _IsoWeek(g_tm) sprintf(nil "%02d" remainder(nth(1 l_iso) 100))))
+        ("g" let((iso) iso = _IsoWeek(g_tm) sprintf(nil "%02d" remainder(nth(1 iso) 100))))
         ("G" sprintf(nil "%04d" nth(1 _IsoWeek(g_tm))))
         ("H" sprintf(nil "%02d" g_tm->tm_hour))
-        ("I" let((n_h) n_h = remainder(g_tm->tm_hour 12) sprintf(nil "%02d" if(n_h == 0 12 n_h))))
+        ("I" let((h) h = remainder(g_tm->tm_hour 12) sprintf(nil "%02d" if(h == 0 12 h))))
         ("j" sprintf(nil "%03d" g_tm->tm_yday + 1))
         ("m" sprintf(nil "%02d" g_tm->tm_mon + 1))
         ("M" sprintf(nil "%02d" g_tm->tm_min))
@@ -156,29 +156,29 @@ procedure(_FormatTime(n_time n_nanos t_pattern t_ctx "xxtt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 格式化结果；模板末尾悬空 % 或未知令牌时 error() 中断
-    let((tm l_out t_ch n_i n_len)
+    let((tm out ch i len)
         tm = timeToTm(n_time)
         unless(tm
             error("%s: cannot convert time %A" t_ctx n_time)
         )
-        l_out = nil
-        n_len = length(t_pattern)
-        n_i = 1
-        while(n_i <= n_len
-            t_ch = substring(t_pattern n_i 1)
-            if(t_ch == "%"
+        out = nil
+        len = length(t_pattern)
+        i = 1
+        while(i <= len
+            ch = substring(t_pattern i 1)
+            if(ch == "%"
             then
-                n_i++
-                when(n_len < n_i
+                i++
+                when(len < i
                     error("%s: pattern ends with a dangling %%" t_ctx)
                 )
-                t_ch = _FormatToken(substring(t_pattern n_i 1) n_time n_nanos tm t_ctx)
+                ch = _FormatToken(substring(t_pattern i 1) n_time n_nanos tm t_ctx)
             )
-            l_out = tconc(l_out t_ch)
-            n_i++
+            out = tconc(out ch)
+            i++
         )
-        if(l_out
-            buildString(car(l_out) "")
+        if(out
+            buildString(car(out) "")
             ""
         )
     )
