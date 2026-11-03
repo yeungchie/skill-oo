@@ -19,7 +19,7 @@ Cadence SKILL++ 的 Unix 时间对象库：`DateTime` 以秒为唯一状态，�
 ```lisp
 let((p)
     ; 当前时刻
-    p = ycDateTime::Now()
+    p = ycDateTime::Current()
     printf("%s\n" p->format())                          ; => 2026-11-03 22:10:57（示例值）
 
     ; 指定格式
@@ -38,10 +38,10 @@ let((p)
 
 ## API 参考
 
-### ycDateTime::Now <sub>`function`</sub>
+### ycDateTime::Current <sub>`function`</sub>
 
 ```text
-ycDateTime::Now()
+ycDateTime::Current()
 => ycDateTime::DateTime
 ```
 
@@ -60,9 +60,9 @@ ycDateTime::Now()
 **例程**
 
 ```lisp
-ycDateTime::Now()->format()
+ycDateTime::Current()->format()
 ; => "2026-11-03 22:10:57"（示例值）
-ycDateTime::Now()->epoch()
+ycDateTime::Current()->epoch()
 ; => 1793715057（示例值）
 ```
 

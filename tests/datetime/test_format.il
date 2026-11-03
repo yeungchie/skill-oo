@@ -148,8 +148,8 @@ let((p)
 
 ; current time formats to the default shape
 _Assert(pcreMatchp("^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$"
-        ycDateTime::Now()->format())
-    "format: Now() matches the default shape")
+        ycDateTime::Current()->format())
+    "format: Current() matches the default shape")
 
 _TestChildDone = t
 

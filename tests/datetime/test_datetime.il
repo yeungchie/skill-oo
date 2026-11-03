@@ -2,10 +2,10 @@
 
 ; --- 1. construction and residency ---
 let((p)
-    p = ycDateTime::Now()
-    _Assert(0 < p->epoch()  "Now: epoch is positive")
+    p = ycDateTime::Current()
+    _Assert(0 < p->epoch()  "Current: epoch is positive")
     _Assert(printself(p) == lsprintf("ycDateTime::DateTime(%d)" p->epoch())
-        "Now: printself is the constructor form")
+        "Current: printself is the constructor form")
 )
 let((p)
     p = ycDateTime::DateTime(0)

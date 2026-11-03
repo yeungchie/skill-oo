@@ -111,7 +111,7 @@ procedure(DateTime(n_time "x")  ; -> DateTime
 )
 
 
-procedure(Now()  ; -> DateTime
+procedure(Current()  ; -> DateTime
     ; 返回当前时刻的 DateTime。
     ;
     ; **返回**
@@ -119,7 +119,7 @@ procedure(Now()  ; -> DateTime
     let((n_now)
         n_now = stringToTime(getCurrentTime())
         unless(fixp(n_now) && 0 <= n_now
-            error("ycDateTime::Now: cannot read the current time")
+            error("ycDateTime::Current: cannot read the current time")
         )
         _MkDateTime(n_now)
     )

@@ -9,7 +9,7 @@ addToNamespace("ycDateTime"
         _DateTimeCache  ; var
         _DateTimeCacheCap  ; var
         _DateTimeCacheN  ; var
-        Now  ; proc
+        Current  ; proc
         _DateTimeTime  ; proc
         _MkDateTime  ; proc
         _InstallDateTime  ; proc
