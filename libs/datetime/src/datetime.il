@@ -140,14 +140,14 @@ procedure(DateTime(n_time \@optional n_nanos(0) "nx")  ; -> DateTime
                 ; fix2 的浮点修正可能把秒向上取整，小数部分随之略小于 0
                 n_frac = 0
             )
-            n_ns = round2(n_frac * 1000000000)
+            n_ns = round2(n_frac * fix(1e9))
         )
-        when(n_ns < 0 || 999999999 < n_ns
-            when(n_ns == 1000000000
+        when(n_ns < 0 || fix(1e9) <= n_ns
+            when(n_ns == fix(1e9)
                 n_ns = 0
                 n_sec++
             )
-            when(n_ns < 0 || 999999999 < n_ns
+            when(n_ns < 0 || fix(1e9) <= n_ns
                 error("ycDateTime::DateTime: nanos must be 0..999999999, got %A" n_ns)
             )
         )
@@ -228,7 +228,7 @@ self->millis = lambda(()  ; -> int
     ;
     ; **返回**
     ;   (int) - 毫秒（0～999）
-    self->_data->nanos / 1000000
+    self->_data->nanos / fix(1e6)
 )
 
 self->format = lambda((\@optional t_pattern("%F %T") "t")  ; -> str
@@ -345,13 +345,13 @@ self->add = lambda((\@key (seconds 0) (minutes 0) (hours 0) (days 0) (millis 0) 
     ;   (DateTime) - 新时刻；增量全为 0 时返回自身（同一驻留实例）
     let((n_dsec n_dns n_sec n_ns)
         n_dsec = seconds + minutes * 60 + hours * 3600 + days * 86400
-        n_dns = millis * 1000000 + nanos
+        n_dns = millis * fix(1e6) + nanos
         n_sec = self->_data->time + n_dsec
         n_ns = self->_data->nanos + n_dns
-        n_sec = n_sec + n_ns / 1000000000
-        n_ns = remainder(n_ns 1000000000)
+        n_sec = n_sec + n_ns / fix(1e9)
+        n_ns = remainder(n_ns fix(1e9))
         when(n_ns < 0
-            n_ns = n_ns + 1000000000
+            n_ns = n_ns + fix(1e9)
             n_sec--
         )
         _MkDateTime(n_sec n_ns)
@@ -373,13 +373,13 @@ self->diff = lambda((g_other "g")  ; -> float
         )
         n_sec = self->_data->time - car(l_o)
         n_ns = self->_data->nanos - cadr(l_o)
-        n_sec = n_sec + n_ns / 1000000000
-        n_ns = remainder(n_ns 1000000000)
+        n_sec = n_sec + n_ns / fix(1e9)
+        n_ns = remainder(n_ns fix(1e9))
         when(n_ns < 0
-            n_ns = n_ns + 1000000000
+            n_ns = n_ns + fix(1e9)
             n_sec--
         )
-        n_sec + n_ns / 1000000000.0
+        n_sec + n_ns / 1e9
     )
 )
 

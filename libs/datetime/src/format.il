@@ -138,7 +138,7 @@ procedure(_FormatToken(t_tok n_time n_nanos g_tm t_ctx "txxgt")  ; -> str
         ("y" sprintf(nil "%02d" remainder(g_tm->tm_year + 1900 100)))
         ("Y" sprintf(nil "%04d" g_tm->tm_year + 1900))
         ("N" sprintf(nil "%09d" n_nanos))
-        ("L" sprintf(nil "%03d" n_nanos / 1000000))
+        ("L" sprintf(nil "%03d" n_nanos / fix(1e6)))
         ("%" "%")
         (t error("%s: unknown format token %%%s" t_ctx t_tok))
     )

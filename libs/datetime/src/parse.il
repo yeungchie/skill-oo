@@ -1,7 +1,7 @@
 useNamespace("ycDateTime")
 
 ; 十进制位权（0～8 次），用于把不定长小数位换算为纳秒/毫秒。
-_Pow10 = list(1 10 100 1000 10000 100000 1000000 10000000 100000000)
+_Pow10 = list(1 10 100 1000 10000 100000 fix(1e6) fix(1e7) fix(1e8))
 
 
 procedure(_ParseDigits(t_text n_pos n_min n_max "txnn")  ; -> (int . int) | nil
@@ -611,7 +611,7 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> list[int]
                 error("%s: %%N cannot be combined with %%L" t_ctx)
             )
             when(n_nanos == nil && n_millis != nil
-                n_nanos = n_millis * 1000000
+                n_nanos = n_millis * fix(1e6)
             )
             when(n_nanos == nil
                 n_nanos = 0

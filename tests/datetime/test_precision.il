@@ -22,17 +22,17 @@ _Assert(ycDateTime::DateTime(1 2) != ycDateTime::DateTime(2 2)
 
 ; --- 2. fractional constructor ---
 _Assert(ycDateTime::DateTime(1.5)->epoch() == 1
-        && ycDateTime::DateTime(1.5)->nanos() == 500000000
+        && ycDateTime::DateTime(1.5)->nanos() == 5e8
     "precision: flonum seconds split into seconds and nanos")
 _Assert(ycDateTime::DateTime(-0.25)->epoch() == -1
-        && ycDateTime::DateTime(-0.25)->nanos() == 750000000
+        && ycDateTime::DateTime(-0.25)->nanos() == 7.5e8
     "precision: negative flonum uses floor seconds")
 
 ; --- 3. validation ---
 _AssertError(lambda(() ycDateTime::DateTime(0 -1) t)  "precision: negative nanos rejected")
-_Assert(ycDateTime::DateTime(0 1000000000) == ycDateTime::DateTime(1 0)
+_Assert(ycDateTime::DateTime(0 fix(1e9)) == ycDateTime::DateTime(1 0)
     "precision: nanos carry into the next second")
-_AssertError(lambda(() ycDateTime::DateTime(0 2000000000) t)
+_AssertError(lambda(() ycDateTime::DateTime(0 fix(2e9)) t)
     "precision: nanos beyond one carry rejected")
 _AssertError(lambda(() ycDateTime::DateTime(1.5 1) t)
     "precision: nanos with a flonum time rejected")
@@ -71,11 +71,11 @@ let((p)
 )
 let((p)
     p = ycDateTime::Parse("2026-11-03 22:10:57.4", "%F %T.%N")
-    _Assert(p->nanos() == 400000000  "precision: short %N is right-padded")
+    _Assert(p->nanos() == 4e8  "precision: short %N is right-padded")
     p = ycDateTime::Parse("2026-11-03 22:10:57.123", "%F %T.%L")
-    _Assert(p->nanos() == 123000000  "precision: %L reads milliseconds")
+    _Assert(p->nanos() == 1.23e8  "precision: %L reads milliseconds")
     p = ycDateTime::Parse("2026-11-03 22:10:57.5", "%F %T.%L")
-    _Assert(p->nanos() == 500000000  "precision: short %L is right-padded")
+    _Assert(p->nanos() == 5e8  "precision: short %L is right-padded")
 )
 _AssertError(lambda(() ycDateTime::Parse("2026-11-03 22:10:57.12", "%F %T.%N%L") t)
     "precision: %N and %L cannot be combined")
@@ -91,14 +91,14 @@ let((p)
     _Assert(p->add(?nanos -1)->epoch() == 0  "precision: nanos borrow from seconds")
     _Assert(p->add(?nanos -1)->nanos() == 999999999  "precision: borrowed nanos wrap")
     _Assert(p->add(?millis 1500)->epoch() == 2  "precision: millis carry into seconds")
-    _Assert(p->add(?millis 1500)->nanos() == 500000000  "precision: millis remainder")
+    _Assert(p->add(?millis 1500)->nanos() == 5e8  "precision: millis remainder")
     _Assert(p->add() == p  "precision: zero delta returns the same instance")
 )
 
 ; --- 7. diff and compare honour nanoseconds ---
-_Assert(ycDateTime::DateTime(2 500000000)->diff(ycDateTime::DateTime(1 0)) == 1.5
+_Assert(ycDateTime::DateTime(2 fix(5e8))->diff(ycDateTime::DateTime(1 0)) == 1.5
     "precision: diff includes the fractional part")
-_Assert(ycDateTime::DateTime(1 0)->diff(ycDateTime::DateTime(1 250000000)) == -0.25
+_Assert(ycDateTime::DateTime(1 0)->diff(ycDateTime::DateTime(1 fix(2.5e8))) == -0.25
     "precision: negative fractional diff")
 _Assert(ycDateTime::DateTime(1 1)->compare(ycDateTime::DateTime(1 0)) == 1
     "precision: compare uses nanos when seconds tie")

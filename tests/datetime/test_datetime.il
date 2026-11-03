@@ -63,7 +63,7 @@ let((a b)
 )
 
 ; --- 5. error paths ---
-_Assert(ycDateTime::DateTime(1.5)->nanos() == 500000000
+_Assert(ycDateTime::DateTime(1.5)->nanos() == 5e8
     "DateTime: float seconds accepted")
 _AssertError(lambda(() ycDateTime::DateTime("1") t)  "DateTime: string rejected")
 _AssertError(lambda(() ycDateTime::DateTime() t)  "DateTime: missing time rejected")
