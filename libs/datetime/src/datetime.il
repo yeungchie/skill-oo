@@ -155,18 +155,25 @@ procedure(DateTime(n_time \@optional n_nanos(0) "nx")  ; -> DateTime
                 error("ycDateTime::DateTime: nanos cannot be combined with a fractional time")
             )
             ; 先在浮点侧判断范围：fix2 对越界值会静默钳位到 32 位边界
+            ; SKILL 的 == 认为 NaN 与自身相等，只能靠序比较识别 NaN
+            when(!(n_time < 0) && !(0 <= n_time)
+                error("ycDateTime::DateTime: time %A is not a number" n_time)
+            )
             when(n_time < -2.147483648e9 || 2.147483647e9 < n_time
                 error("ycDateTime::DateTime: time %A is out of the representable range" n_time)
             )
             sec = fix2(n_time)
             frac = n_time - sec
             when(frac < 0
-                ; fix2 的浮点修正可能把秒向上取整，小数部分随之略小于 0
+                ; fix2 对接近整数的浮点会修到上一格，此时小数略小于 0，按 0 处理
                 frac = 0
             )
             ns = round2(frac * fix(1e9))
             when(ns == fix(1e9)
-                ; 小数部分舍入到整秒
+                ; 兜底：fix2 会把近整数修正为整数，正常到不了这里；到点边界时明确报错
+                when(sec == 2.147483647e9
+                    error("ycDateTime::DateTime: time %A is out of the representable range" n_time)
+                )
                 ns = 0
                 sec++
             )
@@ -367,14 +374,13 @@ self->add = lambda((\@key (seconds 0) (minutes 0) (hours 0) (days 0) (millis 0) 
     ; **返回**
     ;   (DateTime) - 新时刻；增量全为 0 且驻留命中时即 self 本身；
     ;                增量或结果超出 32 位秒值范围时 _err() 中断
-    let((mag dsec sec ns)
-        ; 整数是 32 位：先按浮点校验各增量的量级，避免乘积在溢出后静默回绕
-        mag = abs(seconds * 1.0) + abs(minutes * 1.0) * 60.0 + abs(hours * 1.0) * 3600.0
-            + abs(days * 1.0) * 86400.0
-        when(2.147483647e9 < mag
+    let((dsec sec ns)
+        ; 整秒增量用浮点求和（double 对整数精确），避免 32 位乘积溢出，也允许抵消组合
+        dsec = seconds + minutes * 60.0 + hours * 3600.0 + days * 86400.0
+        when(dsec < -2.147483648e9 || 2.147483647e9 < dsec
             _err("add" "the delta is too large to represent")
         )
-        dsec = seconds + minutes * 60 + hours * 3600 + days * 86400
+        dsec = fix2(dsec)
         sec = _AddSec(self->_data->time dsec)
         sec = _AddSec(sec millis / 1000)
         ns = self->_data->nanos + remainder(millis 1000) * fix(1e6)
@@ -382,7 +388,7 @@ self->add = lambda((\@key (seconds 0) (minutes 0) (hours 0) (days 0) (millis 0) 
         ns = remainder(ns fix(1e9))
         when(ns < 0
             ns = ns + fix(1e9)
-            sec--
+            sec = _AddSec(sec -1)
         )
         sec = _AddSec(sec nanos / fix(1e9))
         ns = ns + remainder(nanos fix(1e9))
@@ -390,7 +396,7 @@ self->add = lambda((\@key (seconds 0) (minutes 0) (hours 0) (days 0) (millis 0) 
         ns = remainder(ns fix(1e9))
         when(ns < 0
             ns = ns + fix(1e9)
-            sec--
+            sec = _AddSec(sec -1)
         )
         _MkDateTime(sec ns)
     )

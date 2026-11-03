@@ -159,12 +159,20 @@ let((p)
 )
 _AssertError(lambda(() ycDateTime::Parse("1793715057 5 5", "%s %L %N") t)
     "parse: %N and %L cannot be combined with %s")
+_AssertError(lambda(() ycDateTime::Parse("-1.5", "%s.%N") t)
+    "parse: negative epoch with a fraction rejected")
+_AssertError(lambda(() ycDateTime::Parse("-0.5", "%s.%N") t)
+    "parse: negative zero epoch with a fraction rejected")
+_Assert(ycDateTime::Parse("-1.000000000", "%s.%N")->epoch() == -1
+    "parse: negative epoch with a zero fraction accepted")
 
 ; --- 11. epoch range ---
 _AssertError(lambda(() ycDateTime::Parse("999999999999", "%s") t)
     "parse: %s beyond the 32-bit range rejected")
 _Assert(ycDateTime::Parse("-2147483648", "%s")->epoch() == fix(-2.147483648e9)
     "parse: %s accepts the smallest 32-bit second")
+_Assert(ycDateTime::Parse("001793715057", "%s")->epoch() == 1793715057
+    "parse: %s accepts a zero-padded 12-digit epoch")
 
 ; --- 12. weekday, pivot and duplicate fields ---
 _AssertErrorMsg(lambda(() ycDateTime::Parse("2026-11-03 9", "%F %w") t)

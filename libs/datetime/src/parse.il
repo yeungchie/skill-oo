@@ -14,25 +14,28 @@ procedure(_ParseDigits(t_text n_pos n_min n_max "txnn")  ; -> (int, int) | nil
     ;   n_max   (int) - 最多位数
     ;
     ; **返回**
-    ;   ((int, int)|nil) - (数值, 下一位)；位数不足或位置越界时 nil
-    let((len i val)
+    ;   ((int, int)|nil) - (数值, 下一位)；位数不足、位置越界或数值超出 32 位秒值范围时 nil
+    let((len i)
         len = length(t_text)
         i = n_pos
-        val = 0
         while(i <= len && (i - n_pos) < n_max
                 && pcreMatchp("^[0-9]$" substring(t_text i 1))
-            val = val * 10 + atoi(substring(t_text i 1))
             i++
         )
         if(n_min <= (i - n_pos)
-            list(val i)
-            nil
+            let((val)
+                ; 用浮点换算：12 位数字的整数累加会越过 32 位
+                val = atof(substring(t_text n_pos i - n_pos))
+                when(val <= 2.147483648e9
+                    list(fix2(val) i)
+                )
+            )
         )
     )
 )
 
 
-procedure(_ParseSigned(t_text n_pos "tx")  ; -> (int, int) | nil
+procedure(_ParseSigned(t_text n_pos "tx")  ; -> (int, int, int) | nil
     ; 从给定位置读带可选负号的十进制整数。
     ;
     ; **参数**
@@ -40,7 +43,8 @@ procedure(_ParseSigned(t_text n_pos "tx")  ; -> (int, int) | nil
     ;   n_pos   (int) - 起始位置（1-based）
     ;
     ; **返回**
-    ;   ((int, int)|nil) - (数值, 下一位)；无数字或超出 32 位秒值范围时 nil
+    ;   ((int, int, int)|nil) - (数值, 下一位, 符号)；符号取 1 或 -1；
+    ;                          无数字或超出 32 位秒值范围时 nil
     let((sign start res val)
         sign = 1
         when(n_pos <= length(t_text) && substring(t_text n_pos 1) == "-"
@@ -48,12 +52,12 @@ procedure(_ParseSigned(t_text n_pos "tx")  ; -> (int, int) | nil
             n_pos++
         )
         start = n_pos
-        ; 最多 10 位；用浮点复核数值，避免整数累加在越界后静默回绕
-        res = _ParseDigits(t_text n_pos 1 10)
+        ; 最多 12 位（容纳 %012d 这类零填充）；用浮点复核数值，超范围返回 nil
+        res = _ParseDigits(t_text n_pos 1 12)
         when(res
             val = atof(substring(t_text start cadr(res) - start))
             when(val <= if(sign < 0 2.147483648e9 2.147483647e9)
-                list(fix2(sign * val) cadr(res))
+                list(fix2(sign * val) cadr(res) sign)
             )
         )
     )
@@ -189,7 +193,7 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> list[int]
     let((pat plen pp tlen pos ch tok res
          year short century month mday
          hour hour12 minute second ampm
-         wday wdayISO yday epoch nanos millis tm md digits)
+         wday wdayISO yday epoch epochSign nanos millis tm md digits)
         pat = _ExpandPattern(t_pattern t_ctx)
         plen = length(pat)
         tlen = length(t_text)
@@ -436,6 +440,7 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> list[int]
                         )
                         epoch = car(res)
                         pos = cadr(res)
+                        epochSign = caddr(res)
                     )
                     ("N"
                         res = _ParseDigits(t_text pos 1 9)
@@ -511,6 +516,9 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> list[int]
             )
             when(nanos == nil
                 nanos = 0
+            )
+            when(epochSign < 0 && nanos != 0
+                error("%s: a negative epoch cannot carry a fractional part; use %%F %%T.%%N" t_ctx)
             )
             list(epoch nanos)
         else

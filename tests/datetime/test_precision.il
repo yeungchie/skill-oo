@@ -119,6 +119,19 @@ _AssertError(lambda(() ycDateTime::DateTime(0)->add(?days 30000) t)
     "precision: day delta beyond the 32-bit range rejected")
 _AssertError(lambda(() ycDateTime::DateTime(fix(2.147483647e9))->add(?seconds 1) t)
     "precision: result beyond the 32-bit range rejected")
+_AssertError(lambda(() ycDateTime::DateTime(fix(-2.147483648e9))->add(?nanos -1) t)
+    "precision: nanos borrow below the 32-bit range rejected")
+_AssertError(lambda(() ycDateTime::DateTime(fix(-2.147483648e9))->add(?millis -1) t)
+    "precision: millis borrow below the 32-bit range rejected")
+_Assert(ycDateTime::DateTime(fix(2.147483647e9))->add(?nanos 1)->nanos() == 1
+    "precision: nanos still fit inside the last representable second")
+_Assert(ycDateTime::DateTime(0)->add(?seconds fix(-2.147483648e9))->epoch()
+        == fix(-2.147483648e9)
+    "precision: the smallest 32-bit second is a valid delta")
+_Assert(ycDateTime::DateTime(0)->add(?hours 596523 ?minutes -1)->epoch() == 2147482740
+    "precision: cancelling deltas are summed in floating point")
+_AssertError(lambda(() ycDateTime::DateTime(1e400 - 1e400) t)
+    "precision: NaN time rejected")
 
 ; --- 7. diff and compare honour nanoseconds ---
 _Assert(ycDateTime::DateTime(2 fix(5e8))->diff(ycDateTime::DateTime(1 0)) == 1.5
