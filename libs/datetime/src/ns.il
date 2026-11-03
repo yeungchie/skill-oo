@@ -25,6 +25,16 @@ addToNamespace("ycDateTime"
         _IsoWeek  ; proc
         _FormatToken  ; proc
         _FormatTime  ; proc
+
+        ; parse.il
+        _ParseDigits  ; proc
+        _ParseSigned  ; proc
+        _ParseName  ; proc
+        _MonthLength  ; proc
+        _MonthDayFromYday  ; proc
+        _ExpandPattern  ; proc
+        _ParseTime  ; proc
+        Parse  ; proc
     ))
 )
 unuseNamespace("ycDateTime")
