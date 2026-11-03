@@ -36,7 +36,9 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv) -> int:
     args = build_parser().parse_args(argv)
     # 按字节读再按 UTF-8 解码：不依赖进程 locale，非 ASCII 模式不会解码失败。
-    pattern: str = sys.stdin.buffer.read().decode("utf-8", "replace")[:-1]
+    pattern: str = sys.stdin.buffer.read().decode("utf-8", "replace")
+    if pattern.endswith("\n"):  # noqa: FURB188 - 目标机可能是 python3.8，没有 str.removesuffix
+        pattern = pattern[:-1]
     rec = re.compile(pattern)
     index = dict(rec.groupindex)
     if args.no_auto_capture:
@@ -49,6 +51,6 @@ def main(argv) -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main(sys.argv[1:]))
-    except (re.error, UnicodeDecodeError) as e:
+    except (re.error, UnicodeDecodeError, KeyboardInterrupt) as e:
         sys.stderr.write(str(e))
         sys.exit(1)
