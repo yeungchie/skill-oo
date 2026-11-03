@@ -126,7 +126,7 @@ procedure(_AddSec(n_sec n_delta "xx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 相加结果；结果超出 32 位秒值范围时 error() 中断
-    when(2147483647.0 < n_sec * 1.0 + n_delta || n_sec * 1.0 + n_delta < -2147483648.0
+    when(2147483647 < n_sec * 1.0 + n_delta || n_sec * 1.0 + n_delta < (-2147483647 - 1)
         error("ycDateTime::DateTime->add: the resulting time is out of the representable range")
     )
     n_sec + n_delta
@@ -159,7 +159,7 @@ procedure(DateTime(n_time \@optional n_nanos(0) "nx")  ; -> DateTime
             when(!(n_time < 0) && !(0 <= n_time)
                 error("ycDateTime::DateTime: time %A is not a number" n_time)
             )
-            when(n_time < -2147483648.0 || 2147483647.0 < n_time
+            when(n_time < (-2147483647 - 1) || 2147483647 < n_time
                 error("ycDateTime::DateTime: time %A is out of the representable range" n_time)
             )
             sec = fix2(n_time)
@@ -377,7 +377,7 @@ self->add = lambda((\@key (seconds 0) (minutes 0) (hours 0) (days 0) (millis 0) 
     let((dsec sec ns)
         ; 整秒增量用浮点求和（double 对整数精确），避免 32 位乘积溢出，也允许抵消组合
         dsec = seconds + minutes * 60.0 + hours * 3600.0 + days * 86400.0
-        when(dsec < -2147483648.0 || 2147483647.0 < dsec
+        when(dsec < (-2147483647 - 1) || 2147483647 < dsec
             _err("add" "the delta is too large to represent")
         )
         dsec = fix2(dsec)

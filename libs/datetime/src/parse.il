@@ -14,7 +14,7 @@ procedure(_ParseDigits(t_text n_pos n_min n_max "txnn")  ; -> (int, int) | nil
     ;   n_max   (int) - 最多位数
     ;
     ; **返回**
-    ;   ((int, int)|nil) - (数值, 下一位)；位数不足、位置越界或数值超出 32 位秒值范围时 nil
+    ;   ((int, int)|nil) - (数值, 下一位)；位数不足或位置越界时 nil；数值超出 32 位时钳到边界
     let((len i)
         len = length(t_text)
         i = n_pos
@@ -23,13 +23,9 @@ procedure(_ParseDigits(t_text n_pos n_min n_max "txnn")  ; -> (int, int) | nil
             i++
         )
         if(n_min <= (i - n_pos)
-            let((val)
-                ; 用浮点换算：12 位数字的整数累加会越过 32 位
-                val = atof(substring(t_text n_pos i - n_pos))
-                when(val <= 2147483648.0
-                    list(fix2(val) i)
-                )
-            )
+            ; 用浮点换算：12 位数字的整数累加会越过 32 位；数值越界时钳到边界，
+            ; 只有 %s 的 12 位路径会走到，它只取位置、不取数值
+            list(fix2(atof(substring(t_text n_pos i - n_pos))) i)
         )
     )
 )
@@ -55,9 +51,9 @@ procedure(_ParseSigned(t_text n_pos "tx")  ; -> (int, int, int) | nil
         ; 最多 12 位（容纳 %012d 这类零填充）；用浮点复核数值，超范围返回 nil
         res = _ParseDigits(t_text n_pos 1 12)
         when(res
-            val = atof(substring(t_text start cadr(res) - start))
-            when(val <= if(sign < 0 2147483648.0 2147483647.0)
-                list(fix2(sign * val) cadr(res) sign)
+            val = sign * atof(substring(t_text start cadr(res) - start))
+            when((-2147483647 - 1) <= val && val <= 2147483647
+                list(fix2(val) cadr(res) sign)
             )
         )
     )

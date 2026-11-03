@@ -117,16 +117,16 @@ let((p)
 )
 _AssertError(lambda(() ycDateTime::DateTime(0)->add(?days 30000) t)
     "precision: day delta beyond the 32-bit range rejected")
-_AssertError(lambda(() ycDateTime::DateTime(fix(2147483647.0))->add(?seconds 1) t)
+_AssertError(lambda(() ycDateTime::DateTime(2147483647)->add(?seconds 1) t)
     "precision: result beyond the 32-bit range rejected")
-_AssertError(lambda(() ycDateTime::DateTime(fix(-2147483648.0))->add(?nanos -1) t)
+_AssertError(lambda(() ycDateTime::DateTime(-2147483647 - 1)->add(?nanos -1) t)
     "precision: nanos borrow below the 32-bit range rejected")
-_AssertError(lambda(() ycDateTime::DateTime(fix(-2147483648.0))->add(?millis -1) t)
+_AssertError(lambda(() ycDateTime::DateTime(-2147483647 - 1)->add(?millis -1) t)
     "precision: millis borrow below the 32-bit range rejected")
-_Assert(ycDateTime::DateTime(fix(2147483647.0))->add(?nanos 1)->nanos() == 1
+_Assert(ycDateTime::DateTime(2147483647)->add(?nanos 1)->nanos() == 1
     "precision: nanos still fit inside the last representable second")
-_Assert(ycDateTime::DateTime(0)->add(?seconds fix(-2147483648.0))->epoch()
-        == fix(-2147483648.0)
+_Assert(ycDateTime::DateTime(0)->add(?seconds (-2147483647 - 1))->epoch()
+        == (-2147483647 - 1)
     "precision: the smallest 32-bit second is a valid delta")
 _Assert(ycDateTime::DateTime(0)->add(?hours 596523 ?minutes -1)->epoch() == 2147482740
     "precision: cancelling deltas are summed in floating point")
@@ -144,7 +144,7 @@ _Assert(ycDateTime::DateTime(1 0)->compare(ycDateTime::DateTime(1 1)) == -1
     "precision: compare reports earlier nanos")
 _Assert(ycDateTime::DateTime(1 1)->compare(ycDateTime::DateTime(1 1)) == 0
     "precision: compare equal instants")
-_Assert(ycDateTime::DateTime(fix(2147483647.0))->diff(ycDateTime::DateTime(fix(-2147483648.0)))
+_Assert(ycDateTime::DateTime(2147483647)->diff(ycDateTime::DateTime(-2147483647 - 1))
         > 4.2e9
     "precision: diff spans the full 32-bit range")
 _Assert(ycDateTime::DateTime(1 999999999)->millis() == 999
