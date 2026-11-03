@@ -1,4 +1,4 @@
-_TestRun("ycDateTime" 60
+_TestRun("ycDateTime" 92
     "test_datetime.il"
     "test_format.il"
 )

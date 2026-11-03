@@ -15,12 +15,16 @@ addToNamespace("ycDateTime"
         _InstallDateTime  ; proc
 
         ; format.il
-        _FormatToken  ; proc
-        _FormatTime  ; proc
         _MonthShort  ; var
         _MonthLong  ; var
         _DayShort  ; var
         _DayLong  ; var
+        _IsLeapYear  ; proc
+        _Jan1Weekday  ; proc
+        _WeeksInYear  ; proc
+        _IsoWeek  ; proc
+        _FormatToken  ; proc
+        _FormatTime  ; proc
     ))
 )
 unuseNamespace("ycDateTime")

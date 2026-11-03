@@ -170,15 +170,15 @@ self->epoch = lambda(()  ; -> int
     self->_data->time
 )
 
-self->format = lambda((\@key (pattern "%Y-%m-%d %H:%M:%S") "t")  ; -> str
+self->format = lambda((\@optional t_pattern("%F %T") "t")  ; -> str
     ; 按模板把本地时间格式化为串。
     ;
     ; **参数**
-    ;   ?pattern  (str) - 模板；默认 "%Y-%m-%d %H:%M:%S"（令牌见 README）
+    ;   t_pattern  (str) - 模板；默认 "%F %T"（等值于 "%Y-%m-%d %H:%M:%S"，令牌见 README）
     ;
     ; **返回**
     ;   (str) - 格式化结果；未知令牌或末尾悬空 % 时 error() 中断
-    _FormatTime(self->_data->time pattern "ycDateTime::DateTime->format")
+    _FormatTime(self->_data->time t_pattern "ycDateTime::DateTime->format")
 )
 
 self->year = lambda(()  ; -> int
