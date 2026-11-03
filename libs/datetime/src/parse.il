@@ -26,7 +26,7 @@ procedure(_ParseDigits(t_text n_pos n_min n_max "txnn")  ; -> (int, int) | nil
             let((val)
                 ; 用浮点换算：12 位数字的整数累加会越过 32 位
                 val = atof(substring(t_text n_pos i - n_pos))
-                when(val <= 2.147483648e9
+                when(val <= 2147483648.0
                     list(fix2(val) i)
                 )
             )
@@ -56,7 +56,7 @@ procedure(_ParseSigned(t_text n_pos "tx")  ; -> (int, int, int) | nil
         res = _ParseDigits(t_text n_pos 1 12)
         when(res
             val = atof(substring(t_text start cadr(res) - start))
-            when(val <= if(sign < 0 2.147483648e9 2.147483647e9)
+            when(val <= if(sign < 0 2147483648.0 2147483647.0)
                 list(fix2(sign * val) cadr(res) sign)
             )
         )

@@ -169,7 +169,7 @@ _Assert(ycDateTime::Parse("-1.000000000", "%s.%N")->epoch() == -1
 ; --- 11. epoch range ---
 _AssertError(lambda(() ycDateTime::Parse("999999999999", "%s") t)
     "parse: %s beyond the 32-bit range rejected")
-_Assert(ycDateTime::Parse("-2147483648", "%s")->epoch() == fix(-2.147483648e9)
+_Assert(ycDateTime::Parse("-2147483648", "%s")->epoch() == fix(-2147483648.0)
     "parse: %s accepts the smallest 32-bit second")
 _Assert(ycDateTime::Parse("001793715057", "%s")->epoch() == 1793715057
     "parse: %s accepts a zero-padded 12-digit epoch")
