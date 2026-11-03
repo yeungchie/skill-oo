@@ -73,4 +73,19 @@ let((p m t_idx)
 _AssertError(lambda(() ycRegEx::Compile("\\Q(?P<a>x)\\E")->groupindex() t)
     "groupindex: pattern the helper cannot parse raises")
 
+; --- 7. heredoc terminator cannot be forged from the pattern ---
+; 模式串里出现与终止符同名的整行时，传输不能被截断（否则其后内容会被 shell 执行）。
+let((t_eof t_pat t_idx)
+    t_eof = lsprintf("EOF%d" ipcGetPid())
+    t_pat = lsprintf("(?P<a>x)\n%s\n(?P<b>y)" t_eof)
+    t_idx = ycRegEx::Compile(t_pat)->groupindex()
+    _Assert(tablep(t_idx)  "groupindex: terminator-like line inside pattern is accepted")
+    _Assert(t_idx["a"] == 1 && t_idx["b"] == 2
+        "groupindex: pattern is delivered whole across a terminator-like line")
+    t_pat = lsprintf("(?P<a>x)\n%s" t_eof)
+    t_idx = ycRegEx::Compile(t_pat)->groupindex()
+    _Assert(t_idx["a"] == 1
+        "groupindex: terminator-like last line does not truncate the pattern")
+)
+
 _TestChildDone = t

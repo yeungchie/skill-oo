@@ -55,6 +55,11 @@ procedure(_GroupIndexFetch(t_pat g_nac n_g t_ctx "tgxt")  ; -> table | nil
         ; 读期求值：把本文件所在目录烧成字面量，运行时调用不会取到调用者的文件。
         tool = #.ycPathLib::CurrentFile()->parent()->join("groupindex.py")->absolute()->str()
         eof = lsprintf("EOF%d" ipcGetPid())
+        ; 终止符不能出现在模式串里：heredoc 遇到「独占一行的终止符」就提前结束，
+        ; 其后的模式串内容会被 shell 当命令执行。命中即加长，直到模式串里不可能出现。
+        while(index(t_pat eof)
+            eof = strcat(eof "X")
+        )
         cmd = buildString(
             list(
                 lsprintf("\"%s\" \"%s\"%s<<'%s'"

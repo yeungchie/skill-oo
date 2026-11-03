@@ -6,7 +6,7 @@ procedure(_EndsOf(l_l "l")  ; -> list of int
     mapcar(lambda((m "g") m->end()) l_l)
 )
 
-_TestRun("ycRegEx" 321
+_TestRun("ycRegEx" 324
     "test_core.il"
     "test_parity.il"
     "test_groupname.il"
