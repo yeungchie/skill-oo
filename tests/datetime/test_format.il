@@ -132,6 +132,24 @@ let((p tm)
             tm->tm_year + 1900 tm->tm_mon + 1 tm->tm_mday
             tm->tm_hour tm->tm_min tm->tm_sec)
         "format: negative epoch")
+    _Assert(p->format("%s") == "-1"  "format: %s of a negative epoch")
+)
+
+; week numbers at year boundaries
+let((p)
+    p = ycDateTime::Parse("2024-01-01 12:00:00", "%F %T")
+    _Assert(p->format("%U %W %V %G") == "00 01 01 2024"
+        "format: Monday 2024-01-01 starts the first ISO week")
+)
+let((p)
+    p = ycDateTime::Parse("2027-01-01 12:00:00", "%F %T")
+    _Assert(p->format("%U %W %V %G") == "00 00 53 2026"
+        "format: 2027-01-01 belongs to ISO week 53 of 2026")
+)
+let((p)
+    p = ycDateTime::Parse("2021-01-01 12:00:00", "%F %T")
+    _Assert(p->format("%V %G") == "53 2020"
+        "format: 2021-01-01 belongs to ISO week 53 of 2020")
 )
 
 ; --- error paths ---

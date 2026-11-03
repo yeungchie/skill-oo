@@ -4,7 +4,7 @@ useNamespace("ycDateTime")
 _Pow10 = list(1 10 100 1000 10000 100000 fix(1e6) fix(1e7) fix(1e8))
 
 
-procedure(_ParseDigits(t_text n_pos n_min n_max "txnn")  ; -> (int . int) | nil
+procedure(_ParseDigits(t_text n_pos n_min n_max "txnn")  ; -> (int, int) | nil
     ; 从给定位置读定长范围内的十进制数字。
     ;
     ; **参数**
@@ -14,7 +14,7 @@ procedure(_ParseDigits(t_text n_pos n_min n_max "txnn")  ; -> (int . int) | nil
     ;   n_max   (int) - 最多位数
     ;
     ; **返回**
-    ;   ((int . int)|nil) - (数值 . 下一位)；位数不足或位置越界时 nil
+    ;   ((int, int)|nil) - (数值, 下一位)；位数不足或位置越界时 nil
     let((n_len n_i n_val)
         n_len = length(t_text)
         n_i = n_pos
@@ -32,7 +32,7 @@ procedure(_ParseDigits(t_text n_pos n_min n_max "txnn")  ; -> (int . int) | nil
 )
 
 
-procedure(_ParseSigned(t_text n_pos "tx")  ; -> (int . int) | nil
+procedure(_ParseSigned(t_text n_pos "tx")  ; -> (int, int) | nil
     ; 从给定位置读带可选负号的十进制整数。
     ;
     ; **参数**
@@ -40,22 +40,27 @@ procedure(_ParseSigned(t_text n_pos "tx")  ; -> (int . int) | nil
     ;   n_pos   (int) - 起始位置（1-based）
     ;
     ; **返回**
-    ;   ((int . int)|nil) - (数值 . 下一位)；无数字时 nil
-    let((n_sign l_res)
+    ;   ((int, int)|nil) - (数值, 下一位)；无数字或超出 32 位秒值范围时 nil
+    let((n_sign n_start l_res n_val)
         n_sign = 1
         when(n_pos <= length(t_text) && substring(t_text n_pos 1) == "-"
             n_sign = -1
             n_pos++
         )
-        l_res = _ParseDigits(t_text n_pos 1 12)
+        n_start = n_pos
+        ; 最多 10 位；用浮点复核数值，避免整数累加在越界后静默回绕
+        l_res = _ParseDigits(t_text n_pos 1 10)
         when(l_res
-            list(n_sign * car(l_res) cadr(l_res))
+            n_val = atof(substring(t_text n_start cadr(l_res) - n_start))
+            when(n_val <= if(n_sign < 0 2.147483648e9 2.147483647e9)
+                list(fix2(n_sign * n_val) cadr(l_res))
+            )
         )
     )
 )
 
 
-procedure(_ParseName(t_text n_pos l_names "txl")  ; -> (int . int) | nil
+procedure(_ParseName(t_text n_pos l_names "txl")  ; -> (int, int) | nil
     ; 从给定位置匹配名称表（大小写不敏感）。
     ;
     ; **参数**
@@ -64,7 +69,7 @@ procedure(_ParseName(t_text n_pos l_names "txl")  ; -> (int . int) | nil
     ;   l_names  (list) - 名称表（元素为 str）
     ;
     ; **返回**
-    ;   ((int . int)|nil) - (名称下标 0-based . 下一位)；无匹配时 nil
+    ;   ((int, int)|nil) - (名称下标 0-based, 下一位)；无匹配时 nil
     let((n_len n_i l_found t_name t_seg)
         n_len = length(t_text)
         n_i = 0
@@ -100,7 +105,7 @@ procedure(_MonthLength(n_year n_month "xx")  ; -> int
 )
 
 
-procedure(_MonthDayFromYday(n_year n_yday "xx")  ; -> (int . int)
+procedure(_MonthDayFromYday(n_year n_yday "xx")  ; -> (int, int)
     ; 把年内的序日换算为（月 . 日）。
     ;
     ; **参数**
@@ -108,7 +113,7 @@ procedure(_MonthDayFromYday(n_year n_yday "xx")  ; -> (int . int)
     ;   n_yday  (int) - 序日（1～366）
     ;
     ; **返回**
-    ;   ((int . int)) - (月份 1～12 . 日 1～31)
+    ;   (int, int) - (月份 1～12, 日 1～31)
     let((n_month n_left)
         n_month = 1
         n_left = n_yday
@@ -121,11 +126,12 @@ procedure(_MonthDayFromYday(n_year n_yday "xx")  ; -> (int . int)
 )
 
 
-procedure(_ExpandPattern(t_pattern "t")  ; -> str
+procedure(_ExpandPattern(t_pattern t_ctx "tt")  ; -> str
     ; 把复合令牌展开为基础令牌（%F/%T/%R/%D/%r/%c/%x/%X）。
     ;
     ; **参数**
     ;   t_pattern  (str) - 用户模板
+    ;   t_ctx      (str) - 出错上下文名（拼入错误消息）
     ;
     ; **返回**
     ;   (str) - 只含基础令牌的模板；末尾悬空 % 时 error() 中断
@@ -137,7 +143,7 @@ procedure(_ExpandPattern(t_pattern "t")  ; -> str
             if(t_ch == "%"
             then
                 when(n_len < n_i + 1
-                    error("ycDateTime::Parse: pattern ends with a dangling %%")
+                    error("%s: pattern ends with a dangling %%" t_ctx)
                 )
                 t_tok = substring(t_pattern n_i + 1 1)
                 t_rep = case(t_tok
@@ -170,7 +176,7 @@ procedure(_ExpandPattern(t_pattern "t")  ; -> str
 
 
 procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> list[int]
-    ; 按模板把文本解析为 Unix 秒。
+    ; 按模板把文本解析为 (Unix 秒, 纳秒)。
     ;
     ; **参数**
     ;   t_text     (str) - 待解析文本
@@ -184,7 +190,7 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> list[int]
          n_year n_short n_century n_month n_mday
          n_hour n_hour12 n_minute n_second n_ampm
          n_wday n_wdayISO n_yday n_epoch n_nanos n_millis tm l_md n_digits)
-        t_pat = _ExpandPattern(t_pattern)
+        t_pat = _ExpandPattern(t_pattern t_ctx)
         n_plen = length(t_pat)
         n_tlen = length(t_text)
         n_pp = 1
@@ -194,9 +200,6 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> list[int]
             if(t_ch == "%"
             then
                 n_pp++
-                when(n_plen < n_pp
-                    error("%s: pattern ends with a dangling %%" t_ctx)
-                )
                 t_tok = substring(t_pat n_pp 1)
                 n_pp++
                 case(t_tok
@@ -500,7 +503,16 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> list[int]
                     || n_wday != nil || n_wdayISO != nil || n_yday != nil
                 error("%s: %%s cannot be combined with date/time tokens" t_ctx)
             )
-            list(n_epoch 0)
+            when(n_nanos != nil && n_millis != nil
+                error("%s: %%N cannot be combined with %%L" t_ctx)
+            )
+            when(n_nanos == nil && n_millis != nil
+                n_nanos = n_millis * fix(1e6)
+            )
+            when(n_nanos == nil
+                n_nanos = 0
+            )
+            list(n_epoch n_nanos)
         else
             ; --- year ---
             when(n_century != nil && n_short == nil
@@ -579,6 +591,9 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> list[int]
                     error("%s: ISO weekday %d is out of range" t_ctx n_wdayISO)
                 )
                 n_wday = remainder(n_wdayISO 7)
+            )
+            when(n_wday != nil && (n_wday < 0 || 6 < n_wday)
+                error("%s: weekday %d is out of range" t_ctx n_wday)
             )
 
             ; --- build and verify ---

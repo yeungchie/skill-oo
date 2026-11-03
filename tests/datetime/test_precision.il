@@ -30,14 +30,21 @@ _Assert(ycDateTime::DateTime(-0.25)->epoch() == -1
 
 ; --- 3. validation ---
 _AssertError(lambda(() ycDateTime::DateTime(0 -1) t)  "precision: negative nanos rejected")
-_Assert(ycDateTime::DateTime(0 fix(1e9)) == ycDateTime::DateTime(1 0)
-    "precision: nanos carry into the next second")
+_AssertError(lambda(() ycDateTime::DateTime(0 fix(1e9)) t)
+    "precision: nanos equal to one second rejected")
 _AssertError(lambda(() ycDateTime::DateTime(0 fix(2e9)) t)
-    "precision: nanos beyond one carry rejected")
+    "precision: nanos beyond one second rejected")
 _AssertError(lambda(() ycDateTime::DateTime(1.5 1) t)
     "precision: nanos with a flonum time rejected")
 _AssertError(lambda(() ycDateTime::DateTime("1") t)  "precision: string time rejected")
 _AssertError(lambda(() ycDateTime::DateTime(1 1.5) t)  "precision: flonum nanos rejected")
+_AssertError(lambda(() ycDateTime::DateTime(1e10) t)
+    "precision: time above the 32-bit range rejected")
+_AssertError(lambda(() ycDateTime::DateTime(-1e10) t)
+    "precision: time below the 32-bit range rejected")
+_Assert(ycDateTime::DateTime(0.9999999999)->epoch() == 1
+        && ycDateTime::DateTime(0.9999999999)->nanos() == 0
+    "precision: flonum rounding up carries into the next second")
 
 ; --- 4. format with sub-second tokens ---
 let((tm n p)
@@ -94,6 +101,24 @@ let((p)
     _Assert(p->add(?millis 1500)->nanos() == 5e8  "precision: millis remainder")
     _Assert(p->add() == p  "precision: zero delta returns the same instance")
 )
+let((p)
+    p = ycDateTime::DateTime(1000)
+    _Assert(p->add(?millis 2148)->epoch() == 1002
+        "precision: millis past two seconds keeps whole seconds")
+    _Assert(p->add(?millis 2148)->nanos() == 1.48e8
+        "precision: millis past two seconds keeps the fraction")
+    _Assert(p->add(?millis 3000)->epoch() == 1003  "precision: three seconds of millis")
+    _Assert(p->add(?millis 10000)->epoch() == 1010  "precision: ten seconds of millis")
+    _Assert(p->add(?millis -3000)->epoch() == 997  "precision: negative millis delta")
+    _Assert(p->add(?millis 1500 ?seconds 2)->epoch() == 1003
+        "precision: millis combines with other keys")
+    _Assert(p->add(?millis 1500 ?seconds 2)->nanos() == 5e8
+        "precision: combined millis fraction")
+)
+_AssertError(lambda(() ycDateTime::DateTime(0)->add(?days 30000) t)
+    "precision: day delta beyond the 32-bit range rejected")
+_AssertError(lambda(() ycDateTime::DateTime(fix(2.147483647e9))->add(?seconds 1) t)
+    "precision: result beyond the 32-bit range rejected")
 
 ; --- 7. diff and compare honour nanoseconds ---
 _Assert(ycDateTime::DateTime(2 fix(5e8))->diff(ycDateTime::DateTime(1 0)) == 1.5
@@ -106,6 +131,11 @@ _Assert(ycDateTime::DateTime(1 0)->compare(ycDateTime::DateTime(1 1)) == -1
     "precision: compare reports earlier nanos")
 _Assert(ycDateTime::DateTime(1 1)->compare(ycDateTime::DateTime(1 1)) == 0
     "precision: compare equal instants")
+_Assert(ycDateTime::DateTime(fix(2.147483647e9))->diff(ycDateTime::DateTime(fix(-2.147483648e9)))
+        > 4.2e9
+    "precision: diff spans the full 32-bit range")
+_Assert(ycDateTime::DateTime(1 999999999)->millis() == 999
+    "precision: millis truncates 999999999 to 999")
 
 _TestChildDone = t
 

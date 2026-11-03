@@ -147,7 +147,72 @@ _AssertError(lambda(() ycDateTime::Parse("2026-11-03 extra", "%F") t)
 _AssertError(lambda(() ycDateTime::Parse("2026-11-03", "%G-%V") t)
     "parse: week-number tokens unsupported")
 
-; --- 10. argument errors ---
+; --- 10. %s with sub-second tokens ---
+let((p)
+    p = ycDateTime::Parse("1793715057 500000000", "%s %N")
+    _Assert(p->epoch() == 1793715057 && p->nanos() == 5e8
+        "parse: %s combines with %N")
+    p = ycDateTime::Parse("1793715057.5", "%s.%N")
+    _Assert(p->nanos() == 5e8  "parse: %s with a fractional separator")
+    p = ycDateTime::Parse("1793715057 500", "%s %L")
+    _Assert(p->nanos() == 5e8  "parse: %s combines with %L")
+)
+_AssertError(lambda(() ycDateTime::Parse("1793715057 5 5", "%s %L %N") t)
+    "parse: %N and %L cannot be combined with %s")
+
+; --- 11. epoch range ---
+_AssertError(lambda(() ycDateTime::Parse("999999999999", "%s") t)
+    "parse: %s beyond the 32-bit range rejected")
+_Assert(ycDateTime::Parse("-2147483648", "%s")->epoch() == fix(-2.147483648e9)
+    "parse: %s accepts the smallest 32-bit second")
+
+; --- 12. weekday, pivot and duplicate fields ---
+_AssertErrorMsg(lambda(() ycDateTime::Parse("2026-11-03 9", "%F %w") t)
+    "weekday 9 is out of range"  "parse: %w out of range has a range message")
+_AssertError(lambda(() ycDateTime::Parse("2026-11-03 8", "%F %u") t)
+    "parse: %u out of range rejected")
+_Assert(ycDateTime::Parse("69-01-01", "%y-%m-%d")->format("%Y") == "1969"
+    "parse: %y 69 maps below the pivot")
+_Assert(ycDateTime::Parse("2026-11-03 04:10:57", "%F %I:%M:%S")->hour() == 4
+    "parse: %I without %p reads the morning")
+_AssertError(lambda(() ycDateTime::Parse("2026 2026", "%Y %Y") t)
+    "parse: duplicate %Y rejected")
+_AssertError(lambda(() ycDateTime::Parse("11 Nov", "%m %b") t)
+    "parse: duplicate month rejected")
+_AssertError(lambda(() ycDateTime::Parse("22 10", "%H %I") t)
+    "parse: duplicate hour rejected")
+_AssertError(lambda(() ycDateTime::Parse("PM pm", "%p %P") t)
+    "parse: duplicate am/pm rejected")
+_AssertError(lambda(() ycDateTime::Parse("307 307", "%j %j") t)
+    "parse: duplicate %j rejected")
+_Assert(ycDateTime::Parse("307 2026-11-03", "%j %F")->format("%F") == "2026-11-03"
+    "parse: %j agrees with a matching month/day")
+_AssertError(lambda(() ycDateTime::Parse("307 2026-11-04", "%j %F") t)
+    "parse: %j conflicting with month/day rejected")
+
+; --- 13. composite tokens parse back ---
+let((p)
+    p = ycDateTime::DateTime(1793715057)
+    _Assert(ycDateTime::Parse(p->format("%F %r"), "%F %r")->epoch() == p->epoch()
+        "parse: %r round-trip")
+    _Assert(ycDateTime::Parse(p->format("%F %R"), "%F %R")->format("%H:%M")
+            == p->format("%H:%M")
+        "parse: %R round-trip")
+    _Assert(ycDateTime::Parse(p->format("%D"), "%D")->format("%F")
+            == p->format("%F")
+        "parse: %D round-trip")
+    _Assert(ycDateTime::Parse(p->format("%x"), "%x")->format("%F")
+            == p->format("%F")
+        "parse: %x round-trip")
+    _Assert(ycDateTime::Parse(p->format("%F %X"), "%F %X")->format("%T")
+            == p->format("%T")
+        "parse: %X round-trip")
+    _Assert(ycDateTime::Parse(p->format("%e %b %Y"), "%e %b %Y")->format("%F")
+            == p->format("%F")
+        "parse: %e reads the space-padded day")
+)
+
+; --- 14. argument errors ---
 _AssertError(lambda(() ycDateTime::Parse(42) t)  "parse: non-string text rejected")
 _AssertError(lambda(() ycDateTime::Parse("2026-11-03", 42) t)
     "parse: non-string pattern rejected")
