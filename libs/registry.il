@@ -30,6 +30,7 @@ ycNamespace:::_ValidNames = list(
     "ycGeom"
     "ycTextwrap"
     "ycTabulate"
+    "ycDateTime"
 )
 
 procedure(ycNamespace:::Require(@rest l_names "t")  ; -> t

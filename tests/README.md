@@ -1,6 +1,6 @@
 # skill-oo 测试
 
-本文件描述测试套件的运行方式。使用 API 见 [ycPathLib](../docs/pathlib/README.md)、[ycRegEx](../docs/regex/README.md)、[ycSubProcess](../docs/subprocess/README.md)、[ycCodec](../docs/codec/core/README.md)、[ycJson](../docs/codec/json/README.md)、[ycYaml](../docs/codec/yaml/README.md)、[ycCsv](../docs/codec/csv/README.md)、[ycToml](../docs/codec/toml/README.md)、[ycIni](../docs/codec/ini/README.md)、[ycUtf8](../docs/utf8/README.md)、[ycString](../docs/string/README.md)、[ycUnits](../docs/units/README.md)、[ycRadix](../docs/radix/README.md)、[ycTextwrap](../docs/textwrap/README.md)、[ycTabulate](../docs/tabulate/README.md)与 [ycGeom](../docs/geom/README.md)。
+本文件描述测试套件的运行方式。使用 API 见 [ycPathLib](../docs/pathlib/README.md)、[ycRegEx](../docs/regex/README.md)、[ycSubProcess](../docs/subprocess/README.md)、[ycCodec](../docs/codec/core/README.md)、[ycJson](../docs/codec/json/README.md)、[ycYaml](../docs/codec/yaml/README.md)、[ycCsv](../docs/codec/csv/README.md)、[ycToml](../docs/codec/toml/README.md)、[ycIni](../docs/codec/ini/README.md)、[ycUtf8](../docs/utf8/README.md)、[ycString](../docs/string/README.md)、[ycUnits](../docs/units/README.md)、[ycRadix](../docs/radix/README.md)、[ycTextwrap](../docs/textwrap/README.md)、[ycTabulate](../docs/tabulate/README.md)、[ycDateTime](../docs/datetime/README.md)与 [ycGeom](../docs/geom/README.md)。
 
 ## 运行测试
 
@@ -17,6 +17,7 @@ load("<path-to-dir>/skill-oo/tests/units/load.il")
 load("<path-to-dir>/skill-oo/tests/radix/load.il")
 load("<path-to-dir>/skill-oo/tests/textwrap/load.il")
 load("<path-to-dir>/skill-oo/tests/tabulate/load.il")
+load("<path-to-dir>/skill-oo/tests/datetime/load.il")
 load("<path-to-dir>/skill-oo/tests/geom/load.il")
 ```
 
@@ -30,7 +31,7 @@ load("<path-to-dir>/skill-oo/tests/codec/load_order.il")
 
 > 修改某个 `libs/<模块>/src/` 后必须**重启 CIW** 再跑对应 `load.il`：同一会话内已加载过对应库时，`load.il` 会打印提示并复用内存中的旧代码，改动静默无效。
 
-pathlib 与 regex 套件会在 cwd 下创建并清理各自的临时夹具；subprocess 套件直接运行短命令，codec、utf8、string、units、radix、textwrap 与 tabulate 套件仅做内存运算，均无夹具。
+pathlib 与 regex 套件会在 cwd 下创建并清理各自的临时夹具；subprocess 套件直接运行短命令，codec、utf8、string、units、radix、textwrap、tabulate 与 datetime 套件仅做内存运算，均无夹具。
 
 所有套件共用 `tests/kit.il` 里的断言、计时与汇总工具；各 `load.il` 先载入它，`test_init.il` 只保留模块专用辅助过程与一行 `_TestRun(...)`。每条测试用例的输出形如：
 

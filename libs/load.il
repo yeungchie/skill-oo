@@ -31,6 +31,7 @@ let((t_dir t_pkgs)
         "geom"
         "textwrap"
         "tabulate"
+        "datetime"
     )
     foreach(t_pkg t_pkgs
         t_dir->join(t_pkg "load.il")->load()
