@@ -2,17 +2,18 @@
 
 [返回首页](../../README.md)
 
-Cadence SKILL++ 的 Unix 时间对象库：`DateTime` 以秒为唯一状态，提供格式化、字段读取、偏移与比较，同一时刻共享同一实例。
+Cadence SKILL++ 的 Unix 时间对象库：`DateTime` 以「秒 + 纳秒」为状态，提供格式化、字段读取、偏移与比较，同一时刻共享同一实例。
 
 ## 概要
 
-- `DateTime` 包装一个 Unix 秒值（1970-01-01 00:00:00 UTC 起算，可为负），不可变：任何"修改"都返回新实例。
-- 同一秒对应的实例驻留共享，`==` 即表示同一时刻；`printself` 输出 `ycDateTime::DateTime(<秒>)`，可用 `evalstring` 复得同一实例。
+- `DateTime` 包装 Unix 秒（1970-01-01 00:00:00 UTC 起算，可为负）与秒内纳秒，不可变：任何"修改"都返回新实例；构造时可传浮点秒，按「秒 + 小数」拆分（单精度）。
+- 同一时刻（秒与纳秒都相同）的实例驻留共享，`==` 即表示同一时刻；`printself` 输出 `ycDateTime::DateTime(<秒>)` 或两参形式，可用 `evalstring` 复得同一实例。
 - 时间字段按本地时间解释（与 `timeToTm` 一致）；不提供时区换算。
 - 格式化使用本库自己的模板方言（令牌见 `format` 条目），默认 `"%F %T"`（等值于 `"%Y-%m-%d %H:%M:%S"`）；未知令牌与末尾悬空 `%` 以 `error()` 中断，不会静默输出。
 - `add` 只做固定时长偏移（一天按 86400 秒），不做日历月/年运算。
 - `diff` 与 `compare` 接受 `DateTime` 或整数秒，便于和外部时间值直接比较。
 - `Parse` 按同一套模板把文本反向解析为 `DateTime`；周序号类令牌（`%U %W %V %G %g`）与 `%z`/`%Z` 不支持，`%s` 只能单独使用。
+- 全局宏 `ycTimeIt` 测量被包裹代码的耗时并返回 `DateTime`（epoch 0 起）；宏无法命名空间化，故不带 `ycDateTime::` 前缀。
 
 ## 快速上手
 
@@ -69,13 +70,13 @@ ycDateTime::Current()->epoch()
 ### ycDateTime::DateTime <sub>`function`</sub> <sub>`class`</sub>
 
 ```text
-ycDateTime::DateTime(n_time)
+ycDateTime::DateTime(n_time [ n_nanos ])
 => ycDateTime::DateTime
 ```
 
 **描述**
 
-按 Unix 秒构造时间对象；同一秒共享同一实例。构造后实例不可变，所有派生操作返回新实例。
+按 Unix 秒与秒内纳秒构造时间对象；同一时刻共享同一实例。`n_time` 可以是整数秒，也可以是浮点秒（按「秒 + 小数」拆分，受单精度限制）。构造后实例不可变，所有派生操作返回新实例。
 
 **方法**
 
@@ -85,11 +86,12 @@ ycDateTime::DateTime(n_time)
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| n_time | int | Unix 秒（1970-01-01 00:00:00 UTC 起算，可为负） |
+| n_time | int / float | Unix 秒（1970-01-01 00:00:00 UTC 起算，可为负）；浮点按下取整秒 |
+| n_nanos | int | 秒内纳秒（0～999999999，默认 0）；1e9 进位到下一秒，更大值报错；仅整数时间可用 |
 
 **返回值**
 
-`ycDateTime::DateTime` — 该秒的驻留实例；非整数参数以 `error()` 中断。
+`ycDateTime::DateTime` — 该时刻的驻留实例；参数类型不符、纳秒越界或浮点时间同时给纳秒时以 `error()` 中断。
 
 **例程**
 
@@ -97,7 +99,10 @@ ycDateTime::DateTime(n_time)
 p = ycDateTime::DateTime(1793715057)
 p->format("%Y-%m-%d")   ; => "2026-11-03"（示例值）
 ycDateTime::DateTime(0)->epoch() ; => 0
+ycDateTime::DateTime(1 500000000)->nanos()  ; => 500000000
+ycDateTime::DateTime(1.5)->nanos()          ; => 500000000
 ycDateTime::DateTime(1234) == ycDateTime::DateTime(1234)  ; => t
+ycDateTime::DateTime(0 2000000000)          ; *Error* ycDateTime::DateTime: nanos must be 0..999999999, got 2000000000
 ```
 
 #### 字段
@@ -125,6 +130,56 @@ p->epoch()
 
 ```lisp
 ycDateTime::DateTime(1793715057)->epoch()   ; => 1793715057
+```
+
+##### nanos <sub>`method`</sub>
+
+```text
+p->nanos()
+=> int
+```
+
+**描述**
+
+返回秒内的小数部分（纳秒）。
+
+**参数**
+
+无
+
+**返回值**
+
+`int` — `0`～`999999999`。
+
+**例程**
+
+```lisp
+ycDateTime::DateTime(1 345678901)->nanos()   ; => 345678901
+```
+
+##### millis <sub>`method`</sub>
+
+```text
+p->millis()
+=> int
+```
+
+**描述**
+
+返回秒内小数部分的毫秒值（截断，不含秒）。
+
+**参数**
+
+无
+
+**返回值**
+
+`int` — `0`～`999`。
+
+**例程**
+
+```lisp
+ycDateTime::DateTime(1 345678901)->millis()   ; => 345
 ```
 
 ##### year <sub>`method`</sub>
@@ -366,9 +421,11 @@ p->format([ t_pattern ])
 | `%H` | 小时（00–23） | `22` |
 | `%I` | 小时（01–12） | `10` |
 | `%j` | 序日（001–366） | `307` |
+| `%L` | 秒内毫秒（000–999） | `345` |
 | `%m` | 月份（01–12） | `11` |
 | `%M` | 分钟（00–59） | `10` |
 | `%n` | 换行 | |
+| `%N` | 秒内纳秒（九位） | `345678901` |
 | `%p` | 上午/下午标记 | `PM` |
 | `%P` | 上午/下午标记（小写） | `pm` |
 | `%r` | 12 小时时间，等值于 `%I:%M:%S %p` | `10:10:57 PM` |
@@ -410,7 +467,7 @@ p->format("%Q")                 ; *Error* ycDateTime::DateTime->format: unknown 
 ##### add <sub>`method`</sub>
 
 ```text
-p->add([ ?seconds n_seconds ] [ ?minutes n_minutes ] [ ?hours n_hours ] [ ?days n_days ])
+p->add([ ?seconds n_seconds ] [ ?minutes n_minutes ] [ ?hours n_hours ] [ ?days n_days ] [ ?millis n_millis ] [ ?nanos n_nanos ])
 => ycDateTime::DateTime
 ```
 
@@ -426,6 +483,8 @@ p->add([ ?seconds n_seconds ] [ ?minutes n_minutes ] [ ?hours n_hours ] [ ?days 
 | ?minutes n_minutes | int | `0` | 分钟增量，可为负 |
 | ?hours n_hours | int | `0` | 小时增量，可为负 |
 | ?days n_days | int | `0` | 天数增量，可为负 |
+| ?millis n_millis | int | `0` | 毫秒增量，可为负 |
+| ?nanos n_nanos | int | `0` | 纳秒增量，可为负 |
 
 **返回值**
 
@@ -440,6 +499,8 @@ p->add(?minutes 1)->epoch()          ; => 1060
 p->add(?hours 1)->epoch()            ; => 4600
 p->add(?days 1)->epoch()             ; => 87400
 p->add(?seconds -5)->epoch()         ; => 995
+p->add(?millis 1500)->nanos()        ; => 500000000
+p->add(?nanos -1)->nanos()           ; => 999999999
 p->add() == p                        ; => t
 ```
 
@@ -447,12 +508,12 @@ p->add() == p                        ; => t
 
 ```text
 p->diff(g_other)
-=> int
+=> float
 ```
 
 **描述**
 
-返回与另一时刻的秒差；`p` 更晚为正。`g_other` 可以是 `DateTime`，也可以是整数 Unix 秒。
+返回与另一时刻的秒差（含亚秒部分，单精度）；`p` 更晚为正。`g_other` 可以是 `DateTime`，也可以是整数 Unix 秒。
 
 **参数**
 
@@ -462,16 +523,17 @@ p->diff(g_other)
 
 **返回值**
 
-`int` — `p` 减 `g_other` 的秒数；参数不可识别时以 `error()` 中断。
+`float` — `p` 减 `g_other` 的秒数；参数不可识别时以 `error()` 中断。
 
 **例程**
 
 ```lisp
 a = ycDateTime::DateTime(1000)
 b = ycDateTime::DateTime(1300)
-b->diff(a)     ; => 300
-a->diff(b)     ; => -300
-a->diff(1000)  ; => 0
+b->diff(a)     ; => 300.0
+a->diff(b)     ; => -300.0
+a->diff(1000)  ; => 0.0
+ycDateTime::DateTime(2 500000000)->diff(ycDateTime::DateTime(1 0))  ; => 1.5
 a->diff("x")   ; *Error* ycDateTime::DateTime->diff: expected a DateTime or an integer time, got "x"
 ```
 
@@ -516,7 +578,7 @@ ycDateTime::Parse(t_text [ t_pattern ])
 
 **描述**
 
-按模板把文本解析为 `DateTime`。模板默认 `"%F %T"`；支持 `format` 的全部基础令牌与复合令牌，但周序号类令牌（`%U %W %V %G %g`）与时区令牌（`%z %Z`）不支持，出现即以 `error()` 中断。`%s` 可直接读 Unix 秒，但只能单独使用，不能与其他日期时间令牌混用。
+按模板把文本解析为 `DateTime`。模板默认 `"%F %T"`；支持 `format` 的全部基础令牌与复合令牌，但周序号类令牌（`%U %W %V %G %g`）与时区令牌（`%z %Z`）不支持，出现即以 `error()` 中断。`%s` 可直接读 Unix 秒，但只能单独使用，不能与其他日期时间令牌混用；`%N`/`%L` 解析秒内小数（不足位数右补零，`%N` 与 `%L` 不能同时出现）。
 
 日期必须由「年 + 月 + 日」或「年 + `%j`」给出，缺失的时间字段按 `0` 处理；`%I` 未配 `%p` 时按上午解释，`%p` 与 `%H` 冲突则报错。文本与模板不匹配、字段越界、日期不存在（如 2 月 30 日）、本地时间不存在（夏令时跳变）或明示的星期/序日与日期冲突时，以 `error()` 中断。
 
@@ -541,6 +603,49 @@ ycDateTime::Parse("03 Nov 2026 22:10", "%d %b %Y %H:%M")->format("%F %T")
 ycDateTime::Parse("1793715057", "%s")->epoch()          ; => 1793715057
 ycDateTime::Parse("2024 060", "%Y %j")->format("%F")    ; => "2024-02-29"
 ycDateTime::Parse("2026-02-30", "%F")                   ; *Error* ycDateTime::Parse: day 30 is invalid for 2026-02
+```
+
+### ycTimeIt <sub>`macro`</sub>
+
+```text
+ycTimeIt(expr [ expr ... ])
+=> ycDateTime::DateTime
+```
+
+**描述**
+
+测量被包裹表达式的运行耗时（墙钟），返回表示该时长的 `DateTime`（以 epoch 0 起算：`epoch()` 为整秒，`nanos()` 为秒内小数）。表达式按顺序求值且只求值一次，其结果被丢弃——需要保留时在体内赋值。
+
+宏是**全局符号**（SKILL 的宏无法命名空间化），加载本库后直接调用，不带 `ycDateTime::` 前缀。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| expr ... | any | 被计时的表达式，至少一个 |
+
+**返回值**
+
+`ycDateTime::DateTime` — 耗时（秒 + 纳秒；来源为单精度时钟）。
+
+**例程**
+
+```lisp
+d = ycTimeIt(let((x)
+    x = 0
+    while(x < 50000
+        x = x + 1
+    )
+))
+d->epoch()        ; => 0（示例值）
+d->format("%N")   ; => "001142979"（示例值）
+ycTimeIt(1 + 1)->nanos()   ; => 3099（示例值）
+
+let((n)
+    n = 0
+    ycTimeIt(n = 42)
+    n             ; => 42（结果留在体内变量）
+)
 ```
 
 [返回首页](../../README.md)

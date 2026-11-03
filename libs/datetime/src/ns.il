@@ -10,7 +10,7 @@ addToNamespace("ycDateTime"
         _DateTimeCacheCap  ; var
         _DateTimeCacheN  ; var
         Current  ; proc
-        _DateTimeTime  ; proc
+        _DateTimeParts  ; proc
         _MkDateTime  ; proc
         _InstallDateTime  ; proc
 
@@ -27,6 +27,7 @@ addToNamespace("ycDateTime"
         _FormatTime  ; proc
 
         ; parse.il
+        _Pow10  ; var
         _ParseDigits  ; proc
         _ParseSigned  ; proc
         _ParseName  ; proc

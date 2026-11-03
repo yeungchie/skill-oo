@@ -63,10 +63,11 @@ let((a b)
 )
 
 ; --- 5. error paths ---
-_AssertError(lambda(() ycDateTime::DateTime(1.5) t)  "DateTime: float rejected")
+_Assert(ycDateTime::DateTime(1.5)->nanos() == 500000000
+    "DateTime: float seconds accepted")
 _AssertError(lambda(() ycDateTime::DateTime("1") t)  "DateTime: string rejected")
 _AssertError(lambda(() ycDateTime::DateTime() t)  "DateTime: missing time rejected")
-_AssertError(lambda(() ycDateTime::DateTime(1 2) t)  "DateTime: extra argument rejected")
+_AssertError(lambda(() ycDateTime::DateTime(1 2 3) t)  "DateTime: extra argument rejected")
 _AssertError(lambda(() ycDateTime::DateTime(0)->diff("x") t)  "diff: non-time rejected")
 _AssertError(lambda(() ycDateTime::DateTime(0)->compare(nil) t)  "compare: nil rejected")
 _AssertError(lambda(() ycDateTime::DateTime(0)->add(?seconds 1.5) t)

@@ -88,14 +88,15 @@ procedure(_IsoWeek(g_tm "g")  ; -> list[int]
 )
 
 
-procedure(_FormatToken(t_tok n_time g_tm t_ctx "txgt")  ; -> str
+procedure(_FormatToken(t_tok n_time n_nanos g_tm t_ctx "txxgt")  ; -> str
     ; 把单个 % 令牌展开为对应的本地时间文本。
     ;
     ; **参数**
-    ;   t_tok  (str) - 令牌字母（% 之后的那一个字符）
-    ;   n_time (int) - Unix 秒（%s 使用）
-    ;   g_tm   (tm)  - timeToTm 返回的本地时间结构
-    ;   t_ctx  (str) - 出错上下文名（拼入错误消息）
+    ;   t_tok    (str) - 令牌字母（% 之后的那一个字符）
+    ;   n_time   (int) - Unix 秒（%s 使用）
+    ;   n_nanos  (int) - 秒内纳秒（%N/%L 使用）
+    ;   g_tm     (tm)  - timeToTm 返回的本地时间结构
+    ;   t_ctx    (str) - 出错上下文名（拼入错误消息）
     ;
     ; **返回**
     ;   (str) - 展开结果；未知令牌时 error() 中断
@@ -105,12 +106,12 @@ procedure(_FormatToken(t_tok n_time g_tm t_ctx "txgt")  ; -> str
         ("b" nth(g_tm->tm_mon _MonthShort))
         ("h" nth(g_tm->tm_mon _MonthShort))
         ("B" nth(g_tm->tm_mon _MonthLong))
-        ("c" _FormatTime(n_time "%a %b %e %H:%M:%S %Y" t_ctx))
+        ("c" _FormatTime(n_time n_nanos "%a %b %e %H:%M:%S %Y" t_ctx))
         ("C" sprintf(nil "%02d" (g_tm->tm_year + 1900) / 100))
         ("d" sprintf(nil "%02d" g_tm->tm_mday))
-        ("D" _FormatTime(n_time "%m/%d/%y" t_ctx))
+        ("D" _FormatTime(n_time n_nanos "%m/%d/%y" t_ctx))
         ("e" sprintf(nil "%2d" g_tm->tm_mday))
-        ("F" _FormatTime(n_time "%Y-%m-%d" t_ctx))
+        ("F" _FormatTime(n_time n_nanos "%Y-%m-%d" t_ctx))
         ("g" let((l_iso) l_iso = _IsoWeek(g_tm) sprintf(nil "%02d" remainder(nth(1 l_iso) 100))))
         ("G" sprintf(nil "%04d" nth(1 _IsoWeek(g_tm))))
         ("H" sprintf(nil "%02d" g_tm->tm_hour))
@@ -121,32 +122,35 @@ procedure(_FormatToken(t_tok n_time g_tm t_ctx "txgt")  ; -> str
         ("n" "\n")
         ("p" if(g_tm->tm_hour < 12 "AM" "PM"))
         ("P" if(g_tm->tm_hour < 12 "am" "pm"))
-        ("r" _FormatTime(n_time "%I:%M:%S %p" t_ctx))
-        ("R" _FormatTime(n_time "%H:%M" t_ctx))
+        ("r" _FormatTime(n_time n_nanos "%I:%M:%S %p" t_ctx))
+        ("R" _FormatTime(n_time n_nanos "%H:%M" t_ctx))
         ("s" sprintf(nil "%d" n_time))
         ("S" sprintf(nil "%02d" g_tm->tm_sec))
         ("t" "\t")
-        ("T" _FormatTime(n_time "%H:%M:%S" t_ctx))
+        ("T" _FormatTime(n_time n_nanos "%H:%M:%S" t_ctx))
         ("u" sprintf(nil "%d" if(g_tm->tm_wday == 0 7 g_tm->tm_wday)))
         ("U" sprintf(nil "%02d" (g_tm->tm_yday + 7 - g_tm->tm_wday) / 7))
         ("V" sprintf(nil "%02d" car(_IsoWeek(g_tm))))
         ("w" sprintf(nil "%d" g_tm->tm_wday))
         ("W" sprintf(nil "%02d" (g_tm->tm_yday + 7 - remainder(g_tm->tm_wday + 6 7)) / 7))
-        ("x" _FormatTime(n_time "%m/%d/%y" t_ctx))
-        ("X" _FormatTime(n_time "%H:%M:%S" t_ctx))
+        ("x" _FormatTime(n_time n_nanos "%m/%d/%y" t_ctx))
+        ("X" _FormatTime(n_time n_nanos "%H:%M:%S" t_ctx))
         ("y" sprintf(nil "%02d" remainder(g_tm->tm_year + 1900 100)))
         ("Y" sprintf(nil "%04d" g_tm->tm_year + 1900))
+        ("N" sprintf(nil "%09d" n_nanos))
+        ("L" sprintf(nil "%03d" n_nanos / 1000000))
         ("%" "%")
         (t error("%s: unknown format token %%%s" t_ctx t_tok))
     )
 )
 
 
-procedure(_FormatTime(n_time t_pattern t_ctx "xtt")  ; -> str
+procedure(_FormatTime(n_time n_nanos t_pattern t_ctx "xxtt")  ; -> str
     ; 按模板把本地时间格式化为串（% 令牌见 _FormatToken）。
     ;
     ; **参数**
     ;   n_time     (int) - Unix 秒（1970-01-01 00:00:00 UTC 起算，可为负）
+    ;   n_nanos    (int) - 秒内纳秒（0～999999999）
     ;   t_pattern  (str) - 模板；% 后跟一个令牌字母，%% 表示字面 %
     ;   t_ctx      (str) - 出错上下文名（拼入错误消息）
     ;
@@ -168,7 +172,7 @@ procedure(_FormatTime(n_time t_pattern t_ctx "xtt")  ; -> str
                 when(n_len < n_i
                     error("%s: pattern ends with a dangling %%" t_ctx)
                 )
-                t_ch = _FormatToken(substring(t_pattern n_i 1) n_time tm t_ctx)
+                t_ch = _FormatToken(substring(t_pattern n_i 1) n_time n_nanos tm t_ctx)
             )
             l_out = tconc(l_out t_ch)
             n_i++

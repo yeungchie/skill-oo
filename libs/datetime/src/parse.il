@@ -1,5 +1,8 @@
 useNamespace("ycDateTime")
 
+; 十进制位权（0～8 次），用于把不定长小数位换算为纳秒/毫秒。
+_Pow10 = list(1 10 100 1000 10000 100000 1000000 10000000 100000000)
+
 
 procedure(_ParseDigits(t_text n_pos n_min n_max "txnn")  ; -> (int . int) | nil
     ; 从给定位置读定长范围内的十进制数字。
@@ -166,7 +169,7 @@ procedure(_ExpandPattern(t_pattern "t")  ; -> str
 )
 
 
-procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> int
+procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> list[int]
     ; 按模板把文本解析为 Unix 秒。
     ;
     ; **参数**
@@ -175,12 +178,12 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> int
     ;   t_ctx      (str) - 出错上下文名（拼入错误消息）
     ;
     ; **返回**
-    ;   (int) - 本地时间对应的 Unix 秒；文本与模板不匹配、字段越界、
-    ;           日期不存在（如 2 月 30 日）、DST 空洞或明示的星期/序日不一致时 error() 中断
+    ;   (list[int]) - (Unix 秒, 纳秒)；文本与模板不匹配、字段越界、
+    ;                 日期不存在（如 2 月 30 日）、DST 空洞或明示的星期/序日不一致时 error() 中断
     let((t_pat n_plen n_pp n_tlen n_pos t_ch t_tok l_r
          n_year n_short n_century n_month n_mday
          n_hour n_hour12 n_minute n_second n_ampm
-         n_wday n_wdayISO n_yday n_epoch tm l_md)
+         n_wday n_wdayISO n_yday n_epoch n_nanos n_millis tm l_md n_digits)
         t_pat = _ExpandPattern(t_pattern)
         n_plen = length(t_pat)
         n_tlen = length(t_text)
@@ -431,6 +434,30 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> int
                         n_epoch = car(l_r)
                         n_pos = cadr(l_r)
                     )
+                    ("N"
+                        l_r = _ParseDigits(t_text n_pos 1 9)
+                        unless(l_r
+                            error("%s: expected fractional seconds at position %d" t_ctx n_pos)
+                        )
+                        when(n_nanos != nil
+                            error("%s: duplicate fractional seconds" t_ctx)
+                        )
+                        n_digits = cadr(l_r) - n_pos
+                        n_nanos = car(l_r) * nth(9 - n_digits _Pow10)
+                        n_pos = cadr(l_r)
+                    )
+                    ("L"
+                        l_r = _ParseDigits(t_text n_pos 1 3)
+                        unless(l_r
+                            error("%s: expected milliseconds at position %d" t_ctx n_pos)
+                        )
+                        when(n_nanos != nil || n_millis != nil
+                            error("%s: duplicate fractional seconds" t_ctx)
+                        )
+                        n_digits = cadr(l_r) - n_pos
+                        n_millis = car(l_r) * nth(3 - n_digits _Pow10)
+                        n_pos = cadr(l_r)
+                    )
                     ("n"
                         unless(substring(t_text n_pos 1) == "\n"
                             error("%s: expected a newline at position %d" t_ctx n_pos)
@@ -473,7 +500,7 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> int
                     || n_wday != nil || n_wdayISO != nil || n_yday != nil
                 error("%s: %%s cannot be combined with date/time tokens" t_ctx)
             )
-            n_epoch
+            list(n_epoch 0)
         else
             ; --- year ---
             when(n_century != nil && n_short == nil
@@ -580,7 +607,16 @@ procedure(_ParseTime(t_text t_pattern t_ctx "ttt")  ; -> int
             when(n_yday != nil && tm->tm_yday + 1 != n_yday
                 error("%s: day-of-year does not match %A" t_ctx t_text)
             )
-            n_epoch
+            when(n_nanos != nil && n_millis != nil
+                error("%s: %%N cannot be combined with %%L" t_ctx)
+            )
+            when(n_nanos == nil && n_millis != nil
+                n_nanos = n_millis * 1000000
+            )
+            when(n_nanos == nil
+                n_nanos = 0
+            )
+            list(n_epoch n_nanos)
         )
     )
 )
@@ -596,7 +632,10 @@ procedure(Parse(t_text \@optional t_pattern("%F %T") "tt")  ; -> DateTime
     ; **返回**
     ;   (DateTime) - 解析结果（驻留实例）；文本与模板不匹配、字段越界、
     ;                 日期不存在或明示的星期/序日不一致时 error() 中断
-    _MkDateTime(_ParseTime(t_text t_pattern "ycDateTime::Parse"))
+    let((l_res)
+        l_res = _ParseTime(t_text t_pattern "ycDateTime::Parse")
+        _MkDateTime(car(l_res) cadr(l_res))
+    )
 )
 
 

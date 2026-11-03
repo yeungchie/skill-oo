@@ -1,7 +1,9 @@
-_TestRun("ycDateTime" 134
+_TestRun("ycDateTime" 186
     "test_datetime.il"
     "test_format.il"
     "test_parse.il"
+    "test_precision.il"
+    "test_timeit.il"
 )
 
 ; END
