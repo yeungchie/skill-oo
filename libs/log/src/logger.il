@@ -3,6 +3,8 @@
 ; Language : Cadence Skill
 ;--------------------------
 
+ycNamespace:::Require("ycDateTime")
+
 useNamespace("ycLog")
 
 
@@ -120,7 +122,7 @@ procedure(_LogLine(t_name s_level g_time t_msg "tsgt")  ; -> str
     ;   (str) - 形如 `[时间] [INFO] [名称] 正文`
     let((tag stamp)
         tag = cadr(_LevelParts(s_level))
-        stamp = if(g_time lsprintf("[%s] " getCurrentTime()) "")
+        stamp = if(g_time lsprintf("[%s] " ycDateTime::Current()->format("%F %T")) "")
         lsprintf("%s[%s]%s %s" stamp tag
             if(t_name == "" "" lsprintf(" [%s]" t_name))
             t_msg)

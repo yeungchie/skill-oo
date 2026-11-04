@@ -10,7 +10,7 @@ Cadence SKILL++ 的分级日志库：按级别过滤，同时写 CIW 与控制�
 - 输出目标可组合：`?console t` 写 CIW / 标准输出，`?file` 指定日志文件；两者可同时开启。
 - 文件默认追加打开；`?append nil` 时截断重写。
 - `?flush t`（默认）在每条记录后立即落盘，文件可被外部实时读取；高吞吐场景可置 `nil`，由 `flush()` 或 `close()` 统一落盘。
-- 时间戳取系统当前时间，固定格式为 `[Nov 14 21:32:47 2026]`；`?time nil` 可关闭。
+- 时间戳使用 `ycDateTime` 的 `%F %T` 格式，形如 `[2026-11-14 21:32:47]`；`?time nil` 可关闭。
 - 构造器错误以 `ycLog::Logger:` 开头，方法错误以 `ycLog::Logger-><方法>:` 开头；格式串类型错误由方法报告，其余参数类型错误由参数绑定报告 `argument #N ...`。
 
 ## 快速上手
@@ -20,7 +20,7 @@ Cadence SKILL++ 的分级日志库：按级别过滤，同时写 CIW 与控制�
 lg = ycLog::Logger("flow")
 lg->info("start")
 ; 控制台输出：
-;   [Nov 14 21:32:47 2026] [INFO] [flow] start
+;   [2026-11-14 21:32:47] [INFO] [flow] start
 
 ; 同时写文件，并只保留 warn 及以上
 lg = ycLog::Logger("flow" ?file "./run.log" ?level 'warn)
@@ -62,8 +62,8 @@ ycLog::Logger(
 日志行形如：
 
 ```text
-[Nov 14 21:32:47 2026] [INFO] [flow] message
-[Nov 14 21:32:47 2026] [WARN] message
+[2026-11-14 21:32:47] [INFO] [flow] message
+[2026-11-14 21:32:47] [WARN] message
 ```
 
 `?time nil` 去掉时间戳段；名称为空时去掉 `[name]` 段。

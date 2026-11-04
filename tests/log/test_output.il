@@ -6,7 +6,7 @@ let((lg lines)
     lg->info("hello")
     lg->close()
     lines = _ReadLines(_LogTmp("a.log"))
-    _Assert(pcreMatchp("^\\[[A-Z][a-z]{2} +[0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9]{4}\\] \\[INFO\\] \\[out\\] hello$"
+    _Assert(pcreMatchp("^\\[[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\\] \\[INFO\\] \\[out\\] hello$"
             car(lines))
         "output: timestamped line shape")
 )
