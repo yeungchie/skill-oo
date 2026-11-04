@@ -51,6 +51,8 @@ addToNamespace("ycGeom"
         ; region.il
         Region  ; proc, class
         _RegionData  ; class
+        _BBoxNear  ; proc
+        _AllApart  ; proc
         _UnionAll  ; proc
         _InstallRegion  ; proc
 

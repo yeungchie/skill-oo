@@ -41,6 +41,51 @@ defmethod(printself (self(Region))  ; -> str
     lsprintf("<%A polygons=%d>" className(self) length(self->_data->polygons))
 )
 
+procedure(_BBoxNear(l_a l_b n_eps "lln")  ; -> t | nil
+    ; 判断两个包围盒是否相交或间距小于容差（内部实现）。
+    ;
+    ; **参数**
+    ;   l_a    (list)  - 包围盒 ((xmin ymin) (xmax ymax))
+    ;   l_b    (list)  - 同上
+    ;   n_eps  (float) - 容差
+    ;
+    ; **返回**
+    ;   (t|nil) - 可能相交为 t；任一轴分离超过 eps 为 nil
+    !(car(cadr(l_a)) + n_eps < car(car(l_b))
+        || car(cadr(l_b)) + n_eps < car(car(l_a))
+        || cadr(cadr(l_a)) + n_eps < cadr(car(l_b))
+        || cadr(cadr(l_b)) + n_eps < cadr(car(l_a)))
+)
+
+
+procedure(_AllApart(l_polys n_eps "ln")  ; -> t | nil
+    ; 保守判断多边形集合是否两两分离（内部实现）。
+    ;
+    ; 包围盒分离则多边形必不相交；任一对包围盒相交或间距小于容差就返回 nil，
+    ; 由调用方走完整布尔合并。
+    ;
+    ; **参数**
+    ;   l_polys  (list[Polygon]) - 输入
+    ;   n_eps    (float)         - 容差
+    ;
+    ; **返回**
+    ;   (t|nil) - 两两分离为 t
+    let((ok l_boxes)
+        ok = t
+        l_boxes = mapcar(lambda((g_p "g") g_p->bBox()) l_polys)
+        while(ok && cdr(l_boxes)
+            foreach(l_b cdr(l_boxes)
+                when(_BBoxNear(car(l_boxes) l_b n_eps)
+                    ok = nil
+                )
+            )
+            l_boxes = cdr(l_boxes)
+        )
+        ok
+    )
+)
+
+
 procedure(_UnionAll(l_polys g_grid n_eps "lgn")  ; -> list[Polygon]
     ; 逐块合并多边形集合。
     ;
@@ -53,9 +98,15 @@ procedure(_UnionAll(l_polys g_grid n_eps "lgn")  ; -> list[Polygon]
     ;   (list[Polygon]) - 互不重叠的结果
     let((l_res)
         when(l_polys
-            l_res = list(car(l_polys))
-            foreach(g_p cdr(l_polys)
-                l_res = _Boolean(l_res list(g_p) 'union g_grid n_eps)
+            if(_AllApart(l_polys n_eps)
+            then
+                ; 两两分离：并集就是原集合，省去逐对布尔合并
+                l_res = copy(l_polys)
+            else
+                l_res = list(car(l_polys))
+                foreach(g_p cdr(l_polys)
+                    l_res = _Boolean(l_res list(g_p) 'union g_grid n_eps)
+                )
             )
         )
         l_res

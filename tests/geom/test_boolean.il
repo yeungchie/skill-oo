@@ -389,6 +389,18 @@ let((g_raw g_norm g_hole l_nat)
         "boolean: native xor matches the method result")
 )
 
+let((g_far)
+    ; 互不重叠的成员走包围盒短路：并集保持各块，面积按块相加
+    g_far = ycGeom::Region(list(
+        ycGeom::Rect(list(0:0 1:1))
+        ycGeom::Rect(list(2:0 3:1))
+        ycGeom::Rect(list(4:0 5:1))))
+    _Assert(g_far->area() == 3.0  "boolean: disjoint members keep their union")
+    _Assert(length(g_far->polygons()) == 3  "boolean: disjoint members are not merged")
+    _Assert(g_far->or(ycGeom::Rect(list(0:2 1:3)))->area() == 4.0
+        "boolean: disjoint region unions with a new member")
+)
+
 _TestChildDone = t
 
 ; END
