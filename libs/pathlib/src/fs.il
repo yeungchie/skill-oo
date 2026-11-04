@@ -295,7 +295,7 @@ self->open = lambda((\@key mode("r") "t")  ; -> Port
                 _error("open" "no such file: %s" t_str)
             )
         )
-        ycIO::Open(t_str ?mode mode)
+        ycIO:::Open(t_str ?mode mode)
     )
 )
 
