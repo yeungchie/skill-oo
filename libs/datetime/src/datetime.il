@@ -137,7 +137,7 @@ procedure(DateTime(n_time \@optional n_nanos(0) "nx")  ; -> DateTime
     ; 按 Unix 秒（整数或浮点）与纳秒构造时间对象。
     ;
     ; **参数**
-    ;   n_time   (num) - Unix 秒；整数按秒解释，浮点按「秒 + 小数」拆分
+    ;   n_time   (num) - Unix 秒；整数按秒解释，浮点按「向下取整秒 + 小数四舍五入到纳秒」拆分
     ;   n_nanos  (int) - 秒内的小数部分（0～999999999，默认 0；仅整数时间可用）
     ;
     ; **返回**
@@ -154,7 +154,7 @@ procedure(DateTime(n_time \@optional n_nanos(0) "nx")  ; -> DateTime
             when(n_nanos != 0
                 error("ycDateTime::DateTime: nanos cannot be combined with a fractional time")
             )
-            ; 先在浮点侧判断范围：fix2 对越界值会静默钳位到 32 位边界
+            ; 先在浮点侧判断范围：fix 对越界值会静默钳位到 32 位边界
             ; SKILL 的 == 认为 NaN 与自身相等，只能靠序比较识别 NaN
             when(!(n_time < 0) && !(0 <= n_time)
                 error("ycDateTime::DateTime: time %A is not a number" n_time)
@@ -162,15 +162,12 @@ procedure(DateTime(n_time \@optional n_nanos(0) "nx")  ; -> DateTime
             when(n_time < (-2147483647 - 1) || 2147483647 < n_time
                 error("ycDateTime::DateTime: time %A is out of the representable range" n_time)
             )
-            sec = fix2(n_time)
+            ; fix 向下取整（不是向零截断）：小数落在 [0,1)，再四舍五入到纳秒
+            sec = fix(n_time)
             frac = n_time - sec
-            when(frac < 0
-                ; fix2 对接近整数的浮点会修到上一格，此时小数略小于 0，按 0 处理
-                frac = 0
-            )
             ns = round2(frac * fix(1e9))
             when(ns == fix(1e9)
-                ; 兜底：fix2 会把近整数修正为整数，正常到不了这里；到点边界时明确报错
+                ; 小数进位到整秒
                 when(sec == 2147483647
                     error("ycDateTime::DateTime: time %A is out of the representable range" n_time)
                 )

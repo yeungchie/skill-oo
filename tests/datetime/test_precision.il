@@ -27,6 +27,15 @@ _Assert(ycDateTime::DateTime(1.5)->epoch() == 1
 _Assert(ycDateTime::DateTime(-0.25)->epoch() == -1
         && ycDateTime::DateTime(-0.25)->nanos() == 7.5e8
     "precision: negative flonum uses floor seconds")
+_Assert(ycDateTime::DateTime(0.9999999)->epoch() == 0
+        && ycDateTime::DateTime(0.9999999)->nanos() == 999999900
+    "precision: a fraction near one second keeps the floor second")
+_Assert(ycDateTime::DateTime(999999.9999999)->epoch() == 999999
+        && ycDateTime::DateTime(999999.9999999)->nanos() == 999999900
+    "precision: near-integer flonum at a larger epoch keeps the floor second")
+_Assert(ycDateTime::DateTime(-0.9999999)->epoch() == -1
+        && ycDateTime::DateTime(-0.9999999)->nanos() == 100
+    "precision: negative near-integer flonum keeps the floor second")
 
 ; --- 3. validation ---
 _AssertError(lambda(() ycDateTime::DateTime(0 -1) t)  "precision: negative nanos rejected")
