@@ -8,6 +8,7 @@ addToNamespace("ycLang"
     mapcar('symbolToString '(
         ; with.il
         _ycWithHas  ; proc
+        _ycWithExpand  ; proc
     ))
 )
 unuseNamespace("ycLang")
