@@ -64,51 +64,11 @@ procedure(_ycWithHas(g_obj s_gf "gs")  ; -> t | nil
 
 ; ---------- macro ----------
 
-procedure(_ycWithExpand(s_name g_expr l_body "sgl")  ; -> list
-    ; 构造 ycWith 的宏展开式（内部实现）。
-    ;
-    ; SKILL 的 defmacro 体内直接用 let 绑定局部变量会报 unbound variable，
-    ; 因此展开构造放在普通过程里，宏体只做一次调用。
-    ;
-    ; **参数**
-    ;   s_name  (sym)  - 绑定变量名
-    ;   g_expr  (form) - 对象表达式
-    ;   l_body  (list) - 体内表达式
-    ;
-    ; **返回**
-    ;   (list) - 宏展开式
-    let((s_obj)
-        s_obj = gensym()
-        (list 'let
-            (list (list s_obj g_expr))
-            (list 'progn
-                (list 'unless s_obj
-                    (list 'error "ycWith: expression evaluated to nil")
-                )
-                (list 'unless
-                    (list 'ycLang::_ycWithHas s_obj (list 'quote '__ycWithEnter__))
-                    (list 'error "ycWith: %A does not implement __ycWithEnter__"
-                        (list 'className s_obj))
-                )
-                (list 'unless
-                    (list 'ycLang::_ycWithHas s_obj (list 'quote '__ycWithExit__))
-                    (list 'error "ycWith: %A does not implement __ycWithExit__"
-                        (list 'className s_obj))
-                )
-                (list 'let
-                    (list (list s_name (list '__ycWithEnter__ s_obj)))
-                    (list 'unwindProtect
-                        (cons 'progn l_body)
-                        (list '__ycWithExit__ s_obj)
-                    )
-                )
-            )
-        )
-    )
-)
-
 (defmacro ycWith (s_name g_expr \@rest l_body)
     ; 在 with 作用域内执行代码：绑定进入钩子的返回值，退出时调用退出钩子。
+    ;
+    ; 隐藏对象用固定名 __ycWithObj__，嵌套时由 let 自然遮蔽；
+    ; 宏体不用局部 let（SKILL 的 defmacro 体内 let 绑定不可见）。
     ;
     ; **参数**
     ;   s_name  (sym)  - 绑定变量名（不求值）
@@ -117,7 +77,29 @@ procedure(_ycWithExpand(s_name g_expr l_body "sgl")  ; -> list
     ;
     ; **返回**
     ;   (any) - 体内最后一个表达式的值；缺钩子或表达式为 nil 时 error()
-    (_ycWithExpand s_name g_expr l_body)
+    `(let ((__ycWithObj__ ,g_expr))
+        (progn
+            (unless __ycWithObj__
+                (error "ycWith: expression evaluated to nil")
+            )
+            (unless (ycLang::_ycWithHas __ycWithObj__ '__ycWithEnter__)
+                (error "ycWith: %A does not implement __ycWithEnter__"
+                    (className __ycWithObj__)
+                )
+            )
+            (unless (ycLang::_ycWithHas __ycWithObj__ '__ycWithExit__)
+                (error "ycWith: %A does not implement __ycWithExit__"
+                    (className __ycWithObj__)
+                )
+            )
+            (let ((,s_name (__ycWithEnter__ __ycWithObj__)))
+                (unwindProtect
+                    (progn ,@l_body)
+                    (__ycWithExit__ __ycWithObj__)
+                )
+            )
+        )
+    )
 )
 
 
