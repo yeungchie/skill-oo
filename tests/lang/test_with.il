@@ -114,8 +114,22 @@ defmethod(__ycWithEnter__ (self(WithNoExit))
     ;
     ; **返回**
     ;   (WithNoExit) - self
-    _WithCalls = tconc(_WithCalls 'noexit-enter)
+    _WithCalls = tconc(_WithCalls 'noexitenter)
     self
+)
+
+defclass(WithOnlyExit () ())
+
+defmethod(__ycWithExit__ (self(WithOnlyExit))
+    ; 记录退出；用于验证缺 enter 时不会被调用。
+    ;
+    ; **参数**
+    ;   self  (WithOnlyExit) - 实例
+    ;
+    ; **返回**
+    ;   (t) - 恒为 t
+    _WithCalls = tconc(_WithCalls 'onlyexit)
+    t
 )
 
 defclass(WithPlain () ())
@@ -223,6 +237,32 @@ defmethod(__ycWithExit__ (self(WithNilName))
     t
 )
 
+defclass(WithEnterNil () ())
+
+defmethod(__ycWithEnter__ (self(WithEnterNil))
+    ; 记录进入并返回 nil。
+    ;
+    ; **参数**
+    ;   self  (WithEnterNil) - 实例
+    ;
+    ; **返回**
+    ;   (nil) - nil
+    _WithCalls = tconc(_WithCalls 'enternil)
+    nil
+)
+
+defmethod(__ycWithExit__ (self(WithEnterNil))
+    ; 记录退出。
+    ;
+    ; **参数**
+    ;   self  (WithEnterNil) - 实例
+    ;
+    ; **返回**
+    ;   (t) - 恒为 t
+    _WithCalls = tconc(_WithCalls 'enternilx)
+    t
+)
+
 defclass(WithExitErr () ())
 
 defmethod(__ycWithEnter__ (self(WithExitErr))
@@ -296,6 +336,14 @@ _AssertErrorMsg(lambda(() ycWith(x makeInstance('WithNoExit)
 _Assert(_WithCalls == nil && _WithBodyRan == nil
     "with: missing exit never calls enter or the body")
 
+_WithCalls = nil
+_WithBodyRan = nil
+_AssertErrorMsg(lambda(() ycWith(x makeInstance('WithOnlyExit)
+            _WithBodyRan = t))
+    "does not implement __ycWithEnter__"  "with: only exit rejected")
+_Assert(_WithCalls == nil && _WithBodyRan == nil
+    "with: only exit never calls exit or the body")
+
 _AssertErrorMsg(lambda(() ycWith(x nil
             x))
     "expression evaluated to nil"  "with: nil expression rejected")
@@ -344,6 +392,13 @@ _Assert(_WithCalls == nil && _WithBodyRan == nil
     "with: nil name never exits when enter fails")
 
 _WithCalls = nil
+_Assert(ycWith(x makeInstance('WithEnterNil)
+        list(x)) == list(nil)
+    "with: enter may return nil")
+_AssertSameSeq(car(_WithCalls) list('enternil 'enternilx)
+    "with: enter nil still calls exit")
+
+_WithCalls = nil
 _Assert(ycWith(x makeInstance('WithOk)) == nil
     "with: omitted body returns nil")
 _AssertSameSeq(car(_WithCalls) list('ok)
@@ -371,8 +426,8 @@ _Assert(ycWith(__ycWithObj__ makeInstance('WithOk)
 
 _Assert(errset(expandMacro('(ycWith 42 makeInstance('WithOk) 1)) nil) == nil
     "with: non-symbol binding name rejected")
-_Assert(errset(expandMacro('(ycWith t makeInstance('WithOk) 1)) nil) == nil
-    "with: t is not a usable binding name")
+_AssertErrorMsg(lambda(() expandMacro('(ycWith t makeInstance('WithOk) 1)))
+    "symbol other than t"  "with: t is not a usable binding name")
 
 _TestChildDone = t
 

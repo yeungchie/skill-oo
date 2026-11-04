@@ -72,7 +72,7 @@ procedure(_ycWithHas(g_obj s_gf "gs")  ; -> t | nil
     ; s_name 为 nil 时只执行两个钩子，不建立用户绑定。
     ;
     ; **参数**
-    ;   s_name  (sym|nil) - 绑定变量名（不求值）；nil 表示不绑定
+    ;   s_name  (sym|nil) - 绑定变量名（不求值）；nil 表示不绑定，t 不可用
     ;   g_expr  (form)    - 求值一次的对象表达式（不求值，交给宏展开）
     ;   l_body  (list)    - 作用域内的表达式（可为空，空 body 返回 nil）
     ;
@@ -80,7 +80,7 @@ procedure(_ycWithHas(g_obj s_gf "gs")  ; -> t | nil
     ;   (any) - 体内最后一个表达式的值（省略 body 为 nil）；缺钩子或表达式为 nil 时 error()
     let((s_obj g_scope)
         unless((s_name == nil) || (symbolp(s_name) && s_name != 't)
-            error("ycWith: binding name must be a symbol or nil")
+            error("ycWith: binding name must be a symbol other than t, or nil")
         )
         s_obj = gensym()
         g_scope = if(s_name
