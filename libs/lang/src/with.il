@@ -67,37 +67,54 @@ procedure(_ycWithHas(g_obj s_gf "gs")  ; -> t | nil
 (defmacro ycWith (s_name g_expr \@rest l_body)
     ; 在 with 作用域内执行代码：绑定进入钩子的返回值，退出时调用退出钩子。
     ;
-    ; quasiquote 里的 let 绑定列表不带初值，初值在体内赋值；
-    ; 直接写初值会被读取器拆错（let: illegal binding form）。
+    ; quasiquote 里的 let 绑定列表带初值会被读取器拆错，因此初值在体内赋值。
+    ; 隐藏对象用 gensym() 生成唯一符号，避免与体内同名变量互相捕获。
+    ; s_name 为 nil 时只执行两个钩子，不建立用户绑定。
     ;
     ; **参数**
-    ;   s_name  (sym)  - 绑定变量名（不求值）
-    ;   g_expr  (form) - 求值一次的对象表达式（不求值，交给宏展开）
-    ;   l_body  (list) - 作用域内的表达式
+    ;   s_name  (sym|nil) - 绑定变量名（不求值）；nil 表示不绑定
+    ;   g_expr  (form)    - 求值一次的对象表达式（不求值，交给宏展开）
+    ;   l_body  (list)    - 作用域内的表达式
     ;
     ; **返回**
     ;   (any) - 体内最后一个表达式的值；缺钩子或表达式为 nil 时 error()
-    `let((__ycWithObj__)
-        __ycWithObj__ = ,g_expr
-        unless(__ycWithObj__
-            error("ycWith: expression evaluated to nil")
+    let((s_obj g_scope)
+        unless((s_name == nil) || (symbolp(s_name) && s_name != 't)
+            error("ycWith: binding name must be a symbol or nil")
         )
-        unless(ycLang::_ycWithHas(__ycWithObj__ '__ycWithEnter__)
-            error("ycWith: %A does not implement __ycWithEnter__"
-                className(__ycWithObj__)
+        s_obj = gensym()
+        g_scope = if(s_name
+            `let((,s_name)
+                ,s_name = __ycWithEnter__(,s_obj)
+                unwindProtect(
+                    { ,@l_body }
+                    __ycWithExit__(,s_obj)
+                )
+            )
+            `progn(
+                __ycWithEnter__(,s_obj)
+                unwindProtect(
+                    { ,@l_body }
+                    __ycWithExit__(,s_obj)
+                )
             )
         )
-        unless(ycLang::_ycWithHas(__ycWithObj__ '__ycWithExit__)
-            error("ycWith: %A does not implement __ycWithExit__"
-                className(__ycWithObj__)
+        `let((,s_obj)
+            ,s_obj = ,g_expr
+            unless(,s_obj
+                error("ycWith: expression evaluated to nil")
             )
-        )
-        let((,s_name)
-            ,s_name = __ycWithEnter__(__ycWithObj__)
-            unwindProtect(
-                { ,@l_body }
-                __ycWithExit__(__ycWithObj__)
+            unless(ycLang::_ycWithHas(,s_obj '__ycWithEnter__)
+                error("ycWith: %A does not implement __ycWithEnter__"
+                    className(,s_obj)
+                )
             )
+            unless(ycLang::_ycWithHas(,s_obj '__ycWithExit__)
+                error("ycWith: %A does not implement __ycWithExit__"
+                    className(,s_obj)
+                )
+            )
+            ,g_scope
         )
     )
 )

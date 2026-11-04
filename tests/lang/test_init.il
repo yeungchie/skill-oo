@@ -1,4 +1,4 @@
-_TestRun("ycLang" 18
+_TestRun("ycLang" 28
     "test_with.il"
 )
 

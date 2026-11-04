@@ -197,6 +197,32 @@ defmethod(__ycWithExit__ (self(WithNestB))
     t
 )
 
+defclass(WithNilName () ())
+
+defmethod(__ycWithEnter__ (self(WithNilName))
+    ; 记录进入并返回一个应被丢弃的值。
+    ;
+    ; **参数**
+    ;   self  (WithNilName) - 实例
+    ;
+    ; **返回**
+    ;   (sym) - ignored
+    _WithCalls = tconc(_WithCalls 'nilenter)
+    'ignored
+)
+
+defmethod(__ycWithExit__ (self(WithNilName))
+    ; 记录退出。
+    ;
+    ; **参数**
+    ;   self  (WithNilName) - 实例
+    ;
+    ; **返回**
+    ;   (t) - 恒为 t
+    _WithCalls = tconc(_WithCalls 'nilexit)
+    t
+)
+
 
 ; ---------- tests ----------
 
@@ -267,6 +293,46 @@ _AssertSameSeq(car(_WithCalls) list('b 'a)
 
 _AssertErrorMsg(lambda(() __ycWithEnter__(makeInstance('WithPlain)))
     "does not implement __ycWithEnter__"  "with: default hook reports the class")
+
+_WithCalls = nil
+_Assert(ycWith(nil makeInstance('WithNilName)
+        42) == 42
+    "with: nil name returns the body value")
+_AssertSameSeq(car(_WithCalls) list('nilenter 'nilexit)
+    "with: nil name still calls both hooks")
+
+_WithCalls = nil
+let((res)
+    res = errset(ycWith(nil makeInstance('WithNilName)
+            error("with probe: nil body failure")
+        ) nil)
+    _Assert(res == nil  "with: nil name body error propagates")
+    _AssertSameSeq(car(_WithCalls) list('nilenter 'nilexit)
+        "with: nil name exits on body error")
+)
+
+_WithCalls = nil
+_WithBodyRan = nil
+_AssertErrorMsg(lambda(() ycWith(nil makeInstance('WithEnterErr)
+            _WithBodyRan = t))
+    "with probe: enter failure"  "with: nil name enter error propagates")
+_Assert(_WithCalls == nil && _WithBodyRan == nil
+    "with: nil name never exits when enter fails")
+
+__ycWithObj__ = 'outer
+_Assert(ycWith(x makeInstance('WithOk)
+        __ycWithObj__) == 'outer
+    "with: hidden binding does not capture body symbols")
+
+_WithCalls = nil
+_Assert(ycWith(__ycWithObj__ makeInstance('WithOk)
+        className(__ycWithObj__)) == 'WithOk
+    "with: binding name may reuse the former hidden name")
+
+_Assert(errset(expandMacro('(ycWith 42 makeInstance('WithOk) 1)) nil) == nil
+    "with: non-symbol binding name rejected")
+_Assert(errset(expandMacro('(ycWith t makeInstance('WithOk) 1)) nil) == nil
+    "with: t is not a usable binding name")
 
 _TestChildDone = t
 
