@@ -10,7 +10,7 @@ Cadence SKILL++ 的分级日志库：按级别过滤，同时写 CIW 与控制�
 - 输出目标可组合：`?console t` 写 CIW / 标准输出，`?file` 指定日志文件；两者可同时开启。
 - 文件默认追加打开；`?append nil` 时截断重写。
 - `?flush t`（默认）在每条记录后立即落盘，文件可被外部实时读取；高吞吐场景可置 `nil`，由 `flush()` 或 `close()` 统一落盘。
-- 时间戳使用 `ycDateTime` 的 `%F %T` 格式，形如 `[2026-11-14 21:32:47]`；`?time nil` 可关闭。
+- 时间戳默认 `[%F %T]`（形如 `[2026-11-14 21:32:47]`），可用 `?timeFormat` 传模板自定义；`?timeFormat nil` 关闭。
 - 构造器错误以 `ycLog::Logger:` 开头，方法错误以 `ycLog::Logger-><方法>:` 开头；格式串类型错误由方法报告，其余参数类型错误由参数绑定报告 `argument #N ...`。
 
 ## 快速上手
@@ -48,7 +48,7 @@ ycLog::Logger(
     [ ?console g_console ]
     [ ?append g_append ]
     [ ?flush g_flush ]
-    [ ?time g_time ]
+    [ ?timeFormat t_timeFormat ]
 )
 => ycLog::Logger
 ```
@@ -66,7 +66,15 @@ ycLog::Logger(
 [2026-11-14 21:32:47] [WARN] message
 ```
 
-`?time nil` 去掉时间戳段；名称为空时去掉 `[name]` 段。
+`?timeFormat` 是 `ycDateTime` 的格式模板：`%F` / `%T` 等令牌原样生效，`%%` 表示字面 `%`，未支持的令牌以 `error()` 中断；格式结果后自动补一个空格再接级别标签。`nil` 去掉时间戳段；名称为空时去掉 `[name]` 段。
+
+```lisp
+lg = ycLog::Logger("demo" ?timeFormat "%F")
+lg->info("custom")
+; 控制台输出：
+;   2026-11-14 [INFO] [demo] custom
+lg->close()
+```
 
 **参数**
 
@@ -78,7 +86,7 @@ ycLog::Logger(
 | ?console g_console | t / nil | t | t 写 CIW / 标准输出，nil 不写 |
 | ?append g_append | t / nil | t | t 追加，nil 截断 |
 | ?flush g_flush | t / nil | t | t 每条记录后立即落盘 |
-| ?time g_time | t / nil | t | t 行首带时间戳，nil 不带 |
+| ?timeFormat t_timeFormat | str / nil | "[%F %T]" | 时间戳模板；nil 关闭 |
 
 `?level` 的取值与过滤结果：
 
@@ -100,12 +108,14 @@ lg1 = ycLog::Logger("demo")                                  ; 只写控制台
 lg2 = ycLog::Logger("demo" ?file "./run.log")                ; 控制台 + 文件
 lg3 = ycLog::Logger("demo" ?file "./run.log" ?append nil)    ; 文件截断重写
 lg4 = ycLog::Logger("demo" ?console nil ?file "./run.log")   ; 只写文件
-lg5 = ycLog::Logger("demo" ?level 'warn ?time nil)           ; 只保留 warn 及以上，无时间戳
+lg5 = ycLog::Logger("demo" ?level 'warn ?timeFormat nil)     ; 只保留 warn 及以上，无时间戳
+lg6 = ycLog::Logger("demo" ?timeFormat "%F")                 ; 只保留日期
 lg1->close()
 lg2->close()
 lg3->close()
 lg4->close()
 lg5->close()
+lg6->close()
 ```
 
 **方法**

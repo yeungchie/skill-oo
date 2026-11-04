@@ -2,7 +2,7 @@ _LogReset()
 
 ; ---- 阈值与过滤 ----
 let((lg lines)
-    lg = ycLog::Logger("lvl" ?console nil ?file _LogTmp("a.log") ?time nil)
+    lg = ycLog::Logger("lvl" ?console nil ?file _LogTmp("a.log") ?timeFormat nil)
     _Assert(lg->level() == 'info  "level: default is info")
     lg->debug("drop")
     lg->info("i")
@@ -18,7 +18,7 @@ let((lg lines)
 
 ; ---- setLevel 与 debug ----
 let((lg lines)
-    lg = ycLog::Logger("lvl" ?console nil ?file _LogTmp("b.log") ?time nil)
+    lg = ycLog::Logger("lvl" ?console nil ?file _LogTmp("b.log") ?timeFormat nil)
     _Assert(lg->setLevel('debug) == lg  "level: setLevel returns self")
     _Assert(lg->level() == 'debug  "level: setLevel updates level")
     lg->debug("d")
@@ -30,7 +30,7 @@ let((lg lines)
 
 ; ---- warn 阈值与 log 入口 ----
 let((lg lines)
-    lg = ycLog::Logger("lvl" ?level 'warn ?console nil ?file _LogTmp("c.log") ?time nil)
+    lg = ycLog::Logger("lvl" ?level 'warn ?console nil ?file _LogTmp("c.log") ?timeFormat nil)
     lg->info("no")
     lg->warn("yes")
     lg->log('error "e")
@@ -43,7 +43,7 @@ let((lg lines)
 
 ; ---- log 入口写 info ----
 let((lg)
-    lg = ycLog::Logger("lvl" ?console nil ?file _LogTmp("d.log") ?time nil)
+    lg = ycLog::Logger("lvl" ?console nil ?file _LogTmp("d.log") ?timeFormat nil)
     lg->log('info "i")
     lg->close()
     _Assert(car(_ReadLines(_LogTmp("d.log"))) == "[INFO] [lvl] i"
@@ -52,7 +52,7 @@ let((lg)
 
 ; ---- error 阈值 ----
 let((lg lines)
-    lg = ycLog::Logger("lvl" ?console nil ?file _LogTmp("e.log") ?time nil)
+    lg = ycLog::Logger("lvl" ?console nil ?file _LogTmp("e.log") ?timeFormat nil)
     lg->setLevel('error)
     lg->debug("d")
     lg->info("i")

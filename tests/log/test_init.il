@@ -53,7 +53,7 @@ procedure(_Capture(t_path g_thunk "tg")  ; -> list[str]
     )
 )
 
-_TestRun("ycLog" 57
+_TestRun("ycLog" 61
     "test_level.il"
     "test_output.il"
     "test_file.il"

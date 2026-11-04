@@ -37,9 +37,9 @@ defclass(_LoggerData () (
         \@initarg flush
         \@initform t
     )
-    time(
-        \@initarg time
-        \@initform t
+    timeFormat(
+        \@initarg timeFormat
+        \@initform "[%F %T]"
     )
 ))
 
@@ -109,20 +109,22 @@ procedure(_CheckFlag(g_value t_name t_ctx "gtt")  ; -> t | nil
     g_value
 )
 
-procedure(_LogLine(t_name s_level g_time t_msg "tsgt")  ; -> str
+procedure(_LogLine(t_name s_level g_timeFormat t_msg "tsgt")  ; -> str
     ; 拼一行日志：可选时间戳、级别标签、可选名称与正文。
     ;
     ; **参数**
-    ;   t_name   (str)   - 日志器名称；空串不显示名称段
-    ;   s_level  (sym)   - 已校验的级别
-    ;   g_time   (t|nil) - 是否带时间戳
-    ;   t_msg    (str)   - 正文
+    ;   t_name        (str)     - 日志器名称；空串不显示名称段
+    ;   s_level       (sym)     - 已校验的级别
+    ;   g_timeFormat  (str|nil) - 时间戳模板；nil 不显示时间戳
+    ;   t_msg         (str)     - 正文
     ;
     ; **返回**
     ;   (str) - 形如 `[时间] [INFO] [名称] 正文`
     let((tag stamp)
         tag = cadr(_LevelParts(s_level))
-        stamp = if(g_time lsprintf("[%s] " ycDateTime::Current()->format("%F %T")) "")
+        stamp = if(g_timeFormat
+            lsprintf("%s " ycDateTime::Current()->format(g_timeFormat))
+            "")
         lsprintf("%s[%s]%s %s" stamp tag
             if(t_name == "" "" lsprintf(" [%s]" t_name))
             t_msg)
@@ -165,7 +167,7 @@ procedure(_emit(t_method s_level t_fmt l_args)  ; -> Logger
         )
         when(car(parts) >= car(_LevelParts(self->_data->level))
             msg = if(l_args apply('lsprintf t_fmt l_args) t_fmt)
-            line = _LogLine(self->_data->name s_level self->_data->time msg)
+            line = _LogLine(self->_data->name s_level self->_data->timeFormat msg)
             when(self->_data->console
                 printf("%s\n" line)
             )
@@ -295,7 +297,7 @@ t
 
 ; ---------- constructor ----------
 
-procedure(Logger(t_name \@key (level 'info) (file nil) (console t) (append t) (flush t) (time t) "tgggggg")  ; -> Logger
+procedure(Logger(t_name \@key (level 'info) (file nil) (console t) (append t) (flush t) (timeFormat "[%F %T]") "tgggggg")  ; -> Logger
     ; 构造分级日志器。
     ;
     ; **参数**
@@ -305,7 +307,7 @@ procedure(Logger(t_name \@key (level 'info) (file nil) (console t) (append t) (f
     ;   ?console   (t|nil)   - 是否写 CIW/标准输出；默认 t
     ;   ?append    (t|nil)   - 文件以追加方式打开；默认 t
     ;   ?flush     (t|nil)   - 每条记录后立即落盘；默认 t
-    ;   ?time      (t|nil)   - 行首是否带时间戳；默认 t
+    ;   ?timeFormat (str|nil) - 时间戳模板；默认 "[%F %T]"，nil 关闭
     ;
     ; **返回**
     ;   (Logger) - 新日志器；参数非法或文件打不开时 error
@@ -316,12 +318,22 @@ procedure(Logger(t_name \@key (level 'info) (file nil) (console t) (append t) (f
         _CheckFlag(console "console" "ycLog::Logger")
         _CheckFlag(append "append" "ycLog::Logger")
         _CheckFlag(flush "flush" "ycLog::Logger")
-        _CheckFlag(time "time" "ycLog::Logger")
         when(file != nil && !stringp(file)
             error("ycLog::Logger: ?file must be a string or nil, got %A" file)
         )
         when(file == ""
             error("ycLog::Logger: ?file must not be empty")
+        )
+        when(timeFormat != nil && !stringp(timeFormat)
+            error("ycLog::Logger: ?timeFormat must be a string or nil, got %A" timeFormat)
+        )
+        when(timeFormat == ""
+            error("ycLog::Logger: ?timeFormat must not be empty; use nil to disable timestamps")
+        )
+        when(timeFormat
+            unless(errset(ycDateTime::Current()->format(timeFormat) nil)
+                error("ycLog::Logger: invalid ?timeFormat %A" timeFormat)
+            )
         )
         when(file
             port = outfile(file if(append "a" "w"))
@@ -335,8 +347,8 @@ procedure(Logger(t_name \@key (level 'info) (file nil) (console t) (append t) (f
             ?file    file
             ?port    port
             ?console console
-            ?flush   flush
-            ?time    time))
+            ?flush      flush
+            ?timeFormat timeFormat))
     )
 )
 
