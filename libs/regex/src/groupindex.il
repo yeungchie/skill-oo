@@ -57,6 +57,8 @@ procedure(_GroupIndexFetch(t_pat g_nac n_g t_ctx "tgxt")  ; -> table | nil
         eof = lsprintf("EOF%d" ipcGetPid())
         ; 终止符不能出现在模式串里：heredoc 遇到「独占一行的终止符」就提前结束，
         ; 其后的模式串内容会被 shell 当命令执行。命中即加长，直到模式串里不可能出现。
+        ; 下面的 heredoc 必须保持引号形式 <<'EOF'：非引号形式会展开模式串里的
+        ; $(...) 与反引号（终止符加长挡不住这条路径）。
         while(index(t_pat eof)
             eof = strcat(eof "X")
         )
@@ -73,7 +75,8 @@ procedure(_GroupIndexFetch(t_pat g_nac n_g t_ctx "tgxt")  ; -> table | nil
             )
             "\n"
         )
-        res = ycSubProcess:::RunWithRead(cmd)
+        ; 辅助解释器是本地一次性解析，正常毫秒级返回；设上限避免异常挂死阻塞 CIW。
+        res = ycSubProcess:::RunWithRead(cmd ?timeout 10)
         unless(car(res) == 0
             msg = caddr(res)
             when(msg == ""

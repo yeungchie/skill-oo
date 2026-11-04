@@ -88,4 +88,13 @@ let((t_eof t_pat t_idx)
         "groupindex: terminator-like last line does not truncate the pattern")
 )
 
+; --- 8. the pattern is never expanded by the shell ---
+; 引号形式的 heredoc 不展开正文；若退化成 <<EOF，命令替换会先执行：
+; $(printf '()') 变成 ()，后面的命名组序号随之从 3 掉到 2。
+let((t_pat t_idx)
+    t_pat = "$(printf '()')(?P<b>y)"
+    t_idx = ycRegEx::Compile(t_pat)->groupindex()
+    _Assert(t_idx["b"] == 3  "groupindex: command substitution stays literal")
+)
+
 _TestChildDone = t
