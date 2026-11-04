@@ -32,6 +32,7 @@ let((t_dir t_pkgs)
         "textwrap"
         "tabulate"
         "datetime"
+        "log"
     )
     foreach(t_pkg t_pkgs
         t_dir->join(t_pkg "load.il")->load()

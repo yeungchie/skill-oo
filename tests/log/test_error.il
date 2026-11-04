@@ -1,0 +1,46 @@
+_LogReset()
+
+; ---- 构造器 ----
+_AssertErrorMsg(lambda(() ycLog::Logger("x" ?level 'trace))
+    "ycLog::Logger: unknown level"  "error: unknown level")
+_AssertErrorMsg(lambda(() ycLog::Logger("x" ?level "info"))
+    "ycLog::Logger: unknown level"  "error: level type")
+_AssertErrorMsg(lambda(() ycLog::Logger("x" ?console "yes"))
+    "?console must be t or nil"  "error: console flag")
+_AssertErrorMsg(lambda(() ycLog::Logger("x" ?append 1))
+    "?append must be t or nil"  "error: append flag")
+_AssertErrorMsg(lambda(() ycLog::Logger("x" ?flush "x"))
+    "?flush must be t or nil"  "error: flush flag")
+_AssertErrorMsg(lambda(() ycLog::Logger("x" ?time 'x))
+    "?time must be t or nil"  "error: time flag")
+_AssertErrorMsg(lambda(() ycLog::Logger("x" ?file 42))
+    "?file must be a string or nil"  "error: file type")
+_AssertErrorMsg(lambda(() ycLog::Logger("x" ?file ""))
+    "?file must not be empty"  "error: empty file")
+_AssertErrorMsg(lambda(() ycLog::Logger("x" ?file _LogTmp("no/such/x.log")))
+    "cannot open log file"  "error: missing directory")
+_AssertErrorMsg(lambda(() ycLog::Logger(42))
+    "argument #1 should be a string"  "error: name type")
+_AssertErrorMsg(lambda(() ycLog::Logger())
+    "too few arguments"  "error: missing name")
+
+; ---- 方法 ----
+let((lg)
+    lg = ycLog::Logger("x" ?console nil ?file _LogTmp("err.log"))
+    _AssertErrorMsg(lambda(() lg->log('trace "x"))
+        "ycLog::Logger->log: unknown level"  "error: log unknown level")
+    _AssertErrorMsg(lambda(() lg->setLevel('trace))
+        "ycLog::Logger->setLevel: unknown level"  "error: setLevel unknown level")
+    _AssertErrorMsg(lambda(() lg->setLevel("info"))
+        "argument #1 should be a symbol"  "error: setLevel type")
+    _AssertErrorMsg(lambda(() lg->info(42))
+        "ycLog::Logger->info: message must be a string"  "error: info message type")
+    _AssertErrorMsg(lambda(() lg->log('info 42))
+        "ycLog::Logger->log: message must be a string"  "error: log message type")
+    lg->close()
+)
+
+_LogCleanup()
+_TestChildDone = t
+
+; END
