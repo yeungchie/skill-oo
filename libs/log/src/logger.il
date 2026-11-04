@@ -70,6 +70,22 @@ defmethod(printself (self(Logger))  ; -> str
         self->_data->name self->_data->level self->_data->file)
 )
 
+defmethod(__ycWithEnter__ (self(Logger))  ; -> Logger
+    ; with 协议：进入作用域时返回 logger 自身。
+    ;
+    ; **返回**
+    ;   (Logger) - self
+    self
+)
+
+defmethod(__ycWithExit__ (self(Logger))  ; -> t
+    ; with 协议：退出作用域时关闭文件端口。
+    ;
+    ; **返回**
+    ;   (t) - close() 的返回值
+    self->close()
+)
+
 
 ; ---------- helpers ----------
 

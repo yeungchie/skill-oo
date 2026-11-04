@@ -21,6 +21,7 @@ let((t_self t_dir)
 let((t_dir t_pkgs)
     t_dir = ycPathLib::CurrentFile()->parent()
     t_pkgs = list(
+        "lang"
         "regex"
         "subprocess"
         "codec"

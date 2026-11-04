@@ -33,6 +33,10 @@
 + [ycDateTime](docs/datetime/README.md) —— Unix 时间对象、格式化与偏移。
 + [ycLog](docs/log/README.md) —— 分级日志：级别过滤、控制台输出与文件追加。
 
+### 语言辅助
+
++ [ycLang](docs/lang/README.md) —— 语言级辅助宏：`ycWith` 作用域资源管理。
+
 ### 几何
 
 + [ycGeom](docs/geom/README.md) —— 平面点、线段、直线、矩形、keyhole 多边形、区域布尔运算、零宽度折线 Route 与带宽度描边 Path。

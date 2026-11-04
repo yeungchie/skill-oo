@@ -1,6 +1,6 @@
 # skill-oo 测试
 
-本文件描述测试套件的运行方式。使用 API 见 [ycPathLib](../docs/pathlib/README.md)、[ycRegEx](../docs/regex/README.md)、[ycSubProcess](../docs/subprocess/README.md)、[ycCodec](../docs/codec/core/README.md)、[ycJson](../docs/codec/json/README.md)、[ycYaml](../docs/codec/yaml/README.md)、[ycCsv](../docs/codec/csv/README.md)、[ycToml](../docs/codec/toml/README.md)、[ycIni](../docs/codec/ini/README.md)、[ycUtf8](../docs/utf8/README.md)、[ycString](../docs/string/README.md)、[ycUnits](../docs/units/README.md)、[ycRadix](../docs/radix/README.md)、[ycTextwrap](../docs/textwrap/README.md)、[ycTabulate](../docs/tabulate/README.md)、[ycDateTime](../docs/datetime/README.md)、[ycLog](../docs/log/README.md)与 [ycGeom](../docs/geom/README.md)。
+本文件描述测试套件的运行方式。使用 API 见 [ycPathLib](../docs/pathlib/README.md)、[ycRegEx](../docs/regex/README.md)、[ycSubProcess](../docs/subprocess/README.md)、[ycCodec](../docs/codec/core/README.md)、[ycJson](../docs/codec/json/README.md)、[ycYaml](../docs/codec/yaml/README.md)、[ycCsv](../docs/codec/csv/README.md)、[ycToml](../docs/codec/toml/README.md)、[ycIni](../docs/codec/ini/README.md)、[ycUtf8](../docs/utf8/README.md)、[ycString](../docs/string/README.md)、[ycUnits](../docs/units/README.md)、[ycRadix](../docs/radix/README.md)、[ycTextwrap](../docs/textwrap/README.md)、[ycTabulate](../docs/tabulate/README.md)、[ycDateTime](../docs/datetime/README.md)、[ycLog](../docs/log/README.md)、[ycLang](../docs/lang/README.md)与 [ycGeom](../docs/geom/README.md)。
 
 ## 运行测试
 
@@ -19,6 +19,7 @@ load("<path-to-dir>/skill-oo/tests/textwrap/load.il")
 load("<path-to-dir>/skill-oo/tests/tabulate/load.il")
 load("<path-to-dir>/skill-oo/tests/datetime/load.il")
 load("<path-to-dir>/skill-oo/tests/log/load.il")
+load("<path-to-dir>/skill-oo/tests/lang/load.il")
 load("<path-to-dir>/skill-oo/tests/geom/load.il")
 ```
 
@@ -32,7 +33,7 @@ load("<path-to-dir>/skill-oo/tests/codec/load_order.il")
 
 > 修改某个 `libs/<模块>/src/` 后必须**重启 CIW** 再跑对应 `load.il`：同一会话内已加载过对应库时，`load.il` 会打印提示并复用内存中的旧代码，改动静默无效。
 
-pathlib、regex 与 log 套件会在 cwd 下创建并清理各自的临时夹具；subprocess 套件直接运行短命令，codec、utf8、string、units、radix、textwrap、tabulate 与 datetime 套件仅做内存运算，均无夹具。
+pathlib、regex 与 log 套件会在 cwd 下创建并清理各自的临时夹具；subprocess 套件直接运行短命令，codec、utf8、string、units、radix、textwrap、tabulate、datetime 与 lang 套件仅做内存运算，均无夹具。
 
 所有套件共用 `tests/kit.il` 里的断言、计时与汇总工具；各 `load.il` 先载入它，`test_init.il` 只保留模块专用辅助过程与一行 `_TestRun(...)`。每条测试用例的输出形如：
 
@@ -61,4 +62,4 @@ TOTAL: <总耗时>
 
 标记与窗口内的错误诊断都写到错误输出端口（`errport`），与库自身的 `*Error*` 同流；窗口打开期间产生的用例结果行会先暂存，等 `_TestErrorEnd` 写完结束标记后再按序打印到标准输出端口（`poport`）。写开始标记前会 `drain` 标准输出，结束标记后也会刷新，重定向或缓冲时两路内容不会错位。`errset(expr nil)` 用于静默捕获预期错误；测试文件载入失败时也由这组标记包住诊断信息。
 
-有失败时以 `*Error* <模块名>: <m> test(s) failed` 终止（`ycPathLib` / `ycRegEx` / `ycSubProcess` / `ycCodec` / `ycJson` / `ycYaml` / `ycCsv` / `ycToml` / `ycIni` / `ycUtf8` / `ycString` / `ycUnits` / `ycRadix` / `ycTextwrap` / `ycTabulate` / `ycLog` / `ycGeom`）。
+有失败时以 `*Error* <模块名>: <m> test(s) failed` 终止（`ycPathLib` / `ycRegEx` / `ycSubProcess` / `ycCodec` / `ycJson` / `ycYaml` / `ycCsv` / `ycToml` / `ycIni` / `ycUtf8` / `ycString` / `ycUnits` / `ycRadix` / `ycTextwrap` / `ycTabulate` / `ycLog` / `ycLang` / `ycGeom`）。
