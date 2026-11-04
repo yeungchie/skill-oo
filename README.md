@@ -8,6 +8,7 @@
 
 ### 文件与进程
 
++ [ycIO](docs/io/README.md) —— 文件端口包装：方法式读写、幂等关闭与 with 自动关闭。
 + [ycPathLib](docs/pathlib/README.md) —— POSIX 路径与文件系统操作。
 + [ycSubProcess](docs/subprocess/README.md) —— 子进程启动、交互与输出管理。
 

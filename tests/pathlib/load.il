@@ -28,6 +28,11 @@ let((t_res t_self t_dir)
     _TestPathlibDir = t_dir
 )
 
+ycNamespace:::Require("ycIO")
+unless(fboundp('ycIO:::Open)
+    loadi(strcat(_TestPathlibDir "../../libs/io/load.il"))
+)
+
 ; load reads and evaluates one top-level form at a time; the ycJson shell
 ; keeps the quoted symbol below readable on a fresh CIW.
 ycNamespace:::Require("ycJson")

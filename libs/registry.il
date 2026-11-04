@@ -15,6 +15,7 @@ unless(findNamespace("ycNamespace")
 
 ycNamespace:::_ValidNames = list(
     "ycPathLib"
+    "ycIO"
     "ycLang"
     "ycRegEx"
     "ycSubProcess"

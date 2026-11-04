@@ -988,12 +988,12 @@ p->touch()  ; => t
 p->open(
     [ ?mode t_mode ]
 )
-=> port
+=> ycIO::Port
 ```
 
 **描述**
 
-打开文件；模式 `"r"`（默认）/ `"w"` / `"a"`；其他模式、`"r"` 下目标为目录或文件不存在均以 `error()` 中断。
+打开文件并返回端口包装；模式 `"r"`（默认）/ `"w"` / `"a"`；其他模式、`"r"` 下目标为目录或文件不存在均以 `error()` 中断。返回对象的方法见 [ycIO](../io/README.md)；需要底层原生 port 时调用 `->port()`。
 
 **参数**
 
@@ -1013,15 +1013,26 @@ p->open(
 
 **返回值**
 
-`port` — 打开的文件 `port`。
+`ycIO::Port` — 端口包装；非法模式、目标为目录、文件缺失或打开失败时以 `error()` 中断。
 
 **例程**
 
 ```lisp
 p = ycPathLib::Path("./a.txt")
 p->writeText("x")
-port = p->open()               ; => port
-port = p->open(?mode "w")      ; => port
+
+port = p->open()               ; => ycIO::Port
+port->readAll()
+; => "x"
+port->close()
+
+; with：退出时自动关闭
+ycWith(q p->open(?mode "w")
+    q->write("done")
+)
+p->readText()
+; => "done"
+
 p->open(?mode "b")
 ; *Error* ycPathLib::Path->open: invalid mode: 'b'
 ```

@@ -1,3 +1,5 @@
+ycNamespace:::Require("ycIO")
+
 useNamespace("ycPathLib")
 
 
@@ -272,15 +274,15 @@ self->touch = lambda(()  ; -> t
     )
 )
 
-self->open = lambda((\@key mode("r") "t")  ; -> port
-    ; 按模式打开文件返回 file port：读取用 "r"，覆盖写入用 "w"（截断已有内容），追加写入用 "a"。
+self->open = lambda((\@key mode("r") "t")  ; -> Port
+    ; 按模式打开文件并返回端口包装：读取用 "r"，覆盖写入用 "w"（截断已有内容），追加写入用 "a"。
     ;
     ; **参数**
     ;   ?mode  (str) - 打开模式："r" 读取、"w" 截断写入、"a" 追加写入（默认 "r"）
     ;
     ; **返回**
-    ;   (port) - 打开的 file port；非法模式、"r" 下目标为目录或文件缺失、打开失败，均走 _error() 中断
-    let((t_str g_port)
+    ;   (Port) - 端口包装；非法模式、"r" 下目标为目录或文件缺失、打开失败，均走 _error() 中断
+    let((t_str)
         t_str = self->str()
         unless(mode == "r" || mode == "w" || mode == "a"
             _error("open" "invalid mode: '%s'" mode)
@@ -292,15 +294,8 @@ self->open = lambda((\@key mode("r") "t")  ; -> port
             unless(self->isFile()
                 _error("open" "no such file: %s" t_str)
             )
-            g_port = infile(_FsName(t_str))
         )
-        when(mode != "r"
-            g_port = outfile(_FsName(t_str) mode)
-        )
-        unless(g_port
-            _error("open" "cannot open: %s" t_str)
-        )
-        g_port
+        ycIO::Open(t_str ?mode mode)
     )
 )
 

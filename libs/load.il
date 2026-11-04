@@ -3,8 +3,9 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-; Load the namespace registry first (no dependencies), then bootstrap
-; ycPathLib - this loader needs ycPathLib::CurrentFile below.
+; Load the namespace registry first (no dependencies), then ycIO (no
+; dependencies), then bootstrap ycPathLib - the loop below needs
+; ycPathLib::CurrentFile, and Path->open returns ycIO::Port.
 let((t_self t_dir)
     t_self = get_filename(piport)
     unless(pcreMatchp("/" t_self)
@@ -12,6 +13,7 @@ let((t_self t_dir)
     )
     t_dir = pcreReplace(pcreCompile("(?<=/)[^/]+/*$") t_self "" 0)
     load(strcat(t_dir "registry.il"))
+    load(strcat(t_dir "io/load.il"))
     load(strcat(t_dir "pathlib/load.il"))
 )
 

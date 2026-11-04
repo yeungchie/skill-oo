@@ -329,9 +329,9 @@ when(isFileName("/proc/version")
 ; --- open ---
 let((g_port)
     g_port = p_base->join("hello.txt")->open(?mode "r")
-    _Assert(g_port != nil  "open: read mode returns port")
+    _Assert(className(g_port) == 'ycIO::Port  "open: read mode returns ycIO::Port")
     when(g_port
-        close(g_port)
+        g_port->close()
     )
     _AssertError(lambda(() p_base->join("hello.txt")->open(?mode "b") t)  "open: invalid mode errors")
     _AssertError(lambda(() p_base->join("missing.txt")->open(?mode "r") t)  "open: missing file errors")

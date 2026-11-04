@@ -3,6 +3,25 @@
 ; Language : Cadence Skill
 ;--------------------------
 
+; Path->open returns ycIO::Port; load ycIO before src so the qualified
+; ycIO::Open reference in fs.il is readable on a fresh session.
+let((t_res t_self t_io)
+    t_res = errset(get_filename(piport) nil)
+    t_self = when(t_res && car(t_res) && stringp(car(t_res)) && car(t_res) != ""
+        car(t_res)
+    )
+    unless(t_self
+        error("ycPathLib: can't determine the current file - load this file with an explicit path")
+    )
+    unless(pcreMatchp("^[~/]|^\\.{1,2}/" t_self)
+        t_self = strcat("./" t_self)
+    )
+    t_io = simplifyFilename(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") t_self "" 0) t)
+    unless(findNamespace("ycIO")
+        loadi(simplifyFilename(strcat(t_io "../io/load.il") t))
+    )
+)
+
 let((t_res t_self t_dir)
     t_res = errset(get_filename(piport) nil)
     t_self = when(t_res && car(t_res) && stringp(car(t_res)) && car(t_res) != ""
