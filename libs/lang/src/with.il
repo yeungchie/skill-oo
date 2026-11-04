@@ -74,10 +74,10 @@ procedure(_ycWithHas(g_obj s_gf "gs")  ; -> t | nil
     ; **参数**
     ;   s_name  (sym|nil) - 绑定变量名（不求值）；nil 表示不绑定
     ;   g_expr  (form)    - 求值一次的对象表达式（不求值，交给宏展开）
-    ;   l_body  (list)    - 作用域内的表达式
+    ;   l_body  (list)    - 作用域内的表达式（可为空，空 body 返回 nil）
     ;
     ; **返回**
-    ;   (any) - 体内最后一个表达式的值；缺钩子或表达式为 nil 时 error()
+    ;   (any) - 体内最后一个表达式的值（省略 body 为 nil）；缺钩子或表达式为 nil 时 error()
     let((s_obj g_scope)
         unless((s_name == nil) || (symbolp(s_name) && s_name != 't)
             error("ycWith: binding name must be a symbol or nil")
@@ -87,14 +87,14 @@ procedure(_ycWithHas(g_obj s_gf "gs")  ; -> t | nil
             `let((,s_name)
                 ,s_name = __ycWithEnter__(,s_obj)
                 unwindProtect(
-                    { ,@l_body }
+                    { nil ,@l_body }
                     __ycWithExit__(,s_obj)
                 )
             )
             `progn(
                 __ycWithEnter__(,s_obj)
                 unwindProtect(
-                    { ,@l_body }
+                    { nil ,@l_body }
                     __ycWithExit__(,s_obj)
                 )
             )

@@ -223,6 +223,30 @@ defmethod(__ycWithExit__ (self(WithNilName))
     t
 )
 
+defclass(WithExitErr () ())
+
+defmethod(__ycWithEnter__ (self(WithExitErr))
+    ; 返回自身。
+    ;
+    ; **参数**
+    ;   self  (WithExitErr) - 实例
+    ;
+    ; **返回**
+    ;   (WithExitErr) - self
+    self
+)
+
+defmethod(__ycWithExit__ (self(WithExitErr))
+    ; 退出时直接报错。
+    ;
+    ; **参数**
+    ;   self  (WithExitErr) - 实例
+    ;
+    ; **返回**
+    ;   (never) - 总是报错
+    error("with probe: exit failure")
+)
+
 
 ; ---------- tests ----------
 
@@ -318,6 +342,22 @@ _AssertErrorMsg(lambda(() ycWith(nil makeInstance('WithEnterErr)
     "with probe: enter failure"  "with: nil name enter error propagates")
 _Assert(_WithCalls == nil && _WithBodyRan == nil
     "with: nil name never exits when enter fails")
+
+_WithCalls = nil
+_Assert(ycWith(x makeInstance('WithOk)) == nil
+    "with: omitted body returns nil")
+_AssertSameSeq(car(_WithCalls) list('ok)
+    "with: omitted body still exits")
+
+_WithCalls = nil
+_Assert(ycWith(nil makeInstance('WithNilName)) == nil
+    "with: omitted body with nil name returns nil")
+_AssertSameSeq(car(_WithCalls) list('nilenter 'nilexit)
+    "with: omitted body with nil name still calls hooks")
+
+_AssertErrorMsg(lambda(() ycWith(x makeInstance('WithExitErr)
+            error("with probe: body failure")))
+    "with probe: exit failure"  "with: exit error overrides body error")
 
 __ycWithObj__ = 'outer
 _Assert(ycWith(x makeInstance('WithOk)

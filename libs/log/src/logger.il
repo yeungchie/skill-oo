@@ -347,6 +347,9 @@ procedure(Logger(t_name \@key (level 'info) (file nil) (console t) (append t) (f
             error("ycLog::Logger: ?timeFormat must not be empty; use nil to disable timestamps")
         )
         when(timeFormat
+            unless(fboundp('ycDateTime:::Current)
+                error("ycLog::Logger: ycDateTime is not loaded")
+            )
             unless(errset(ycDateTime:::Current()->format(timeFormat) nil)
                 error("ycLog::Logger: invalid ?timeFormat %A" timeFormat)
             )
