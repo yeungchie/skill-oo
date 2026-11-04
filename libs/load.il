@@ -18,7 +18,8 @@ let((t_self t_dir)
 
 ; pathlib stays outside the loop because the loop itself depends on it;
 ; every other package goes through the list below (one dir per entry,
-; each must contain a load.il).
+; each must contain a load.il). Order below is not semantically required:
+; regular packages resolve cross-library calls through ::: at call time.
 let((t_dir t_pkgs)
     t_dir = ycPathLib::CurrentFile()->parent()
     t_pkgs = list(

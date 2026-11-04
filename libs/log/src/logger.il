@@ -139,7 +139,7 @@ procedure(_LogLine(t_name s_level g_timeFormat t_msg "tsgt")  ; -> str
     let((tag stamp)
         tag = cadr(_LevelParts(s_level))
         stamp = if(g_timeFormat
-            lsprintf("%s " ycDateTime::Current()->format(g_timeFormat))
+            lsprintf("%s " ycDateTime:::Current()->format(g_timeFormat))
             "")
         lsprintf("%s[%s]%s %s" stamp tag
             if(t_name == "" "" lsprintf(" [%s]" t_name))
@@ -347,7 +347,7 @@ procedure(Logger(t_name \@key (level 'info) (file nil) (console t) (append t) (f
             error("ycLog::Logger: ?timeFormat must not be empty; use nil to disable timestamps")
         )
         when(timeFormat
-            unless(errset(ycDateTime::Current()->format(timeFormat) nil)
+            unless(errset(ycDateTime:::Current()->format(timeFormat) nil)
                 error("ycLog::Logger: invalid ?timeFormat %A" timeFormat)
             )
         )

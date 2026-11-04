@@ -157,7 +157,7 @@ procedure(_CellLines(g_cell t_floatFmt t_missing g_max t_unit n_amb "gttgtx")  ;
     let((t_text l_lines)
         t_text = _CellText(g_cell t_floatFmt t_missing)
         l_lines = if(g_max
-            ycTextwrap::Wrap(t_text ?width g_max ?unit t_unit ?ambiguous n_amb)
+            ycTextwrap:::Wrap(t_text ?width g_max ?unit t_unit ?ambiguous n_amb)
             _SplitCellLines(t_text)
         )
         if(l_lines l_lines list(""))

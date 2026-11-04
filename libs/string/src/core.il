@@ -270,7 +270,7 @@ procedure(Split(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> list
                 unless(stringp(sep) && sep != ""
                     error("ycString::Split: regex mode needs a non-empty pattern (%A)" sep)
                 )
-                l_parts = ycRegEx::Split(sep t_s)
+                l_parts = ycRegEx:::Split(sep t_s)
             )
             (sep
                 unless(stringp(sep)
@@ -378,7 +378,7 @@ procedure(Replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
             when(t_old == ""
                 error("ycString::Replace: pattern must not be empty")
             )
-            ycRegEx::Sub(t_old t_new t_s)
+            ycRegEx:::Sub(t_old t_new t_s)
         )
         (t
             when(t_old == ""
@@ -425,7 +425,7 @@ procedure(Count(t_s t_sub \@key (regex nil) "ttg")  ; -> int
             when(t_sub == ""
                 error("ycString::Count: pattern must not be empty")
             )
-            length(ycRegEx::Findall(t_sub t_s))
+            length(ycRegEx:::Findall(t_sub t_s))
         )
         (t
             when(t_sub == ""
