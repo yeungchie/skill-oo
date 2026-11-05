@@ -18,10 +18,10 @@ procedure(_Code(t_s n_i "tx")  ; -> int | nil
     ;
     ; **返回**
     ;   (int|nil) - 该字节的字符码；越界时为 nil
-    let((g_c)
-        g_c = getchar(t_s n_i)
-        when(g_c
-            charToInt(g_c)
+    let((c)
+        c = getchar(t_s n_i)
+        when(c
+            charToInt(c)
         )
     )
 )
@@ -46,18 +46,18 @@ procedure(_LineCol(t_s n_i "tx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (行 列) 两元素表
-    let((n_line n_last)
-        n_line = 1
-        n_last = 0
+    let((line last)
+        line = 1
+        last = 0
         when(1 < n_i
-            for(n_k 1 n_i - 1
-                when(_Code(t_s n_k) == 10
-                    n_line++
-                    n_last = n_k
+            for(k 1 n_i - 1
+                when(_Code(t_s k) == 10
+                    line++
+                    last = k
                 )
             )
         )
-        list(n_line n_i - n_last)
+        list(line n_i - last)
     )
 )
 
@@ -71,9 +71,9 @@ procedure(_Error(t_s n_i t_msg "txt")  ; -> never
     ;
     ; **返回**
     ;   (never) - 总是调用 error()，不返回
-    let((l_pos)
-        l_pos = _LineCol(t_s n_i)
-        error("ycToml::Decode: %s at line %d, column %d" t_msg car(l_pos) cadr(l_pos))
+    let((pos)
+        pos = _LineCol(t_s n_i)
+        error("ycToml::Decode: %s at line %d, column %d" t_msg car(pos) cadr(pos))
     )
 )
 
@@ -96,26 +96,26 @@ procedure(_Normalize(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 归一化文本
-    let((n_i n_len l_p)
+    let((i len p)
         when(length(t_s) >= 3 && _Code(t_s 1) == 239 && _Code(t_s 2) == 187 && _Code(t_s 3) == 191
             t_s = substring(t_s 4)
         )
-        n_i = 1
-        n_len = length(t_s)
-        while(n_i <= n_len
-            if(_Code(t_s n_i) == 13
+        i = 1
+        len = length(t_s)
+        while(i <= len
+            if(_Code(t_s i) == 13
             then
-                l_p = tconc(l_p "\n")
-                n_i++
-                when(_Code(t_s n_i) == 10
-                    n_i++
+                p = tconc(p "\n")
+                i++
+                when(_Code(t_s i) == 10
+                    i++
                 )
             else
-                l_p = tconc(l_p substring(t_s n_i 1))
-                n_i++
+                p = tconc(p substring(t_s i 1))
+                i++
             )
         )
-        _Build(l_p)
+        _Build(p)
     )
 )
 
@@ -130,10 +130,10 @@ procedure(_SkipWs(t_s n_i g_newlines g_comments "txgg")  ; -> int
     ;
     ; **返回**
     ;   (int) - 首个未跳过的位置
-    let((n_len g_stop n_c)
-        n_len = length(t_s)
-        g_stop = nil
-        while(!g_stop && n_i <= n_len
+    let((len stop c)
+        len = length(t_s)
+        stop = nil
+        while(!stop && n_i <= len
             case(_Code(t_s n_i)
                 ((32 9)
                     n_i++
@@ -141,28 +141,28 @@ procedure(_SkipWs(t_s n_i g_newlines g_comments "txgg")  ; -> int
                 (10
                     if(g_newlines
                         n_i++
-                        g_stop = t
+                        stop = t
                     )
                 )
                 (35
                     if(g_comments
                     then
-                        while(n_i <= n_len && _Code(t_s n_i) != 10
-                            n_c = _Code(t_s n_i)
-                            when((n_c < 32 && n_c != 9) || n_c == 127
+                        while(n_i <= len && _Code(t_s n_i) != 10
+                            c = _Code(t_s n_i)
+                            when((c < 32 && c != 9) || c == 127
                                 _Error(t_s n_i "control character in comment")
                             )
                             n_i++
                         )
                         when(!g_newlines
-                            g_stop = t
+                            stop = t
                         )
                     else
-                        g_stop = t
+                        stop = t
                     )
                 )
                 (t
-                    g_stop = t
+                    stop = t
                 )
             )
         )
@@ -179,8 +179,8 @@ procedure(_LineEnd(t_s n_i "tx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 换行后的位置；到串尾时为 length+1
-    let((n_len)
-        n_len = length(t_s)
+    let((len)
+        len = length(t_s)
         n_i = _SkipWs(t_s n_i nil t)
         case(_Code(t_s n_i)
             (10 n_i + 1)
@@ -200,16 +200,16 @@ procedure(_PathKey(l_path "l")  ; -> str
     ;
     ; **返回**
     ;   (str) - 用换行连接的稳定路径键
-    let((l_p)
-        foreach(g_seg l_path
-            l_p = tconc(l_p
-                if(fixp(g_seg)
-                    lsprintf("i%d" g_seg)
-                    lsprintf("s%d:%s" length(g_seg) g_seg)
+    let((p)
+        foreach(seg l_path
+            p = tconc(p
+                if(fixp(seg)
+                    lsprintf("i%d" seg)
+                    lsprintf("s%d:%s" length(seg) seg)
                 )
             )
         )
-        buildString(car(l_p) "\n")
+        buildString(car(p) "\n")
     )
 )
 
@@ -275,16 +275,16 @@ procedure(_IsTableList(g_val "g")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 非空表列表时为 t
-    let((g_ok)
-        g_ok = g_val && listp(g_val)
-        when(g_ok
-            foreach(g_item g_val
-                unless(tablep(g_item)
-                    g_ok = nil
+    let((ok)
+        ok = g_val && listp(g_val)
+        when(ok
+            foreach(item g_val
+                unless(tablep(item)
+                    ok = nil
                 )
             )
         )
-        g_ok
+        ok
     )
 )
 
@@ -301,16 +301,16 @@ procedure(_MarkInline(g_meta l_path g_val "glg")  ; -> t
     cond(
         (tablep(g_val)
             _MetaSet(g_meta l_path "inline")
-            foreach(t_key g_val
-                _MarkInline(g_meta append1(l_path t_key) g_val[t_key])
+            foreach(key g_val
+                _MarkInline(g_meta append1(l_path key) g_val[key])
             )
         )
         (listp(g_val)
-            let((n_i)
-                n_i = 0
-                foreach(g_item g_val
-                    n_i++
-                    _MarkInline(g_meta append1(l_path n_i) g_item)
+            let((i)
+                i = 0
+                foreach(item g_val
+                    i++
+                    _MarkInline(g_meta append1(l_path i) item)
                 )
             )
         )
@@ -395,80 +395,80 @@ procedure(_ValidUtf8(t_s "t")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 合法时为 t
-    let((n_len n_i n_b n_b1 n_b2 n_b3 g_ok)
-        n_len = length(t_s)
-        n_i = 1
-        g_ok = t
-        while(g_ok && n_i <= n_len
-            n_b = _Code(t_s n_i)
+    let((len i b b1 b2 b3 ok)
+        len = length(t_s)
+        i = 1
+        ok = t
+        while(ok && i <= len
+            b = _Code(t_s i)
             cond(
-                (n_b <= 127
-                    n_i++
+                (b <= 127
+                    i++
                 )
-                ((n_b >= 194 && n_b <= 223)
-                    n_b1 = _Code(t_s n_i + 1)
-                    if(_ContByte(n_b1)
-                        n_i = n_i + 2
-                        g_ok = nil
+                ((b >= 194 && b <= 223)
+                    b1 = _Code(t_s i + 1)
+                    if(_ContByte(b1)
+                        i = i + 2
+                        ok = nil
                     )
                 )
-                (n_b == 224
-                    n_b1 = _Code(t_s n_i + 1)
-                    n_b2 = _Code(t_s n_i + 2)
-                    if(n_b1 && n_b1 >= 160 && n_b1 <= 191 && _ContByte(n_b2)
-                        n_i = n_i + 3
-                        g_ok = nil
+                (b == 224
+                    b1 = _Code(t_s i + 1)
+                    b2 = _Code(t_s i + 2)
+                    if(b1 && b1 >= 160 && b1 <= 191 && _ContByte(b2)
+                        i = i + 3
+                        ok = nil
                     )
                 )
-                ((n_b >= 225 && n_b <= 236) || (n_b >= 238 && n_b <= 239)
-                    n_b1 = _Code(t_s n_i + 1)
-                    n_b2 = _Code(t_s n_i + 2)
-                    if(_ContByte(n_b1) && _ContByte(n_b2)
-                        n_i = n_i + 3
-                        g_ok = nil
+                ((b >= 225 && b <= 236) || (b >= 238 && b <= 239)
+                    b1 = _Code(t_s i + 1)
+                    b2 = _Code(t_s i + 2)
+                    if(_ContByte(b1) && _ContByte(b2)
+                        i = i + 3
+                        ok = nil
                     )
                 )
-                (n_b == 237
-                    n_b1 = _Code(t_s n_i + 1)
-                    n_b2 = _Code(t_s n_i + 2)
-                    if(n_b1 && n_b1 >= 128 && n_b1 <= 159 && _ContByte(n_b2)
-                        n_i = n_i + 3
-                        g_ok = nil
+                (b == 237
+                    b1 = _Code(t_s i + 1)
+                    b2 = _Code(t_s i + 2)
+                    if(b1 && b1 >= 128 && b1 <= 159 && _ContByte(b2)
+                        i = i + 3
+                        ok = nil
                     )
                 )
-                (n_b == 240
-                    n_b1 = _Code(t_s n_i + 1)
-                    n_b2 = _Code(t_s n_i + 2)
-                    n_b3 = _Code(t_s n_i + 3)
-                    if(n_b1 && n_b1 >= 144 && n_b1 <= 191 && _ContByte(n_b2) && _ContByte(n_b3)
-                        n_i = n_i + 4
-                        g_ok = nil
+                (b == 240
+                    b1 = _Code(t_s i + 1)
+                    b2 = _Code(t_s i + 2)
+                    b3 = _Code(t_s i + 3)
+                    if(b1 && b1 >= 144 && b1 <= 191 && _ContByte(b2) && _ContByte(b3)
+                        i = i + 4
+                        ok = nil
                     )
                 )
-                ((n_b >= 241 && n_b <= 243)
-                    n_b1 = _Code(t_s n_i + 1)
-                    n_b2 = _Code(t_s n_i + 2)
-                    n_b3 = _Code(t_s n_i + 3)
-                    if(_ContByte(n_b1) && _ContByte(n_b2) && _ContByte(n_b3)
-                        n_i = n_i + 4
-                        g_ok = nil
+                ((b >= 241 && b <= 243)
+                    b1 = _Code(t_s i + 1)
+                    b2 = _Code(t_s i + 2)
+                    b3 = _Code(t_s i + 3)
+                    if(_ContByte(b1) && _ContByte(b2) && _ContByte(b3)
+                        i = i + 4
+                        ok = nil
                     )
                 )
-                (n_b == 244
-                    n_b1 = _Code(t_s n_i + 1)
-                    n_b2 = _Code(t_s n_i + 2)
-                    n_b3 = _Code(t_s n_i + 3)
-                    if(n_b1 && n_b1 >= 128 && n_b1 <= 143 && _ContByte(n_b2) && _ContByte(n_b3)
-                        n_i = n_i + 4
-                        g_ok = nil
+                (b == 244
+                    b1 = _Code(t_s i + 1)
+                    b2 = _Code(t_s i + 2)
+                    b3 = _Code(t_s i + 3)
+                    if(b1 && b1 >= 128 && b1 <= 143 && _ContByte(b2) && _ContByte(b3)
+                        i = i + 4
+                        ok = nil
                     )
                 )
                 (t
-                    g_ok = nil
+                    ok = nil
                 )
             )
         )
-        g_ok
+        ok
     )
 )
 

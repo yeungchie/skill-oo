@@ -22,48 +22,48 @@ procedure(_AssignValue(t_s g_meta l_base g_obj l_path g_val n_pos n_max "tglglgx
     ;
     ; **返回**
     ;   (t) - 写入成功
-    let((l_cur n_i n_n t_key g_next t_tab t_kind)
+    let((cur i n key next tab kind)
         when(length(l_base) + length(l_path) > n_max
             _Error(t_s n_pos "nesting too deep")
         )
-        l_cur = l_base
-        n_i = 0
-        n_n = length(l_path)
-        foreach(t_key l_path
-            n_i++
-            if(n_i < n_n
+        cur = l_base
+        i = 0
+        n = length(l_path)
+        foreach(key2 l_path
+            i++
+            if(i < n
             then
-                if(!_HasKey(g_obj t_key)
+                if(!_HasKey(g_obj key2)
                 then
-                    t_tab = _NewTable()
-                    g_obj[t_key] = t_tab
-                    _MetaSet(g_meta append1(l_cur t_key) "dotted")
-                    l_cur = append1(l_cur t_key)
-                    g_obj = t_tab
+                    tab = _NewTable()
+                    g_obj[key2] = tab
+                    _MetaSet(g_meta append1(cur key2) "dotted")
+                    cur = append1(cur key2)
+                    g_obj = tab
                 else
-                    g_next = g_obj[t_key]
-                    when(listp(g_next)
+                    next = g_obj[key2]
+                    when(listp(next)
                         _Error(t_s n_pos "key path crosses an array")
                     )
-                    unless(tablep(g_next)
+                    unless(tablep(next)
                         _Error(t_s n_pos "key path crosses a value")
                     )
-                    t_kind = _MetaGet(g_meta append1(l_cur t_key))
-                    when(t_kind == "inline"
+                    kind = _MetaGet(g_meta append1(cur key2))
+                    when(kind == "inline"
                         _Error(t_s n_pos "cannot extend an inline table")
                     )
-                    when(t_kind == "array"
+                    when(kind == "array"
                         _Error(t_s n_pos "key path crosses an array")
                     )
-                    l_cur = append1(l_cur t_key)
-                    g_obj = g_next
+                    cur = append1(cur key2)
+                    g_obj = next
                 )
             else
-                when(_HasKey(g_obj t_key)
+                when(_HasKey(g_obj key2)
                     _Error(t_s n_pos "duplicate key")
                 )
-                g_obj[t_key] = g_val
-                _MarkInline(g_meta append1(l_cur t_key) g_val)
+                g_obj[key2] = g_val
+                _MarkInline(g_meta append1(cur key2) g_val)
             )
         )
         t
@@ -84,115 +84,115 @@ procedure(_HeaderTarget(t_s g_root g_meta l_path n_pos g_array n_max "tgglxgx") 
     ;
     ; **返回**
     ;   (list) - (目标表 规范路径)
-    let((n_n n_i t_obj t_key g_val t_kind t_tab l_cur n_last g_has)
+    let((n i obj key val kind tab cur last has)
         when(length(l_path) > n_max
             _Error(t_s n_pos "nesting too deep")
         )
-        n_n = length(l_path)
-        n_i = 0
-        t_obj = g_root
-        l_cur = nil
-        foreach(t_key l_path
-            n_i++
-            g_has = _HasKey(t_obj t_key)
-            g_val = t_obj[t_key]
-            if(n_i < n_n
+        n = length(l_path)
+        i = 0
+        obj = g_root
+        cur = nil
+        foreach(key2 l_path
+            i++
+            has = _HasKey(obj key2)
+            val = obj[key2]
+            if(i < n
             then
-                if(!g_has
+                if(!has
                 then
-                    t_tab = _NewTable()
-                    t_obj[t_key] = t_tab
-                    _MetaSet(g_meta append1(l_cur t_key) "implicit")
-                    l_cur = append1(l_cur t_key)
-                    t_obj = t_tab
+                    tab = _NewTable()
+                    obj[key2] = tab
+                    _MetaSet(g_meta append1(cur key2) "implicit")
+                    cur = append1(cur key2)
+                    obj = tab
                 else
-                    if(listp(g_val)
+                    if(listp(val)
                     then
-                        t_kind = _MetaGet(g_meta append1(l_cur t_key))
-                        unless(t_kind == "array" && length(g_val) > 0
+                        kind = _MetaGet(g_meta append1(cur key2))
+                        unless(kind == "array" && length(val) > 0
                             _Error(t_s n_pos "key path is not a table")
                         )
-                        n_last = length(g_val)
-                        l_cur = append1(append1(l_cur t_key) n_last)
-                        t_obj = nth(n_last - 1 g_val)
+                        last = length(val)
+                        cur = append1(append1(cur key2) last)
+                        obj = nth(last - 1 val)
                     else
-                        unless(tablep(g_val)
+                        unless(tablep(val)
                             _Error(t_s n_pos "key path is not a table")
                         )
-                        t_kind = _MetaGet(g_meta append1(l_cur t_key))
-                        when(t_kind == "inline"
+                        kind = _MetaGet(g_meta append1(cur key2))
+                        when(kind == "inline"
                             _Error(t_s n_pos "cannot extend an inline table")
                         )
-                        when(t_kind == "array"
+                        when(kind == "array"
                             _Error(t_s n_pos "key path is not a table")
                         )
-                        l_cur = append1(l_cur t_key)
-                        t_obj = g_val
+                        cur = append1(cur key2)
+                        obj = val
                     )
                 )
             else
                 if(g_array
-                    if(!g_has
+                    if(!has
                     then
-                        t_tab = _NewTable()
-                        t_obj[t_key] = list(t_tab)
-                        _MetaSet(g_meta append1(l_cur t_key) "array")
-                        _MetaSet(g_meta append1(append1(l_cur t_key) 1) "explicit")
-                        l_cur = append1(append1(l_cur t_key) 1)
-                        t_obj = t_tab
+                        tab = _NewTable()
+                        obj[key2] = list(tab)
+                        _MetaSet(g_meta append1(cur key2) "array")
+                        _MetaSet(g_meta append1(append1(cur key2) 1) "explicit")
+                        cur = append1(append1(cur key2) 1)
+                        obj = tab
                     else
-                        if(listp(g_val)
+                        if(listp(val)
                         then
-                            t_kind = _MetaGet(g_meta append1(l_cur t_key))
-                            unless(t_kind == "array"
+                            kind = _MetaGet(g_meta append1(cur key2))
+                            unless(kind == "array"
                                 _Error(t_s n_pos "key is not an array of tables")
                             )
-                            t_tab = _NewTable()
-                            t_obj[t_key] = append1(g_val t_tab)
-                            n_last = length(t_obj[t_key])
-                            _MetaSet(g_meta append1(append1(l_cur t_key) n_last) "explicit")
-                            l_cur = append1(append1(l_cur t_key) n_last)
-                            t_obj = t_tab
+                            tab = _NewTable()
+                            obj[key2] = append1(val tab)
+                            last = length(obj[key2])
+                            _MetaSet(g_meta append1(append1(cur key2) last) "explicit")
+                            cur = append1(append1(cur key2) last)
+                            obj = tab
                         else
                             _Error(t_s n_pos "key is not an array of tables")
                         )
                     )
-                    if(!g_has
+                    if(!has
                     then
-                        t_tab = _NewTable()
-                        t_obj[t_key] = t_tab
-                        _MetaSet(g_meta append1(l_cur t_key) "explicit")
-                        l_cur = append1(l_cur t_key)
-                        t_obj = t_tab
+                        tab = _NewTable()
+                        obj[key2] = tab
+                        _MetaSet(g_meta append1(cur key2) "explicit")
+                        cur = append1(cur key2)
+                        obj = tab
                     else
-                        unless(tablep(g_val)
+                        unless(tablep(val)
                             _Error(t_s n_pos "key is not a table")
                         )
-                        t_kind = _MetaGet(g_meta append1(l_cur t_key))
+                        kind = _MetaGet(g_meta append1(cur key2))
                         cond(
-                            (t_kind == "implicit"
-                                _MetaSet(g_meta append1(l_cur t_key) "explicit")
+                            (kind == "implicit"
+                                _MetaSet(g_meta append1(cur key2) "explicit")
                             )
-                            (t_kind == "explicit"
+                            (kind == "explicit"
                                 _Error(t_s n_pos "table already defined")
                             )
-                            (t_kind == "dotted"
+                            (kind == "dotted"
                                 _Error(t_s n_pos "table already defined")
                             )
-                            (t_kind == "inline"
+                            (kind == "inline"
                                 _Error(t_s n_pos "cannot extend an inline table")
                             )
                             (t
                                 _Error(t_s n_pos "table already defined")
                             )
                         )
-                        l_cur = append1(l_cur t_key)
-                        t_obj = g_val
+                        cur = append1(cur key2)
+                        obj = val
                     )
                 )
             )
         )
-        list(t_obj l_cur)
+        list(obj cur)
     )
 )
 

@@ -13,14 +13,14 @@ procedure(_IndentStr(n_level n_indent "xx")  ; -> str
     ;
     ; **返回**
     ;   (str) - 缩进空白串
-    let((t_s n_i)
-        t_s = ""
+    let((item i)
+        item = ""
         when(0 < n_level && 0 < n_indent
-            for(n_i 1 n_level * n_indent
-                t_s = strcat(t_s " ")
+            for(i2 1 n_level * n_indent
+                item = strcat(item " ")
             )
         )
-        t_s
+        item
     )
 )
 
@@ -32,17 +32,17 @@ procedure(_PlainSafe(t_s "t")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 可安全输出为 t
-    prog((n_len n_c n_i g_bad)
-        n_len = length(t_s)
-        when(n_len == 0 || t_s == "..."
+    prog((len c i bad)
+        len = length(t_s)
+        when(len == 0 || t_s == "..."
             return(nil)
         )
-        n_c = _Code(t_s 1)
-        when(n_c == 32 || n_c == 9 || n_c == 10 || n_c == 13
+        c = _Code(t_s 1)
+        when(c == 32 || c == 9 || c == 10 || c == 13
             return(nil)
         )
-        n_c = _Code(t_s n_len)
-        when(n_c == 32 || n_c == 9 || n_c == 10 || n_c == 13
+        c = _Code(t_s len)
+        when(c == 32 || c == 9 || c == 10 || c == 13
             return(nil)
         )
         when(_SpecialStart(_Code(t_s 1))
@@ -51,25 +51,25 @@ procedure(_PlainSafe(t_s "t")  ; -> t | nil
         when(_Code(t_s 1) == 45 || _Code(t_s 1) == 63 || _Code(t_s 1) == 58
             return(nil)
         )
-        g_bad = nil
-        for(n_i 1 n_len
-            n_c = _Code(t_s n_i)
+        bad = nil
+        for(i2 1 len
+            c = _Code(t_s i2)
             cond(
-                (n_c == 10 || n_c == 13 || n_c == 9
-                    g_bad = t
+                (c == 10 || c == 13 || c == 9
+                    bad = t
                 )
-                (n_c < 32
-                    g_bad = t
+                (c < 32
+                    bad = t
                 )
-                (n_c == 35 && n_i > 1 && (_Code(t_s n_i - 1) == 32 || _Code(t_s n_i - 1) == 9)
-                    g_bad = t
+                (c == 35 && i2 > 1 && (_Code(t_s i2 - 1) == 32 || _Code(t_s i2 - 1) == 9)
+                    bad = t
                 )
-                (n_c == 58 && n_i < n_len && (_Code(t_s n_i + 1) == 32 || _Code(t_s n_i + 1) == 9)
-                    g_bad = t
+                (c == 58 && i2 < len && (_Code(t_s i2 + 1) == 32 || _Code(t_s i2 + 1) == 9)
+                    bad = t
                 )
             )
         )
-        when(g_bad
+        when(bad
             return(nil)
         )
         return(_ResolvePlain(t_s) == t_s)
@@ -95,17 +95,17 @@ procedure(_EncodeString(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 带双引号的 YAML 字符串
-    let((n_len n_i n_c l_p n_run)
-        n_len = length(t_s)
-        n_run = 1
-        for(n_i 1 n_len
-            n_c = _Code(t_s n_i)
-            when(n_c == 34 || n_c == 92 || n_c < 32
-                when(n_run < n_i
-                    l_p = tconc(l_p substring(t_s n_run n_i - n_run))
+    let((len i c p run)
+        len = length(t_s)
+        run = 1
+        for(i2 1 len
+            c = _Code(t_s i2)
+            when(c == 34 || c == 92 || c < 32
+                when(run < i2
+                    p = tconc(p substring(t_s run i2 - run))
                 )
-                l_p = tconc(l_p
-                    case(n_c
+                p = tconc(p
+                    case(c
                         (34 "\\\"")
                         (92 "\\\\")
                         (8 "\\b")
@@ -113,16 +113,16 @@ procedure(_EncodeString(t_s "t")  ; -> str
                         (10 "\\n")
                         (13 "\\r")
                         (9 "\\t")
-                        (t sprintf(nil "\\u%04x" n_c))
+                        (t sprintf(nil "\\u%04x" c))
                     )
                 )
-                n_run = n_i + 1
+                run = i2 + 1
             )
         )
-        when(n_run <= n_len
-            l_p = tconc(l_p substring(t_s n_run n_len - n_run + 1))
+        when(run <= len
+            p = tconc(p substring(t_s run len - run + 1))
         )
-        lsprintf("\"%s\"" _Build(l_p))
+        lsprintf("\"%s\"" _Build(p))
     )
 )
 
@@ -135,22 +135,22 @@ procedure(_EncodeKey(g_key g_opt "gg")  ; -> str
     ;
     ; **返回**
     ;   (str) - 键文本
-    let((t_s)
+    let((item)
         when(g_opt["strict"] && !stringp(g_key)
             error("ycYaml::Encode: strict mode requires string keys, got %A" g_key)
         )
-        t_s = cond(
+        item = cond(
             (stringp(g_key) g_key)
             (symbolp(g_key) symbolToString(g_key))
             (fixp(g_key) sprintf(nil "%d" g_key))
         )
-        unless(t_s
+        unless(item
             error("ycYaml::Encode: unsupported table key of type %s" symbolToString(type(g_key)))
         )
         cond(
-            (fixp(g_key) t_s)
-            (_PlainSafe(t_s) && !pcreMatchp("[ 	]" t_s) t_s)
-            (t _EncodeString(t_s))
+            (fixp(g_key) item)
+            (_PlainSafe(item) && !pcreMatchp("[ 	]" item) item)
+            (t _EncodeString(item))
         )
     )
 )
@@ -169,15 +169,15 @@ procedure(_NumText(n_num "n")  ; -> str
             (isNaN(n_num) ".nan")
             (isInfinity(n_num) if(n_num > 0 ".inf" "-.inf"))
             (t
-                let((t_s)
-                    t_s = sprintf(nil "%.15g" n_num)
-                    unless(atof(t_s) == n_num
-                        t_s = sprintf(nil "%.17g" n_num)
+                let((item)
+                    item = sprintf(nil "%.15g" n_num)
+                    unless(atof(item) == n_num
+                        item = sprintf(nil "%.17g" n_num)
                     )
-                    unless(pcreMatchp("[.eE]" t_s)
-                        t_s = strcat(t_s ".0")
+                    unless(pcreMatchp("[.eE]" item)
+                        item = strcat(item ".0")
                     )
-                    t_s
+                    item
                 )
             )
         )
@@ -230,40 +230,40 @@ procedure(_EncodeFlow(g_val n_level g_opt "gxg")  ; -> str
     cond(
         (g_val == nil "[]")
         (tablep(g_val)
-            prog((l_keys l_p t_orig t_ks)
+            prog((keys p orig ks)
                 when(length(g_val) == 0
                     return("{}")
                 )
-                l_keys = nil
-                foreach(g_k g_val
-                    l_keys = tconc(l_keys g_k)
+                keys = nil
+                foreach(k g_val
+                    keys = tconc(keys k)
                 )
-                l_keys = car(l_keys)
-                t_orig = makeTable("ycYamlKeys" ycCodec:::Missing)
-                l_p = nil
-                foreach(g_k l_keys
-                    t_ks = _EncodeKey(g_k g_opt)
-                    when(t_orig[t_ks] != ycCodec:::Missing
-                        error("ycYaml::Encode: duplicate mapping key %A after encoding" t_ks)
+                keys = car(keys)
+                orig = makeTable("ycYamlKeys" ycCodec:::Missing)
+                p = nil
+                foreach(k keys
+                    ks = _EncodeKey(k g_opt)
+                    when(orig[ks] != ycCodec:::Missing
+                        error("ycYaml::Encode: duplicate mapping key %A after encoding" ks)
                     )
-                    t_orig[t_ks] = g_k
-                    l_p = tconc(l_p lsprintf("%s: %s"
-                        t_ks
-                        _EncodeFlow(g_val[g_k] n_level + 1 g_opt)
+                    orig[ks] = k
+                    p = tconc(p lsprintf("%s: %s"
+                        ks
+                        _EncodeFlow(g_val[k] n_level + 1 g_opt)
                     ))
                 )
                 when(g_opt["sortKeys"]
-                    l_p = sort(car(l_p) 'alphalessp)
+                    p = sort(car(p) 'alphalessp)
                 )
-                return(lsprintf("{%s}" _JoinBuild(l_p ", ")))
+                return(lsprintf("{%s}" _JoinBuild(p ", ")))
             )
         )
         (listp(g_val)
-            let((l_p)
-                foreach(g_item g_val
-                    l_p = tconc(l_p _EncodeFlow(g_item n_level + 1 g_opt))
+            let((p)
+                foreach(item g_val
+                    p = tconc(p _EncodeFlow(item n_level + 1 g_opt))
                 )
-                lsprintf("[%s]" _JoinBuild(l_p ", "))
+                lsprintf("[%s]" _JoinBuild(p ", "))
             )
         )
         (t
@@ -297,81 +297,81 @@ procedure(_BlockLines(g_val n_level g_opt "gxg")  ; -> list[str]
             when(length(g_val) == 0
                 return(list("{}"))
             )
-            prog((l_keys l_res t_ks t_orig t_pad t_child l_child t_first)
-                l_keys = nil
-                t_orig = makeTable("ycYamlKeys" ycCodec:::Missing)
-                foreach(g_k g_val
-                    t_ks = _EncodeKey(g_k g_opt)
-                    when(t_orig[t_ks] != ycCodec:::Missing
-                        error("ycYaml::Encode: duplicate mapping key %A after encoding" t_ks)
+            prog((keys res ks orig pad child child2 first)
+                keys = nil
+                orig = makeTable("ycYamlKeys" ycCodec:::Missing)
+                foreach(k g_val
+                    ks = _EncodeKey(k g_opt)
+                    when(orig[ks] != ycCodec:::Missing
+                        error("ycYaml::Encode: duplicate mapping key %A after encoding" ks)
                     )
-                    t_orig[t_ks] = g_k
-                    l_keys = tconc(l_keys t_ks)
+                    orig[ks] = k
+                    keys = tconc(keys ks)
                 )
-                l_keys = car(l_keys)
+                keys = car(keys)
                 when(g_opt["sortKeys"]
-                    l_keys = sort(copy(l_keys) 'alphalessp)
+                    keys = sort(copy(keys) 'alphalessp)
                 )
-                l_res = nil
-                t_pad = _IndentStr(n_level g_opt["indent"])
-                foreach(t_ks l_keys
-                    g_k = t_orig[t_ks]
+                res = nil
+                pad = _IndentStr(n_level g_opt["indent"])
+                foreach(ks2 keys
+                    g_k = orig[ks2]
                     cond(
                         (g_val[g_k] == nil
-                            l_res = tconc(l_res lsprintf("%s%s: []" t_pad t_ks))
+                            res = tconc(res lsprintf("%s%s: []" pad ks2))
                         )
                         ((tablep(g_val[g_k]) && length(g_val[g_k]) == 0)
-                            l_res = tconc(l_res lsprintf("%s%s: {}" t_pad t_ks))
+                            res = tconc(res lsprintf("%s%s: {}" pad ks2))
                         )
                         ((tablep(g_val[g_k]) || listp(g_val[g_k]))
-                            l_res = tconc(l_res lsprintf("%s%s:" t_pad t_ks))
-                            l_child = _BlockLines(g_val[g_k] n_level + 1 g_opt)
-                            foreach(t_first l_child
-                                l_res = tconc(l_res t_first)
+                            res = tconc(res lsprintf("%s%s:" pad ks2))
+                            child2 = _BlockLines(g_val[g_k] n_level + 1 g_opt)
+                            foreach(first2 child2
+                                res = tconc(res first2)
                             )
                         )
                         (t
-                            l_res = tconc(l_res lsprintf("%s%s: %s"
-                                t_pad t_ks _EncodeScalar(g_val[g_k] g_opt)))
+                            res = tconc(res lsprintf("%s%s: %s"
+                                pad ks2 _EncodeScalar(g_val[g_k] g_opt)))
                         )
                     )
                 )
-                return(car(l_res))
+                return(car(res))
             )
         )
         (listp(g_val)
-            let((l_res t_pad l_child t_first l_item)
-                l_res = nil
-                t_pad = _IndentStr(n_level g_opt["indent"])
-                foreach(l_item g_val
+            let((res pad child first item)
+                res = nil
+                pad = _IndentStr(n_level g_opt["indent"])
+                foreach(item2 g_val
                     cond(
-                        ((tablep(l_item) && length(l_item) == 0)
-                            l_res = tconc(l_res lsprintf("%s- {}" t_pad))
+                        ((tablep(item2) && length(item2) == 0)
+                            res = tconc(res lsprintf("%s- {}" pad))
                         )
-                        ((tablep(l_item) && length(l_item) > 0)
-                            l_child = _BlockLines(l_item n_level + 1 g_opt)
-                            l_res = tconc(l_res lsprintf("%s- %s"
-                                t_pad
-                                _Ltrim(car(l_child))
+                        ((tablep(item2) && length(item2) > 0)
+                            child = _BlockLines(item2 n_level + 1 g_opt)
+                            res = tconc(res lsprintf("%s- %s"
+                                pad
+                                _Ltrim(car(child))
                             ))
-                            foreach(t_first cdr(l_child)
-                                l_res = tconc(l_res t_first)
+                            foreach(first2 cdr(child)
+                                res = tconc(res first2)
                             )
                         )
-                        ((listp(l_item) && l_item != nil)
-                            l_res = tconc(l_res strcat(t_pad "-"))
-                            l_child = _BlockLines(l_item n_level + 1 g_opt)
-                            foreach(t_first l_child
-                                l_res = tconc(l_res t_first)
+                        ((listp(item2) && item2 != nil)
+                            res = tconc(res strcat(pad "-"))
+                            child = _BlockLines(item2 n_level + 1 g_opt)
+                            foreach(first2 child
+                                res = tconc(res first2)
                             )
                         )
                         (t
-                            l_res = tconc(l_res lsprintf("%s- %s"
-                                t_pad _EncodeScalar(l_item g_opt)))
+                            res = tconc(res lsprintf("%s- %s"
+                                pad _EncodeScalar(item2 g_opt)))
                         )
                     )
                 )
-                car(l_res)
+                car(res)
             )
         )
         (t
@@ -398,7 +398,7 @@ procedure(Encode(g_val \@key (format "yaml") (indent nil) (sortKeys nil) (strict
     ;
     ; **返回**
     ;   (str) - YAML 文本
-    let((n_indent g_opt l_lines t_s l_docs)
+    let((indent2 opt lines item docs)
         when(maxDepth == nil
             maxDepth = _MaxEncodeDepth
         )
@@ -411,39 +411,39 @@ procedure(Encode(g_val \@key (format "yaml") (indent nil) (sortKeys nil) (strict
         unless(fixp(indent) && indent >= 1
             error("ycYaml::Encode: ?indent must be a positive fixnum")
         )
-        g_opt = makeTable("ycYamlOpt")
-        g_opt["indent"] = indent
-        g_opt["sortKeys"] = sortKeys
-        g_opt["strict"] = strict
-        g_opt["flow"] = flow
-        g_opt["maxDepth"] = maxDepth
+        opt = makeTable("ycYamlOpt")
+        opt["indent"] = indent
+        opt["sortKeys"] = sortKeys
+        opt["strict"] = strict
+        opt["flow"] = flow
+        opt["maxDepth"] = maxDepth
         case(format
             ("yaml"
-                l_lines = _BlockLines(g_val 0 g_opt)
-                t_s = buildString(l_lines "\n")
+                lines = _BlockLines(g_val 0 opt)
+                item = buildString(lines "\n")
                 when(explicitStart
-                    t_s = strcat("---\n" t_s)
+                    item = strcat("---\n" item)
                 )
                 when(explicitEnd
-                    t_s = strcat(t_s "\n...")
+                    item = strcat(item "\n...")
                 )
-                if(finalNewline strcat(t_s "\n") t_s)
+                if(finalNewline strcat(item "\n") item)
             )
             ("yaml-stream"
                 unless(listp(g_val)
                     error("ycYaml::Encode: format \"yaml-stream\" expects a list")
                 )
-                l_docs = nil
-                foreach(g_item g_val
-                    l_docs = tconc(l_docs
-                        strcat("---\n" buildString(_BlockLines(g_item 0 g_opt) "\n"))
+                docs = nil
+                foreach(item2 g_val
+                    docs = tconc(docs
+                        strcat("---\n" buildString(_BlockLines(item2 0 opt) "\n"))
                     )
                 )
-                t_s = buildString(car(l_docs) "\n")
+                item = buildString(car(docs) "\n")
                 cond(
-                    (t_s == "" "")
-                    (finalNewline strcat(t_s "\n"))
-                    (t t_s)
+                    (item == "" "")
+                    (finalNewline strcat(item "\n"))
+                    (t item)
                 )
             )
             (t

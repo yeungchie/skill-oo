@@ -3,17 +3,17 @@ procedure(_Dump(g_v "g")  ; -> str
 )
 
 procedure(_AssertDumpEq(g_a g_b t_msg "ggt")  ; -> t | nil
-    let(((t_a nil) (t_b nil) (g_ok nil) (l_perf nil))
-        l_perf = measureTime(
-            t_a = _Dump(g_a)
-            t_b = _Dump(g_b)
-            g_ok = t_a == t_b
+    let(((a nil) (b nil) (ok nil) (perf nil))
+        perf = measureTime(
+            a = _Dump(g_a)
+            b = _Dump(g_b)
+            ok = a == b
         )
-        unless(g_ok
-            printf("  expected: %s\n" t_b)
-            printf("  actual: %s\n" t_a)
+        unless(ok
+            printf("  expected: %s\n" b)
+            printf("  actual: %s\n" a)
         )
-        _TestReport(g_ok t_msg caddr(l_perf))
+        _TestReport(ok t_msg caddr(perf))
     )
 )
 

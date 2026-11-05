@@ -14,39 +14,39 @@ procedure(_ParseQuoted(t_s n_i n_delim "txn")  ; -> list
     ;
     ; **返回**
     ;   (list) - (字段字符串 下一位置)；未闭合或闭合后有多余字符时报错
-    let((n_len n_open n_run l_p g_closed n_c)
-        n_len = length(t_s)
-        n_open = n_i
+    let((len open run p closed c)
+        len = length(t_s)
+        open = n_i
         n_i++
-        n_run = n_i
-        while(n_i <= n_len && !g_closed
-            n_c = _Code(t_s n_i)
-            if(n_c == 34
+        run = n_i
+        while(n_i <= len && !closed
+            c = _Code(t_s n_i)
+            if(c == 34
             then
-                when(n_run < n_i
-                    l_p = tconc(l_p substring(t_s n_run n_i - n_run))
+                when(run < n_i
+                    p = tconc(p substring(t_s run n_i - run))
                 )
                 if(_Code(t_s n_i + 1) == 34
                 then
-                    l_p = tconc(l_p "\"")
+                    p = tconc(p "\"")
                     n_i = n_i + 2
-                    n_run = n_i
+                    run = n_i
                 else
                     n_i++
-                    g_closed = t
+                    closed = t
                 )
             else
                 n_i++
             )
         )
-        unless(g_closed
-            _Error(t_s n_open "unterminated quoted field")
+        unless(closed
+            _Error(t_s open "unterminated quoted field")
         )
-        n_c = _Code(t_s n_i)
-        unless(!n_c || n_c == n_delim || n_c == 10 || n_c == 13
+        c = _Code(t_s n_i)
+        unless(!c || c == n_delim || c == 10 || c == 13
             _Error(t_s n_i "unexpected character after closing quote")
         )
-        list(_Build(l_p) n_i)
+        list(_Build(p) n_i)
     )
 )
 
@@ -60,20 +60,20 @@ procedure(_ParseField(t_s n_i n_delim "txn")  ; -> list
     ;
     ; **返回**
     ;   (list) - (字段字符串 下一位置)；裸字段内出现引号时报错
-    let((n_len n_start n_c g_stop)
-        n_len = length(t_s)
-        if(n_i <= n_len && _Code(t_s n_i) == 34
+    let((len start c stop)
+        len = length(t_s)
+        if(n_i <= len && _Code(t_s n_i) == 34
         then
             _ParseQuoted(t_s n_i n_delim)
         else
-            n_start = n_i
-            while(n_i <= n_len && !g_stop
-                n_c = _Code(t_s n_i)
+            start = n_i
+            while(n_i <= len && !stop
+                c = _Code(t_s n_i)
                 cond(
-                    (n_c == n_delim || n_c == 10 || n_c == 13
-                        g_stop = t
+                    (c == n_delim || c == 10 || c == 13
+                        stop = t
                     )
-                    (n_c == 34
+                    (c == 34
                         _Error(t_s n_i "unexpected quote in unquoted field")
                     )
                     (t
@@ -81,7 +81,7 @@ procedure(_ParseField(t_s n_i n_delim "txn")  ; -> list
                     )
                 )
             )
-            list(if(n_start < n_i substring(t_s n_start n_i - n_start) "") n_i)
+            list(if(start < n_i substring(t_s start n_i - start) "") n_i)
         )
     )
 )
@@ -96,29 +96,29 @@ procedure(_ParseRecord(t_s n_i n_delim "txn")  ; -> list
     ;
     ; **返回**
     ;   (list) - (字段列表 下一位置)
-    let((l_fields l_field n_c g_done)
-        while(!g_done
-            l_field = _ParseField(t_s n_i n_delim)
-            l_fields = tconc(l_fields car(l_field))
-            n_i = cadr(l_field)
-            n_c = _Code(t_s n_i)
+    let((fields field c done)
+        while(!done
+            field = _ParseField(t_s n_i n_delim)
+            fields = tconc(fields car(field))
+            n_i = cadr(field)
+            c = _Code(t_s n_i)
             cond(
-                (!n_c
-                    g_done = t
+                (!c
+                    done = t
                 )
-                (n_c == n_delim
+                (c == n_delim
                     n_i++
                 )
                 (t
-                    if(n_c == 13 && _Code(t_s n_i + 1) == 10
+                    if(c == 13 && _Code(t_s n_i + 1) == 10
                         n_i = n_i + 2
                         n_i++
                     )
-                    g_done = t
+                    done = t
                 )
             )
         )
-        list(car(l_fields) n_i)
+        list(car(fields) n_i)
     )
 )
 
@@ -132,20 +132,20 @@ procedure(_ScanRows(t_s n_delim g_skipEmpty "tng")  ; -> list
     ;
     ; **返回**
     ;   (list) - (行列表 起点列表)，两者按记录顺序对应
-    let((n_len n_i n_start l_rows l_starts l_rec l_row)
-        n_len = length(t_s)
-        n_i = 1
-        while(n_i <= n_len
-            n_start = n_i
-            l_rec = _ParseRecord(t_s n_i n_delim)
-            l_row = car(l_rec)
-            n_i = cadr(l_rec)
-            unless(g_skipEmpty && length(l_row) == 1 && car(l_row) == ""
-                l_rows = tconc(l_rows l_row)
-                l_starts = tconc(l_starts n_start)
+    let((len i start rows starts rec row)
+        len = length(t_s)
+        i = 1
+        while(i <= len
+            start = i
+            rec = _ParseRecord(t_s i n_delim)
+            row = car(rec)
+            i = cadr(rec)
+            unless(g_skipEmpty && length(row) == 1 && car(row) == ""
+                rows = tconc(rows row)
+                starts = tconc(starts start)
             )
         )
-        list(car(l_rows) car(l_starts))
+        list(car(rows) car(starts))
     )
 )
 
@@ -160,11 +160,11 @@ procedure(_CheckWidths(l_rows l_starts n_width t_s "llnt")  ; -> t
     ;
     ; **返回**
     ;   (t) - 全部合法时返回 t；超宽行以 error() 中断
-    for(n_i 1 length(l_rows)
-        when(n_width < length(nth(n_i - 1 l_rows))
-            _Error(t_s nth(n_i - 1 l_starts)
+    for(i 1 length(l_rows)
+        when(n_width < length(nth(i - 1 l_rows))
+            _Error(t_s nth(i - 1 l_starts)
                 lsprintf("row %d has %d fields but header has %d"
-                    n_i length(nth(n_i - 1 l_rows)) n_width)
+                    i length(nth(i - 1 l_rows)) n_width)
             )
         )
     )
@@ -189,9 +189,9 @@ procedure(Decode(t_str \@key (format "csv") (header nil) (delimiter nil) (skipEm
     unless(stringp(t_str)
         error("ycCsv::Decode: expects a string")
     )
-    let((n_delim g_header n_len t_body l_scan l_rows l_starts l_names)
-        n_delim = _DelimCode(delimiter _FormatDelim(format "ycCsv::Decode") "ycCsv::Decode")
-        g_header = cond(
+    let((delim header2 len body scan rows starts names)
+        delim = _DelimCode(delimiter _FormatDelim(format "ycCsv::Decode") "ycCsv::Decode")
+        header2 = cond(
             (header == nil nil)
             (header == t t)
             (t
@@ -201,34 +201,34 @@ procedure(Decode(t_str \@key (format "csv") (header nil) (delimiter nil) (skipEm
                 _CheckHeader(header "ycCsv::Decode")
             )
         )
-        n_len = length(t_str)
-        t_body = t_str
-        when(stripBom && 3 <= n_len
+        len = length(t_str)
+        body = t_str
+        when(stripBom && 3 <= len
                 && _Code(t_str 1) == 239
                 && _Code(t_str 2) == 187
                 && _Code(t_str 3) == 191
-            t_body = if(3 < n_len substring(t_str 4) "")
+            body = if(3 < len substring(t_str 4) "")
         )
-        l_scan = _ScanRows(t_body n_delim skipEmpty)
-        l_rows = car(l_scan)
-        l_starts = cadr(l_scan)
+        scan = _ScanRows(body delim skipEmpty)
+        rows = car(scan)
+        starts = cadr(scan)
         cond(
-            (g_header == t
-                if(l_rows
+            (header2 == t
+                if(rows
                 then
-                    l_names = _CheckHeader(car(l_rows) "ycCsv::Decode")
-                    _CheckWidths(cdr(l_rows) cdr(l_starts) length(l_names) t_body)
-                    Table(cdr(l_rows) ?header l_names)
+                    names = _CheckHeader(car(rows) "ycCsv::Decode")
+                    _CheckWidths(cdr(rows) cdr(starts) length(names) body)
+                    Table(cdr(rows) ?header names)
                 else
                     Table(nil)
                 )
             )
-            (g_header
-                _CheckWidths(l_rows l_starts length(g_header) t_body)
-                Table(l_rows ?header g_header)
+            (header2
+                _CheckWidths(rows starts length(header2) body)
+                Table(rows ?header header2)
             )
             (t
-                Table(l_rows)
+                Table(rows)
             )
         )
     )

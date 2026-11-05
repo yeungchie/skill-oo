@@ -11,22 +11,22 @@ procedure(_LineSplit(t_s "t")  ; -> list
     ;
     ; **返回**
     ;   (list) - 各行文本（不含 \n；行尾 \r 原样保留）
-    let((l_res n_len n_start)
-        l_res = nil
-        n_len = length(t_s)
-        when(0 < n_len
-            n_start = 1
-            for(n_k 1 n_len
-                when(_Code(t_s n_k) == 10
-                    l_res = tconc(l_res substring(t_s n_start n_k - n_start))
-                    n_start = n_k + 1
+    let((res len start)
+        res = nil
+        len = length(t_s)
+        when(0 < len
+            start = 1
+            for(k 1 len
+                when(_Code(t_s k) == 10
+                    res = tconc(res substring(t_s start k - start))
+                    start = k + 1
                 )
             )
-            when(n_start <= n_len
-                l_res = tconc(l_res substring(t_s n_start n_len - n_start + 1))
+            when(start <= len
+                res = tconc(res substring(t_s start len - start + 1))
             )
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -38,17 +38,17 @@ procedure(_LineBlankp(t_line "t")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 全空白或空串时为 t
-    let((n_len n_c g_blank)
-        g_blank = t
-        n_len = length(t_line)
-        when(0 < n_len
-            for(n_k 1 n_len
-                unless(_Code(t_line n_k) == 32 || _Code(t_line n_k) == 9 || _Code(t_line n_k) == 13
-                    g_blank = nil
+    let((len c blank)
+        blank = t
+        len = length(t_line)
+        when(0 < len
+            for(k 1 len
+                unless(_Code(t_line k) == 32 || _Code(t_line k) == 9 || _Code(t_line k) == 13
+                    blank = nil
                 )
             )
         )
-        g_blank
+        blank
     )
 )
 
@@ -60,14 +60,14 @@ procedure(_Newlines(n_n "x")  ; -> str
     ;
     ; **返回**
     ;   (str) - n_n 个 "\n" 组成的串
-    let((t_s)
-        t_s = ""
+    let((item)
+        item = ""
         when(0 < n_n
-            for(n_k 1 n_n
-                t_s = strcat(t_s "\n")
+            for(k 1 n_n
+                item = strcat(item "\n")
             )
         )
-        t_s
+        item
     )
 )
 
@@ -80,24 +80,24 @@ procedure(_DecodeLines(t_str n_max "tx")  ; -> list
     ;
     ; **返回**
     ;   (list) - 按行序的解码产物列表；无有效行时为 nil
-    let((l_lines l_res l_r t_line n_idx)
-        l_lines = _LineSplit(t_str)
-        l_res = nil
-        n_idx = 0
-        while(l_lines
-            t_line = car(l_lines)
-            n_idx++
-            unless(_LineBlankp(t_line)
-                l_r = errset(_DecodeText(t_line nil n_max) nil)
-                if(l_r
-                    l_res = tconc(l_res car(l_r))
+    let((lines res r line idx)
+        lines = _LineSplit(t_str)
+        res = nil
+        idx = 0
+        while(lines
+            line = car(lines)
+            idx++
+            unless(_LineBlankp(line)
+                r = errset(_DecodeText(line nil n_max) nil)
+                if(r
+                    res = tconc(res car(r))
                     ; 行内报错：以等长换行前缀重跑，令错误行列指向原始行号
-                    _DecodeText(strcat(_Newlines(n_idx - 1) t_line) nil n_max)
+                    _DecodeText(strcat(_Newlines(idx - 1) line) nil n_max)
                 )
             )
-            l_lines = cdr(l_lines)
+            lines = cdr(lines)
         )
-        car(l_res)
+        car(res)
     )
 )
 

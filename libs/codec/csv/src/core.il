@@ -11,10 +11,10 @@ procedure(_Code(t_s n_i "tx")  ; -> int | nil
     ;
     ; **返回**
     ;   (int|nil) - 该字节的字符码；越界时为 nil
-    let((g_c)
-        g_c = getchar(t_s n_i)
-        when(g_c
-            charToInt(g_c)
+    let((c)
+        c = getchar(t_s n_i)
+        when(c
+            charToInt(c)
         )
     )
 )
@@ -28,28 +28,28 @@ procedure(_LineCol(t_s n_i "tx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (行 列) 两元素表，均 1-based
-    let((n_line n_last n_c g_prevCr)
-        n_line = 1
-        n_last = 0
+    let((line last c prevCr)
+        line = 1
+        last = 0
         when(1 < n_i
-            for(n_k 1 n_i - 1
-                n_c = _Code(t_s n_k)
+            for(k 1 n_i - 1
+                c = _Code(t_s k)
                 cond(
-                    (n_c == 13
-                        n_line++
-                        n_last = n_k
+                    (c == 13
+                        line++
+                        last = k
                     )
-                    (n_c == 10
-                        unless(g_prevCr
-                            n_line++
+                    (c == 10
+                        unless(prevCr
+                            line++
                         )
-                        n_last = n_k
+                        last = k
                     )
                 )
-                g_prevCr = n_c == 13
+                prevCr = c == 13
             )
         )
-        list(n_line n_i - n_last)
+        list(line n_i - last)
     )
 )
 
@@ -63,9 +63,9 @@ procedure(_Error(t_s n_i t_msg "txt")  ; -> never
     ;
     ; **返回**
     ;   (never) - 总是调用 error()，不返回
-    let((l_pos)
-        l_pos = _LineCol(t_s n_i)
-        error("ycCsv::Decode: %s at line %d, column %d" t_msg car(l_pos) cadr(l_pos))
+    let((pos)
+        pos = _LineCol(t_s n_i)
+        error("ycCsv::Decode: %s at line %d, column %d" t_msg car(pos) cadr(pos))
     )
 )
 
@@ -88,11 +88,11 @@ procedure(_CopyRows(l_rows "l")  ; -> list
     ;
     ; **返回**
     ;   (list[list[str]]) - 新外层列表，每行也是新列表
-    let((l_res)
-        foreach(l_row l_rows
-            l_res = tconc(l_res copy(l_row))
+    let((res)
+        foreach(row l_rows
+            res = tconc(res copy(row))
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -133,12 +133,12 @@ procedure(_DelimCode(g_delim n_default t_ctx "gnt")  ; -> int
         unless(stringp(g_delim) && length(g_delim) == 1
             error("%s: delimiter must be a single-byte string" t_ctx)
         )
-        let((n_c)
-            n_c = _Code(g_delim 1)
-            when(n_c == 34 || n_c == 10 || n_c == 13
+        let((c)
+            c = _Code(g_delim 1)
+            when(c == 34 || c == 10 || c == 13
                 error("%s: delimiter cannot be a quote or line break" t_ctx)
             )
-            n_c
+            c
         )
     )
 )
@@ -170,16 +170,16 @@ procedure(_CheckHeader(l_header t_ctx "lt")  ; -> list[str] | nil
         unless(listp(l_header)
             error("%s: header must be a list of strings or nil" t_ctx)
         )
-        let((t_seen)
-            t_seen = makeTable("ycCsvHeader" nil)
-            foreach(t_name l_header
-                unless(stringp(t_name)
+        let((seen)
+            seen = makeTable("ycCsvHeader" nil)
+            foreach(name l_header
+                unless(stringp(name)
                     error("%s: header names must be strings" t_ctx)
                 )
-                when(t_seen[t_name]
-                    error("%s: duplicate header name %A" t_ctx t_name)
+                when(seen[name]
+                    error("%s: duplicate header name %A" t_ctx name)
                 )
-                t_seen[t_name] = t
+                seen[name] = t
             )
             copy(l_header)
         )
@@ -198,21 +198,21 @@ procedure(_CheckRows(l_rows t_ctx "lt")  ; -> list
     unless(listp(l_rows)
         error("%s: rows must be a list" t_ctx)
     )
-    for(n_i 1 length(l_rows)
-        let((l_row)
-            l_row = nth(n_i - 1 l_rows)
-            unless(listp(l_row)
-                error("%s: row %d is not a list" t_ctx n_i)
+    for(i 1 length(l_rows)
+        let((row)
+            row = nth(i - 1 l_rows)
+            unless(listp(row)
+                error("%s: row %d is not a list" t_ctx i)
             )
-            when(length(l_row) == 0
-                error("%s: row %d is empty" t_ctx n_i)
+            when(length(row) == 0
+                error("%s: row %d is empty" t_ctx i)
             )
-            for(n_j 1 length(l_row)
-                let((g_cell)
-                    g_cell = nth(n_j - 1 l_row)
-                    unless(stringp(g_cell)
+            for(j 1 length(row)
+                let((cell)
+                    cell = nth(j - 1 row)
+                    unless(stringp(cell)
                         error("%s: row %d, field %d: expected a string, got %A"
-                            t_ctx n_i n_j g_cell)
+                            t_ctx i j cell)
                     )
                 )
             )

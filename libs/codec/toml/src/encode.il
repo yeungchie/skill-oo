@@ -57,11 +57,11 @@ procedure(_PathRender(l_path "l")  ; -> str
     ;
     ; **返回**
     ;   (str) - 点分路径
-    let((l_p)
-        foreach(t_key l_path
-            l_p = tconc(l_p _KeyRender(t_key))
+    let((p)
+        foreach(key l_path
+            p = tconc(p _KeyRender(key))
         )
-        buildString(car(l_p) ".")
+        buildString(car(p) ".")
     )
 )
 
@@ -76,21 +76,21 @@ procedure(_EncodeString(t_s "t")  ; -> str
     unless(_ValidUtf8(t_s)
         error("ycToml::Encode: invalid UTF-8 string")
     )
-    let((n_len n_run l_p n_c)
-        n_len = length(t_s)
-        n_run = 1
-        l_p = nil
-        when(0 < n_len
-            for(n_k 1 n_len
-                n_c = _Code(t_s n_k)
+    let((len run p c)
+        len = length(t_s)
+        run = 1
+        p = nil
+        when(0 < len
+            for(k 1 len
+                c = _Code(t_s k)
                 cond(
-                    (n_c == 34 || n_c == 92 || n_c < 32 || n_c == 127
+                    (c == 34 || c == 92 || c < 32 || c == 127
                         {
-                        when(n_run < n_k
-                            l_p = tconc(l_p substring(t_s n_run n_k - n_run))
+                        when(run < k
+                            p = tconc(p substring(t_s run k - run))
                         )
-                        l_p = tconc(l_p
-                            case(n_c
+                        p = tconc(p
+                            case(c
                                 (34 "\\\"")
                                 (92 "\\\\")
                                 (8 "\\b")
@@ -98,19 +98,19 @@ procedure(_EncodeString(t_s "t")  ; -> str
                                 (10 "\\n")
                                 (12 "\\f")
                                 (13 "\\r")
-                                (t sprintf(nil "\\u%04x" n_c))
+                                (t sprintf(nil "\\u%04x" c))
                             )
                         )
-                        n_run = n_k + 1
+                        run = k + 1
                         }
                     )
                 )
             )
-            when(n_run <= n_len
-                l_p = tconc(l_p substring(t_s n_run n_len - n_run + 1))
+            when(run <= len
+                p = tconc(p substring(t_s run len - run + 1))
             )
         )
-        lsprintf("\"%s\"" _Build(l_p))
+        lsprintf("\"%s\"" _Build(p))
     )
 )
 
@@ -133,15 +133,15 @@ procedure(_EncodeNumber(n_num "n")  ; -> str
             if(0 < n_num "inf" "-inf")
         )
         (t
-            let((t_s)
-                t_s = sprintf(nil "%.15g" n_num)
-                unless(atof(t_s) == n_num
-                    t_s = sprintf(nil "%.17g" n_num)
+            let((item)
+                item = sprintf(nil "%.15g" n_num)
+                unless(atof(item) == n_num
+                    item = sprintf(nil "%.17g" n_num)
                 )
-                unless(pcreMatchp("[.eE]" t_s)
-                    t_s = strcat(t_s ".0")
+                unless(pcreMatchp("[.eE]" item)
+                    item = strcat(item ".0")
                 )
-                t_s
+                item
             )
         )
     )
@@ -206,11 +206,11 @@ procedure(_EncodeArray(l_arr n_depth g_opt "lxg")  ; -> str
     ;
     ; **返回**
     ;   (str) - 数组文本
-    let((l_p)
-        foreach(g_item l_arr
-            l_p = tconc(l_p _EncodeValue(g_item n_depth + 1 g_opt))
+    let((p)
+        foreach(item l_arr
+            p = tconc(p _EncodeValue(item n_depth + 1 g_opt))
         )
-        lsprintf("[%s]" buildString(car(l_p) ", "))
+        lsprintf("[%s]" buildString(car(p) ", "))
     )
 )
 
@@ -224,18 +224,18 @@ procedure(_EncodeTable(g_obj n_depth g_opt "gxg")  ; -> str
     ;
     ; **返回**
     ;   (str) - 内联表文本
-    let((l_keys l_p)
-        l_keys = _TableKeys(g_obj g_opt)
-        foreach(t_key l_keys
-            l_p = tconc(l_p
+    let((keys p)
+        keys = _TableKeys(g_obj g_opt)
+        foreach(key keys
+            p = tconc(p
                 lsprintf("%s = %s"
-                    _KeyRender(t_key)
-                    _EncodeValue(g_obj[t_key] n_depth + 1 g_opt)
+                    _KeyRender(key)
+                    _EncodeValue(g_obj[key] n_depth + 1 g_opt)
                 )
             )
         )
-        if(car(l_p)
-            lsprintf("{ %s }" buildString(car(l_p) ", "))
+        if(car(p)
+            lsprintf("{ %s }" buildString(car(p) ", "))
             "{}"
         )
     )
@@ -252,31 +252,31 @@ procedure(_TableKeys(g_obj g_opt "gg")  ; -> list
     ;
     ; **返回**
     ;   (list) - 原始键列表
-    let((t_byText l_texts t_text g_key)
-        t_byText = makeTable("ycTomlKeys" ycCodec:::Missing)
-        l_texts = nil
-        foreach(g_key g_obj
-            t_text = _KeyStr(g_key g_opt)
-            when(t_byText[t_text] != ycCodec:::Missing
-                error("ycToml::Encode: duplicate key %A after string conversion" t_text)
+    let((byText texts text key)
+        byText = makeTable("ycTomlKeys" ycCodec:::Missing)
+        texts = nil
+        foreach(key2 g_obj
+            text = _KeyStr(key2 g_opt)
+            when(byText[text] != ycCodec:::Missing
+                error("ycToml::Encode: duplicate key %A after string conversion" text)
             )
-            t_byText[t_text] = g_key
-            l_texts = tconc(l_texts t_text)
+            byText[text] = key2
+            texts = tconc(texts text)
         )
-        l_texts = car(l_texts)
+        texts = car(texts)
         when(g_opt["sortKeys"]
-            l_texts = sort(l_texts 'alphalessp)
+            texts = sort(texts 'alphalessp)
         )
-        let((l_res)
+        let((res)
             if(g_opt["sortKeys"]
-                foreach(t_text l_texts
-                    l_res = tconc(l_res t_byText[t_text])
+                foreach(text2 texts
+                    res = tconc(res byText[text2])
                 )
-                foreach(g_key g_obj
-                    l_res = tconc(l_res g_key)
+                foreach(key2 g_obj
+                    res = tconc(res key2)
                 )
             )
-            car(l_res)
+            car(res)
         )
     )
 )
@@ -352,27 +352,27 @@ procedure(_EmitBody(l_p g_obj l_path n_depth g_opt "lglxg")  ; -> list
     when(n_depth > g_opt["maxDepth"]
         error("ycToml::Encode: nesting too deep (limit %d)" g_opt["maxDepth"])
     )
-    let((l_keys g_val l_child)
-        l_keys = _TableKeys(g_obj g_opt)
-        foreach(t_key l_keys
-            g_val = g_obj[t_key]
-            unless(tablep(g_val) || _IsTableList(g_val)
+    let((keys val child)
+        keys = _TableKeys(g_obj g_opt)
+        foreach(key keys
+            val = g_obj[key]
+            unless(tablep(val) || _IsTableList(val)
                 l_p = tconc(l_p
                     lsprintf("%s = %s"
-                        _KeyRender(_KeyStr(t_key g_opt))
-                        _EncodeValue(g_val n_depth g_opt)
+                        _KeyRender(_KeyStr(key g_opt))
+                        _EncodeValue(val n_depth g_opt)
                     )
                 )
             )
         )
-        foreach(t_key l_keys
-            g_val = g_obj[t_key]
-            when(tablep(g_val)
-                l_p = _EmitTable(l_p g_val append1(l_path _KeyStr(t_key g_opt)) n_depth + 1 g_opt)
+        foreach(key keys
+            val = g_obj[key]
+            when(tablep(val)
+                l_p = _EmitTable(l_p val append1(l_path _KeyStr(key g_opt)) n_depth + 1 g_opt)
             )
-            when(_IsTableList(g_val)
-                foreach(l_child g_val
-                    l_p = _EmitElement(l_p l_child append1(l_path _KeyStr(t_key g_opt)) n_depth + 1 g_opt)
+            when(_IsTableList(val)
+                foreach(child2 val
+                    l_p = _EmitElement(l_p child2 append1(l_path _KeyStr(key g_opt)) n_depth + 1 g_opt)
                 )
             )
         )
@@ -401,19 +401,19 @@ procedure(Encode(g_val \@key (sortKeys nil) (strict nil) (finalNewline t) (maxDe
     unless(tablep(g_val)
         error("ycToml::Encode: root value must be a table")
     )
-    let((g_opt l_p t_out)
-        g_opt = makeTable("ycTomlOpt")
-        g_opt["sortKeys"] = sortKeys
-        g_opt["strict"] = strict
-        g_opt["maxDepth"] = maxDepth
-        l_p = _EmitBody(nil g_val nil 0 g_opt)
-        t_out = buildString(car(l_p) "\n")
+    let((opt p out)
+        opt = makeTable("ycTomlOpt")
+        opt["sortKeys"] = sortKeys
+        opt["strict"] = strict
+        opt["maxDepth"] = maxDepth
+        p = _EmitBody(nil g_val nil 0 opt)
+        out = buildString(car(p) "\n")
         cond(
-            (t_out == "" "")
+            (out == "" "")
             (finalNewline
-                strcat(t_out "\n")
+                strcat(out "\n")
             )
-            (t t_out)
+            (t out)
         )
     )
 )

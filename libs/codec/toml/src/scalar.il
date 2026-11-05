@@ -19,16 +19,16 @@ procedure(_ReadHex(t_s n_i n_count "txx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 解析值
-    let((n_v n_d n_c)
-        n_v = 0
-        for(n_k 1 n_count
-            n_c = _HexVal(_Code(t_s n_i + n_k - 1))
-            unless(n_c
-                _Error(t_s n_i + n_k - 1 "invalid hexadecimal escape")
+    let((v d c)
+        v = 0
+        for(k 1 n_count
+            c = _HexVal(_Code(t_s n_i + k - 1))
+            unless(c
+                _Error(t_s n_i + k - 1 "invalid hexadecimal escape")
             )
-            n_v = n_v * 16 + n_c
+            v = v * 16 + c
         )
-        n_v
+        v
     )
 )
 
@@ -44,159 +44,159 @@ procedure(_ParseBasicString(t_s n_i g_key "txg")  ; -> list
     ;
     ; **返回**
     ;   (list) - (字符串值 闭引号后一位置)
-    let((n_len n_k n_seg n_c n_run l_p g_done g_triple n_esc t_esc n_cp n_next n_probe)
-        n_len = length(t_s)
+    let((len k seg c run p done triple esc esc2 cp next probe)
+        len = length(t_s)
         when(g_key && _Code(t_s n_i + 1) == 34 && _Code(t_s n_i + 2) == 34
             _Error(t_s n_i "triple-quoted keys are not allowed")
         )
-        g_triple = !g_key && _Code(t_s n_i + 1) == 34 && _Code(t_s n_i + 2) == 34
-        n_k = n_i + if(g_triple 3 1)
-        when(g_triple && _Code(t_s n_k) == 10
-            n_k++
+        triple = !g_key && _Code(t_s n_i + 1) == 34 && _Code(t_s n_i + 2) == 34
+        k = n_i + if(triple 3 1)
+        when(triple && _Code(t_s k) == 10
+            k++
         )
-        n_seg = n_k
-        g_done = nil
-        while(!g_done
-            when(n_k > n_len
-                _Error(t_s n_k "unterminated string")
+        seg = k
+        done = nil
+        while(!done
+            when(k > len
+                _Error(t_s k "unterminated string")
             )
-            n_c = _Code(t_s n_k)
+            c = _Code(t_s k)
             cond(
-                (n_c == 34
-                    if(g_triple
+                (c == 34
+                    if(triple
                     then
-                        n_run = 0
-                        while(_Code(t_s n_k + n_run) == 34
-                            n_run++
+                        run = 0
+                        while(_Code(t_s k + run) == 34
+                            run++
                         )
-                        if(n_run >= 3
+                        if(run >= 3
                         then
-                            when(n_run > 5
-                                _Error(t_s n_k "too many consecutive quotation marks")
+                            when(run > 5
+                                _Error(t_s k "too many consecutive quotation marks")
                             )
-                            when(n_seg < n_k
-                                l_p = tconc(l_p substring(t_s n_seg n_k - n_seg))
+                            when(seg < k
+                                p = tconc(p substring(t_s seg k - seg))
                             )
-                            for(n_q 1 n_run - 3
-                                l_p = tconc(l_p "\"")
+                            for(q 1 run - 3
+                                p = tconc(p "\"")
                             )
-                            n_k = n_k + n_run
-                            g_done = t
+                            k = k + run
+                            done = t
                         else
-                            n_k = n_k + n_run
+                            k = k + run
                         )
                     else
-                        when(n_seg < n_k
-                            l_p = tconc(l_p substring(t_s n_seg n_k - n_seg))
+                        when(seg < k
+                            p = tconc(p substring(t_s seg k - seg))
                         )
-                        n_k++
-                        g_done = t
+                        k++
+                        done = t
                     )
                 )
-                (n_c == 92
+                (c == 92
                     {
-                    when(n_seg < n_k
-                        l_p = tconc(l_p substring(t_s n_seg n_k - n_seg))
+                    when(seg < k
+                        p = tconc(p substring(t_s seg k - seg))
                     )
-                    n_esc = n_k
-                    n_k++
-                    when(n_k > n_len
-                        _Error(t_s n_esc "unterminated escape")
+                    esc = k
+                    k++
+                    when(k > len
+                        _Error(t_s esc "unterminated escape")
                     )
-                    n_c = _Code(t_s n_k)
-                    if(g_triple && (n_c == 10 || n_c == 32 || n_c == 9)
+                    c = _Code(t_s k)
+                    if(triple && (c == 10 || c == 32 || c == 9)
                     then
-                        n_probe = n_k
-                        while(n_probe <= n_len
-                            && (_Code(t_s n_probe) == 32 || _Code(t_s n_probe) == 9)
-                            n_probe++
+                        probe = k
+                        while(probe <= len
+                            && (_Code(t_s probe) == 32 || _Code(t_s probe) == 9)
+                            probe++
                         )
-                        unless(_Code(t_s n_probe) == 10
-                            _Error(t_s n_esc "invalid escape")
+                        unless(_Code(t_s probe) == 10
+                            _Error(t_s esc "invalid escape")
                         )
-                        n_k = n_probe + 1
-                        while(n_k <= n_len
-                            && (_Code(t_s n_k) == 32 || _Code(t_s n_k) == 9 || _Code(t_s n_k) == 10)
-                            n_k++
+                        k = probe + 1
+                        while(k <= len
+                            && (_Code(t_s k) == 32 || _Code(t_s k) == 9 || _Code(t_s k) == 10)
+                            k++
                         )
-                        n_seg = n_k
+                        seg = k
                     else
-                        case(n_c
+                        case(c
                             (34
                                 {
-                                t_esc = "\""
-                                n_next = n_k + 1
+                                esc2 = "\""
+                                next = k + 1
                                 }
                             )
                             (92
                                 {
-                                t_esc = "\\"
-                                n_next = n_k + 1
+                                esc2 = "\\"
+                                next = k + 1
                                 }
                             )
                             (98
                                 {
-                                t_esc = intToChar(8)
-                                n_next = n_k + 1
+                                esc2 = intToChar(8)
+                                next = k + 1
                                 }
                             )
                             (116
                                 {
-                                t_esc = intToChar(9)
-                                n_next = n_k + 1
+                                esc2 = intToChar(9)
+                                next = k + 1
                                 }
                             )
                             (110
                                 {
-                                t_esc = intToChar(10)
-                                n_next = n_k + 1
+                                esc2 = intToChar(10)
+                                next = k + 1
                                 }
                             )
                             (102
                                 {
-                                t_esc = intToChar(12)
-                                n_next = n_k + 1
+                                esc2 = intToChar(12)
+                                next = k + 1
                                 }
                             )
                             (114
                                 {
-                                t_esc = intToChar(13)
-                                n_next = n_k + 1
+                                esc2 = intToChar(13)
+                                next = k + 1
                                 }
                             )
                             (117
                                 {
-                                n_cp = _ReadHex(t_s n_k + 1 4)
-                                t_esc = _Utf8Str(n_cp)
-                                n_next = n_k + 5
+                                cp = _ReadHex(t_s k + 1 4)
+                                esc2 = _Utf8Str(cp)
+                                next = k + 5
                                 }
                             )
                             (85
                                 {
-                                n_cp = _ReadHex(t_s n_k + 1 8)
-                                t_esc = _Utf8Str(n_cp)
-                                n_next = n_k + 9
+                                cp = _ReadHex(t_s k + 1 8)
+                                esc2 = _Utf8Str(cp)
+                                next = k + 9
                                 }
                             )
                             (t
-                                _Error(t_s n_esc "invalid escape")
+                                _Error(t_s esc "invalid escape")
                             )
                         )
-                        l_p = tconc(l_p t_esc)
-                        n_k = n_next
-                        n_seg = n_k
+                        p = tconc(p esc2)
+                        k = next
+                        seg = k
                     )
                     }
                 )
                 (t
-                    when((n_c < 32 || n_c == 127) && n_c != 9 && !(g_triple && n_c == 10)
-                        _Error(t_s n_k "control character in string")
+                    when((c < 32 || c == 127) && c != 9 && !(triple && c == 10)
+                        _Error(t_s k "control character in string")
                     )
-                    n_k++
+                    k++
                 )
             )
         )
-        list(_Build(l_p) n_k)
+        list(_Build(p) k)
     )
 )
 
@@ -210,62 +210,62 @@ procedure(_ParseLiteralString(t_s n_i g_key "txg")  ; -> list
     ;
     ; **返回**
     ;   (list) - (字符串值 闭引号后一位置)
-    let((n_len n_k n_seg n_c n_run l_p g_done g_triple)
-        n_len = length(t_s)
+    let((len k seg c run p done triple)
+        len = length(t_s)
         when(g_key && _Code(t_s n_i + 1) == 39 && _Code(t_s n_i + 2) == 39
             _Error(t_s n_i "triple-quoted keys are not allowed")
         )
-        g_triple = !g_key && _Code(t_s n_i + 1) == 39 && _Code(t_s n_i + 2) == 39
-        n_k = n_i + if(g_triple 3 1)
-        when(g_triple && _Code(t_s n_k) == 10
-            n_k++
+        triple = !g_key && _Code(t_s n_i + 1) == 39 && _Code(t_s n_i + 2) == 39
+        k = n_i + if(triple 3 1)
+        when(triple && _Code(t_s k) == 10
+            k++
         )
-        n_seg = n_k
-        g_done = nil
-        while(!g_done
-            when(n_k > n_len
-                _Error(t_s n_k "unterminated literal string")
+        seg = k
+        done = nil
+        while(!done
+            when(k > len
+                _Error(t_s k "unterminated literal string")
             )
-            n_c = _Code(t_s n_k)
-            if(n_c == 39
+            c = _Code(t_s k)
+            if(c == 39
             then
-                if(g_triple
+                if(triple
                 then
-                    n_run = 0
-                    while(_Code(t_s n_k + n_run) == 39
-                        n_run++
+                    run = 0
+                    while(_Code(t_s k + run) == 39
+                        run++
                     )
-                    if(n_run >= 3
+                    if(run >= 3
                     then
-                        when(n_run > 5
-                            _Error(t_s n_k "too many consecutive quotation marks")
+                        when(run > 5
+                            _Error(t_s k "too many consecutive quotation marks")
                         )
-                        when(n_seg < n_k
-                            l_p = tconc(l_p substring(t_s n_seg n_k - n_seg))
+                        when(seg < k
+                            p = tconc(p substring(t_s seg k - seg))
                         )
-                        for(n_q 1 n_run - 3
-                            l_p = tconc(l_p "'")
+                        for(q 1 run - 3
+                            p = tconc(p "'")
                         )
-                        n_k = n_k + n_run
-                        g_done = t
+                        k = k + run
+                        done = t
                     else
-                        n_k = n_k + n_run
+                        k = k + run
                     )
                 else
-                    when(n_seg < n_k
-                        l_p = tconc(l_p substring(t_s n_seg n_k - n_seg))
+                    when(seg < k
+                        p = tconc(p substring(t_s seg k - seg))
                     )
-                    n_k++
-                    g_done = t
+                    k++
+                    done = t
                 )
             else
-                when((n_c < 32 || n_c == 127) && n_c != 9 && !(g_triple && n_c == 10)
-                    _Error(t_s n_k "control character in literal string")
+                when((c < 32 || c == 127) && c != 9 && !(triple && c == 10)
+                    _Error(t_s k "control character in literal string")
                 )
-                n_k++
+                k++
             )
         )
-        list(_Build(l_p) n_k)
+        list(_Build(p) k)
     )
 )
 
@@ -282,66 +282,66 @@ procedure(_IntValue(t_s n_i n_end "txx")  ; -> int
     ;
     ; **返回**
     ;   (int) - fixnum 值
-    let((t_tok t_clean n_base n_pos n_v n_c n_sign)
-        t_tok = substring(t_s n_i n_end - n_i)
-        n_sign = 1
-        when(_Code(t_tok 1) == 45 || _Code(t_tok 1) == 43
-            when(_Code(t_tok 1) == 45
-                n_sign = -1
+    let((tok clean base pos v c sign)
+        tok = substring(t_s n_i n_end - n_i)
+        sign = 1
+        when(_Code(tok 1) == 45 || _Code(tok 1) == 43
+            when(_Code(tok 1) == 45
+                sign = -1
             )
-            t_tok = substring(t_tok 2)
+            tok = substring(tok 2)
         )
-        n_base = 10
-        when(_Code(t_tok 1) == 48 && length(t_tok) > 1
-            case(_Code(t_tok 2)
-                (120 n_base = 16)
-                (111 n_base = 8)
-                (98 n_base = 2)
+        base = 10
+        when(_Code(tok 1) == 48 && length(tok) > 1
+            case(_Code(tok 2)
+                (120 base = 16)
+                (111 base = 8)
+                (98 base = 2)
             )
-            when(n_base != 10
-                t_tok = substring(t_tok 3)
+            when(base != 10
+                tok = substring(tok 3)
             )
         )
-        t_clean = pcreReplace(pcreCompile("_") t_tok "" 0)
-        when(t_clean == ""
+        clean = pcreReplace(pcreCompile("_") tok "" 0)
+        when(clean == ""
             _Error(t_s n_i "invalid integer")
         )
-        if(n_base == 10
+        if(base == 10
         then
-            n_v = atof(t_clean)
-            when(n_v > 2147483647
-                unless(n_sign < 0 && t_clean == "2147483648"
+            v = atof(clean)
+            when(v > 2147483647
+                unless(sign < 0 && clean == "2147483648"
                     _Error(t_s n_i "integer out of fixnum range")
                 )
             )
-            if(n_sign < 0 && t_clean == "2147483648"
+            if(sign < 0 && clean == "2147483648"
             then
                 (-2147483647 - 1)
             else
-                n_v = atoi(t_clean)
-                when(n_sign < 0
-                    n_v = -n_v
+                v = atoi(clean)
+                when(sign < 0
+                    v = -v
                 )
-                n_v
+                v
             )
         else
-            n_v = 0
-            n_pos = 1
-            while(n_pos <= length(t_clean)
-                n_c = _HexVal(_Code(t_clean n_pos))
-                unless(n_c != nil && n_c < n_base
+            v = 0
+            pos = 1
+            while(pos <= length(clean)
+                c = _HexVal(_Code(clean pos))
+                unless(c != nil && c < base
                     _Error(t_s n_i "invalid integer")
                 )
-                when(n_v > (2147483647 - n_base + 1) / n_base
+                when(v > (2147483647 - base + 1) / base
                     _Error(t_s n_i "integer out of fixnum range")
                 )
-                n_v = n_v * n_base + n_c
-                when(n_v > 2147483647
+                v = v * base + c
+                when(v > 2147483647
                     _Error(t_s n_i "integer out of fixnum range")
                 )
-                n_pos++
+                pos++
             )
-            n_v
+            v
         )
     )
 )
@@ -355,43 +355,43 @@ procedure(_ParseNumber(t_s n_i "tx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (数值 下一位置)
-    let((n_len n_end n_c t_tok t_clean)
-        n_len = length(t_s)
-        n_end = n_i
-        while(n_end <= n_len
-            && !(_Code(t_s n_end) == 32
-                || _Code(t_s n_end) == 9
-                || _Code(t_s n_end) == 10
-                || _Code(t_s n_end) == 35
-                || _Code(t_s n_end) == 44
-                || _Code(t_s n_end) == 93
-                || _Code(t_s n_end) == 125)
-            n_end++
+    let((len end c tok clean)
+        len = length(t_s)
+        end = n_i
+        while(end <= len
+            && !(_Code(t_s end) == 32
+                || _Code(t_s end) == 9
+                || _Code(t_s end) == 10
+                || _Code(t_s end) == 35
+                || _Code(t_s end) == 44
+                || _Code(t_s end) == 93
+                || _Code(t_s end) == 125)
+            end++
         )
-        t_tok = substring(t_s n_i n_end - n_i)
+        tok = substring(t_s n_i end - n_i)
         cond(
-            (pcreMatchp("^[+-]?inf\\z" t_tok)
-                list(if(_Code(t_tok 1) == 45 -atof("1e999") atof("1e999")) n_end)
+            (pcreMatchp("^[+-]?inf\\z" tok)
+                list(if(_Code(tok 1) == 45 -atof("1e999") atof("1e999")) end)
             )
-            (pcreMatchp("^[+-]?nan\\z" t_tok)
-                list(atof("nan") n_end)
+            (pcreMatchp("^[+-]?nan\\z" tok)
+                list(atof("nan") end)
             )
-            (pcreMatchp("^[+-]?(?:0|[1-9](?:_?[0-9])*)\\z" t_tok)
-                list(_IntValue(t_s n_i n_end) n_end)
+            (pcreMatchp("^[+-]?(?:0|[1-9](?:_?[0-9])*)\\z" tok)
+                list(_IntValue(t_s n_i end) end)
             )
-            (pcreMatchp("^0x[0-9A-Fa-f](?:_?[0-9A-Fa-f])*\\z" t_tok)
-                list(_IntValue(t_s n_i n_end) n_end)
+            (pcreMatchp("^0x[0-9A-Fa-f](?:_?[0-9A-Fa-f])*\\z" tok)
+                list(_IntValue(t_s n_i end) end)
             )
-            (pcreMatchp("^0o[0-7](?:_?[0-7])*\\z" t_tok)
-                list(_IntValue(t_s n_i n_end) n_end)
+            (pcreMatchp("^0o[0-7](?:_?[0-7])*\\z" tok)
+                list(_IntValue(t_s n_i end) end)
             )
-            (pcreMatchp("^0b[01](?:_?[01])*\\z" t_tok)
-                list(_IntValue(t_s n_i n_end) n_end)
+            (pcreMatchp("^0b[01](?:_?[01])*\\z" tok)
+                list(_IntValue(t_s n_i end) end)
             )
-            (pcreMatchp("^[+-]?(?:(?:0|[1-9](?:_?[0-9])*)\\.[0-9](?:_?[0-9])*(?:[eE][+-]?[0-9](?:_?[0-9])*)?|(?:0|[1-9](?:_?[0-9])*)[eE][+-]?[0-9](?:_?[0-9])*)\\z" t_tok)
+            (pcreMatchp("^[+-]?(?:(?:0|[1-9](?:_?[0-9])*)\\.[0-9](?:_?[0-9])*(?:[eE][+-]?[0-9](?:_?[0-9])*)?|(?:0|[1-9](?:_?[0-9])*)[eE][+-]?[0-9](?:_?[0-9])*)\\z" tok)
                 {
-                t_clean = pcreReplace(pcreCompile("_") t_tok "" 0)
-                list(atof(t_clean) n_end)
+                clean = pcreReplace(pcreCompile("_") tok "" 0)
+                list(atof(clean) end)
                 }
             )
             (t

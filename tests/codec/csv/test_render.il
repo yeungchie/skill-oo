@@ -3,48 +3,48 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-let((t_v t_expected)
-    t_v = ycCsv::Decode("name,qty\napple,3\n" ?header t)
-    t_expected = ycTabulate::Render(list(list("apple" "3")) ?headers list("name" "qty"))
-    _Assert(t_v->render() == t_expected  "render: basic table")
-    _Assert(t_v->render(?format "grid" ?align "right") ==
+let((v expected)
+    v = ycCsv::Decode("name,qty\napple,3\n" ?header t)
+    expected = ycTabulate::Render(list(list("apple" "3")) ?headers list("name" "qty"))
+    _Assert(v->render() == expected  "render: basic table")
+    _Assert(v->render(?format "grid" ?align "right") ==
         ycTabulate::Render(list(list("apple" "3")) ?headers list("name" "qty") ?format "grid" ?align "right")
         "render: format and align"
     )
 )
 
-let((t_v)
-    t_v = ycCsv::Decode("a,b\n1\n" ?header t)
-    _Assert(t_v->cell(1 2) == ycCodec::Missing  "render: fixture has Missing cell")
-    _Assert(t_v->render(?missingVal "-") ==
+let((v)
+    v = ycCsv::Decode("a,b\n1\n" ?header t)
+    _Assert(v->cell(1 2) == ycCodec::Missing  "render: fixture has Missing cell")
+    _Assert(v->render(?missingVal "-") ==
         ycTabulate::Render(list(list("1" "-")) ?headers list("a" "b") ?missingVal "-")
         "render: pads Missing cells"
     )
 )
 
-let((t_v)
-    t_v = ycCsv::Decode("a,b\nc\n")
-    _Assert(t_v->render() ==
+let((v)
+    v = ycCsv::Decode("a,b\nc\n")
+    _Assert(v->render() ==
         ycTabulate::Render(list(list("a" "b") list("c" "")))
         "render: pads ragged rows"
     )
 )
 
-let((t_v)
-    t_v = ycCsv::Decode("a\nlong text\n" ?header t)
-    _Assert(t_v->render(?maxColWidth 4) ==
+let((v)
+    v = ycCsv::Decode("a\nlong text\n" ?header t)
+    _Assert(v->render(?maxColWidth 4) ==
         ycTabulate::Render(list(list("long text")) ?headers list("a") ?maxColWidth 4)
         "render: forwards maxColWidth"
     )
 )
 
-let((t_v)
-    t_v = ycCsv::Decode("name,qty\n中,3\n" ?header t)
-    _Assert(t_v->render(?unit "char") ==
+let((v)
+    v = ycCsv::Decode("name,qty\n中,3\n" ?header t)
+    _Assert(v->render(?unit "char") ==
         ycTabulate::Render(list(list("中" "3")) ?headers list("name" "qty") ?unit "char")
         "render: forwards unit"
     )
-    _Assert(t_v->render(?ambiguous 2) ==
+    _Assert(v->render(?ambiguous 2) ==
         ycTabulate::Render(list(list("中" "3")) ?headers list("name" "qty") ?ambiguous 2)
         "render: forwards ambiguous"
     )
@@ -52,17 +52,17 @@ let((t_v)
 
 _Assert(ycCsv::Decode("")->render() == ""  "render: empty table")
 _Assert(ycCsv::Decode("")->print() == t  "print: empty table returns t")
-let((t_v t_p t_old t_out t_ret)
-    t_v = ycCsv::Decode("a,b\n1,2\n" ?header t)
-    t_p = outstring()
-    t_old = poport
-    poport = t_p
-    t_ret = t_v->print()
-    poport = t_old
-    t_out = getOutstring(t_p)
-    close(t_p)
-    _Assert(t_ret == t  "print: returns t")
-    _Assert(t_out == strcat(t_v->render() "\n")  "print: writes rendered text and newline")
+let((v p old out ret)
+    v = ycCsv::Decode("a,b\n1,2\n" ?header t)
+    p = outstring()
+    old = poport
+    poport = p
+    ret = v->print()
+    poport = old
+    out = getOutstring(p)
+    close(p)
+    _Assert(ret == t  "print: returns t")
+    _Assert(out == strcat(v->render() "\n")  "print: writes rendered text and newline")
 )
 
 _AssertError(lambda(() ycCsv::Decode("a\n1\n" ?header t)->render(?format "xml"))

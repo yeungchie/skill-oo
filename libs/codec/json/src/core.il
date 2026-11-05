@@ -11,10 +11,10 @@ procedure(_Code(t_s n_i "tx")  ; -> int | nil
     ;
     ; **返回**
     ;   (int|nil) - 该字节的字符码；越界时为 nil
-    let((g_c)
-        g_c = getchar(t_s n_i)
-        when(g_c
-            charToInt(g_c)
+    let((c)
+        c = getchar(t_s n_i)
+        when(c
+            charToInt(c)
         )
     )
 )
@@ -39,18 +39,18 @@ procedure(_LineCol(t_s n_i "tx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (行 列) 两元素表
-    let((n_line n_last)
-        n_line = 1
-        n_last = 0
+    let((line last)
+        line = 1
+        last = 0
         when(1 < n_i
-            for(n_k 1 n_i - 1
-                when(_Code(t_s n_k) == 10
-                    n_line++
-                    n_last = n_k
+            for(k 1 n_i - 1
+                when(_Code(t_s k) == 10
+                    line++
+                    last = k
                 )
             )
         )
-        list(n_line n_i - n_last)
+        list(line n_i - last)
     )
 )
 
@@ -64,9 +64,9 @@ procedure(_Error(t_s n_i t_msg "txt")  ; -> never
     ;
     ; **返回**
     ;   (never) - 总是调用 error()，不返回
-    let((l_pos)
-        l_pos = _LineCol(t_s n_i)
-        error("ycJson::Decode: %s at line %d, column %d" t_msg car(l_pos) cadr(l_pos))
+    let((pos)
+        pos = _LineCol(t_s n_i)
+        error("ycJson::Decode: %s at line %d, column %d" t_msg car(pos) cadr(pos))
     )
 )
 

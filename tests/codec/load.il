@@ -5,22 +5,22 @@
 ; 子套件在 let 之外加载：测试执行期间少一层局部作用域，
 ; 给深层嵌套用例留出调用栈余量。
 
-let((t_res t_self t_dir)
-    t_res = errset(get_filename(piport) nil)
-    t_self = when(t_res && car(t_res) && stringp(car(t_res)) && car(t_res) != ""
-        car(t_res)
+let((res path dir)
+    res = errset(get_filename(piport) nil)
+    path = when(res && car(res) && stringp(car(res)) && car(res) != ""
+        car(res)
     )
-    unless(t_self
+    unless(path
         error("ycCodec: can't determine the current file - load this file with an explicit path")
     )
-    unless(pcreMatchp("^[~/]|^\\.{1,2}/" t_self)
-        t_self = strcat("./" t_self)
+    unless(pcreMatchp("^[~/]|^\\.{1,2}/" path)
+        path = strcat("./" path)
     )
-    t_dir = simplifyFilename(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") t_self "" 0) t)
-    unless(pcreMatchp("/$" t_dir)
-        t_dir = strcat(t_dir "/")
+    dir = simplifyFilename(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") path "" 0) t)
+    unless(pcreMatchp("/$" dir)
+        dir = strcat(dir "/")
     )
-    _CodecTestDir = t_dir
+    _CodecTestDir = dir
 )
 
 loadi(strcat(_CodecTestDir "core/load.il"))

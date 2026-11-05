@@ -72,25 +72,25 @@ procedure(Type(t_name "t")  ; -> Type
     ;
     ; **返回**
     ;   (Type) - 规范名对应的唯一实例；非字符串或未知名报错
-    let((t_canon g_inst)
+    let((canon inst)
         unless(stringp(t_name)
             error("ycCodec::Type: unknown type name %A" t_name)
         )
-        t_canon = cond(
+        canon = cond(
             (pcreMatchp("(?i)^true\\z" t_name) "True")
             (pcreMatchp("(?i)^false\\z" t_name) "False")
             (pcreMatchp("(?i)^null\\z" t_name) "Null")
             (pcreMatchp("(?i)^missing\\z" t_name) "Missing")
         )
-        unless(t_canon
+        unless(canon
             error("ycCodec::Type: unknown type name %A" t_name)
         )
-        g_inst = _TypeCache[t_canon]
-        unless(g_inst
-            g_inst = makeInstance('Type ?_data makeInstance('_TypeData ?name t_canon))
-            _TypeCache[t_canon] = g_inst
+        inst = _TypeCache[canon]
+        unless(inst
+            inst = makeInstance('Type ?_data makeInstance('_TypeData ?name canon))
+            _TypeCache[canon] = inst
         )
-        g_inst
+        inst
     )
 )
 

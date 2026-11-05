@@ -11,9 +11,9 @@ procedure(_SkipIgnorable(l_lines n_pos "lx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 下一非空白行号
-    let((n_len)
-        n_len = length(l_lines)
-        while(n_pos <= n_len && _Blankp(_Nth1(n_pos l_lines))
+    let((len)
+        len = length(l_lines)
+        while(n_pos <= len && _Blankp(_Nth1(n_pos l_lines))
             n_pos++
         )
         n_pos
@@ -27,36 +27,36 @@ procedure(_FindKeyColon(t_s "t")  ; -> int | nil
     ;
     ; **返回**
     ;   (int|nil) - 冒号位置；不是映射行为 nil
-    prog((n_len n_i n_c n_next g_sq g_dq g_esc g_flow)
-        n_len = length(t_s)
-        n_i = 1
-        g_sq = nil
-        g_dq = nil
-        g_esc = nil
-        g_flow = 0
-        while(n_i <= n_len
-            n_c = _Code(t_s n_i)
+    prog((len i c next sq dq esc flow)
+        len = length(t_s)
+        i = 1
+        sq = nil
+        dq = nil
+        esc = nil
+        flow = 0
+        while(i <= len
+            c = _Code(t_s i)
             cond(
-                (g_dq
-                    when(g_esc g_esc = nil)
-                    when(!g_esc && n_c == 92 g_esc = t)
-                    when(!g_esc && n_c == 34 g_dq = nil)
+                (dq
+                    when(esc esc = nil)
+                    when(!esc && c == 92 esc = t)
+                    when(!esc && c == 34 dq = nil)
                 )
-                (g_sq
-                    when(n_c == 39 g_sq = nil)
+                (sq
+                    when(c == 39 sq = nil)
                 )
-                (n_c == 34 g_dq = t)
-                (n_c == 39 g_sq = t)
-                (n_c == 91 || n_c == 123 g_flow = g_flow + 1)
-                (n_c == 93 || n_c == 125 when(g_flow > 0 g_flow = g_flow - 1))
-                (n_c == 58 && g_flow == 0
-                    n_next = _Code(t_s n_i + 1)
-                    when(n_next == nil || n_next == 32 || n_next == 9
-                        return(n_i)
+                (c == 34 dq = t)
+                (c == 39 sq = t)
+                (c == 91 || c == 123 flow = flow + 1)
+                (c == 93 || c == 125 when(flow > 0 flow = flow - 1))
+                (c == 58 && flow == 0
+                    next = _Code(t_s i + 1)
+                    when(next == nil || next == 32 || next == 9
+                        return(i)
                     )
                 )
             )
-            n_i++
+            i++
         )
         return(nil)
     )
@@ -70,13 +70,13 @@ procedure(_MergeInto(g_map g_src "gg")  ; -> t
     ;
     ; **返回**
     ;   (t) - 合并完成
-    foreach(g_item if(listp(g_src) g_src list(g_src))
-        unless(tablep(g_item)
+    foreach(item if(listp(g_src) g_src list(g_src))
+        unless(tablep(item)
             error("ycYaml::Decode: merge value must be a mapping or a sequence of mappings")
         )
-        foreach(g_key g_item
-            when(g_map[g_key] == ycCodec:::Missing
-                g_map[g_key] = g_item[g_key]
+        foreach(key item
+            when(g_map[key] == ycCodec:::Missing
+                g_map[key] = item[key]
             )
         )
     )
@@ -93,17 +93,17 @@ procedure(_ParseChild(l_lines n_pos n_parentIndent n_max "lxnn")  ; -> list
     ;
     ; **返回**
     ;   (list) - (值 下一行号)
-    prog((n_ind t_line)
+    prog((ind line)
         n_pos = _SkipIgnorable(l_lines n_pos)
         when(n_pos > length(l_lines)
             return(list(ycCodec:::Null n_pos))
         )
-        t_line = _Nth1(n_pos l_lines)
-        n_ind = _LineIndent(t_line n_pos)
+        line = _Nth1(n_pos l_lines)
+        ind = _LineIndent(line n_pos)
         return(
-            if(n_ind <= n_parentIndent
+            if(ind <= n_parentIndent
                 list(ycCodec:::Null n_pos)
-                _ParseBlock(l_lines n_pos n_ind n_max - 1)
+                _ParseBlock(l_lines n_pos ind n_max - 1)
             )
         )
     )
@@ -122,90 +122,90 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
     ;
     ; **返回**
     ;   (list) - (值 下一行号)
-    prog((t_tag t_anchor t_token n_end l_v g_val n_i n_len n_c g_stop)
+    prog((tag anchor token end v val i len c stop)
         t_text = _Rtrim(t_text)
-        n_len = length(t_text)
-        n_i = 1
-        while(n_i <= n_len && _Code(t_text n_i) == 32
-            n_i++
+        len = length(t_text)
+        i = 1
+        while(i <= len && _Code(t_text i) == 32
+            i++
         )
-        t_text = _Tail(t_text n_i)
-        g_stop = nil
-        while(!g_stop && t_text != ""
-            n_c = _Code(t_text 1)
+        t_text = _Tail(t_text i)
+        stop = nil
+        while(!stop && t_text != ""
+            c = _Code(t_text 1)
             cond(
-                (n_c == 38
-                    n_end = 2
-                    while(n_end <= length(t_text) && _Code(t_text n_end) != 32
-                        n_end++
+                (c == 38
+                    end = 2
+                    while(end <= length(t_text) && _Code(t_text end) != 32
+                        end++
                     )
-                    t_anchor = substring(t_text 2 n_end - 2)
-                    when(t_anchor == "" _ErrorLine("empty anchor name" n_line n_col))
-                    t_text = _Rtrim(_StripComment(_Tail(t_text n_end)))
+                    anchor = substring(t_text 2 end - 2)
+                    when(anchor == "" _ErrorLine("empty anchor name" n_line n_col))
+                    t_text = _Rtrim(_StripComment(_Tail(t_text end)))
                 )
-                (n_c == 33
-                    n_end = 2
-                    while(n_end <= length(t_text) && _Code(t_text n_end) != 32
-                        n_end++
+                (c == 33
+                    end = 2
+                    while(end <= length(t_text) && _Code(t_text end) != 32
+                        end++
                     )
-                    t_tag = substring(t_text 1 n_end - 1)
-                    t_text = _Rtrim(_StripComment(_Tail(t_text n_end)))
+                    tag = substring(t_text 1 end - 1)
+                    t_text = _Rtrim(_StripComment(_Tail(t_text end)))
                 )
                 (t
-                    g_stop = t
+                    stop = t
                 )
             )
         )
         t_text = _Ltrim(t_text)
         when(_Code(t_text 1) == 42
-            n_end = 2
-            while(n_end <= length(t_text) && _Code(t_text n_end) != 32
-                n_end++
+            end = 2
+            while(end <= length(t_text) && _Code(t_text end) != 32
+                end++
             )
-            unless(_Rtrim(_Tail(t_text n_end)) == ""
+            unless(_Rtrim(_Tail(t_text end)) == ""
                 _ErrorLine("unexpected characters after alias" n_line n_col)
             )
-            g_val = _AliasValue(substring(t_text 2 n_end - 2))
-            when(t_tag g_val = _TagValue(g_val t_tag))
-            return(list(g_val n_pos))
+            val = _AliasValue(substring(t_text 2 end - 2))
+            when(tag val = _TagValue(val tag))
+            return(list(val n_pos))
         )
-        when(t_anchor
-            when(_ActiveAnchors[t_anchor]
+        when(anchor
+            when(_ActiveAnchors[anchor]
                 _ErrorLine("recursive anchor" n_line n_col)
             )
-            _ActiveAnchors[t_anchor] = t
+            _ActiveAnchors[anchor] = t
         )
         cond(
             (t_text == ""
-                l_v = _ParseChild(l_lines n_pos n_parentIndent n_max)
+                v = _ParseChild(l_lines n_pos n_parentIndent n_max)
             )
             ((_Code(t_text 1) == 124 || _Code(t_text 1) == 62)
-                l_v = _ParseBlockScalar(l_lines n_pos n_parentIndent t_text n_line n_col)
+                v = _ParseBlockScalar(l_lines n_pos n_parentIndent t_text n_line n_col)
             )
             (t
                 if(_Code(t_text 1) == 91 || _Code(t_text 1) == 123
                 then
-                    l_v = errset(_FlowValue(t_text 1 n_max))
-                    unless(l_v
+                    v = errset(_FlowValue(t_text 1 n_max))
+                    unless(v
                         _ErrorLine("unterminated or invalid flow value" n_line n_col)
                     )
-                    l_v = car(l_v)
-                    unless(_Rtrim(_Tail(t_text cadr(l_v))) == ""
+                    v = car(v)
+                    unless(_Rtrim(_Tail(t_text cadr(v))) == ""
                         _ErrorLine("unexpected characters after value" n_line n_col)
                     )
-                    l_v = list(car(l_v) n_pos)
+                    v = list(car(v) n_pos)
                 else
-                    l_v = list(_ParseScalarText(t_text) n_pos)
+                    v = list(_ParseScalarText(t_text) n_pos)
                 )
             )
         )
-        g_val = car(l_v)
-        when(t_tag g_val = _TagValue(g_val t_tag))
-        when(t_anchor
-            _Anchors[t_anchor] = g_val
-            _ActiveAnchors[t_anchor] = nil
+        val = car(v)
+        when(tag val = _TagValue(val tag))
+        when(anchor
+            _Anchors[anchor] = val
+            _ActiveAnchors[anchor] = nil
         )
-        return(list(g_val cadr(l_v)))
+        return(list(val cadr(v)))
     )
 )
 procedure(_ParseMapInto(g_map l_lines n_pos n_indent n_max g_inline n_line n_col "glxnngnn")  ; -> list
@@ -223,57 +223,57 @@ procedure(_ParseMapInto(g_map l_lines n_pos n_indent n_max g_inline n_line n_col
     ;
     ; **返回**
     ;   (list) - (table 下一行号)
-    let((n_len t_line t_content n_ind n_colon t_key t_rest l_v g_key g_first g_stop)
-        n_len = length(l_lines)
-        g_first = g_inline
-        g_stop = nil
-        while(!g_stop && (g_first || n_pos <= n_len)
-            t_content = nil
+    let((len line content ind colon key rest v key2 first stop)
+        len = length(l_lines)
+        first = g_inline
+        stop = nil
+        while(!stop && (first || n_pos <= len)
+            content = nil
             cond(
-                (g_first
-                    t_content = g_first
-                    g_first = nil
+                (first
+                    content = first
+                    first = nil
                 )
                 (t
                     n_pos = _SkipIgnorable(l_lines n_pos)
-                    when(n_pos > n_len
-                        n_pos = n_len + 1
+                    when(n_pos > len
+                        n_pos = len + 1
                     )
-                    when(n_pos <= n_len
-                        t_line = _Nth1(n_pos l_lines)
-                        n_ind = _LineIndent(t_line n_pos)
-                        when(n_ind < n_indent
-                            g_stop = t
+                    when(n_pos <= len
+                        line = _Nth1(n_pos l_lines)
+                        ind = _LineIndent(line n_pos)
+                        when(ind < n_indent
+                            stop = t
                         )
-                        when(n_ind > n_indent
+                        when(ind > n_indent
                             _ErrorLine("unexpected indentation" n_pos 1)
                         )
-                        when(n_ind == n_indent
-                            t_content = _StripComment(substring(t_line n_ind + 1 length(t_line) - n_ind))
-                            n_col = n_ind + 1
+                        when(ind == n_indent
+                            content = _StripComment(substring(line ind + 1 length(line) - ind))
+                            n_col = ind + 1
                             n_pos++
                         )
                     )
                 )
             )
-            when(t_content
-                when(_Code(t_content 1) == 45 && (_Code(t_content 2) == nil || _Code(t_content 2) == 32)
+            when(content
+                when(_Code(content 1) == 45 && (_Code(content 2) == nil || _Code(content 2) == 32)
                     _ErrorLine("mixed mapping and sequence" n_pos - 1 n_col)
                 )
-                n_colon = _FindKeyColon(t_content)
-                unless(n_colon
+                colon = _FindKeyColon(content)
+                unless(colon
                     _ErrorLine("expected a mapping key" n_pos - 1 n_col)
                 )
-                t_key = _ParseKeyText(substring(t_content 1 n_colon - 1))
-                t_rest = _Tail(t_content n_colon + 1)
-                l_v = _ParseValueText(t_rest l_lines n_pos n_indent n_max n_pos - 1 n_col + n_colon)
-                n_pos = cadr(l_v)
+                key = _ParseKeyText(substring(content 1 colon - 1))
+                rest = _Tail(content colon + 1)
+                v = _ParseValueText(rest l_lines n_pos n_indent n_max n_pos - 1 n_col + colon)
+                n_pos = cadr(v)
                 cond(
-                    (t_key == "<<" && (tablep(car(l_v)) || listp(car(l_v)))
-                        _MergeInto(g_map car(l_v))
+                    (key == "<<" && (tablep(car(v)) || listp(car(v)))
+                        _MergeInto(g_map car(v))
                     )
                     (t
-                        g_map[t_key] = car(l_v)
+                        g_map[key] = car(v)
                     )
                 )
             )
@@ -292,9 +292,9 @@ procedure(_ParseMap(l_lines n_pos n_indent n_max "lxnn")  ; -> list
     ;
     ; **返回**
     ;   (list) - (table 下一行号)
-    let((t_map)
-        t_map = makeTable("ycYaml" ycCodec:::Missing)
-        _ParseMapInto(t_map l_lines n_pos n_indent n_max nil 1 1)
+    let((map)
+        map = makeTable("ycYaml" ycCodec:::Missing)
+        _ParseMapInto(map l_lines n_pos n_indent n_max nil 1 1)
     )
 )
 procedure(_ParseSeqNested(l_lines n_pos n_indent n_max t_first n_line n_col "lxnntnn")  ; -> list
@@ -311,45 +311,45 @@ procedure(_ParseSeqNested(l_lines n_pos n_indent n_max t_first n_line n_col "lxn
     ;
     ; **返回**
     ;   (list) - (列表 下一行号)
-    let((l_res l_v n_len t_line n_ind t_content g_stop)
+    let((res v len line ind content stop)
         when(n_max < 0
             error("ycYaml::Decode: nesting too deep")
         )
-        n_len = length(l_lines)
-        g_stop = nil
-        l_v = _ParseValueText(t_first l_lines n_pos n_indent n_max n_line n_col)
-        l_res = tconc(l_res car(l_v))
-        n_pos = cadr(l_v)
-        while(!g_stop && n_pos <= n_len
+        len = length(l_lines)
+        stop = nil
+        v = _ParseValueText(t_first l_lines n_pos n_indent n_max n_line n_col)
+        res = tconc(res car(v))
+        n_pos = cadr(v)
+        while(!stop && n_pos <= len
             n_pos = _SkipIgnorable(l_lines n_pos)
-            when(n_pos > n_len
-                g_stop = t
+            when(n_pos > len
+                stop = t
             )
-            unless(g_stop
-                t_line = _Nth1(n_pos l_lines)
-                n_ind = _LineIndent(t_line n_pos)
+            unless(stop
+                line = _Nth1(n_pos l_lines)
+                ind = _LineIndent(line n_pos)
                 cond(
-                    (n_ind < n_indent
-                        g_stop = t
+                    (ind < n_indent
+                        stop = t
                     )
-                    (n_ind > n_indent
+                    (ind > n_indent
                         _ErrorLine("unexpected indentation" n_pos 1)
                     )
                     (t
-                        t_content = _StripComment(substring(t_line n_ind + 1 length(t_line) - n_ind))
-                        if(_Code(t_content 1) == 45
+                        content = _StripComment(substring(line ind + 1 length(line) - ind))
+                        if(_Code(content 1) == 45
                         then
-                            l_v = _ParseValueText(_Tail(t_content 3) l_lines n_pos + 1 n_indent n_max n_pos n_ind + 3)
-                            l_res = tconc(l_res car(l_v))
-                            n_pos = cadr(l_v)
+                            v = _ParseValueText(_Tail(content 3) l_lines n_pos + 1 n_indent n_max n_pos ind + 3)
+                            res = tconc(res car(v))
+                            n_pos = cadr(v)
                         else
-                            g_stop = t
+                            stop = t
                         )
                     )
                 )
             )
         )
-        list(car(l_res) n_pos)
+        list(car(res) n_pos)
     )
 )
 procedure(_ParseSeq(l_lines n_pos n_indent n_max "lxnn")  ; -> list
@@ -363,55 +363,55 @@ procedure(_ParseSeq(l_lines n_pos n_indent n_max "lxnn")  ; -> list
     ;
     ; **返回**
     ;   (list) - (列表 下一行号)
-    let((n_len l_res t_line n_ind t_content t_rest l_v t_map g_stop)
-        n_len = length(l_lines)
-        g_stop = nil
-        while(!g_stop && n_pos <= n_len
+    let((len res line ind content rest v map stop)
+        len = length(l_lines)
+        stop = nil
+        while(!stop && n_pos <= len
             n_pos = _SkipIgnorable(l_lines n_pos)
-            when(n_pos <= n_len
-                t_line = _Nth1(n_pos l_lines)
-                n_ind = _LineIndent(t_line n_pos)
+            when(n_pos <= len
+                line = _Nth1(n_pos l_lines)
+                ind = _LineIndent(line n_pos)
                 cond(
-                    (n_ind < n_indent
-                        g_stop = t
+                    (ind < n_indent
+                        stop = t
                     )
-                    (n_ind > n_indent
+                    (ind > n_indent
                         _ErrorLine("unexpected indentation" n_pos 1)
                     )
                     (t
-                        t_content = _StripComment(substring(t_line n_ind + 1 length(t_line) - n_ind))
-                        unless(_Code(t_content 1) == 45
-                            _ErrorLine("expected a sequence item" n_pos n_ind + 1)
+                        content = _StripComment(substring(line ind + 1 length(line) - ind))
+                        unless(_Code(content 1) == 45
+                            _ErrorLine("expected a sequence item" n_pos ind + 1)
                         )
-                        t_rest = _Rtrim(_Tail(t_content 3))
+                        rest = _Rtrim(_Tail(content 3))
                         cond(
-                            (t_rest == ""
-                                l_v = _ParseChild(l_lines n_pos + 1 n_indent n_max)
-                                l_res = tconc(l_res car(l_v))
-                                n_pos = cadr(l_v)
+                            (rest == ""
+                                v = _ParseChild(l_lines n_pos + 1 n_indent n_max)
+                                res = tconc(res car(v))
+                                n_pos = cadr(v)
                             )
-                            ((_Code(t_rest 1) == 45 && (_Code(t_rest 2) == nil || _Code(t_rest 2) == 32))
-                                l_v = _ParseSeqNested(l_lines n_pos + 1 n_indent + 2 n_max - 1 _Tail(t_rest 3) n_pos n_ind + 3)
-                                l_res = tconc(l_res car(l_v))
-                                n_pos = cadr(l_v)
+                            ((_Code(rest 1) == 45 && (_Code(rest 2) == nil || _Code(rest 2) == 32))
+                                v = _ParseSeqNested(l_lines n_pos + 1 n_indent + 2 n_max - 1 _Tail(rest 3) n_pos ind + 3)
+                                res = tconc(res car(v))
+                                n_pos = cadr(v)
                             )
-                            (_FindKeyColon(t_rest)
-                                t_map = makeTable("ycYaml" ycCodec:::Missing)
-                                l_v = _ParseMapInto(t_map l_lines n_pos + 1 n_indent + 2 n_max t_rest n_pos n_ind + 3)
-                                l_res = tconc(l_res car(l_v))
-                                n_pos = cadr(l_v)
+                            (_FindKeyColon(rest)
+                                map = makeTable("ycYaml" ycCodec:::Missing)
+                                v = _ParseMapInto(map l_lines n_pos + 1 n_indent + 2 n_max rest n_pos ind + 3)
+                                res = tconc(res car(v))
+                                n_pos = cadr(v)
                             )
                             (t
-                                l_v = _ParseValueText(t_rest l_lines n_pos + 1 n_indent n_max n_pos n_ind + 3)
-                                l_res = tconc(l_res car(l_v))
-                                n_pos = cadr(l_v)
+                                v = _ParseValueText(rest l_lines n_pos + 1 n_indent n_max n_pos ind + 3)
+                                res = tconc(res car(v))
+                                n_pos = cadr(v)
                             )
                         )
                     )
                 )
             )
         )
-        list(car(l_res) n_pos)
+        list(car(res) n_pos)
     )
 )
 procedure(_ParseBlock(l_lines n_pos n_indent n_max "lxnn")  ; -> list
@@ -425,29 +425,29 @@ procedure(_ParseBlock(l_lines n_pos n_indent n_max "lxnn")  ; -> list
     ;
     ; **返回**
     ;   (list) - (值 下一行号)
-    prog((n_len t_line n_ind t_content)
+    prog((len line ind content)
         when(n_max < 0
             error("ycYaml::Decode: nesting too deep")
         )
-        n_len = length(l_lines)
+        len = length(l_lines)
         n_pos = _SkipIgnorable(l_lines n_pos)
-        when(n_pos > n_len
+        when(n_pos > len
             return(list(ycCodec:::Null n_pos))
         )
-        t_line = _Nth1(n_pos l_lines)
-        n_ind = _LineIndent(t_line n_pos)
-        when(n_ind < n_indent
+        line = _Nth1(n_pos l_lines)
+        ind = _LineIndent(line n_pos)
+        when(ind < n_indent
             return(list(ycCodec:::Null n_pos))
         )
-        n_indent = n_ind
-        t_content = _StripComment(substring(t_line n_ind + 1 length(t_line) - n_ind))
-        when(_Code(t_content 1) == 45 && (_Code(t_content 2) == nil || _Code(t_content 2) == 32)
+        n_indent = ind
+        content = _StripComment(substring(line ind + 1 length(line) - ind))
+        when(_Code(content 1) == 45 && (_Code(content 2) == nil || _Code(content 2) == 32)
             return(_ParseSeq(l_lines n_pos n_indent n_max))
         )
-        when(_FindKeyColon(t_content)
+        when(_FindKeyColon(content)
             return(_ParseMap(l_lines n_pos n_indent n_max))
         )
-        return(_ParseValueText(t_content l_lines n_pos + 1 n_indent n_max n_pos n_ind + 1))
+        return(_ParseValueText(content l_lines n_pos + 1 n_indent n_max n_pos ind + 1))
     )
 )
 procedure(_SplitDocuments(t_s "t")  ; -> list
@@ -458,46 +458,46 @@ procedure(_SplitDocuments(t_s "t")  ; -> list
     ;
     ; **返回**
     ;   (list) - 每项的 line 列表
-    let((l_lines l_docs l_cur g_active t_line t_rest n_i)
-        l_lines = _SplitLines(t_s)
-        l_docs = nil
-        g_active = nil
-        foreach(t_line l_lines
-            t_rest = _Rtrim(_StripComment(t_line))
+    let((lines docs cur active line rest i)
+        lines = _SplitLines(t_s)
+        docs = nil
+        active = nil
+        foreach(line2 lines
+            rest = _Rtrim(_StripComment(line2))
             cond(
-                (pcreMatchp("^---([ \t].*)?\\z" t_rest)
-                    when(g_active || l_cur
-                        l_docs = tconc(l_docs car(l_cur))
+                (pcreMatchp("^---([ \t].*)?\\z" rest)
+                    when(active || cur
+                        docs = tconc(docs car(cur))
                     )
-                    l_cur = nil
-                    g_active = t
-                    when(length(t_rest) > 3
-                        t_rest = _Rtrim(substring(t_rest 4 length(t_rest) - 3))
-                        when(t_rest != "" l_cur = tconc(nil t_rest))
+                    cur = nil
+                    active = t
+                    when(length(rest) > 3
+                        rest = _Rtrim(substring(rest 4 length(rest) - 3))
+                        when(rest != "" cur = tconc(nil rest))
                     )
                 )
-                (pcreMatchp("^\\.\\.\\.[ \t]*(#.*)?\\z" t_rest)
-                    when(g_active || l_cur
-                        l_docs = tconc(l_docs car(l_cur))
+                (pcreMatchp("^\\.\\.\\.[ \t]*(#.*)?\\z" rest)
+                    when(active || cur
+                        docs = tconc(docs car(cur))
                     )
-                    l_cur = nil
-                    g_active = nil
+                    cur = nil
+                    active = nil
                 )
-                (pcreMatchp("^%[A-Za-z]" t_rest)
+                (pcreMatchp("^%[A-Za-z]" rest)
                     nil
                 )
                 (t
-                    when(t_rest != "" || g_active || l_cur
-                        g_active = t
-                        l_cur = tconc(l_cur t_line)
+                    when(rest != "" || active || cur
+                        active = t
+                        cur = tconc(cur line2)
                     )
                 )
             )
         )
-        when(g_active || l_cur
-            l_docs = tconc(l_docs car(l_cur))
+        when(active || cur
+            docs = tconc(docs car(cur))
         )
-        car(l_docs)
+        car(docs)
     )
 )
 procedure(_DecodeText(l_lines n_max "lx")  ; -> any
@@ -509,15 +509,15 @@ procedure(_DecodeText(l_lines n_max "lx")  ; -> any
     ;
     ; **返回**
     ;   (any) - 文档值
-    let((l_r n_pos)
+    let((r pos)
         _Anchors = makeTable("yamlAnchors" nil)
         _ActiveAnchors = makeTable("yamlActiveAnchors" nil)
-        l_r = _ParseBlock(l_lines 1 0 n_max)
-        n_pos = _SkipIgnorable(l_lines cadr(l_r))
-        when(n_pos <= length(l_lines)
-            _ErrorLine("unexpected trailing content" n_pos 1)
+        r = _ParseBlock(l_lines 1 0 n_max)
+        pos = _SkipIgnorable(l_lines cadr(r))
+        when(pos <= length(l_lines)
+            _ErrorLine("unexpected trailing content" pos 1)
         )
-        car(l_r)
+        car(r)
     )
 )
 procedure(_DecodeStream(l_docs n_max "ln")  ; -> list
@@ -529,11 +529,11 @@ procedure(_DecodeStream(l_docs n_max "ln")  ; -> list
     ;
     ; **返回**
     ;   (list) - 各文档值
-    let((l_res)
-        foreach(l_doc l_docs
-            l_res = tconc(l_res _DecodeText(l_doc n_max))
+    let((res)
+        foreach(doc l_docs
+            res = tconc(res _DecodeText(doc n_max))
         )
-        car(l_res)
+        car(res)
     )
 )
 procedure(Decode(t_str \@key (format "yaml") (maxDepth nil) "ttg")  ; -> any | list
@@ -546,7 +546,7 @@ procedure(Decode(t_str \@key (format "yaml") (maxDepth nil) "ttg")  ; -> any | l
     ;
     ; **返回**
     ;   (any|list) - 单文档值或文档列表；错误以 error() 中断
-    let((l_docs)
+    let((docs)
         unless(stringp(t_str)
             error("ycYaml::Decode: expects a string")
         )
@@ -556,16 +556,16 @@ procedure(Decode(t_str \@key (format "yaml") (maxDepth nil) "ttg")  ; -> any | l
         unless(fixp(maxDepth) && maxDepth >= 1
             error("ycYaml::Decode: ?maxDepth must be a positive fixnum")
         )
-        l_docs = _SplitDocuments(t_str)
+        docs = _SplitDocuments(t_str)
         case(format
             ("yaml"
                 cond(
-                    (l_docs == nil ycCodec:::Null)
-                    (cadr(l_docs) _ErrorLine("multiple documents; use yaml-stream" 1 1))
-                    (t _DecodeText(car(l_docs) maxDepth))
+                    (docs == nil ycCodec:::Null)
+                    (cadr(docs) _ErrorLine("multiple documents; use yaml-stream" 1 1))
+                    (t _DecodeText(car(docs) maxDepth))
                 )
             )
-            ("yaml-stream" _DecodeStream(l_docs maxDepth))
+            ("yaml-stream" _DecodeStream(docs maxDepth))
             (t error("ycYaml::Decode: unknown format %A" format))
         )
     )

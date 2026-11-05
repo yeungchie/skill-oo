@@ -18,33 +18,33 @@ procedure(_SkipWs(t_s n_i g_relaxed "txg")  ; -> int
     ;
     ; **返回**
     ;   (int) - 首个非空白非注释字符的位置；到串尾为 length+1
-    let((n_len n_c g_stop n_close)
-        n_len = length(t_s)
-        g_stop = nil
-        while(!g_stop && n_i <= n_len
-            n_c = _Code(t_s n_i)
+    let((len c stop close)
+        len = length(t_s)
+        stop = nil
+        while(!stop && n_i <= len
+            c = _Code(t_s n_i)
             cond(
-                (n_c == 32 || n_c == 9 || n_c == 10 || n_c == 13
+                (c == 32 || c == 9 || c == 10 || c == 13
                     n_i++
                 )
-                (g_relaxed && n_c == 47 && _Code(t_s n_i + 1) == 47
+                (g_relaxed && c == 47 && _Code(t_s n_i + 1) == 47
                     n_i = n_i + 2
-                    while(n_i <= n_len && _Code(t_s n_i) != 10
+                    while(n_i <= len && _Code(t_s n_i) != 10
                         n_i++
                     )
                 )
-                (g_relaxed && n_c == 47 && _Code(t_s n_i + 1) == 42
-                    n_close = n_i + 2
-                    while(n_close <= n_len - 1 && !(_Code(t_s n_close) == 42 && _Code(t_s n_close + 1) == 47)
-                        n_close++
+                (g_relaxed && c == 47 && _Code(t_s n_i + 1) == 42
+                    close = n_i + 2
+                    while(close <= len - 1 && !(_Code(t_s close) == 42 && _Code(t_s close + 1) == 47)
+                        close++
                     )
-                    if(n_close <= n_len - 1
-                        n_i = n_close + 2
+                    if(close <= len - 1
+                        n_i = close + 2
                         _Error(t_s n_i "unterminated block comment")
                     )
                 )
                 (t
-                    g_stop = t
+                    stop = t
                 )
             )
         )
@@ -64,15 +64,15 @@ procedure(_Value(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (值 下一位置)；深度超限或字符非法报错
-    let((n_c)
+    let((c)
         when(n_depth > n_max
             _Error(t_s n_i lsprintf("nesting too deep (limit %d)" n_max))
         )
-        n_c = _Code(t_s n_i)
-        when(!n_c
+        c = _Code(t_s n_i)
+        when(!c
             _Error(t_s n_i "unexpected end of input")
         )
-        case(n_c
+        case(c
             (34 _String(t_s n_i))
             (123 _Object(t_s n_i g_relaxed n_depth n_max))
             (91 _Array(t_s n_i g_relaxed n_depth n_max))
@@ -80,7 +80,7 @@ procedure(_Value(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
             (102 _Literal(t_s n_i))
             (110 _Literal(t_s n_i))
             (t
-                if(n_c == 45 || _Digitp(n_c)
+                if(c == 45 || _Digitp(c)
                     _Number(t_s n_i)
                     _Error(t_s n_i "unexpected character")
                 )
@@ -101,52 +101,52 @@ procedure(_Object(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (table 闭括号后一位置)
-    let((n_k n_c l_r t_key t_obj g_done)
-        n_k = _SkipWs(t_s n_i + 1 g_relaxed)
-        t_obj = makeTable("ycJson" ycCodec:::Missing)
-        g_done = nil
-        when(_Code(t_s n_k) == 125
-            g_done = t
-            n_k++
+    let((k c r key obj done)
+        k = _SkipWs(t_s n_i + 1 g_relaxed)
+        obj = makeTable("ycJson" ycCodec:::Missing)
+        done = nil
+        when(_Code(t_s k) == 125
+            done = t
+            k++
         )
-        while(!g_done
-            n_k = _SkipWs(t_s n_k g_relaxed)
-            unless(_Code(t_s n_k) == 34
-                _Error(t_s n_k "expected string key")
+        while(!done
+            k = _SkipWs(t_s k g_relaxed)
+            unless(_Code(t_s k) == 34
+                _Error(t_s k "expected string key")
             )
-            l_r = _String(t_s n_k)
-            t_key = car(l_r)
-            n_k = _SkipWs(t_s cadr(l_r) g_relaxed)
-            unless(_Code(t_s n_k) == 58
-                _Error(t_s n_k "expected ':'")
+            r = _String(t_s k)
+            key = car(r)
+            k = _SkipWs(t_s cadr(r) g_relaxed)
+            unless(_Code(t_s k) == 58
+                _Error(t_s k "expected ':'")
             )
-            n_k = _SkipWs(t_s n_k + 1 g_relaxed)
-            l_r = _Value(t_s n_k g_relaxed n_depth + 1 n_max)
-            t_obj[t_key] = car(l_r)
-            n_k = _SkipWs(t_s cadr(l_r) g_relaxed)
-            n_c = _Code(t_s n_k)
-            case(n_c
+            k = _SkipWs(t_s k + 1 g_relaxed)
+            r = _Value(t_s k g_relaxed n_depth + 1 n_max)
+            obj[key] = car(r)
+            k = _SkipWs(t_s cadr(r) g_relaxed)
+            c = _Code(t_s k)
+            case(c
                 (125
                     {
-                    g_done = t
-                    n_k++
+                    done = t
+                    k++
                     }
                 )
                 (44
                     {
-                    n_k = _SkipWs(t_s n_k + 1 g_relaxed)
-                    when(g_relaxed && _Code(t_s n_k) == 125
-                        g_done = t
-                        n_k++
+                    k = _SkipWs(t_s k + 1 g_relaxed)
+                    when(g_relaxed && _Code(t_s k) == 125
+                        done = t
+                        k++
                     )
                     }
                 )
                 (t
-                    _Error(t_s n_k "expected ',' or '}'")
+                    _Error(t_s k "expected ',' or '}'")
                 )
             )
         )
-        list(t_obj n_k)
+        list(obj k)
     )
 )
 
@@ -162,42 +162,42 @@ procedure(_Array(t_s n_i g_relaxed n_depth n_max "txgxx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (列表或 nil 闭括号后一位置)
-    let((n_k n_c l_res l_r g_done)
-        n_k = _SkipWs(t_s n_i + 1 g_relaxed)
-        l_res = nil
-        g_done = nil
-        when(_Code(t_s n_k) == 93
-            g_done = t
-            n_k++
+    let((k c res r done)
+        k = _SkipWs(t_s n_i + 1 g_relaxed)
+        res = nil
+        done = nil
+        when(_Code(t_s k) == 93
+            done = t
+            k++
         )
-        while(!g_done
-            n_k = _SkipWs(t_s n_k g_relaxed)
-            l_r = _Value(t_s n_k g_relaxed n_depth + 1 n_max)
-            l_res = tconc(l_res car(l_r))
-            n_k = _SkipWs(t_s cadr(l_r) g_relaxed)
-            n_c = _Code(t_s n_k)
-            case(n_c
+        while(!done
+            k = _SkipWs(t_s k g_relaxed)
+            r = _Value(t_s k g_relaxed n_depth + 1 n_max)
+            res = tconc(res car(r))
+            k = _SkipWs(t_s cadr(r) g_relaxed)
+            c = _Code(t_s k)
+            case(c
                 (93
                     {
-                    g_done = t
-                    n_k++
+                    done = t
+                    k++
                     }
                 )
                 (44
                     {
-                    n_k = _SkipWs(t_s n_k + 1 g_relaxed)
-                    when(g_relaxed && _Code(t_s n_k) == 93
-                        g_done = t
-                        n_k++
+                    k = _SkipWs(t_s k + 1 g_relaxed)
+                    when(g_relaxed && _Code(t_s k) == 93
+                        done = t
+                        k++
                     )
                     }
                 )
                 (t
-                    _Error(t_s n_k "expected ',' or ']'")
+                    _Error(t_s k "expected ',' or ']'")
                 )
             )
         )
-        list(car(l_res) n_k)
+        list(car(res) k)
     )
 )
 
@@ -211,15 +211,15 @@ procedure(_DecodeText(t_s g_relaxed n_max "tgx")  ; -> any
     ;
     ; **返回**
     ;   (any) - 解析产物
-    let((n_k l_r g_val)
-        n_k = _SkipWs(t_s 1 g_relaxed)
-        l_r = _Value(t_s n_k g_relaxed 0 n_max)
-        g_val = car(l_r)
-        n_k = _SkipWs(t_s cadr(l_r) g_relaxed)
-        when(n_k <= length(t_s)
-            _Error(t_s n_k "unexpected trailing characters")
+    let((k r val)
+        k = _SkipWs(t_s 1 g_relaxed)
+        r = _Value(t_s k g_relaxed 0 n_max)
+        val = car(r)
+        k = _SkipWs(t_s cadr(r) g_relaxed)
+        when(k <= length(t_s)
+            _Error(t_s k "unexpected trailing characters")
         )
-        g_val
+        val
     )
 )
 

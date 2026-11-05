@@ -13,15 +13,15 @@ procedure(_FlowSkip(t_s n_i "tx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 下一有效字符位置
-    let((n_len n_c g_stop)
-        n_len = length(t_s)
-        g_stop = nil
-        while(!g_stop && n_i <= n_len
-            n_c = _Code(t_s n_i)
+    let((len c stop)
+        len = length(t_s)
+        stop = nil
+        while(!stop && n_i <= len
+            c = _Code(t_s n_i)
             cond(
-                (n_c == 32 || n_c == 9 n_i = n_i + 1)
-                (n_c == 35 n_i = n_len + 1)
-                (t g_stop = t)
+                (c == 32 || c == 9 n_i = n_i + 1)
+                (c == 35 n_i = len + 1)
+                (t stop = t)
             )
         )
         n_i
@@ -37,17 +37,17 @@ procedure(_FlowTokenEnd(t_s n_i "tx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 终止位置（不含）
-    let((n_len n_c g_stop)
-        n_len = length(t_s)
-        g_stop = nil
-        while(!g_stop && n_i <= n_len
-            n_c = _Code(t_s n_i)
-            if(n_c == 32 || n_c == 9 || n_c == 44 || n_c == 93 || n_c == 125
-                g_stop = t
+    let((len c stop)
+        len = length(t_s)
+        stop = nil
+        while(!stop && n_i <= len
+            c = _Code(t_s n_i)
+            if(c == 32 || c == 9 || c == 44 || c == 93 || c == 125
+                stop = t
                 n_i++
             )
         )
-        if(g_stop n_i - 1 n_i)
+        if(stop n_i - 1 n_i)
     )
 )
 
@@ -78,32 +78,32 @@ procedure(_FlowPrefix(t_s n_i l_state "txl")  ; -> list
     ;
     ; **返回**
     ;   (list) - (标签 锚点 下一位置)
-    let((n_len n_c n_end t_tag t_anchor g_stop)
-        n_len = length(t_s)
-        t_tag = car(l_state)
-        t_anchor = cadr(l_state)
+    let((len c end tag anchor stop)
+        len = length(t_s)
+        tag = car(l_state)
+        anchor = cadr(l_state)
         n_i = _FlowSkip(t_s n_i)
-        g_stop = nil
-        while(!g_stop && n_i <= n_len
-            n_c = _Code(t_s n_i)
+        stop = nil
+        while(!stop && n_i <= len
+            c = _Code(t_s n_i)
             cond(
-                (n_c == 38
-                    n_end = _FlowTokenEnd(t_s n_i + 1)
-                    t_anchor = substring(t_s n_i + 1 n_end - n_i - 1)
-                    when(t_anchor == "" error("ycYaml::Decode: empty anchor name"))
-                    n_i = _FlowSkip(t_s n_end)
+                (c == 38
+                    end = _FlowTokenEnd(t_s n_i + 1)
+                    anchor = substring(t_s n_i + 1 end - n_i - 1)
+                    when(anchor == "" error("ycYaml::Decode: empty anchor name"))
+                    n_i = _FlowSkip(t_s end)
                 )
-                (n_c == 33
-                    n_end = _FlowTokenEnd(t_s n_i)
-                    t_tag = substring(t_s n_i n_end - n_i)
-                    n_i = _FlowSkip(t_s n_end)
+                (c == 33
+                    end = _FlowTokenEnd(t_s n_i)
+                    tag = substring(t_s n_i end - n_i)
+                    n_i = _FlowSkip(t_s end)
                 )
                 (t
-                    g_stop = t
+                    stop = t
                 )
             )
         )
-        list(t_tag t_anchor n_i)
+        list(tag anchor n_i)
     )
 )
 
@@ -117,74 +117,74 @@ procedure(_FlowValue(t_s n_i n_max "txn")  ; -> list
     ;
     ; **返回**
     ;   (list) - (值 下一位置)
-    prog((n_len n_c n_end l_p l_v t_tag t_anchor g_val l_q g_stop)
+    prog((len c end p v tag anchor val q stop)
         when(n_max < 0
             error("ycYaml::Decode: nesting too deep")
         )
-        n_len = length(t_s)
+        len = length(t_s)
         n_i = _FlowSkip(t_s n_i)
-        when(n_i > n_len
+        when(n_i > len
             error("ycYaml::Decode: unexpected end of flow value")
         )
-        n_c = _Code(t_s n_i)
-        when(n_c == 42
-            n_end = _FlowTokenEnd(t_s n_i + 1)
-            l_v = _AliasValue(substring(t_s n_i + 1 n_end - n_i - 1))
-            return(list(l_v n_end))
+        c = _Code(t_s n_i)
+        when(c == 42
+            end = _FlowTokenEnd(t_s n_i + 1)
+            v = _AliasValue(substring(t_s n_i + 1 end - n_i - 1))
+            return(list(v end))
         )
-        l_p = _FlowPrefix(t_s n_i list(nil nil))
-        t_tag = car(l_p)
-        t_anchor = cadr(l_p)
-        n_i = caddr(l_p)
-        when(n_i > n_len
+        p = _FlowPrefix(t_s n_i list(nil nil))
+        tag = car(p)
+        anchor = cadr(p)
+        n_i = caddr(p)
+        when(n_i > len
             error("ycYaml::Decode: missing value after tag or anchor")
         )
-        n_c = _Code(t_s n_i)
-        when(t_anchor
-            when(_ActiveAnchors[t_anchor]
-                error("ycYaml::Decode: recursive anchor %A" t_anchor)
+        c = _Code(t_s n_i)
+        when(anchor
+            when(_ActiveAnchors[anchor]
+                error("ycYaml::Decode: recursive anchor %A" anchor)
             )
-            _ActiveAnchors[t_anchor] = t
+            _ActiveAnchors[anchor] = t
         )
         cond(
-            (n_c == 91
+            (c == 91
                 n_i++
-                l_v = _FlowSeq(t_s n_i n_max - 1)
+                v = _FlowSeq(t_s n_i n_max - 1)
             )
-            (n_c == 123
+            (c == 123
                 n_i++
-                l_v = _FlowMap(t_s n_i n_max - 1)
+                v = _FlowMap(t_s n_i n_max - 1)
             )
-            (n_c == 34 || n_c == 39
-                l_q = _ParseQuoted(t_s n_i 1)
-                l_v = list(car(l_q) cadr(l_q))
+            (c == 34 || c == 39
+                q = _ParseQuoted(t_s n_i 1)
+                v = list(car(q) cadr(q))
             )
             (t
-                n_end = n_i
-                g_stop = nil
-                while(!g_stop && n_end <= n_len
-                    n_c = _Code(t_s n_end)
-                    if(n_c == 44 || n_c == 93 || n_c == 125
-                        || (n_c == 35 && (n_end == n_i || _Code(t_s n_end - 1) == 32 || _Code(t_s n_end - 1) == 9))
-                        g_stop = t
+                end = n_i
+                stop = nil
+                while(!stop && end <= len
+                    c = _Code(t_s end)
+                    if(c == 44 || c == 93 || c == 125
+                        || (c == 35 && (end == n_i || _Code(t_s end - 1) == 32 || _Code(t_s end - 1) == 9))
+                        stop = t
                     )
-                    unless(g_stop
-                        n_end++
+                    unless(stop
+                        end++
                     )
                 )
-                l_v = list(_ParseScalarText(_Rtrim(substring(t_s n_i n_end - n_i))) n_end)
+                v = list(_ParseScalarText(_Rtrim(substring(t_s n_i end - n_i))) end)
             )
         )
-        g_val = car(l_v)
-        when(t_tag
-            g_val = _TagValue(g_val t_tag)
-            l_v = list(g_val cadr(l_v))
+        val = car(v)
+        when(tag
+            val = _TagValue(val tag)
+            v = list(val cadr(v))
         )
-        when(t_anchor
-            _Anchors[t_anchor] = g_val
-            _ActiveAnchors[t_anchor] = nil
+        when(anchor
+            _Anchors[anchor] = val
+            _ActiveAnchors[anchor] = nil
         )
-        return(l_v)
+        return(v)
     )
 )
 
@@ -198,34 +198,34 @@ procedure(_FlowSeq(t_s n_i n_max "txn")  ; -> list
     ;
     ; **返回**
     ;   (list) - (列表或 nil 下一位置)
-    prog((n_len l_res l_v n_c g_done)
+    prog((len res v c done)
         when(n_max < 0
             error("ycYaml::Decode: nesting too deep")
         )
-        n_len = length(t_s)
-        g_done = nil
+        len = length(t_s)
+        done = nil
         n_i = _FlowSkip(t_s n_i)
-        when(n_i <= n_len && _Code(t_s n_i) == 93
+        when(n_i <= len && _Code(t_s n_i) == 93
             return(list(nil n_i + 1))
         )
-        while(!g_done
-            l_v = _FlowValue(t_s n_i n_max)
-            l_res = tconc(l_res car(l_v))
-            n_i = _FlowSkip(t_s cadr(l_v))
-            when(n_i > n_len
+        while(!done
+            v = _FlowValue(t_s n_i n_max)
+            res = tconc(res car(v))
+            n_i = _FlowSkip(t_s cadr(v))
+            when(n_i > len
                 error("ycYaml::Decode: unterminated flow sequence")
             )
-            n_c = _Code(t_s n_i)
-            case(n_c
+            c = _Code(t_s n_i)
+            case(c
                 (44
                     n_i = _FlowSkip(t_s n_i + 1)
-                    when(n_i <= n_len && _Code(t_s n_i) == 93
-                        g_done = t
+                    when(n_i <= len && _Code(t_s n_i) == 93
+                        done = t
                         n_i++
                     )
                 )
                 (93
-                    g_done = t
+                    done = t
                     n_i++
                 )
                 (t
@@ -233,7 +233,7 @@ procedure(_FlowSeq(t_s n_i n_max "txn")  ; -> list
                 )
             )
         )
-        return(list(car(l_res) n_i))
+        return(list(car(res) n_i))
     )
 )
 
@@ -245,26 +245,26 @@ procedure(_ParseKeyText(t_text "t")  ; -> any
     ;
     ; **返回**
     ;   (any) - 键值
-    prog((n_i n_len l_q)
+    prog((i len q)
         t_text = _Rtrim(t_text)
-        n_i = 1
-        n_len = length(t_text)
-        while(n_i <= n_len && _Code(t_text n_i) == 32
-            n_i++
+        i = 1
+        len = length(t_text)
+        while(i <= len && _Code(t_text i) == 32
+            i++
         )
-        when(n_i > n_len
+        when(i > len
             return("")
         )
-        when(_Code(t_text n_i) == 34 || _Code(t_text n_i) == 39
-            l_q = _ParseQuoted(t_text n_i 1)
-            return(car(l_q))
+        when(_Code(t_text i) == 34 || _Code(t_text i) == 39
+            q = _ParseQuoted(t_text i 1)
+            return(car(q))
         )
-        t_text = substring(t_text n_i n_len - n_i + 1)
+        t_text = substring(t_text i len - i + 1)
         when(pcreMatchp("^[+-]?[0-9_]+\\z" t_text)
-            let((g_v)
-                g_v = _ParseIntText(pcreReplace(pcreCompile("_") t_text "" 0))
-                when(fixp(g_v)
-                    return(g_v)
+            let((v)
+                v = _ParseIntText(pcreReplace(pcreCompile("_") t_text "" 0))
+                when(fixp(v)
+                    return(v)
                 )
             )
         )
@@ -281,35 +281,35 @@ procedure(_FlowKey(t_s n_i "tx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (键值 冒号位置)
-    prog((n_len n_c n_start n_k g_sq g_dq g_esc)
-        n_len = length(t_s)
+    prog((len c start k sq dq esc)
+        len = length(t_s)
         n_i = _FlowSkip(t_s n_i)
-        n_start = n_i
-        g_sq = nil
-        g_dq = nil
-        g_esc = nil
-        n_k = n_i
-        while(n_k <= n_len
-            n_c = _Code(t_s n_k)
+        start = n_i
+        sq = nil
+        dq = nil
+        esc = nil
+        k = n_i
+        while(k <= len
+            c = _Code(t_s k)
             cond(
-                (g_dq
-                    when(g_esc g_esc = nil)
-                    when(!g_esc && n_c == 92 g_esc = t)
-                    when(!g_esc && n_c == 34 g_dq = nil)
+                (dq
+                    when(esc esc = nil)
+                    when(!esc && c == 92 esc = t)
+                    when(!esc && c == 34 dq = nil)
                 )
-                (g_sq
-                    when(n_c == 39 g_sq = nil)
+                (sq
+                    when(c == 39 sq = nil)
                 )
-                (n_c == 34 g_dq = t)
-                (n_c == 39 g_sq = t)
-                (n_c == 58
-                    return(list(_ParseKeyText(substring(t_s n_start n_k - n_start)) n_k))
+                (c == 34 dq = t)
+                (c == 39 sq = t)
+                (c == 58
+                    return(list(_ParseKeyText(substring(t_s start k - start)) k))
                 )
-                (n_c == 44 || n_c == 93 || n_c == 125
+                (c == 44 || c == 93 || c == 125
                     error("ycYaml::Decode: expected ':' in flow mapping")
                 )
             )
-            n_k++
+            k++
         )
         error("ycYaml::Decode: expected ':' in flow mapping")
     )
@@ -325,50 +325,50 @@ procedure(_FlowMap(t_s n_i n_max "txn")  ; -> list
     ;
     ; **返回**
     ;   (list) - (table 下一位置)
-    prog((n_len t_map l_k l_v n_c g_done g_key)
+    prog((len map k v c done key)
         when(n_max < 0
             error("ycYaml::Decode: nesting too deep")
         )
-        n_len = length(t_s)
-        t_map = makeTable("ycYaml" ycCodec:::Missing)
-        g_done = nil
+        len = length(t_s)
+        map = makeTable("ycYaml" ycCodec:::Missing)
+        done = nil
         n_i = _FlowSkip(t_s n_i)
-        when(n_i <= n_len && _Code(t_s n_i) == 125
-            return(list(t_map n_i + 1))
+        when(n_i <= len && _Code(t_s n_i) == 125
+            return(list(map n_i + 1))
         )
-        while(!g_done
-            l_k = _FlowKey(t_s n_i)
-            g_key = car(l_k)
-            n_i = _FlowSkip(t_s cadr(l_k) + 1)
+        while(!done
+            k = _FlowKey(t_s n_i)
+            key = car(k)
+            n_i = _FlowSkip(t_s cadr(k) + 1)
             cond(
-                (n_i > n_len || _Code(t_s n_i) == 44 || _Code(t_s n_i) == 125
-                    l_v = list(ycCodec:::Null n_i)
+                (n_i > len || _Code(t_s n_i) == 44 || _Code(t_s n_i) == 125
+                    v = list(ycCodec:::Null n_i)
                 )
                 (t
-                    l_v = _FlowValue(t_s n_i n_max)
+                    v = _FlowValue(t_s n_i n_max)
                 )
             )
-            if(g_key == "<<" && (tablep(car(l_v)) || listp(car(l_v)))
-                _MergeInto(t_map car(l_v))
+            if(key == "<<" && (tablep(car(v)) || listp(car(v)))
+                _MergeInto(map car(v))
             )
-            unless(g_key == "<<" && (tablep(car(l_v)) || listp(car(l_v)))
-                t_map[g_key] = car(l_v)
+            unless(key == "<<" && (tablep(car(v)) || listp(car(v)))
+                map[key] = car(v)
             )
-            n_i = _FlowSkip(t_s cadr(l_v))
-            when(n_i > n_len
+            n_i = _FlowSkip(t_s cadr(v))
+            when(n_i > len
                 error("ycYaml::Decode: unterminated flow mapping")
             )
-            n_c = _Code(t_s n_i)
-            case(n_c
+            c = _Code(t_s n_i)
+            case(c
                 (44
                     n_i = _FlowSkip(t_s n_i + 1)
-                    when(n_i <= n_len && _Code(t_s n_i) == 125
-                        g_done = t
+                    when(n_i <= len && _Code(t_s n_i) == 125
+                        done = t
                         n_i++
                     )
                 )
                 (125
-                    g_done = t
+                    done = t
                     n_i++
                 )
                 (t
@@ -376,7 +376,7 @@ procedure(_FlowMap(t_s n_i n_max "txn")  ; -> list
                 )
             )
         )
-        return(list(t_map n_i))
+        return(list(map n_i))
     )
 )
 

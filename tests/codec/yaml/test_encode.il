@@ -38,89 +38,89 @@ _Assert(ycYaml::Encode(list(makeTable("ycTest"))) == "- {}\n"  "encode: empty ma
 
 ; --- 映射输出 ---
 _Assert(ycYaml::Encode(makeTable("ycTest")) == "{}\n"  "encode: empty map")
-let((t_v)
-    t_v = makeTable("ycTest")
-    t_v["a"] = 1
-    t_v["b"] = 2
-    _Assert(ycYaml::Encode(t_v ?sortKeys t) == "a: 1\nb: 2\n"  "encode: map")
-    _Assert(ycYaml::Encode(t_v ?sortKeys t) == "a: 1\nb: 2\n"  "encode: sorted map")
+let((v)
+    v = makeTable("ycTest")
+    v["a"] = 1
+    v["b"] = 2
+    _Assert(ycYaml::Encode(v ?sortKeys t) == "a: 1\nb: 2\n"  "encode: map")
+    _Assert(ycYaml::Encode(v ?sortKeys t) == "a: 1\nb: 2\n"  "encode: sorted map")
 )
-let((t_v t_in)
-    t_in = makeTable("ycTest")
-    t_in["b"] = 1
-    t_v = makeTable("ycTest")
-    t_v["a"] = t_in
-    _Assert(ycYaml::Encode(t_v) == "a:\n  b: 1\n"  "encode: nested map")
+let((v in)
+    in = makeTable("ycTest")
+    in["b"] = 1
+    v = makeTable("ycTest")
+    v["a"] = in
+    _Assert(ycYaml::Encode(v) == "a:\n  b: 1\n"  "encode: nested map")
 )
-let((t_v)
-    t_v = makeTable("ycTest")
-    t_v["a"] = list(1 2)
-    _Assert(ycYaml::Encode(t_v) == "a:\n  - 1\n  - 2\n"  "encode: map with sequence")
+let((v)
+    v = makeTable("ycTest")
+    v["a"] = list(1 2)
+    _Assert(ycYaml::Encode(v) == "a:\n  - 1\n  - 2\n"  "encode: map with sequence")
 )
-let((t_v)
-    t_v = makeTable("ycTest")
-    t_v["a"] = 1
-    t_v["b"] = 2
-    _Assert(ycYaml::Encode(list(t_v) ?sortKeys t) == "- a: 1\n  b: 2\n"  "encode: sequence of maps")
+let((v)
+    v = makeTable("ycTest")
+    v["a"] = 1
+    v["b"] = 2
+    _Assert(ycYaml::Encode(list(v) ?sortKeys t) == "- a: 1\n  b: 2\n"  "encode: sequence of maps")
 )
-let((t_v)
-    t_v = makeTable("ycTest")
-    t_v["a b"] = 1
-    _Assert(ycYaml::Encode(t_v) == "\"a b\": 1\n"  "encode: quoted key")
+let((v)
+    v = makeTable("ycTest")
+    v["a b"] = 1
+    _Assert(ycYaml::Encode(v) == "\"a b\": 1\n"  "encode: quoted key")
 )
-let((t_v)
-    t_v = makeTable("ycTest")
-    t_v['k] = 1
-    t_v[3] = 2
-    _Assert(ycYaml::Encode(t_v ?sortKeys t) == "3: 2\nk: 1\n"  "encode: symbol and integer keys")
-    _AssertError(lambda(() ycYaml::Encode(t_v ?strict t))  "encode: strict rejects non-string keys")
+let((v)
+    v = makeTable("ycTest")
+    v['k] = 1
+    v[3] = 2
+    _Assert(ycYaml::Encode(v ?sortKeys t) == "3: 2\nk: 1\n"  "encode: symbol and integer keys")
+    _AssertError(lambda(() ycYaml::Encode(v ?strict t))  "encode: strict rejects non-string keys")
 )
-let((t_v)
-    t_v = makeTable("ycTest")
-    t_v["a"] = 1
-    t_v['a] = 2
-    _AssertError(lambda(() ycYaml::Encode(t_v))  "encode: stringified key collision errors")
+let((v)
+    v = makeTable("ycTest")
+    v["a"] = 1
+    v['a] = 2
+    _AssertError(lambda(() ycYaml::Encode(v))  "encode: stringified key collision errors")
 )
 
-let((t_v)
-    t_v = makeTable("ycTest")
-    t_v["a"] = nil
-    _Assert(ycYaml::Encode(t_v) == "a: []\n"  "encode: nil map value is empty sequence")
+let((v)
+    v = makeTable("ycTest")
+    v["a"] = nil
+    _Assert(ycYaml::Encode(v) == "a: []\n"  "encode: nil map value is empty sequence")
 )
-let((t_v)
-    t_v = makeTable("ycTest")
-    t_v["a"] = ycCodec::Missing
-    _AssertError(lambda(() ycYaml::Encode(t_v))  "encode: Missing value errors")
+let((v)
+    v = makeTable("ycTest")
+    v["a"] = ycCodec::Missing
+    _AssertError(lambda(() ycYaml::Encode(v))  "encode: Missing value errors")
 )
 
 ; --- 流式输出 ---
 _Assert(ycYaml::Encode(list(1 2) ?flow t) == "[1, 2]\n"  "flow encode: sequence")
 _Assert(ycYaml::Encode(nil ?flow t) == "[]\n"  "flow encode: empty sequence")
-let((t_v)
-    t_v = makeTable("ycTest")
-    t_v["a"] = nil
-    _Assert(ycYaml::Encode(t_v) == "a: []\n"  "encode: nil map value is empty sequence")
+let((v)
+    v = makeTable("ycTest")
+    v["a"] = nil
+    _Assert(ycYaml::Encode(v) == "a: []\n"  "encode: nil map value is empty sequence")
 )
-let((t_v)
-    t_v = makeTable("ycTest")
-    t_v["a"] = 1
-    t_v["b"] = list(2 3)
-    _Assert(ycYaml::Encode(t_v ?flow t ?sortKeys t) == "{a: 1, b: [2, 3]}\n"  "flow encode: map")
+let((v)
+    v = makeTable("ycTest")
+    v["a"] = 1
+    v["b"] = list(2 3)
+    _Assert(ycYaml::Encode(v ?flow t ?sortKeys t) == "{a: 1, b: [2, 3]}\n"  "flow encode: map")
 )
-let((t_v)
-    t_v = makeTable("ycTest")
-    t_v["a"] = 1
-    t_v['a] = 2
-    _AssertError(lambda(() ycYaml::Encode(t_v ?flow t))  "flow encode: key collision errors")
+let((v)
+    v = makeTable("ycTest")
+    v["a"] = 1
+    v['a] = 2
+    _AssertError(lambda(() ycYaml::Encode(v ?flow t))  "flow encode: key collision errors")
 )
 
 ; --- 文档与选项 ---
 _Assert(ycYaml::Encode(1 ?explicitStart t) == "---\n1\n"  "doc encode: explicit start")
 _Assert(ycYaml::Encode(1 ?finalNewline nil) == "1"  "doc encode: finalNewline nil")
-let((t_v)
-    t_v = makeTable("ycTest")
-    t_v["a"] = list(1 2)
-    _Assert(ycYaml::Encode(t_v ?indent 4) == "a:\n    - 1\n    - 2\n"  "doc encode: indent 4")
+let((v)
+    v = makeTable("ycTest")
+    v["a"] = list(1 2)
+    _Assert(ycYaml::Encode(v ?indent 4) == "a:\n    - 1\n    - 2\n"  "doc encode: indent 4")
 )
 _Assert(ycYaml::Encode(list(1 2) ?format "yaml-stream") == "---\n1\n---\n2\n"  "stream encode: documents")
 _Assert(ycYaml::Encode(nil ?format "yaml-stream") == ""  "stream encode: empty")
@@ -135,15 +135,15 @@ _AssertError(lambda(() ycYaml::Encode(1 ?maxDepth 1.5))  "encode: maxDepth float
 _AssertError(lambda(() ycYaml::Encode(list(list(list(1))) ?maxDepth 1))  "encode: maxDepth nesting error")
 
 ; --- 往返 ---
-let((g_v t_s)
-    g_v = ycYaml::Decode("a:\n  - 1\n  - 2.5\n  - true\n  - null\n  - \"x\"\nb:\n  c: d\n")
-    t_s = ycYaml::Encode(g_v ?sortKeys t)
-    _AssertDumpEq(ycYaml::Decode(t_s) g_v  "encode: roundtrip composite")
+let((v item)
+    v = ycYaml::Decode("a:\n  - 1\n  - 2.5\n  - true\n  - null\n  - \"x\"\nb:\n  c: d\n")
+    item = ycYaml::Encode(v ?sortKeys t)
+    _AssertDumpEq(ycYaml::Decode(item) v  "encode: roundtrip composite")
 )
-let((g_v t_s)
-    g_v = ycYaml::Decode("- a\n- b: 1\n  c: [2, 3]\n", ?maxDepth 100)
-    t_s = ycYaml::Encode(g_v ?sortKeys t)
-    _AssertDumpEq(ycYaml::Decode(t_s) g_v  "encode: roundtrip nested")
+let((v item)
+    v = ycYaml::Decode("- a\n- b: 1\n  c: [2, 3]\n", ?maxDepth 100)
+    item = ycYaml::Encode(v ?sortKeys t)
+    _AssertDumpEq(ycYaml::Decode(item) v  "encode: roundtrip nested")
 )
 _TestChildDone = t
 

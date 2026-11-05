@@ -3,45 +3,45 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-let((t_res t_self t_dir)
-    t_res = errset(get_filename(piport) nil)
-    t_self = when(t_res && car(t_res) && stringp(car(t_res)) && car(t_res) != ""
-        car(t_res)
+let((res path dir)
+    res = errset(get_filename(piport) nil)
+    path = when(res && car(res) && stringp(car(res)) && car(res) != ""
+        car(res)
     )
-    unless(t_self
+    unless(path
         error("ycCsv: can't determine the current file - load this file with an explicit path")
     )
-    unless(pcreMatchp("^[~/]|^\\.{1,2}/" t_self)
-        t_self = strcat("./" t_self)
+    unless(pcreMatchp("^[~/]|^\\.{1,2}/" path)
+        path = strcat("./" path)
     )
-    t_dir = simplifyFilename(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") t_self "" 0) t)
-    unless(pcreMatchp("/$" t_dir)
-        t_dir = strcat(t_dir "/")
+    dir = simplifyFilename(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") path "" 0) t)
+    unless(pcreMatchp("/$" dir)
+        dir = strcat(dir "/")
     )
     if(findNamespace("ycCsv") == nil || findSymbol("Decode" ?namespace "ycCsv") == nil || !fboundp(findSymbol("Decode" ?namespace "ycCsv"))
         ; libs/codec/csv/load.il relies on ycPathLib; when ycPathLib is absent,
         ; enter through libs/load.il so the bootstrap order is respected.
         if(findNamespace("ycPathLib")
-            loadi(simplifyFilename(strcat(t_dir "../../../libs/codec/csv/load.il") t))
-            loadi(simplifyFilename(strcat(t_dir "../../../libs/load.il") t))
+            loadi(simplifyFilename(strcat(dir "../../../libs/codec/csv/load.il") t))
+            loadi(simplifyFilename(strcat(dir "../../../libs/load.il") t))
         )
         printf("ycCsv: re-running tests with previously loaded code; restart CIW if you edited libs/codec/csv/src/\n")
     )
-    _TestCsvDir = t_dir
+    _TestCsvDir = dir
 )
 
-let((t_dir)
-    t_dir = _TestCsvDir
+let((dir)
+    dir = _TestCsvDir
     unless(findNamespace("ycUtf8")
-        loadi(simplifyFilename(strcat(t_dir "../../../libs/utf8/load.il") t))
+        loadi(simplifyFilename(strcat(dir "../../../libs/utf8/load.il") t))
     )
     unless(findNamespace("ycTextwrap")
-        loadi(simplifyFilename(strcat(t_dir "../../../libs/textwrap/load.il") t))
+        loadi(simplifyFilename(strcat(dir "../../../libs/textwrap/load.il") t))
     )
     unless(fboundp('ycTabulate:::Render)
-        loadi(simplifyFilename(strcat(t_dir "../../../libs/tabulate/load.il") t))
+        loadi(simplifyFilename(strcat(dir "../../../libs/tabulate/load.il") t))
     )
-    _TestDir = t_dir
+    _TestDir = dir
     unless(fboundp('_TestRun)
         loadi(strcat(_TestDir "../../kit.il"))
     )

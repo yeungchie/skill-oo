@@ -18,32 +18,32 @@ procedure(_ParseKeyPart(t_s n_i "tx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (键名 下一位置)
-    let((n_c n_k l_r)
-        n_c = _Code(t_s n_i)
+    let((c k r)
+        c = _Code(t_s n_i)
         cond(
-            (n_c == 34
-                l_r = _ParseBasicString(t_s n_i t)
+            (c == 34
+                r = _ParseBasicString(t_s n_i t)
             )
-            (n_c == 39
-                l_r = _ParseLiteralString(t_s n_i t)
+            (c == 39
+                r = _ParseLiteralString(t_s n_i t)
             )
             (t
-                n_k = n_i
-                while(n_k <= length(t_s)
-                    && ((_Code(t_s n_k) >= 48 && _Code(t_s n_k) <= 57)
-                        || (_Code(t_s n_k) >= 65 && _Code(t_s n_k) <= 90)
-                        || (_Code(t_s n_k) >= 97 && _Code(t_s n_k) <= 122)
-                        || _Code(t_s n_k) == 45
-                        || _Code(t_s n_k) == 95)
-                    n_k++
+                k = n_i
+                while(k <= length(t_s)
+                    && ((_Code(t_s k) >= 48 && _Code(t_s k) <= 57)
+                        || (_Code(t_s k) >= 65 && _Code(t_s k) <= 90)
+                        || (_Code(t_s k) >= 97 && _Code(t_s k) <= 122)
+                        || _Code(t_s k) == 45
+                        || _Code(t_s k) == 95)
+                    k++
                 )
-                when(n_k == n_i
+                when(k == n_i
                     _Error(t_s n_i "expected a key")
                 )
-                l_r = list(substring(t_s n_i n_k - n_i) n_k)
+                r = list(substring(t_s n_i k - n_i) k)
             )
         )
-        l_r
+        r
     )
 )
 
@@ -56,17 +56,17 @@ procedure(_ParseKeyPath(t_s n_i "tx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (键段列表 下一位置)
-    let((l_res l_r)
-        l_r = _ParseKeyPart(t_s n_i)
-        l_res = tconc(l_res car(l_r))
-        n_i = _SkipWs(t_s cadr(l_r) nil nil)
+    let((res r)
+        r = _ParseKeyPart(t_s n_i)
+        res = tconc(res car(r))
+        n_i = _SkipWs(t_s cadr(r) nil nil)
         while(_Code(t_s n_i) == 46
             n_i = _SkipWs(t_s n_i + 1 nil nil)
-            l_r = _ParseKeyPart(t_s n_i)
-            l_res = tconc(l_res car(l_r))
-            n_i = _SkipWs(t_s cadr(l_r) nil nil)
+            r = _ParseKeyPart(t_s n_i)
+            res = tconc(res car(r))
+            n_i = _SkipWs(t_s cadr(r) nil nil)
         )
-        list(car(l_res) n_i)
+        list(car(res) n_i)
     )
 )
 unuseNamespace("ycToml")

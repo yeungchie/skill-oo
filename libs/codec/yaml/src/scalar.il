@@ -30,124 +30,124 @@ procedure(_ParseQuoted(t_s n_i n_line "txn")  ; -> list
     ;
     ; **返回**
     ;   (list) - (字符串值 闭引号后一位置)
-    let((n_len n_q n_pos n_seg n_c n_esc n_d n_k n_cp l_p g_done)
-        n_len = length(t_s)
-        n_q = _Code(t_s n_i)
-        n_pos = n_i + 1
-        n_seg = n_pos
-        g_done = nil
-        while(!g_done
-            when(n_pos > n_len
+    let((len q pos seg c esc d k cp p done)
+        len = length(t_s)
+        q = _Code(t_s n_i)
+        pos = n_i + 1
+        seg = pos
+        done = nil
+        while(!done
+            when(pos > len
                 _ErrorLine("unterminated quoted scalar" n_line n_i)
             )
-            n_c = _Code(t_s n_pos)
+            c = _Code(t_s pos)
             cond(
-                (n_q == 39
+                (q == 39
                     cond(
-                        (n_c == 39
+                        (c == 39
                             cond(
-                                (_Code(t_s n_pos + 1) == 39
-                                    l_p = tconc(l_p substring(t_s n_seg n_pos - n_seg))
-                                    l_p = tconc(l_p "'")
-                                    n_pos = n_pos + 2
-                                    n_seg = n_pos
+                                (_Code(t_s pos + 1) == 39
+                                    p = tconc(p substring(t_s seg pos - seg))
+                                    p = tconc(p "'")
+                                    pos = pos + 2
+                                    seg = pos
                                 )
                                 (t
-                                    l_p = tconc(l_p substring(t_s n_seg n_pos - n_seg))
-                                    g_done = t
-                                    n_pos++
+                                    p = tconc(p substring(t_s seg pos - seg))
+                                    done = t
+                                    pos++
                                 )
                             )
                         )
                         (t
-                            n_pos++
+                            pos++
                         )
                     )
                 )
                 (t
                     cond(
-                        (n_c == 34
-                            l_p = tconc(l_p substring(t_s n_seg n_pos - n_seg))
-                            g_done = t
-                            n_pos++
+                        (c == 34
+                            p = tconc(p substring(t_s seg pos - seg))
+                            done = t
+                            pos++
                         )
-                        (n_c == 92
-                            l_p = tconc(l_p substring(t_s n_seg n_pos - n_seg))
-                            n_esc = n_pos
-                            n_pos++
-                            when(n_pos > n_len
-                                _ErrorLine("unterminated escape" n_line n_esc)
+                        (c == 92
+                            p = tconc(p substring(t_s seg pos - seg))
+                            esc = pos
+                            pos++
+                            when(pos > len
+                                _ErrorLine("unterminated escape" n_line esc)
                             )
-                            n_cp = _Code(t_s n_pos)
-                            case(n_cp
-                                (48 l_p = tconc(l_p _Utf8Str(0)))
-                                (97 l_p = tconc(l_p _Utf8Str(7)))
-                                (98 l_p = tconc(l_p _Utf8Str(8)))
-                                (116 l_p = tconc(l_p _Utf8Str(9)))
-                                (110 l_p = tconc(l_p _Utf8Str(10)))
-                                (118 l_p = tconc(l_p _Utf8Str(11)))
-                                (102 l_p = tconc(l_p _Utf8Str(12)))
-                                (114 l_p = tconc(l_p _Utf8Str(13)))
-                                (101 l_p = tconc(l_p _Utf8Str(27)))
-                                (32 l_p = tconc(l_p " "))
-                                (34 l_p = tconc(l_p "\""))
-                                (47 l_p = tconc(l_p "/"))
-                                (92 l_p = tconc(l_p "\\"))
-                                (78 l_p = tconc(l_p _Utf8Str(133)))
-                                (95 l_p = tconc(l_p _Utf8Str(160)))
-                                (76 l_p = tconc(l_p _Utf8Str(8232)))
-                                (80 l_p = tconc(l_p _Utf8Str(8233)))
+                            cp = _Code(t_s pos)
+                            case(cp
+                                (48 p = tconc(p _Utf8Str(0)))
+                                (97 p = tconc(p _Utf8Str(7)))
+                                (98 p = tconc(p _Utf8Str(8)))
+                                (116 p = tconc(p _Utf8Str(9)))
+                                (110 p = tconc(p _Utf8Str(10)))
+                                (118 p = tconc(p _Utf8Str(11)))
+                                (102 p = tconc(p _Utf8Str(12)))
+                                (114 p = tconc(p _Utf8Str(13)))
+                                (101 p = tconc(p _Utf8Str(27)))
+                                (32 p = tconc(p " "))
+                                (34 p = tconc(p "\""))
+                                (47 p = tconc(p "/"))
+                                (92 p = tconc(p "\\"))
+                                (78 p = tconc(p _Utf8Str(133)))
+                                (95 p = tconc(p _Utf8Str(160)))
+                                (76 p = tconc(p _Utf8Str(8232)))
+                                (80 p = tconc(p _Utf8Str(8233)))
                                 (120
-                                    n_d = 0
-                                    for(n_k 1 2
-                                        n_cp = _HexVal(_Code(t_s n_pos + n_k))
-                                        unless(n_cp
-                                            _ErrorLine("invalid hex escape" n_line n_esc)
+                                    d = 0
+                                    for(k2 1 2
+                                        cp = _HexVal(_Code(t_s pos + k2))
+                                        unless(cp
+                                            _ErrorLine("invalid hex escape" n_line esc)
                                         )
-                                        n_d = n_d * 16 + n_cp
+                                        d = d * 16 + cp
                                     )
-                                    l_p = tconc(l_p _Utf8Str(n_d))
-                                    n_pos = n_pos + 2
+                                    p = tconc(p _Utf8Str(d))
+                                    pos = pos + 2
                                 )
                                 (117
-                                    n_d = 0
-                                    for(n_k 1 4
-                                        n_cp = _HexVal(_Code(t_s n_pos + n_k))
-                                        unless(n_cp
-                                            _ErrorLine("invalid unicode escape" n_line n_esc)
+                                    d = 0
+                                    for(k2 1 4
+                                        cp = _HexVal(_Code(t_s pos + k2))
+                                        unless(cp
+                                            _ErrorLine("invalid unicode escape" n_line esc)
                                         )
-                                        n_d = n_d * 16 + n_cp
+                                        d = d * 16 + cp
                                     )
-                                    l_p = tconc(l_p _Utf8Str(n_d))
-                                    n_pos = n_pos + 4
+                                    p = tconc(p _Utf8Str(d))
+                                    pos = pos + 4
                                 )
                                 (85
-                                    n_d = 0
-                                    for(n_k 1 8
-                                        n_cp = _HexVal(_Code(t_s n_pos + n_k))
-                                        unless(n_cp
-                                            _ErrorLine("invalid unicode escape" n_line n_esc)
+                                    d = 0
+                                    for(k2 1 8
+                                        cp = _HexVal(_Code(t_s pos + k2))
+                                        unless(cp
+                                            _ErrorLine("invalid unicode escape" n_line esc)
                                         )
-                                        n_d = n_d * 16 + n_cp
+                                        d = d * 16 + cp
                                     )
-                                    l_p = tconc(l_p _Utf8Str(n_d))
-                                    n_pos = n_pos + 8
+                                    p = tconc(p _Utf8Str(d))
+                                    pos = pos + 8
                                 )
                                 (t
-                                    _ErrorLine("invalid escape" n_line n_esc)
+                                    _ErrorLine("invalid escape" n_line esc)
                                 )
                             )
-                            n_pos++
-                            n_seg = n_pos
+                            pos++
+                            seg = pos
                         )
                         (t
-                            n_pos++
+                            pos++
                         )
                     )
                 )
             )
         )
-        list(_Build(l_p) n_pos)
+        list(_Build(p) pos)
     )
 )
 
@@ -159,43 +159,43 @@ procedure(_ParseIntText(t_s "t")  ; -> any
     ;
     ; **返回**
     ;   (int|float) - 解析结果；非法时 nil
-    let((t_clean t_digits n_base n_i n_len n_sign n_v n_d n_c n_digit g_bad)
-        t_clean = pcreReplace(pcreCompile("_") t_s "" 0)
-        n_sign = 1
-        n_i = 1
-        n_len = length(t_clean)
-        when(n_i <= n_len && (_Code(t_clean n_i) == 43 || _Code(t_clean n_i) == 45)
-            when(_Code(t_clean n_i) == 45
-                n_sign = -1
+    let((clean digits base i len sign v d c digit bad)
+        clean = pcreReplace(pcreCompile("_") t_s "" 0)
+        sign = 1
+        i = 1
+        len = length(clean)
+        when(i <= len && (_Code(clean i) == 43 || _Code(clean i) == 45)
+            when(_Code(clean i) == 45
+                sign = -1
             )
-            n_i++
+            i++
         )
-        n_base = 10
-        when(n_i + 1 <= n_len && _Code(t_clean n_i) == 48
-            case(_Code(t_clean n_i + 1)
-                (120 n_base = 16 n_i = n_i + 2)
-                (111 n_base = 8 n_i = n_i + 2)
-                (98 n_base = 2 n_i = n_i + 2)
+        base = 10
+        when(i + 1 <= len && _Code(clean i) == 48
+            case(_Code(clean i + 1)
+                (120 base = 16 i = i + 2)
+                (111 base = 8 i = i + 2)
+                (98 base = 2 i = i + 2)
             )
         )
-        n_v = 0
-        g_bad = nil
-        while(n_i <= n_len && !g_bad
-            n_c = _Code(t_clean n_i)
-            n_digit = cond(
-                (n_c >= 48 && n_c <= 57 n_c - 48)
-                (n_c >= 97 && n_c <= 102 n_c - 87)
-                (n_c >= 65 && n_c <= 70 n_c - 55)
+        v = 0
+        bad = nil
+        while(i <= len && !bad
+            c = _Code(clean i)
+            digit = cond(
+                (c >= 48 && c <= 57 c - 48)
+                (c >= 97 && c <= 102 c - 87)
+                (c >= 65 && c <= 70 c - 55)
             )
-            if(n_digit == nil || n_digit >= n_base
-                g_bad = t
-                n_v = n_v * n_base + n_digit
+            if(digit == nil || digit >= base
+                bad = t
+                v = v * base + digit
             )
-            n_i++
+            i++
         )
-        unless(g_bad
-            when(n_sign < 0 n_v = -n_v)
-            n_v
+        unless(bad
+            when(sign < 0 v = -v)
+            v
         )
     )
 )
@@ -208,7 +208,7 @@ procedure(_ResolvePlain(t_s "t")  ; -> any
     ;
     ; **返回**
     ;   (any) - ycCodec::Null/布尔哨兵/数字/字符串
-    prog((t_low t_clean n_v)
+    prog((low clean v)
         when(t_s == "" || t_s == "~" || pcreMatchp("(?i)^null\\z" t_s)
             return(ycCodec:::Null)
         )
@@ -224,15 +224,15 @@ procedure(_ResolvePlain(t_s "t")  ; -> any
         when(pcreMatchp("(?i)^\\.nan\\z" t_s)
             return(atof("nan"))
         )
-        t_clean = pcreReplace(pcreCompile("_") t_s "" 0)
-        when(pcreMatchp("^[+-]?(0[xX][0-9a-fA-F]+|0[oO][0-7]+|0[bB][01]+|[0-9]+)\\z" t_clean)
-            n_v = _ParseIntText(t_clean)
-            when(n_v != nil
-                return(n_v)
+        clean = pcreReplace(pcreCompile("_") t_s "" 0)
+        when(pcreMatchp("^[+-]?(0[xX][0-9a-fA-F]+|0[oO][0-7]+|0[bB][01]+|[0-9]+)\\z" clean)
+            v = _ParseIntText(clean)
+            when(v != nil
+                return(v)
             )
         )
-        when(pcreMatchp("^[+-]?([0-9]+\\.[0-9]*|\\.[0-9]+|[0-9]+[eE][+-]?[0-9]+|[0-9]+\\.[0-9]*[eE][+-]?[0-9]+)\\z" t_clean)
-            return(atof(t_clean))
+        when(pcreMatchp("^[+-]?([0-9]+\\.[0-9]*|\\.[0-9]+|[0-9]+[eE][+-]?[0-9]+|[0-9]+\\.[0-9]*[eE][+-]?[0-9]+)\\z" clean)
+            return(atof(clean))
         )
         return(t_s)
     )
@@ -246,25 +246,25 @@ procedure(_ParseScalarText(t_text "t")  ; -> any
     ;
     ; **返回**
     ;   (any) - 标量值；引号未闭合或非法转义报错
-    prog((n_len n_i l_q)
+    prog((len i q)
         t_text = _Rtrim(t_text)
-        n_len = length(t_text)
-        n_i = 1
-        while(n_i <= n_len && _Code(t_text n_i) == 32
-            n_i++
+        len = length(t_text)
+        i = 1
+        while(i <= len && _Code(t_text i) == 32
+            i++
         )
-        when(n_i > n_len
+        when(i > len
             return(ycCodec:::Null)
         )
-        if(_Code(t_text n_i) == 34 || _Code(t_text n_i) == 39
+        if(_Code(t_text i) == 34 || _Code(t_text i) == 39
         then
-            l_q = _ParseQuoted(t_text n_i 1)
-            when(_Rtrim(_Tail(t_text cadr(l_q))) != ""
-                _ErrorLine("unexpected characters after quoted scalar" 1 cadr(l_q))
+            q = _ParseQuoted(t_text i 1)
+            when(_Rtrim(_Tail(t_text cadr(q))) != ""
+                _ErrorLine("unexpected characters after quoted scalar" 1 cadr(q))
             )
-            return(car(l_q))
+            return(car(q))
         else
-            return(_ResolvePlain(_Rtrim(substring(t_text n_i n_len - n_i + 1))))
+            return(_ResolvePlain(_Rtrim(substring(t_text i len - i + 1))))
         )
     )
 )
@@ -300,23 +300,23 @@ procedure(_TagValue(g_val t_tag "gt")  ; -> any
     ;
     ; **返回**
     ;   (any) - 转换后的值；未知标签或类型不符报错
-    let((t_name t_s)
-        t_name = t_tag
+    let((name item)
+        name = t_tag
         when(pcreMatchp("^tag:yaml\\.org,2002:" t_tag)
-            t_name = strcat("!!" pcreReplace(pcreCompile("^tag:yaml\\.org,2002:") t_tag "" 0))
+            name = strcat("!!" pcreReplace(pcreCompile("^tag:yaml\\.org,2002:") t_tag "" 0))
         )
-        case(t_name
+        case(name
             ("!!str" _ScalarText(g_val))
             ("!!int"
                 if(fixp(g_val)
                 then
                     g_val
                 else
-                    t_s = _ScalarText(g_val)
-                    unless(pcreMatchp("^[+-]?(0[xX][0-9a-fA-F_]+|0[oO][0-7_]+|0[bB][01_]+|[0-9_]+)\\z" t_s)
+                    item = _ScalarText(g_val)
+                    unless(pcreMatchp("^[+-]?(0[xX][0-9a-fA-F_]+|0[oO][0-7_]+|0[bB][01_]+|[0-9_]+)\\z" item)
                         error("ycYaml::Decode: !!int value is not an integer")
                     )
-                    _ParseIntText(t_s)
+                    _ParseIntText(item)
                 )
             )
             ("!!float"
@@ -324,11 +324,11 @@ procedure(_TagValue(g_val t_tag "gt")  ; -> any
                 then
                     g_val
                 else
-                    t_s = _ScalarText(g_val)
-                    unless(pcreMatchp("^[+-]?([0-9_]+(\\.[0-9_]*)?|\\.[0-9_]+)([eE][+-]?[0-9]+)?\\z" t_s)
+                    item = _ScalarText(g_val)
+                    unless(pcreMatchp("^[+-]?([0-9_]+(\\.[0-9_]*)?|\\.[0-9_]+)([eE][+-]?[0-9]+)?\\z" item)
                         error("ycYaml::Decode: !!float value is not a number")
                     )
-                    atof(pcreReplace(pcreCompile("_") t_s "" 0))
+                    atof(pcreReplace(pcreCompile("_") item "" 0))
                 )
             )
             ("!!bool"
@@ -374,103 +374,103 @@ procedure(_ParseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
     ;
     ; **返回**
     ;   (list) - (字符串 下一行号)
-    prog((n_len n_i n_c n_style n_chomp n_hint n_indent n_last l_raw t_line n_ind n_content n_count n_tail t_body l_p g_stop g_prevBlank g_prevMore)
-        n_len = length(t_header)
-        n_style = _Code(t_header 1)
-        n_chomp = 0
-        n_hint = 0
-        n_i = 2
-        while(n_i <= n_len
-            n_c = _Code(t_header n_i)
+    prog((len i c style chomp hint indent last raw line ind content count tail body p stop prevBlank prevMore)
+        len = length(t_header)
+        style = _Code(t_header 1)
+        chomp = 0
+        hint = 0
+        i = 2
+        while(i <= len
+            c = _Code(t_header i)
             cond(
-                (n_c == 43 n_chomp = 1)
-                (n_c == 45 n_chomp = -1)
-                (n_c >= 49 && n_c <= 57 n_hint = n_c - 48)
-                (n_c == 32 || n_c == 9 n_i = n_len + 1)
+                (c == 43 chomp = 1)
+                (c == 45 chomp = -1)
+                (c >= 49 && c <= 57 hint = c - 48)
+                (c == 32 || c == 9 i = len + 1)
                 (t _ErrorLine("invalid block scalar header" n_line n_col))
             )
-            n_i++
+            i++
         )
-        n_last = n_pos
-        l_raw = nil
-        n_content = nil
-        g_stop = nil
-        while(!g_stop && n_last <= length(l_lines)
-            t_line = _Nth1(n_last l_lines)
-            n_ind = _LineIndent(t_line n_last)
-            when(_Rtrim(t_line) == ""
-                l_raw = tconc(l_raw "")
-                n_last++
+        last = n_pos
+        raw = nil
+        content = nil
+        stop = nil
+        while(!stop && last <= length(l_lines)
+            line = _Nth1(last l_lines)
+            ind = _LineIndent(line last)
+            when(_Rtrim(line) == ""
+                raw = tconc(raw "")
+                last++
             )
-            unless(g_stop || _Rtrim(t_line) == ""
-                when(n_content == nil
-                    n_content = if(n_hint > 0 n_parentIndent + n_hint n_ind)
+            unless(stop || _Rtrim(line) == ""
+                when(content == nil
+                    content = if(hint > 0 n_parentIndent + hint ind)
                 )
                 cond(
-                    (n_ind < n_content
-                        g_stop = t
+                    (ind < content
+                        stop = t
                     )
                     (t
-                        l_raw = tconc(l_raw substring(t_line n_content + 1 length(t_line) - n_content))
-                        n_last++
+                        raw = tconc(raw substring(line content + 1 length(line) - content))
+                        last++
                     )
                 )
             )
         )
-        l_raw = car(l_raw)
-        n_count = length(l_raw)
-        while(n_count > 0 && _Nth1(n_count l_raw) == ""
-            n_count--
+        raw = car(raw)
+        count = length(raw)
+        while(count > 0 && _Nth1(count raw) == ""
+            count--
         )
         cond(
-            (n_style == 62
-                t_body = ""
-                g_prevBlank = t
-                for(n_i 1 length(l_raw)
-                    t_line = _Nth1(n_i l_raw)
-                    let((g_more t_sep)
-                        g_more = length(t_line) > 0 && (_Code(t_line 1) == 32 || _Code(t_line 1) == 9)
-                        if(n_i == 1
+            (style == 62
+                body = ""
+                prevBlank = t
+                for(i2 1 length(raw)
+                    line = _Nth1(i2 raw)
+                    let((more sep)
+                        more = length(line) > 0 && (_Code(line 1) == 32 || _Code(line 1) == 9)
+                        if(i2 == 1
                         then
-                            t_body = t_line
+                            body = line
                         else
-                            t_sep = cond(
-                                (t_line == "" && !g_prevMore && !g_prevBlank "")
-                                (t_line == "" || g_prevBlank || g_more || g_prevMore "\n")
+                            sep = cond(
+                                (line == "" && !prevMore && !prevBlank "")
+                                (line == "" || prevBlank || more || prevMore "\n")
                                 (t " ")
                             )
-                            t_body = strcat(t_body t_sep t_line)
+                            body = strcat(body sep line)
                         )
-                        g_prevBlank = t_line == ""
-                        g_prevMore = g_more
+                        prevBlank = line == ""
+                        prevMore = more
                     )
                 )
-                t_body = strcat(t_body intToChar(10))
+                body = strcat(body intToChar(10))
             )
             (t
-                l_p = nil
-                foreach(t_line l_raw
-                    l_p = tconc(l_p t_line)
+                p = nil
+                foreach(line2 raw
+                    p = tconc(p line2)
                 )
-                t_body = strcat(_JoinBuild(l_p "\n") "\n")
+                body = strcat(_JoinBuild(p "\n") "\n")
             )
         )
         cond(
-            (n_chomp == -1
-                while(length(t_body) > 0 && _Code(t_body length(t_body)) == 10
-                    t_body = substring(t_body 1 length(t_body) - 1)
+            (chomp == -1
+                while(length(body) > 0 && _Code(body length(body)) == 10
+                    body = substring(body 1 length(body) - 1)
                 )
             )
-            (n_chomp == 0
-                while(length(t_body) > 0 && _Code(t_body length(t_body)) == 10
-                    t_body = substring(t_body 1 length(t_body) - 1)
+            (chomp == 0
+                while(length(body) > 0 && _Code(body length(body)) == 10
+                    body = substring(body 1 length(body) - 1)
                 )
-                when(length(t_body) > 0
-                    t_body = strcat(t_body intToChar(10))
+                when(length(body) > 0
+                    body = strcat(body intToChar(10))
                 )
             )
         )
-        return(list(t_body n_last))
+        return(list(body last))
     )
 )
 

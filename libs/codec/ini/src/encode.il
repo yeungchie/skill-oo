@@ -39,20 +39,20 @@ procedure(_EmitSection(l_p g_obj g_key g_opt "lggg")  ; -> list
     ;
     ; **返回**
     ;   (list) - 更新后的行容器；段内嵌套表报错
-    let((t_name t_sec l_keys g_val)
-        t_name = _SectionText(g_key g_opt)
+    let((name sec keys val)
+        name = _SectionText(g_key g_opt)
         when(car(l_p)
             l_p = tconc(l_p "")
         )
-        l_p = tconc(l_p lsprintf("[%s]" t_name))
-        t_sec = g_obj[g_key]
-        l_keys = _TableKeys(t_sec g_opt "section")
-        foreach(t_key l_keys
-            g_val = t_sec[t_key]
-            when(tablep(g_val)
-                error("ycIni::Encode: nested table in section %A is not supported" t_name)
+        l_p = tconc(l_p lsprintf("[%s]" name))
+        sec = g_obj[g_key]
+        keys = _TableKeys(sec g_opt "section")
+        foreach(key keys
+            val = sec[key]
+            when(tablep(val)
+                error("ycIni::Encode: nested table in section %A is not supported" name)
             )
-            l_p = _EmitScalar(l_p t_sec t_key g_opt "ycIni::Encode")
+            l_p = _EmitScalar(l_p sec key g_opt "ycIni::Encode")
         )
         l_p
     )
@@ -73,32 +73,32 @@ procedure(Encode(g_val \@key (sortKeys nil) (strict nil) (delimiter nil) (finalN
     unless(tablep(g_val)
         error("ycIni::Encode: root value must be a table")
     )
-    let((g_opt t_delim l_keys t_scalars t_sections l_p t_out)
-        t_delim = _Delim(delimiter "ycIni::Encode")
-        g_opt = makeTable("ycIniOpt" nil)
-        g_opt["sortKeys"] = sortKeys
-        g_opt["strict"] = strict
-        g_opt["delimiter"] = t_delim
-        l_keys = _TableKeys(g_val g_opt "root")
-        foreach(g_key l_keys
-            if(tablep(g_val[g_key])
-                t_sections = tconc(t_sections g_key)
-                t_scalars = tconc(t_scalars g_key)
+    let((opt delim keys scalars sections p out)
+        delim = _Delim(delimiter "ycIni::Encode")
+        opt = makeTable("ycIniOpt" nil)
+        opt["sortKeys"] = sortKeys
+        opt["strict"] = strict
+        opt["delimiter"] = delim
+        keys = _TableKeys(g_val opt "root")
+        foreach(key keys
+            if(tablep(g_val[key])
+                sections = tconc(sections key)
+                scalars = tconc(scalars key)
             )
         )
-        foreach(g_key car(t_scalars)
-            l_p = _EmitScalar(l_p g_val g_key g_opt "ycIni::Encode")
+        foreach(key car(scalars)
+            p = _EmitScalar(p g_val key opt "ycIni::Encode")
         )
-        foreach(g_key car(t_sections)
-            l_p = _EmitSection(l_p g_val g_key g_opt)
+        foreach(key car(sections)
+            p = _EmitSection(p g_val key opt)
         )
-        t_out = buildString(car(l_p) "\n")
+        out = buildString(car(p) "\n")
         cond(
-            (t_out == "" "")
+            (out == "" "")
             (finalNewline
-                strcat(t_out "\n")
+                strcat(out "\n")
             )
-            (t t_out)
+            (t out)
         )
     )
 )

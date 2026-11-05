@@ -14,23 +14,23 @@ procedure(_Hex4(t_s n_i "tx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 0..65535 的码元值
-    let((n_len n_v n_c n_d)
-        n_len = length(t_s)
-        when(n_i + 3 > n_len
-            _Error(t_s n_len + 1 "invalid \\u escape")
+    let((len v c d)
+        len = length(t_s)
+        when(n_i + 3 > len
+            _Error(t_s len + 1 "invalid \\u escape")
         )
-        n_v = 0
-        for(n_k n_i n_i + 3
-            n_c = _Code(t_s n_k)
+        v = 0
+        for(k n_i n_i + 3
+            c = _Code(t_s k)
             cond(
-                (n_c >= 48 && n_c <= 57 n_d = n_c - 48)
-                (n_c >= 97 && n_c <= 102 n_d = n_c - 87)
-                (n_c >= 65 && n_c <= 70 n_d = n_c - 55)
-                (t _Error(t_s n_k "invalid \\u escape"))
+                (c >= 48 && c <= 57 d = c - 48)
+                (c >= 97 && c <= 102 d = c - 87)
+                (c >= 65 && c <= 70 d = c - 55)
+                (t _Error(t_s k "invalid \\u escape"))
             )
-            n_v = n_v * 16 + n_d
+            v = v * 16 + d
         )
-        n_v
+        v
     )
 )
 
@@ -76,120 +76,120 @@ procedure(_String(t_s n_i "tx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (字符串值 闭引号后一位置)
-    let((n_len n_k n_c n_run n_esc l_p n_cp n_lo g_done)
-        n_len = length(t_s)
-        n_k = n_i + 1
-        n_run = n_k
-        g_done = nil
-        while(!g_done
-            when(n_k > n_len
-                _Error(t_s n_k "unterminated string")
+    let((len k c run esc p cp lo done)
+        len = length(t_s)
+        k = n_i + 1
+        run = k
+        done = nil
+        while(!done
+            when(k > len
+                _Error(t_s k "unterminated string")
             )
-            n_c = _Code(t_s n_k)
-            case(n_c
+            c = _Code(t_s k)
+            case(c
                 (34
-                    when(n_run < n_k
-                        l_p = tconc(l_p substring(t_s n_run n_k - n_run))
+                    when(run < k
+                        p = tconc(p substring(t_s run k - run))
                     )
-                    g_done = t
+                    done = t
                 )
                 (92
                     {
-                    when(n_run < n_k
-                        l_p = tconc(l_p substring(t_s n_run n_k - n_run))
+                    when(run < k
+                        p = tconc(p substring(t_s run k - run))
                     )
-                    n_esc = n_k
-                    n_k++
-                    n_c = _Code(t_s n_k)
-                    when(!n_c
-                        _Error(t_s n_esc "unterminated string")
+                    esc = k
+                    k++
+                    c = _Code(t_s k)
+                    when(!c
+                        _Error(t_s esc "unterminated string")
                     )
-                    case(n_c
+                    case(c
                         (34
                             {
-                            l_p = tconc(l_p "\"")
-                            n_k++
+                            p = tconc(p "\"")
+                            k++
                             }
                         )
                         (92
                             {
-                            l_p = tconc(l_p "\\")
-                            n_k++
+                            p = tconc(p "\\")
+                            k++
                             }
                         )
                         (47
                             {
-                            l_p = tconc(l_p "/")
-                            n_k++
+                            p = tconc(p "/")
+                            k++
                             }
                         )
                         (98
                             {
-                            l_p = tconc(l_p strcat(intToChar(8)))
-                            n_k++
+                            p = tconc(p strcat(intToChar(8)))
+                            k++
                             }
                         )
                         (102
                             {
-                            l_p = tconc(l_p strcat(intToChar(12)))
-                            n_k++
+                            p = tconc(p strcat(intToChar(12)))
+                            k++
                             }
                         )
                         (110
                             {
-                            l_p = tconc(l_p strcat(intToChar(10)))
-                            n_k++
+                            p = tconc(p strcat(intToChar(10)))
+                            k++
                             }
                         )
                         (114
                             {
-                            l_p = tconc(l_p strcat(intToChar(13)))
-                            n_k++
+                            p = tconc(p strcat(intToChar(13)))
+                            k++
                             }
                         )
                         (116
                             {
-                            l_p = tconc(l_p strcat(intToChar(9)))
-                            n_k++
+                            p = tconc(p strcat(intToChar(9)))
+                            k++
                             }
                         )
                         (117
                             {
-                            n_cp = _Hex4(t_s n_k + 1)
-                            n_k = n_k + 5
-                            when(n_cp >= 55296 && n_cp <= 56319
-                                unless(_Code(t_s n_k) == 92 && _Code(t_s n_k + 1) == 117
-                                    _Error(t_s n_esc "invalid surrogate pair")
+                            cp = _Hex4(t_s k + 1)
+                            k = k + 5
+                            when(cp >= 55296 && cp <= 56319
+                                unless(_Code(t_s k) == 92 && _Code(t_s k + 1) == 117
+                                    _Error(t_s esc "invalid surrogate pair")
                                 )
-                                n_lo = _Hex4(t_s n_k + 2)
-                                unless(n_lo >= 56320 && n_lo <= 57343
-                                    _Error(t_s n_esc "invalid surrogate pair")
+                                lo = _Hex4(t_s k + 2)
+                                unless(lo >= 56320 && lo <= 57343
+                                    _Error(t_s esc "invalid surrogate pair")
                                 )
-                                n_cp = 65536 + (n_cp - 55296) * 1024 + n_lo - 56320
-                                n_k = n_k + 6
+                                cp = 65536 + (cp - 55296) * 1024 + lo - 56320
+                                k = k + 6
                             )
-                            when(n_cp >= 56320 && n_cp <= 57343
-                                _Error(t_s n_esc "invalid surrogate pair")
+                            when(cp >= 56320 && cp <= 57343
+                                _Error(t_s esc "invalid surrogate pair")
                             )
-                            l_p = tconc(l_p _Utf8Str(n_cp))
+                            p = tconc(p _Utf8Str(cp))
                             }
                         )
                         (t
-                            _Error(t_s n_esc "invalid escape")
+                            _Error(t_s esc "invalid escape")
                         )
                     )
-                    n_run = n_k
+                    run = k
                     }
                 )
                 (t
-                    if(n_c < 32
-                        _Error(t_s n_k "control character in string")
-                        n_k++
+                    if(c < 32
+                        _Error(t_s k "control character in string")
+                        k++
                     )
                 )
             )
         )
-        list(_Build(l_p) n_k + 1)
+        list(_Build(p) k + 1)
     )
 )
 
@@ -227,65 +227,65 @@ procedure(_Number(t_s n_i "tx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (数值 下一位置)；整数走 fixnum（范围内），否则 flonum
-    let((n_len n_k n_c t_tok n_v g_num)
-        n_len = length(t_s)
-        n_k = n_i
-        n_c = _Code(t_s n_k)
-        when(n_c == 45
-            n_k++
-            n_c = _Code(t_s n_k)
+    let((len k c tok v num)
+        len = length(t_s)
+        k = n_i
+        c = _Code(t_s k)
+        when(c == 45
+            k++
+            c = _Code(t_s k)
         )
         cond(
-            (n_c == 48
-                n_k++
+            (c == 48
+                k++
             )
-            (n_c >= 49 && n_c <= 57
-                n_k++
-                while(n_k <= n_len && _Digitp(_Code(t_s n_k))
-                    n_k++
+            (c >= 49 && c <= 57
+                k++
+                while(k <= len && _Digitp(_Code(t_s k))
+                    k++
                 )
             )
             (t
                 _Error(t_s n_i "invalid number")
             )
         )
-        when(n_c == 48 && _Digitp(_Code(t_s n_k))
-            _Error(t_s n_k "invalid number")
+        when(c == 48 && _Digitp(_Code(t_s k))
+            _Error(t_s k "invalid number")
         )
-        when(_Code(t_s n_k) == 46
-            n_k++
-            unless(_Digitp(_Code(t_s n_k))
+        when(_Code(t_s k) == 46
+            k++
+            unless(_Digitp(_Code(t_s k))
                 _Error(t_s n_i "invalid number")
             )
-            while(n_k <= n_len && _Digitp(_Code(t_s n_k))
-                n_k++
+            while(k <= len && _Digitp(_Code(t_s k))
+                k++
             )
         )
-        n_c = _Code(t_s n_k)
-        when(n_c == 101 || n_c == 69
-            n_k++
-            n_c = _Code(t_s n_k)
-            when(n_c == 43 || n_c == 45
-                n_k++
+        c = _Code(t_s k)
+        when(c == 101 || c == 69
+            k++
+            c = _Code(t_s k)
+            when(c == 43 || c == 45
+                k++
             )
-            unless(_Digitp(_Code(t_s n_k))
+            unless(_Digitp(_Code(t_s k))
                 _Error(t_s n_i "invalid number")
             )
-            while(n_k <= n_len && _Digitp(_Code(t_s n_k))
-                n_k++
+            while(k <= len && _Digitp(_Code(t_s k))
+                k++
             )
         )
-        t_tok = substring(t_s n_i n_k - n_i)
-        if(pcreMatchp("[.eE]" t_tok)
+        tok = substring(t_s n_i k - n_i)
+        if(pcreMatchp("[.eE]" tok)
         then
-            list(atof(t_tok) n_k)
+            list(atof(tok) k)
         else
-            n_v = atof(t_tok)
-            if(n_v >= (-2147483647 - 1) && n_v <= 2147483647
-                g_num = atoi(t_tok)
-                g_num = n_v
+            v = atof(tok)
+            if(v >= (-2147483647 - 1) && v <= 2147483647
+                num = atoi(tok)
+                num = v
             )
-            list(g_num n_k)
+            list(num k)
         )
     )
 )

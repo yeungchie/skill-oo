@@ -24,31 +24,31 @@ procedure(_ParseValue(t_s n_i n_depth n_max "txxx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (值 下一位置)
-    let((n_c)
+    let((c)
         when(n_depth > n_max
             _Error(t_s n_i "nesting too deep")
         )
-        n_c = _Code(t_s n_i)
+        c = _Code(t_s n_i)
         cond(
-            (n_c == 34
+            (c == 34
                 _ParseBasicString(t_s n_i nil)
             )
-            (n_c == 39
+            (c == 39
                 _ParseLiteralString(t_s n_i nil)
             )
-            (n_c == 91
+            (c == 91
                 _ParseArray(t_s n_i n_depth n_max)
             )
-            (n_c == 123
+            (c == 123
                 _ParseInlineTable(t_s n_i n_depth n_max)
             )
-            (n_c == 116
+            (c == 116
                 if(substring(t_s n_i 4) == "true"
                     list(ycCodec:::True n_i + 4)
                     _Error(t_s n_i "invalid value")
                 )
             )
-            (n_c == 102
+            (c == 102
                 if(substring(t_s n_i 5) == "false"
                     list(ycCodec:::False n_i + 5)
                     _Error(t_s n_i "invalid value")
@@ -75,33 +75,33 @@ procedure(_ParseArray(t_s n_i n_depth n_max "txxx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (列表或 nil 闭括号后一位置)
-    let((n_len l_res l_r n_c g_done)
-        n_len = length(t_s)
+    let((len res r c done)
+        len = length(t_s)
         n_i = _SkipWs(t_s n_i + 1 t t)
-        l_res = nil
-        g_done = nil
+        res = nil
+        done = nil
         when(_Code(t_s n_i) == 93
-            g_done = t
+            done = t
             n_i++
         )
-        while(!g_done
-            when(n_i > n_len
+        while(!done
+            when(n_i > len
                 _Error(t_s n_i "unterminated array")
             )
-            l_r = _ParseValue(t_s n_i n_depth + 1 n_max)
-            l_res = tconc(l_res car(l_r))
-            n_i = _SkipWs(t_s cadr(l_r) t t)
-            n_c = _Code(t_s n_i)
-            case(n_c
+            r = _ParseValue(t_s n_i n_depth + 1 n_max)
+            res = tconc(res car(r))
+            n_i = _SkipWs(t_s cadr(r) t t)
+            c = _Code(t_s n_i)
+            case(c
                 (93
-                    g_done = t
+                    done = t
                     n_i++
                 )
                 (44
                     {
                     n_i = _SkipWs(t_s n_i + 1 t t)
                     when(_Code(t_s n_i) == 93
-                        g_done = t
+                        done = t
                         n_i++
                     )
                     }
@@ -111,7 +111,7 @@ procedure(_ParseArray(t_s n_i n_depth n_max "txxx")  ; -> list
                 )
             )
         )
-        list(car(l_res) n_i)
+        list(car(res) n_i)
     )
 )
 
@@ -126,29 +126,29 @@ procedure(_ParseInlineTable(t_s n_i n_depth n_max "txxx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (table 闭括号后一位置)
-    let((t_obj t_meta l_path l_r n_c l_v g_done n_key)
-        t_obj = _NewTable()
-        t_meta = _MetaNew()
+    let((obj meta path r c v done key)
+        obj = _NewTable()
+        meta = _MetaNew()
         n_i = _SkipWs(t_s n_i + 1 nil nil)
-        g_done = nil
+        done = nil
         when(_Code(t_s n_i) == 125
-            g_done = t
+            done = t
             n_i++
         )
-        while(!g_done
-            n_key = n_i
-            l_r = _ParseKeyPath(t_s n_i)
-            l_path = car(l_r)
-            n_i = _SkipWs(t_s cadr(l_r) nil nil)
+        while(!done
+            key = n_i
+            r = _ParseKeyPath(t_s n_i)
+            path = car(r)
+            n_i = _SkipWs(t_s cadr(r) nil nil)
             unless(_Code(t_s n_i) == 61
                 _Error(t_s n_i "expected '='")
             )
             n_i = _SkipWs(t_s n_i + 1 nil nil)
-            l_v = _ParseValue(t_s n_i n_depth + 1 n_max)
-            _AssignValue(t_s t_meta nil t_obj l_path car(l_v) n_key n_max)
-            n_i = _SkipWs(t_s cadr(l_v) nil nil)
-            n_c = _Code(t_s n_i)
-            case(n_c
+            v = _ParseValue(t_s n_i n_depth + 1 n_max)
+            _AssignValue(t_s meta nil obj path car(v) key n_max)
+            n_i = _SkipWs(t_s cadr(v) nil nil)
+            c = _Code(t_s n_i)
+            case(c
                 (44
                     {
                     n_i = _SkipWs(t_s n_i + 1 nil nil)
@@ -158,7 +158,7 @@ procedure(_ParseInlineTable(t_s n_i n_depth n_max "txxx")  ; -> list
                     }
                 )
                 (125
-                    g_done = t
+                    done = t
                     n_i++
                 )
                 (10
@@ -169,7 +169,7 @@ procedure(_ParseInlineTable(t_s n_i n_depth n_max "txxx")  ; -> list
                 )
             )
         )
-        list(t_obj n_i)
+        list(obj n_i)
     )
 )
 
@@ -185,26 +185,26 @@ procedure(_ParseHeader(t_s n_i n_max "txx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (键路径 下一位置 array标志)
-    let((g_array n_k l_r l_path)
-        g_array = _Code(t_s n_i + 1) == 91
-        n_k = n_i + if(g_array 2 1)
-        n_k = _SkipWs(t_s n_k nil nil)
-        l_r = _ParseKeyPath(t_s n_k)
-        l_path = car(l_r)
-        n_k = _SkipWs(t_s cadr(l_r) nil nil)
-        if(g_array
+    let((array k r path)
+        array = _Code(t_s n_i + 1) == 91
+        k = n_i + if(array 2 1)
+        k = _SkipWs(t_s k nil nil)
+        r = _ParseKeyPath(t_s k)
+        path = car(r)
+        k = _SkipWs(t_s cadr(r) nil nil)
+        if(array
         then
-            unless(_Code(t_s n_k) == 93 && _Code(t_s n_k + 1) == 93
-                _Error(t_s n_k "expected ']]'")
+            unless(_Code(t_s k) == 93 && _Code(t_s k + 1) == 93
+                _Error(t_s k "expected ']]'")
             )
-            n_k = n_k + 2
+            k = k + 2
         else
-            unless(_Code(t_s n_k) == 93
-                _Error(t_s n_k "expected ']'")
+            unless(_Code(t_s k) == 93
+                _Error(t_s k "expected ']'")
             )
-            n_k++
+            k++
         )
-        list(l_path _LineEnd(t_s n_k) g_array)
+        list(path _LineEnd(t_s k) array)
     )
 )
 
@@ -217,40 +217,40 @@ procedure(_DecodeText(t_s n_max "tx")  ; -> table
     ;
     ; **返回**
     ;   (table) - 文档根表
-    let((n_i n_len t_root t_meta t_cur l_cur l_r n_key l_v l_path l_h)
+    let((i len root meta cur cur2 r key v path h)
         t_s = _Normalize(t_s)
-        n_i = 1
-        n_len = length(t_s)
-        t_root = _NewTable()
-        t_meta = _MetaNew()
-        t_cur = t_root
-        l_cur = nil
-        while(n_i <= n_len
-            n_i = _SkipWs(t_s n_i t t)
-            when(n_i <= n_len
-                if(_Code(t_s n_i) == 91
+        i = 1
+        len = length(t_s)
+        root = _NewTable()
+        meta = _MetaNew()
+        cur = root
+        cur2 = nil
+        while(i <= len
+            i = _SkipWs(t_s i t t)
+            when(i <= len
+                if(_Code(t_s i) == 91
                 then
-                    l_h = _ParseHeader(t_s n_i n_max)
-                    l_r = _HeaderTarget(t_s t_root t_meta car(l_h) n_i cadr(cdr(l_h)) n_max)
-                    t_cur = car(l_r)
-                    l_cur = cadr(l_r)
-                    n_i = cadr(l_h)
+                    h = _ParseHeader(t_s i n_max)
+                    r = _HeaderTarget(t_s root meta car(h) i cadr(cdr(h)) n_max)
+                    cur = car(r)
+                    cur2 = cadr(r)
+                    i = cadr(h)
                 else
-                    n_key = n_i
-                    l_r = _ParseKeyPath(t_s n_i)
-                    l_path = car(l_r)
-                    n_i = _SkipWs(t_s cadr(l_r) nil nil)
-                    unless(_Code(t_s n_i) == 61
-                        _Error(t_s n_i "expected '='")
+                    key = i
+                    r = _ParseKeyPath(t_s i)
+                    path = car(r)
+                    i = _SkipWs(t_s cadr(r) nil nil)
+                    unless(_Code(t_s i) == 61
+                        _Error(t_s i "expected '='")
                     )
-                    n_i = _SkipWs(t_s n_i + 1 nil nil)
-                    l_v = _ParseValue(t_s n_i 0 n_max)
-                    _AssignValue(t_s t_meta l_cur t_cur l_path car(l_v) n_key n_max)
-                    n_i = _LineEnd(t_s cadr(l_v))
+                    i = _SkipWs(t_s i + 1 nil nil)
+                    v = _ParseValue(t_s i 0 n_max)
+                    _AssignValue(t_s meta cur2 cur path car(v) key n_max)
+                    i = _LineEnd(t_s cadr(v))
                 )
             )
         )
-        t_root
+        root
     )
 )
 

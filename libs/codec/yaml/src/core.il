@@ -66,13 +66,13 @@ procedure(_Ltrim(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 去左侧空白后的串
-    let((n_len n_i)
-        n_len = length(t_s)
-        n_i = 1
-        while(n_i <= n_len && (_Code(t_s n_i) == 32 || _Code(t_s n_i) == 9)
-            n_i++
+    let((len i)
+        len = length(t_s)
+        i = 1
+        while(i <= len && (_Code(t_s i) == 32 || _Code(t_s i) == 9)
+            i++
         )
-        _Tail(t_s n_i)
+        _Tail(t_s i)
     )
 )
 
@@ -85,10 +85,10 @@ procedure(_Code(t_s n_i "tx")  ; -> int | nil
     ;
     ; **返回**
     ;   (int|nil) - 该字符的码值；越界为 nil
-    let((g_c)
-        g_c = getchar(t_s n_i)
-        when(g_c
-            charToInt(g_c)
+    let((c)
+        c = getchar(t_s n_i)
+        when(c
+            charToInt(c)
         )
     )
 )
@@ -147,18 +147,18 @@ procedure(_LineCol(t_s n_i "tx")  ; -> list
     ;
     ; **返回**
     ;   (list) - (行 列)
-    let((n_line n_last)
-        n_line = 1
-        n_last = 0
+    let((line last)
+        line = 1
+        last = 0
         when(1 < n_i
-            for(n_k 1 n_i - 1
-                when(_Code(t_s n_k) == 10
-                    n_line++
-                    n_last = n_k
+            for(k 1 n_i - 1
+                when(_Code(t_s k) == 10
+                    line++
+                    last = k
                 )
             )
         )
-        list(n_line n_i - n_last)
+        list(line n_i - last)
     )
 )
 
@@ -183,15 +183,15 @@ procedure(_Rtrim(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 去尾后的串
-    let((n_end n_c)
-        n_end = length(t_s)
-        n_c = 0
-        while(n_end > 0 && (n_c = _Code(t_s n_end)) && (n_c == 32 || n_c == 9)
-            n_end--
+    let((end c)
+        end = length(t_s)
+        c = 0
+        while(end > 0 && (c = _Code(t_s end)) && (c == 32 || c == 9)
+            end--
         )
-        if(n_end == 0
+        if(end == 0
             ""
-            substring(t_s 1 n_end)
+            substring(t_s 1 end)
         )
     )
 )
@@ -204,10 +204,10 @@ procedure(_ChompCr(t_line "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 去 CR 后的行
-    let((n_len)
-        n_len = length(t_line)
-        if(n_len > 0 && _Code(t_line n_len) == 13
-            substring(t_line 1 n_len - 1)
+    let((len)
+        len = length(t_line)
+        if(len > 0 && _Code(t_line len) == 13
+            substring(t_line 1 len - 1)
             t_line
         )
     )
@@ -221,19 +221,19 @@ procedure(_SplitLines(t_s "t")  ; -> list
     ;
     ; **返回**
     ;   (list[str]) - 行列表；空串为 nil
-    let((l_res n_start n_len n_k)
-        n_len = length(t_s)
-        n_start = 1
-        for(n_k 1 n_len
-            when(_Code(t_s n_k) == 10
-                l_res = tconc(l_res _ChompCr(substring(t_s n_start n_k - n_start)))
-                n_start = n_k + 1
+    let((res start len k)
+        len = length(t_s)
+        start = 1
+        for(k2 1 len
+            when(_Code(t_s k2) == 10
+                res = tconc(res _ChompCr(substring(t_s start k2 - start)))
+                start = k2 + 1
             )
         )
-        when(n_start <= n_len
-            l_res = tconc(l_res _ChompCr(substring(t_s n_start n_len - n_start + 1)))
+        when(start <= len
+            res = tconc(res _ChompCr(substring(t_s start len - start + 1)))
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -246,18 +246,18 @@ procedure(_LineIndent(t_line n_line "tx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 行首空格数
-    let((n_i n_c g_stop)
-        n_i = 0
-        g_stop = nil
-        while(!g_stop && n_i < length(t_line)
-            n_c = _Code(t_line n_i + 1)
+    let((i c stop)
+        i = 0
+        stop = nil
+        while(!stop && i < length(t_line)
+            c = _Code(t_line i + 1)
             cond(
-                (n_c == 32 n_i = n_i + 1)
-                (n_c == 9 _ErrorLine("tab character in indentation" n_line n_i + 1))
-                (t g_stop = t)
+                (c == 32 i = i + 1)
+                (c == 9 _ErrorLine("tab character in indentation" n_line i + 1))
+                (t stop = t)
             )
         )
-        n_i
+        i
     )
 )
 
@@ -269,58 +269,58 @@ procedure(_StripComment(t_line "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 去注释后的文本
-    let((n_len n_i n_c n_cut n_prev g_sq g_dq g_esc)
-        n_len = length(t_line)
-        n_i = 1
-        n_cut = nil
-        g_sq = nil
-        g_dq = nil
-        g_esc = nil
-        while(n_i <= n_len && !n_cut
-            n_c = _Code(t_line n_i)
-            n_prev = if(n_i > 1 _Code(t_line n_i - 1) 0)
+    let((len i c cut prev sq dq esc)
+        len = length(t_line)
+        i = 1
+        cut = nil
+        sq = nil
+        dq = nil
+        esc = nil
+        while(i <= len && !cut
+            c = _Code(t_line i)
+            prev = if(i > 1 _Code(t_line i - 1) 0)
             cond(
-                (g_dq
-                    when(g_esc
-                        g_esc = nil
+                (dq
+                    when(esc
+                        esc = nil
                     )
-                    when(!g_esc && n_c == 92
-                        g_esc = t
+                    when(!esc && c == 92
+                        esc = t
                     )
-                    when(!g_esc && n_c == 34
-                        g_dq = nil
+                    when(!esc && c == 34
+                        dq = nil
                     )
-                    n_i++
+                    i++
                 )
-                (g_sq
-                    when(n_c == 39
-                        if(_Code(t_line n_i + 1) == 39
-                            n_i++
-                            g_sq = nil
+                (sq
+                    when(c == 39
+                        if(_Code(t_line i + 1) == 39
+                            i++
+                            sq = nil
                         )
                     )
-                    n_i++
+                    i++
                 )
-                (n_c == 34
-                    g_dq = t
-                    n_i++
+                (c == 34
+                    dq = t
+                    i++
                 )
-                (n_c == 39
-                    g_sq = t
-                    n_i++
+                (c == 39
+                    sq = t
+                    i++
                 )
-                (n_c == 35 && (n_i == 1 || n_prev == 32 || n_prev == 9)
-                    n_cut = n_i
+                (c == 35 && (i == 1 || prev == 32 || prev == 9)
+                    cut = i
                 )
                 (t
-                    n_i++
+                    i++
                 )
             )
         )
-        if(n_cut
-            if(n_cut == 1
+        if(cut
+            if(cut == 1
                 ""
-                _Rtrim(substring(t_line 1 n_cut - 1))
+                _Rtrim(substring(t_line 1 cut - 1))
             )
             t_line
         )

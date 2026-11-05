@@ -132,10 +132,10 @@ defmethod(initializeInstance (self(Table) \@rest _args)
         unless(fixp(g_col) && 1 <= g_col && g_col <= self->columnCount()
             error("%A->cell: column index %A out of range" className(self) g_col)
         )
-        let((l_row)
-            l_row = nth(g_row - 1 self->_data->rows)
-            if(g_col <= length(l_row)
-                nth(g_col - 1 l_row)
+        let((row2)
+            row2 = nth(g_row - 1 self->_data->rows)
+            if(g_col <= length(row2)
+                nth(g_col - 1 row2)
                 _Missing()
             )
         )
@@ -152,16 +152,16 @@ defmethod(initializeInstance (self(Table) \@rest _args)
         unless(fixp(g_col) && 1 <= g_col && g_col <= self->columnCount()
             error("%A->columnAt: column index %A out of range" className(self) g_col)
         )
-        let((l_res)
-            foreach(l_row self->_data->rows
-                l_res = tconc(l_res
-                    if(g_col <= length(l_row)
-                        nth(g_col - 1 l_row)
+        let((res)
+            foreach(row2 self->_data->rows
+                res = tconc(res
+                    if(g_col <= length(row2)
+                        nth(g_col - 1 row2)
                         _Missing()
                     )
                 )
             )
-            car(l_res)
+            car(res)
         )
     )
 
@@ -181,12 +181,12 @@ defmethod(initializeInstance (self(Table) \@rest _args)
         unless(stringp(g_name)
             error("%A->value: column name must be a string" className(self))
         )
-        let((n_col)
-            n_col = self->_data->index[g_name]
-            unless(n_col
+        let((col)
+            col = self->_data->index[g_name]
+            unless(col
                 error("%A->value: unknown column name %A" className(self) g_name)
             )
-            self->cell(g_row n_col)
+            self->cell(g_row col)
         )
     )
 
@@ -243,10 +243,10 @@ procedure(_InstallRender(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t) - 打印成功；ycTabulate 未加载或渲染失败时报错
-        let((t_text)
-            t_text = apply(self->render l_args)
-            when(t_text != ""
-                printf("%s\n" t_text)
+        let((text)
+            text = apply(self->render l_args)
+            when(text != ""
+                printf("%s\n" text)
             )
             t
         )
@@ -265,20 +265,20 @@ procedure(_RenderRows(g_self t_missing "gt")  ; -> list
     ;
     ; **返回**
     ;   (list) - 等宽行列表
-    let((n_cols l_res l_row l_cells n_i g_cell)
-        n_cols = g_self->columnCount()
-        foreach(l_row g_self->rows()
-            l_cells = nil
-            for(n_i 1 n_cols
-                g_cell = if(n_i <= length(l_row) nth(n_i - 1 l_row) _Missing())
-                when(g_cell == _Missing()
-                    g_cell = t_missing
+    let((cols res row2 cells i cell2)
+        cols = g_self->columnCount()
+        foreach(row3 g_self->rows()
+            cells = nil
+            for(i2 1 cols
+                cell2 = if(i2 <= length(row3) nth(i2 - 1 row3) _Missing())
+                when(cell2 == _Missing()
+                    cell2 = t_missing
                 )
-                l_cells = tconc(l_cells g_cell)
+                cells = tconc(cells cell2)
             )
-            l_res = tconc(l_res car(l_cells))
+            res = tconc(res car(cells))
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -293,14 +293,14 @@ procedure(_MaxWidth(l_rows "l")  ; -> int
     ;
     ; **返回**
     ;   (int) - 最长行的字段数；空列表为 0
-    let((n_max)
-        n_max = 0
-        foreach(l_row l_rows
-            when(n_max < length(l_row)
-                n_max = length(l_row)
+    let((max)
+        max = 0
+        foreach(row2 l_rows
+            when(max < length(row2)
+                max = length(row2)
             )
         )
-        n_max
+        max
     )
 )
 
@@ -313,27 +313,27 @@ procedure(Table(l_rows \@key (header nil) "lg")  ; -> Table
     ;
     ; **返回**
     ;   (Table) - 新实例；行/表头类型非法、空行、重复列名或行宽超过表头时报错
-    let((l_names l_index n_width t_obj)
-        l_names = _CheckHeader(header "ycCsv::Table")
+    let((names index2 width obj)
+        names = _CheckHeader(header "ycCsv::Table")
         l_rows = _CopyRows(_CheckRows(l_rows "ycCsv::Table"))
-        when(l_names
-            n_width = length(l_names)
-            for(n_i 1 length(l_rows)
-                when(n_width < length(nth(n_i - 1 l_rows))
+        when(names
+            width = length(names)
+            for(i 1 length(l_rows)
+                when(width < length(nth(i - 1 l_rows))
                     error("ycCsv::Table: row %d has %d fields but header has %d"
-                        n_i length(nth(n_i - 1 l_rows)) n_width)
+                        i length(nth(i - 1 l_rows)) width)
                 )
             )
-            l_index = makeTable("ycCsvIndex" nil)
-            for(n_i 1 n_width
-                l_index[nth(n_i - 1 l_names)] = n_i
+            index2 = makeTable("ycCsvIndex" nil)
+            for(i 1 width
+                index2[nth(i - 1 names)] = i
             )
         )
-        t_obj = makeInstance('Table ?_data
-            makeInstance('_TableData ?header l_names ?rows l_rows ?index l_index)
+        obj = makeInstance('Table ?_data
+            makeInstance('_TableData ?header names ?rows l_rows ?index index2)
         )
-        _InstallRender(t_obj)
-        t_obj
+        _InstallRender(obj)
+        obj
     )
 )
 

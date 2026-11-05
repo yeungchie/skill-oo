@@ -39,14 +39,14 @@ procedure(_IndentStr(n_level n_indent "xx")  ; -> str
     ;
     ; **返回**
     ;   (str) - 缩进空白串
-    let((t_s)
-        t_s = ""
+    let((item)
+        item = ""
         when(0 < n_level && 0 < n_indent
-            for(n_k 1 n_level * n_indent
-                t_s = strcat(t_s " ")
+            for(k 1 n_level * n_indent
+                item = strcat(item " ")
             )
         )
-        t_s
+        item
     )
 )
 
@@ -58,21 +58,21 @@ procedure(_EncodeString(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 带双引号的 JSON 字符串文本
-    let((n_len n_run l_p n_c)
-        n_len = length(t_s)
-        n_run = 1
-        l_p = nil
-        when(0 < n_len
-            for(n_k 1 n_len
-                n_c = _Code(t_s n_k)
+    let((len run p c)
+        len = length(t_s)
+        run = 1
+        p = nil
+        when(0 < len
+            for(k 1 len
+                c = _Code(t_s k)
                 cond(
-                    (n_c == 34 || n_c == 92 || n_c < 32
+                    (c == 34 || c == 92 || c < 32
                         {
-                        when(n_run < n_k
-                            l_p = tconc(l_p substring(t_s n_run n_k - n_run))
+                        when(run < k
+                            p = tconc(p substring(t_s run k - run))
                         )
-                        l_p = tconc(l_p
-                        case(n_c
+                        p = tconc(p
+                        case(c
                             (34 "\\\"")
                             (92 "\\\\")
                             (8 "\\b")
@@ -80,19 +80,19 @@ procedure(_EncodeString(t_s "t")  ; -> str
                             (10 "\\n")
                             (13 "\\r")
                             (9 "\\t")
-                            (t sprintf(nil "\\u%04x" n_c))
+                            (t sprintf(nil "\\u%04x" c))
                         )
                         )
-                        n_run = n_k + 1
+                        run = k + 1
                         }
                     )
                 )
             )
-            when(n_run <= n_len
-                l_p = tconc(l_p substring(t_s n_run n_len - n_run + 1))
+            when(run <= len
+                p = tconc(p substring(t_s run len - run + 1))
             )
         )
-        lsprintf("\"%s\"" _Build(l_p))
+        lsprintf("\"%s\"" _Build(p))
     )
 )
 
@@ -106,18 +106,18 @@ procedure(_EncodeNumber(n_num "n")  ; -> str
     ;   (str) - JSON 数字文本；inf/nan 报错
     if(fixp(n_num)
         sprintf(nil "%d" n_num)
-        let((t_s)
+        let((item)
             when(isNaN(n_num) || isInfinity(n_num)
                 error("ycJson::Encode: cannot dump non-finite float")
             )
-            t_s = sprintf(nil "%.15g" n_num)
-            unless(atof(t_s) == n_num
-                t_s = sprintf(nil "%.17g" n_num)
+            item = sprintf(nil "%.15g" n_num)
+            unless(atof(item) == n_num
+                item = sprintf(nil "%.17g" n_num)
             )
-            unless(pcreMatchp("[.eE]" t_s)
-                t_s = strcat(t_s ".0")
+            unless(pcreMatchp("[.eE]" item)
+                item = strcat(item ".0")
             )
-            t_s
+            item
         )
     )
 )
@@ -165,33 +165,33 @@ procedure(_EncodeList(l_arr n_depth g_opt "lxg")  ; -> str
     ;
     ; **返回**
     ;   (str) - JSON 数组文本
-    let((n_indent l_items l_q t_pad t_padIn)
-        n_indent = g_opt["indent"]
-        when(n_indent > 0
-            t_pad = _IndentStr(n_depth n_indent)
-            t_padIn = _IndentStr(n_depth + 1 n_indent)
+    let((indent2 items q pad padIn)
+        indent2 = g_opt["indent"]
+        when(indent2 > 0
+            pad = _IndentStr(n_depth indent2)
+            padIn = _IndentStr(n_depth + 1 indent2)
         )
-        l_items = nil
-        foreach(g_item l_arr
-            l_items = tconc(l_items _EncodeValue(g_item n_depth + 1 g_opt))
+        items = nil
+        foreach(item l_arr
+            items = tconc(items _EncodeValue(item n_depth + 1 g_opt))
         )
-        l_items = car(l_items)
-        if(n_indent > 0
+        items = car(items)
+        if(indent2 > 0
         then
-            l_q = nil
-            while(l_items
-                l_q = tconc(l_q
+            q = nil
+            while(items
+                q = tconc(q
                     lsprintf("%s%s%s"
-                        t_padIn
-                        car(l_items)
-                        if(cdr(l_items) "," "")
+                        padIn
+                        car(items)
+                        if(cdr(items) "," "")
                     )
                 )
-                l_items = cdr(l_items)
+                items = cdr(items)
             )
-            lsprintf("[\n%s\n%s]" buildString(car(l_q) "\n") t_pad)
+            lsprintf("[\n%s\n%s]" buildString(car(q) "\n") pad)
         else
-            lsprintf("[%s]" buildString(l_items ","))
+            lsprintf("[%s]" buildString(items ","))
         )
     )
 )
@@ -208,50 +208,50 @@ procedure(_EncodeTable(g_obj n_depth g_opt "gxg")  ; -> str
     ;   (str) - JSON 对象文本
     if(length(g_obj) == 0
         "{}"
-        let((l_keys t_orig l_strs l_p t_pad t_padIn t_ks n_indent)
-            n_indent = g_opt["indent"]
-            l_keys = nil
-            foreach(g_k g_obj
-                l_keys = tconc(l_keys g_k)
+        let((keys orig strs p pad padIn ks indent2)
+            indent2 = g_opt["indent"]
+            keys = nil
+            foreach(k g_obj
+                keys = tconc(keys k)
             )
-            l_keys = car(l_keys)
-            t_orig = makeTable("ycJsonKeys" ycCodec:::Missing)
-            l_strs = nil
-            foreach(g_k l_keys
-                t_ks = _KeyStr(g_k g_opt)
-                when(t_orig[t_ks] != ycCodec:::Missing
-                    error("ycJson::Encode: duplicate object key %A after string conversion" t_ks)
+            keys = car(keys)
+            orig = makeTable("ycJsonKeys" ycCodec:::Missing)
+            strs = nil
+            foreach(k keys
+                ks = _KeyStr(k g_opt)
+                when(orig[ks] != ycCodec:::Missing
+                    error("ycJson::Encode: duplicate object key %A after string conversion" ks)
                 )
-                l_strs = tconc(l_strs t_ks)
-                t_orig[t_ks] = g_k
+                strs = tconc(strs ks)
+                orig[ks] = k
             )
-            l_strs = car(l_strs)
+            strs = car(strs)
             when(g_opt["sortKeys"]
-                l_strs = sort(l_strs 'alphalessp)
+                strs = sort(strs 'alphalessp)
             )
-            when(n_indent > 0
-                t_pad = _IndentStr(n_depth n_indent)
-                t_padIn = _IndentStr(n_depth + 1 n_indent)
+            when(indent2 > 0
+                pad = _IndentStr(n_depth indent2)
+                padIn = _IndentStr(n_depth + 1 indent2)
             )
-            l_p = nil
-            foreach(t_ks l_strs
-                l_p = tconc(l_p
-                    if(n_indent > 0
+            p = nil
+            foreach(ks2 strs
+                p = tconc(p
+                    if(indent2 > 0
                         lsprintf("%s%s: %s"
-                            t_padIn
-                            _EncodeString(t_ks)
-                            _EncodeValue(g_obj[t_orig[t_ks]] n_depth + 1 g_opt)
+                            padIn
+                            _EncodeString(ks2)
+                            _EncodeValue(g_obj[orig[ks2]] n_depth + 1 g_opt)
                         )
                         lsprintf("%s:%s"
-                            _EncodeString(t_ks)
-                            _EncodeValue(g_obj[t_orig[t_ks]] n_depth + 1 g_opt)
+                            _EncodeString(ks2)
+                            _EncodeValue(g_obj[orig[ks2]] n_depth + 1 g_opt)
                         )
                     )
                 )
             )
-            if(n_indent > 0
-                lsprintf("{\n%s\n%s}" buildString(car(l_p) "\n") t_pad)
-                lsprintf("{%s}" buildString(car(l_p) ","))
+            if(indent2 > 0
+                lsprintf("{\n%s\n%s}" buildString(car(p) "\n") pad)
+                lsprintf("{%s}" buildString(car(p) ","))
             )
         )
     )
@@ -281,42 +281,42 @@ procedure(Encode(g_val \@key (format "json") (indent nil) (sortKeys nil) (strict
     unless(fixp(maxDepth) && maxDepth >= 1
         error("ycJson::Encode: ?maxDepth must be a positive fixnum")
     )
-    let((n_indent g_opt)
-        n_indent = 0
+    let((indent2 opt)
+        indent2 = 0
         when(indent
             unless(fixp(indent)
                 error("ycJson::Encode: ?indent must be a fixnum")
             )
             when(indent > 0
-                n_indent = indent
+                indent2 = indent
             )
         )
-        g_opt = makeTable("ycJsonOpt")
-        g_opt["indent"] = n_indent
-        g_opt["sortKeys"] = sortKeys
-        g_opt["strict"] = strict
-        g_opt["nilAs"] = nilAs
-        g_opt["maxDepth"] = maxDepth
+        opt = makeTable("ycJsonOpt")
+        opt["indent"] = indent2
+        opt["sortKeys"] = sortKeys
+        opt["strict"] = strict
+        opt["nilAs"] = nilAs
+        opt["maxDepth"] = maxDepth
         case(format
             (("json" "jsonc")
-                _EncodeValue(g_val 0 g_opt)
+                _EncodeValue(g_val 0 opt)
             )
             ("jsonl"
                 unless(listp(g_val)
                     error("ycJson::Encode: format \"jsonl\" expects a list")
                 )
-                let((l_p t_s)
-                    l_p = nil
-                    foreach(g_item g_val
-                        l_p = tconc(l_p _EncodeValue(g_item 0 g_opt))
+                let((p item)
+                    p = nil
+                    foreach(item2 g_val
+                        p = tconc(p _EncodeValue(item2 0 opt))
                     )
-                    t_s = buildString(car(l_p) "\n")
+                    item = buildString(car(p) "\n")
                     cond(
-                        (t_s == "" "")
+                        (item == "" "")
                         (finalNewline
-                            strcat(t_s "\n")
+                            strcat(item "\n")
                         )
-                        (t t_s)
+                        (t item)
                     )
                 )
             )

@@ -12,36 +12,36 @@ procedure(_QuoteField(t_s n_delim g_quoteAll "tng")  ; -> str
     ;
     ; **返回**
     ;   (str) - 可直接写入 CSV 的字段文本
-    let((g_need n_len n_i n_c l_p n_run)
-        n_len = length(t_s)
-        g_need = g_quoteAll
-        unless(g_need
-            for(n_i 1 n_len
-                n_c = _Code(t_s n_i)
-                when(n_c == n_delim || n_c == 34 || n_c == 10 || n_c == 13
-                    g_need = t
+    let((need len i c p run)
+        len = length(t_s)
+        need = g_quoteAll
+        unless(need
+            for(i2 1 len
+                c = _Code(t_s i2)
+                when(c == n_delim || c == 34 || c == 10 || c == 13
+                    need = t
                 )
             )
         )
-        if(!g_need
+        if(!need
         then
             t_s
         else
-            n_run = 1
-            for(n_i 1 n_len
-                n_c = _Code(t_s n_i)
-                when(n_c == 34
-                    when(n_run < n_i
-                        l_p = tconc(l_p substring(t_s n_run n_i - n_run))
+            run = 1
+            for(i2 1 len
+                c = _Code(t_s i2)
+                when(c == 34
+                    when(run < i2
+                        p = tconc(p substring(t_s run i2 - run))
                     )
-                    l_p = tconc(l_p "\"\"")
-                    n_run = n_i + 1
+                    p = tconc(p "\"\"")
+                    run = i2 + 1
                 )
             )
-            when(n_run <= n_len
-                l_p = tconc(l_p substring(t_s n_run n_len - n_run + 1))
+            when(run <= len
+                p = tconc(p substring(t_s run len - run + 1))
             )
-            strcat("\"" _Build(l_p) "\"")
+            strcat("\"" _Build(p) "\"")
         )
     )
 )
@@ -56,11 +56,11 @@ procedure(_RecordText(l_cells n_delim g_quoteAll "lng")  ; -> str
     ;
     ; **返回**
     ;   (str) - 不含行尾的记录文本
-    let((l_p)
-        foreach(t_cell l_cells
-            l_p = tconc(l_p _QuoteField(t_cell n_delim g_quoteAll))
+    let((p)
+        foreach(cell l_cells
+            p = tconc(p _QuoteField(cell n_delim g_quoteAll))
         )
-        buildString(car(l_p) intToChar(n_delim))
+        buildString(car(p) intToChar(n_delim))
     )
 )
 
@@ -86,41 +86,41 @@ procedure(Encode(g_table \@key (format "csv") (delimiter nil) (eol "\n") (quoteA
         error("ycCsv::Encode: expects a ycCsv::Table, got %s"
             symbolToString(type(g_table)))
     )
-    let((l_header l_rows n_delim t_eol l_lines t_line)
-        l_header = g_table->header()
-        l_rows = g_table->rows()
-        _CheckRows(l_rows "ycCsv::Encode")
-        when(l_header
-            for(n_i 1 length(l_rows)
-                when(length(l_header) < length(nth(n_i - 1 l_rows))
+    let((header rows delim eol2 lines line)
+        header = g_table->header()
+        rows = g_table->rows()
+        _CheckRows(rows "ycCsv::Encode")
+        when(header
+            for(i 1 length(rows)
+                when(length(header) < length(nth(i - 1 rows))
                     error("ycCsv::Encode: row %d has %d fields but header has %d"
-                        n_i length(nth(n_i - 1 l_rows)) length(l_header))
+                        i length(nth(i - 1 rows)) length(header))
                 )
             )
         )
-        n_delim = _DelimCode(delimiter _FormatDelim(format "ycCsv::Encode") "ycCsv::Encode")
-        t_eol = _EolText(eol)
-        when(l_header
-            t_line = _RecordText(l_header n_delim quoteAll)
-            when(!finalNewline && l_rows == nil && t_line == ""
-                t_line = "\"\""
+        delim = _DelimCode(delimiter _FormatDelim(format "ycCsv::Encode") "ycCsv::Encode")
+        eol2 = _EolText(eol)
+        when(header
+            line = _RecordText(header delim quoteAll)
+            when(!finalNewline && rows == nil && line == ""
+                line = "\"\""
             )
-            l_lines = tconc(l_lines t_line)
+            lines = tconc(lines line)
         )
-        for(n_i 1 length(l_rows)
-            t_line = _RecordText(nth(n_i - 1 l_rows) n_delim quoteAll)
-            when(!finalNewline && n_i == length(l_rows) && t_line == ""
-                t_line = "\"\""
+        for(i 1 length(rows)
+            line = _RecordText(nth(i - 1 rows) delim quoteAll)
+            when(!finalNewline && i == length(rows) && line == ""
+                line = "\"\""
             )
-            l_lines = tconc(l_lines t_line)
+            lines = tconc(lines line)
         )
-        if(l_lines
-            let((t_out)
-                t_out = buildString(car(l_lines) t_eol)
+        if(lines
+            let((out)
+                out = buildString(car(lines) eol2)
                 when(finalNewline
-                    t_out = strcat(t_out t_eol)
+                    out = strcat(out eol2)
                 )
-                t_out
+                out
             )
             ""
         )

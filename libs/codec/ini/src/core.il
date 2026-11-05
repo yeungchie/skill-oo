@@ -29,10 +29,10 @@ procedure(_Code(t_s n_i "tx")  ; -> int | nil
     ;
     ; **返回**
     ;   (int|nil) - 该字节的字符码；越界时为 nil
-    let((g_c)
-        g_c = getchar(t_s n_i)
-        when(g_c
-            charToInt(g_c)
+    let((c)
+        c = getchar(t_s n_i)
+        when(c
+            charToInt(c)
         )
     )
 )
@@ -46,15 +46,15 @@ procedure(_Find(t_s t_sub "tt")  ; -> int | nil
     ;
     ; **返回**
     ;   (int|nil) - 1-based 位置；未找到为 nil
-    let((n_len n_i n_c)
-        n_len = length(t_s)
-        n_c = _Code(t_sub 1)
-        n_i = 1
-        while(n_i <= n_len && _Code(t_s n_i) != n_c
-            n_i++
+    let((len i c)
+        len = length(t_s)
+        c = _Code(t_sub 1)
+        i = 1
+        while(i <= len && _Code(t_s i) != c
+            i++
         )
-        when(n_i <= n_len
-            n_i
+        when(i <= len
+            i
         )
     )
 )
@@ -67,15 +67,15 @@ procedure(_Ltrim(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 去左侧空白后的串
-    let((n_len n_i)
-        n_len = length(t_s)
-        n_i = 1
-        while(n_i <= n_len && (_Code(t_s n_i) == 32 || _Code(t_s n_i) == 9)
-            n_i++
+    let((len i)
+        len = length(t_s)
+        i = 1
+        while(i <= len && (_Code(t_s i) == 32 || _Code(t_s i) == 9)
+            i++
         )
-        if(n_i > n_len
+        if(i > len
             ""
-            substring(t_s n_i n_len - n_i + 1)
+            substring(t_s i len - i + 1)
         )
     )
 )
@@ -88,14 +88,14 @@ procedure(_Rtrim(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 去右侧空白后的串
-    let((n_end)
-        n_end = length(t_s)
-        while(n_end > 0 && (_Code(t_s n_end) == 32 || _Code(t_s n_end) == 9)
-            n_end--
+    let((end)
+        end = length(t_s)
+        while(end > 0 && (_Code(t_s end) == 32 || _Code(t_s end) == 9)
+            end--
         )
-        if(n_end == 0
+        if(end == 0
             ""
-            substring(t_s 1 n_end)
+            substring(t_s 1 end)
         )
     )
 )
@@ -119,17 +119,17 @@ procedure(_HasControl(t_s "t")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 含控制字节时为 t
-    let((n_len n_i n_c g_hit)
-        n_len = length(t_s)
-        n_i = 1
-        while(!g_hit && n_i <= n_len
-            n_c = _Code(t_s n_i)
-            when((n_c < 32 && n_c != 9) || n_c == 127
-                g_hit = t
+    let((len i c hit)
+        len = length(t_s)
+        i = 1
+        while(!hit && i <= len
+            c = _Code(t_s i)
+            when((c < 32 && c != 9) || c == 127
+                hit = t
             )
-            n_i++
+            i++
         )
-        g_hit
+        hit
     )
 )
 
@@ -141,13 +141,13 @@ procedure(_LineIndent(t_line "t")  ; -> int
     ;
     ; **返回**
     ;   (int) - 行首空白字节数
-    let((n_len n_i)
-        n_len = length(t_line)
-        n_i = 1
-        while(n_i <= n_len && (_Code(t_line n_i) == 32 || _Code(t_line n_i) == 9)
-            n_i++
+    let((len i)
+        len = length(t_line)
+        i = 1
+        while(i <= len && (_Code(t_line i) == 32 || _Code(t_line i) == 9)
+            i++
         )
-        n_i - 1
+        i - 1
     )
 )
 
@@ -161,26 +161,26 @@ procedure(_Normalize(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 归一化文本
-    let((n_i n_len l_p)
+    let((i len p)
         when(length(t_s) >= 3 && _Code(t_s 1) == 239 && _Code(t_s 2) == 187 && _Code(t_s 3) == 191
             t_s = substring(t_s 4)
         )
-        n_i = 1
-        n_len = length(t_s)
-        while(n_i <= n_len
-            if(_Code(t_s n_i) == 13
+        i = 1
+        len = length(t_s)
+        while(i <= len
+            if(_Code(t_s i) == 13
             then
-                l_p = tconc(l_p "\n")
-                n_i++
-                when(_Code(t_s n_i) == 10
-                    n_i++
+                p = tconc(p "\n")
+                i++
+                when(_Code(t_s i) == 10
+                    i++
                 )
             else
-                l_p = tconc(l_p substring(t_s n_i 1))
-                n_i++
+                p = tconc(p substring(t_s i 1))
+                i++
             )
         )
-        _Build(l_p)
+        _Build(p)
     )
 )
 
@@ -192,19 +192,19 @@ procedure(_SplitLines(t_s "t")  ; -> list
     ;
     ; **返回**
     ;   (list[str]) - 行列表；空串为 nil，末尾换行不产生额外空行
-    let((l_res n_start n_len n_k)
-        n_len = length(t_s)
-        n_start = 1
-        for(n_k 1 n_len
-            when(_Code(t_s n_k) == 10
-                l_res = tconc(l_res substring(t_s n_start n_k - n_start))
-                n_start = n_k + 1
+    let((res start len k)
+        len = length(t_s)
+        start = 1
+        for(k2 1 len
+            when(_Code(t_s k2) == 10
+                res = tconc(res substring(t_s start k2 - start))
+                start = k2 + 1
             )
         )
-        when(n_start <= n_len
-            l_res = tconc(l_res substring(t_s n_start n_len - n_start + 1))
+        when(start <= len
+            res = tconc(res substring(t_s start len - start + 1))
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -225,9 +225,9 @@ procedure(_Delim(g_delim t_ctx "gt")  ; -> str
     unless(stringp(g_delim) && length(g_delim) == 1
         error("%s: ?delimiter must be a single-byte string" t_ctx)
     )
-    let((n_c)
-        n_c = _Code(g_delim 1)
-        when(n_c < 33 || n_c == 127 || n_c == 35 || n_c == 59 || n_c == 91 || n_c == 93
+    let((c)
+        c = _Code(g_delim 1)
+        when(c < 33 || c == 127 || c == 35 || c == 59 || c == 91 || c == 93
             error("%s: ?delimiter must be a printable character other than '#' ';' '[' ']'" t_ctx)
         )
         g_delim
@@ -297,8 +297,8 @@ procedure(_KeyText(g_key g_opt "gg")  ; -> str
     when(g_opt["strict"] && !stringp(g_key)
         error("ycIni::Encode: strict mode requires string keys, got %A" g_key)
     )
-    let((t_key n_c)
-        t_key = cond(
+    let((key c)
+        key = cond(
             (stringp(g_key) g_key)
             (symbolp(g_key) symbolToString(g_key))
             (fixp(g_key) sprintf(nil "%d" g_key))
@@ -306,23 +306,23 @@ procedure(_KeyText(g_key g_opt "gg")  ; -> str
                 error("ycIni::Encode: unsupported table key of type %s" symbolToString(type(g_key)))
             )
         )
-        when(t_key == ""
+        when(key == ""
             error("ycIni::Encode: key must not be empty")
         )
-        unless(_Trim(t_key) == t_key
+        unless(_Trim(key) == key
             error("ycIni::Encode: key must not have leading or trailing whitespace")
         )
-        when(_HasControl(t_key)
-            error("ycIni::Encode: control character in key %A" t_key)
+        when(_HasControl(key)
+            error("ycIni::Encode: control character in key %A" key)
         )
-        n_c = _Code(t_key 1)
-        when(n_c == 91 || n_c == 35 || n_c == 59
+        c = _Code(key 1)
+        when(c == 91 || c == 35 || c == 59
             error("ycIni::Encode: key cannot start with '[' '#' or ';'")
         )
-        when(_Find(t_key g_opt["delimiter"])
+        when(_Find(key g_opt["delimiter"])
             error("ycIni::Encode: key must not contain the delimiter %A" g_opt["delimiter"])
         )
-        t_key
+        key
     )
 )
 
@@ -338,8 +338,8 @@ procedure(_SectionText(g_key g_opt "gg")  ; -> str
     when(g_opt["strict"] && !stringp(g_key)
         error("ycIni::Encode: strict mode requires string keys, got %A" g_key)
     )
-    let((t_name)
-        t_name = cond(
+    let((name)
+        name = cond(
             (stringp(g_key) g_key)
             (symbolp(g_key) symbolToString(g_key))
             (fixp(g_key) sprintf(nil "%d" g_key))
@@ -347,19 +347,19 @@ procedure(_SectionText(g_key g_opt "gg")  ; -> str
                 error("ycIni::Encode: unsupported table key of type %s" symbolToString(type(g_key)))
             )
         )
-        when(t_name == ""
+        when(name == ""
             error("ycIni::Encode: section name must not be empty")
         )
-        unless(_Trim(t_name) == t_name
+        unless(_Trim(name) == name
             error("ycIni::Encode: section name must not have leading or trailing whitespace")
         )
-        when(_HasControl(t_name)
-            error("ycIni::Encode: control character in section name %A" t_name)
+        when(_HasControl(name)
+            error("ycIni::Encode: control character in section name %A" name)
         )
-        when(_Find(t_name "[") || _Find(t_name "]")
+        when(_Find(name "[") || _Find(name "]")
             error("ycIni::Encode: section name must not contain '[' or ']'")
         )
-        t_name
+        name
     )
 )
 
@@ -397,12 +397,12 @@ procedure(_NumText(n_num t_ctx "nt")  ; -> str
             error("%s: cannot represent non-finite numbers" t_ctx)
         )
         (t
-            let((t_s)
-                t_s = sprintf(nil "%.15g" n_num)
-                unless(atof(t_s) == n_num
-                    t_s = sprintf(nil "%.17g" n_num)
+            let((item)
+                item = sprintf(nil "%.15g" n_num)
+                unless(atof(item) == n_num
+                    item = sprintf(nil "%.17g" n_num)
                 )
-                t_s
+                item
             )
         )
     )
@@ -417,8 +417,8 @@ procedure(_ValueText(g_val t_ctx "gt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 文本；容器、哨兵、控制字符或首尾空白报错
-    let((t_text)
-        t_text = cond(
+    let((text)
+        text = cond(
             (g_val == nil "")
             (g_val == t || g_val == ycCodec:::True "true")
             (g_val == ycCodec:::False "false")
@@ -441,13 +441,13 @@ procedure(_ValueText(g_val t_ctx "gt")  ; -> str
                 error("%s: unsupported value of type %s" t_ctx symbolToString(type(g_val)))
             )
         )
-        unless(_Trim(t_text) == t_text
+        unless(_Trim(text) == text
             error("%s: value must not have leading or trailing whitespace" t_ctx)
         )
-        when(_HasControl(t_text)
-            error("%s: control character in value %A" t_ctx t_text)
+        when(_HasControl(text)
+            error("%s: control character in value %A" t_ctx text)
         )
-        t_text
+        text
     )
 )
 
@@ -461,30 +461,30 @@ procedure(_TableKeys(g_obj g_opt t_mode "ggt")  ; -> list
     ;
     ; **返回**
     ;   (list) - 原始键列表；键非法或文本碰撞时报错
-    let((t_byText l_texts t_text g_key)
-        t_byText = makeTable("ycIniKeys" ycCodec:::Missing)
-        foreach(g_key g_obj
-            t_text = _NameText(g_key g_obj[g_key] g_opt t_mode)
-            when(t_byText[t_text] != ycCodec:::Missing
-                error("ycIni::Encode: duplicate key %A after string conversion" t_text)
+    let((byText texts text key)
+        byText = makeTable("ycIniKeys" ycCodec:::Missing)
+        foreach(key2 g_obj
+            text = _NameText(key2 g_obj[key2] g_opt t_mode)
+            when(byText[text] != ycCodec:::Missing
+                error("ycIni::Encode: duplicate key %A after string conversion" text)
             )
-            t_byText[t_text] = g_key
-            l_texts = tconc(l_texts t_text)
+            byText[text] = key2
+            texts = tconc(texts text)
         )
-        l_texts = car(l_texts)
+        texts = car(texts)
         when(g_opt["sortKeys"]
-            l_texts = sort(l_texts 'alphalessp)
+            texts = sort(texts 'alphalessp)
         )
-        let((l_res)
+        let((res)
             if(g_opt["sortKeys"]
-                foreach(t_text l_texts
-                    l_res = tconc(l_res t_byText[t_text])
+                foreach(text2 texts
+                    res = tconc(res byText[text2])
                 )
-                foreach(g_key g_obj
-                    l_res = tconc(l_res g_key)
+                foreach(key2 g_obj
+                    res = tconc(res key2)
                 )
             )
-            car(l_res)
+            car(res)
         )
     )
 )
