@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 240" role="img" aria-label="描边的组成">
+  <rect width="520" height="240" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">描边 = 边带 + 接头 + 端帽的并集</text>
+
+  <polyline points="100,180 340,180 340,80" fill="none" stroke="#bfdbfe" stroke-width="34" stroke-linejoin="miter" stroke-linecap="butt"/>
+  <polyline points="100,180 340,180 340,80" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <circle cx="340" cy="180" r="4" fill="#1d4ed8"/>
+
+  <text x="108" y="206" font-family="sans-serif" font-size="12" fill="#1d4ed8">butt 端帽</text>
+  <text x="196" y="164" font-family="sans-serif" font-size="12" fill="#1e40af">边带（宽 w）</text>
+  <text x="356" y="140" font-family="sans-serif" font-size="12" fill="#b45309">miter 接头</text>
+  <text x="330" y="62" font-family="sans-serif" font-size="12" fill="#1d4ed8">中心线</text>
+
+  <line x1="240" y1="180" x2="240" y2="163" stroke="#6b7280" stroke-width="1"/>
+  <line x1="356" y1="146" x2="352" y2="166" stroke="#6b7280" stroke-width="1"/>
+
+  <text x="392" y="190" font-family="sans-serif" font-size="12" fill="#666">miter / bevel / round</text>
+  <text x="392" y="210" font-family="sans-serif" font-size="12" fill="#666">butt / square / round</text>
+</svg>

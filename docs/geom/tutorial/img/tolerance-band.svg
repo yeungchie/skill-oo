@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 180" role="img" aria-label="容差带示意">
+  <rect width="520" height="180" fill="#ffffff"/>
+  <line x1="40" y1="110" x2="480" y2="110" stroke="#666" stroke-width="1.5"/>
+  <polygon points="480,110 470,105 470,115" fill="#666"/>
+
+  <rect x="170" y="76" width="60" height="68" fill="#dbeafe" stroke="#93c5fd" stroke-dasharray="4 3"/>
+  <line x1="200" y1="70" x2="200" y2="150" stroke="#3b82f6" stroke-width="2"/>
+  <circle cx="200" cy="110" r="5" fill="#1d4ed8"/>
+  <text x="200" y="164" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1d4ed8">A</text>
+
+  <circle cx="245" cy="110" r="5" fill="#dc2626"/>
+  <text x="245" y="164" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#dc2626">B</text>
+
+  <line x1="170" y1="60" x2="230" y2="60" stroke="#93c5fd" stroke-width="1"/>
+  <line x1="170" y1="55" x2="170" y2="65" stroke="#93c5fd" stroke-width="1"/>
+  <line x1="230" y1="55" x2="230" y2="65" stroke="#93c5fd" stroke-width="1"/>
+  <text x="200" y="48" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#2563eb">ε 邻域</text>
+
+  <text x="40" y="32" font-family="sans-serif" font-size="15" fill="#111">只有落进 ε 邻域的点才被视为同一点</text>
+  <text x="260" y="90" font-family="sans-serif" font-size="12" fill="#666">|x − A| ≤ ε</text>
+  <text x="330" y="150" font-family="sans-serif" font-size="12" fill="#666">B 在邻域外，判定为不同点</text>
+</svg>

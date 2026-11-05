@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 240" role="img" aria-label="keyhole 多边形">
+  <rect width="520" height="240" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">keyhole：用一条往返切割线把洞接到外环</text>
+
+  <polygon points="100,50 340,50 340,190 100,190" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <polygon points="180,90 260,90 260,150 180,150" fill="#ffffff" stroke="#dc2626" stroke-width="2"/>
+
+  <line x1="180" y1="90" x2="180" y2="50" stroke="#f59e0b" stroke-width="3"/>
+  <line x1="186" y1="50" x2="186" y2="90" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+  <text x="104" y="70" font-family="sans-serif" font-size="13" fill="#2563eb">外环（逆时针）</text>
+  <text x="196" y="124" font-family="sans-serif" font-size="13" fill="#dc2626">洞（顺时针）</text>
+  <text x="196" y="44" font-family="sans-serif" font-size="12" fill="#b45309">切割线，往返出现两次</text>
+
+  <text x="370" y="80" font-family="sans-serif" font-size="12" fill="#666">面积 = 外环 − 洞</text>
+  <text x="370" y="100" font-family="sans-serif" font-size="12" fill="#666">周长默认不含切割线</text>
+  <text x="370" y="120" font-family="sans-serif" font-size="12" fill="#666">?includeSeams t 时计入</text>
+  <text x="370" y="150" font-family="sans-serif" font-size="12" fill="#666">整个形状仍是一个环</text>
+</svg>

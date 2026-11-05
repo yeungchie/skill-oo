@@ -4,6 +4,8 @@
 
 Cadence SKILL++ 的平面几何库：点、线段、直线、矩形、keyhole 多边形、区域布尔运算，以及折线 `Route` 与带宽度描边的 `Path`。
 
+图形算法原理教程（面向初学者，讲原理与实现）：[tutorial/](tutorial/README.md)
+
 ## 概要
 
 - 所有坐标在构造时转为浮点数；整数输入不会产生舍入误差，`toSkill()` 始终输出浮点坐标。

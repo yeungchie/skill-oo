@@ -1,0 +1,184 @@
+# 第 4 章 多边形规范化与 keyhole
+
+[返回目录](README.md) ｜ [上一章：规范点与键](03-canonical-points-and-keys.md) ｜ [下一章：区域布尔流水线](05-boolean-pipeline.md)
+
+![keyhole 多边形：外环、洞，以及把洞接入外环的切割线](img/keyhole.svg)
+
+## 4.1 问题：多边形的写法太多
+
+同一个形状可以有无数种点列写法：从哪个顶点开始、顺时针还是逆时针、有没有重复点、有没有多余的共线点。布尔运算、描边、面积计算都要求输入是**规范形**，否则同一个形状会被当成不同的东西。
+
+工程上要先约定四件事：
+
+1. **闭合方式**：点列隐式闭合，末尾不重复首点。`points()` 返回四个点表示四边形，不是五个。
+2. **方向**：外环逆时针（有符号面积为正），洞顺时针。
+3. **顶点**：不重复、不共线、数量至少 3。
+4. **洞**：本库用 keyhole 方式并入外环，而不是「外环 + 内环」两级结构。
+
+## 4.2 有符号面积与方向
+
+鞋带公式（第 6 章细讲数值稳定性）：
+
+```text
+2A = Σ (x_i * y_{i+1} - x_{i+1} * y_i)
+```
+
+结果的正负就是方向：
+
+```lisp:run
+procedure(_SignedArea(l_pts "l")  ; -> float
+    let((sum n)
+        sum = 0.0
+        n = length(l_pts)
+        for(i 0 n - 1
+            let((p1 p2 j)
+                p1 = nth(i l_pts)
+                j = if(i == n - 1 0 i + 1)
+                p2 = nth(j l_pts)
+                sum = sum + p1->x() * p2->y() - p2->x() * p1->y()
+            )
+        )
+        sum / 2.0
+    )
+)
+
+procedure(_OrientRing(l_pts "l")  ; -> list
+    if(_SignedArea(l_pts) < 0.0 reverse(l_pts) l_pts)
+)
+
+square = list(ycGeom::Point(0:0) ycGeom::Point(4:0)
+    ycGeom::Point(4:4) ycGeom::Point(0:4))
+
+_SignedArea(square)                        ; => 16.0
+_SignedArea(reverse(square))               ; => -16.0
+_SignedArea(_OrientRing(reverse(square)))  ; => 16.0
+```
+
+`ycGeom` 里对应 `isClockwise()` 与 `reverse()`：
+
+```lisp:run
+poly = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
+poly->isClockwise()          ; => nil，逆时针
+poly->reverse()->isClockwise()   ; => t
+poly->area()                 ; => 100.0
+```
+
+## 4.3 共线清理
+
+连续三个点共线时，中间那个点不改变形状，但会增加顶点数、干扰去重与配对。清理规则：对每个顶点检查前一个、当前、后一个组成的叉积，近似为零就删掉当前点。
+
+```lisp:run
+procedure(_RemoveCollinear(l_pts n_eps "ln")  ; -> list
+    let((src changed n res)
+        src = l_pts
+        changed = t
+        while(changed && length(src) > 3
+            changed = nil
+            n = length(src)
+            res = nil
+            for(i 0 n - 1
+                let((prev cur next cross l1 l2)
+                    prev = nth(if(i == 0 n - 1 i - 1) src)
+                    cur = nth(i src)
+                    next = nth(if(i == n - 1 0 i + 1) src)
+                    cross = (cur->x() - prev->x()) * (next->y() - cur->y())
+                        - (cur->y() - prev->y()) * (next->x() - cur->x())
+                    l1 = sqrt((cur->x() - prev->x()) * (cur->x() - prev->x())
+                        + (cur->y() - prev->y()) * (cur->y() - prev->y()))
+                    l2 = sqrt((next->x() - cur->x()) * (next->x() - cur->x())
+                        + (next->y() - cur->y()) * (next->y() - cur->y()))
+                    if(abs(cross) <= n_eps * l1 * l2
+                    then
+                        changed = t
+                    else
+                        res = tconc(res cur)
+                    )
+                )
+            )
+            src = car(res)
+        )
+        src
+    )
+)
+
+withBend = list(ycGeom::Point(0:0) ycGeom::Point(5:0)
+    ycGeom::Point(10:0) ycGeom::Point(10:10) ycGeom::Point(0:10))
+
+length(withBend)                                        ; => 5
+length(_RemoveCollinear(withBend 1e-9))                 ; => 4
+_SignedArea(_RemoveCollinear(withBend 1e-9))            ; => 100.0
+```
+
+`while` 循环是必要的：删掉一个点后，原本不相邻的三个点可能变成新的共线三点。
+
+`ycGeom` 的 `Polygon` 构造时会自动做规范化，`removeCollinear()` 可以显式取出去掉共线点后的结果：
+
+```lisp:run
+p = ycGeom::Polygon('((0 0) (5 0) (10 0) (10 10) (0 10)))
+length(p->points())                     ; => 5
+length(p->removeCollinear()->points())  ; => 4
+```
+
+## 4.4 重复点
+
+**连续重复点是非法的**，构造时直接报错：
+
+```lisp
+ycGeom::Polygon('((0 0) (0 0) (1 0) (1 1)))
+; *Error* ycGeom::Polygon: consecutive duplicate point at index 3
+```
+
+这条规则是刻意的：完全重复的点没有任何几何意义，静默删掉会掩盖上游错误。**非连续**的近重合顶点（例如环在远处绕回起点附近）会按容差合并到同一代表点。
+
+## 4.5 keyhole：用一个环表示带洞的形状
+
+「外环 + 若干内环」的两级结构在布尔运算里很麻烦：每条边都要判断属于哪个环、洞和外环的包含关系要单独维护。keyhole 的思路是把洞「切开」再接到外环上：
+
+```text
+外环:  (0,0) → (10,0) → (10,10) → (0,10) → 回到 (0,0)
+洞:    (3,3) → (7,3) → (7,7) → (3,7)
+
+keyhole 点列：
+(0,0) → (10,0) → (10,10) → (0,10) → (3,0) → (3,3)
+      → (7,3) → (7,7) → (3,7) → (3,3) → (3,0) → (0,0)
+                        └──── 洞 ────┘   └ 切割线原路返回 ┘
+```
+
+切割线在点列里出现两次、方向相反，围出的区域正好是「外环减去洞」。这样整个形状仍然是一个环，布尔运算只需处理一种输入。
+
+`ycGeom` 用 `Region` 的差集生成带洞多边形：
+
+```lisp:run
+outer = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
+hole = ycGeom::Polygon('((3 3) (7 3) (7 7) (3 7)))
+holeRing = car(ycGeom::Region(list(outer))->not(ycGeom::Region(list(hole)))->polygons())
+
+holeRing->area()                              ; => 84.0，100 - 16
+holeRing->perimeter()                         ; => 56.0，40 + 16，切割线不计
+holeRing->perimeter(?includeSeams t)          ; => 62.0，加上切割线往返 2 x 3
+length(holeRing->points())                    ; => 11
+```
+
+几个约束：
+
+- 切割线必须是**水平或垂直**的，这样它与边的交点、重合段都可以精确处理；
+- 切割线不能穿过其他边（否则会额外产生交点与子环）；
+- 面积不受切割线影响；周长默认扣除切割线，`?includeSeams t` 时按完整点列计算。
+
+## 4.6 边界与常见误解
+
+- **规范化不改变形状，只改变表示。** 去掉共线点、统一方向、合并近点，面积与周长（按默认口径）都不变。
+- **自交多边形不在支持范围内。** 本章的规范化假设输入是简单多边形；自交形状要先拆分或交给布尔运算。
+- **keyhole 不是「洞的列表」。** 一个 `Polygon` 只有一个环；多洞形状会有多条切割线。
+- **切割线的方向有讲究。** 库内选择与坐标轴对齐且不与其他边相交的切割线；手写点列时不要随意选斜线。
+
+## 小结
+
+- 多边形 = 不重复首点的闭合点列；外环逆时针，洞顺时针。
+- 规范化 = 去重复点 + 去共线点 + 统一方向 + 面积非零。
+- 有符号面积的符号就是方向，清理共线点要循环到稳定。
+- keyhole 用一条往返切割线把洞并入外环，面积不变、周长默认扣除切割线。
+
+下一章把这些规范化后的多边形放进集合运算：并、交、差、对称差。
+
+[返回目录](README.md) ｜ [下一章](05-boolean-pipeline.md)

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 220" role="img" aria-label="鞋带公式">
+  <rect width="520" height="220" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">鞋带公式：以原点为顶点的一圈有向三角形</text>
+
+  <polygon points="220,40 360,80 320,170 140,160 110,90" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <circle cx="60" cy="190" r="4" fill="#111"/>
+  <text x="44" y="208" font-family="sans-serif" font-size="12" fill="#111">O</text>
+
+  <g stroke="#93c5fd" stroke-width="1" stroke-dasharray="4 3">
+    <line x1="60" y1="190" x2="220" y2="40"/>
+    <line x1="60" y1="190" x2="360" y2="80"/>
+    <line x1="60" y1="190" x2="320" y2="170"/>
+    <line x1="60" y1="190" x2="140" y2="160"/>
+    <line x1="60" y1="190" x2="110" y2="90"/>
+  </g>
+
+  <polygon points="60,190 220,40 360,80" fill="#bfdbfe" opacity="0.5"/>
+  <polygon points="60,190 320,170 140,160" fill="#fde68a" opacity="0.5"/>
+
+  <text x="392" y="90" font-family="sans-serif" font-size="12" fill="#1d4ed8">逆时针为正</text>
+  <text x="392" y="112" font-family="sans-serif" font-size="12" fill="#b45309">顺时针为负</text>
+
+  <text x="24" y="60" font-family="sans-serif" font-size="13" fill="#666">2A = Σ (xᵢ·yᵢ₊₁ − xᵢ₊₁·yᵢ)</text>
+  <text x="24" y="80" font-family="sans-serif" font-size="12" fill="#666">正负抵消后得到净面积</text>
+</svg>
