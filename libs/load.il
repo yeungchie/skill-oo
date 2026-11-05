@@ -6,23 +6,23 @@
 ; Load the namespace registry first (no dependencies), then bootstrap
 ; ycPathLib - the loop below needs ycPathLib::CurrentFile. ycIO is a
 ; regular package below; Path->open resolves ycIO:::Open at call time.
-let((t_self t_dir)
-    t_self = get_filename(piport)
-    unless(pcreMatchp("/" t_self)
-        t_self = strcat("./" t_self)
+let((path dir)
+    path = get_filename(piport)
+    unless(pcreMatchp("/" path)
+        path = strcat("./" path)
     )
-    t_dir = pcreReplace(pcreCompile("(?<=/)[^/]+/*$") t_self "" 0)
-    load(strcat(t_dir "registry.il"))
-    load(strcat(t_dir "pathlib/load.il"))
+    dir = pcreReplace(pcreCompile("(?<=/)[^/]+/*$") path "" 0)
+    load(strcat(dir "registry.il"))
+    load(strcat(dir "pathlib/load.il"))
 )
 
 ; pathlib stays outside the loop because the loop itself depends on it;
 ; every other package goes through the list below (one dir per entry,
 ; each must contain a load.il). Order below is not semantically required:
 ; regular packages resolve cross-library calls through ::: at call time.
-let((t_dir t_pkgs)
-    t_dir = ycPathLib::CurrentFile()->parent()
-    t_pkgs = list(
+let((dir pkgs)
+    dir = ycPathLib::CurrentFile()->parent()
+    pkgs = list(
         "io"
         "lang"
         "regex"
@@ -38,8 +38,8 @@ let((t_dir t_pkgs)
         "datetime"
         "log"
     )
-    foreach(t_pkg t_pkgs
-        t_dir->join(t_pkg "load.il")->load()
+    foreach(pkg pkgs
+        dir->join(pkg "load.il")->load()
     )
 )
 

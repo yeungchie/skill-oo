@@ -3,10 +3,10 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-let((t_dir)
-    t_dir = ycPathLib::CurrentFile()->parent()
-    foreach(t_file '("ns.il" "with.il")
-        t_dir->join("src" t_file)->load()
+let((dir)
+    dir = ycPathLib::CurrentFile()->parent()
+    foreach(file '("ns.il" "with.il")
+        dir->join("src" file)->load()
     )
 )
 

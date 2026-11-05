@@ -29,11 +29,11 @@ procedure(_TestPrint(t_kitFmt @rest l_kitArgs "tg")  ; -> t
     ;
     ; **返回**
     ;   (t) - 恒为 t
-    let(((t_kitText nil))
-        t_kitText = apply('sprintf (cons nil (cons t_kitFmt l_kitArgs)))
+    let(((kitText nil))
+        kitText = apply('sprintf (cons nil (cons t_kitFmt l_kitArgs)))
         if(_TestErrWindow
-            _TestDeferred = tconc(_TestDeferred t_kitText)
-            printf("%s" t_kitText)
+            _TestDeferred = tconc(_TestDeferred kitText)
+            printf("%s" kitText)
         )
         t
     )
@@ -48,13 +48,13 @@ procedure(_TestFmtTime(n_kitSec "n")  ; -> str
     ; **返回**
     ;   (str) - 不足 1 秒用 ms，不足 1 分钟用 s，不足 1 小时用 m，其余用 h；
     ;           小数位随量级收缩，使同单位下的字符串宽度一致（如 0.088ms 与 184.4ms）
-    let((n_kitMs)
+    let((kitMs)
         n_kitSec = n_kitSec * 1.0
-        n_kitMs = n_kitSec * 1000.0
+        kitMs = n_kitSec * 1000.0
         cond(
-            (n_kitMs < 9.9995 sprintf(nil "%.3fms" n_kitMs))
-            (n_kitMs < 99.995 sprintf(nil "%.2fms" n_kitMs))
-            (n_kitMs < 999.995 sprintf(nil "%.1fms" n_kitMs))
+            (kitMs < 9.9995 sprintf(nil "%.3fms" kitMs))
+            (kitMs < 99.995 sprintf(nil "%.2fms" kitMs))
+            (kitMs < 999.995 sprintf(nil "%.1fms" kitMs))
             (n_kitSec < 9.9995 sprintf(nil "%.3fs" n_kitSec))
             (n_kitSec < 59.995 sprintf(nil "%.2fs" n_kitSec))
             (n_kitSec < 599.995 sprintf(nil "%.3fm" n_kitSec / 60.0))
@@ -103,8 +103,8 @@ procedure(_TestErrorEnd()  ; -> t
     drain(errport)
     _TestErrWindow = nil
     when(_TestDeferred
-        foreach(t_kitText car(_TestDeferred)
-            printf("%s" t_kitText)
+        foreach(kitText car(_TestDeferred)
+            printf("%s" kitText)
         )
         _TestDeferred = nil
     )
@@ -154,17 +154,17 @@ procedure(_TestOkResult(g_kitRes t_kitName n_kitSec "gtn")  ; -> t | nil（errse
     ;
     ; **返回**
     ;   (t|nil) - 是否通过
-    let(((g_kitOk nil))
-        g_kitOk = g_kitRes && car(g_kitRes)
-        _TestReport(g_kitOk t_kitName n_kitSec)
-        unless(g_kitOk
+    let(((kitOk nil))
+        kitOk = g_kitRes && car(g_kitRes)
+        _TestReport(kitOk t_kitName n_kitSec)
+        unless(kitOk
             when(g_kitRes == nil
                 _TestErrorBegin(t_kitName)
                 fprintf(errport "%A\n" errset.errset)
                 _TestErrorEnd()
             )
         )
-        g_kitOk
+        kitOk
     )
 )
 
@@ -185,9 +185,9 @@ procedure(_AssertError(g_kitThunk t_kitName "gt")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 捕获到错误时为 t
-    let(((g_kitRes nil) (l_kitPerf nil))
-        l_kitPerf = measureTime(g_kitRes = errset(funcall(g_kitThunk) nil))
-        _TestReport(!g_kitRes t_kitName caddr(l_kitPerf))
+    let(((kitRes nil) (kitPerf nil))
+        kitPerf = measureTime(kitRes = errset(funcall(g_kitThunk) nil))
+        _TestReport(!kitRes t_kitName caddr(kitPerf))
     )
 )
 
@@ -201,21 +201,21 @@ procedure(_AssertErrorMsg(g_kitThunk t_kitSub t_kitName "gtt")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 条件满足时为 t
-    let(((g_kitRes nil) (t_kitText nil) (g_kitOk nil) (l_kitPerf nil))
-        l_kitPerf = measureTime(g_kitRes = errset(funcall(g_kitThunk) nil))
-        when(!g_kitRes
+    let(((kitRes nil) (kitText nil) (kitOk nil) (kitPerf nil))
+        kitPerf = measureTime(kitRes = errset(funcall(g_kitThunk) nil))
+        when(!kitRes
             ; errset.errset 为 ("error" 序号 t nil ("*Error* 消息"))，取末元素首字符串
             when(errset.errset && 4 <= length(errset.errset)
-                t_kitText = car(car(cdr(cdr(cdr(cdr(errset.errset))))))
+                kitText = car(car(cdr(cdr(cdr(cdr(errset.errset))))))
             )
         )
-        g_kitOk = !g_kitRes && t_kitText && index(t_kitText t_kitSub)
-        _TestReport(g_kitOk t_kitName caddr(l_kitPerf))
-        unless(g_kitOk
+        kitOk = !kitRes && kitText && index(kitText t_kitSub)
+        _TestReport(kitOk t_kitName caddr(kitPerf))
+        unless(kitOk
             _TestPrint("  expected message containing: %A\n" t_kitSub)
-            _TestPrint("  actual: %A\n" if(t_kitText t_kitText "no error detail"))
+            _TestPrint("  actual: %A\n" if(kitText kitText "no error detail"))
         )
-        g_kitOk
+        kitOk
     )
 )
 
@@ -228,14 +228,14 @@ procedure(_TestSeqEq(l_actual l_expected "ll")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 长度与逐项都相等时为 t
-    let(((g_ok t) (l_a l_actual) (l_b l_expected))
-        g_ok = length(l_actual) == length(l_expected)
-        while(g_ok && l_a
-            g_ok = car(l_a) == car(l_b)
-            l_a = cdr(l_a)
-            l_b = cdr(l_b)
+    let(((ok t) (a l_actual) (b l_expected))
+        ok = length(l_actual) == length(l_expected)
+        while(ok && a
+            ok = car(a) == car(b)
+            a = cdr(a)
+            b = cdr(b)
         )
-        g_ok
+        ok
     )
 )
 
@@ -248,13 +248,13 @@ procedure(_TestCountStr(l_list t_str "lt")  ; -> n
     ;
     ; **返回**
     ;   (int) - 出现次数
-    let(((n_c 0))
-        foreach(t_s l_list
-            when(t_s == t_str
-                n_c++
+    let(((c 0))
+        foreach(item l_list
+            when(item == t_str
+                c++
             )
         )
-        n_c
+        c
     )
 )
 
@@ -267,23 +267,23 @@ procedure(_TestStrMultisetEq(l_actual l_expected "ll")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 多重集相等时为 t
-    let(((g_ok nil))
-        g_ok = length(l_actual) == length(l_expected)
-        when(g_ok
-            foreach(t_s l_actual
-                when(_TestCountStr(l_actual t_s) != _TestCountStr(l_expected t_s)
-                    g_ok = nil
+    let(((ok nil))
+        ok = length(l_actual) == length(l_expected)
+        when(ok
+            foreach(item l_actual
+                when(_TestCountStr(l_actual item) != _TestCountStr(l_expected item)
+                    ok = nil
                 )
             )
         )
-        when(g_ok
-            foreach(t_s l_expected
-                when(_TestCountStr(l_expected t_s) != _TestCountStr(l_actual t_s)
-                    g_ok = nil
+        when(ok
+            foreach(item l_expected
+                when(_TestCountStr(l_expected item) != _TestCountStr(l_actual item)
+                    ok = nil
                 )
             )
         )
-        g_ok
+        ok
     )
 )
 
@@ -344,13 +344,13 @@ procedure(_TestSameSeqVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; -> 
     ;
     ; **返回**
     ;   (t|nil) - 是否通过
-    let(((g_kitOk nil))
-        g_kitOk = _TestSeqEq(l_actual l_expected)
-        unless(g_kitOk
+    let(((kitOk nil))
+        kitOk = _TestSeqEq(l_actual l_expected)
+        unless(kitOk
             _TestPrint("  expected (%d): %A\n" length(l_expected) l_expected)
             _TestPrint("  actual (%d): %A\n" length(l_actual) l_actual)
         )
-        _TestReport(g_kitOk t_kitName n_kitSec)
+        _TestReport(kitOk t_kitName n_kitSec)
     )
 )
 
@@ -365,19 +365,19 @@ procedure(_TestSameStrsVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; ->
     ;
     ; **返回**
     ;   (t|nil) - 是否通过
-    let(((g_kitOk nil))
-        g_kitOk = _TestStrMultisetEq(l_actual l_expected)
-        unless(g_kitOk
+    let(((kitOk nil))
+        kitOk = _TestStrMultisetEq(l_actual l_expected)
+        unless(kitOk
             _TestPrint("  expected (%d):\n" length(l_expected))
-            foreach(t_s l_expected
-                _TestPrint("    %s\n" t_s)
+            foreach(item l_expected
+                _TestPrint("    %s\n" item)
             )
             _TestPrint("  actual (%d):\n" length(l_actual))
-            foreach(t_s l_actual
-                _TestPrint("    %s\n" t_s)
+            foreach(item l_actual
+                _TestPrint("    %s\n" item)
             )
         )
-        _TestReport(g_kitOk t_kitName n_kitSec)
+        _TestReport(kitOk t_kitName n_kitSec)
     )
 )
 
@@ -392,17 +392,17 @@ procedure(_TestSameTuplesVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; 
     ;
     ; **返回**
     ;   (t|nil) - 是否通过
-    let(((g_kitOk nil) (l_kitA nil) (l_kitB nil))
-        l_kitA = mapcar('_TestTupKey l_actual)
-        l_kitB = mapcar('_TestTupKey l_expected)
-        g_kitOk = _TestSeqEq(l_kitA l_kitB)
-        unless(g_kitOk
+    let(((kitOk nil) (kitA nil) (kitB nil))
+        kitA = mapcar('_TestTupKey l_actual)
+        kitB = mapcar('_TestTupKey l_expected)
+        kitOk = _TestSeqEq(kitA kitB)
+        unless(kitOk
             _TestPrint("  expected (%d): [%s]\n"
-                length(l_expected) buildString(l_kitB "; "))
+                length(l_expected) buildString(kitB "; "))
             _TestPrint("  actual (%d): [%s]\n"
-                length(l_actual) buildString(l_kitA "; "))
+                length(l_actual) buildString(kitA "; "))
         )
-        _TestReport(g_kitOk t_kitName n_kitSec)
+        _TestReport(kitOk t_kitName n_kitSec)
     )
 )
 
@@ -417,15 +417,15 @@ procedure(_TestSameIntsVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; ->
     ;
     ; **返回**
     ;   (t|nil) - 是否通过
-    let(((g_kitOk nil))
-        g_kitOk = _TestSeqEq(l_actual l_expected)
-        unless(g_kitOk
+    let(((kitOk nil))
+        kitOk = _TestSeqEq(l_actual l_expected)
+        unless(kitOk
             _TestPrint("  expected ints (%d): %s\n"
                 length(l_expected) _TestIntKey(l_expected))
             _TestPrint("  actual ints (%d): %s\n"
                 length(l_actual) _TestIntKey(l_actual))
         )
-        _TestReport(g_kitOk t_kitName n_kitSec)
+        _TestReport(kitOk t_kitName n_kitSec)
     )
 )
 
@@ -441,20 +441,20 @@ procedure(_TestSameSpanVals(g_match n_start n_end t_kitName n_kitSec "gnntn")  ;
     ;
     ; **返回**
     ;   (t|nil) - 是否通过
-    let(((l_kitSpan nil) (g_kitOk nil))
+    let(((kitSpan nil) (kitOk nil))
         when(g_match
-            l_kitSpan = g_match->span()
+            kitSpan = g_match->span()
         )
-        g_kitOk = g_match && length(l_kitSpan) == 2
-            && car(l_kitSpan) == n_start
-            && car(cdr(l_kitSpan)) == n_end
-        unless(g_kitOk
+        kitOk = g_match && length(kitSpan) == 2
+            && car(kitSpan) == n_start
+            && car(cdr(kitSpan)) == n_end
+        unless(kitOk
             _TestPrint("  expected span (%d, %d)\n" n_start n_end)
-            when(l_kitSpan
-                _TestPrint("  actual span (%d, %d)\n" car(l_kitSpan) car(cdr(l_kitSpan)))
+            when(kitSpan
+                _TestPrint("  actual span (%d, %d)\n" car(kitSpan) car(cdr(kitSpan)))
             )
         )
-        _TestReport(g_kitOk t_kitName n_kitSec)
+        _TestReport(kitOk t_kitName n_kitSec)
     )
 )
 
@@ -469,13 +469,13 @@ procedure(_TestSameRowsVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; ->
     ;
     ; **返回**
     ;   (t|nil) - 是否通过
-    let(((g_kitOk nil))
-        g_kitOk = _TestRowsEq(l_actual l_expected)
-        unless(g_kitOk
+    let(((kitOk nil))
+        kitOk = _TestRowsEq(l_actual l_expected)
+        unless(kitOk
             _TestPrint("  expected (%d): %A\n" length(l_expected) l_expected)
             _TestPrint("  actual (%d): %A\n" length(l_actual) l_actual)
         )
-        _TestReport(g_kitOk t_kitName n_kitSec)
+        _TestReport(kitOk t_kitName n_kitSec)
     )
 )
 
@@ -556,12 +556,12 @@ procedure(_TestLoadFile(t_kitFile "t")  ; -> t
     ;
     ; **返回**
     ;   (t) - 恒为 t
-    let(((l_kitRes nil) (l_kitPerf nil) (n_kitBefore nil))
+    let(((kitRes nil) (kitPerf nil) (kitBefore nil))
         _TestFileIndex++
-        n_kitBefore = _TestCount
+        kitBefore = _TestCount
         _TestChildDone = nil
         _TestPrint("\n[%d/%d] %s\n" _TestFileIndex _TestFileTotal t_kitFile)
-        l_kitPerf = measureTime(l_kitRes = errset(load(strcat(_TestDir t_kitFile)) nil))
+        kitPerf = measureTime(kitRes = errset(load(strcat(_TestDir t_kitFile)) nil))
         when(_TestErrWindow
             _TestErrorEnd()
         )
@@ -569,8 +569,8 @@ procedure(_TestLoadFile(t_kitFile "t")  ; -> t
             _TestCount++
             _TestFail++
             _TestPrint("[%d/%d] %s TEST FAILED - %s did not run to completion\n"
-                _TestCount _TestExpected _TestFmtTime(caddr(l_kitPerf)) t_kitFile)
-            when(l_kitRes == nil
+                _TestCount _TestExpected _TestFmtTime(caddr(kitPerf)) t_kitFile)
+            when(kitRes == nil
                 _TestErrorBegin(t_kitFile)
                 fprintf(errport "%A\n" errset.errset)
                 _TestErrorEnd()
@@ -580,8 +580,8 @@ procedure(_TestLoadFile(t_kitFile "t")  ; -> t
             _TestFileIndex
             _TestFileTotal
             t_kitFile
-            _TestFmtTime(caddr(l_kitPerf))
-            _TestCount - n_kitBefore)
+            _TestFmtTime(caddr(kitPerf))
+            _TestCount - kitBefore)
         t
     )
 )
@@ -596,7 +596,7 @@ procedure(_TestRun(t_kitModule n_kitExpected @rest l_kitFiles "tng")  ; -> t
     ;
     ; **返回**
     ;   (t) - 全部通过时为 t；有失败时抛出错误
-    let(((l_kitPerf nil))
+    let(((kitPerf nil))
         _TestCount = 0
         _TestFail = 0
         _TestFileIndex = 0
@@ -604,13 +604,13 @@ procedure(_TestRun(t_kitModule n_kitExpected @rest l_kitFiles "tng")  ; -> t
         _TestExpected = n_kitExpected
         _TestProgDigits = length(lsprintf("%d" n_kitExpected))
         _TestPrint("\n=== %s ===\n" t_kitModule)
-        l_kitPerf = measureTime(
+        kitPerf = measureTime(
             foreach(t_kitFile l_kitFiles
                 _TestLoadFile(t_kitFile)
             )
         )
         _TestPrint("\nPASS: %d / FAIL: %d\n" _TestCount - _TestFail _TestFail)
-        _TestPrint("TOTAL: %s\n" _TestFmtTime(caddr(l_kitPerf)))
+        _TestPrint("TOTAL: %s\n" _TestFmtTime(caddr(kitPerf)))
         drain(poport)
         unless(_TestCount == n_kitExpected
             _TestPrint("NOTE: expected %d tests, ran %d\n"

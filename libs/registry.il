@@ -45,13 +45,13 @@ procedure(ycNamespace:::Require(@rest l_names "t")  ; -> t
     ;
     ; **返回**
     ;   (t) - 全部已存在或已建立；名单外名字 error
-    foreach(t_name l_names
-        when(findNamespace(t_name) == nil
-            unless(member(t_name ycNamespace:::_ValidNames)
-                error("ycNamespace::Require: unknown namespace %A" t_name)
+    foreach(name l_names
+        when(findNamespace(name) == nil
+            unless(member(name ycNamespace:::_ValidNames)
+                error("ycNamespace::Require: unknown namespace %A" name)
             )
-            makeNamespace(t_name)
-            unuseNamespace(t_name)
+            makeNamespace(name)
+            unuseNamespace(name)
         )
     )
     t

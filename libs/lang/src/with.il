@@ -78,43 +78,43 @@ defmacro(ycWith (s_name g_expr \@rest l_body)
     ;
     ; **返回**
     ;   (any) - 体内最后一个表达式的值（省略 body 为 nil）；缺钩子或表达式为 nil 时 error()
-    let((s_obj g_scope)
+    let((obj scope)
         unless((s_name == nil) || (symbolp(s_name) && s_name != 't)
             error("ycWith: binding name must be a symbol other than t, or nil")
         )
-        s_obj = gensym()
-        g_scope = if(s_name
+        obj = gensym()
+        scope = if(s_name
             `let((,s_name)
-                ,s_name = __ycWithEnter__(,s_obj)
+                ,s_name = __ycWithEnter__(,obj)
                 unwindProtect(
                     { nil ,@l_body }
-                    __ycWithExit__(,s_obj)
+                    __ycWithExit__(,obj)
                 )
             )
             `progn(
-                __ycWithEnter__(,s_obj)
+                __ycWithEnter__(,obj)
                 unwindProtect(
                     { nil ,@l_body }
-                    __ycWithExit__(,s_obj)
+                    __ycWithExit__(,obj)
                 )
             )
         )
-        `let((,s_obj)
-            ,s_obj = ,g_expr
-            unless(,s_obj
+        `let((,obj)
+            ,obj = ,g_expr
+            unless(,obj
                 error("ycWith: expression evaluated to nil")
             )
-            unless(ycLang::_ycWithHas(,s_obj '__ycWithEnter__)
+            unless(ycLang::_ycWithHas(,obj '__ycWithEnter__)
                 error("ycWith: %A does not implement __ycWithEnter__"
-                    className(,s_obj)
+                    className(,obj)
                 )
             )
-            unless(ycLang::_ycWithHas(,s_obj '__ycWithExit__)
+            unless(ycLang::_ycWithHas(,obj '__ycWithExit__)
                 error("ycWith: %A does not implement __ycWithExit__"
-                    className(,s_obj)
+                    className(,obj)
                 )
             )
-            ,g_scope
+            ,scope
         )
     )
 )
