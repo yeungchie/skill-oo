@@ -11,15 +11,15 @@ procedure(_InRanges(l_ranges n_cp "lx")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 命中回 t
-    prog((n_lo n_hi n_mid l_r)
-        n_lo = 0
-        n_hi = length(l_ranges) - 1
-        while(n_lo <= n_hi
-            n_mid = (n_lo + n_hi) / 2
-            l_r = nth(n_mid l_ranges)
+    prog((lo hi mid r)
+        lo = 0
+        hi = length(l_ranges) - 1
+        while(lo <= hi
+            mid = (lo + hi) / 2
+            r = nth(mid l_ranges)
             cond(
-                (n_cp < car(l_r) n_hi = n_mid - 1)
-                (n_cp > cadr(l_r) n_lo = n_mid + 1)
+                (n_cp < car(r) hi = mid - 1)
+                (n_cp > cadr(r) lo = mid + 1)
                 (t return(t))
             )
         )
@@ -62,15 +62,15 @@ procedure(Width(t_str \@key (strict t) (ambiguous 1) "tgx")  ; -> int
     unless(stringp(t_str)
         error("ycUtf8::Width: expects a string")
     )
-    let((l_res n_i n_sum)
-        n_i = 1
-        n_sum = 0
-        while(n_i <= length(t_str)
-            l_res = _Read(t_str n_i strict "ycUtf8::Width")
-            n_sum = n_sum + _WidthOf(car(l_res) ambiguous)
-            n_i = cadr(l_res)
+    let((res i sum)
+        i = 1
+        sum = 0
+        while(i <= length(t_str)
+            res = _Read(t_str i strict "ycUtf8::Width")
+            sum = sum + _WidthOf(car(res) ambiguous)
+            i = cadr(res)
         )
-        n_sum
+        sum
     )
 )
 

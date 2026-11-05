@@ -33,12 +33,12 @@ procedure(_PrefixBase(t_text n_pos "tx")  ; -> list | nil
     ; **返回**
     ;   (list|nil) - (进制 前缀长度)；不是前缀时为 nil
     when(n_pos + 1 <= length(t_text)
-        let((t_two)
-            t_two = lowerCase(substring(t_text n_pos 2))
+        let((two)
+            two = lowerCase(substring(t_text n_pos 2))
             cond(
-                (t_two == "0b" list(2 2))
-                (t_two == "0o" list(8 2))
-                (t_two == "0x" list(16 2))
+                (two == "0b" list(2 2))
+                (two == "0o" list(8 2))
+                (two == "0x" list(16 2))
                 (t nil)
             )
         )
@@ -77,7 +77,7 @@ procedure(Parse(t_text \@key (base nil) (prefix t) (wrap nil) "tggg")  ; -> int
     ;
     ; **返回**
     ;   (int) - 解析结果；超出 32 位、非法数字或缺数字时 error
-    let((n_len n_i n_ch g_neg n_base l_pf f_acc n_digit)
+    let((len i ch neg base2 pf f_acc digit)
         unless(prefix == t || prefix == nil
             error("ycRadix::Parse: ?prefix must be t or nil, got %A" prefix)
         )
@@ -89,61 +89,61 @@ procedure(Parse(t_text \@key (base nil) (prefix t) (wrap nil) "tggg")  ; -> int
                 error("ycRadix::Parse: base must be an integer in 2..36, got %A" base)
             )
         )
-        n_len = length(t_text)
-        unless(n_len > 0
+        len = length(t_text)
+        unless(len > 0
             error("ycRadix::Parse: expected a non-empty string")
         )
-        n_i = 1
-        n_ch = charToInt(getchar(t_text 1))
-        when(n_ch == 43 || n_ch == 45
-            g_neg = (n_ch == 45)
-            n_i = 2
+        i = 1
+        ch = charToInt(getchar(t_text 1))
+        when(ch == 43 || ch == 45
+            neg = (ch == 45)
+            i = 2
         )
         when(prefix
-            l_pf = _PrefixBase(t_text n_i)
-            when(l_pf
-                when(base && base != car(l_pf)
+            pf = _PrefixBase(t_text i)
+            when(pf
+                when(base && base != car(pf)
                     error("ycRadix::Parse: prefix implies base %d, conflicts with base %d"
-                        car(l_pf) base
+                        car(pf) base
                     )
                 )
-                n_base = car(l_pf)
-                n_i = n_i + cadr(l_pf)
+                base2 = car(pf)
+                i = i + cadr(pf)
             )
-            unless(l_pf
-                when(base == nil && n_i <= n_len && charToInt(getchar(t_text n_i)) == 48
-                    n_base = 8
+            unless(pf
+                when(base == nil && i <= len && charToInt(getchar(t_text i)) == 48
+                    base2 = 8
                 )
             )
         )
-        unless(n_base
-            n_base = if(base base 10)
+        unless(base2
+            base2 = if(base base 10)
         )
-        when(n_i > n_len
+        when(i > len
             error("ycRadix::Parse: missing digits in %A" t_text)
         )
         f_acc = 0.0
-        while(n_i <= n_len
-            n_digit = _DigitValue(charToInt(getchar(t_text n_i)))
-            when(n_digit == nil || n_digit >= n_base
+        while(i <= len
+            digit = _DigitValue(charToInt(getchar(t_text i)))
+            when(digit == nil || digit >= base2
                 error("ycRadix::Parse: invalid digit %A for base %d in %A"
-                    getchar(t_text n_i) n_base t_text
+                    getchar(t_text i) base2 t_text
                 )
             )
-            f_acc = f_acc * n_base + n_digit
+            f_acc = f_acc * base2 + digit
             when(f_acc > 4294967295.0
                 error("ycRadix::Parse: value out of 32-bit range in %A" t_text)
             )
-            n_i++
+            i++
         )
         cond(
-            (g_neg
-                let((n_val)
+            (neg
+                let((val)
                     when(f_acc > 2147483648.0
                         error("ycRadix::Parse: value out of 32-bit range in %A" t_text)
                     )
-                    n_val = int(0.0 - f_acc)
-                    n_val
+                    val = int(0.0 - f_acc)
+                    val
                 )
             )
             (f_acc <= 2147483647.0
@@ -174,7 +174,7 @@ procedure(Format(n_value \@key (base 10) (prefix nil) (upper nil) (width nil) (p
     ;
     ; **返回**
     ;   (str) - 格式化文本；负数为符号加绝对值，宽度不含符号与前缀
-    let((t_digits g_neg n_mag n_quot n_rem t_out t_pre n_need)
+    let((digits neg mag quot rem out pre need)
         unless(fixp(base) && 2 <= base && base <= 36
             error("ycRadix::Format: base must be an integer in 2..36, got %A" base)
         )
@@ -192,51 +192,51 @@ procedure(Format(n_value \@key (base 10) (prefix nil) (upper nil) (width nil) (p
                 error("ycRadix::Format: ?width must be a non-negative integer, got %A" width)
             )
         )
-        t_digits = if(upper
+        digits = if(upper
             "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             "0123456789abcdefghijklmnopqrstuvwxyz"
         )
-        g_neg = n_value < 0
-        n_mag = if(n_value == (-1 - 2147483647)
+        neg = n_value < 0
+        mag = if(n_value == (-1 - 2147483647)
             2147483648.0
             abs(n_value)
         )
-        t_out = ""
-        while(n_mag > 0
-            n_quot = int((1.0 * n_mag) / base)
-            n_rem = int(n_mag - (1.0 * n_quot) * base)
-            t_out = strcat(substring(t_digits n_rem + 1 1) t_out)
-            n_mag = n_quot
+        out = ""
+        while(mag > 0
+            quot = int((1.0 * mag) / base)
+            rem = int(mag - (1.0 * quot) * base)
+            out = strcat(substring(digits rem + 1 1) out)
+            mag = quot
         )
-        when(t_out == ""
-            t_out = "0"
+        when(out == ""
+            out = "0"
         )
-        t_pre = cond(
+        pre = cond(
             (prefix == nil "")
             (prefix == t
-                let((t_p)
+                let((p)
                     cond(
-                        (base == 2 t_p = "0b")
-                        (base == 8 t_p = "0o")
-                        (base == 16 t_p = "0x")
+                        (base == 2 p = "0b")
+                        (base == 8 p = "0o")
+                        (base == 16 p = "0x")
                         (t error("ycRadix::Format: ?prefix t is only supported for base 2, 8, or 16"))
                     )
                     when(upper
-                        t_p = upperCase(t_p)
+                        p = upperCase(p)
                     )
-                    t_p
+                    p
                 )
             )
             (t prefix)
         )
         when(width
-            n_need = width - length(t_out)
-            while(n_need > 0
-                t_out = strcat(pad t_out)
-                n_need--
+            need = width - length(out)
+            while(need > 0
+                out = strcat(pad out)
+                need--
             )
         )
-        lsprintf("%s%s%s" if(g_neg "-" "") t_pre t_out)
+        lsprintf("%s%s%s" if(neg "-" "") pre out)
     )
 )
 
@@ -262,9 +262,9 @@ procedure(ApplyMask(n_value n_bits "xx")  ; -> int
     ;
     ; **返回**
     ;   (int) - n_value 的低 n_bits 位
-    let((n_mask)
-        n_mask = _Mask(n_bits "ycRadix::ApplyMask")
-        n_value & n_mask
+    let((mask)
+        mask = _Mask(n_bits "ycRadix::ApplyMask")
+        n_value & mask
     )
 )
 

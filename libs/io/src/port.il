@@ -105,9 +105,9 @@ procedure(_InstallPort(self "g")  ; -> t
             error("%A->readLine: port is closed: %s"
                 className(self) self->_data->path)
         )
-        let((t_line)
-            gets(t_line self->_data->port)
-            t_line
+        let((line)
+            gets(line self->_data->port)
+            line
         )
     )
 
@@ -120,12 +120,12 @@ procedure(_InstallPort(self "g")  ; -> t
             error("%A->readAll: port is closed: %s"
                 className(self) self->_data->path)
         )
-        let((t_line l_res)
-            while(gets(t_line self->_data->port)
-                l_res = tconc(l_res t_line)
+        let((line res)
+            while(gets(line self->_data->port)
+                res = tconc(res line)
             )
-            if(l_res
-                buildString(car(l_res) "")
+            if(res
+                buildString(car(res) "")
                 ""
             )
         )
@@ -193,19 +193,19 @@ procedure(Open(t_path \@key (mode "r") "tt")  ; -> Port
     ;
     ; **返回**
     ;   (Port) - 新的端口包装；非法模式、打开失败时 error() 中断
-    let((g_port)
+    let((port2)
         unless(mode == "r" || mode == "w" || mode == "a"
             error("ycIO::Open: invalid mode: '%s'" mode)
         )
-        g_port = if(mode == "r"
+        port2 = if(mode == "r"
             infile(_PortName(t_path))
             outfile(_PortName(t_path) mode)
         )
-        unless(g_port
+        unless(port2
             error("ycIO::Open: cannot open: %s" t_path)
         )
         makeInstance('Port ?_data makeInstance('_PortData
-            ?port   g_port
+            ?port   port2
             ?path   t_path
             ?mode   mode
             ?closed nil))

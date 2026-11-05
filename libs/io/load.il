@@ -3,25 +3,25 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-let((t_res t_self t_dir)
-    t_res = errset(get_filename(piport) nil)
-    t_self = when(t_res && car(t_res) && stringp(car(t_res)) && car(t_res) != ""
-        car(t_res)
+let((res path dir)
+    res = errset(get_filename(piport) nil)
+    path = when(res && car(res) && stringp(car(res)) && car(res) != ""
+        car(res)
     )
-    unless(t_self
+    unless(path
         error("ycIO: can't determine the current file - load this file with an explicit path")
     )
-    unless(pcreMatchp("^[~/]|^\\.{1,2}/" t_self)
-        t_self = strcat("./" t_self)
+    unless(pcreMatchp("^[~/]|^\\.{1,2}/" path)
+        path = strcat("./" path)
     )
-    t_dir = simplifyFilename(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") t_self "" 0) t)
-    foreach(t_file '("ns.il" "port.il")
-        let((t_path)
-            t_path = lsprintf("%s/src/%s" t_dir t_file)
-            unless(isFile(t_path)
-                error("ycIO: not a valid file - %A" t_path)
+    dir = simplifyFilename(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") path "" 0) t)
+    foreach(file '("ns.il" "port.il")
+        let((path2)
+            path2 = lsprintf("%s/src/%s" dir file)
+            unless(isFile(path2)
+                error("ycIO: not a valid file - %A" path2)
             )
-            load(t_path)
+            load(path2)
         )
     )
 )

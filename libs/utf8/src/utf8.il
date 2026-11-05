@@ -11,63 +11,63 @@ procedure(_Next(t_s n_i "tx")  ; -> list
     ;
     ; **返回**
     ;   (list) - 合法为 (码点 下一位置)，非法为 (nil 起始位置)
-    let((n_len n_c n_need n_left n_cp n_k n_b g_bad)
-        n_len = length(t_s)
-        n_c = charToInt(getchar(t_s n_i))
+    let((len c need left cp k b bad)
+        len = length(t_s)
+        c = charToInt(getchar(t_s n_i))
         cond(
-            (n_c <= 127
-                n_need = 0
-                n_cp = n_c
+            (c <= 127
+                need = 0
+                cp = c
             )
-            (n_c >= 194 && n_c <= 223
-                n_need = 1
-                n_cp = n_c - 192
+            (c >= 194 && c <= 223
+                need = 1
+                cp = c - 192
             )
-            (n_c >= 224 && n_c <= 239
-                n_need = 2
-                n_cp = n_c - 224
+            (c >= 224 && c <= 239
+                need = 2
+                cp = c - 224
             )
-            (n_c >= 240 && n_c <= 244
-                n_need = 3
-                n_cp = n_c - 240
+            (c >= 240 && c <= 244
+                need = 3
+                cp = c - 240
             )
             (t
-                n_need = -1
+                need = -1
             )
         )
-        when(n_need >= 1
-            n_left = n_need
-            n_k = n_i
-            while(n_left > 0 && !g_bad
-                n_k++
-                when(n_k > n_len
-                    g_bad = t
+        when(need >= 1
+            left = need
+            k = n_i
+            while(left > 0 && !bad
+                k++
+                when(k > len
+                    bad = t
                 )
-                unless(g_bad
-                    n_b = charToInt(getchar(t_s n_k))
-                    unless(n_b >= 128 && n_b <= 191
-                        g_bad = t
+                unless(bad
+                    b = charToInt(getchar(t_s k))
+                    unless(b >= 128 && b <= 191
+                        bad = t
                     )
-                    unless(g_bad
-                        n_cp = n_cp * 64 + n_b - 128
+                    unless(bad
+                        cp = cp * 64 + b - 128
                     )
                 )
-                n_left--
+                left--
             )
-            unless(g_bad
+            unless(bad
                 cond(
-                    (n_need == 1 && n_cp < 128 g_bad = t)
-                    (n_need == 2 && n_cp < 2048 g_bad = t)
-                    (n_need == 3 && n_cp < 65536 g_bad = t)
+                    (need == 1 && cp < 128 bad = t)
+                    (need == 2 && cp < 2048 bad = t)
+                    (need == 3 && cp < 65536 bad = t)
                 )
-                when(n_cp > 1114111 || (n_cp >= 55296 && n_cp <= 57343)
-                    g_bad = t
+                when(cp > 1114111 || (cp >= 55296 && cp <= 57343)
+                    bad = t
                 )
             )
         )
-        if(g_bad || n_need < 0
+        if(bad || need < 0
             list(nil n_i)
-            list(n_cp n_i + n_need + 1)
+            list(cp n_i + need + 1)
         )
     )
 )
@@ -83,10 +83,10 @@ procedure(_Read(t_s n_i g_strict t_ctx "txgt")  ; -> list
     ;
     ; **返回**
     ;   (list) - (码点 下一位置)
-    let((l_res)
-        l_res = _Next(t_s n_i)
+    let((res)
+        res = _Next(t_s n_i)
         cond(
-            (car(l_res) l_res)
+            (car(res) res)
             (g_strict
                 error("%s: invalid UTF-8 at byte %d" t_ctx n_i)
             )
@@ -153,14 +153,14 @@ procedure(Decode(t_str \@key (strict t) "tg")  ; -> list | nil
     unless(stringp(t_str)
         error("ycUtf8::Decode: expects a string")
     )
-    let((l_res l_p n_i)
-        n_i = 1
-        while(n_i <= length(t_str)
-            l_res = _Read(t_str n_i strict "ycUtf8::Decode")
-            l_p = tconc(l_p car(l_res))
-            n_i = cadr(l_res)
+    let((res p i)
+        i = 1
+        while(i <= length(t_str)
+            res = _Read(t_str i strict "ycUtf8::Decode")
+            p = tconc(p car(res))
+            i = cadr(res)
         )
-        car(l_p)
+        car(p)
     )
 )
 
@@ -175,22 +175,22 @@ procedure(Encode(l_cps "l")  ; -> str
     unless(listp(l_cps)
         error("ycUtf8::Encode: expects a list")
     )
-    let((l_p n_idx n_cp)
-        n_idx = 0
-        foreach(n_cp l_cps
-            n_idx++
-            unless(fixp(n_cp) && n_cp >= 0 && n_cp <= 1114111
-                error("ycUtf8::Encode: invalid codepoint at index %d (%A)" n_idx n_cp)
+    let((p idx cp)
+        idx = 0
+        foreach(cp2 l_cps
+            idx++
+            unless(fixp(cp2) && cp2 >= 0 && cp2 <= 1114111
+                error("ycUtf8::Encode: invalid codepoint at index %d (%A)" idx cp2)
             )
-            when(n_cp >= 55296 && n_cp <= 57343
-                error("ycUtf8::Encode: invalid codepoint at index %d (%A)" n_idx n_cp)
+            when(cp2 >= 55296 && cp2 <= 57343
+                error("ycUtf8::Encode: invalid codepoint at index %d (%A)" idx cp2)
             )
-            when(n_cp == 0
-                error("ycUtf8::Encode: codepoint at index %d (%A) cannot be represented in a SKILL string" n_idx n_cp)
+            when(cp2 == 0
+                error("ycUtf8::Encode: codepoint at index %d (%A) cannot be represented in a SKILL string" idx cp2)
             )
-            l_p = tconc(l_p _EncCp(n_cp))
+            p = tconc(p _EncCp(cp2))
         )
-        _Build(l_p)
+        _Build(p)
     )
 )
 
@@ -206,15 +206,15 @@ procedure(CharCount(t_str \@key (strict t) "tg")  ; -> int
     unless(stringp(t_str)
         error("ycUtf8::CharCount: expects a string")
     )
-    let((l_res n_i n_n)
-        n_i = 1
-        n_n = 0
-        while(n_i <= length(t_str)
-            l_res = _Read(t_str n_i strict "ycUtf8::CharCount")
-            n_i = cadr(l_res)
-            n_n++
+    let((res i n)
+        i = 1
+        n = 0
+        while(i <= length(t_str)
+            res = _Read(t_str i strict "ycUtf8::CharCount")
+            i = cadr(res)
+            n++
         )
-        n_n
+        n
     )
 )
 
@@ -238,24 +238,24 @@ procedure(Slice(t_str n_start n_len \@key (strict t) "txxg")  ; -> str | nil
     unless(fixp(n_len) && n_len >= 0
         error("ycUtf8::Slice: length must be an integer >= 0")
     )
-    let((l_res l_p n_i n_total n_seen n_take)
-        n_total = length(t_str)
-        n_i = 1
-        n_seen = 0
-        while(n_i <= n_total && n_seen < n_start - 1
-            l_res = _Read(t_str n_i strict "ycUtf8::Slice")
-            n_i = cadr(l_res)
-            n_seen++
+    let((res p i total seen take)
+        total = length(t_str)
+        i = 1
+        seen = 0
+        while(i <= total && seen < n_start - 1
+            res = _Read(t_str i strict "ycUtf8::Slice")
+            i = cadr(res)
+            seen++
         )
-        unless(n_i > n_total
-            n_take = 0
-            while(n_i <= n_total && n_take < n_len
-                l_res = _Read(t_str n_i strict "ycUtf8::Slice")
-                l_p = tconc(l_p _EncCp(car(l_res)))
-                n_i = cadr(l_res)
-                n_take++
+        unless(i > total
+            take = 0
+            while(i <= total && take < n_len
+                res = _Read(t_str i strict "ycUtf8::Slice")
+                p = tconc(p _EncCp(car(res)))
+                i = cadr(res)
+                take++
             )
-            _Build(l_p)
+            _Build(p)
         )
     )
 )
@@ -271,17 +271,17 @@ procedure(IsValid(t_str "t")  ; -> t | nil
     unless(stringp(t_str)
         error("ycUtf8::IsValid: expects a string")
     )
-    let((l_res n_i g_ok)
-        n_i = 1
-        g_ok = t
-        while(g_ok && n_i <= length(t_str)
-            l_res = _Next(t_str n_i)
-            if(car(l_res)
-                n_i = cadr(l_res)
-                g_ok = nil
+    let((res i ok)
+        i = 1
+        ok = t
+        while(ok && i <= length(t_str)
+            res = _Next(t_str i)
+            if(car(res)
+                i = cadr(res)
+                ok = nil
             )
         )
-        g_ok
+        ok
     )
 )
 
