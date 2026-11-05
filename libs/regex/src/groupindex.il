@@ -51,7 +51,7 @@ procedure(_GroupIndexFetch(t_pat g_nac n_g t_ctx "tgxt")  ; -> table | nil
     ; **返回**
     ;   (table|nil) - 组名 -> 组号；无命名组时 nil；
     ;                 解析失败、返回数据异常或组号超出 n_g 时 error() 中断
-    let((tool eof cmd res dec names msg n_max name)
+    let((tool eof cmd res dec names msg max name)
         ; 读期求值：把本文件所在目录烧成字面量，运行时调用不会取到调用者的文件。
         tool = #.ycPathLib::CurrentFile()->parent()->join("groupindex.py")->absolute()->str()
         eof = lsprintf("EOF%d" ipcGetPid())
@@ -89,14 +89,14 @@ procedure(_GroupIndexFetch(t_pat g_nac n_g t_ctx "tgxt")  ; -> table | nil
             error("%A: group name resolution returned unexpected data" t_ctx)
         )
         names = car(dec)
-        n_max = 0
+        max = 0
         foreach(name names
-            when(n_max < names[name]
-                n_max = names[name]
+            when(max < names[name]
+                max = names[name]
             )
         )
-        when(n_g < n_max
-            error("%A: cannot resolve group names for this pattern (group index %d exceeds the pattern's %d group(s))" t_ctx n_max n_g)
+        when(n_g < max
+            error("%A: cannot resolve group names for this pattern (group index %d exceeds the pattern's %d group(s))" t_ctx max n_g)
         )
         if(length(names) == 0
             nil

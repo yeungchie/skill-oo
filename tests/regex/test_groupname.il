@@ -1,15 +1,15 @@
 ; ycRegEx named-group suite: Pattern->groupindex, Matched->group(name), groupdict.
 
 ; --- 1. Pattern->groupindex ---
-let((p t_idx)
+let((p idx)
     p = ycRegEx::Compile("(?P<y>\\d{4})")
-    t_idx = p->groupindex()
-    _Assert(tablep(t_idx)  "groupindex: named pattern returns a table")
-    _Assert(t_idx["y"] == 1  "groupindex: single name maps to 1")
+    idx = p->groupindex()
+    _Assert(tablep(idx)  "groupindex: named pattern returns a table")
+    _Assert(idx["y"] == 1  "groupindex: single name maps to 1")
     _Assert(ycRegEx::Compile("(\\d+)-(\\d+)")->groupindex() == nil
         "groupindex: no named group returns nil")
-    t_idx = ycRegEx::Compile("(?P<a>x)(?P<b>y)")->groupindex()
-    _AssertSameInts(list(t_idx["a"] t_idx["b"]) '(1 2)
+    idx = ycRegEx::Compile("(?P<a>x)(?P<b>y)")->groupindex()
+    _AssertSameInts(list(idx["a"] idx["b"]) '(1 2)
         "groupindex: names numbered in order")
     _Assert(ycRegEx::Compile("(x)(?P<a>y)")->groupindex()["a"] == 2
         "groupindex: default numbering counts plain groups")
@@ -31,11 +31,11 @@ let((m)
 )
 
 ; --- 3. Matched->groupdict ---
-let((m t_d)
+let((m d)
     m = ycRegEx::Search("(?P<a>\\d+)-(?P<b>\\d+)" "10-20")
-    t_d = m->groupdict()
-    _Assert(tablep(t_d)  "groupdict: returns a table")
-    _Assert(t_d["a"] == "10" && t_d["b"] == "20"  "groupdict: name to value")
+    d = m->groupdict()
+    _Assert(tablep(d)  "groupdict: returns a table")
+    _Assert(d["a"] == "10" && d["b"] == "20"  "groupdict: name to value")
     m = ycRegEx::Search("(?P<a>a)?(?P<b>b)" "b")
     _Assert(m->groupdict()["a"] == ""  "groupdict: non-participating group is empty")
     _Assert(m->groupdict()["b"] == "b"  "groupdict: participated group kept")
@@ -57,10 +57,10 @@ _AssertError(lambda(() ycRegEx::Search("(a)" "a")->group("a") t)
     "group: name without named group raises")
 
 ; --- 5. no_auto_capture numbering ---
-let((p m t_idx)
+let((p m idx)
     p = ycRegEx::Compile("(a)(?P<x>b)(c)(?P<y>d)" ?compileOpts 'no_auto_capture)
-    t_idx = p->groupindex()
-    _AssertSameInts(list(t_idx["x"] t_idx["y"]) '(1 2)
+    idx = p->groupindex()
+    _AssertSameInts(list(idx["x"] idx["y"]) '(1 2)
         "groupindex: no_auto_capture numbers only named groups")
     m = p->match("abcd")
     _Assert(m->group("x") == "b"  "group: no_auto_capture name x")
@@ -75,26 +75,26 @@ _AssertError(lambda(() ycRegEx::Compile("\\Q(?P<a>x)\\E")->groupindex() t)
 
 ; --- 7. heredoc terminator cannot be forged from the pattern ---
 ; 模式串里出现与终止符同名的整行时，传输不能被截断（否则其后内容会被 shell 执行）。
-let((t_eof t_pat t_idx)
-    t_eof = lsprintf("EOF%d" ipcGetPid())
-    t_pat = lsprintf("(?P<a>x)\n%s\n(?P<b>y)" t_eof)
-    t_idx = ycRegEx::Compile(t_pat)->groupindex()
-    _Assert(tablep(t_idx)  "groupindex: terminator-like line inside pattern is accepted")
-    _Assert(t_idx["a"] == 1 && t_idx["b"] == 2
+let((eof pat idx)
+    eof = lsprintf("EOF%d" ipcGetPid())
+    pat = lsprintf("(?P<a>x)\n%s\n(?P<b>y)" eof)
+    idx = ycRegEx::Compile(pat)->groupindex()
+    _Assert(tablep(idx)  "groupindex: terminator-like line inside pattern is accepted")
+    _Assert(idx["a"] == 1 && idx["b"] == 2
         "groupindex: pattern is delivered whole across a terminator-like line")
-    t_pat = lsprintf("(?P<a>x)\n%s" t_eof)
-    t_idx = ycRegEx::Compile(t_pat)->groupindex()
-    _Assert(t_idx["a"] == 1
+    pat = lsprintf("(?P<a>x)\n%s" eof)
+    idx = ycRegEx::Compile(pat)->groupindex()
+    _Assert(idx["a"] == 1
         "groupindex: terminator-like last line does not truncate the pattern")
 )
 
 ; --- 8. the pattern is never expanded by the shell ---
 ; 引号形式的 heredoc 不展开正文；若退化成 <<EOF，命令替换会先执行：
 ; $(printf '()') 变成 ()，后面的命名组序号随之从 3 掉到 2。
-let((t_pat t_idx)
-    t_pat = "$(printf '()')(?P<b>y)"
-    t_idx = ycRegEx::Compile(t_pat)->groupindex()
-    _Assert(t_idx["b"] == 3  "groupindex: command substitution stays literal")
+let((pat idx)
+    pat = "$(printf '()')(?P<b>y)"
+    idx = ycRegEx::Compile(pat)->groupindex()
+    _Assert(idx["b"] == 3  "groupindex: command substitution stays literal")
 )
 
 _TestChildDone = t

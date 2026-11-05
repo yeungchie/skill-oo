@@ -44,26 +44,26 @@ procedure(_SplitBy(t_str t_delim "tt")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]) - 逐段结果，恒含末段；t_delim 为空串时不拆、返回单元素列表 (t_str)
-    let((l_res t_cur n_i n_len n_d g_hit)
-        t_cur = ""
-        n_len = length(t_str)
-        n_d = length(t_delim)
-        n_i = 1
-        while(n_i <= n_len
-            g_hit = n_d > 0 && n_d <= n_len - n_i + 1 && substring(t_str n_i n_d) == t_delim
-            when(g_hit
-                l_res = tconc(l_res t_cur)
-                t_cur = ""
+    let((res cur i len d hit)
+        cur = ""
+        len = length(t_str)
+        d = length(t_delim)
+        i = 1
+        while(i <= len
+            hit = d > 0 && d <= len - i + 1 && substring(t_str i d) == t_delim
+            when(hit
+                res = tconc(res cur)
+                cur = ""
             )
-            unless(g_hit
-                t_cur = strcat(t_cur substring(t_str n_i 1))
+            unless(hit
+                cur = strcat(cur substring(t_str i 1))
             )
-            if(g_hit
-                n_i = n_i + n_d
-                n_i++
+            if(hit
+                i = i + d
+                i++
             )
         )
-        car(tconc(l_res t_cur))
+        car(tconc(res cur))
     )
 )
 
@@ -76,22 +76,22 @@ procedure(_CountSub(t_str t_sub "tt")  ; -> int
     ;
     ; **返回**
     ;   (int) - 非重叠命中次数；t_sub 为空串返回 0
-    let((n_c n_i n_len n_d g_hit)
-        n_c = 0
-        n_len = length(t_str)
-        n_d = length(t_sub)
-        n_i = 1
-        while(n_i <= n_len
-            g_hit = n_d > 0 && n_d <= n_len - n_i + 1 && substring(t_str n_i n_d) == t_sub
-            when(g_hit
-                n_c++
+    let((c i len d hit)
+        c = 0
+        len = length(t_str)
+        d = length(t_sub)
+        i = 1
+        while(i <= len
+            hit = d > 0 && d <= len - i + 1 && substring(t_str i d) == t_sub
+            when(hit
+                c++
             )
-            if(g_hit
-                n_i = n_i + n_d
-                n_i++
+            if(hit
+                i = i + d
+                i++
             )
         )
-        n_c
+        c
     )
 )
 
@@ -131,12 +131,12 @@ procedure(_FoldCat(l_list "l")  ; -> str
     ;
     ; **返回**
     ;   (str) - 按序 strcat 的结果；空列表返回 ""
-    let((t_res)
-        t_res = ""
-        foreach(t_s l_list
-            t_res = strcat(t_res t_s)
+    let((res)
+        res = ""
+        foreach(item l_list
+            res = strcat(res item)
         )
-        t_res
+        res
     )
 )
 
@@ -153,64 +153,64 @@ procedure(_FlagsFromValue(g_flags t_ctx "gt")  ; -> str
     ; **返回**
     ;   (str) - 无修饰返回 ""；否则按 i m s x 固定序去重拼成 "(?imsx)" 式串；
     ;           遇 'g' 走 error() 提示全局匹配已是默认；非符号/字符串或未知字母走 error() 中断
-    let((t_s t_letters t_c t_in n_i n_len)
+    let((item letters c in i len)
         cond(
             (g_flags == nil
-                t_s = ""
+                item = ""
             )
             (symbolp(g_flags)
-                t_s = symbolToString(g_flags)
+                item = symbolToString(g_flags)
             )
             (stringp(g_flags)
-                t_s = g_flags
+                item = g_flags
             )
             (t
                 error("%A: flags must be a symbol or string, got %A" t_ctx g_flags)
             )
         )
-        t_letters = ""
-        n_len = length(t_s)
-        n_i = 1
-        while(n_i <= n_len
-            t_c = substring(t_s n_i 1)
-            case(t_c
+        letters = ""
+        len = length(item)
+        i = 1
+        while(i <= len
+            c = substring(item i 1)
+            case(c
                 (("i" "I")
-                    t_letters = strcat(t_letters "i")
+                    letters = strcat(letters "i")
                 )
                 (("m" "M")
-                    t_letters = strcat(t_letters "m")
+                    letters = strcat(letters "m")
                 )
                 (("s" "S")
-                    t_letters = strcat(t_letters "s")
+                    letters = strcat(letters "s")
                 )
                 (("x" "X")
-                    t_letters = strcat(t_letters "x")
+                    letters = strcat(letters "x")
                 )
                 (("g" "G")
                     error("%A: flag 'g' is not supported; global matching is the default, use ?first t for first-only" t_ctx)
                 )
                 (t
-                    error("%A: unknown flag '%s' (use 'I 'M 'S 'X)" t_ctx t_c)
+                    error("%A: unknown flag '%s' (use 'I 'M 'S 'X)" t_ctx c)
                 )
             )
-            n_i++
+            i++
         )
-        t_in = ""
-        when(index(t_letters "i")
-            t_in = strcat(t_in "i")
+        in = ""
+        when(index(letters "i")
+            in = strcat(in "i")
         )
-        when(index(t_letters "m")
-            t_in = strcat(t_in "m")
+        when(index(letters "m")
+            in = strcat(in "m")
         )
-        when(index(t_letters "s")
-            t_in = strcat(t_in "s")
+        when(index(letters "s")
+            in = strcat(in "s")
         )
-        when(index(t_letters "x")
-            t_in = strcat(t_in "x")
+        when(index(letters "x")
+            in = strcat(in "x")
         )
-        if(t_in == ""
+        if(in == ""
             ""
-            lsprintf("(?%s)" t_in)
+            lsprintf("(?%s)" in)
         )
     )
 )
@@ -242,22 +242,22 @@ procedure(_CompileOptsBits(g_opts t_ctx "gt")  ; -> int
     ;
     ; **返回**
     ;   (int) - pcreGenCompileOptBits 的位值；无选项返回 0
-    let((l_args)
-        foreach(g_opt _OptsList(g_opts t_ctx)
-            case(g_opt
-                (caseLess l_args = append(l_args list('?caseLess t)))
-                (multiLine l_args = append(l_args list('?multiLine t)))
-                (dotAll l_args = append(l_args list('?dotAll t)))
-                (extended l_args = append(l_args list('?extended t)))
-                (anchored l_args = append(l_args list('?anchored t)))
-                (dollar_endonly l_args = append(l_args list('?dollar_endonly t)))
-                (ungreedy l_args = append(l_args list('?ungreedy t)))
-                (no_auto_capture l_args = append(l_args list('?no_auto_capture t)))
-                (firstline l_args = append(l_args list('?firstline t)))
-                (t error("%A: unknown compile option %A" t_ctx g_opt))
+    let((args)
+        foreach(opt _OptsList(g_opts t_ctx)
+            case(opt
+                (caseLess args = append(args list('?caseLess t)))
+                (multiLine args = append(args list('?multiLine t)))
+                (dotAll args = append(args list('?dotAll t)))
+                (extended args = append(args list('?extended t)))
+                (anchored args = append(args list('?anchored t)))
+                (dollar_endonly args = append(args list('?dollar_endonly t)))
+                (ungreedy args = append(args list('?ungreedy t)))
+                (no_auto_capture args = append(args list('?no_auto_capture t)))
+                (firstline args = append(args list('?firstline t)))
+                (t error("%A: unknown compile option %A" t_ctx opt))
             )
         )
-        apply('pcreGenCompileOptBits l_args)
+        apply('pcreGenCompileOptBits args)
     )
 )
 
@@ -270,17 +270,17 @@ procedure(_ExecOptsBits(g_opts t_ctx "gt")  ; -> int
     ;
     ; **返回**
     ;   (int) - pcreGenExecOptBits 的位值；无选项返回 0
-    let((l_args)
-        foreach(g_opt _OptsList(g_opts t_ctx)
-            case(g_opt
-                (anchored l_args = append(l_args list('?anchored t)))
-                (notbol l_args = append(l_args list('?notbol t)))
-                (noteol l_args = append(l_args list('?noteol t)))
-                (notempty l_args = append(l_args list('?notempty t)))
-                (t error("%A: unknown execution option %A" t_ctx g_opt))
+    let((args)
+        foreach(opt _OptsList(g_opts t_ctx)
+            case(opt
+                (anchored args = append(args list('?anchored t)))
+                (notbol args = append(args list('?notbol t)))
+                (noteol args = append(args list('?noteol t)))
+                (notempty args = append(args list('?notempty t)))
+                (t error("%A: unknown execution option %A" t_ctx opt))
             )
         )
-        apply('pcreGenExecOptBits l_args)
+        apply('pcreGenExecOptBits args)
     )
 )
 
@@ -293,10 +293,10 @@ procedure(_CompileChecked(t_str t_ctx n_opts "ttx")  ; -> compiled
     ;
     ; **返回**
     ;   (compiled) - 编译成功返回对象；失败不返回
-    let((l_res)
-        l_res = errset(pcreCompile(t_str n_opts) t)
-        if(l_res && pcreObjectp(car(l_res))
-            car(l_res)
+    let((res)
+        res = errset(pcreCompile(t_str n_opts) t)
+        if(res && pcreObjectp(car(res))
+            car(res)
             error("%A: pattern compilation failed" t_ctx)
         )
     )
@@ -313,17 +313,17 @@ procedure(_MkPattern(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
     ;
     ; **返回**
     ;   (Pattern) - 非串模式或编译失败时 error() 中断，否则返回新实例
-    let((g_faithful g_span g_full n_g)
+    let((faithful span full g)
         unless(stringp(g_pat)
             error("%A: pattern must be a string, got %A" t_ctx g_pat)
         )
-        g_faithful = _CompileChecked(strcat(t_flags g_pat) t_ctx n_opts)
-        g_span = _CompileChecked(lsprintf("%s\\A(?:%s)" t_flags g_pat) t_ctx n_opts)
-        g_full = _CompileChecked(lsprintf("%s\\A(?:%s)\\z" t_flags g_pat) t_ctx n_opts)
-        n_g = pcreSubpatCount(g_faithful)
+        faithful = _CompileChecked(strcat(t_flags g_pat) t_ctx n_opts)
+        span = _CompileChecked(lsprintf("%s\\A(?:%s)" t_flags g_pat) t_ctx n_opts)
+        full = _CompileChecked(lsprintf("%s\\A(?:%s)\\z" t_flags g_pat) t_ctx n_opts)
+        g = pcreSubpatCount(faithful)
         makeInstance('Pattern ?_data makeInstance('_PatternData
-            ?pattern g_pat ?flags t_flags ?compileOpts n_opts ?pcre g_faithful
-            ?span g_span ?full g_full ?nGroups n_g))
+            ?pattern g_pat ?flags t_flags ?compileOpts n_opts ?pcre faithful
+            ?span span ?full full ?nGroups g))
     )
 )
 
@@ -339,15 +339,15 @@ procedure(_AsPat(g_pat t_flags t_ctx n_opts "gttx")  ; -> Pattern
     ;   (Pattern) - 字符串走 _MkPattern；Pattern 经 ->pattern() 校验为串后原样返回
     if(stringp(g_pat)
         _MkPattern(g_pat t_flags t_ctx n_opts)
-        let((l_pat)
+        let((pat)
             when(n_opts != 0
                 error("%A: cannot pass compile options with a compiled pattern" t_ctx)
             )
             unless(t_flags == ""
                 error("%A: cannot pass flags with a compiled pattern" t_ctx)
             )
-            l_pat = errset(g_pat->pattern() nil)
-            unless(l_pat && stringp(car(l_pat))
+            pat = errset(g_pat->pattern() nil)
+            unless(pat && stringp(car(pat))
                 error("%A: expected string pattern or Pattern, got %A" t_ctx g_pat)
             )
             g_pat
