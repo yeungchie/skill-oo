@@ -8,7 +8,8 @@
 
 几何程序的第一课不是公式，而是误差。坐标是浮点数，浮点数的加减乘除几乎每一步都会引入舍入：
 
-```lisp:run
+```lisp
+; 可运行
 0.1 + 0.2 == 0.3                    ; => nil
 abs((0.1 + 0.2) - 0.3) < 1e-12      ; => t
 ```
@@ -25,7 +26,8 @@ abs((0.1 + 0.2) - 0.3) < 1e-12      ; => t
 
 最直接的做法是给一个绝对阈值 ε：两个数的差不超过 ε 就视为相等。
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_NearTol(n_a n_b n_eps "nnn")  ; -> t | nil
     let((fa fb rel)
         fa = float(n_a)
@@ -61,7 +63,8 @@ rel = 1e-15 * max(|a|, |b|)
 
 `ycGeom` 的所有比较都遵循这个口径，默认 `?eps` 为 `1e-9`：
 
-```lisp:run
+```lisp
+; 可运行
 ycGeom::Point(0:0)->equals(ycGeom::Point(1e-10:0))                  ; => t
 ycGeom::Point(0:0)->equals(ycGeom::Point(1e-10:0) ?eps 1e-12)       ; => nil
 ycGeom::Point(1e9:0)->equals(ycGeom::Point(1e9 + 0.000001:0))       ; => t
@@ -71,7 +74,8 @@ ycGeom::Point(1e9:0)->equals(ycGeom::Point(1e9 + 0.000001:0))       ; => t
 
 容差也出现在查询接口上：
 
-```lisp:run
+```lisp
+; 可运行
 rect = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
 rect->contains(ycGeom::Point(10:5))                     ; => t
 rect->contains(ycGeom::Point(10.000001:5))              ; => nil
@@ -88,7 +92,8 @@ rect->contains(ycGeom::Point(10.000001:5) ?eps 1e-5)    ; => t
 snap(v) = round(v / g) * g
 ```
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_SnapToGrid(n_val n_grid "nn")  ; -> float
     round(n_val / n_grid) * n_grid
 )
@@ -116,7 +121,8 @@ _SnapToGrid(-3.1 0.5)     ; => -3.0
 
 下面的例子把两个矩形并起来，左矩形右边界在 `x = 10`，右矩形左边界在 `x = 10.01`，两者有 `0.01` 的缝：
 
-```lisp:run
+```lisp
+; 可运行
 ga = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
 gb = ycGeom::Polygon('((10.01 0) (20 0) (20 10) (10.01 10)))
 ra = ycGeom::Region(list(ga))

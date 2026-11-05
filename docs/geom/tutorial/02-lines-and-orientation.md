@@ -32,7 +32,8 @@ a × b = ax * by - ay * bx
 
 判断「点 C 在有向直线 AB 的哪一侧」，只需把 A 当作原点：
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_Cross2(g_a g_b g_c "ggg")  ; -> float
     ; (b - a) × (c - a)
     (g_b->x() - g_a->x()) * (g_c->y() - g_a->y())
@@ -76,7 +77,8 @@ u = ((C - A) × r) / (r × s)
 - 为 0：两线段平行或共线，需要单独处理；
 - 不为 0：算出 t、u，同时落在 `[0, 1]` 才有交点。
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_SegCross(g_a g_b g_c g_d "gggg")  ; -> list[float] | nil
     let((rx ry sx sy qx qy den tt u)
         rx = g_b->x() - g_a->x()
@@ -111,7 +113,8 @@ _SegCross(a b ycGeom::Point(0:1) ycGeom::Point(10:1))   ; => nil，平行
 | 共线重叠 | 重叠部分的 `Segment` |
 | 平行、无交 | `nil` |
 
-```lisp:run
+```lisp
+; 可运行
 s1 = ycGeom::Segment(list(0:0 10:0))
 s1->intersection(ycGeom::Segment(list(5:-5 5:5)))->toSkill()   ; => (5.0 0.0)
 s1->intersection(ycGeom::Segment(list(5:0 15:0)))->toSkill()   ; => ((5.0 0.0) (10.0 0.0))
@@ -128,7 +131,8 @@ t = ((P - A) · (B - A)) / |B - A|^2
 
 再把 t 夹到 `[0, 1]`（投影落在线段外时取最近的端点），最后算欧氏距离：
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_PointSegDist(g_p g_a g_b "ggg")  ; -> float
     let((dx dy len2 tt px py)
         dx = g_b->x() - g_a->x()
@@ -154,7 +158,8 @@ _PointSegDist(ycGeom::Point(15:0) a b)    ; => 5.0，取端点 B
 
 库里的 `Segment->distanceTo(Point)` 做的是同一件事：
 
-```lisp:run
+```lisp
+; 可运行
 ycGeom::Segment(list(0:0 10:0))->distanceTo(ycGeom::Point(5:3))   ; => 3.0
 ```
 
@@ -167,7 +172,8 @@ ycGeom::Segment(list(0:0 10:0))->distanceTo(ycGeom::Point(5:3))   ; => 3.0
 1. 只统计「跨过射线高度」的边：`(y1 > y) != (y2 > y)`。这一步同时排除了水平边（两端同高）。
 2. 计算边与射线所在水平线的交点 x，只有交点在待测点右侧才计数。
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_RayInside(l_ring g_p "lg")  ; -> t | nil
     let((x y n inside)
         x = g_p->x()
@@ -201,7 +207,8 @@ _RayInside(ring ycGeom::Point(5:2))   ; => nil
 
 `ycGeom` 的 `Polygon->contains` 提供 `?boundary` 选项：
 
-```lisp:run
+```lisp
+; 可运行
 poly = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
 poly->contains(ycGeom::Point(2:2))                        ; => t
 poly->contains(ycGeom::Point(0:2))                        ; => t

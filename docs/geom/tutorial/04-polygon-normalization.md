@@ -25,7 +25,8 @@
 
 结果的正负就是方向：
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_SignedArea(l_pts "l")  ; -> float
     let((sum n)
         sum = 0.0
@@ -56,7 +57,8 @@ _SignedArea(_OrientRing(reverse(square)))  ; => 16.0
 
 `ycGeom` 里对应 `isClockwise()` 与 `reverse()`：
 
-```lisp:run
+```lisp
+; 可运行
 poly = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
 poly->isClockwise()          ; => nil，逆时针
 poly->reverse()->isClockwise()   ; => t
@@ -67,7 +69,8 @@ poly->area()                 ; => 100.0
 
 连续三个点共线时，中间那个点不改变形状，但会增加顶点数、干扰去重与配对。清理规则：对每个顶点检查前一个、当前、后一个组成的叉积，近似为零就删掉当前点。
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_RemoveCollinear(l_pts n_eps "ln")  ; -> list
     let((src changed n res)
         src = l_pts
@@ -113,7 +116,8 @@ _SignedArea(_RemoveCollinear(withBend 1e-9))            ; => 100.0
 
 `ycGeom` 的 `Polygon` 构造时会自动做规范化，`removeCollinear()` 可以显式取出去掉共线点后的结果：
 
-```lisp:run
+```lisp
+; 可运行
 p = ycGeom::Polygon('((0 0) (5 0) (10 0) (10 10) (0 10)))
 length(p->points())                     ; => 5
 length(p->removeCollinear()->points())  ; => 4
@@ -148,7 +152,8 @@ keyhole 点列：
 
 `ycGeom` 用 `Region` 的差集生成带洞多边形：
 
-```lisp:run
+```lisp
+; 可运行
 outer = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
 hole = ycGeom::Polygon('((3 3) (7 3) (7 7) (3 7)))
 holeRing = car(ycGeom::Region(list(outer))->not(ycGeom::Region(list(hole)))->polygons())

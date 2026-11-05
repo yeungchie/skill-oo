@@ -23,7 +23,8 @@ n = (-dy, dx) / |d|
 
 中心线两侧的偏移点就是 `P ± n * (w / 2)`：
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_OffsetLine(g_a g_b n_dist "ggn")  ; -> list[Point]
     let((dx dy len nx ny)
         dx = g_b->x() - g_a->x()
@@ -55,7 +56,8 @@ p = (A + n1 * h) + t * d1
 t = ((B + n2 * h) - (A + n1 * h)) × d2 / (d1 × d2)
 ```
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_MiterPoint(g_a g_b g_c n_half "gggn")  ; -> Point | nil
     let((d1x d1y d2x d2y n1x n1y n2x n2y
          p1x p1y p2x p2y den tt)
@@ -120,7 +122,8 @@ miter 长度按 `1 / sin(θ/2)` 增长。工程上用 **miter limit** 限制它�
 
 ## 7.6 跑一遍
 
-```lisp:run
+```lisp
+; 可运行
 openPath = ycGeom::Path(list(0:0 10:0) ?width 2)
 
 openPath->toRegion()->area()          ; => 20.0，10 x 2
@@ -133,7 +136,8 @@ openPath->toRegion(?cap 'square)->area()   ; => 24.0
 
 L 形折线比较三种接头：
 
-```lisp:run
+```lisp
+; 可运行
 bentPath = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
 
 bentPath->toRegion()->area()                    ; => 40.0，miter
@@ -143,7 +147,8 @@ bentPath->toRegion(?join 'round)->area()        ; => 39.78036
 
 闭合路径没有端帽，面积等于「周长 x 宽度」：
 
-```lisp:run
+```lisp
+; 可运行
 closedPath = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
 
 closedPath->isClosed()                ; => t
@@ -159,7 +164,8 @@ closedPath->toRegion()->area()        ; => 80.0，40 x 2
 3. 与输入区域比对，重合才接受；
 4. 候选不唯一（或存在洞、变宽、圆角）时返回 `nil`。
 
-```lisp:run
+```lisp
+; 可运行
 bar = ycGeom::Polygon(list(0:0 10:0 10:4 0:4))
 back = bar->toPath()
 
@@ -169,7 +175,8 @@ back->width()              ; => 4.0
 
 闭合方形描边也能还原，只是中心线的起点和方向可能与原路径不同：
 
-```lisp:run
+```lisp
+; 可运行
 outline = car(closedPath->toRegion()->polygons())->toPath()
 outline->width()                  ; => 2.0
 outline->isClosed()               ; => t

@@ -20,7 +20,8 @@
 
 每个三角形带符号，逆时针为正、顺时针为负，正好抵消出多边形的净面积。符号就是方向（第 4 章）。
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_ShoelaceRaw(l_pts "l")  ; -> float
     let((sum n)
         sum = 0.0
@@ -57,7 +58,8 @@ x' = x - x0,  y' = y - y0
 
 平移后，乘积的量级从「坐标平方」降到「尺寸平方」，抵消不再发生：
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_ShoelaceShifted(l_pts "l")  ; -> float
     let((x0 y0 sum n)
         x0 = car(l_pts)->x()
@@ -95,7 +97,8 @@ sum = t
 结果 = sum + comp
 ```
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_ShoelaceComp(l_pts "l")  ; -> float
     let((x0 y0 sum comp n p1 p2 j tt term)
         x0 = car(l_pts)->x()
@@ -137,7 +140,8 @@ cross_i = x_i * y_{i+1} - x_{i+1} * y_i
 
 同样要平移；`6A = 3 * (2A)`，所以除数是 `3 * a2`：
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_CentroidOf(l_pts "l")  ; -> Point
     let((x0 y0 a2 cx cy n a b cross)
         x0 = car(l_pts)->x()
@@ -176,7 +180,8 @@ sprintf(nil "%.17g" c->y())       ; => "1000005.25"
 
 **打印陷阱**：`%A` 对浮点数只保留有限有效位，直接 `printf("%A" c->x())` 会显示成 `1000005.0`，看起来像算错了。核验大坐标结果时用 `%.17g`。
 
-```lisp:run
+```lisp
+; 可运行
 printf("%A\n" 1000005.25)                 ; 显示 1000005.0
 sprintf(nil "%.17g" 1000005.25)           ; => "1000005.25"
 ```
@@ -188,7 +193,8 @@ keyhole 多边形的切割线在点列里出现两次、方向相反：
 - **面积**：两次贡献符号相反，正好抵消，所以公式不用特殊处理；
 - **周长**：默认扣除切割线（真实边界才有意义），`?includeSeams t` 时按完整点列计算。
 
-```lisp:run
+```lisp
+; 可运行
 outer = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
 hole = ycGeom::Polygon('((3 3) (7 3) (7 7) (3 7)))
 holeRing = car(ycGeom::Region(list(outer))->not(ycGeom::Region(list(hole)))->polygons())

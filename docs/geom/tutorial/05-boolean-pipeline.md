@@ -41,7 +41,8 @@ Region = {P1, P2, ...}，语义是 P1 ∪ P2 ∪ ...
 
 先把环拆成无向边，再对每条边求它与另一环所有边的交点参数。交点参数必须同时落在两条边上（`0 <= t <= 1` 且 `0 <= u <= 1`），否则是延长线相交，不能算。
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_RingEdges(l_pts "l")  ; -> list[list[Point]]
     let((res n)
         n = length(l_pts)
@@ -128,7 +129,8 @@ procedure(_SplitAll(l_ringA l_ringB n_grid "lln")  ; -> list[list[Point]]
 3. 按运算决定左右是否属于结果；
 4. 两侧归属不同，这条边就是结果边界；把「结果内部」放在左侧，决定边的方向。
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_ResultMember(s_op g_inA g_inB "sgg")  ; -> t | nil
     case(s_op
         ('or g_inA || g_inB)
@@ -176,7 +178,8 @@ procedure(_Classify(l_edges l_ringA l_ringB s_op n_grid "lllsn")  ; -> list[list
 
 分类后得到一组有向边，每条边都保证「左侧是结果内部」。从一个端点出发，沿着同起点的下一条边继续走，直到回到起点：
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_TraceLoops(l_directed n_grid "ln")  ; -> list[list[Point]]
     let((tab order res e start cur next ring key)
         tab = makeTable("tutorialTrace" nil)
@@ -214,7 +217,8 @@ procedure(_TraceLoops(l_directed n_grid "ln")  ; -> list[list[Point]]
 
 ## 5.7 跑一遍
 
-```lisp:run
+```lisp
+; 可运行
 A = list(ycGeom::Point(0:0) ycGeom::Point(4:0)
     ycGeom::Point(4:4) ycGeom::Point(0:4))
 B = list(ycGeom::Point(2:2) ycGeom::Point(6:2)
@@ -234,7 +238,8 @@ _SignedArea(car(unionRings))                    ; => 28.0
 
 交集同样一条流水线，只改分类规则：
 
-```lisp:run
+```lisp
+; 可运行
 dirsAnd = _Classify(edges A B 'and 0.25)
 andRings = _TraceLoops(dirsAnd 0.25)
 length(andRings)                                ; => 1
@@ -243,7 +248,8 @@ _SignedArea(car(andRings))                      ; => 4.0
 
 `ycGeom` 的对应接口：
 
-```lisp:run
+```lisp
+; 可运行
 ra = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
 rb = ycGeom::Region(list(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))))
 

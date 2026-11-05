@@ -10,7 +10,8 @@
 
 先看一个反例。用坐标文本直接作键：
 
-```lisp:run
+```lisp
+; 可运行
 key1 = lsprintf("%.17g|%.17g" 0.1 + 0.2 0.0)
 key2 = lsprintf("%.17g|%.17g" 0.3 0.0)
 key1 == key2    ; => nil
@@ -33,7 +34,8 @@ key1 == key2    ; => nil
 key(P) = "%d|%d" % (round(P.x / g), round(P.y / g))
 ```
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_PointKey(g_p n_grid "gn")  ; -> str
     lsprintf("%d|%d" round(g_p->x() / n_grid) round(g_p->y() / n_grid))
 )
@@ -64,7 +66,8 @@ keys                ; => 两个键（顺序由 table 决定）
 
 边没有方向：`A→B` 与 `B→A` 是同一条边。作键时把两个端点键按字典序排好再拼接：
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_UndirEdgeKey(g_a g_b n_grid "ggn")  ; -> str
     let((ka kb)
         ka = _PointKey(g_a n_grid)
@@ -90,7 +93,8 @@ _UndirEdgeKey(ycGeom::Point(10:0) ycGeom::Point(0:0) 1.0)   ; => "0|0~10|0"
 3. 正向、反向各算一遍；
 4. 取字典序最小的那个作为环键。
 
-```lisp:run
+```lisp
+; 可运行
 procedure(_RotText(l_keys n_start n_dir "lxx")  ; -> str
     let((n text j r)
         n = length(l_keys)
@@ -140,7 +144,8 @@ _RingKeyText(square 1.0) == _RingKeyText(reversed 1.0)   ; => t
 - 因此布尔运算的输入如果有「几乎重合但不重合」的边，必须给网格，否则键对不上；
 - 输出 `Region` 里的多边形已经过规范化，同一环不会以旋转或反向的等价形式重复出现。
 
-```lisp:run
+```lisp
+; 可运行
 polyA = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
 polyB = ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))
 union = ycGeom::Region(list(polyA))->or(ycGeom::Region(list(polyB)))
