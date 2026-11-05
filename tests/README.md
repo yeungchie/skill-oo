@@ -36,32 +36,25 @@ load("<path-to-dir>/skill-oo/tests/codec/load_order.il")
 
 pathlib、io、regex 与 log 套件会在 cwd 下创建并清理各自的临时夹具；subprocess 套件直接运行短命令，codec、utf8、string、units、radix、textwrap、tabulate、datetime 与 lang 套件仅做内存运算，均无夹具。
 
-## 套件规模
+## 套件结果
 
-各套件的用例总数由 `test_init.il` 里的 `_TestRun` 第二个参数声明，下表是当前值；增删用例时同步更新，两者不一致时运行结束会打印 `NOTE: expected <n> tests, ran <m>` 提醒。
+各模块最近一次实测的用例数与结果见对应目录下的 `RESULTS.md`：
 
-| 套件 | 用例数 |
-| --- | --- |
-| pathlib | 436 |
-| io | 25 |
-| regex | 325 |
-| subprocess | 172 |
-| codec/core | 16 |
-| codec/json | 230 |
-| codec/yaml | 187 |
-| codec/csv | 238 |
-| codec/toml | 167 |
-| codec/ini | 129 |
-| utf8 | 107 |
-| string | 111 |
-| units | 76 |
-| radix | 177 |
-| textwrap | 82 |
-| tabulate | 43 |
-| datetime | 242 |
-| log | 64 |
-| lang | 37 |
-| geom | 591 |
+- [pathlib](pathlib/RESULTS.md)
+- [io](io/RESULTS.md)
+- [regex](regex/RESULTS.md)
+- [subprocess](subprocess/RESULTS.md)
+- [codec](codec/RESULTS.md)
+- [utf8](utf8/RESULTS.md)
+- [string](string/RESULTS.md)
+- [units](units/RESULTS.md)
+- [radix](radix/RESULTS.md)
+- [textwrap](textwrap/RESULTS.md)
+- [tabulate](tabulate/RESULTS.md)
+- [datetime](datetime/RESULTS.md)
+- [log](log/RESULTS.md)
+- [lang](lang/RESULTS.md)
+- [geom](geom/RESULTS.md)
 
 所有套件共用 `tests/kit.il` 里的断言、计时与汇总工具；各 `load.il` 先载入它，`test_init.il` 只保留模块专用辅助过程与一行 `_TestRun(...)`。每条测试用例的输出形如：
 
