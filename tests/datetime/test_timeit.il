@@ -50,6 +50,13 @@ let((d)
     _Assert(0 <= d->nanos() && d->nanos() <= 999999999  "timeit: empty body nanos in range")
 )
 
+; --- 7. hidden binding is hygienic ---
+let((_ycTimeItPerf seen)
+    _ycTimeItPerf = 7
+    ycTimeIt(seen = _ycTimeItPerf)
+    _Assert(seen == 7  "timeit: hidden binding does not shadow body names")
+)
+
 _TestChildDone = t
 
 ; END
