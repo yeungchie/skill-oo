@@ -112,7 +112,11 @@ _SegCross(a b ycGeom::Point(0:1) ycGeom::Point(10:1))   ; => nil，平行
 
 ![参数 t 与 u 同时落在 0..1 时两线段才相交](img/segment-params.svg)
 
-**共线是麻烦的一种。** 分母为 0 且 `(C - A) × r = 0` 时，两条线段在同一直线上，交集可能是一个点、一段线段，或者空。库里的 `Segment->intersection` 会返回：
+**共线是麻烦的一种。** 分母为 0 且 `(C - A) × r = 0` 时，两条线段在同一直线上，交集可能是一个点、一段线段，或者空。![共线重叠时返回的是一段线段](img/collinear-overlap.svg)
+
+*共线重叠时返回的是一段线段。*
+
+库里的 `Segment->intersection` 会返回：
 
 | 情况 | 返回 |
 | --- | --- |

@@ -90,6 +90,10 @@ _MiterPoint(A B C 1.0)->toSkill()   ; => (9.0 1.0)
 
 miter 长度按 `1 / sin(θ/2)` 增长。工程上用 **miter limit** 限制它：超过阈值就退回 bevel，否则尖角会伸出去很远。
 
+![夹角越小 miter 越长，超过 limit 就退回 bevel](img/miter-limit.svg)
+
+*夹角越小 miter 越长，超过 limit 就退回 bevel。*
+
 ## 7.4 端帽：butt、square、round
 
 开放路径的两端：
@@ -113,6 +117,10 @@ miter 长度按 `1 / sin(θ/2)` 增长。工程上用 **miter limit** 限制它�
 1. 每条边生成一条独立边带；
 2. 每个接头、每个端帽生成独立多边形；
 3. 全部丢进区域并集，重叠部分自动合并。
+
+![内侧偏移线交叉处由并集自动合并](img/self-intersection.svg)
+
+*内侧偏移线交叉处由并集自动合并。*
 
 `ycGeom` 的 `Path->toRegion` 就是这么做的，所以它能处理任意折线而不会产生重叠碎片。
 
