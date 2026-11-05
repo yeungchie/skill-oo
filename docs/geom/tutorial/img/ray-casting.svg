@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 240" role="img" aria-label="射线法判断点在多边形内">
+  <rect width="520" height="240" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">射线法：数向右射线穿过的边数，奇数在内、偶数在外</text>
+
+  <polygon points="80,60 300,60 300,140 200,140 200,200 80,200"
+      fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+
+  <circle cx="150" cy="170" r="5" fill="#dc2626"/>
+  <text x="132" y="190" font-family="sans-serif" font-size="12" fill="#dc2626">内部点</text>
+  <line x1="150" y1="170" x2="470" y2="170" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <circle cx="200" cy="170" r="5" fill="#dc2626"/>
+  <text x="206" y="164" font-family="sans-serif" font-size="12" fill="#dc2626">1 次</text>
+
+  <circle cx="360" cy="105" r="5" fill="#16a34a"/>
+  <text x="346" y="92" font-family="sans-serif" font-size="12" fill="#16a34a">外部点</text>
+  <line x1="360" y1="105" x2="470" y2="105" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="392" y="124" font-family="sans-serif" font-size="12" fill="#16a34a">0 次</text>
+
+  <text x="352" y="196" font-family="sans-serif" font-size="12" fill="#666">只统计跨过射线高度</text>
+  <text x="352" y="214" font-family="sans-serif" font-size="12" fill="#666">且交点在右侧的边</text>
+</svg>

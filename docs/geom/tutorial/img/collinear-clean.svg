@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 220" role="img" aria-label="共线点清理">
+  <rect width="520" height="220" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">共线清理：删掉不改变形状的中间点</text>
+
+  <polyline points="40,160 140,160 240,160 240,60 40,60 40,160"
+      fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <circle cx="140" cy="160" r="6" fill="#dc2626"/>
+  <text x="128" y="186" font-family="sans-serif" font-size="12" fill="#dc2626">删除</text>
+  <text x="60" y="206" font-family="sans-serif" font-size="12" fill="#666">5 个顶点</text>
+
+  <line x1="258" y1="110" x2="288" y2="110" stroke="#6b7280" stroke-width="2"/>
+  <polygon points="288,110 278,104 278,116" fill="#6b7280"/>
+
+  <polyline points="300,160 440,160 440,60 300,60 300,160"
+      fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="330" y="206" font-family="sans-serif" font-size="12" fill="#666">4 个顶点，形状不变</text>
+</svg>

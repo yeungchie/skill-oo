@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 220" role="img" aria-label="描边偏移与法线">
+  <defs>
+    <marker id="an" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#dc2626"/>
+    </marker>
+  </defs>
+  <rect width="520" height="220" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">偏移：沿单位法线各走半个宽度</text>
+
+  <line x1="80" y1="160" x2="420" y2="100" stroke="#6b7280" stroke-width="2" stroke-dasharray="6 4"/>
+  <line x1="80" y1="120" x2="420" y2="60" stroke="#2563eb" stroke-width="2"/>
+  <line x1="80" y1="200" x2="420" y2="140" stroke="#2563eb" stroke-width="2"/>
+
+  <line x1="200" y1="140" x2="200" y2="104" stroke="#dc2626" stroke-width="1.5" marker-end="url(#an)"/>
+  <line x1="200" y1="140" x2="200" y2="176" stroke="#dc2626" stroke-width="1.5" marker-end="url(#an)"/>
+
+  <text x="208" y="100" font-family="sans-serif" font-size="12" fill="#dc2626">n = (−dy, dx) / |d|</text>
+  <text x="208" y="184" font-family="sans-serif" font-size="12" fill="#dc2626">−n</text>
+  <text x="300" y="168" font-family="sans-serif" font-size="12" fill="#6b7280">中心线</text>
+  <text x="300" y="52" font-family="sans-serif" font-size="12" fill="#2563eb">偏移 +h</text>
+  <text x="300" y="132" font-family="sans-serif" font-size="12" fill="#2563eb">偏移 −h</text>
+</svg>

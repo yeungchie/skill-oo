@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 260" role="img" aria-label="布尔运算拆边">
+  <rect width="520" height="260" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">拆边：交点把每条边切成小段</text>
+
+  <rect x="60" y="60" width="200" height="120" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <rect x="160" y="120" width="200" height="120" fill="#f0fdf4" stroke="#16a34a" stroke-width="2" opacity="0.75"/>
+
+  <circle cx="160" cy="180" r="5" fill="#dc2626"/>
+  <circle cx="260" cy="120" r="5" fill="#dc2626"/>
+  <text x="96" y="206" font-family="sans-serif" font-size="12" fill="#dc2626">交点 1</text>
+  <text x="268" y="114" font-family="sans-serif" font-size="12" fill="#dc2626">交点 2</text>
+
+  <line x1="160" y1="180" x2="160" y2="196" stroke="#dc2626" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="260" y1="120" x2="276" y2="120" stroke="#dc2626" stroke-width="1" stroke-dasharray="3 3"/>
+
+  <text x="24" y="244" font-family="sans-serif" font-size="12" fill="#666">交点参数排序后，与 0、1 相邻两项之间就是一小段</text>
+</svg>

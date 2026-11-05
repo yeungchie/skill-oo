@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 240" role="img" aria-label="三种接头风格">
+  <rect width="520" height="240" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">三种接头：miter、bevel、round</text>
+
+  <g stroke="#bfdbfe" stroke-width="26" fill="none">
+    <polyline points="50,170 120,170 120,80" stroke-linejoin="miter"/>
+    <polyline points="220,170 290,170 290,80" stroke-linejoin="bevel"/>
+    <polyline points="390,170 460,170 460,80" stroke-linejoin="round"/>
+  </g>
+  <g stroke="#2563eb" stroke-width="1.2" stroke-dasharray="4 3" fill="none">
+    <polyline points="50,170 120,170 120,80"/>
+    <polyline points="220,170 290,170 290,80"/>
+    <polyline points="390,170 460,170 460,80"/>
+  </g>
+
+  <text x="62" y="206" font-family="sans-serif" font-size="12" fill="#666">miter：两条偏移线求交</text>
+  <text x="232" y="206" font-family="sans-serif" font-size="12" fill="#666">bevel：直接切平</text>
+  <text x="400" y="206" font-family="sans-serif" font-size="12" fill="#666">round：圆弧近似</text>
+
+  <text x="24" y="228" font-family="sans-serif" font-size="12" fill="#666">miter 长度随夹角变小而暴涨，需要 miter limit 兜底</text>
+</svg>

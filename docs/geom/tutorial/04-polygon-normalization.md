@@ -66,6 +66,10 @@ _SignedArea(reverse(square))               ; => -16.0
 _SignedArea(_OrientRing(reverse(square)))  ; => 16.0
 ```
 
+![逆时针为正、顺时针为负](img/orientation.svg)
+
+*逆时针为正、顺时针为负。*
+
 `ycGeom` 里对应 `isClockwise()` 与 `reverse()`：
 
 ```lisp
@@ -100,6 +104,10 @@ _Collinear3(ycGeom::Point(0:0) ycGeom::Point(5:0) ycGeom::Point(10:0) 1e-9)
 _Collinear3(ycGeom::Point(0:0) ycGeom::Point(5:1) ycGeom::Point(10:0) 1e-9)
 ; => nil
 ```
+
+![删掉共线中间点，顶点数变少、形状不变](img/collinear-clean.svg)
+
+*删掉共线中间点，顶点数变少、形状不变。*
 
 清理就是对每个顶点调用它：命中就删掉当前点，扫完一轮再从头扫，直到没有点被删——删掉一个点后，原本不相邻的三个点可能变成新的共线三点。循环骨架很短，但要处理首尾相接和最少 3 个顶点，这里直接看结果。
 

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 220" role="img" aria-label="边两侧采样分类">
+  <defs>
+    <marker id="ac" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#6b7280"/>
+    </marker>
+  </defs>
+  <rect width="520" height="220" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">分类：看边两侧的采样点是否属于结果</text>
+
+  <line x1="100" y1="120" x2="420" y2="120" stroke="#2563eb" stroke-width="3"/>
+  <circle cx="260" cy="120" r="4" fill="#2563eb"/>
+  <line x1="260" y1="120" x2="260" y2="72" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ac)"/>
+  <line x1="260" y1="120" x2="260" y2="168" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ac)"/>
+
+  <circle cx="260" cy="64" r="5" fill="#16a34a"/>
+  <text x="270" y="60" font-family="sans-serif" font-size="12" fill="#16a34a">left：在结果内</text>
+  <circle cx="260" cy="176" r="5" fill="#dc2626"/>
+  <text x="270" y="190" font-family="sans-serif" font-size="12" fill="#dc2626">right：在结果外</text>
+
+  <text x="24" y="206" font-family="sans-serif" font-size="12" fill="#666">两侧归属不同 → 这条边是结果边界；方向取「内部在左」</text>
+</svg>

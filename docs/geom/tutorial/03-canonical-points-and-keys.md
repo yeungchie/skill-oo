@@ -84,6 +84,10 @@ _UndirEdgeKey(ycGeom::Point(0:0) ycGeom::Point(10:0) 1.0)   ; => "0|0~10|0"
 _UndirEdgeKey(ycGeom::Point(10:0) ycGeom::Point(0:0) 1.0)   ; => "0|0~10|0"
 ```
 
+![A→B 与 B→A 得到同一个边键](img/edge-key.svg)
+
+*A→B 与 B→A 得到同一个边键。*
+
 布尔运算里，这个键用来做两件事：拆分后的边去重；识别「同一条边被两个多边形共用」——后者是共边合并与洞拼接的基础。
 
 ## 3.4 环键：旋转与方向归一
@@ -139,6 +143,10 @@ reversed = list(ycGeom::Point(0:0) ycGeom::Point(0:4)
 _RingKeyText(square 1.0) == _RingKeyText(rotated 1.0)    ; => t
 _RingKeyText(square 1.0) == _RingKeyText(reversed 1.0)   ; => t
 ```
+
+![旋转与反向都归一到同一个环键](img/ring-rotation.svg)
+
+*旋转与反向都归一到同一个环键。*
 
 注意这是**精确键**：只要有一个顶点不同，环键就不同。环的「近似相等」仍要用逐点容差比较，环键只负责快速判等与去重。
 

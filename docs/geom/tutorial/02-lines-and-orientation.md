@@ -170,6 +170,10 @@ _PointSegDist(ycGeom::Point(-5:0) a b)    ; => 5.0，投影落在线段外，取
 _PointSegDist(ycGeom::Point(15:0) a b)    ; => 5.0，取端点 B
 ```
 
+![投影落在段内取垂足，落在段外取最近端点](img/point-seg-distance.svg)
+
+*投影落在段内取垂足，落在段外取最近端点。*
+
 库里的 `Segment->distanceTo(Point)` 做的是同一件事：
 
 ```lisp
@@ -221,6 +225,10 @@ ring = list(ycGeom::Point(0:0) ycGeom::Point(4:0)
 _RayInside(ring ycGeom::Point(2:2))   ; => t
 _RayInside(ring ycGeom::Point(5:2))   ; => nil
 ```
+
+![向右射线穿过奇数条边在内部，偶数条在外部](img/ray-casting.svg)
+
+*向右射线穿过奇数条边在内部，偶数条在外部。*
 
 这个版本对「射线正好穿过顶点」和「点在边界上」都不做特殊处理：穿过顶点会数成 0 次或 2 次，结果仍然正确（这是奇偶规则的巧合之一）；边界点则可能被判内也可能被判外。生产实现必须把边界单独处理。
 

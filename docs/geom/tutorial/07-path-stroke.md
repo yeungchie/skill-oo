@@ -46,6 +46,10 @@ procedure(_OffsetLine(g_a g_b n_dist "ggn")  ; -> list[Point]
 _OffsetLine(ycGeom::Point(0:0) ycGeom::Point(10:0) 1.0)   ; => 两点，y 均为 1.0
 ```
 
+![两条偏移线分别位于法线的正负方向](img/offset-normal.svg)
+
+*两条偏移线分别位于法线的正负方向。*
+
 一条边带就是「原边 + 两条偏移线」围成的矩形；整条路径的区域是所有边带、接头、端帽的并集。
 
 ## 7.3 接头：miter、bevel、round
@@ -80,6 +84,10 @@ _MiterPoint(A B C 1.0)->toSkill()   ; => (9.0 1.0)
 | `'bevel` | 直接用直线连接两个外角点 | 平切，面积略小 |
 | `'round` | 以拐点为圆心画圆弧（多边形近似） | 圆滑，面积介于两者之间 |
 
+![miter 最尖、bevel 切平、round 圆弧](img/join-types.svg)
+
+*miter 最尖、bevel 切平、round 圆弧。*
+
 miter 长度按 `1 / sin(θ/2)` 增长。工程上用 **miter limit** 限制它：超过阈值就退回 bevel，否则尖角会伸出去很远。
 
 ## 7.4 端帽：butt、square、round
@@ -91,6 +99,10 @@ miter 长度按 `1 / sin(θ/2)` 增长。工程上用 **miter limit** 限制它�
 | `'butt` | 在端点处平切 | 0 |
 | `'square` | 沿方向再延伸 `w / 2` | 每端 `w² / 4` |
 | `'round` | 半圆（多边形近似） | 每端约 `π * w² / 8` |
+
+![butt 平切、square 延伸、round 半圆](img/caps.svg)
+
+*butt 平切、square 延伸、round 半圆。*
 
 闭合路径没有端帽，接头环绕一整圈。
 
@@ -156,6 +168,10 @@ back = bar->toPath()
 back->route()->toSkill()   ; => ((0.0 2.0) (10.0 2.0))
 back->width()              ; => 4.0
 ```
+
+![区域与 Path 的互转：宽度由形状推断](img/to-path.svg)
+
+*区域与 Path 的互转：宽度由形状推断。*
 
 闭合方形描边也能还原，只是中心线的起点和方向可能与原路径不同：
 

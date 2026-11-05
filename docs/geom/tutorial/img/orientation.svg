@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 220" role="img" aria-label="有符号面积与方向">
+  <defs>
+    <marker id="ao" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="aor" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#dc2626"/>
+    </marker>
+  </defs>
+  <rect width="520" height="220" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">有符号面积的正负就是环的方向</text>
+
+  <rect x="80" y="60" width="120" height="120" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <path d="M 80 180 A 120 120 0 0 1 200 60" fill="none" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ao)"/>
+  <text x="96" y="206" font-family="sans-serif" font-size="13" fill="#2563eb">逆时针：2A = +16</text>
+
+  <rect x="320" y="60" width="120" height="120" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+  <path d="M 320 60 A 120 120 0 0 1 440 180" fill="none" stroke="#dc2626" stroke-width="1.5" marker-end="url(#aor)"/>
+  <text x="336" y="206" font-family="sans-serif" font-size="13" fill="#dc2626">顺时针：2A = −16</text>
+</svg>

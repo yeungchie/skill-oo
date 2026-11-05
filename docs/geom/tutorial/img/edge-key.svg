@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200" role="img" aria-label="无向边键">
+  <rect width="520" height="200" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">边键与方向无关：两个端点键按字典序拼接</text>
+
+  <circle cx="90" cy="80" r="5" fill="#2563eb"/>
+  <circle cx="310" cy="80" r="5" fill="#2563eb"/>
+  <text x="74" y="74" font-family="sans-serif" font-size="13" fill="#2563eb">A</text>
+  <text x="316" y="74" font-family="sans-serif" font-size="13" fill="#2563eb">B</text>
+  <line x1="90" y1="80" x2="300" y2="80" stroke="#2563eb" stroke-width="2.5"/>
+  <polygon points="300,80 288,74 288,86" fill="#2563eb"/>
+  <text x="340" y="85" font-family="sans-serif" font-size="13" fill="#111">"0|0~10|0"</text>
+
+  <circle cx="90" cy="140" r="5" fill="#16a34a"/>
+  <circle cx="310" cy="140" r="5" fill="#16a34a"/>
+  <text x="74" y="134" font-family="sans-serif" font-size="13" fill="#16a34a">B</text>
+  <text x="316" y="134" font-family="sans-serif" font-size="13" fill="#16a34a">A</text>
+  <line x1="310" y1="140" x2="100" y2="140" stroke="#16a34a" stroke-width="2.5"/>
+  <polygon points="100,140 112,134 112,146" fill="#16a34a"/>
+  <text x="340" y="145" font-family="sans-serif" font-size="13" fill="#111">"0|0~10|0"</text>
+
+  <text x="340" y="178" font-family="sans-serif" font-size="12" fill="#666">两条有向边，同一个键</text>
+</svg>

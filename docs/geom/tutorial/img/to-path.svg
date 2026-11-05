@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 220" role="img" aria-label="区域与路径的互转">
+  <defs>
+    <marker id="ap" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#6b7280"/>
+    </marker>
+  </defs>
+  <rect width="520" height="220" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">区域 ⇄ 中心线 + 宽度</text>
+
+  <rect x="60" y="90" width="160" height="60" fill="#bfdbfe" stroke="#2563eb" stroke-width="2"/>
+  <line x1="60" y1="120" x2="220" y2="120" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="76" y="176" font-family="sans-serif" font-size="12" fill="#666">区域（等宽矩形）</text>
+
+  <line x1="248" y1="110" x2="292" y2="110" stroke="#6b7280" stroke-width="2" marker-end="url(#ap)"/>
+  <text x="238" y="98" font-family="sans-serif" font-size="12" fill="#6b7280">toPath()</text>
+
+  <line x1="320" y1="120" x2="460" y2="120" stroke="#2563eb" stroke-width="3"/>
+  <line x1="320" y1="100" x2="460" y2="100" stroke="#93c5fd" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="320" y1="140" x2="460" y2="140" stroke="#93c5fd" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="330" y="176" font-family="sans-serif" font-size="12" fill="#666">Path（中心线 + 宽度）</text>
+
+  <text x="60" y="204" font-family="sans-serif" font-size="12" fill="#666">逆推要求形状确实由等宽描边生成；多洞、变宽、圆角会返回 nil</text>
+</svg>

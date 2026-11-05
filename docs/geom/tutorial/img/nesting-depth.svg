@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 240" role="img" aria-label="嵌套深度">
+  <rect width="520" height="240" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">嵌套深度：偶数深度是实心，奇数深度是洞</text>
+
+  <rect x="60" y="52" width="360" height="160" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <rect x="120" y="88" width="240" height="88" fill="#ffffff" stroke="#dc2626" stroke-width="2"/>
+  <rect x="200" y="112" width="80" height="40" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+
+  <text x="72" y="72" font-family="sans-serif" font-size="12" fill="#2563eb">深度 0：外环</text>
+  <text x="132" y="108" font-family="sans-serif" font-size="12" fill="#dc2626">深度 1：洞</text>
+  <text x="212" y="134" font-family="sans-serif" font-size="12" fill="#2563eb">深度 2：岛</text>
+
+  <text x="60" y="232" font-family="sans-serif" font-size="12" fill="#666">用射线穿过所有环，按交点个数确定每个环的深度</text>
+</svg>

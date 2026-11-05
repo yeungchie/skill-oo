@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 220" role="img" aria-label="坐标量级与可分辨间隔">
+  <rect width="520" height="220" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">坐标越大，能分辨的间隔越粗</text>
+
+  <line x1="60" y1="80" x2="460" y2="80" stroke="#9ca3af" stroke-width="1.5"/>
+  <g stroke="#2563eb" stroke-width="1.5">
+    <line x1="200" y1="72" x2="200" y2="88"/>
+    <line x1="210" y1="72" x2="210" y2="88"/>
+  </g>
+  <text x="60" y="62" font-family="sans-serif" font-size="12" fill="#666">坐标 ~1：相邻浮点间隔约 2e-16</text>
+  <circle cx="200" cy="80" r="4" fill="#dc2626"/>
+  <circle cx="210" cy="80" r="4" fill="#dc2626"/>
+  <text x="228" y="84" font-family="sans-serif" font-size="12" fill="#dc2626">两个不同的点</text>
+
+  <line x1="60" y1="150" x2="460" y2="150" stroke="#9ca3af" stroke-width="1.5"/>
+  <g stroke="#16a34a" stroke-width="1.5">
+    <line x1="240" y1="142" x2="240" y2="158"/>
+  </g>
+  <text x="60" y="132" font-family="sans-serif" font-size="12" fill="#666">坐标 ~1e9：相邻浮点间隔约 1e-7</text>
+  <circle cx="240" cy="150" r="6" fill="#16a34a"/>
+  <text x="256" y="154" font-family="sans-serif" font-size="12" fill="#16a34a">1e-9 的差别已经存不下</text>
+</svg>

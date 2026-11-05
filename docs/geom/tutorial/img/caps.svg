@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200" role="img" aria-label="三种端帽风格">
+  <rect width="520" height="200" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">三种端帽：butt、square、round</text>
+
+  <g stroke="#bfdbfe" stroke-width="26" stroke-linecap="butt">
+    <line x1="60" y1="60" x2="200" y2="60"/>
+  </g>
+  <g stroke="#bfdbfe" stroke-width="26" stroke-linecap="square">
+    <line x1="60" y1="105" x2="200" y2="105"/>
+  </g>
+  <g stroke="#bfdbfe" stroke-width="26" stroke-linecap="round">
+    <line x1="60" y1="150" x2="200" y2="150"/>
+  </g>
+
+  <g stroke="#2563eb" stroke-width="1.2" stroke-dasharray="4 3">
+    <line x1="60" y1="60" x2="200" y2="60"/>
+    <line x1="60" y1="105" x2="200" y2="105"/>
+    <line x1="60" y1="150" x2="200" y2="150"/>
+  </g>
+
+  <text x="240" y="64" font-family="sans-serif" font-size="12" fill="#666">butt：端点处平切</text>
+  <text x="240" y="109" font-family="sans-serif" font-size="12" fill="#666">square：再延伸 w/2</text>
+  <text x="240" y="154" font-family="sans-serif" font-size="12" fill="#666">round：半圆近似</text>
+</svg>

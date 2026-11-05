@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 240" role="img" aria-label="追踪有向边成环">
+  <defs>
+    <marker id="at" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect width="520" height="240" fill="#ffffff"/>
+  <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">追踪：每条边的终点就是下一条边的起点</text>
+
+  <rect x="90" y="60" width="240" height="140" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1"/>
+
+  <line x1="90" y1="200" x2="330" y2="200" stroke="#2563eb" stroke-width="2.5" marker-end="url(#at)"/>
+  <line x1="330" y1="200" x2="330" y2="60" stroke="#2563eb" stroke-width="2.5" marker-end="url(#at)"/>
+  <line x1="330" y1="60" x2="90" y2="60" stroke="#2563eb" stroke-width="2.5" marker-end="url(#at)"/>
+  <line x1="90" y1="60" x2="90" y2="200" stroke="#2563eb" stroke-width="2.5" marker-end="url(#at)"/>
+
+  <circle cx="90" cy="200" r="5" fill="#dc2626"/>
+  <text x="52" y="220" font-family="sans-serif" font-size="12" fill="#dc2626">起点</text>
+
+  <text x="356" y="96" font-family="sans-serif" font-size="12" fill="#666">建一张</text>
+  <text x="356" y="116" font-family="sans-serif" font-size="12" fill="#666">「起点 → 终点」表</text>
+  <text x="356" y="150" font-family="sans-serif" font-size="12" fill="#666">回到起点即闭环</text>
+</svg>
