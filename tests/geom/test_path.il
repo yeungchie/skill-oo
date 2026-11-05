@@ -141,7 +141,7 @@ let((p s r s2 r2)
     _Assert(r2->isClosed()  "route: state round-trip closed")
 )
 
-let((s (ycGeom::Path(list(0:0 10:0) ?width 2)->toSkill()))
+let(((s (ycGeom::Path(list(0:0 10:0) ?width 2)->toSkill())))
     _AssertError(lambda(() ycGeom::Path(s ?width 3) t)
         "path: duplicate width rejected")
 )

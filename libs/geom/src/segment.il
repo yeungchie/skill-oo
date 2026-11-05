@@ -118,7 +118,7 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggn")  ; -> Point | Segme
     ; **返回**
     ;   (Point|Segment|nil) - 唯一交点、重叠线段或无交
     let((rx ry sx sy qx qy qpx qpy rxs qpxr
-         rr lenr lens tolr tols t0 t1 min max value u)
+         rr lenr lens tolr tols t0 t1 lo hi value u)
         cond(
             (g_a->equals(g_b ?eps n_eps) && g_c->equals(g_d ?eps n_eps)
                 when(g_a->equals(g_c ?eps n_eps) g_a)
@@ -149,15 +149,15 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggn")  ; -> Point | Segme
                         t0 = (qpx * rx + qpy * ry) / rr
                         t1 = ((g_d->x() - g_a->x()) * rx
                             + (g_d->y() - g_a->y()) * ry) / rr
-                        min = min(t0 t1)
-                        max = max(t0 t1)
-                        unless(max < -tolr || min > 1.0 + tolr
-                            min = max(min 0.0)
-                            max = min(max 1.0)
-                            if(_Near(min max tolr)
-                                _SegPointAt(g_a g_b min)
-                                Segment(list(_SegPointAt(g_a g_b min)
-                                    _SegPointAt(g_a g_b max)))
+                        lo = min(t0 t1)
+                        hi = max(t0 t1)
+                        unless(hi < -tolr || lo > 1.0 + tolr
+                            lo = max(lo 0.0)
+                            hi = min(hi 1.0)
+                            if(_Near(lo hi tolr)
+                                _SegPointAt(g_a g_b lo)
+                                Segment(list(_SegPointAt(g_a g_b lo)
+                                    _SegPointAt(g_a g_b hi)))
                             )
                         )
                     )

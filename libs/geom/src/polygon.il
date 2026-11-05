@@ -218,7 +218,7 @@ procedure(_InstallPolygon(self "g")  ; -> t
             eps2 = _Eps(eps)
             seams = _SeamKeys(self->_data->points)
             len = length(self->_data->points)
-            ; Kahan-Babuska-Neumaier 补偿求和：把每步舍入误差留在 n_comp。
+            ; Kahan-Babuska-Neumaier 补偿求和：把每步舍入误差留在 comp。
             sum = 0.0
             comp = 0.0
             for(i2 1 len

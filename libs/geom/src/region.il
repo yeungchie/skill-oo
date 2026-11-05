@@ -162,7 +162,7 @@ procedure(_InstallRegion(self "g")  ; -> t
         let((sum comp term next eps2)
             _Flag(includeSeams "includeSeams")
             eps2 = _Eps(eps)
-            ; Kahan-Babuska-Neumaier 补偿求和：把每步舍入误差留在 n_comp。
+            ; Kahan-Babuska-Neumaier 补偿求和：把每步舍入误差留在 comp。
             sum = 0.0
             comp = 0.0
             foreach(p self->_data->polygons

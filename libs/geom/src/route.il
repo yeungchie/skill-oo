@@ -194,7 +194,7 @@ procedure(Route(l_points \@key (eps nil) "lg")  ; -> Route
     ;
     ; **返回**
     ;   (Route) - 新折线；点数不足、重复点或格式非法 error
-    let((pts len eps2 closed2 i prev cur acc)
+    let((pts len eps2 isClosed i prev cur acc)
         pts = _AsPointList(l_points "ycGeom::Route")
         len = length(pts)
         unless(len >= 1
@@ -204,8 +204,8 @@ procedure(Route(l_points \@key (eps nil) "lg")  ; -> Route
         when(len == 1
             error("ycGeom::Route: at least 2 points are required")
         )
-        closed2 = _SamePoint(car(pts) _Nth1(len pts) eps2)
-        when(closed2
+        isClosed = _SamePoint(car(pts) _Nth1(len pts) eps2)
+        when(isClosed
             for(i2 1 len - 1
                 acc = tconc(acc _Nth1(i2 pts))
             )
@@ -215,12 +215,12 @@ procedure(Route(l_points \@key (eps nil) "lg")  ; -> Route
                 error("ycGeom::Route: closed route needs at least 3 distinct points")
             )
         )
-        unless(closed2 || len >= 2
+        unless(isClosed || len >= 2
             error("ycGeom::Route: at least 2 points are required")
         )
         for(i2 1 len
             cur = _Nth1(i2 pts)
-            prev = when(!(i2 == 1 && !closed2)
+            prev = when(!(i2 == 1 && !isClosed)
                 _Nth1(if(i2 == 1 len (i2 - 1)) pts)
             )
             when(prev && _Near(prev->x() cur->x() eps2)
@@ -229,7 +229,7 @@ procedure(Route(l_points \@key (eps nil) "lg")  ; -> Route
             )
         )
         makeInstance('Route ?_data makeInstance('_RouteData
-            ?points pts ?closed closed2))
+            ?points pts ?closed isClosed))
     )
 )
 

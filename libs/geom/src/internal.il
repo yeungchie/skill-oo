@@ -420,26 +420,26 @@ procedure(_AsLineOrSegment(g_x g_as t_ctx "ggt")  ; -> Line | Segment
     ;
     ; **返回**
     ;   (Line|Segment) - 归一化对象；数组歧义或类型非法时 error
-    let((as2)
+    let((asText)
         when(g_as
             unless(symbolp(g_as)
                 error("%s: ?as must be 'Line or 'Segment, got %A" t_ctx g_as)
             )
-            as2 = symbolToString(g_as)
-            unless(member(as2 '("Line" "Segment"))
+            asText = symbolToString(g_as)
+            unless(member(asText '("Line" "Segment"))
                 error("%s: ?as must be 'Line or 'Segment, got %A" t_ctx g_as)
             )
         )
         cond(
             (_LineP(g_x)
-                when(g_as && as2 != "Line"
-                    error("%s: expected %s, got %A" t_ctx as2 g_x)
+                when(g_as && asText != "Line"
+                    error("%s: expected %s, got %A" t_ctx asText g_x)
                 )
                 g_x
             )
             (_SegmentP(g_x)
-                when(g_as && as2 != "Segment"
-                    error("%s: expected %s, got %A" t_ctx as2 g_x)
+                when(g_as && asText != "Segment"
+                    error("%s: expected %s, got %A" t_ctx asText g_x)
                 )
                 g_x
             )
@@ -449,8 +449,8 @@ procedure(_AsLineOrSegment(g_x g_as t_ctx "ggt")  ; -> Line | Segment
                         t_ctx)
                 )
                 cond(
-                    ((as2 == "Line") _AsLine(g_x t_ctx))
-                    ((as2 == "Segment") _AsSegment(g_x t_ctx))
+                    ((asText == "Line") _AsLine(g_x t_ctx))
+                    ((asText == "Segment") _AsSegment(g_x t_ctx))
                     (t
                         error("%s: ?as must be 'Line or 'Segment, got %A"
                             t_ctx g_as)
@@ -582,13 +582,13 @@ procedure(_ConvertToGeomObject(g_value t_ctx g_as "gtg")  ; -> any
     ;
     ; **返回**
     ;   (any) - Point/Segment/Line/Rect/Polygon/Region
-    let((kind as2 actual pts2 res2)
+    let((kind asText actual pts2 res2)
         when(g_as && !symbolp(g_as)
             error("%s: ?as must be a symbol, got %A" t_ctx g_as)
         )
         when(g_as
-            as2 = symbolToString(g_as)
-            unless(member(as2 '("Point" "Segment" "Line" "Rect" "Polygon" "Region"))
+            asText = symbolToString(g_as)
+            unless(member(asText '("Point" "Segment" "Line" "Rect" "Polygon" "Region"))
                 error("%s: ?as must be Point, Segment, Line, Rect, Polygon, or Region, got %A"
                     t_ctx g_as)
             )
@@ -597,7 +597,7 @@ procedure(_ConvertToGeomObject(g_value t_ctx g_as "gtg")  ; -> any
         cond(
             (kind
                 actual = symbolToString(kind)
-                if(as2 == nil || as2 == actual
+                if(asText == nil || asText == actual
                 then
                     cond(
                         ((actual == "Point") Point(g_value->toSkill()))
@@ -608,15 +608,15 @@ procedure(_ConvertToGeomObject(g_value t_ctx g_as "gtg")  ; -> any
                         ((actual == "Region") Region(g_value->toSkill()))
                     )
                 else
-                    error("%s: expected %s, got %A" t_ctx as2 g_value)
+                    error("%s: expected %s, got %A" t_ctx asText g_value)
                 )
             )
-            ((as2 == "Point") _AsPoint(g_value t_ctx))
-            ((as2 == "Segment") Segment(g_value))
-            ((as2 == "Line") Line(g_value))
-            ((as2 == "Rect") Rect(g_value))
-            ((as2 == "Polygon") Polygon(g_value))
-            ((as2 == "Region") _AsRegion(g_value t_ctx))
+            ((asText == "Point") _AsPoint(g_value t_ctx))
+            ((asText == "Segment") Segment(g_value))
+            ((asText == "Line") Line(g_value))
+            ((asText == "Rect") Rect(g_value))
+            ((asText == "Polygon") Polygon(g_value))
+            ((asText == "Region") _AsRegion(g_value t_ctx))
             (t
                 res2 = errset(_AsPoint(g_value t_ctx) nil)
                 if(res2

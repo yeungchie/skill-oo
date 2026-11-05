@@ -208,7 +208,7 @@ procedure(_Parse(t_str t_ctx "tt")  ; -> list
     ;
     ; **返回**
     ;   (list) - (数值 单位)
-    let((len i start b digits edigits expStart space num unit2 pf)
+    let((len i start b digits edigits expStart space num unitText pf)
         len = length(t_str)
         i = 1
         while(i <= len && _IsWs(charToInt(getchar(t_str i)))
@@ -258,21 +258,21 @@ procedure(_Parse(t_str t_ctx "tt")  ; -> list
         while(i <= len && _IsWs(charToInt(getchar(t_str i)))
             i++
         )
-        unit2 = if(i <= len substring(t_str i len - i + 1) "")
+        unitText = if(i <= len substring(t_str i len - i + 1) "")
         while(
-            unit2 != ""
-            && _IsWs(charToInt(getchar(unit2 length(unit2))))
-            unit2 = substring(unit2 1 length(unit2) - 1)
+            unitText != ""
+            && _IsWs(charToInt(getchar(unitText length(unitText))))
+            unitText = substring(unitText 1 length(unitText) - 1)
         )
-        when(_HasWs(unit2)
+        when(_HasWs(unitText)
             error("%s: whitespace inside unit (%A)" t_ctx t_str)
         )
         when(
-            unit2 != ""
-            && (_IsDigit(charToInt(getchar(unit2 1))) || charToInt(getchar(unit2 1)) == 46)
+            unitText != ""
+            && (_IsDigit(charToInt(getchar(unitText 1))) || charToInt(getchar(unitText 1)) == 46)
             error("%s: invalid number (%A)" t_ctx t_str)
         )
-        pf = _PrefixScale(unit2 space)
+        pf = _PrefixScale(unitText space)
         list(atof(num) * car(pf) cadr(pf))
     )
 )
@@ -305,31 +305,31 @@ procedure(Format(n_value \@key (unit "") (precision 6) "ntx")  ; -> str
     )
     if(n_value == 0
         strcat("0" unit)
-        let((abs exp mant fmt mant2 rounded)
-            abs = abs(n_value)
+        let((magnitude exp mant fmt mantText rounded)
+            magnitude = abs(n_value)
             fmt = lsprintf("%%.%dg" precision)
-            if(abs < 1e-24 || abs >= 1e27
+            if(magnitude < 1e-24 || magnitude >= 1e27
             then
                 strcat(sprintf(nil fmt n_value) unit)
             else
-                exp = floor(log10(abs) / 3) * 3
+                exp = floor(log10(magnitude) / 3) * 3
                 mant = n_value * expt(10.0 -exp)
-                mant2 = sprintf(nil fmt mant)
-                rounded = atof(mant2)
+                mantText = sprintf(nil fmt mant)
+                rounded = atof(mantText)
                 when(abs(rounded) >= 1000
                     if(exp < 24
                     then
                         exp = exp + 3
                         mant = n_value * expt(10.0 -exp)
-                        mant2 = sprintf(nil fmt mant)
+                        mantText = sprintf(nil fmt mant)
                     else
-                        mant2 = sprintf(nil fmt n_value)
+                        mantText = sprintf(nil fmt n_value)
                         exp = nil
                     )
                 )
                 if(exp
-                    lsprintf("%s%s%s" mant2 _PrefixForExp(exp) unit)
-                    strcat(mant2 unit)
+                    lsprintf("%s%s%s" mantText _PrefixForExp(exp) unit)
+                    strcat(mantText unit)
                 )
             )
         )

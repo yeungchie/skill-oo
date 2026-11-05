@@ -418,14 +418,14 @@ let((out in res poly)
 )
 
 ; 大坐标偏移下 toPath 的容差必须随坐标量级放大
-let((rad cos sin acc src poly back trap)
+let((rad cosV sinV acc src poly back trap)
     rad = 37.0 * 3.14159265358979323846 / 180.0
-    cos = cos(rad)
-    sin = sin(rad)
+    cosV = cos(rad)
+    sinV = sin(rad)
     foreach(p list(0.0:0.0 10.0:0.0 10.0:10.0)
         acc = tconc(acc list(
-            cos * car(p) - sin * cadr(p) + 5.0e6
-            sin * car(p) + cos * cadr(p) + 5.0e6
+            cosV * car(p) - sinV * cadr(p) + 5.0e6
+            sinV * car(p) + cosV * cadr(p) + 5.0e6
         ))
     )
     src = ycGeom::Path(car(acc) ?width 2)
@@ -449,14 +449,14 @@ let((rad cos sin acc src poly back trap)
 )
 
 ; 闭合描边环走的是 _PolyToPathRing 分支，失效门槛比开放描边更高
-let((rad cos sin acc poly back)
+let((rad cosV sinV acc poly back)
     rad = 37.0 * 3.14159265358979323846 / 180.0
-    cos = cos(rad)
-    sin = sin(rad)
+    cosV = cos(rad)
+    sinV = sin(rad)
     foreach(p list(0.0:0.0 10.0:0.0 10.0:10.0 0.0:10.0 0.0:0.0)
         acc = tconc(acc list(
-            cos * car(p) - sin * cadr(p) + 1.0e8
-            sin * car(p) + cos * cadr(p) + 1.0e8
+            cosV * car(p) - sinV * cadr(p) + 1.0e8
+            sinV * car(p) + cosV * cadr(p) + 1.0e8
         ))
     )
     poly = car(ycGeom::Path(car(acc) ?width 2)->toRegion()->polygons())

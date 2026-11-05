@@ -143,14 +143,14 @@ procedure(_SizeOrientRings(l_rings "l")  ; -> list[list[Point]]
     ;
     ; **返回**
     ;   (list[list[Point]]) - 定向后的环
-    let((max infos res)
+    let((maxArea infos res)
         foreach(ring l_rings
             let((area)
                 ring = _CollinearClean(ring _Eps(nil))
                 area = abs(_SignedArea(ring))
                 infos = tconc(infos list(ring area))
-                when(max == nil || area > max
-                    max = area
+                when(maxArea == nil || area > maxArea
+                    maxArea = area
                 )
             )
         )
@@ -159,7 +159,7 @@ procedure(_SizeOrientRings(l_rings "l")  ; -> list[list[Point]]
             let((ring area)
                 ring = car(info)
                 area = cadr(info)
-                if(area == max
+                if(area == maxArea
                     when(_SignedArea(ring) < 0.0
                         ring = reverse(ring)
                     )
