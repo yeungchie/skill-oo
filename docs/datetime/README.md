@@ -615,13 +615,13 @@ ycDateTime::Parse("2026-02-30", "%F")                   ; *Error* ycDateTime::Pa
 ### ycTimeIt <sub>`macro`</sub>
 
 ```text
-ycTimeIt(expr [ expr ... ])
+ycTimeIt([ expr ... ])
 => ycDateTime::DateTime
 ```
 
 **描述**
 
-测量被包裹表达式的运行耗时（墙钟），返回表示该时长的 `DateTime`（以 epoch 0 起算：`epoch()` 为整秒，`nanos()` 为秒内小数）。表达式按顺序求值且只求值一次，其结果被丢弃——需要保留时在体内赋值。
+测量被包裹表达式的运行耗时（墙钟），返回表示该时长的 `DateTime`（以 epoch 0 起算：`epoch()` 为整秒，`nanos()` 为秒内小数）。表达式按顺序求值且只求值一次，其结果被丢弃——需要保留时在体内赋值。省略全部表达式时只测一次 `nil`，返回约 0 的耗时。
 
 宏是**全局符号**（SKILL 的宏无法命名空间化），加载本库后直接调用，不带 `ycDateTime::` 前缀。
 
@@ -629,7 +629,7 @@ ycTimeIt(expr [ expr ... ])
 
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| expr ... | any | 被计时的表达式，至少一个 |
+| expr ... | any | 被计时的表达式；可为空，为空时测得约 0 |
 
 **返回值**
 
@@ -647,6 +647,7 @@ d = ycTimeIt(let((x)
 d->epoch()        ; => 0（示例值）
 d->format("%N")   ; => "001142979"（示例值）
 ycTimeIt(1 + 1)->nanos()   ; => 3099（示例值）
+ycTimeIt()->epoch()        ; => 0（空 body，示例值）
 
 let((n)
     n = 0

@@ -42,7 +42,13 @@ let((d)
 
 ; --- 5. errors ---
 _AssertError(lambda(() ycTimeIt(error("boom")) t)  "timeit: body errors propagate")
-_AssertError(lambda(() ycTimeIt() t)  "timeit: empty body rejected")
+
+; --- 6. empty body ---
+let((d)
+    d = ycTimeIt()
+    _Assert(d->epoch() == 0  "timeit: empty body returns zero epoch")
+    _Assert(0 <= d->nanos() && d->nanos() <= 999999999  "timeit: empty body nanos in range")
+)
 
 _TestChildDone = t
 
