@@ -14,6 +14,5 @@
   <line x1="240" y1="180" x2="240" y2="163" stroke="#6b7280" stroke-width="1"/>
   <line x1="356" y1="146" x2="352" y2="166" stroke="#6b7280" stroke-width="1"/>
 
-  <text x="392" y="190" font-family="sans-serif" font-size="12" fill="#666">miter / bevel / round</text>
-  <text x="392" y="210" font-family="sans-serif" font-size="12" fill="#666">butt / square / round</text>
+  <text x="24" y="228" font-family="sans-serif" font-size="11" fill="#666">接头 miter / bevel / round　　端帽 butt / square / round</text>
 </svg>

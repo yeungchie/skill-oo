@@ -8,15 +8,17 @@
   <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">偏移：沿单位法线各走半个宽度</text>
 
   <line x1="80" y1="160" x2="420" y2="100" stroke="#6b7280" stroke-width="2" stroke-dasharray="6 4"/>
-  <line x1="80" y1="120" x2="420" y2="60" stroke="#2563eb" stroke-width="2"/>
-  <line x1="80" y1="200" x2="420" y2="140" stroke="#2563eb" stroke-width="2"/>
+  <line x1="73" y1="121" x2="413" y2="61" stroke="#2563eb" stroke-width="2"/>
+  <line x1="87" y1="199" x2="427" y2="139" stroke="#2563eb" stroke-width="2"/>
 
-  <line x1="200" y1="140" x2="200" y2="104" stroke="#dc2626" stroke-width="1.5" marker-end="url(#an)"/>
-  <line x1="200" y1="140" x2="200" y2="176" stroke="#dc2626" stroke-width="1.5" marker-end="url(#an)"/>
+  <line x1="250" y1="130" x2="257" y2="169" stroke="#dc2626" stroke-width="1.8" marker-end="url(#an)"/>
+  <line x1="250" y1="130" x2="243" y2="91" stroke="#dc2626" stroke-width="1.8" marker-end="url(#an)"/>
 
-  <text x="208" y="100" font-family="sans-serif" font-size="12" fill="#dc2626">n = (−dy, dx) / |d|</text>
-  <text x="208" y="184" font-family="sans-serif" font-size="12" fill="#dc2626">−n</text>
-  <text x="300" y="168" font-family="sans-serif" font-size="12" fill="#6b7280">中心线</text>
-  <text x="300" y="52" font-family="sans-serif" font-size="12" fill="#2563eb">偏移 +h</text>
-  <text x="300" y="132" font-family="sans-serif" font-size="12" fill="#2563eb">偏移 −h</text>
+  <text x="236" y="86" font-family="sans-serif" font-size="12" fill="#dc2626">−n</text>
+  <text x="266" y="180" font-family="sans-serif" font-size="12" fill="#dc2626">+n</text>
+  <text x="300" y="152" font-family="sans-serif" font-size="12" fill="#6b7280">中心线</text>
+  <text x="300" y="52" font-family="sans-serif" font-size="12" fill="#2563eb">偏移 −h</text>
+  <text x="330" y="176" font-family="sans-serif" font-size="12" fill="#2563eb">偏移 +h</text>
+
+  <text x="24" y="212" font-family="sans-serif" font-size="12" fill="#666">n = (−dy, dx) / |d|，两条偏移线分别在 +h 与 −h</text>
 </svg>
