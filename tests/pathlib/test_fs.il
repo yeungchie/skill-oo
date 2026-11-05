@@ -1,9 +1,9 @@
-let((t_tmp p_base)
+let((tmp p_base)
 
-t_tmp = "ycPathlibTmpTest"
-system(strcat("rm -rf " t_tmp))
+tmp = "ycPathlibTmpTest"
+system(strcat("rm -rf " tmp))
 
-p_base = _P(t_tmp)
+p_base = _P(tmp)
 _Assert(!p_base->exists()  "fixture: clean before start")
 
 ; --- mkdir ---
@@ -47,17 +47,17 @@ let((p_f)
 )
 
 ; --- iterdir ---
-let((p_sub l_names)
+let((p_sub names)
     p_sub = p_base->join("sub")
     p_sub->mkdir()
     _AssertError(lambda(() p_base->join("hello.txt")->iterdir() t)  "iterdir: non-directory errors")
-    l_names = _Sl(p_base->iterdir())
-    _Assert(length(l_names) == 3  "iterdir: three entries")
-    _Assert(_HasStr(l_names p_base->join("hello.txt")->str())  "iterdir: includes file")
-    _Assert(_HasStr(l_names p_sub->str())  "iterdir: includes subdir")
-    _Assert(_HasStr(l_names p_base->join("a")->str())  "iterdir: includes tree")
-    _Assert(!_HasStr(l_names ".")  "iterdir: no dot entry")
-    _Assert(!_HasStr(l_names "..")  "iterdir: no dotdot entry")
+    names = _Sl(p_base->iterdir())
+    _Assert(length(names) == 3  "iterdir: three entries")
+    _Assert(_HasStr(names p_base->join("hello.txt")->str())  "iterdir: includes file")
+    _Assert(_HasStr(names p_sub->str())  "iterdir: includes subdir")
+    _Assert(_HasStr(names p_base->join("a")->str())  "iterdir: includes tree")
+    _Assert(!_HasStr(names ".")  "iterdir: no dot entry")
+    _Assert(!_HasStr(names "..")  "iterdir: no dotdot entry")
 )
 
 ; --- glob ---
@@ -133,20 +133,20 @@ let((p_f p_sub)
         "glob: file base empty")
     _AssertError(lambda(() p_base->glob("") t)  "glob: empty pattern errors")
     _AssertError(lambda(() p_base->glob("/abs/*") t)  "glob: absolute pattern errors")
-    let((l_r)
-        l_r = errset(_Sl(p_base->glob("a**")) nil)
-        _Assert(l_r  "glob: partial ** does not error")
-        when(l_r
-            _AssertSameStrs(car(l_r)
+    let((r)
+        r = errset(_Sl(p_base->glob("a**")) nil)
+        _Assert(r  "glob: partial ** does not error")
+        when(r
+            _AssertSameStrs(car(r)
                 list(p_base->join("a")->str())
                 "glob: partial ** acts as single star")
         )
     )
-    let((l_r)
-        l_r = errset(_Sl(p_base->glob("**txt")) nil)
-        _Assert(l_r  "glob: leading partial ** does not error")
-        when(l_r
-            _AssertSameStrs(car(l_r)
+    let((r)
+        r = errset(_Sl(p_base->glob("**txt")) nil)
+        _Assert(r  "glob: leading partial ** does not error")
+        when(r
+            _AssertSameStrs(car(r)
                 list(p_base->join("hello.txt")->str())
                 "glob: leading partial ** acts as single star")
         )
@@ -235,10 +235,10 @@ let((p_wd)
     _Assert(p_wd->exists()  "cwd: exists")
     _Assert(p_wd->str() == _S(getWorkingDir())  "cwd: matches getWorkingDir")
 )
-let((t_home)
-    t_home = getShellEnvVar("HOME")
-    when(stringp(t_home) && t_home != ""
-        _Assert(ycPathLib::Home()->str() == _S(t_home)  "home: matches HOME env")
+let((home)
+    home = getShellEnvVar("HOME")
+    when(stringp(home) && home != ""
+        _Assert(ycPathLib::Home()->str() == _S(home)  "home: matches HOME env")
     )
 )
 
@@ -305,7 +305,7 @@ let((p_src p_dst)
 ; touch() now shells out to touch(1) (like rename uses mv).
 ; system("sleep 1.1") avoids a false pass from whole-second mtime resolution;
 ; SKILL has no sleep builtin, so this shells out like the rm/ln calls above.
-let((p_t t_before t_after)
+let((p_t before after)
     p_t = p_base->join("touched.txt")
     p_t->touch()
     _Assert(p_t->exists() && p_t->isFile()  "touch: creates file")
@@ -313,11 +313,11 @@ let((p_t t_before t_after)
     p_t->touch()
     _Assert(p_t->readText() == "keep"  "touch: preserves content")
     _AssertError(lambda(() p_base->touch() t)  "touch: directory errors")
-    t_before = p_t->mtime()
+    before = p_t->mtime()
     system("sleep 1.1")
     p_t->touch()
-    t_after = p_t->mtime()
-    _Assert(t_after > t_before  "touch: updates mtime of existing file (CPython updates)")
+    after = p_t->mtime()
+    _Assert(after > before  "touch: updates mtime of existing file (CPython updates)")
     _Assert(p_t->readText() == "keep"  "touch: content preserved after mtime bump")
 )
 when(isFileName("/proc/version")
@@ -327,11 +327,11 @@ when(isFileName("/proc/version")
 )
 
 ; --- open ---
-let((g_port)
-    g_port = p_base->join("hello.txt")->open(?mode "r")
-    _Assert(className(g_port) == 'ycIO::Port  "open: read mode returns ycIO::Port")
-    when(g_port
-        g_port->close()
+let((port)
+    port = p_base->join("hello.txt")->open(?mode "r")
+    _Assert(className(port) == 'ycIO::Port  "open: read mode returns ycIO::Port")
+    when(port
+        port->close()
     )
     _AssertError(lambda(() p_base->join("hello.txt")->open(?mode "b") t)  "open: invalid mode errors")
     _AssertError(lambda(() p_base->join("missing.txt")->open(?mode "r") t)  "open: missing file errors")
@@ -430,13 +430,13 @@ let((p_tfile p_tdir p_link p_moved p_dirlnk p_broken)
 ; CPython Path.stat().st_size on a directory is a number (real dir size).
 ; size() only checks exists(), which is also true for directories, so the
 ; call returns the directory's real byte size (a number).
-let((l_r)
-    l_r = errset(p_base->size() nil)
-    _Assert(l_r && numberp(car(l_r))  "size: directory returns a number (CPython stat().st_size)")
+let((r)
+    r = errset(p_base->size() nil)
+    _Assert(r && numberp(car(r))  "size: directory returns a number (CPython stat().st_size)")
 )
 
 ; --- cleanup ---
-system(strcat("rm -rf " t_tmp))
+system(strcat("rm -rf " tmp))
 _Assert(!p_base->exists()  "fixture: cleanup")
 
 )  ; end let

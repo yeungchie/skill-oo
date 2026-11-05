@@ -14,59 +14,59 @@ procedure(_FnmatchBracket(t_pattern n_open n_len "txx")  ; -> (str, int)
     ; **返回**
     ;   (str, int) - 二元组 (正则串, 段后 1-based 位置)：支持 "!" 取反与段内元字符转义；
     ;                无闭合 "]" 时正则按字面 "[" 转义为 \[，位置回到 n_open + 1
-    let((n_j g_stop t_stuff g_neg t_out n_k t_ch)
-        n_j = n_open + 1
-        when(n_j <= n_len
-            when(substring(t_pattern n_j 1) == "!"
-                n_j++
+    let((j stop stuff neg out k ch)
+        j = n_open + 1
+        when(j <= n_len
+            when(substring(t_pattern j 1) == "!"
+                j++
             )
         )
-        when(n_j <= n_len
-            when(substring(t_pattern n_j 1) == "]"
-                n_j++
+        when(j <= n_len
+            when(substring(t_pattern j 1) == "]"
+                j++
             )
         )
-        while(!g_stop
+        while(!stop
             cond(
-                (n_j > n_len
-                    g_stop = t
+                (j > n_len
+                    stop = t
                 )
-                (substring(t_pattern n_j 1) == "]"
-                    g_stop = t
+                (substring(t_pattern j 1) == "]"
+                    stop = t
                 )
-                (t n_j = n_j + 1)
+                (t j = j + 1)
             )
         )
-        if(n_j > n_len
+        if(j > n_len
             list("\\[" n_open + 1)
-            let((l_res)
-                t_stuff = substring(t_pattern n_open + 1 n_j - n_open - 1)
-                when(substring(t_stuff 1 1) == "!"
-                    g_neg = t
-                    t_stuff = substring(t_stuff 2 length(t_stuff) - 1)
+            let((res)
+                stuff = substring(t_pattern n_open + 1 j - n_open - 1)
+                when(substring(stuff 1 1) == "!"
+                    neg = t
+                    stuff = substring(stuff 2 length(stuff) - 1)
                 )
-                t_out = ""
-                n_k = 1
-                while(n_k <= length(t_stuff)
-                    t_ch = substring(t_stuff n_k 1)
-                    t_out = strcat(t_out
-                        if(index("\\&~|" t_ch)
-                            strcat("\\" t_ch)
-                            t_ch
+                out = ""
+                k = 1
+                while(k <= length(stuff)
+                    ch = substring(stuff k 1)
+                    out = strcat(out
+                        if(index("\\&~|" ch)
+                            strcat("\\" ch)
+                            ch
                         )
                     )
-                    n_k++
+                    k++
                 )
-                unless(t_out == ""
-                    when(index("^[]" substring(t_out 1 1))
-                        t_out = strcat("\\" t_out)
+                unless(out == ""
+                    when(index("^[]" substring(out 1 1))
+                        out = strcat("\\" out)
                     )
                 )
-                l_res = list(
-                    lsprintf("%s%s]" if(g_neg "[^" "[") t_out)
-                    n_j + 1
+                res = list(
+                    lsprintf("%s%s]" if(neg "[^" "[") out)
+                    j + 1
                 )
-                l_res
+                res
             )
         )
     )
@@ -80,38 +80,38 @@ procedure(_FnmatchToPcre(t_pattern "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 供 ^...\z 全串匹配使用的正则；其余正则元字符逐个加反斜杠转义
-    let((t_res n_i n_len t_c)
-        t_res = ""
-        n_i = 1
-        n_len = length(t_pattern)
-        while(n_i <= n_len
-            t_c = substring(t_pattern n_i 1)
-            n_i++
-            case(t_c
+    let((res i len c)
+        res = ""
+        i = 1
+        len = length(t_pattern)
+        while(i <= len
+            c = substring(t_pattern i 1)
+            i++
+            case(c
                 ("*"
-                    t_res = strcat(t_res "[^/]*")
+                    res = strcat(res "[^/]*")
                 )
                 ("?"
-                    t_res = strcat(t_res "[^/]")
+                    res = strcat(res "[^/]")
                 )
                 ("["
-                    let((t_br)
-                        t_br = _FnmatchBracket(t_pattern n_i - 1 n_len)
-                        t_res = strcat(t_res car(t_br))
-                        n_i = car(cdr(t_br))
+                    let((br)
+                        br = _FnmatchBracket(t_pattern i - 1 len)
+                        res = strcat(res car(br))
+                        i = car(cdr(br))
                     )
                 )
                 (t
-                    t_res = strcat(t_res
-                        if(index("\\^$.+()[]{}|" t_c)
-                            strcat("\\" t_c)
-                            t_c
+                    res = strcat(res
+                        if(index("\\^$.+()[]{}|" c)
+                            strcat("\\" c)
+                            c
                         )
                     )
                 )
             )
         )
-        t_res
+        res
     )
 )
 
@@ -150,18 +150,18 @@ procedure(_AllMatchp(l_names l_comps "ll")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 等长且逐段 _Fnmatch1 全通过返回 t；长度不同或任一段不匹配返回 nil
-    let((g_ok l_rest)
-        g_ok = length(l_names) == length(l_comps)
-        l_rest = l_names
-        when(g_ok
-            foreach(t_c l_comps
-                when(g_ok
-                    g_ok = l_rest != nil && _Fnmatch1(car(l_rest) t_c)
-                    l_rest = cdr(l_rest)
+    let((ok rest)
+        ok = length(l_names) == length(l_comps)
+        rest = l_names
+        when(ok
+            foreach(c l_comps
+                when(ok
+                    ok = rest != nil && _Fnmatch1(car(rest) c)
+                    rest = cdr(rest)
                 )
             )
         )
-        g_ok
+        ok
     )
 )
 
@@ -174,11 +174,11 @@ procedure(_SuffixMatchp(l_names l_comps "ll")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - l_comps 不长于 l_names 且右对齐逐段匹配返回 t；否则返回 nil
-    let((n_len n_comp)
-        n_len = length(l_names)
-        n_comp = length(l_comps)
-        unless(n_comp > n_len
-            _AllMatchp(_DropFirstN(l_names n_len - n_comp) l_comps)
+    let((len comp)
+        len = length(l_names)
+        comp = length(l_comps)
+        unless(comp > len
+            _AllMatchp(_DropFirstN(l_names len - comp) l_comps)
         )
     )
 )

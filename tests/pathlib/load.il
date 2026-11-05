@@ -3,29 +3,29 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-let((t_res t_self t_dir)
-    t_res = errset(get_filename(piport) nil)
-    t_self = when(t_res && car(t_res) && stringp(car(t_res)) && car(t_res) != ""
-        car(t_res)
+let((res path dir)
+    res = errset(get_filename(piport) nil)
+    path = when(res && car(res) && stringp(car(res)) && car(res) != ""
+        car(res)
     )
-    unless(t_self
+    unless(path
         error("ycPathLib: can't determine the current file - load this file with an explicit path")
     )
-    unless(pcreMatchp("^[~/]|^\\.{1,2}/" t_self)
-        t_self = strcat("./" t_self)
+    unless(pcreMatchp("^[~/]|^\\.{1,2}/" path)
+        path = strcat("./" path)
     )
-    t_dir = simplifyFilename(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") t_self "" 0) t)
-    unless(pcreMatchp("/$" t_dir)
-        t_dir = strcat(t_dir "/")
+    dir = simplifyFilename(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") path "" 0) t)
+    unless(pcreMatchp("/$" dir)
+        dir = strcat(dir "/")
     )
     unless(findNamespace("ycNamespace")
-        loadi(strcat(t_dir "../../libs/registry.il"))
+        loadi(strcat(dir "../../libs/registry.il"))
     )
     if(findNamespace("ycPathLib") == nil
-        loadi(strcat(t_dir "../../libs/pathlib/load.il"))
+        loadi(strcat(dir "../../libs/pathlib/load.il"))
         printf("ycPathLib: re-running tests with previously loaded code; restart CIW if you edited libs/pathlib/src/\n")
     )
-    _TestPathlibDir = t_dir
+    _TestPathlibDir = dir
 )
 
 ycNamespace:::Require("ycIO")

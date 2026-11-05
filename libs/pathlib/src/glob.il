@@ -9,14 +9,14 @@ procedure(_CollapseStars(l_segs "l")  ; -> list[str] | nil
     ;
     ; **返回**
     ;   (list[str]|nil) - 折叠后的段列表；空入参返回 nil
-    let((l_res t_prev)
-        foreach(t_s l_segs
-            unless(t_s == "**" && t_prev == "**"
-                l_res = tconc(l_res t_s)
-                t_prev = t_s
+    let((res prev)
+        foreach(item l_segs
+            unless(item == "**" && prev == "**"
+                res = tconc(res item)
+                prev = item
             )
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -28,17 +28,17 @@ procedure(_GlobDirs(g_dir "g")  ; -> list[Path]
     ;
     ; **返回**
     ;   (list[Path]) - g_dir 自身及全部真实子目录（深度递归）；符号链接目录不进入也不列出
-    let((l_res)
-        l_res = list(g_dir)
-        foreach(t_s _DirNames(g_dir->str())
+    let((res)
+        res = list(g_dir)
+        foreach(item _DirNames(g_dir->str())
             let((p_sub)
-                p_sub = g_dir->join(t_s)
+                p_sub = g_dir->join(item)
                 when(p_sub->isDir() && !p_sub->isSymlink()
-                    l_res = append(l_res _GlobDirs(p_sub))
+                    res = append(res _GlobDirs(p_sub))
                 )
             )
         )
-        l_res
+        res
     )
 )
 
@@ -50,18 +50,18 @@ procedure(_GlobTree(g_dir "g")  ; -> list[Path]
     ;
     ; **返回**
     ;   (list[Path]) - g_dir 自身与全部条目；真实目录递归进入，符号链接目录只产出条目不进入
-    let((l_res)
-        l_res = list(g_dir)
-        foreach(t_s _DirNames(g_dir->str())
+    let((res)
+        res = list(g_dir)
+        foreach(item _DirNames(g_dir->str())
             let((p_sub)
-                p_sub = g_dir->join(t_s)
+                p_sub = g_dir->join(item)
                 if(p_sub->isDir() && !p_sub->isSymlink()
-                    l_res = append(l_res _GlobTree(p_sub))
-                    l_res = append(l_res list(p_sub))
+                    res = append(res _GlobTree(p_sub))
+                    res = append(res list(p_sub))
                 )
             )
         )
-        l_res
+        res
     )
 )
 
@@ -75,33 +75,33 @@ procedure(_GlobChain(g_dir l_segs "gl")  ; -> list[Path] | nil
     ; **返回**
     ;   (list[Path]|nil) - 匹配路径列表（终端段产出匹配条目；终端 "**" 与 "" 锚点另含 g_dir 自身；
     ;                      非终端段仅沿目录递归）；无匹配返回 nil
-    let((t_first l_rest l_res)
-        t_first = car(l_segs)
-        l_rest = cdr(l_segs)
-        case(t_first
+    let((first rest res)
+        first = car(l_segs)
+        rest = cdr(l_segs)
+        case(first
             ((nil "")
-                l_res = list(g_dir)
+                res = list(g_dir)
             )
             (".."
-                l_res = _GlobChain(g_dir->join("..") l_rest)
+                res = _GlobChain(g_dir->join("..") rest)
             )
             ("**"
-                if(l_rest == nil
-                    l_res = _GlobTree(g_dir)
+                if(rest == nil
+                    res = _GlobTree(g_dir)
                     foreach(p_sp _GlobDirs(g_dir)
-                        l_res = append(l_res _GlobChain(p_sp l_rest))
+                        res = append(res _GlobChain(p_sp rest))
                     )
                 )
             )
             (t
-                foreach(t_s _DirNames(g_dir->str())
-                    when(_Fnmatch1(t_s t_first)
+                foreach(item _DirNames(g_dir->str())
+                    when(_Fnmatch1(item first)
                         let((p_child)
-                            p_child = g_dir->join(t_s)
-                            if(l_rest == nil
-                                l_res = cons(p_child l_res)
+                            p_child = g_dir->join(item)
+                            if(rest == nil
+                                res = cons(p_child res)
                                 when(p_child->isDir()
-                                    l_res = append(l_res _GlobChain(p_child l_rest))
+                                    res = append(res _GlobChain(p_child rest))
                                 )
                             )
                         )
@@ -109,7 +109,7 @@ procedure(_GlobChain(g_dir l_segs "gl")  ; -> list[Path] | nil
                 )
             )
         )
-        l_res
+        res
     )
 )
 
@@ -123,29 +123,29 @@ procedure(_GlobPattern(g_base t_pattern "gt")  ; -> list[Path] | nil
     ; **返回**
     ;   (list[Path]|nil) - 按字符串去重的匹配列表（顺序未定义）；g_base 非目录或无匹配返回 nil；绝对 pattern 抛
     ;                      "ycPathLib: non-relative patterns are unsupported"；解析后无有效段（如 ""、"."）抛 "ycPathLib: unacceptable pattern"
-    let((l_parse l_segs)
+    let((parse segs)
         when(pcreMatchp("^/" t_pattern)
             error("ycPathLib: non-relative patterns are unsupported")
         )
-        l_parse = _ParsePath(t_pattern)
-        l_segs = cdr(l_parse)
-        when(l_segs == nil
+        parse = _ParsePath(t_pattern)
+        segs = cdr(parse)
+        when(segs == nil
             error("ycPathLib: unacceptable pattern: '%s'" t_pattern)
         )
         when(_EndsWith(t_pattern "/")
-            l_segs = append(l_segs list(""))
+            segs = append(segs list(""))
         )
-        l_segs = _CollapseStars(l_segs)
+        segs = _CollapseStars(segs)
         when(g_base->isDir()
-            let((l_res g_seen)
-                g_seen = makeTable("globSeen" nil)
-                foreach(p _GlobChain(g_base l_segs)
-                    unless(g_seen[p->str()]
-                        g_seen[p->str()] = t
-                        l_res = tconc(l_res p)
+            let((res seen)
+                seen = makeTable("globSeen" nil)
+                foreach(p _GlobChain(g_base segs)
+                    unless(seen[p->str()]
+                        seen[p->str()] = t
+                        res = tconc(res p)
                     )
                 )
-                car(l_res)
+                car(res)
             )
         )
     )
@@ -176,13 +176,13 @@ self->iterdir = lambda(()  ; -> list[Path] | nil
     ;
     ; **返回**
     ;   (list[Path]|nil) - 空目录返回 nil；非目录走 _error() 中断；含点开头名与子目录，顺序未定义
-    let((t_str)
-        t_str = self->str()
+    let((str)
+        str = self->str()
         unless(self->isDir()
-            _error("iterdir" "not a directory: '%s'" t_str)
+            _error("iterdir" "not a directory: '%s'" str)
         )
         mapcar(lambda((t_s "t") self->join(t_s))
-            _DirNames(t_str)
+            _DirNames(str)
         )
     )
 )

@@ -45,11 +45,11 @@ self->suffix = lambda(()  ; -> str
     ; **返回**
     ;   (str) - 最后一个 "." 既非首字符也非末字符时返回自该点起的后缀，否则返回 ""；
     ;           如 ".bashrc"（最后一个 "." 即首字符）返回 ""，"..foo"（最后一个 "." 在位置 2）返回 ".foo"
-    let((t_name n_idx)
-        t_name = self->name()
-        n_idx = _DotIndex(t_name)
-        if(n_idx && n_idx > 1 && n_idx < length(t_name)
-            substring(t_name n_idx)
+    let((name2 idx)
+        name2 = self->name()
+        idx = _DotIndex(name2)
+        if(idx && idx > 1 && idx < length(name2)
+            substring(name2 idx)
             ""
         )
     )
@@ -60,12 +60,12 @@ self->stem = lambda(()  ; -> str
     ;
     ; **返回**
     ;   (str) - 有后缀时返回后缀之前的部分；无有效后缀时返回整个名称
-    let((t_name n_idx)
-        t_name = self->name()
-        n_idx = _DotIndex(t_name)
-        if(n_idx && n_idx > 1 && n_idx < length(t_name)
-            substring(t_name 1 n_idx - 1)
-            t_name
+    let((name2 idx)
+        name2 = self->name()
+        idx = _DotIndex(name2)
+        if(idx && idx > 1 && idx < length(name2)
+            substring(name2 1 idx - 1)
+            name2
         )
     )
 )
@@ -76,11 +76,11 @@ self->suffixes = lambda(()  ; -> list[str]
     ; **返回**
     ;   (list[str]|nil) - 如 (".tar" ".gz")；无后缀返回 nil（"foo."、".bashrc"、
     ;                     "x.y." 均是）；"a..b" 返回 ("." ".b")
-    let((t_name)
-        t_name = self->name()
-        unless(t_name == "" || _EndsWith(t_name ".")
+    let((name2)
+        name2 = self->name()
+        unless(name2 == "" || _EndsWith(name2 ".")
             mapcar(lambda((t_s "t") strcat("." t_s))
-                cdr(_SplitKeep(_LstripDots(t_name) "."))
+                cdr(_SplitKeep(_LstripDots(name2) "."))
             )
         )
     )
@@ -102,13 +102,13 @@ self->parents = lambda(()  ; -> list[Path]
     ;
     ; **返回**
     ;   (list[Path]|nil) - 如 ("a/b" "a" ".")；"." 与根返回 nil
-    let((l_res l_parts)
-        l_parts = self->_data->parts
-        while(l_parts
-            l_parts = _DropLast(l_parts)
-            l_res = tconc(l_res _MkPath(self->_data->anchor l_parts))
+    let((res parts2)
+        parts2 = self->_data->parts
+        while(parts2
+            parts2 = _DropLast(parts2)
+            res = tconc(res _MkPath(self->_data->anchor parts2))
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -140,24 +140,24 @@ self->join = lambda((\@rest l_args "g")  ; -> Path
     ;
     ; **返回**
     ;   (Path) - 拼接结果（按规范串驻留）；零段返回按驻留规则复用的等价实例
-    let((t_anchor l_parts l_parse p_seg)
-        t_anchor = self->_data->anchor
-        l_parts = self->_data->parts
-        foreach(g_seg l_args
-            p_seg = _AsPath(g_seg)
+    let((anchor2 parts2 parse p_seg)
+        anchor2 = self->_data->anchor
+        parts2 = self->_data->parts
+        foreach(seg l_args
+            p_seg = _AsPath(seg)
             unless(p_seg
-                _error("join" "expected string or Path, got %A" g_seg)
+                _error("join" "expected string or Path, got %A" seg)
             )
-            l_parse = _ParsePath(p_seg->str())
-            when(car(l_parse) == "/"
-                t_anchor = "/"
-                l_parts = cdr(l_parse)
+            parse = _ParsePath(p_seg->str())
+            when(car(parse) == "/"
+                anchor2 = "/"
+                parts2 = cdr(parse)
             )
-            unless(car(l_parse) == "/"
-                l_parts = append(l_parts cdr(l_parse))
+            unless(car(parse) == "/"
+                parts2 = append(parts2 cdr(parse))
             )
         )
-        _MkPath(t_anchor l_parts)
+        _MkPath(anchor2 parts2)
     )
 )
 
@@ -215,9 +215,9 @@ self->withName = lambda((t_name "t")  ; -> Path
     ; **返回**
     ;   (Path) - 替换后的路径；新名为空、含 "/"、等于 "."，或 self 无名
     ;            （"."、"/"），均走 _error() 中断
-    let((t_old)
-        t_old = self->name()
-        when(t_old == ""
+    let((old)
+        old = self->name()
+        when(old == ""
             _error("withName" "%s has an empty name" self->str())
         )
         unless(t_name != "" && index(t_name "/") == nil && t_name != "."
@@ -238,9 +238,9 @@ self->withSuffix = lambda((t_suffix "t")  ; -> Path
     ; **返回**
     ;   (Path) - 替换后的路径；self 无名，或非空且不以 "." 开头、等于 "."、
     ;            含 "/"，均走 _error() 中断
-    let((t_name)
-        t_name = self->name()
-        when(t_name == ""
+    let((name2)
+        name2 = self->name()
+        when(name2 == ""
             _error("withSuffix" "%s has an empty name" self->str())
         )
         unless(t_suffix == ""
@@ -262,34 +262,34 @@ self->match = lambda((t_pattern "t")  ; -> t | nil
     ;   (t|nil) - 以 "/" 开头要求锚相等并整路径部件比较（root-only 路径例外，
     ;             "/" 可与 "**" 对齐），否则右对齐到部件边界比较；匹配返回 t、不匹配返回 nil；
     ;             pattern 相对（锚为空）且解析后无部件（"."、""）时走 _error() 中断（"/" 有锚不触发）
-    let((l_parse t_anchor l_parts g_ok)
-        l_parse = _ParsePath(t_pattern)
-        t_anchor = car(l_parse)
-        l_parts = cdr(l_parse)
-        when(t_anchor == "" && l_parts == nil
+    let((parse anchor2 parts2 ok)
+        parse = _ParsePath(t_pattern)
+        anchor2 = car(parse)
+        parts2 = cdr(parse)
+        when(anchor2 == "" && parts2 == nil
             _error("match" "empty pattern")
         )
-        if(t_anchor == "/"
-            when(self->_data->anchor == t_anchor
-                g_ok = if(length(self->_data->parts) == length(l_parts)
-                    _AllMatchp(self->_data->parts l_parts)
-                    when(self->_data->parts == nil && length(l_parts) == 1
-                        _CanMatchEmpty(car(l_parts))
+        if(anchor2 == "/"
+            when(self->_data->anchor == anchor2
+                ok = if(length(self->_data->parts) == length(parts2)
+                    _AllMatchp(self->_data->parts parts2)
+                    when(self->_data->parts == nil && length(parts2) == 1
+                        _CanMatchEmpty(car(parts2))
                     )
                 )
             )
-            let((t_path)
-                t_path = self->_data->parts
+            let((path)
+                path = self->_data->parts
                 when(self->_data->anchor == "/"
-                    t_path = cons("" t_path)
+                    path = cons("" path)
                 )
-                when(t_path == nil
-                    t_path = list("")
+                when(path == nil
+                    path = list("")
                 )
-                g_ok = _SuffixMatchp(t_path l_parts)
+                ok = _SuffixMatchp(path parts2)
             )
         )
-        g_ok
+        ok
     )
 )
 
@@ -299,27 +299,27 @@ self->expandUser = lambda(()  ; -> Path
     ; **返回**
     ;   (Path) - "~" 与 "~/..." 展开为 HOME；绝对路径、"." 及普通路径返回自身；
     ;            "~other" 形式、HOME 未设置或为空串，走 _error() 中断
-    let((t_first)
-        t_first = self->_data->parts && car(self->_data->parts)
+    let((first)
+        first = self->_data->parts && car(self->_data->parts)
         cond(
             (self->isAbsolute() || self->_data->parts == nil
                 self
             )
-            (t_first == "~"
-                let((t_home l_rest)
-                    t_home = getShellEnvVar("HOME")
-                    when(t_home == nil || t_home == ""
+            (first == "~"
+                let((home rest)
+                    home = getShellEnvVar("HOME")
+                    when(home == nil || home == ""
                         _error("expandUser" "home directory is not known")
                     )
-                    l_rest = cdr(self->_data->parts)
-                    if(l_rest == nil
-                        Path(t_home)
-                        Path(lsprintf("%s/%s" t_home buildString(l_rest "/")))
+                    rest = cdr(self->_data->parts)
+                    if(rest == nil
+                        Path(home)
+                        Path(lsprintf("%s/%s" home buildString(rest "/")))
                     )
                 )
             )
-            (t_first && substring(t_first 1 1) == "~"
-                _error("expandUser" "user home directories are not supported: '%s'" t_first)
+            (first && substring(first 1 1) == "~"
+                _error("expandUser" "user home directories are not supported: '%s'" first)
             )
             (t
                 self

@@ -11,13 +11,13 @@ procedure(_Sl(l_list "g")  ; -> list of str
 )
 
 procedure(_HasStr(l_list t_str "lt")  ; -> t | nil
-    let((g_found)
-        foreach(t_s l_list
-            when(t_s == t_str
-                g_found = t
+    let((found)
+        foreach(item l_list
+            when(item == t_str
+                found = t
             )
         )
-        g_found
+        found
     )
 )
 

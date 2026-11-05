@@ -20,14 +20,14 @@ procedure(_AsPath(g_x "g")  ; -> Path | nil
     ; **返回**
     ;   (Path|nil) - 解析结果按规范串驻留返回 Path；g_x 非 string 且 ->str()
     ;                失败或结果非 string 时返回 nil
-    let((t_s l_parse)
+    let((item parse)
         if(stringp(g_x)
-            t_s = g_x
-            t_s = car(errset(g_x->str() nil))
+            item = g_x
+            item = car(errset(g_x->str() nil))
         )
-        when(stringp(t_s)
-            l_parse = _ParsePath(t_s)
-            _MkPath(car(l_parse) cdr(l_parse))
+        when(stringp(item)
+            parse = _ParsePath(item)
+            _MkPath(car(parse) cdr(parse))
         )
     )
 )
@@ -74,13 +74,13 @@ procedure(_MkPath(t_anchor l_parts "tl")  ; -> Path
     ; **返回**
     ;   (Path) - 按规范串查 _PathCache：命中即复用，未命中新建登记；
     ;            超过 _PathCacheCap 条整表清空重计（丢共享只弱化 == 快路径，不改正确性）
-    let((t_key hit)
-        t_key = _PathKey(t_anchor l_parts)
-        hit = _PathCache[t_key]
+    let((key hit)
+        key = _PathKey(t_anchor l_parts)
+        hit = _PathCache[key]
         when(hit == nil
             hit = makeInstance('Path ?_data
                 makeInstance('_PathData ?anchor t_anchor ?parts l_parts))
-            _PathCache[t_key] = hit
+            _PathCache[key] = hit
             _PathCacheN++
             when(_PathCacheN > _PathCacheCap
                 _PathCache = makeTable("pathCache" nil)
@@ -144,15 +144,15 @@ procedure(_DotIndex(t_name "t")  ; -> int | nil
     ;
     ; **返回**
     ;   (int|nil) - 最后一个 "." 的 1-based 位置；没有 "." 返回 nil
-    let((n_found n_i)
-        n_i = 1
-        while(n_i <= length(t_name)
-            when(substring(t_name n_i 1) == "."
-                n_found = n_i
+    let((found i)
+        i = 1
+        while(i <= length(t_name)
+            when(substring(t_name i 1) == "."
+                found = i
             )
-            n_i++
+            i++
         )
-        n_found
+        found
     )
 )
 
@@ -164,14 +164,14 @@ procedure(_LstripDots(t_str "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 自首个非 "." 字符起的后缀；空串或全为 "." 返回 ""
-    let((n_i)
-        n_i = 1
-        while(n_i <= length(t_str) && substring(t_str n_i 1) == "."
-            n_i++
+    let((i)
+        i = 1
+        while(i <= length(t_str) && substring(t_str i 1) == "."
+            i++
         )
-        if(n_i > length(t_str)
+        if(i > length(t_str)
             ""
-            substring(t_str n_i)
+            substring(t_str i)
         )
     )
 )
@@ -185,21 +185,21 @@ procedure(_SplitKeep(t_str t_sep "tt")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]) - 含首尾空字段的字段列表；空串返回单元素 ("")
-    let((l_res t_cur n_i n_len)
-        t_cur = ""
-        n_len = length(t_str)
-        n_i = 1
-        while(n_i <= n_len
-            when(substring(t_str n_i 1) == t_sep
-                l_res = tconc(l_res t_cur)
-                t_cur = ""
+    let((res cur i len)
+        cur = ""
+        len = length(t_str)
+        i = 1
+        while(i <= len
+            when(substring(t_str i 1) == t_sep
+                res = tconc(res cur)
+                cur = ""
             )
-            unless(substring(t_str n_i 1) == t_sep
-                t_cur = strcat(t_cur substring(t_str n_i 1))
+            unless(substring(t_str i 1) == t_sep
+                cur = strcat(cur substring(t_str i 1))
             )
-            n_i++
+            i++
         )
-        car(tconc(l_res t_cur))
+        car(tconc(res cur))
     )
 )
 
@@ -212,12 +212,12 @@ procedure(_EndsWith(t_str t_suf "tt")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 后缀匹配返回 t；t_suf 为空串返回 t；不匹配返回 nil
-    let((n_ls n_rs)
-        n_ls = length(t_str)
-        n_rs = length(t_suf)
-        if(n_rs == 0
+    let((ls rs)
+        ls = length(t_str)
+        rs = length(t_suf)
+        if(rs == 0
             t
-            n_rs <= n_ls && substring(t_str n_ls - n_rs + 1 n_rs) == t_suf
+            rs <= ls && substring(t_str ls - rs + 1 rs) == t_suf
         )
     )
 )
@@ -231,13 +231,13 @@ procedure(_StrMember(t_str l_list "tl")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 找到相等元素返回 t，否则返回 nil
-    let((g_found)
-        foreach(t_s l_list
-            when(t_s == t_str
-                g_found = t
+    let((found)
+        foreach(item l_list
+            when(item == t_str
+                found = t
             )
         )
-        g_found
+        found
     )
 )
 

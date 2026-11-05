@@ -25,10 +25,10 @@ procedure(_DirNames(t_dir "t")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]|nil) - 目录存在且非空返回条目名列表；空目录或路径不是目录返回 nil
-    let((t_fs)
-        t_fs = _FsName(t_dir)
-        when(isDir(t_fs)
-            setof(t_s getDirFiles(t_fs) t_s != "." && t_s != "..")
+    let((fs)
+        fs = _FsName(t_dir)
+        when(isDir(fs)
+            setof(t_s getDirFiles(fs) t_s != "." && t_s != "..")
         )
     )
 )
@@ -114,12 +114,12 @@ self->size = lambda(()  ; -> int
     ;
     ; **返回**
     ;   (int) - 文件字节数；目录返回目录自身字节数；目标不存在（含 broken symlink）走 _error() 中断
-    let((t_str)
-        t_str = self->str()
+    let((str)
+        str = self->str()
         unless(self->exists()
-            _error("size" "no such file: %s" t_str)
+            _error("size" "no such file: %s" str)
         )
-        fileLength(_FsName(t_str))
+        fileLength(_FsName(str))
     )
 )
 
@@ -128,16 +128,16 @@ self->mtime = lambda(()  ; -> int
     ;
     ; **返回**
     ;   (int) - 整数秒 mtime；目标不存在（含 broken symlink）或取值为 nil 走 _error() 中断
-    let((t_str n_time)
-        t_str = self->str()
+    let((str time)
+        str = self->str()
         unless(self->exists()
-            _error("mtime" "no such file: %s" t_str)
+            _error("mtime" "no such file: %s" str)
         )
-        n_time = fileTimeModified(_FsName(t_str))
-        unless(n_time
-            _error("mtime" "no such file: %s" t_str)
+        time = fileTimeModified(_FsName(str))
+        unless(time
+            _error("mtime" "no such file: %s" str)
         )
-        n_time
+        time
     )
 )
 
@@ -151,26 +151,26 @@ self->mkdir = lambda((\@key parents existOk "gg")  ; -> t
     ;
     ; **返回**
     ;   (t) - 成功返回 t；失败走 _error() 中断（existOk 仅豁免「已存在且是目录」）
-    let((t_str)
-        t_str = self->str()
+    let((str)
+        str = self->str()
         when(self->isDir()
             unless(existOk
-                _error("mkdir" "file exists: %s" t_str)
+                _error("mkdir" "file exists: %s" str)
             )
         )
         unless(self->isDir()
             when(self->exists()
-                _error("mkdir" "file exists: %s" t_str)
+                _error("mkdir" "file exists: %s" str)
             )
             unless(self->parent()->isDir()
                 if(parents
                     self->parent()->mkdir(?parents t ?existOk existOk)
-                    _error("mkdir" "no such file or directory: %s" t_str)
+                    _error("mkdir" "no such file or directory: %s" str)
                 )
             )
-            createDir(_FsName(t_str))
-            unless(isDir(_FsName(t_str))
-                _error("mkdir" "cannot create directory: %s" t_str)
+            createDir(_FsName(str))
+            unless(isDir(_FsName(str))
+                _error("mkdir" "cannot create directory: %s" str)
             )
         )
         t
@@ -182,17 +182,17 @@ self->rmdir = lambda(()  ; -> t
     ;
     ; **返回**
     ;   (t) - 成功返回 t；目标不存在或不是目录、目录非空、删除后仍存在，均走 _error() 中断
-    let((t_str)
-        t_str = self->str()
+    let((str)
+        str = self->str()
         unless(self->isDir()
-            _error("rmdir" "not a directory: %s" t_str)
+            _error("rmdir" "not a directory: %s" str)
         )
-        when(_DirNames(t_str)
-            _error("rmdir" "directory not empty: %s" t_str)
+        when(_DirNames(str)
+            _error("rmdir" "directory not empty: %s" str)
         )
-        deleteDir(_FsName(t_str))
+        deleteDir(_FsName(str))
         when(self->isDir()
-            _error("rmdir" "cannot remove directory: %s" t_str)
+            _error("rmdir" "cannot remove directory: %s" str)
         )
         t
     )
@@ -206,19 +206,19 @@ self->unlink = lambda((\@key missingOk "g")  ; -> t
     ;
     ; **返回**
     ;   (t) - 成功返回 t；目标是真实目录或删除后仍存在走 _error() 中断；缺失时仅 missingOk 静默放行
-    let((t_str)
-        t_str = self->str()
+    let((str)
+        str = self->str()
         when(self->isDir() && !self->isSymlink()
-            _error("unlink" "is a directory: %s" t_str)
+            _error("unlink" "is a directory: %s" str)
         )
         if(self->exists() || self->isSymlink()
-            deleteFile(_FsName(t_str))
+            deleteFile(_FsName(str))
             unless(missingOk
-                _error("unlink" "no such file: %s" t_str)
+                _error("unlink" "no such file: %s" str)
             )
         )
         when(self->exists() || self->isSymlink()
-            _error("unlink" "cannot remove: %s" t_str)
+            _error("unlink" "cannot remove: %s" str)
         )
         t
     )
@@ -233,23 +233,23 @@ self->rename = lambda((g_target "g")  ; -> Path
     ; **返回**
     ;   (Path) - 目标路径对应的 Path；g_target 非 string/Path、源不存在、目标是已存在目录、
     ;            或移动后源仍存在或目标缺失，均走 _error() 中断
-    let((p_o t_src t_dst)
+    let((p_o src dst)
         p_o = _AsPath(g_target)
         unless(p_o
             _error("rename" "expected string or Path, got %A" g_target)
         )
-        t_src = self->str()
-        t_dst = p_o->str()
+        src = self->str()
+        dst = p_o->str()
         unless(self->exists() || self->isSymlink()
-            _error("rename" "no such file: '%s'" t_src)
+            _error("rename" "no such file: '%s'" src)
         )
-        unless(simplifyFilename(t_src) == simplifyFilename(t_dst)
+        unless(simplifyFilename(src) == simplifyFilename(dst)
             when(p_o->isDir()
-                _error("rename" "cannot rename '%s' to '%s'" t_src t_dst)
+                _error("rename" "cannot rename '%s' to '%s'" src dst)
             )
-            system(lsprintf("mv %s %s" ShellQuote(t_src) ShellQuote(t_dst)))
+            system(lsprintf("mv %s %s" ShellQuote(src) ShellQuote(dst)))
             when(self->exists() || self->isSymlink() || !(p_o->exists() || p_o->isSymlink())
-                _error("rename" "cannot rename '%s' to '%s'" t_src t_dst)
+                _error("rename" "cannot rename '%s' to '%s'" src dst)
             )
         )
         p_o
@@ -261,14 +261,14 @@ self->touch = lambda(()  ; -> t
     ;
     ; **返回**
     ;   (t) - 成功返回 t；目标是目录、touch 命令失败或文件未生成，走 _error() 中断
-    let((t_str n_rc)
-        t_str = self->str()
+    let((str rc)
+        str = self->str()
         when(self->isDir()
-            _error("touch" "is a directory: %s" t_str)
+            _error("touch" "is a directory: %s" str)
         )
-        n_rc = system(strcat("touch " ShellQuote(t_str)))
-        unless(n_rc == 0 && self->exists()
-            _error("touch" "cannot touch: %s" t_str)
+        rc = system(strcat("touch " ShellQuote(str)))
+        unless(rc == 0 && self->exists()
+            _error("touch" "cannot touch: %s" str)
         )
         t
     )
@@ -282,20 +282,20 @@ self->open = lambda((\@key mode("r") "t")  ; -> Port
     ;
     ; **返回**
     ;   (Port) - 端口包装；非法模式、"r" 下目标为目录或文件缺失、打开失败，均走 _error() 中断
-    let((t_str)
-        t_str = self->str()
+    let((str)
+        str = self->str()
         unless(mode == "r" || mode == "w" || mode == "a"
             _error("open" "invalid mode: '%s'" mode)
         )
         when(mode == "r"
             when(self->isDir()
-                _error("open" "is a directory: %s" t_str)
+                _error("open" "is a directory: %s" str)
             )
             unless(self->isFile()
-                _error("open" "no such file: %s" t_str)
+                _error("open" "no such file: %s" str)
             )
         )
-        ycIO:::Open(t_str ?mode mode)
+        ycIO:::Open(str ?mode mode)
     )
 )
 
@@ -304,29 +304,29 @@ self->readText = lambda(()  ; -> str
     ;
     ; **返回**
     ;   (str) - 文件全文；目标为目录、文件缺失、打开或读取失败，走 _error() 中断
-    let((t_str g_port t_line l_res g_ok)
-        t_str = self->str()
+    let((str port line res ok)
+        str = self->str()
         when(self->isDir()
-            _error("readText" "is a directory: %s" t_str)
+            _error("readText" "is a directory: %s" str)
         )
         unless(self->isFile()
-            _error("readText" "no such file: %s" t_str)
+            _error("readText" "no such file: %s" str)
         )
-        g_port = infile(_FsName(t_str))
-        unless(g_port
-            _error("readText" "cannot open: %s" t_str)
+        port = infile(_FsName(str))
+        unless(port
+            _error("readText" "cannot open: %s" str)
         )
-        g_ok = errset(
-            while(gets(t_line g_port)
-                l_res = tconc(l_res t_line)
+        ok = errset(
+            while(gets(line port)
+                res = tconc(res line)
             )
             t
         )
-        close(g_port)
-        unless(g_ok
-            _error("readText" "cannot read: %s" t_str)
+        close(port)
+        unless(ok
+            _error("readText" "cannot read: %s" str)
         )
-        buildString(car(l_res) "")
+        buildString(car(res) "")
     )
 )
 
@@ -339,19 +339,19 @@ self->writeText = lambda((t_text "t")  ; -> t
     ; **返回**
     ;   (t) - 成功返回 t；目标为目录、父目录缺失、打开或写入失败走 _error() 中断；
     ;         刷盘失败由 close 以原生错误中断（消息带系统原因，如 No space left on device）
-    let((t_str g_port g_ok)
-        t_str = self->str()
+    let((str port ok)
+        str = self->str()
         when(self->isDir()
-            _error("writeText" "is a directory: %s" t_str)
+            _error("writeText" "is a directory: %s" str)
         )
-        g_port = outfile(_FsName(t_str) "w")
-        unless(g_port
-            _error("writeText" "cannot open: %s" t_str)
+        port = outfile(_FsName(str) "w")
+        unless(port
+            _error("writeText" "cannot open: %s" str)
         )
-        g_ok = errset(fprintf(g_port "%s" t_text) t)
-        close(g_port)
-        unless(g_ok
-            _error("writeText" "cannot write: %s" t_str)
+        ok = errset(fprintf(port "%s" t_text) t)
+        close(port)
+        unless(ok
+            _error("writeText" "cannot write: %s" str)
         )
         t
     )
@@ -365,20 +365,20 @@ self->load = lambda((\@optional g_password "g")  ; -> t
     ;
     ; **返回**
     ;   (t) - 成功返回 t（原生 load 的返回值；失败按原生语义外传）
-    let((t_str)
+    let((str)
         when(g_password && !stringp(g_password)
             _error("load" "password must be a string")
         )
-        t_str = self->str()
+        str = self->str()
         when(self->isDir()
-            _error("load" "is a directory: %s" t_str)
+            _error("load" "is a directory: %s" str)
         )
         unless(self->isFile()
-            _error("load" "no such file: %s" t_str)
+            _error("load" "no such file: %s" str)
         )
         if(g_password
-            load(_FsName(t_str) g_password)
-            load(_FsName(t_str))
+            load(_FsName(str) g_password)
+            load(_FsName(str))
         )
     )
 )
@@ -391,20 +391,20 @@ self->loadi = lambda((\@optional g_password "g")  ; -> t
     ;
     ; **返回**
     ;   (t) - 成功返回 t（原生 loadi 的返回值；失败按原生语义外传）
-    let((t_str)
+    let((str)
         when(g_password && !stringp(g_password)
             _error("loadi" "password must be a string")
         )
-        t_str = self->str()
+        str = self->str()
         when(self->isDir()
-            _error("loadi" "is a directory: %s" t_str)
+            _error("loadi" "is a directory: %s" str)
         )
         unless(self->isFile()
-            _error("loadi" "no such file: %s" t_str)
+            _error("loadi" "no such file: %s" str)
         )
         if(g_password
-            loadi(_FsName(t_str) g_password)
-            loadi(_FsName(t_str))
+            loadi(_FsName(str) g_password)
+            loadi(_FsName(str))
         )
     )
 )

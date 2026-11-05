@@ -243,12 +243,12 @@ _Assert(ycPathLib::CurrentFile()->name() == "test_pure.il"  "CurrentFile: name i
 _Assert(ycPathLib::CurrentFile()->parent()->name() == "pathlib"  "CurrentFile: parent dir name")
 
 ; --- expandUser / absolute ---
-let((t_home)
-    t_home = getShellEnvVar("HOME")
-    when(stringp(t_home) && t_home != ""
-        _Assert(_P("~/x")->expandUser()->str() == _S(strcat(t_home "/x"))  "expandUser: ~/x -> HOME")
-        _Assert(_P("~")->expandUser()->str() == _S(t_home)  "expandUser: ~ -> HOME")
-        _Assert(_P("~/")->expandUser()->str() == _S(t_home)  "expandUser: ~/ -> HOME")
+let((home)
+    home = getShellEnvVar("HOME")
+    when(stringp(home) && home != ""
+        _Assert(_P("~/x")->expandUser()->str() == _S(strcat(home "/x"))  "expandUser: ~/x -> HOME")
+        _Assert(_P("~")->expandUser()->str() == _S(home)  "expandUser: ~ -> HOME")
+        _Assert(_P("~/")->expandUser()->str() == _S(home)  "expandUser: ~/ -> HOME")
     )
     _AssertError(lambda(() _P("~other")->expandUser() t)  "expandUser: ~other errors")
 )
