@@ -136,7 +136,7 @@ procedure(_TestReport(g_kitOk t_kitName n_kitSec "gtn")  ; -> t | nil
     g_kitOk
 )
 
-(defmacro _Assert (g_cond t_msg)
+defmacro(_Assert (g_cond t_msg)
     (list 'let
         (list (list 'g_kitVal nil) (list 'l_kitPerf nil))
         (list 'setq 'l_kitPerf
@@ -168,7 +168,7 @@ procedure(_TestOkResult(g_kitRes t_kitName n_kitSec "gtn")  ; -> t | nil（errse
     )
 )
 
-(defmacro _AssertOk (g_expr t_msg)
+defmacro(_AssertOk (g_expr t_msg)
     (list 'let
         (list (list 'g_kitRes nil) (list 'l_kitPerf nil))
         (list 'setq 'l_kitPerf
@@ -479,7 +479,7 @@ procedure(_TestSameRowsVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; ->
     )
 )
 
-(defmacro _AssertSameSeq (l_actual l_expected t_msg)
+defmacro(_AssertSameSeq (l_actual l_expected t_msg)
     (list 'let
         (list (list 'l_kitA nil) (list 'l_kitB nil) (list 'l_kitPerf nil))
         (list 'setq 'l_kitPerf
@@ -490,7 +490,7 @@ procedure(_TestSameRowsVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; ->
             'l_kitA 'l_kitB t_msg (list 'caddr 'l_kitPerf)))
 )
 
-(defmacro _AssertSameStrs (l_actual l_expected t_msg)
+defmacro(_AssertSameStrs (l_actual l_expected t_msg)
     (list 'let
         (list (list 'l_kitA nil) (list 'l_kitB nil) (list 'l_kitPerf nil))
         (list 'setq 'l_kitPerf
@@ -501,7 +501,7 @@ procedure(_TestSameRowsVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; ->
             'l_kitA 'l_kitB t_msg (list 'caddr 'l_kitPerf)))
 )
 
-(defmacro _AssertSameTuples (l_actual l_expected t_msg)
+defmacro(_AssertSameTuples (l_actual l_expected t_msg)
     (list 'let
         (list (list 'l_kitA nil) (list 'l_kitB nil) (list 'l_kitPerf nil))
         (list 'setq 'l_kitPerf
@@ -512,7 +512,7 @@ procedure(_TestSameRowsVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; ->
             'l_kitA 'l_kitB t_msg (list 'caddr 'l_kitPerf)))
 )
 
-(defmacro _AssertSameInts (l_actual l_expected t_msg)
+defmacro(_AssertSameInts (l_actual l_expected t_msg)
     (list 'let
         (list (list 'l_kitA nil) (list 'l_kitB nil) (list 'l_kitPerf nil))
         (list 'setq 'l_kitPerf
@@ -523,7 +523,7 @@ procedure(_TestSameRowsVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; ->
             'l_kitA 'l_kitB t_msg (list 'caddr 'l_kitPerf)))
 )
 
-(defmacro _AssertSameSpan (g_m n_start n_end t_msg)
+defmacro(_AssertSameSpan (g_m n_start n_end t_msg)
     (list 'let
         (list (list 'g_kitMatch nil) (list 'n_kitStart nil)
               (list 'n_kitEnd nil) (list 'l_kitPerf nil))
@@ -537,7 +537,7 @@ procedure(_TestSameRowsVals(l_actual l_expected t_kitName n_kitSec "lltn")  ; ->
             (list 'caddr 'l_kitPerf)))
 )
 
-(defmacro _AssertRows (l_actual l_expected t_msg)
+defmacro(_AssertRows (l_actual l_expected t_msg)
     (list 'let
         (list (list 'l_kitA nil) (list 'l_kitB nil) (list 'l_kitPerf nil))
         (list 'setq 'l_kitPerf

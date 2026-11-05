@@ -64,7 +64,7 @@ procedure(_ycWithHas(g_obj s_gf "gs")  ; -> t | nil
 
 ; ---------- macro ----------
 
-(defmacro ycWith (s_name g_expr \@rest l_body)
+defmacro(ycWith (s_name g_expr \@rest l_body)
     ; 在 with 作用域内执行代码：绑定进入钩子的返回值，退出时调用退出钩子。
     ;
     ; quasiquote 里的 let 绑定列表带初值会被读取器拆错，因此初值在体内赋值。
