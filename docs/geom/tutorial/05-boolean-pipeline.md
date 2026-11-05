@@ -35,90 +35,48 @@ Region = {P1, P2, ...}，语义是 P1 ∪ P2 ∪ ...
    └─ 6. 规范化：去重复、去共线、统一方向
 ```
 
-下面用两个交叠的正方形演示前三个阶段。为了专注于流程，示例做了两个简化：只处理两个环、每个顶点最多一条出边；完整实现还要处理多分量、多出边选择与洞。
+下面把前三个阶段各拆出一小段可运行代码，用两个交叠的正方形说明。完整流水线还要处理多分量、多出边、重叠边与洞，这些由库实现。
 
-## 5.4 拆边
+## 5.4 拆边：先求交点参数
 
-先把环拆成无向边，再对每条边求它与另一环所有边的交点参数。交点参数必须同时落在两条边上（`0 <= t <= 1` 且 `0 <= u <= 1`），否则是延长线相交，不能算。
+一条边可能被多个交点切开，所以先把所有交点参数收集起来。对边 AB 和边 CD，交点在 AB 上的参数是：
+
+```text
+t = ((C - A) × (D - C)) / ((B - A) × (D - C))
+```
+
+t 落在 `[0, 1]` 内，交点才在线段 AB 上；同一组参数在 CD 上也必须落在 `[0, 1]` 内，否则只是延长线相交。
 
 ```lisp
 ; 可运行
-procedure(_RingEdges(l_pts "l")  ; -> list[list[Point]]
-    let((res n)
-        n = length(l_pts)
-        for(i 0 n - 1
-            res = tconc(res list(nth(i l_pts)
-                nth(if(i == n - 1 0 i + 1) l_pts)))
-        )
-        car(res)
-    )
-)
-
-procedure(_SnapPt(g_p n_grid "gn")  ; -> Point
-    ycGeom::Point(list(
-        round(g_p->x() / n_grid) * n_grid
-        round(g_p->y() / n_grid) * n_grid))
-)
-
-procedure(_CutEdge(g_a g_b l_other n_grid "ggln")  ; -> list[list[Point]]
-    let((rx ry ts res prev)
+procedure(_CutT(g_a g_b g_c g_d "gggg")  ; -> float | nil
+    ; 返回边 AB 与 CD 的交点在 AB 上的参数 t；不相交返回 nil
+    let((rx ry sx sy qx qy den tt uu)
         rx = g_b->x() - g_a->x()
         ry = g_b->y() - g_a->y()
-        ts = list(0.0 1.0)
-        foreach(o l_other
-            let((sx sy qx qy den tt uu)
-                sx = cadr(o)->x() - car(o)->x()
-                sy = cadr(o)->y() - car(o)->y()
-                qx = car(o)->x() - g_a->x()
-                qy = car(o)->y() - g_a->y()
-                den = rx * sy - ry * sx
-                unless(abs(den) <= 1e-12
-                    tt = (qx * sy - qy * sx) / den
-                    uu = (qx * ry - qy * rx) / den
-                    when(tt > 0.0 && tt < 1.0 && uu >= 0.0 && uu <= 1.0
-                        ts = cons(tt ts))
-                )
-            )
+        sx = g_d->x() - g_c->x()
+        sy = g_d->y() - g_c->y()
+        qx = g_c->x() - g_a->x()
+        qy = g_c->y() - g_a->y()
+        den = rx * sy - ry * sx                  ; 平行时为 0
+        unless(abs(den) <= 1e-12
+            tt = (qx * sy - qy * sx) / den       ; 在 AB 上的参数
+            uu = (qx * ry - qy * rx) / den       ; 在 CD 上的参数
+            when(tt >= 0.0 && tt <= 1.0 && uu >= 0.0 && uu <= 1.0
+                tt)
         )
-        ts = sort(ts 'lessp)
-        prev = car(ts)
-        foreach(tt cdr(ts)
-            when(tt - prev > 1e-9
-                res = tconc(res list(
-                    _SnapPt(ycGeom::Point(list(
-                        g_a->x() + prev * rx
-                        g_a->y() + prev * ry)) n_grid)
-                    _SnapPt(ycGeom::Point(list(
-                        g_a->x() + tt * rx
-                        g_a->y() + tt * ry)) n_grid)))
-                prev = tt
-            )
-        )
-        car(res)
     )
 )
 
-procedure(_SplitAll(l_ringA l_ringB n_grid "lln")  ; -> list[list[Point]]
-    let((res)
-        foreach(e _RingEdges(l_ringA)
-            foreach(sub _CutEdge(car(e) cadr(e) _RingEdges(l_ringB) n_grid)
-                res = tconc(res sub)
-            )
-        )
-        foreach(e _RingEdges(l_ringB)
-            foreach(sub _CutEdge(car(e) cadr(e) _RingEdges(l_ringA) n_grid)
-                res = tconc(res sub)
-            )
-        )
-        car(res)
-    )
-)
+_CutT(ycGeom::Point(0:0) ycGeom::Point(4:0)
+    ycGeom::Point(2:-2) ycGeom::Point(2:2))
+; => 0.5，交点是中点
 ```
 
-两处细节：
+把一条边上的所有 t 排序，加上 0 和 1，相邻两个 t 之间就是一小段。两个细节：
 
-- **交点要吸附到网格。** 同一条交点分别从 A 的边和 B 的边算出，浮点结果可能差最后几位；不吸附，后面按端点配对就会失败。
-- **共线重叠的边要特殊处理。** 本节示例没有重叠边；完整实现会把重叠区间也当作切分参数。
+- **交点要吸附到网格。** 同一点分别从 A 的边和 B 的边算出，浮点结果可能差最后几位；不吸附，后面按端点配对会失败。
+- **共线重叠的边要特殊处理。** 重叠区间也要当作切分参数，而不是只算交点。
 
 ## 5.5 分类：看边的两侧
 
@@ -131,7 +89,8 @@ procedure(_SplitAll(l_ringA l_ringB n_grid "lln")  ; -> list[list[Point]]
 
 ```lisp
 ; 可运行
-procedure(_ResultMember(s_op g_inA g_inB "sgg")  ; -> t | nil
+procedure(_Member(s_op g_inA g_inB "sgg")  ; -> t | nil
+    ; 按运算判断一个采样点是否属于结果
     case(s_op
         ('or g_inA || g_inB)
         ('and g_inA && g_inB)
@@ -139,40 +98,50 @@ procedure(_ResultMember(s_op g_inA g_inB "sgg")  ; -> t | nil
         ('xor (g_inA && !g_inB) || (!g_inA && g_inB))
     )
 )
+```
 
-procedure(_Classify(l_edges l_ringA l_ringB s_op n_grid "lllsn")  ; -> list[list[Point]]
-    let((res delta)
-        delta = n_grid
-        foreach(e l_edges
-            let((a b dx dy len mx my nx ny left right inL inR)
-                a = car(e)
-                b = cadr(e)
-                dx = b->x() - a->x()
-                dy = b->y() - a->y()
-                len = sqrt(dx * dx + dy * dy)
-                when(len > 0.0
-                    mx = (a->x() + b->x()) / 2.0
-                    my = (a->y() + b->y()) / 2.0
-                    nx = -dy / len
-                    ny = dx / len
-                    left = ycGeom::Point(list(mx + nx * delta my + ny * delta))
-                    right = ycGeom::Point(list(mx - nx * delta my - ny * delta))
-                    inL = _ResultMember(s_op
-                        _RayInside(l_ringA left) _RayInside(l_ringB left))
-                    inR = _ResultMember(s_op
-                        _RayInside(l_ringA right) _RayInside(l_ringB right))
-                    when(inL != inR
-                        res = tconc(res if(inL list(a b) list(b a)))
-                    )
-                )
-            )
+有了归属规则，再取边两侧的采样点：
+
+```lisp
+; 可运行
+procedure(_EdgeInResult(g_a g_b l_ringA l_ringB s_op "gglls")  ; -> t | nil
+    ; 边两侧各取一个采样点；两侧归属不同，这条边就是结果边界
+    let((dx dy len mx my nx ny left right inL inR)
+        dx = g_b->x() - g_a->x()
+        dy = g_b->y() - g_a->y()
+        len = sqrt(dx * dx + dy * dy)
+        when(len > 0.0
+            mx = (g_a->x() + g_b->x()) / 2.0
+            my = (g_a->y() + g_b->y()) / 2.0
+            nx = -dy / len                       ; 单位法线
+            ny = dx / len
+            left = ycGeom::Point(list(mx + nx my + ny))
+            right = ycGeom::Point(list(mx - nx my - ny))
+            inL = _Member(s_op
+                _RayInside(l_ringA left) _RayInside(l_ringB left))
+            inR = _Member(s_op
+                _RayInside(l_ringA right) _RayInside(l_ringB right))
+            inL != inR
         )
-        car(res)
     )
 )
 ```
 
-`delta` 是采样偏移，必须**小于最小特征尺寸**：太大，采样点会跨过邻近的边；太小，又会被浮点误差淹没。示例用 `delta = n_grid`，实际实现通常取最短边的一个小比例。
+用一条并集边界试一下：
+
+```lisp
+; 可运行
+ringA = list(ycGeom::Point(0:0) ycGeom::Point(4:0)
+    ycGeom::Point(4:4) ycGeom::Point(0:4))
+ringB = list(ycGeom::Point(2:2) ycGeom::Point(6:2)
+    ycGeom::Point(6:6) ycGeom::Point(2:6))
+
+_EdgeInResult(ycGeom::Point(0:0) ycGeom::Point(4:0)
+    ringA ringB 'or)
+; => t，下方在外、上方在 A 内，是并集的边界
+```
+
+采样偏移这里取了 1 个单位，只为看清方向；实际实现取一个远小于最小特征尺寸的值。太大，采样点会跨过邻近的边；太小，又会被浮点误差淹没。
 
 ## 5.6 追踪：把有向边接成环
 
@@ -180,84 +149,58 @@ procedure(_Classify(l_edges l_ringA l_ringB s_op n_grid "lllsn")  ; -> list[list
 
 ```lisp
 ; 可运行
-procedure(_TraceLoops(l_directed n_grid "ln")  ; -> list[list[Point]]
-    let((tab order res e start cur next ring key)
+procedure(_TraceLoop(l_directed "l")  ; -> list[Point] | nil
+    ; 每条有向边按起点建索引，从第一条边出发走回起点
+    let((tab start cur next ring)
         tab = makeTable("tutorialTrace" nil)
         foreach(e l_directed
-            key = _PointKey(car(e) n_grid)
-            unless(tab[key] order = tconc(order key))
-            tab[key] = e
+            tab[_PointKey(car(e) 1.0)] = cadr(e)
         )
-        order = car(order)
-        while(order
-            start = tab[car(order)]
-            ring = tconc(nil car(start))
-            cur = cadr(start)
-            tab[_PointKey(car(start) n_grid)] = nil
-            while(_PointKey(cur n_grid) != _PointKey(car(start) n_grid)
-                ring = tconc(ring cur)
-                next = tab[_PointKey(cur n_grid)]
-                unless(next
-                    error("tutorial trace: open chain at %s" _PointKey(cur n_grid))
-                )
-                tab[_PointKey(cur n_grid)] = nil
-                cur = cadr(next)
-            )
-            res = tconc(res car(ring))
-            order = nil
-            foreach(k tab when(tab[k] order = tconc(order k)))
-            order = car(order)
+        start = car(car(l_directed))
+        cur = cadr(car(l_directed))
+        ring = tconc(nil start)
+        while(_PointKey(cur 1.0) != _PointKey(start 1.0)
+            ring = tconc(ring cur)
+            next = tab[_PointKey(cur 1.0)]
+            unless(next error("tutorial trace: open chain"))
+            cur = next
         )
-        car(res)
+        car(ring)
     )
 )
 ```
 
-一般情况一个顶点可能有多条出边（例如两个洞在同一处接入外环），这时要按转角选「最靠左」的一条，保证环不自交、内部分配一致。示例里每个顶点最多一条出边，所以直接取唯一一条。
-
-## 5.7 跑一遍
+拿一个正方形试一下：
 
 ```lisp
 ; 可运行
-A = list(ycGeom::Point(0:0) ycGeom::Point(4:0)
-    ycGeom::Point(4:4) ycGeom::Point(0:4))
-B = list(ycGeom::Point(2:2) ycGeom::Point(6:2)
-    ycGeom::Point(6:6) ycGeom::Point(2:6))
+squareEdges = list(
+    list(ycGeom::Point(0:0) ycGeom::Point(4:0))
+    list(ycGeom::Point(4:0) ycGeom::Point(4:4))
+    list(ycGeom::Point(4:4) ycGeom::Point(0:4))
+    list(ycGeom::Point(0:4) ycGeom::Point(0:0)))
 
-edges = _SplitAll(A B 0.25)
-length(edges)                                   ; => 12
-
-dirs = _Classify(edges A B 'or 0.25)
-length(dirs)                                    ; => 8
-unionRings = _TraceLoops(dirs 0.25)
-length(unionRings)                              ; => 1
-_SignedArea(car(unionRings))                    ; => 28.0
+length(_TraceLoop(squareEdges))            ; => 4
+_SignedArea(_TraceLoop(squareEdges))       ; => 16.0
 ```
 
-结果是 8 个顶点的外轮廓：两个正方形各贡献 3 条外边，两个交点各贡献 1 个拐角。面积 `16 + 16 - 4 = 28`。
+一般情况一个顶点可能有多条出边（例如两个洞在同一处接入外环），这时要按转角选「最靠左」的一条，保证环不自交、内部分配一致。本节示例每个顶点只有一条出边。
 
-交集同样一条流水线，只改分类规则：
-
-```lisp
-; 可运行
-dirsAnd = _Classify(edges A B 'and 0.25)
-andRings = _TraceLoops(dirsAnd 0.25)
-length(andRings)                                ; => 1
-_SignedArea(car(andRings))                      ; => 4.0
-```
-
-`ycGeom` 的对应接口：
+## 5.7 库里的完整实现
 
 ```lisp
 ; 可运行
 ra = ycGeom::Region(list(ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))))
 rb = ycGeom::Region(list(ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))))
 
-ra->or(rb)->area()    ; => 28.0
-ra->and(rb)->area()   ; => 4.0
-ra->not(rb)->area()   ; => 12.0
-ra->xor(rb)->area()   ; => 24.0
+ra->or(rb)->area()     ; => 28.0
+ra->and(rb)->area()    ; => 4.0
+ra->not(rb)->area()    ; => 12.0
+ra->xor(rb)->area()    ; => 24.0
+length(ra->or(rb)->polygons())   ; => 1
 ```
+
+并集面积 `16 + 16 - 4 = 28`，交集 4，两块差集分别是 12 与 24。结果已经是一块规范化的多边形，不会留下重叠碎片。
 
 ## 5.8 洞与嵌套
 
@@ -274,7 +217,7 @@ ra->xor(rb)->area()   ; => 24.0
 - **结果一定被规范化。** 输入的多个多边形可能重叠，输出的成员互不重叠。
 - **近重合的边必须给网格。** 拆边、配对、追踪都依赖精确端点，容差判断救不了。
 - **采样偏移有上限。** 布尔实现里，边两侧的采样距离通常有上限；特征尺寸小于该上限时分类可能出错。网格能消除这类问题，这也是 `?grid` 存在的原因。
-- **教学实现不是通用实现。** 本节代码省略了多分量、多出边、重叠边与洞；库里的实现把这些都做了。
+- **本节代码是片段。** 多分量、多出边、重叠边与洞都没有展开；库里的实现把这些都做了。
 
 ## 小结
 

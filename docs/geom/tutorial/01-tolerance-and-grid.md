@@ -32,6 +32,7 @@ procedure(_NearTol(n_a n_b n_eps "nnn")  ; -> t | nil
     let((fa fb rel)
         fa = float(n_a)
         fb = float(n_b)
+        ; 相对容差兜底：坐标越大，能分辨的绝对误差越大
         rel = 1e-15 * max(abs(fa) abs(fb))
         abs(fa - fb) <= max(float(n_eps) rel)
     )
@@ -95,6 +96,7 @@ snap(v) = round(v / g) * g
 ```lisp
 ; 可运行
 procedure(_SnapToGrid(n_val n_grid "nn")  ; -> float
+    ; 先除以网格取整，再乘回网格间距
     round(n_val / n_grid) * n_grid
 )
 

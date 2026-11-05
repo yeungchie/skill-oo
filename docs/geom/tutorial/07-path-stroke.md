@@ -26,6 +26,7 @@ n = (-dy, dx) / |d|
 ```lisp
 ; 可运行
 procedure(_OffsetLine(g_a g_b n_dist "ggn")  ; -> list[Point]
+    ; 单位法线 = 方向向量逆时针旋转 90 度
     let((dx dy len nx ny)
         dx = g_b->x() - g_a->x()
         dy = g_b->y() - g_a->y()
@@ -59,26 +60,9 @@ t = ((B + n2 * h) - (A + n1 * h)) × d2 / (d1 × d2)
 ```lisp
 ; 可运行
 procedure(_MiterPoint(g_a g_b g_c n_half "gggn")  ; -> Point | nil
-    let((d1x d1y d2x d2y n1x n1y n2x n2y
-         p1x p1y p2x p2y den tt)
-        d1x = g_b->x() - g_a->x()
-        d1y = g_b->y() - g_a->y()
-        d2x = g_c->x() - g_b->x()
-        d2y = g_c->y() - g_b->y()
-        n1x = -d1y / sqrt(d1x * d1x + d1y * d1y)
-        n1y = d1x / sqrt(d1x * d1x + d1y * d1y)
-        n2x = -d2y / sqrt(d2x * d2x + d2y * d2y)
-        n2y = d2x / sqrt(d2x * d2x + d2y * d2y)
-        p1x = g_a->x() + n1x * n_half
-        p1y = g_a->y() + n1y * n_half
-        p2x = g_b->x() + n2x * n_half
-        p2y = g_b->y() + n2y * n_half
-        den = d1x * d2y - d1y * d2x
-        unless(abs(den) <= 1e-12
-            tt = ((p2x - p1x) * d2y - (p2y - p1y) * d2x) / den
-            ycGeom::Point(list(p1x + tt * d1x p1y + tt * d1y))
-        )
-    )
+    ; 两条偏移线求交；?as 'Line 表示把两段偏移线当作无限直线
+    ycGeom::Segment(_OffsetLine(g_a g_b n_half))->intersection(
+        _OffsetLine(g_b g_c n_half) ?as 'Line)
 )
 
 A = ycGeom::Point(0:0)

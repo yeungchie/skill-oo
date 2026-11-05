@@ -37,6 +37,7 @@ key(P) = "%d|%d" % (round(P.x / g), round(P.y / g))
 ```lisp
 ; 可运行
 procedure(_PointKey(g_p n_grid "gn")  ; -> str
+    ; 坐标除以网格后取整，用整数对作键
     lsprintf("%d|%d" round(g_p->x() / n_grid) round(g_p->y() / n_grid))
 )
 
@@ -69,6 +70,7 @@ keys                ; => 两个键（顺序由 table 决定）
 ```lisp
 ; 可运行
 procedure(_UndirEdgeKey(g_a g_b n_grid "ggn")  ; -> str
+    ; 无向边：两个端点键按字典序拼接，与方向无关
     let((ka kb)
         ka = _PointKey(g_a n_grid)
         kb = _PointKey(g_b n_grid)
@@ -95,35 +97,38 @@ _UndirEdgeKey(ycGeom::Point(10:0) ycGeom::Point(0:0) 1.0)   ; => "0|0~10|0"
 
 ```lisp
 ; 可运行
-procedure(_RotText(l_keys n_start n_dir "lxx")  ; -> str
-    let((n text j r)
-        n = length(l_keys)
-        text = ""
-        for(j 0 n - 1
-            r = if(n_dir > 0 n_start + j n_start - j)
-            when(r >= n r = r - n)
-            when(r < 0 r = r + n)
-            text = strcat(text nth(r l_keys) ";")
-        )
-        text
-    )
-)
-
 procedure(_RingKeyText(l_pts n_grid "ln")  ; -> str
-    let((keys n best text i)
+    ; 环键：旋转不变、方向不变，取字典序最小的写法
+    let((keys n best text i j r)
         foreach(p l_pts keys = tconc(keys _PointKey(p n_grid)))
         keys = car(keys)
         n = length(keys)
         for(i 0 n - 1
-            text = _RotText(keys i 1)
+            ; 从第 i 个顶点起正向绕一圈
+            text = ""
+            for(j 0 n - 1
+                r = remainder(i + j n)
+                text = strcat(text nth(r keys) ";")
+            )
             when(best == nil || alphalessp(text best) best = text)
-            text = _RotText(keys i -1)
+            ; 再从第 i 个顶点起反向绕一圈
+            text = ""
+            for(j 0 n - 1
+                r = remainder(i - j n)
+                when(r < 0 r = r + n)
+                text = strcat(text nth(r keys) ";")
+            )
             when(alphalessp(text best) best = text)
         )
         best
     )
 )
+```
 
+环键的比较只需要几行：
+
+```lisp
+; 可运行
 square = list(ycGeom::Point(0:0) ycGeom::Point(4:0)
     ycGeom::Point(4:4) ycGeom::Point(0:4))
 rotated = list(ycGeom::Point(4:0) ycGeom::Point(4:4)

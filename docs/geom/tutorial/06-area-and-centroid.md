@@ -23,6 +23,7 @@
 ```lisp
 ; 可运行
 procedure(_ShoelaceRaw(l_pts "l")  ; -> float
+    ; 逐边累加有向面积，最后除以 2
     let((sum n)
         sum = 0.0
         n = length(l_pts)
@@ -37,7 +38,12 @@ procedure(_ShoelaceRaw(l_pts "l")  ; -> float
         sum / 2.0
     )
 )
+```
 
+用一个细长三角形试一下：
+
+```lisp
+; 可运行
 thin = list(ycGeom::Point(1e9:1e9)
     ycGeom::Point(1e9 + 1000:1e9)
     ycGeom::Point(1e9:1e9 + 0.001))
@@ -56,34 +62,9 @@ x' = x - x0,  y' = y - y0
 2A = Σ (x'_i * y'_{i+1} - x'_{i+1} * y'_i)
 ```
 
-平移后，乘积的量级从「坐标平方」降到「尺寸平方」，抵消不再发生：
+平移后，乘积的量级从「坐标平方」降到「尺寸平方」，抵消不再发生。下一节的最终实现会先减参考点，再做累加；同一组输入的朴素结果是 `0.0`，平移后是 `0.5000234`，与库一致。
 
-```lisp
-; 可运行
-procedure(_ShoelaceShifted(l_pts "l")  ; -> float
-    let((x0 y0 sum n)
-        x0 = car(l_pts)->x()
-        y0 = car(l_pts)->y()
-        sum = 0.0
-        n = length(l_pts)
-        for(i 0 n - 1
-            let((p1 p2 j)
-                p1 = nth(i l_pts)
-                j = if(i == n - 1 0 i + 1)
-                p2 = nth(j l_pts)
-                sum = sum + (p1->x() - x0) * (p2->y() - y0)
-                    - (p2->x() - x0) * (p1->y() - y0)
-            )
-        )
-        sum / 2.0
-    )
-)
-
-_ShoelaceShifted(thin)   ; => 0.5000234
-ycGeom::Polygon(thin)->area()   ; => 0.5000234
-```
-
-结果与库一致。注意它不是 `0.5`：点 `(1e9, 1e9 + 0.001)` 本身就存不下精确的 `0.001`，输入已经有约 `4.7e-5` 的相对误差。**平移能消除计算误差，消除不了输入表示误差。**
+注意它不是 `0.5`：点 `(1e9, 1e9 + 0.001)` 本身就存不下精确的 `0.001`，输入已经有约 `4.7e-5` 的相对误差。**平移能消除计算误差，消除不了输入表示误差。**
 
 ## 6.4 第二招：补偿求和
 
@@ -97,21 +78,25 @@ sum = t
 结果 = sum + comp
 ```
 
+最终实现把平移与补偿合在一起：先减参考点，再用补偿累加。
+
 ```lisp
 ; 可运行
-procedure(_ShoelaceComp(l_pts "l")  ; -> float
+procedure(_ShoelaceStable(l_pts "l")  ; -> float
     let((x0 y0 sum comp n p1 p2 j tt term)
-        x0 = car(l_pts)->x()
+        x0 = car(l_pts)->x()                  ; 参考点：第一个顶点
         y0 = car(l_pts)->y()
         sum = 0.0
-        comp = 0.0
+        comp = 0.0                             ; 补偿项
         n = length(l_pts)
         for(i 0 n - 1
             p1 = nth(i l_pts)
             j = if(i == n - 1 0 i + 1)
             p2 = nth(j l_pts)
+            ; 平移后的有向三角形面积（两倍）
             term = (p1->x() - x0) * (p2->y() - y0)
                 - (p2->x() - x0) * (p1->y() - y0)
+            ; 补偿累加：把这一步的舍入误差记进 comp
             tt = sum + term
             if(abs(sum) >= abs(term)
                 comp = comp + ((sum - tt) + term)
@@ -122,8 +107,14 @@ procedure(_ShoelaceComp(l_pts "l")  ; -> float
         (sum + comp) / 2.0
     )
 )
+```
 
-_ShoelaceComp(thin)   ; => 0.5000234
+最终实现的结果：
+
+```lisp
+; 可运行
+_ShoelaceStable(thin)             ; => 0.5000234
+ycGeom::Polygon(thin)->area()     ; => 0.5000234
 ```
 
 顶点上千、坐标跨度大时，补偿求和的收益才明显；三五个顶点时，平移通常已经够用。
@@ -151,10 +142,12 @@ procedure(_CentroidOf(l_pts "l")  ; -> Point
         cx = 0.0
         cy = 0.0
         for(i 0 n - 1
+            ; 相邻两点与参考点组成的有向三角形
             a = nth(i l_pts)
             b = nth(if(i == n - 1 0 i + 1) l_pts)
             cross = (a->x() - x0) * (b->y() - y0)
                 - (b->x() - x0) * (a->y() - y0)
+            ; 面积累加与一阶矩累加共用同一个 cross
             a2 = a2 + cross
             cx = cx + ((a->x() - x0) + (b->x() - x0)) * cross
             cy = cy + ((a->y() - y0) + (b->y() - y0)) * cross
@@ -164,7 +157,12 @@ procedure(_CentroidOf(l_pts "l")  ; -> Point
             y0 + cy / (3.0 * a2)))
     )
 )
+```
 
+验算两个质心：
+
+```lisp
+; 可运行
 square = list(ycGeom::Point(0:0) ycGeom::Point(4:0)
     ycGeom::Point(4:4) ycGeom::Point(0:4))
 _CentroidOf(square)->toSkill()    ; => (2.0 2.0)

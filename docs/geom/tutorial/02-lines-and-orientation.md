@@ -35,7 +35,7 @@ a × b = ax * by - ay * bx
 ```lisp
 ; 可运行
 procedure(_Cross2(g_a g_b g_c "ggg")  ; -> float
-    ; (b - a) × (c - a)
+    ; (b - a) × (c - a)：正数表示 c 在 ab 左侧，负数在右侧，零表示共线
     (g_b->x() - g_a->x()) * (g_c->y() - g_a->y())
         - (g_b->y() - g_a->y()) * (g_c->x() - g_a->x())
 )
@@ -88,16 +88,23 @@ procedure(_SegCross(g_a g_b g_c g_d "gggg")  ; -> list[float] | nil
         qx = g_c->x() - g_a->x()
         qy = g_c->y() - g_a->y()
         den = rx * sy - ry * sx
+        ; 方向叉积为 0 表示平行或共线，这里按平行处理
         unless(abs(den) <= 1e-12 * sqrt((rx * rx + ry * ry) * (sx * sx + sy * sy))
-            tt = (qx * sy - qy * sx) / den
-            u = (qx * ry - qy * rx) / den
+            tt = (qx * sy - qy * sx) / den   ; 交点在 AB 上的参数
+            u = (qx * ry - qy * rx) / den    ; 交点在 CD 上的参数
+            ; 两个参数都落在 [0, 1] 才是线段相交，而不是延长线相交
             when(tt >= 0.0 && tt <= 1.0 && u >= 0.0 && u <= 1.0
                 list(tt u)
             )
         )
     )
 )
+```
 
+三组例子：相交、交点不在第一段上、平行。
+
+```lisp
+; 可运行
 _SegCross(a b ycGeom::Point(5:-5) ycGeom::Point(5:5))   ; => (0.5 0.5)
 _SegCross(a b ycGeom::Point(5:2) ycGeom::Point(5:8))    ; => nil，交点不在第一段上
 _SegCross(a b ycGeom::Point(0:1) ycGeom::Point(10:1))   ; => nil，平行
@@ -138,6 +145,7 @@ procedure(_PointSegDist(g_p g_a g_b "ggg")  ; -> float
         dx = g_b->x() - g_a->x()
         dy = g_b->y() - g_a->y()
         len2 = dx * dx + dy * dy
+        ; 投影参数；夹到 [0, 1] 后，投影落在线段外时取最近端点
         tt = if(len2 == 0.0
             0.0
             max(0.0 min(1.0
@@ -146,11 +154,17 @@ procedure(_PointSegDist(g_p g_a g_b "ggg")  ; -> float
         )
         px = g_a->x() + tt * dx
         py = g_a->y() + tt * dy
+        ; 投影点到待测点的欧氏距离
         sqrt((g_p->x() - px) * (g_p->x() - px)
             + (g_p->y() - py) * (g_p->y() - py))
     )
 )
+```
 
+三组：投影落在段内、落在线段外两侧。
+
+```lisp
+; 可运行
 _PointSegDist(ycGeom::Point(5:3) a b)     ; => 3.0
 _PointSegDist(ycGeom::Point(-5:0) a b)    ; => 5.0，投影落在线段外，取端点 A
 _PointSegDist(ycGeom::Point(15:0) a b)    ; => 5.0，取端点 B
@@ -184,10 +198,10 @@ procedure(_RayInside(l_ring g_p "lg")  ; -> t | nil
                 p1 = nth(i l_ring)
                 j = if(i == n - 1 0 i + 1)
                 p2 = nth(j l_ring)
-                when((p1->y() > y) != (p2->y() > y)
+                when((p1->y() > y) != (p2->y() > y)   ; 这条边跨过射线高度
                     when(x < (p2->x() - p1->x()) * (y - p1->y())
                             / (p2->y() - p1->y()) + p1->x()
-                        inside = !inside
+                        inside = !inside            ; 交点在右侧，计一次穿越
                     )
                 )
             )
@@ -195,7 +209,12 @@ procedure(_RayInside(l_ring g_p "lg")  ; -> t | nil
         inside
     )
 )
+```
 
+用一个正方形验证：
+
+```lisp
+; 可运行
 ring = list(ycGeom::Point(0:0) ycGeom::Point(4:0)
     ycGeom::Point(4:4) ycGeom::Point(0:4))
 

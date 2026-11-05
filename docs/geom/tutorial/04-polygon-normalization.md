@@ -28,6 +28,7 @@
 ```lisp
 ; 可运行
 procedure(_SignedArea(l_pts "l")  ; -> float
+    ; 逐边累加有向面积；结果为正表示逆时针
     let((sum n)
         sum = 0.0
         n = length(l_pts)
@@ -42,11 +43,21 @@ procedure(_SignedArea(l_pts "l")  ; -> float
         sum / 2.0
     )
 )
+```
 
+方向统一只需要看面积的符号：负数就反转点列。
+
+```lisp
+; 可运行
 procedure(_OrientRing(l_pts "l")  ; -> list
     if(_SignedArea(l_pts) < 0.0 reverse(l_pts) l_pts)
 )
+```
 
+用正方形验证一下：
+
+```lisp
+; 可运行
 square = list(ycGeom::Point(0:0) ycGeom::Point(4:0)
     ycGeom::Point(4:4) ycGeom::Point(0:4))
 
@@ -71,48 +82,26 @@ poly->area()                 ; => 100.0
 
 ```lisp
 ; 可运行
-procedure(_RemoveCollinear(l_pts n_eps "ln")  ; -> list
-    let((src changed n res)
-        src = l_pts
-        changed = t
-        while(changed && length(src) > 3
-            changed = nil
-            n = length(src)
-            res = nil
-            for(i 0 n - 1
-                let((prev cur next cross l1 l2)
-                    prev = nth(if(i == 0 n - 1 i - 1) src)
-                    cur = nth(i src)
-                    next = nth(if(i == n - 1 0 i + 1) src)
-                    cross = (cur->x() - prev->x()) * (next->y() - cur->y())
-                        - (cur->y() - prev->y()) * (next->x() - cur->x())
-                    l1 = sqrt((cur->x() - prev->x()) * (cur->x() - prev->x())
-                        + (cur->y() - prev->y()) * (cur->y() - prev->y()))
-                    l2 = sqrt((next->x() - cur->x()) * (next->x() - cur->x())
-                        + (next->y() - cur->y()) * (next->y() - cur->y()))
-                    if(abs(cross) <= n_eps * l1 * l2
-                    then
-                        changed = t
-                    else
-                        res = tconc(res cur)
-                    )
-                )
-            )
-            src = car(res)
-        )
-        src
+procedure(_Collinear3(g_a g_b g_c n_eps "gggn")  ; -> t | nil
+    ; 叉积按两条边长度归一：|ab × bc| <= eps * |ab| * |bc|
+    let((abx aby bcx bcy)
+        abx = g_b->x() - g_a->x()
+        aby = g_b->y() - g_a->y()
+        bcx = g_c->x() - g_b->x()
+        bcy = g_c->y() - g_b->y()
+        abs(abx * bcy - aby * bcx)
+            <= n_eps * sqrt(abx * abx + aby * aby)
+                * sqrt(bcx * bcx + bcy * bcy)
     )
 )
 
-withBend = list(ycGeom::Point(0:0) ycGeom::Point(5:0)
-    ycGeom::Point(10:0) ycGeom::Point(10:10) ycGeom::Point(0:10))
-
-length(withBend)                                        ; => 5
-length(_RemoveCollinear(withBend 1e-9))                 ; => 4
-_SignedArea(_RemoveCollinear(withBend 1e-9))            ; => 100.0
+_Collinear3(ycGeom::Point(0:0) ycGeom::Point(5:0) ycGeom::Point(10:0) 1e-9)
+; => t
+_Collinear3(ycGeom::Point(0:0) ycGeom::Point(5:1) ycGeom::Point(10:0) 1e-9)
+; => nil
 ```
 
-`while` 循环是必要的：删掉一个点后，原本不相邻的三个点可能变成新的共线三点。
+清理就是对每个顶点调用它：命中就删掉当前点，扫完一轮再从头扫，直到没有点被删——删掉一个点后，原本不相邻的三个点可能变成新的共线三点。循环骨架很短，但要处理首尾相接和最少 3 个顶点，这里直接看结果。
 
 `ycGeom` 的 `Polygon` 构造时会自动做规范化，`removeCollinear()` 可以显式取出去掉共线点后的结果：
 
