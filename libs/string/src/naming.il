@@ -62,40 +62,40 @@ procedure(Words(t_s "t")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]) - 词列表；无词时为 nil
-    let((l_p t_cur t_prev t_ch t_nx n_len)
-        t_cur = ""
-        t_prev = ""
-        n_len = ycUtf8:::CharCount(t_s)
-        when(n_len > 0
-            for(n_i 1 n_len
-                t_ch = ycUtf8:::Slice(t_s n_i 1)
-                t_nx = if(n_i < n_len ycUtf8:::Slice(t_s n_i + 1 1) "")
+    let((p cur prev ch nx len)
+        cur = ""
+        prev = ""
+        len = ycUtf8:::CharCount(t_s)
+        when(len > 0
+            for(i 1 len
+                ch = ycUtf8:::Slice(t_s i 1)
+                nx = if(i < len ycUtf8:::Slice(t_s i + 1 1) "")
                 cond(
-                    (!_IsWordChar(t_ch)
-                        when(t_cur != ""
-                            l_p = tconc(l_p t_cur)
-                            t_cur = ""
+                    (!_IsWordChar(ch)
+                        when(cur != ""
+                            p = tconc(p cur)
+                            cur = ""
                         )
                     )
-                    ((t_cur != "" && _IsUpperChar(t_ch) && (_IsLowerChar(t_prev) || _IsDigitChar(t_prev)))
-                        l_p = tconc(l_p t_cur)
-                        t_cur = t_ch
+                    ((cur != "" && _IsUpperChar(ch) && (_IsLowerChar(prev) || _IsDigitChar(prev)))
+                        p = tconc(p cur)
+                        cur = ch
                     )
-                    ((t_cur != "" && _IsUpperChar(t_prev) && _IsUpperChar(t_ch) && _IsLowerChar(t_nx))
-                        l_p = tconc(l_p t_cur)
-                        t_cur = t_ch
+                    ((cur != "" && _IsUpperChar(prev) && _IsUpperChar(ch) && _IsLowerChar(nx))
+                        p = tconc(p cur)
+                        cur = ch
                     )
                     (t
-                        t_cur = strcat(t_cur t_ch)
+                        cur = strcat(cur ch)
                     )
                 )
-                t_prev = t_ch
+                prev = ch
             )
         )
-        when(t_cur != ""
-            l_p = tconc(l_p t_cur)
+        when(cur != ""
+            p = tconc(p cur)
         )
-        car(l_p)
+        car(p)
     )
 )
 
@@ -107,12 +107,12 @@ procedure(_CapWord(t_w "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 首字母大写的结果；空词为空串
-    let((n_n)
-        n_n = ycUtf8:::CharCount(t_w)
+    let((n)
+        n = ycUtf8:::CharCount(t_w)
         cond(
             (t_w == "" "")
-            (n_n <= 1 upperCase(t_w))
-            (t strcat(upperCase(ycUtf8:::Slice(t_w 1 1)) ycUtf8:::Slice(t_w 2 n_n - 1)))
+            (n <= 1 upperCase(t_w))
+            (t strcat(upperCase(ycUtf8:::Slice(t_w 1 1)) ycUtf8:::Slice(t_w 2 n - 1)))
         )
     )
 )
@@ -129,38 +129,38 @@ procedure(JoinWords(l_words \@key (style "snake") "lt")  ; -> str
     unless(member(style '("snake" "kebab" "camel" "pascal"))
         error("ycString::JoinWords: unknown style %A" style)
     )
-    let((l_p n_i t_sep t_w)
-        t_sep = cond(
+    let((p i sep w)
+        sep = cond(
             (style == "snake" "_")
             (style == "kebab" "-")
             (t "")
         )
-        n_i = 0
-        foreach(t_item l_words
-            n_i++
-            unless(stringp(t_item)
-                error("ycString::JoinWords: item #%d is not a string (%A)" n_i t_item)
+        i = 0
+        foreach(item l_words
+            i++
+            unless(stringp(item)
+                error("ycString::JoinWords: item #%d is not a string (%A)" i item)
             )
-            unless(n_i == 1
-                when(t_sep != ""
-                    l_p = tconc(l_p t_sep)
+            unless(i == 1
+                when(sep != ""
+                    p = tconc(p sep)
                 )
             )
-            t_w = lowerCase(t_item)
+            w = lowerCase(item)
             cond(
                 (style == "camel"
-                    when(n_i > 1
-                        t_w = _CapWord(t_w)
+                    when(i > 1
+                        w = _CapWord(w)
                     )
                 )
                 (style == "pascal"
-                    t_w = _CapWord(t_w)
+                    w = _CapWord(w)
                 )
             )
-            l_p = tconc(l_p t_w)
+            p = tconc(p w)
         )
-        if(l_p
-            apply('strcat car(l_p))
+        if(p
+            apply('strcat car(p))
             ""
         )
     )
@@ -175,16 +175,16 @@ procedure(Sanitize(t_s \@key (style "snake") "tt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 标识符；数字开头补下划线；无可用字符时报错
-    let((l_w t_r)
-        l_w = Words(t_s)
-        unless(l_w
+    let((w r)
+        w = Words(t_s)
+        unless(w
             error("ycString::Sanitize: no valid characters (%A)" t_s)
         )
-        t_r = JoinWords(l_w ?style style)
-        when(_IsDigitChar(substring(t_r 1 1))
-            t_r = strcat("_" t_r)
+        r = JoinWords(w ?style style)
+        when(_IsDigitChar(substring(r 1 1))
+            r = strcat("_" r)
         )
-        t_r
+        r
     )
 )
 

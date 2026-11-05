@@ -2,9 +2,9 @@ _Assert(ycSubProcess::CreateJob("echo 123")->await() == "123\n" "await returns c
 _Assert(ycSubProcess::CreateJob("echo" "-n" "AB")->await() == "AB" "multiple arguments are joined with spaces")
 _Assert(ycSubProcess::CreateJob("echo" 123)->await() == "123\n" "non-string arguments are converted to text")
 
-let((aj l_res)
+let((aj res)
     aj = ycSubProcess::CreateJob("cat")
-    l_res = errset({
+    res = errset({
         _Assert(aj->state() == 'None "state is 'None before start")
         _Assert(aj->start() == aj "start returns the job itself")
         _Assert(aj->state() == 'Active "state is 'Active after start")
@@ -32,7 +32,7 @@ let((aj l_res)
 
         _Assert(aj->stdout->isEmpty() == t "stdout is empty after shifting every line")
     } nil)
-    when(l_res == nil
+    when(res == nil
         _TestErrorBegin("create-job block")
         fprintf(errport "%A\n" errset.errset)
         _TestErrorEnd()

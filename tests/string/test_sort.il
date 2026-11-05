@@ -29,12 +29,12 @@ _Assert(!ycString::NaturalLess("n123456789012345678902" "n123456789012345678901"
 ; 无数字串按字母序
 _Assert(ycString::NaturalLess("abc" "abd")  "natural: plain alphabetical")
 
-let((l_in l_out)
-    l_in = list("VDD10" "VDD2" "VDD1")
-    l_out = ycString::NaturalSort(l_in)
-    _Assert(l_out == list("VDD1" "VDD2" "VDD10")  "nsort: ascending natural order")
-    _Assert(l_in == list("VDD10" "VDD2" "VDD1")  "nsort: input list untouched")
-    _Assert(ycString::NaturalSort(l_in ?reverse t) == list("VDD10" "VDD2" "VDD1")
+let((in out)
+    in = list("VDD10" "VDD2" "VDD1")
+    out = ycString::NaturalSort(in)
+    _Assert(out == list("VDD1" "VDD2" "VDD10")  "nsort: ascending natural order")
+    _Assert(in == list("VDD10" "VDD2" "VDD1")  "nsort: input list untouched")
+    _Assert(ycString::NaturalSort(in ?reverse t) == list("VDD10" "VDD2" "VDD1")
         "nsort: reverse option")
     _Assert(ycString::NaturalSort(list("b" "a" "b")) == list("a" "b" "b")
         "nsort: duplicates kept")

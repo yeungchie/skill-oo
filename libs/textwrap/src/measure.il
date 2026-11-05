@@ -80,12 +80,12 @@ procedure(_WidthCps(l_cps t_unit n_amb "ltx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 总宽度
-    let((n_sum)
-        n_sum = 0
-        foreach(n_cp l_cps
-            n_sum = n_sum + _CpWidth(n_cp t_unit n_amb)
+    let((sum)
+        sum = 0
+        foreach(cp l_cps
+            sum = sum + _CpWidth(cp t_unit n_amb)
         )
-        n_sum
+        sum
     )
 )
 
@@ -100,13 +100,13 @@ procedure(_TakeCps(l_cps n_count "lx")  ; -> list[int]
     ;
     ; **返回**
     ;   (list[int]) - 前 n 项；不足时取全部
-    let((l_res)
+    let((res)
         while(l_cps && n_count > 0
-            l_res = tconc(l_res car(l_cps))
+            res = tconc(res car(l_cps))
             l_cps = cdr(l_cps)
             n_count--
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -137,15 +137,15 @@ procedure(_FitCount(l_cps n_max t_unit n_amb "lxtx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 可容纳码点数；首码点即超宽时为 0
-    let((n_sum n_have)
-        n_sum = 0
-        n_have = 0
-        while(l_cps && n_sum + _CpWidth(car(l_cps) t_unit n_amb) <= n_max
-            n_sum = n_sum + _CpWidth(car(l_cps) t_unit n_amb)
-            n_have++
+    let((sum have)
+        sum = 0
+        have = 0
+        while(l_cps && sum + _CpWidth(car(l_cps) t_unit n_amb) <= n_max
+            sum = sum + _CpWidth(car(l_cps) t_unit n_amb)
+            have++
             l_cps = cdr(l_cps)
         )
-        n_have
+        have
     )
 )
 
@@ -160,9 +160,9 @@ procedure(_CutCount(l_cps n_max t_unit n_amb "lxtx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 至少为 1
-    let((n_have)
-        n_have = _FitCount(l_cps n_max t_unit n_amb)
-        if(n_have == 0 && l_cps 1 n_have)
+    let((have)
+        have = _FitCount(l_cps n_max t_unit n_amb)
+        if(have == 0 && l_cps 1 have)
     )
 )
 
@@ -178,17 +178,17 @@ procedure(_FirstChunk(l_word n_max g_hyphen t_unit n_amb "lxgtx")  ; -> list[int
     ;
     ; **返回**
     ;   (list[int]) - 片段码点
-    let((n_count n_i n_hy)
-        n_count = _CutCount(l_word n_max t_unit n_amb)
-        when(g_hyphen && n_count > 1
-            n_i = 1
-            foreach(n_cp _TakeCps(l_word n_count)
-                when(n_cp == 45 n_hy = n_i)
-                n_i++
+    let((count i hy)
+        count = _CutCount(l_word n_max t_unit n_amb)
+        when(g_hyphen && count > 1
+            i = 1
+            foreach(cp _TakeCps(l_word count)
+                when(cp == 45 hy = i)
+                i++
             )
-            when(n_hy n_count = n_hy)
+            when(hy count = hy)
         )
-        _TakeCps(l_word n_count)
+        _TakeCps(l_word count)
     )
 )
 
@@ -200,18 +200,18 @@ procedure(_WordsFromCps(l_cps "l")  ; -> list | nil
     ;
     ; **返回**
     ;   (list[list[int]]|nil) - 词列表；全空白为 nil
-    let((l_res l_acc)
-        foreach(n_cp l_cps
-            if(_IsSpaceCp(n_cp)
-                when(l_acc
-                    l_res = tconc(l_res car(l_acc))
-                    l_acc = nil
+    let((res acc)
+        foreach(cp l_cps
+            if(_IsSpaceCp(cp)
+                when(acc
+                    res = tconc(res car(acc))
+                    acc = nil
                 )
-                l_acc = tconc(l_acc n_cp)
+                acc = tconc(acc cp)
             )
         )
-        when(l_acc l_res = tconc(l_res car(l_acc)))
-        car(l_res)
+        when(acc res = tconc(res car(acc)))
+        car(res)
     )
 )
 
@@ -223,12 +223,12 @@ procedure(_JoinWordsCps(l_words "l")  ; -> list[int]
     ;
     ; **返回**
     ;   (list[int]) - 拼接后的码点
-    let((l_res)
-        foreach(l_word l_words
-            when(car(l_res) l_res = tconc(l_res 32))
-            foreach(n_cp l_word l_res = tconc(l_res n_cp))
+    let((res)
+        foreach(word l_words
+            when(car(res) res = tconc(res 32))
+            foreach(cp word res = tconc(res cp))
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -240,23 +240,23 @@ procedure(_NormalizeNewlines(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 统一换行后的串
-    let((l_res n_i n_len n_b)
-        n_i = 1
-        n_len = length(t_s)
-        while(n_i <= n_len
-            n_b = charToInt(getchar(t_s n_i))
-            if(n_b == 13
+    let((res i len b)
+        i = 1
+        len = length(t_s)
+        while(i <= len
+            b = charToInt(getchar(t_s i))
+            if(b == 13
             then
-                l_res = tconc(l_res "\n")
-                when(n_i < n_len && charToInt(getchar(t_s n_i + 1)) == 10
-                    n_i++
+                res = tconc(res "\n")
+                when(i < len && charToInt(getchar(t_s i + 1)) == 10
+                    i++
                 )
             else
-                l_res = tconc(l_res getchar(t_s n_i))
+                res = tconc(res getchar(t_s i))
             )
-            n_i++
+            i++
         )
-        buildString(car(l_res) "")
+        buildString(car(res) "")
     )
 )
 
@@ -268,23 +268,23 @@ procedure(_LogicalLines(t_s "t")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]) - 行列表；空串为 nil
-    let((l_res l_line n_i n_len)
-        n_i = 1
-        n_len = length(t_s)
-        while(n_i <= n_len
-            if(charToInt(getchar(t_s n_i)) == 10
+    let((res line i len)
+        i = 1
+        len = length(t_s)
+        while(i <= len
+            if(charToInt(getchar(t_s i)) == 10
             then
-                l_res = tconc(l_res buildString(car(l_line) ""))
-                l_line = nil
+                res = tconc(res buildString(car(line) ""))
+                line = nil
             else
-                l_line = tconc(l_line getchar(t_s n_i))
+                line = tconc(line getchar(t_s i))
             )
-            n_i++
+            i++
         )
-        unless(t_s == "" || charToInt(getchar(t_s n_len)) == 10
-            l_res = tconc(l_res buildString(car(l_line) ""))
+        unless(t_s == "" || charToInt(getchar(t_s len)) == 10
+            res = tconc(res buildString(car(line) ""))
         )
-        car(l_res)
+        car(res)
     )
 )
 

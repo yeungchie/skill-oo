@@ -119,8 +119,8 @@ procedure(CreateJob(g_arg \@key callback userData verbose \@rest l_args "ggggg")
     ;
     ; **返回**
     ;   (AsyncJob) - 未启动的任务对象，需再调用 start() 启动
-    let((t_cmd)
-        t_cmd = if(l_args
+    let((cmd2)
+        cmd2 = if(l_args
         then
             buildString(foreach(mapcar x cons(g_arg l_args)
                 ycPathLib::ShellQuote(stringp(x) && x || lsprintf("%A" x))
@@ -128,7 +128,7 @@ procedure(CreateJob(g_arg \@key callback userData verbose \@rest l_args "ggggg")
         else
             stringp(g_arg) && g_arg || lsprintf("%A" g_arg)
         )
-        AsyncJob(t_cmd
+        AsyncJob(cmd2
             ?callback   callback
             ?userData   userData
             ?verbose    verbose

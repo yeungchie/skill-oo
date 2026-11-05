@@ -18,34 +18,34 @@ procedure(_RowLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; 
     ;
     ; **返回**
     ;   (list[str]) - 行文本
-    let((n_lines l_res t_line l_block t_cell)
-        n_lines = 0
-        foreach(l_block l_blocks
-            when(length(l_block) > n_lines
-                n_lines = length(l_block)
+    let((lines res line block cell)
+        lines = 0
+        foreach(block2 l_blocks
+            when(length(block2) > lines
+                lines = length(block2)
             )
         )
-        for(n_i 0 n_lines - 1
-            t_line = ""
-            for(n_c 0 length(l_blocks) - 1
-                when(n_c > 0 t_line = strcat(t_line "  "))
-                l_block = nth(n_c l_blocks)
-                t_cell = if(nth(n_i l_block) nth(n_i l_block) "")
-                t_line = strcat(
-                    t_line
+        for(i 0 lines - 1
+            line = ""
+            for(c 0 length(l_blocks) - 1
+                when(c > 0 line = strcat(line "  "))
+                block = nth(c l_blocks)
+                cell = if(nth(i block) nth(i block) "")
+                line = strcat(
+                    line
                     _PadCell(
-                        t_cell
-                        nth(n_c l_widths)
-                        nth(n_c l_aligns)
-                        nth(n_c l_decs)
+                        cell
+                        nth(c l_widths)
+                        nth(c l_aligns)
+                        nth(c l_decs)
                         t_unit
                         n_amb
                     )
                 )
             )
-            l_res = tconc(l_res _Rstrip(t_line))
+            res = tconc(res _Rstrip(line))
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -62,34 +62,34 @@ procedure(_BoxLines(l_blocks l_widths l_aligns l_decs t_unit n_amb "lllltx")  ; 
     ;
     ; **返回**
     ;   (list[str]) - 行文本
-    let((n_lines l_res t_line l_block t_cell)
-        n_lines = 0
-        foreach(l_block l_blocks
-            when(length(l_block) > n_lines
-                n_lines = length(l_block)
+    let((lines res line block cell)
+        lines = 0
+        foreach(block2 l_blocks
+            when(length(block2) > lines
+                lines = length(block2)
             )
         )
-        for(n_i 0 n_lines - 1
-            t_line = "| "
-            for(n_c 0 length(l_blocks) - 1
-                when(n_c > 0 t_line = strcat(t_line " | "))
-                l_block = nth(n_c l_blocks)
-                t_cell = if(nth(n_i l_block) nth(n_i l_block) "")
-                t_line = strcat(
-                    t_line
+        for(i 0 lines - 1
+            line = "| "
+            for(c 0 length(l_blocks) - 1
+                when(c > 0 line = strcat(line " | "))
+                block = nth(c l_blocks)
+                cell = if(nth(i block) nth(i block) "")
+                line = strcat(
+                    line
                     _PadCell(
-                        t_cell
-                        nth(n_c l_widths)
-                        nth(n_c l_aligns)
-                        nth(n_c l_decs)
+                        cell
+                        nth(c l_widths)
+                        nth(c l_aligns)
+                        nth(c l_decs)
                         t_unit
                         n_amb
                     )
                 )
             )
-            l_res = tconc(l_res strcat(t_line " |"))
+            res = tconc(res strcat(line " |"))
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -102,12 +102,12 @@ procedure(_Border(l_widths t_ch "lt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 边框行
-    let((t_res)
-        t_res = "+"
-        foreach(n_w l_widths
-            t_res = strcat(t_res _RepeatChar(t_ch n_w + 2) "+")
+    let((res)
+        res = "+"
+        foreach(w l_widths
+            res = strcat(res _RepeatChar(t_ch w + 2) "+")
         )
-        t_res
+        res
     )
 )
 
@@ -119,13 +119,13 @@ procedure(_SimpleSep(l_widths "l")  ; -> str
     ;
     ; **返回**
     ;   (str) - 分隔行
-    let((t_res)
-        t_res = ""
-        for(n_i 0 length(l_widths) - 1
-            when(n_i > 0 t_res = strcat(t_res "  "))
-            t_res = strcat(t_res _RepeatChar("-" nth(n_i l_widths)))
+    let((res)
+        res = ""
+        for(i 0 length(l_widths) - 1
+            when(i > 0 res = strcat(res "  "))
+            res = strcat(res _RepeatChar("-" nth(i l_widths)))
         )
-        _Rstrip(t_res)
+        _Rstrip(res)
     )
 )
 
@@ -138,22 +138,22 @@ procedure(_PipeSep(l_widths l_aligns "ll")  ; -> str
     ;
     ; **返回**
     ;   (str) - 分隔行
-    let((t_res t_mark t_align n_w)
-        t_res = "| "
-        for(n_i 0 length(l_widths) - 1
-            when(n_i > 0 t_res = strcat(t_res " | "))
-            n_w = nth(n_i l_widths)
-            t_align = nth(n_i l_aligns)
-            t_mark = cond(
-                (t_align == "left" strcat(":" _RepeatChar("-" n_w - 1)))
-                ((t_align == "right" || t_align == "decimal")
-                    strcat(_RepeatChar("-" n_w - 1) ":")
+    let((res mark align w)
+        res = "| "
+        for(i 0 length(l_widths) - 1
+            when(i > 0 res = strcat(res " | "))
+            w = nth(i l_widths)
+            align = nth(i l_aligns)
+            mark = cond(
+                (align == "left" strcat(":" _RepeatChar("-" w - 1)))
+                ((align == "right" || align == "decimal")
+                    strcat(_RepeatChar("-" w - 1) ":")
                 )
-                (t strcat(":" _RepeatChar("-" n_w - 2) ":"))
+                (t strcat(":" _RepeatChar("-" w - 2) ":"))
             )
-            t_res = strcat(t_res t_mark)
+            res = strcat(res mark)
         )
-        strcat(t_res " |")
+        strcat(res " |")
     )
 )
 
@@ -171,18 +171,18 @@ procedure(_FormatPlain(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "llll
     ;
     ; **返回**
     ;   (str) - 表格文本
-    let((l_out)
+    let((out)
         when(l_head
-            foreach(t_line _RowLines(l_head l_widths l_aligns l_decs t_unit n_amb)
-                l_out = tconc(l_out t_line)
+            foreach(line _RowLines(l_head l_widths l_aligns l_decs t_unit n_amb)
+                out = tconc(out line)
             )
         )
-        foreach(l_row l_rows
-            foreach(t_line _RowLines(l_row l_widths l_aligns l_decs t_unit n_amb)
-                l_out = tconc(l_out t_line)
+        foreach(row l_rows
+            foreach(line _RowLines(row l_widths l_aligns l_decs t_unit n_amb)
+                out = tconc(out line)
             )
         )
-        buildString(car(l_out) "\n")
+        buildString(car(out) "\n")
     )
 )
 
@@ -200,19 +200,19 @@ procedure(_FormatSimple(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "lll
     ;
     ; **返回**
     ;   (str) - 表格文本
-    let((l_out)
+    let((out)
         when(l_head
-            foreach(t_line _RowLines(l_head l_widths l_aligns l_decs t_unit n_amb)
-                l_out = tconc(l_out t_line)
+            foreach(line _RowLines(l_head l_widths l_aligns l_decs t_unit n_amb)
+                out = tconc(out line)
             )
-            l_out = tconc(l_out _SimpleSep(l_widths))
+            out = tconc(out _SimpleSep(l_widths))
         )
-        foreach(l_row l_rows
-            foreach(t_line _RowLines(l_row l_widths l_aligns l_decs t_unit n_amb)
-                l_out = tconc(l_out t_line)
+        foreach(row l_rows
+            foreach(line _RowLines(row l_widths l_aligns l_decs t_unit n_amb)
+                out = tconc(out line)
             )
         )
-        buildString(car(l_out) "\n")
+        buildString(car(out) "\n")
     )
 )
 
@@ -230,21 +230,21 @@ procedure(_FormatGrid(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "lllll
     ;
     ; **返回**
     ;   (str) - 表格文本
-    let((l_out)
-        l_out = tconc(l_out _Border(l_widths "-"))
+    let((out)
+        out = tconc(out _Border(l_widths "-"))
         when(l_head
-            foreach(t_line _BoxLines(l_head l_widths l_aligns l_decs t_unit n_amb)
-                l_out = tconc(l_out t_line)
+            foreach(line _BoxLines(l_head l_widths l_aligns l_decs t_unit n_amb)
+                out = tconc(out line)
             )
-            l_out = tconc(l_out _Border(l_widths "="))
+            out = tconc(out _Border(l_widths "="))
         )
-        foreach(l_row l_rows
-            foreach(t_line _BoxLines(l_row l_widths l_aligns l_decs t_unit n_amb)
-                l_out = tconc(l_out t_line)
+        foreach(row l_rows
+            foreach(line _BoxLines(row l_widths l_aligns l_decs t_unit n_amb)
+                out = tconc(out line)
             )
-            l_out = tconc(l_out _Border(l_widths "-"))
+            out = tconc(out _Border(l_widths "-"))
         )
-        buildString(car(l_out) "\n")
+        buildString(car(out) "\n")
     )
 )
 
@@ -262,19 +262,19 @@ procedure(_FormatPipe(l_head l_rows l_widths l_aligns l_decs t_unit n_amb "lllll
     ;
     ; **返回**
     ;   (str) - 表格文本
-    let((l_out)
+    let((out)
         when(l_head
-            foreach(t_line _BoxLines(l_head l_widths l_aligns l_decs t_unit n_amb)
-                l_out = tconc(l_out t_line)
+            foreach(line _BoxLines(l_head l_widths l_aligns l_decs t_unit n_amb)
+                out = tconc(out line)
             )
-            l_out = tconc(l_out _PipeSep(l_widths l_aligns))
+            out = tconc(out _PipeSep(l_widths l_aligns))
         )
-        foreach(l_row l_rows
-            foreach(t_line _BoxLines(l_row l_widths l_aligns l_decs t_unit n_amb)
-                l_out = tconc(l_out t_line)
+        foreach(row l_rows
+            foreach(line _BoxLines(row l_widths l_aligns l_decs t_unit n_amb)
+                out = tconc(out line)
             )
         )
-        buildString(car(l_out) "\n")
+        buildString(car(out) "\n")
     )
 )
 

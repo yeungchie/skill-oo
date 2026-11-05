@@ -14,13 +14,13 @@ procedure(_DigitRunEnd(t_s n_from "tx")  ; -> int
     ;
     ; **返回**
     ;   (int) - 数字段末尾的下一个下标；该处不是数字时原样返回 n_from
-    let((n_len n_i)
-        n_len = length(t_s)
-        n_i = n_from
-        while(n_i <= n_len && _IsDigitChar(substring(t_s n_i 1))
-            n_i++
+    let((len i)
+        len = length(t_s)
+        i = n_from
+        while(i <= len && _IsDigitChar(substring(t_s i 1))
+            i++
         )
-        n_i
+        i
     )
 )
 
@@ -32,13 +32,13 @@ procedure(_StripZeros(t_s "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 去零后的数字串
-    let((n_len n_i)
-        n_len = length(t_s)
-        n_i = 1
-        while(n_i < n_len && substring(t_s n_i 1) == "0"
-            n_i++
+    let((len i)
+        len = length(t_s)
+        i = 1
+        while(i < len && substring(t_s i 1) == "0"
+            i++
         )
-        substring(t_s n_i)
+        substring(t_s i)
     )
 )
 
@@ -54,52 +54,52 @@ procedure(NaturalLess(t_a t_b "tt")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - t 表示 a 排在 b 之前；相等或 a 在后回 nil
-    let((n_la n_lb n_i n_j n_sign n_ea n_eb t_ca t_cb t_ra t_rb t_sa t_sb)
-        n_la = length(t_a)
-        n_lb = length(t_b)
-        n_i = 1
-        n_j = 1
-        n_sign = 0
-        while(n_sign == 0 && n_i <= n_la && n_j <= n_lb
-            t_ca = substring(t_a n_i 1)
-            t_cb = substring(t_b n_j 1)
-            if(t_ca == t_cb
+    let((la lb i j sign ea eb ca cb ra rb sa sb)
+        la = length(t_a)
+        lb = length(t_b)
+        i = 1
+        j = 1
+        sign = 0
+        while(sign == 0 && i <= la && j <= lb
+            ca = substring(t_a i 1)
+            cb = substring(t_b j 1)
+            if(ca == cb
             then
-                n_i++
-                n_j++
+                i++
+                j++
             else
-                if(_IsDigitChar(t_ca) && _IsDigitChar(t_cb)
+                if(_IsDigitChar(ca) && _IsDigitChar(cb)
                 then
-                    n_ea = _DigitRunEnd(t_a n_i)
-                    n_eb = _DigitRunEnd(t_b n_j)
-                    t_ra = substring(t_a n_i (n_ea - n_i))
-                    t_rb = substring(t_b n_j (n_eb - n_j))
-                    t_sa = _StripZeros(t_ra)
-                    t_sb = _StripZeros(t_rb)
+                    ea = _DigitRunEnd(t_a i)
+                    eb = _DigitRunEnd(t_b j)
+                    ra = substring(t_a i (ea - i))
+                    rb = substring(t_b j (eb - j))
+                    sa = _StripZeros(ra)
+                    sb = _StripZeros(rb)
                     cond(
-                        (length(t_sa) != length(t_sb)
-                            n_sign = if(length(t_sa) < length(t_sb) -1 1)
+                        (length(sa) != length(sb)
+                            sign = if(length(sa) < length(sb) -1 1)
                         )
-                        (t_sa != t_sb
-                            n_sign = strcmp(t_sa t_sb)
+                        (sa != sb
+                            sign = strcmp(sa sb)
                         )
-                        (length(t_ra) != length(t_rb)
-                            n_sign = if(length(t_ra) < length(t_rb) -1 1)
+                        (length(ra) != length(rb)
+                            sign = if(length(ra) < length(rb) -1 1)
                         )
                     )
-                    n_i = n_ea
-                    n_j = n_eb
+                    i = ea
+                    j = eb
                 else
-                    n_sign = strcmp(lowerCase(t_ca) lowerCase(t_cb))
-                    n_i++
-                    n_j++
+                    sign = strcmp(lowerCase(ca) lowerCase(cb))
+                    i++
+                    j++
                 )
             )
         )
         cond(
-            (n_sign != 0 n_sign < 0)
-            (n_i > n_la && n_j > n_lb strcmp(t_a t_b) < 0)
-            (n_i > n_la t)
+            (sign != 0 sign < 0)
+            (i > la && j > lb strcmp(t_a t_b) < 0)
+            (i > la t)
             (t nil)
         )
     )
@@ -114,18 +114,18 @@ procedure(NaturalSort(l_items \@key (reverse nil) "lg")  ; -> list
     ;
     ; **返回**
     ;   (list[str]) - 新列表；空输入回 nil
-    let((l_out n_idx)
-        n_idx = 0
-        foreach(t_item l_items
-            n_idx++
-            unless(stringp(t_item)
-                error("ycString::NaturalSort: item #%d must be a string, got %A" n_idx t_item)
+    let((out idx)
+        idx = 0
+        foreach(item l_items
+            idx++
+            unless(stringp(item)
+                error("ycString::NaturalSort: item #%d must be a string, got %A" idx item)
             )
         )
-        l_out = sort(copy(l_items) 'ycString::NaturalLess)
+        out = sort(copy(l_items) 'ycString::NaturalLess)
         if(reverse
-            reverse(l_out)
-            l_out
+            reverse(out)
+            out
         )
     )
 )

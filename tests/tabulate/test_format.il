@@ -1,27 +1,27 @@
 _TestFormatDone = nil
 
-let((l_rows l_head)
-    l_rows = list(list("a" 1) list("bb" 22))
-    l_head = list("name" "n")
+let((rows head)
+    rows = list(list("a" 1) list("bb" 22))
+    head = list("name" "n")
 
     ; ---- four formats ----
     _Assert(
-        ycTabulate::Render(l_rows ?headers l_head)
+        ycTabulate::Render(rows ?headers head)
             == "name  n\n----  --\na     1\nbb    22"
         "format: simple"
     )
     _Assert(
-        ycTabulate::Render(l_rows ?headers l_head ?format "plain")
+        ycTabulate::Render(rows ?headers head ?format "plain")
             == "name  n\na     1\nbb    22"
         "format: plain"
     )
     _Assert(
-        ycTabulate::Render(l_rows ?headers l_head ?format "grid")
+        ycTabulate::Render(rows ?headers head ?format "grid")
             == "+------+----+\n| name | n  |\n+======+====+\n| a    | 1  |\n+------+----+\n| bb   | 22 |\n+------+----+"
         "format: grid"
     )
     _Assert(
-        ycTabulate::Render(l_rows ?headers l_head ?format "pipe")
+        ycTabulate::Render(rows ?headers head ?format "pipe")
             == "| name | n   |\n| :--- | :-- |\n| a    | 1   |\n| bb   | 22  |"
         "format: pipe"
     )

@@ -18,23 +18,23 @@ procedure(_TrimSide(t_s t_chars g_left g_right "ttgg")  ; -> str
     ;
     ; **返回**
     ;   (str) - 剥离后的串；全部剥离时为空串
-    let((n_len n_start n_end)
-        n_len = ycUtf8:::CharCount(t_s)
-        n_start = 1
-        n_end = n_len
+    let((len start end)
+        len = ycUtf8:::CharCount(t_s)
+        start = 1
+        end = len
         when(g_left
-            while(n_start <= n_end && index(t_chars ycUtf8:::Slice(t_s n_start 1))
-                n_start++
+            while(start <= end && index(t_chars ycUtf8:::Slice(t_s start 1))
+                start++
             )
         )
         when(g_right
-            while(n_end >= n_start && index(t_chars ycUtf8:::Slice(t_s n_end 1))
-                n_end--
+            while(end >= start && index(t_chars ycUtf8:::Slice(t_s end 1))
+                end--
             )
         )
-        if(n_start > n_end
+        if(start > end
             ""
-            ycUtf8:::Slice(t_s n_start n_end - n_start + 1)
+            ycUtf8:::Slice(t_s start end - start + 1)
         )
     )
 )
@@ -104,14 +104,14 @@ procedure(_Repeat(t_fill n_times "tx")  ; -> str
     ;
     ; **返回**
     ;   (str) - 重复结果；0 次为空串
-    let((t_res)
-        t_res = ""
+    let((res)
+        res = ""
         when(n_times > 0
-            for(n_i 1 n_times
-                t_res = strcat(t_res t_fill)
+            for(i 1 n_times
+                res = strcat(res t_fill)
             )
         )
-        t_res
+        res
     )
 )
 
@@ -146,18 +146,18 @@ procedure(Pad(t_s n_width \@key (fill " ") (side "end") (unit "display") (ambigu
     when(unit == "display" && ycUtf8:::Width(fill ?ambiguous ambiguous) != 1
         error("ycString::Pad: fill must be single width in display mode (%A)" fill)
     )
-    let((n_have)
-        n_have = if(unit == "char"
+    let((have)
+        have = if(unit == "char"
             ycUtf8:::CharCount(t_s)
             ycUtf8:::Width(t_s ?ambiguous ambiguous)
         )
-        if(n_width <= n_have
+        if(n_width <= have
             t_s
-            let((t_pad)
-                t_pad = _Repeat(fill n_width - n_have)
+            let((pad)
+                pad = _Repeat(fill n_width - have)
                 if(side == "start"
-                    strcat(t_pad t_s)
-                    strcat(t_s t_pad)
+                    strcat(pad t_s)
+                    strcat(t_s pad)
                 )
             )
         )
@@ -183,23 +183,23 @@ procedure(_SplitWhitespace(t_s "t")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]) - 非空词列表；无词时为 nil
-    let((l_p n_i n_j n_len)
-        n_len = length(t_s)
-        n_i = 1
-        while(n_i <= n_len
-            while(n_i <= n_len && _IsWhitespace(substring(t_s n_i 1))
-                n_i++
+    let((p i j len)
+        len = length(t_s)
+        i = 1
+        while(i <= len
+            while(i <= len && _IsWhitespace(substring(t_s i 1))
+                i++
             )
-            n_j = n_i
-            while(n_j <= n_len && !_IsWhitespace(substring(t_s n_j 1))
-                n_j++
+            j = i
+            while(j <= len && !_IsWhitespace(substring(t_s j 1))
+                j++
             )
-            when(n_j > n_i
-                l_p = tconc(l_p substring(t_s n_i n_j - n_i))
+            when(j > i
+                p = tconc(p substring(t_s i j - i))
             )
-            n_i = n_j
+            i = j
         )
-        car(l_p)
+        car(p)
     )
 )
 
@@ -212,26 +212,26 @@ procedure(_SplitLiteral(t_s t_sep "tt")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]) - 切分段（含空段）
-    let((l_p t_rest n_cut n_pos n_len n_sep g_done)
-        t_rest = t_s
-        n_sep = length(t_sep)
-        while(!g_done
-            n_cut = index(t_rest t_sep)
-            if(n_cut
+    let((p rest cut pos len sep2 done)
+        rest = t_s
+        sep2 = length(t_sep)
+        while(!done
+            cut = index(rest t_sep)
+            if(cut
             then
-                n_len = length(t_rest)
-                n_pos = n_len - length(n_cut) + 1
-                l_p = tconc(l_p if(n_pos > 1 substring(t_rest 1 n_pos - 1) ""))
-                t_rest = if(n_pos + n_sep > n_len
+                len = length(rest)
+                pos = len - length(cut) + 1
+                p = tconc(p if(pos > 1 substring(rest 1 pos - 1) ""))
+                rest = if(pos + sep2 > len
                     ""
-                    substring(t_rest n_pos + n_sep n_len - n_pos - n_sep + 1)
+                    substring(rest pos + sep2 len - pos - sep2 + 1)
                 )
             else
-                l_p = tconc(l_p t_rest)
-                g_done = t
+                p = tconc(p rest)
+                done = t
             )
         )
-        car(l_p)
+        car(p)
     )
 )
 
@@ -243,13 +243,13 @@ procedure(_KeepNonEmpty(l_items "l")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]) - 过滤结果；全为空串时为 nil
-    let((l_p)
-        foreach(t_item l_items
-            unless(t_item == ""
-                l_p = tconc(l_p t_item)
+    let((p)
+        foreach(item l_items
+            unless(item == ""
+                p = tconc(p item)
             )
         )
-        car(l_p)
+        car(p)
     )
 )
 
@@ -264,13 +264,13 @@ procedure(Split(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> list
     ;
     ; **返回**
     ;   (list[str]) - 切分段列表
-    let((l_parts)
+    let((parts)
         cond(
             (regex
                 unless(stringp(sep) && sep != ""
                     error("ycString::Split: regex mode needs a non-empty pattern (%A)" sep)
                 )
-                l_parts = ycRegEx:::Split(sep t_s)
+                parts = ycRegEx:::Split(sep t_s)
             )
             (sep
                 unless(stringp(sep)
@@ -279,15 +279,15 @@ procedure(Split(t_s \@key (sep nil) (regex nil) (keepEmpty t) "tggg")  ; -> list
                 unless(sep != ""
                     error("ycString::Split: separator must not be empty")
                 )
-                l_parts = _SplitLiteral(t_s sep)
+                parts = _SplitLiteral(t_s sep)
             )
             (t
-                l_parts = _SplitWhitespace(t_s)
+                parts = _SplitWhitespace(t_s)
             )
         )
         if(keepEmpty
-            l_parts
-            _KeepNonEmpty(l_parts)
+            parts
+            _KeepNonEmpty(parts)
         )
     )
 )
@@ -304,20 +304,20 @@ procedure(Join(l_items \@key (sep "") "lt")  ; -> str
     unless(stringp(sep)
         error("ycString::Join: separator must be a string (%A)" sep)
     )
-    let((l_p n_i)
-        n_i = 0
-        foreach(t_item l_items
-            n_i++
-            unless(stringp(t_item)
-                error("ycString::Join: item #%d is not a string (%A)" n_i t_item)
+    let((p i)
+        i = 0
+        foreach(item l_items
+            i++
+            unless(stringp(item)
+                error("ycString::Join: item #%d is not a string (%A)" i item)
             )
-            unless(n_i == 1
-                l_p = tconc(l_p sep)
+            unless(i == 1
+                p = tconc(p sep)
             )
-            l_p = tconc(l_p t_item)
+            p = tconc(p item)
         )
-        if(l_p
-            apply('strcat car(l_p))
+        if(p
+            apply('strcat car(p))
             ""
         )
     )
@@ -332,12 +332,12 @@ procedure(StartsWith(t_s t_prefix "tt")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 是则为 t；空前缀回 t
-    let((n_lp n_ls)
-        n_lp = length(t_prefix)
-        n_ls = length(t_s)
-        if(n_lp == 0
+    let((lp ls)
+        lp = length(t_prefix)
+        ls = length(t_s)
+        if(lp == 0
             t
-            n_lp <= n_ls && substring(t_s 1 n_lp) == t_prefix
+            lp <= ls && substring(t_s 1 lp) == t_prefix
         )
     )
 )
@@ -351,13 +351,13 @@ procedure(EndsWith(t_s t_suffix "tt")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 是则为 t；空后缀回 t
-    let((n_lx n_ls)
-        n_lx = length(t_suffix)
-        n_ls = length(t_s)
+    let((lx ls)
+        lx = length(t_suffix)
+        ls = length(t_s)
         cond(
-            (n_lx == 0 t)
-            (n_lx > n_ls nil)
-            (t substring(t_s n_ls - n_lx + 1 n_lx) == t_suffix)
+            (lx == 0 t)
+            (lx > ls nil)
+            (t substring(t_s ls - lx + 1 lx) == t_suffix)
         )
     )
 )
@@ -384,27 +384,27 @@ procedure(Replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
             when(t_old == ""
                 error("ycString::Replace: search string must not be empty")
             )
-            let((l_p t_rest n_cut n_pos n_len n_old g_done)
-                t_rest = t_s
-                n_old = length(t_old)
-                while(!g_done
-                    n_cut = index(t_rest t_old)
-                    if(n_cut
+            let((p rest cut pos len old done)
+                rest = t_s
+                old = length(t_old)
+                while(!done
+                    cut = index(rest t_old)
+                    if(cut
                     then
-                        n_len = length(t_rest)
-                        n_pos = n_len - length(n_cut) + 1
-                        l_p = tconc(l_p if(n_pos > 1 substring(t_rest 1 n_pos - 1) ""))
-                        l_p = tconc(l_p t_new)
-                        t_rest = if(n_pos + n_old > n_len
+                        len = length(rest)
+                        pos = len - length(cut) + 1
+                        p = tconc(p if(pos > 1 substring(rest 1 pos - 1) ""))
+                        p = tconc(p t_new)
+                        rest = if(pos + old > len
                             ""
-                            substring(t_rest n_pos + n_old n_len - n_pos - n_old + 1)
+                            substring(rest pos + old len - pos - old + 1)
                         )
                     else
-                        l_p = tconc(l_p t_rest)
-                        g_done = t
+                        p = tconc(p rest)
+                        done = t
                     )
                 )
-                apply('strcat car(l_p))
+                apply('strcat car(p))
             )
         )
     )
@@ -431,26 +431,26 @@ procedure(Count(t_s t_sub \@key (regex nil) "ttg")  ; -> int
             when(t_sub == ""
                 error("ycString::Count: search string must not be empty")
             )
-            let((n_n t_rest n_cut n_pos n_len n_sub g_done)
-                n_n = 0
-                t_rest = t_s
-                n_sub = length(t_sub)
-                while(!g_done
-                    n_cut = index(t_rest t_sub)
-                    if(n_cut
+            let((n rest cut pos len sub done)
+                n = 0
+                rest = t_s
+                sub = length(t_sub)
+                while(!done
+                    cut = index(rest t_sub)
+                    if(cut
                     then
-                        n_n++
-                        n_len = length(t_rest)
-                        n_pos = n_len - length(n_cut) + 1
-                        t_rest = if(n_pos + n_sub > n_len
+                        n++
+                        len = length(rest)
+                        pos = len - length(cut) + 1
+                        rest = if(pos + sub > len
                             ""
-                            substring(t_rest n_pos + n_sub n_len - n_pos - n_sub + 1)
+                            substring(rest pos + sub len - pos - sub + 1)
                         )
                     else
-                        g_done = t
+                        done = t
                     )
                 )
-                n_n
+                n
             )
         )
     )

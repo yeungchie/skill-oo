@@ -14,29 +14,29 @@ procedure(Escape(t_s \@key (quote nil) "tg")  ; -> str
     ;
     ; **返回**
     ;   (str) - 转义后的串；?quote 时可直接 evalstring 回读
-    let((l_p n_len t_ch t_out)
-        n_len = length(t_s)
-        when(n_len > 0
-            for(n_i 1 n_len
-                t_ch = substring(t_s n_i 1)
-                t_out = cond(
-                    (t_ch == "\\" "\\\\")
-                    (t_ch == "\"" "\\\"")
-                    (t_ch == "\n" "\\n")
-                    (t_ch == "\t" "\\t")
-                    (t_ch == "\r" "\\r")
-                    (t t_ch)
+    let((p len ch out)
+        len = length(t_s)
+        when(len > 0
+            for(i 1 len
+                ch = substring(t_s i 1)
+                out = cond(
+                    (ch == "\\" "\\\\")
+                    (ch == "\"" "\\\"")
+                    (ch == "\n" "\\n")
+                    (ch == "\t" "\\t")
+                    (ch == "\r" "\\r")
+                    (t ch)
                 )
-                l_p = tconc(l_p t_out)
+                p = tconc(p out)
             )
         )
-        t_out = if(l_p
-            apply('strcat car(l_p))
+        out = if(p
+            apply('strcat car(p))
             ""
         )
         if(quote
-            lsprintf("\"%s\"" t_out)
-            t_out
+            lsprintf("\"%s\"" out)
+            out
         )
     )
 )
@@ -50,39 +50,39 @@ procedure(Unescape(t_s \@key (strict nil) "tg")  ; -> str
     ;
     ; **返回**
     ;   (str) - 还原后的串
-    let((l_p n_i n_len t_ch t_nx)
-        n_len = length(t_s)
-        n_i = 1
-        while(n_i <= n_len
-            t_ch = substring(t_s n_i 1)
-            if(t_ch == "\\" && n_i < n_len
+    let((p i len ch nx)
+        len = length(t_s)
+        i = 1
+        while(i <= len
+            ch = substring(t_s i 1)
+            if(ch == "\\" && i < len
             then
-                t_nx = substring(t_s n_i + 1 1)
+                nx = substring(t_s i + 1 1)
                 cond(
-                    (t_nx == "\\" l_p = tconc(l_p "\\"))
-                    (t_nx == "\"" l_p = tconc(l_p "\""))
-                    (t_nx == "n" l_p = tconc(l_p "\n"))
-                    (t_nx == "t" l_p = tconc(l_p "\t"))
-                    (t_nx == "r" l_p = tconc(l_p "\r"))
-                    (strict error("ycString::Unescape: unknown escape \\%s" t_nx))
-                    (t l_p = tconc(l_p strcat("\\" t_nx)))
+                    (nx == "\\" p = tconc(p "\\"))
+                    (nx == "\"" p = tconc(p "\""))
+                    (nx == "n" p = tconc(p "\n"))
+                    (nx == "t" p = tconc(p "\t"))
+                    (nx == "r" p = tconc(p "\r"))
+                    (strict error("ycString::Unescape: unknown escape \\%s" nx))
+                    (t p = tconc(p strcat("\\" nx)))
                 )
-                n_i = n_i + 2
+                i = i + 2
             else
-                when(t_ch == "\\"
+                when(ch == "\\"
                     if(strict
                         error("ycString::Unescape: trailing backslash")
-                        l_p = tconc(l_p "\\")
+                        p = tconc(p "\\")
                     )
                 )
-                unless(t_ch == "\\"
-                    l_p = tconc(l_p t_ch)
+                unless(ch == "\\"
+                    p = tconc(p ch)
                 )
-                n_i++
+                i++
             )
         )
-        if(l_p
-            apply('strcat car(l_p))
+        if(p
+            apply('strcat car(p))
             ""
         )
     )

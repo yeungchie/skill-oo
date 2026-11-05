@@ -17,21 +17,21 @@ procedure(_SplitAll(t_s "t")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]) - 行列表
-    let((l_res l_line n_i n_len)
-        n_i = 1
-        n_len = length(t_s)
-        while(n_i <= n_len
-            if(charToInt(getchar(t_s n_i)) == 10
+    let((res line i len)
+        i = 1
+        len = length(t_s)
+        while(i <= len
+            if(charToInt(getchar(t_s i)) == 10
             then
-                l_res = tconc(l_res buildString(car(l_line) ""))
-                l_line = nil
+                res = tconc(res buildString(car(line) ""))
+                line = nil
             else
-                l_line = tconc(l_line getchar(t_s n_i))
+                line = tconc(line getchar(t_s i))
             )
-            n_i++
+            i++
         )
-        l_res = tconc(l_res buildString(car(l_line) ""))
-        car(l_res)
+        res = tconc(res buildString(car(line) ""))
+        car(res)
     )
 )
 
@@ -45,17 +45,17 @@ procedure(_WsPrefix(t_s "t")  ; -> list
     ;   (list) - (前缀串 空白行标志)
     if(t_s == ""
         list("" t)
-        let((n_i n_len n_ch g_done)
-            n_i = 1
-            n_len = length(t_s)
-            while(n_i <= n_len && !g_done
-                n_ch = charToInt(getchar(t_s n_i))
+        let((i len ch done)
+            i = 1
+            len = length(t_s)
+            while(i <= len && !done
+                ch = charToInt(getchar(t_s i))
                 cond(
-                    (n_ch == 32 || n_ch == 9 n_i = n_i + 1)
-                    (t g_done = t)
+                    (ch == 32 || ch == 9 i = i + 1)
+                    (t done = t)
                 )
             )
-            list(substring(t_s 1 n_i - 1) n_i > n_len)
+            list(substring(t_s 1 i - 1) i > len)
         )
     )
 )
@@ -69,12 +69,12 @@ procedure(_CommonPrefix(t_a t_b "tt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 最长公共前缀
-    let((n_len)
-        n_len = if(length(t_a) <= length(t_b) length(t_a) length(t_b))
-        while(n_len > 0 && substring(t_a 1 n_len) != substring(t_b 1 n_len)
-            n_len--
+    let((len)
+        len = if(length(t_a) <= length(t_b) length(t_a) length(t_b))
+        while(len > 0 && substring(t_a 1 len) != substring(t_b 1 len)
+            len--
         )
-        if(n_len == 0 "" substring(t_a 1 n_len))
+        if(len == 0 "" substring(t_a 1 len))
     )
 )
 
@@ -91,37 +91,37 @@ procedure(Dedent(t_text "t")  ; -> str
     unless(stringp(t_text)
         error("ycTextwrap::Dedent: text must be a string (%A)" t_text)
     )
-    let((l_lines t_common g_have l_out)
-        l_lines = _SplitAll(_NormalizeNewlines(t_text))
-        foreach(t_line l_lines
-            let((l_wp)
-                l_wp = _WsPrefix(t_line)
-                unless(cadr(l_wp)
-                    if(g_have
+    let((lines common have out)
+        lines = _SplitAll(_NormalizeNewlines(t_text))
+        foreach(line lines
+            let((wp)
+                wp = _WsPrefix(line)
+                unless(cadr(wp)
+                    if(have
                     then
-                        t_common = _CommonPrefix(t_common car(l_wp))
+                        common = _CommonPrefix(common car(wp))
                     else
-                        t_common = car(l_wp)
-                        g_have = t
+                        common = car(wp)
+                        have = t
                     )
                 )
             )
         )
-        unless(g_have t_common = "")
-        foreach(t_line l_lines
-            let((l_wp)
-                l_wp = _WsPrefix(t_line)
-                if(cadr(l_wp)
-                    l_out = tconc(l_out "")
-                    l_out = tconc(l_out substring(
-                        t_line
-                        length(t_common) + 1
-                        length(t_line) - length(t_common)
+        unless(have common = "")
+        foreach(line lines
+            let((wp)
+                wp = _WsPrefix(line)
+                if(cadr(wp)
+                    out = tconc(out "")
+                    out = tconc(out substring(
+                        line
+                        length(common) + 1
+                        length(line) - length(common)
                     ))
                 )
             )
         )
-        buildString(car(l_out) "\n")
+        buildString(car(out) "\n")
     )
 )
 
@@ -140,15 +140,15 @@ procedure(Indent(t_text \@key (prefix "  ") "tt")  ; -> str
     unless(stringp(prefix)
         error("ycTextwrap::Indent: prefix must be a string (%A)" prefix)
     )
-    let((l_lines l_out)
-        l_lines = _SplitAll(_NormalizeNewlines(t_text))
-        foreach(t_line l_lines
-            if(cadr(_WsPrefix(t_line))
-                l_out = tconc(l_out t_line)
-                l_out = tconc(l_out strcat(prefix t_line))
+    let((lines out)
+        lines = _SplitAll(_NormalizeNewlines(t_text))
+        foreach(line lines
+            if(cadr(_WsPrefix(line))
+                out = tconc(out line)
+                out = tconc(out strcat(prefix line))
             )
         )
-        buildString(car(l_out) "\n")
+        buildString(car(out) "\n")
     )
 )
 
@@ -174,9 +174,9 @@ procedure(Shorten(t_text n_width \@key (placeholder "...") (unit "display") (amb
         error("ycTextwrap::Shorten: placeholder must be a string (%A)" placeholder)
     )
     _CheckUnit("ycTextwrap::Shorten" unit ambiguous)
-    let((l_cps)
-        l_cps = _JoinWordsCps(_WordsFromCps(ycUtf8:::Decode(_NormalizeNewlines(t_text))))
-        ycUtf8:::Encode(_ShortenCps(l_cps n_width placeholder unit ambiguous))
+    let((cps)
+        cps = _JoinWordsCps(_WordsFromCps(ycUtf8:::Decode(_NormalizeNewlines(t_text))))
+        ycUtf8:::Encode(_ShortenCps(cps n_width placeholder unit ambiguous))
     )
 )
 

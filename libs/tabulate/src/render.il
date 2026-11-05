@@ -47,48 +47,48 @@ procedure(Render(l_rows \@key (headers nil) (format "simple") (align "left") (fl
     unless(errset(sprintf(nil floatFmt 0.0) nil)
         error("ycTabulate::Render: invalid floatFmt %A" floatFmt)
     )
-    let((n_cols n_row l_head l_cellRows l_aligns l_decs l_widths)
-        n_cols = cond(
+    let((cols row head cellRows aligns decs widths)
+        cols = cond(
             (headers length(headers))
             (l_rows length(car(l_rows)))
             (t 0)
         )
-        if(n_cols == 0
+        if(cols == 0
         then
             ""
         else
-            l_head = when(headers
+            head = when(headers
                 mapcar(
                     lambda((g_cell) _CellLines(g_cell floatFmt missingVal maxColWidth unit ambiguous))
                     headers
                 )
             )
-            n_row = 0
-            foreach(l_row l_rows
-                n_row++
-                unless(listp(l_row)
-                    error("ycTabulate::Render: row %d is not a list" n_row)
+            row = 0
+            foreach(row2 l_rows
+                row++
+                unless(listp(row2)
+                    error("ycTabulate::Render: row %d is not a list" row)
                 )
-                unless(length(l_row) == n_cols
+                unless(length(row2) == cols
                     error(
                         "ycTabulate::Render: row %d has %d cells, expected %d"
-                        n_row
-                        length(l_row)
-                        n_cols
+                        row
+                        length(row2)
+                        cols
                     )
                 )
-                let((l_cells)
-                    foreach(g_cell l_row
-                        l_cells = tconc(l_cells
-                            _CellLines(g_cell floatFmt missingVal maxColWidth unit ambiguous))
+                let((cells)
+                    foreach(cell row2
+                        cells = tconc(cells
+                            _CellLines(cell floatFmt missingVal maxColWidth unit ambiguous))
                     )
-                    l_cellRows = tconc(l_cellRows car(l_cells))
+                    cellRows = tconc(cellRows car(cells))
                 )
             )
-            l_rows = car(l_cellRows)
+            l_rows = car(cellRows)
             when(format == "pipe"
-                l_head = when(l_head
-                    mapcar(lambda((l_block) _PipeCell(l_block)) l_head)
+                head = when(head
+                    mapcar(lambda((l_block) _PipeCell(l_block)) head)
                 )
                 l_rows = mapcar(
                     lambda((l_row)
@@ -97,33 +97,33 @@ procedure(Render(l_rows \@key (headers nil) (format "simple") (align "left") (fl
                     l_rows
                 )
             )
-            l_aligns = _NormalizeAlign(align n_cols)
-            for(n_i 0 n_cols - 1
-                let((l_blocks l_dec n_w)
-                    l_blocks = _ColumnBlocks(l_head l_rows n_i)
-                    l_dec = when(nth(n_i l_aligns) == "decimal"
-                        _DecInfo(l_blocks unit ambiguous)
+            aligns = _NormalizeAlign(align cols)
+            for(i 0 cols - 1
+                let((blocks dec w)
+                    blocks = _ColumnBlocks(head l_rows i)
+                    dec = when(nth(i aligns) == "decimal"
+                        _DecInfo(blocks unit ambiguous)
                     )
-                    n_w = _ColWidth(l_blocks l_dec unit ambiguous)
-                    when(format == "pipe" && n_w < 3
-                        n_w = 3
+                    w = _ColWidth(blocks dec unit ambiguous)
+                    when(format == "pipe" && w < 3
+                        w = 3
                     )
-                    l_widths = tconc(l_widths n_w)
-                    l_decs = tconc(l_decs l_dec)
+                    widths = tconc(widths w)
+                    decs = tconc(decs dec)
                 )
             )
             cond(
                 ((format == "plain")
-                    _FormatPlain(l_head l_rows car(l_widths) l_aligns car(l_decs) unit ambiguous)
+                    _FormatPlain(head l_rows car(widths) aligns car(decs) unit ambiguous)
                 )
                 ((format == "simple")
-                    _FormatSimple(l_head l_rows car(l_widths) l_aligns car(l_decs) unit ambiguous)
+                    _FormatSimple(head l_rows car(widths) aligns car(decs) unit ambiguous)
                 )
                 ((format == "grid")
-                    _FormatGrid(l_head l_rows car(l_widths) l_aligns car(l_decs) unit ambiguous)
+                    _FormatGrid(head l_rows car(widths) aligns car(decs) unit ambiguous)
                 )
                 (t
-                    _FormatPipe(l_head l_rows car(l_widths) l_aligns car(l_decs) unit ambiguous)
+                    _FormatPipe(head l_rows car(widths) aligns car(decs) unit ambiguous)
                 )
             )
         )
