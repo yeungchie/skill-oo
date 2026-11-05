@@ -3,12 +3,12 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-let((t_dir)
-    t_dir = ycPathLib::CurrentFile()->parent()
-    foreach(t_file '("ns.il" "internal.il" "point.il" "segment.il" "line.il" "rect.il"
+let((dir)
+    dir = ycPathLib::CurrentFile()->parent()
+    foreach(file '("ns.il" "internal.il" "point.il" "segment.il" "line.il" "rect.il"
                      "polygon.il" "boolean.il" "region.il" "size.il"
                      "route.il" "stroke.il" "path.il" "to_path.il")
-        t_dir->join("src" t_file)->load()
+        dir->join("src" file)->load()
     )
 )
 

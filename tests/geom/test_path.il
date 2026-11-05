@@ -1,22 +1,22 @@
 _TestPathDone = nil
 
-let((g_p g_s g_l)
-    g_p = ycGeom::Path(list(0:0 10:0) ?width 2)
-    _Assert(classOf(g_p) == findClass('ycGeom::Path)  "path: class identity")
-    _Assert(g_p->width() == 2.0  "path: width")
-    _Assert(!g_p->isClosed()  "path: open")
-    _Assert(abs(g_p->area() - 20.0) <= 1e-9  "path: butt rectangle area")
-    _Assert(g_p->bBox() == list(list(0.0 -1.0) list(10.0 1.0))
+let((p s l)
+    p = ycGeom::Path(list(0:0 10:0) ?width 2)
+    _Assert(classOf(p) == findClass('ycGeom::Path)  "path: class identity")
+    _Assert(p->width() == 2.0  "path: width")
+    _Assert(!p->isClosed()  "path: open")
+    _Assert(abs(p->area() - 20.0) <= 1e-9  "path: butt rectangle area")
+    _Assert(p->bBox() == list(list(0.0 -1.0) list(10.0 1.0))
         "path: butt rectangle bBox")
 
-    g_s = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
-    _Assert(g_s->isClosed()  "path: closed square")
-    _Assert(abs(g_s->area() - 80.0) <= 1e-9  "path: miter ring area")
-    _Assert(g_s->bBox() == list(list(-1.0 -1.0) list(11.0 11.0))
+    s = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    _Assert(s->isClosed()  "path: closed square")
+    _Assert(abs(s->area() - 80.0) <= 1e-9  "path: miter ring area")
+    _Assert(s->bBox() == list(list(-1.0 -1.0) list(11.0 11.0))
         "path: miter ring bBox")
 
-    g_l = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
-    _Assert(abs(g_l->area() - 40.0) <= 1e-9  "path: miter L area")
+    l = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    _Assert(abs(l->area() - 40.0) <= 1e-9  "path: miter L area")
 )
 
 _AssertError(lambda(() ycGeom::Path(list(0:0 10:0)) t)  "path: width required")
@@ -28,24 +28,24 @@ _AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2 ?eps 0) t)
 _AssertError(lambda(() ycGeom::Path(list(0 0 10 0) ?width 2) t)
     "path: flat coords rejected")
 
-let((g_p g_l g_s n_circle n_quarter)
-    n_circle = 16.0 * sin(3.141592653589793 / 16.0)
-    n_quarter = 4.0 * sin(3.141592653589793 / 16.0)
-    g_p = ycGeom::Path(list(0:0 10:0) ?width 2)
+let((p l s circle quarter)
+    circle = 16.0 * sin(3.141592653589793 / 16.0)
+    quarter = 4.0 * sin(3.141592653589793 / 16.0)
+    p = ycGeom::Path(list(0:0 10:0) ?width 2)
 
-    _Assert(abs(g_p->toRegion(?cap 'square)->area() - 24.0) <= 1e-9
+    _Assert(abs(p->toRegion(?cap 'square)->area() - 24.0) <= 1e-9
         "path: square cap area")
-    _Assert(abs(g_p->toRegion(?cap 'round)->area() - (20.0 + n_circle)) <= 1e-9
+    _Assert(abs(p->toRegion(?cap 'round)->area() - (20.0 + circle)) <= 1e-9
         "path: round cap area")
 
-    g_l = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
-    _Assert(abs(g_l->toRegion(?join 'bevel)->area() - 39.5) <= 1e-9
+    l = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    _Assert(abs(l->toRegion(?join 'bevel)->area() - 39.5) <= 1e-9
         "path: bevel join area")
-    _Assert(abs(g_l->toRegion(?join 'round)->area() - (40.0 - 1.0 + n_quarter)) <= 1e-9
+    _Assert(abs(l->toRegion(?join 'round)->area() - (40.0 - 1.0 + quarter)) <= 1e-9
         "path: round join area")
 
-    g_s = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
-    _Assert(abs(g_s->toRegion(?cap 'round)->area() - 80.0) <= 1e-9
+    s = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    _Assert(abs(s->toRegion(?cap 'round)->area() - 80.0) <= 1e-9
         "path: closed ignores cap")
 )
 
@@ -62,108 +62,108 @@ _AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?eps 0) t
 _AssertError(lambda(() ycGeom::Path(list(0:0 10:0) ?width 2)->toRegion(?grid 0) t)
     "path: bad grid rejected")
 
-let((g_p g_s)
-    g_p = ycGeom::Path(list(0:0 10:0) ?width 2)
-    _Assert(abs(g_p->perimeter() - 24.0) <= 1e-9  "path: butt perimeter")
-    _Assert(g_p->centroid()->toSkill() == list(5.0 0.0)  "path: butt centroid")
-    _Assert(g_p->toRect()->toSkill() == list(list(0.0 -1.0) list(10.0 1.0))
+let((p s)
+    p = ycGeom::Path(list(0:0 10:0) ?width 2)
+    _Assert(abs(p->perimeter() - 24.0) <= 1e-9  "path: butt perimeter")
+    _Assert(p->centroid()->toSkill() == list(5.0 0.0)  "path: butt centroid")
+    _Assert(p->toRect()->toSkill() == list(list(0.0 -1.0) list(10.0 1.0))
         "path: butt toRect")
-    _Assert(g_p->contains(ycGeom::Point(5:0))  "path: contains center")
-    _Assert(!g_p->contains(ycGeom::Point(5:5))  "path: excludes outside")
-    _Assert(g_p->onBoundary(ycGeom::Point(5:1))  "path: boundary point")
+    _Assert(p->contains(ycGeom::Point(5:0))  "path: contains center")
+    _Assert(!p->contains(ycGeom::Point(5:5))  "path: excludes outside")
+    _Assert(p->onBoundary(ycGeom::Point(5:1))  "path: boundary point")
 
-    g_s = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
-    _Assert(abs(g_s->perimeter() - 80.0) <= 1e-9  "path: ring perimeter")
-    _Assert(g_s->centroid()->toSkill() == list(5.0 5.0)  "path: ring centroid")
+    s = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    _Assert(abs(s->perimeter() - 80.0) <= 1e-9  "path: ring perimeter")
+    _Assert(s->centroid()->toSkill() == list(5.0 5.0)  "path: ring centroid")
 )
 
-let((g_p g_ok g_open g_edge)
-    g_p = ycGeom::Path(list(0:0 2:0 2:1 0:1 0:0) ?width 0.2)
-    _Assert(g_p->toLegalPathPoints() == list(
+let((p ok open edge)
+    p = ycGeom::Path(list(0:0 2:0 2:1 0:1 0:0) ?width 0.2)
+    _Assert(p->toLegalPathPoints() == list(
         list(1.0 0.0) list(2.0 0.0) list(2.0 1.0)
         list(0.0 1.0) list(0.0 0.0) list(1.0 0.0))
         "path: seam moved to straight edge")
 
-    g_ok = ycGeom::Path(list(1:0 2:0 2:1 0:1 0:0 1:0) ?width 0.2)
-    _Assert(g_ok->toLegalPathPoints() == list(
+    ok = ycGeom::Path(list(1:0 2:0 2:1 0:1 0:0 1:0) ?width 0.2)
+    _Assert(ok->toLegalPathPoints() == list(
         list(1.0 0.0) list(2.0 0.0) list(2.0 1.0)
         list(0.0 1.0) list(0.0 0.0) list(1.0 0.0))
         "path: legal seam unchanged")
 
-    g_open = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
-    _Assert(g_open->toLegalPathPoints() == list(
+    open = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    _Assert(open->toLegalPathPoints() == list(
         list(0.0 0.0) list(10.0 0.0) list(10.0 10.0))
         "path: open points unchanged")
 
-    g_edge = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
-    _Assert(g_edge->toLegalPathPoints(?edge 2 ?ratio 0.25) == list(
+    edge = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    _Assert(edge->toLegalPathPoints(?edge 2 ?ratio 0.25) == list(
         list(10.0 2.5) list(10.0 10.0) list(0.0 10.0)
         list(0.0 0.0) list(10.0 0.0) list(10.0 2.5))
         "path: edge and ratio options")
 )
 
-let((g_e g_o g_bad)
-    g_e = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
-    g_o = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
-    g_bad = ycGeom::Path(list(0:0 10:10 10:0 0:10 0:0) ?width 2)
-    _AssertError(lambda(() g_e->toLegalPathPoints(?edge 5) t)
+let((e o bad)
+    e = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    o = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    bad = ycGeom::Path(list(0:0 10:10 10:0 0:10 0:0) ?width 2)
+    _AssertError(lambda(() e->toLegalPathPoints(?edge 5) t)
         "path: edge out of range")
-    _AssertError(lambda(() g_o->toLegalPathPoints(?ratio 0) t)
+    _AssertError(lambda(() o->toLegalPathPoints(?ratio 0) t)
         "path: ratio zero rejected")
-    _AssertError(lambda(() g_o->toLegalPathPoints(?ratio "x") t)
+    _AssertError(lambda(() o->toLegalPathPoints(?ratio "x") t)
         "path: string ratio rejected")
-    _AssertError(lambda(() g_bad->toLegalPathPoints() t)
+    _AssertError(lambda(() bad->toLegalPathPoints() t)
         "path: self-intersection rejected")
 )
 
-let((g_p g_s g_r l_s l_r)
-    g_p = ycGeom::Path(list(0:0 10:0) ?width 2)
-    l_s = g_p->toSkill()
-    _Assert(l_s == list(list(list(0.0 0.0) list(10.0 0.0)) 2.0)
+let((p s r s2 r2)
+    p = ycGeom::Path(list(0:0 10:0) ?width 2)
+    s2 = p->toSkill()
+    _Assert(s2 == list(list(list(0.0 0.0) list(10.0 0.0)) 2.0)
         "path: open toSkill")
-    g_r = ycGeom::Path(l_s)
-    _Assert(g_r->toSkill() == l_s  "path: open state round-trip")
+    r = ycGeom::Path(s2)
+    _Assert(r->toSkill() == s2  "path: open state round-trip")
 
-    g_s = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
-    l_s = g_s->toSkill()
-    _Assert(l_s == list(list(list(0.0 0.0) list(10.0 0.0)
+    s = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    s2 = s->toSkill()
+    _Assert(s2 == list(list(list(0.0 0.0) list(10.0 0.0)
         list(10.0 10.0) list(0.0 10.0) list(0.0 0.0)) 2.0)
         "path: closed toSkill")
-    g_r = ycGeom::Path(l_s)
-    _Assert(g_r->isClosed()  "path: closed state round-trip closed")
-    _Assert(g_r->toSkill() == l_s  "path: closed state round-trip")
+    r = ycGeom::Path(s2)
+    _Assert(r->isClosed()  "path: closed state round-trip closed")
+    _Assert(r->toSkill() == s2  "path: closed state round-trip")
 
-    g_r = ycGeom::Path(ycGeom::Route(list(0:0 10:0 10:10)) ?width 2)
-    _Assert(g_r->route()->toSkill() == list(list(0.0 0.0) list(10.0 0.0) list(10.0 10.0))
+    r = ycGeom::Path(ycGeom::Route(list(0:0 10:0 10:10)) ?width 2)
+    _Assert(r->route()->toSkill() == list(list(0.0 0.0) list(10.0 0.0) list(10.0 10.0))
         "path: Route input")
 
-    l_r = ycGeom::Route(g_s->route()->toSkill())
-    _Assert(l_r->isClosed()  "route: state round-trip closed")
+    r2 = ycGeom::Route(s->route()->toSkill())
+    _Assert(r2->isClosed()  "route: state round-trip closed")
 )
 
-let((l_s (ycGeom::Path(list(0:0 10:0) ?width 2)->toSkill()))
-    _AssertError(lambda(() ycGeom::Path(l_s ?width 3) t)
+let((s (ycGeom::Path(list(0:0 10:0) ?width 2)->toSkill()))
+    _AssertError(lambda(() ycGeom::Path(s ?width 3) t)
         "path: duplicate width rejected")
 )
 
-let((g_l g_s g_t g_p)
-    g_l = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
-    _Assert(abs(g_l->toRegion(?miterLimit 1.4142135623730951)->area() - 40.0) <= 1e-9
+let((l s value p)
+    l = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    _Assert(abs(l->toRegion(?miterLimit 1.4142135623730951)->area() - 40.0) <= 1e-9
         "path: miter exactly at limit stays miter")
-    _Assert(abs(g_l->toRegion(?miterLimit 1.414)->area() - 39.5) <= 1e-9
+    _Assert(abs(l->toRegion(?miterLimit 1.414)->area() - 39.5) <= 1e-9
         "path: miter over limit falls back to bevel")
 
-    g_s = ycGeom::Path(list(0:0 10:0 5:0) ?width 2)
-    _Assert(abs(g_s->area() - 20.0) <= 1e-9  "path: reversal spike area")
-    _Assert(g_s->bBox() == list(list(0.0 -1.0) list(10.0 1.0))
+    s = ycGeom::Path(list(0:0 10:0 5:0) ?width 2)
+    _Assert(abs(s->area() - 20.0) <= 1e-9  "path: reversal spike area")
+    _Assert(s->bBox() == list(list(0.0 -1.0) list(10.0 1.0))
         "path: reversal spike bBox")
 
-    g_t = ycGeom::Path(list(0:0 1e-6:0 -0.5e-6:0.5e-6 0:0) ?width 1e-7)
-    _Assert(length(g_t->toLegalPathPoints()) == 5
+    value = ycGeom::Path(list(0:0 1e-6:0 -0.5e-6:0.5e-6 0:0) ?width 1e-7)
+    _Assert(length(value->toLegalPathPoints()) == 5
         "path: tiny scale seam is not treated as collinear")
 
-    g_p = ycGeom::Path(list(0:0 10:0) ?width 2)
-    _Assert(abs(g_p->toRegion(?cap 'round ?roundSegments 1)->area() - 22.0) <= 1e-9
+    p = ycGeom::Path(list(0:0 10:0) ?width 2)
+    _Assert(abs(p->toRegion(?cap 'round ?roundSegments 1)->area() - 22.0) <= 1e-9
         "path: roundSegments changes cap polygon")
 )
 
@@ -179,12 +179,12 @@ _AssertError(lambda(() ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
     ->toLegalPathPoints(?edge 1.5) t)  "path: float edge rejected")
 
 ; ?edge 上界在开放路径上同样校验
-let((g_two g_three)
-    g_two = ycGeom::Path(list(0:0 10:0) ?width 2)
-    g_three = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
-    _AssertError(lambda(() g_two->toLegalPathPoints(?edge 2) t)
+let((two three)
+    two = ycGeom::Path(list(0:0 10:0) ?width 2)
+    three = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    _AssertError(lambda(() two->toLegalPathPoints(?edge 2) t)
         "path: open path edge out of range")
-    _Assert(g_three->toLegalPathPoints(?edge 2)
+    _Assert(three->toLegalPathPoints(?edge 2)
         == list(list(0.0 0.0) list(10.0 0.0) list(10.0 10.0))
         "path: open path edge in range")
 )

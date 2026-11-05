@@ -9,33 +9,33 @@ procedure(_SizeBoxNear(l_a l_b "ll")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 两个角点的 x/y 都在 1e-9 内相等为 t
-    let((g_ok)
-        g_ok = length(l_a) == 2 && length(l_b) == 2
-        when(g_ok
-            for(n_i 1 2
-                when(!listp(ycGeom::_Nth1(n_i l_a)) || !listp(ycGeom::_Nth1(n_i l_b))
-                    g_ok = nil
+    let((ok)
+        ok = length(l_a) == 2 && length(l_b) == 2
+        when(ok
+            for(i 1 2
+                when(!listp(ycGeom::_Nth1(i l_a)) || !listp(ycGeom::_Nth1(i l_b))
+                    ok = nil
                 )
-                when(g_ok
-                    when(abs(car(ycGeom::_Nth1(n_i l_a)) - car(ycGeom::_Nth1(n_i l_b))) > 1e-9
-                        g_ok = nil
+                when(ok
+                    when(abs(car(ycGeom::_Nth1(i l_a)) - car(ycGeom::_Nth1(i l_b))) > 1e-9
+                        ok = nil
                     )
-                    when(abs(cadr(ycGeom::_Nth1(n_i l_a)) - cadr(ycGeom::_Nth1(n_i l_b))) > 1e-9
-                        g_ok = nil
+                    when(abs(cadr(ycGeom::_Nth1(i l_a)) - cadr(ycGeom::_Nth1(i l_b))) > 1e-9
+                        ok = nil
                     )
                 )
             )
         )
-        g_ok
+        ok
     )
 )
 
 
-let((g_sq)
-    g_sq = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
-    _Assert(g_sq->size(1)->area() > 100.0  "size: numeric grow")
-    _Assert(g_sq->size(-1)->area() < 100.0  "size: numeric shrink")
-    _Assert(g_sq->size(0)->area() == 100.0  "size: zero no-op")
+let((sq)
+    sq = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
+    _Assert(sq->size(1)->area() > 100.0  "size: numeric grow")
+    _Assert(sq->size(-1)->area() < 100.0  "size: numeric shrink")
+    _Assert(sq->size(0)->area() == 100.0  "size: zero no-op")
 )
 
 _AssertError(lambda(() ycGeom::Polygon('((0 0) (4 0) (0 4)))->size(1 ?dir 'bad) t)  "size: bad direction")
@@ -45,54 +45,54 @@ _AssertError(lambda(() ycGeom::Polygon('((0 0) (4 0) (0 4)))->size(1 ?corner 'ba
 _AssertError(lambda(() ycGeom::Polygon('((0 0) (4 0) (0 4)))->size(1 ?miterLimit 0) t)  "size: bad miter limit")
 _AssertError(lambda(() ycGeom::Polygon('((0 0) (4 0) (0 4)))->size(1 ?roundSegments 0) t)  "size: bad round segments")
 
-let((g_sq)
-    g_sq = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
-    _Assert(g_sq->size(1 ?corner 'miter)->bBox() == list(list(-1.0 -1.0) list(11.0 11.0))  "size: miter bBox")
-    _Assert(g_sq->size(1 ?corner 'miter)->area() == 144.0  "size: miter area")
-    _Assert(g_sq->size(1 ?dir 'right ?corner 'miter)->bBox() == list(list(0.0 0.0) list(11.0 10.0))  "size: right bBox")
-    _Assert(g_sq->size(1 ?dir '(up down) ?corner 'miter)->bBox() == list(list(0.0 -1.0) list(10.0 11.0))  "size: vertical bBox")
-    _Assert(g_sq->size(1 ?dir '(left up) ?corner 'miter)->bBox() == list(list(-1.0 0.0) list(10.0 11.0))  "size: corner directions bBox")
-    _Assert(g_sq->size(1 ?corner 'bevel)->area() == 142.0  "size: bevel area")
-    _Assert(g_sq->size(1 ?corner 'none)->area() == 140.0  "size: none area")
-    _Assert(g_sq->size(1 ?corner 'miter ?miterLimit 1)->area() < 144.0  "size: miter limit")
-    _Assert(g_sq->size(1 ?corner 'round)->area() < 144.0  "size: round area")
-    _Assert(g_sq->size(1 ?corner 'round)->area() > 100.0  "size: round grows")
-    _Assert(_SizeBoxNear(g_sq->size(1.2 ?ratio t)->bBox() list(list(-1.0 -1.0) list(11.0 11.0)))  "size: ratio all bBox")
-    _Assert(_SizeBoxNear(g_sq->size(0.8 ?ratio t)->bBox() list(list(1.0 1.0) list(9.0 9.0)))  "size: ratio shrink bBox")
-    _Assert(g_sq->size(1.2 ?ratio t ?dir 'right)->bBox() == list(list(0.0 0.0) list(12.0 10.0))  "size: ratio right bBox")
-    _Assert(_SizeBoxNear(g_sq->size(1.2 ?ratio t ?dir '(left right))->bBox() list(list(-1.0 0.0) list(11.0 10.0)))  "size: ratio both x bBox")
+let((sq)
+    sq = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
+    _Assert(sq->size(1 ?corner 'miter)->bBox() == list(list(-1.0 -1.0) list(11.0 11.0))  "size: miter bBox")
+    _Assert(sq->size(1 ?corner 'miter)->area() == 144.0  "size: miter area")
+    _Assert(sq->size(1 ?dir 'right ?corner 'miter)->bBox() == list(list(0.0 0.0) list(11.0 10.0))  "size: right bBox")
+    _Assert(sq->size(1 ?dir '(up down) ?corner 'miter)->bBox() == list(list(0.0 -1.0) list(10.0 11.0))  "size: vertical bBox")
+    _Assert(sq->size(1 ?dir '(left up) ?corner 'miter)->bBox() == list(list(-1.0 0.0) list(10.0 11.0))  "size: corner directions bBox")
+    _Assert(sq->size(1 ?corner 'bevel)->area() == 142.0  "size: bevel area")
+    _Assert(sq->size(1 ?corner 'none)->area() == 140.0  "size: none area")
+    _Assert(sq->size(1 ?corner 'miter ?miterLimit 1)->area() < 144.0  "size: miter limit")
+    _Assert(sq->size(1 ?corner 'round)->area() < 144.0  "size: round area")
+    _Assert(sq->size(1 ?corner 'round)->area() > 100.0  "size: round grows")
+    _Assert(_SizeBoxNear(sq->size(1.2 ?ratio t)->bBox() list(list(-1.0 -1.0) list(11.0 11.0)))  "size: ratio all bBox")
+    _Assert(_SizeBoxNear(sq->size(0.8 ?ratio t)->bBox() list(list(1.0 1.0) list(9.0 9.0)))  "size: ratio shrink bBox")
+    _Assert(sq->size(1.2 ?ratio t ?dir 'right)->bBox() == list(list(0.0 0.0) list(12.0 10.0))  "size: ratio right bBox")
+    _Assert(_SizeBoxNear(sq->size(1.2 ?ratio t ?dir '(left right))->bBox() list(list(-1.0 0.0) list(11.0 10.0)))  "size: ratio both x bBox")
 )
 
-let((g_p g_r)
-    g_p = ycGeom::Polygon('((0 0) (2 0) (4 0) (4 4) (0 4)))
-    g_r = g_p->size(0)
-    _Assert(length(car(g_r->polygons())->points()) == 4  "size: zero cleans collinear")
-    _Assert(length(car(g_p->size(1)->polygons())->points()) == 4  "size: offset cleans collinear")
+let((p r)
+    p = ycGeom::Polygon('((0 0) (2 0) (4 0) (4 4) (0 4)))
+    r = p->size(0)
+    _Assert(length(car(r->polygons())->points()) == 4  "size: zero cleans collinear")
+    _Assert(length(car(p->size(1)->polygons())->points()) == 4  "size: offset cleans collinear")
 )
 
-let((g_hole g_r g_multi)
-    g_hole = ycGeom::Polygon('((0 0) (10 0) (10 7) (7 7) (7 3) (3 3)
+let((hole r multi)
+    hole = ycGeom::Polygon('((0 0) (10 0) (10 7) (7 7) (7 3) (3 3)
                               (3 7) (7 7) (10 7) (10 10) (0 10)))
-    _Assert(g_hole->size(1)->area() > 84.0  "size: hole grows")
-    _Assert(g_hole->size(-1)->area() < 84.0  "size: hole shrinks")
-    g_r = ycGeom::Region(list(g_hole))
-    _Assert(g_r->size(1)->area() > g_r->area()  "size: region hole")
-    g_multi = ycGeom::Region(list(
+    _Assert(hole->size(1)->area() > 84.0  "size: hole grows")
+    _Assert(hole->size(-1)->area() < 84.0  "size: hole shrinks")
+    r = ycGeom::Region(list(hole))
+    _Assert(r->size(1)->area() > r->area()  "size: region hole")
+    multi = ycGeom::Region(list(
         ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
         ycGeom::Polygon('((10 0) (14 0) (14 4) (10 4)))
     ))
-    _Assert(g_multi->size(1)->area() > g_multi->area()  "size: region independent")
+    _Assert(multi->size(1)->area() > multi->area()  "size: region independent")
 )
 _Assert(ycGeom::Region(nil)->size(1)->isEmpty()  "size: empty region")
 
-let((g_tri g_l)
-    g_tri = ycGeom::Polygon('((0 0) (10 0) (0 10)))
-    _Assert(g_tri->size(1)->area() > 50.0  "size: triangle grow")
-    _Assert(g_tri->size(1 ?dir 'right)->area() > 50.0  "size: triangle right")
-    _Assert(g_tri->size(1 ?corner 'none)->area() > 50.0  "size: triangle none")
-    g_l = ycGeom::Polygon('((0 0) (10 0) (10 4) (4 4) (4 10) (0 10)))
-    _Assert(g_l->size(1)->area() > 64.0  "size: concave grow")
-    _Assert(g_l->size(-1)->area() < 64.0  "size: concave shrink")
+let((tri l)
+    tri = ycGeom::Polygon('((0 0) (10 0) (0 10)))
+    _Assert(tri->size(1)->area() > 50.0  "size: triangle grow")
+    _Assert(tri->size(1 ?dir 'right)->area() > 50.0  "size: triangle right")
+    _Assert(tri->size(1 ?corner 'none)->area() > 50.0  "size: triangle none")
+    l = ycGeom::Polygon('((0 0) (10 0) (10 4) (4 4) (4 10) (0 10)))
+    _Assert(l->size(1)->area() > 64.0  "size: concave grow")
+    _Assert(l->size(-1)->area() < 64.0  "size: concave shrink")
 )
 
 _TestChildDone = t

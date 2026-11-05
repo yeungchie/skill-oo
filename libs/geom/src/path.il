@@ -89,9 +89,9 @@ procedure(_InstallPath(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Region) - 描边区域
-        let((n_half n_limit n_segments n_eps n_grid l_pieces
-                l_pts n_len n_seg n_i g_a g_b g_prev g_v g_next
-                g_piece n_dx n_dy n_dlen g_dir)
+        let((half limit segments eps2 grid2 pieces
+                pts len seg i a b prev v next
+                piece dx dy dlen dir)
             unless(symbolp(cap) && member(cap '(butt square round))
                 error("ycGeom::Path->toRegion: ?cap must be butt, square, or round, got %A"
                     cap)
@@ -100,79 +100,79 @@ procedure(_InstallPath(self "g")  ; -> t
                 error("ycGeom::Path->toRegion: ?join must be miter, round, or bevel, got %A"
                     join)
             )
-            n_half = self->_data->width / 2.0
-            n_limit = _SizeMiterLimit(miterLimit)
-            n_segments = _SizeRoundSegments(roundSegments)
-            n_eps = _Eps(eps)
-            n_grid = _Grid(grid)
-            l_pts = self->_data->route->points()
-            n_len = length(l_pts)
+            half = self->_data->width / 2.0
+            limit = _SizeMiterLimit(miterLimit)
+            segments = _SizeRoundSegments(roundSegments)
+            eps2 = _Eps(eps)
+            grid2 = _Grid(grid)
+            pts = self->_data->route->points()
+            len = length(pts)
 
-            n_seg = if(self->_data->route->isClosed() n_len (n_len - 1))
-            for(n_i 1 n_seg
-                g_a = _Nth1(n_i l_pts)
-                g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
-                g_piece = _StrokeBand(g_a g_b n_half)
-                when(g_piece
-                    l_pieces = tconc(l_pieces g_piece)
+            seg = if(self->_data->route->isClosed() len (len - 1))
+            for(i2 1 seg
+                a = _Nth1(i2 pts)
+                b = _Nth1(if(i2 == len 1 (i2 + 1)) pts)
+                piece = _StrokeBand(a b half)
+                when(piece
+                    pieces = tconc(pieces piece)
                 )
             )
 
             if(self->_data->route->isClosed()
             then
-                for(n_i 1 n_len
-                    g_prev = _Nth1(if(n_i == 1 n_len (n_i - 1)) l_pts)
-                    g_v = _Nth1(n_i l_pts)
-                    g_next = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
-                    g_piece = _StrokeJoin(g_prev g_v g_next n_half
-                        join n_limit n_segments)
-                    when(g_piece
-                        l_pieces = tconc(l_pieces g_piece)
+                for(i2 1 len
+                    prev = _Nth1(if(i2 == 1 len (i2 - 1)) pts)
+                    v = _Nth1(i2 pts)
+                    next = _Nth1(if(i2 == len 1 (i2 + 1)) pts)
+                    piece = _StrokeJoin(prev v next half
+                        join limit segments)
+                    when(piece
+                        pieces = tconc(pieces piece)
                     )
                 )
             else
-                for(n_i 2 n_len - 1
-                    g_prev = _Nth1((n_i - 1) l_pts)
-                    g_v = _Nth1(n_i l_pts)
-                    g_next = _Nth1((n_i + 1) l_pts)
-                    g_piece = _StrokeJoin(g_prev g_v g_next n_half
-                        join n_limit n_segments)
-                    when(g_piece
-                        l_pieces = tconc(l_pieces g_piece)
+                for(i2 2 len - 1
+                    prev = _Nth1((i2 - 1) pts)
+                    v = _Nth1(i2 pts)
+                    next = _Nth1((i2 + 1) pts)
+                    piece = _StrokeJoin(prev v next half
+                        join limit segments)
+                    when(piece
+                        pieces = tconc(pieces piece)
                     )
                 )
 
-                g_a = car(l_pts)
-                g_b = _Nth1(2 l_pts)
-                n_dx = g_a->x() - g_b->x()
-                n_dy = g_a->y() - g_b->y()
-                n_dlen = sqrt(n_dx * n_dx + n_dy * n_dy)
-                when(n_dlen > _Eps(nil)
-                    g_dir = Point(list(n_dx / n_dlen n_dy / n_dlen))
-                    g_piece = _StrokeCap(g_a g_dir n_half cap n_segments)
-                    when(g_piece
-                        l_pieces = tconc(l_pieces g_piece)
+                a = car(pts)
+                b = _Nth1(2 pts)
+                dx = a->x() - b->x()
+                dy = a->y() - b->y()
+                dlen = sqrt(dx * dx + dy * dy)
+                when(dlen > _Eps(nil)
+                    dir = Point(list(dx / dlen dy / dlen))
+                    piece = _StrokeCap(a dir half cap segments)
+                    when(piece
+                        pieces = tconc(pieces piece)
                     )
                 )
 
-                g_a = _Nth1(n_len l_pts)
-                g_b = _Nth1((n_len - 1) l_pts)
-                n_dx = g_a->x() - g_b->x()
-                n_dy = g_a->y() - g_b->y()
-                n_dlen = sqrt(n_dx * n_dx + n_dy * n_dy)
-                when(n_dlen > _Eps(nil)
-                    g_dir = Point(list(n_dx / n_dlen n_dy / n_dlen))
-                    g_piece = _StrokeCap(g_a g_dir n_half cap n_segments)
-                    when(g_piece
-                        l_pieces = tconc(l_pieces g_piece)
+                a = _Nth1(len pts)
+                b = _Nth1((len - 1) pts)
+                dx = a->x() - b->x()
+                dy = a->y() - b->y()
+                dlen = sqrt(dx * dx + dy * dy)
+                when(dlen > _Eps(nil)
+                    dir = Point(list(dx / dlen dy / dlen))
+                    piece = _StrokeCap(a dir half cap segments)
+                    when(piece
+                        pieces = tconc(pieces piece)
                     )
                 )
             )
 
-            unless(l_pieces
+            unless(pieces
                 error("ycGeom::Path->toRegion: stroke degraded to an empty region")
             )
-            Region(car(l_pieces) ?normalize t ?grid n_grid ?eps n_eps)
+            Region(car(pieces) ?normalize t ?grid grid2 ?eps eps2)
         )
     )
     self->area = lambda(()  ; -> float
@@ -251,8 +251,8 @@ procedure(_InstallPath(self "g")  ; -> t
         ;
         ; **返回**
         ;   (list[list[float]]) - 闭合时首尾重复；无法单 path 表示 error
-        let((l_pts l_src l_res n_len n_eps n_tol g_closed n_i n_j g_a g_b g_c g_d
-                n_cross n_dot n_l1 n_l2 n_idx g_p n_edge)
+        let((pts src res len eps2 tol closed i j a b c d
+                cross dot l1 l2 idx p edge2)
             unless(fixp(edge) && edge >= 1
                 error("ycGeom::Path->toLegalPathPoints: ?edge must be a positive integer, got %A"
                     edge)
@@ -261,92 +261,92 @@ procedure(_InstallPath(self "g")  ; -> t
                 error("ycGeom::Path->toLegalPathPoints: ?ratio must be in (0,1), got %A"
                     ratio)
             )
-            n_eps = _Eps(eps)
-            n_tol = max(_AngleTol() n_eps)
-            l_pts = self->_data->route->points()
-            n_len = length(l_pts)
-            g_closed = self->_data->route->isClosed()
+            eps2 = _Eps(eps)
+            tol = max(_AngleTol() eps2)
+            pts = self->_data->route->points()
+            len = length(pts)
+            closed = self->_data->route->isClosed()
             ; 开放路径没有接缝，但 ?edge 仍按 1..边数 校验，
             ; 避免同一个关键字在两类路径上给出不一致的契约。
-            n_edge = if(g_closed n_len (n_len - 1))
-            when(edge > n_edge
+            edge2 = if(closed len (len - 1))
+            when(edge > edge2
                 error("ycGeom::Path->toLegalPathPoints: ?edge %d out of range 1..%d"
-                    edge n_edge)
+                    edge edge2)
             )
 
-            for(n_i 1 n_edge
-                for(n_j 1 n_edge
-                    when(n_j > n_i
-                        && !(n_j == (n_i + 1))
-                        && !(g_closed && n_i == 1 && n_j == n_edge)
-                        g_a = _Nth1(n_i l_pts)
-                        g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
-                        g_c = _Nth1(n_j l_pts)
-                        g_d = _Nth1(if(n_j == n_len 1 (n_j + 1)) l_pts)
-                        when(_SegmentsCross(g_a g_b g_c g_d n_eps)
+            for(i2 1 edge2
+                for(j2 1 edge2
+                    when(j2 > i2
+                        && !(j2 == (i2 + 1))
+                        && !(closed && i2 == 1 && j2 == edge2)
+                        a = _Nth1(i2 pts)
+                        b = _Nth1(if(i2 == len 1 (i2 + 1)) pts)
+                        c = _Nth1(j2 pts)
+                        d = _Nth1(if(j2 == len 1 (j2 + 1)) pts)
+                        when(_SegmentsCross(a b c d eps2)
                             error("ycGeom::Path->toLegalPathPoints: path self-intersects; a single native path cannot represent it, use toRegion()")
                         )
                     )
                 )
             )
 
-            for(n_i if(g_closed 1 2) if(g_closed n_len (n_len - 1))
-                g_a = _Nth1(if(n_i == 1 n_len (n_i - 1)) l_pts)
-                g_b = _Nth1(n_i l_pts)
-                g_c = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
-                n_cross = (g_b->x() - g_a->x()) * (g_c->y() - g_b->y())
-                    - (g_b->y() - g_a->y()) * (g_c->x() - g_b->x())
-                n_dot = (g_b->x() - g_a->x()) * (g_c->x() - g_b->x())
-                    + (g_b->y() - g_a->y()) * (g_c->y() - g_b->y())
-                n_l1 = sqrt((g_b->x() - g_a->x()) * (g_b->x() - g_a->x())
-                    + (g_b->y() - g_a->y()) * (g_b->y() - g_a->y()))
-                n_l2 = sqrt((g_c->x() - g_b->x()) * (g_c->x() - g_b->x())
-                    + (g_c->y() - g_b->y()) * (g_c->y() - g_b->y()))
-                when(n_l1 > 0.0 && n_l2 > 0.0
-                    && abs(n_cross / (n_l1 * n_l2)) <= n_tol
-                    && n_dot < 0.0
+            for(i2 if(closed 1 2) if(closed len (len - 1))
+                a = _Nth1(if(i2 == 1 len (i2 - 1)) pts)
+                b = _Nth1(i2 pts)
+                c = _Nth1(if(i2 == len 1 (i2 + 1)) pts)
+                cross = (b->x() - a->x()) * (c->y() - b->y())
+                    - (b->y() - a->y()) * (c->x() - b->x())
+                dot = (b->x() - a->x()) * (c->x() - b->x())
+                    + (b->y() - a->y()) * (c->y() - b->y())
+                l1 = sqrt((b->x() - a->x()) * (b->x() - a->x())
+                    + (b->y() - a->y()) * (b->y() - a->y()))
+                l2 = sqrt((c->x() - b->x()) * (c->x() - b->x())
+                    + (c->y() - b->y()) * (c->y() - b->y()))
+                when(l1 > 0.0 && l2 > 0.0
+                    && abs(cross / (l1 * l2)) <= tol
+                    && dot < 0.0
                     error("ycGeom::Path->toLegalPathPoints: path doubles back at a vertex; use toRegion()")
                 )
             )
 
-            if(!g_closed
+            if(!closed
             then
                 self->_data->route->toSkill()
             else
-                g_a = _Nth1(n_len l_pts)
-                g_b = car(l_pts)
-                g_c = _Nth1(2 l_pts)
-                n_cross = (g_b->x() - g_a->x()) * (g_c->y() - g_b->y())
-                    - (g_b->y() - g_a->y()) * (g_c->x() - g_b->x())
-                n_dot = (g_b->x() - g_a->x()) * (g_c->x() - g_b->x())
-                    + (g_b->y() - g_a->y()) * (g_c->y() - g_b->y())
-                n_l1 = sqrt((g_b->x() - g_a->x()) * (g_b->x() - g_a->x())
-                    + (g_b->y() - g_a->y()) * (g_b->y() - g_a->y()))
-                n_l2 = sqrt((g_c->x() - g_b->x()) * (g_c->x() - g_b->x())
-                    + (g_c->y() - g_b->y()) * (g_c->y() - g_b->y()))
-                if(n_l1 > 0.0 && n_l2 > 0.0
-                    && abs(n_cross / (n_l1 * n_l2)) <= n_tol
-                    && n_dot > 0.0
+                a = _Nth1(len pts)
+                b = car(pts)
+                c = _Nth1(2 pts)
+                cross = (b->x() - a->x()) * (c->y() - b->y())
+                    - (b->y() - a->y()) * (c->x() - b->x())
+                dot = (b->x() - a->x()) * (c->x() - b->x())
+                    + (b->y() - a->y()) * (c->y() - b->y())
+                l1 = sqrt((b->x() - a->x()) * (b->x() - a->x())
+                    + (b->y() - a->y()) * (b->y() - a->y()))
+                l2 = sqrt((c->x() - b->x()) * (c->x() - b->x())
+                    + (c->y() - b->y()) * (c->y() - b->y()))
+                if(l1 > 0.0 && l2 > 0.0
+                    && abs(cross / (l1 * l2)) <= tol
+                    && dot > 0.0
                 then
                     self->_data->route->toSkill()
                 else
-                    l_src = self->_data->route->points()
-                    g_a = _Nth1(edge l_src)
-                    g_b = _Nth1(if(edge == n_len 1 (edge + 1)) l_src)
-                    g_p = Point(list(
-                        g_a->x() + ratio * (g_b->x() - g_a->x())
-                        g_a->y() + ratio * (g_b->y() - g_a->y())
+                    src = self->_data->route->points()
+                    a = _Nth1(edge src)
+                    b = _Nth1(if(edge == len 1 (edge + 1)) src)
+                    p = Point(list(
+                        a->x() + ratio * (b->x() - a->x())
+                        a->y() + ratio * (b->y() - a->y())
                     ))
-                    l_res = tconc(l_res g_p->toSkill())
-                    for(n_i 1 n_len
-                        n_idx = edge + n_i
-                        when(n_idx > n_len
-                            n_idx = n_idx - n_len
+                    res = tconc(res p->toSkill())
+                    for(i2 1 len
+                        idx = edge + i2
+                        when(idx > len
+                            idx = idx - len
                         )
-                        l_res = tconc(l_res _Nth1(n_idx l_src)->toSkill())
+                        res = tconc(res _Nth1(idx src)->toSkill())
                     )
-                    l_res = tconc(l_res g_p->toSkill())
-                    car(l_res)
+                    res = tconc(res p->toSkill())
+                    car(res)
                 )
             )
         )
@@ -386,7 +386,7 @@ procedure(Path(g_data \@key width (eps nil) "ggg")  ; -> Path
     ;
     ; **返回**
     ;   (Path) - 新描边对象；参数非法 error
-    let((g_route n_width)
+    let((route2 width2)
         when(listp(g_data) && length(g_data) == 2 && numberp(cadr(g_data))
             when(width != nil
                 error("ycGeom::Path: width given both in state list and ?width")
@@ -396,17 +396,17 @@ procedure(Path(g_data \@key width (eps nil) "ggg")  ; -> Path
         )
         cond(
             (classOf(g_data) == findClass('ycGeom::Route)
-                g_route = g_data)
+                route2 = g_data)
             (listp(g_data)
-                g_route = Route(g_data ?eps eps))
+                route2 = Route(g_data ?eps eps))
             (t error("ycGeom::Path: expected a Route or point list, got %A" g_data))
         )
         unless(numberp(width) && width > 0.0
             error("ycGeom::Path: ?width must be a positive number, got %A" width)
         )
-        n_width = float(width)
+        width2 = float(width)
         makeInstance('Path ?_data makeInstance('_PathData
-            ?route g_route ?width n_width))
+            ?route route2 ?width width2))
     )
 )
 

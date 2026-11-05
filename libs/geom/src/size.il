@@ -30,7 +30,7 @@ procedure(_SizeDirs(g_dir "g")  ; -> list[sym]
     ;
     ; **返回**
     ;   (list[sym]) - 去重后的方向；非法值 error
-    let((l_res)
+    let((res)
         cond(
             (g_dir == 'all list('left 'right 'up 'down))
             (_SizeDirP(g_dir) list(g_dir))
@@ -38,20 +38,20 @@ procedure(_SizeDirs(g_dir "g")  ; -> list[sym]
                 unless(g_dir
                     error("ycGeom: ?dir must not be an empty list")
                 )
-                foreach(g_item g_dir
-                    unless(_SizeDirP(g_item)
-                        error("ycGeom: invalid ?dir element %A" g_item)
+                foreach(item g_dir
+                    unless(_SizeDirP(item)
+                        error("ycGeom: invalid ?dir element %A" item)
                     )
                 )
                 when(member('all g_dir) && length(g_dir) > 1
                     error("ycGeom: ?dir 'all cannot be combined with other directions")
                 )
-                foreach(g_item g_dir
-                    unless(member(g_item l_res)
-                        l_res = tconc(l_res g_item)
+                foreach(item g_dir
+                    unless(member(item res)
+                        res = tconc(res item)
                     )
                 )
-                car(l_res)
+                car(res)
             )
             (t error("ycGeom: ?dir must be a direction or list, got %A" g_dir))
         )
@@ -119,19 +119,19 @@ procedure(_SizeCheck(n_value g_dir g_ratio g_corner g_limit g_segments t_ctx "ng
     ;
     ; **返回**
     ;   (list) - (方向列表 倍率标志)
-    let((l_dirs g_ratioMode)
+    let((dirs ratioMode)
         unless(numberp(n_value)
             error("%s: value must be a number, got %A" t_ctx n_value)
         )
-        l_dirs = _SizeDirs(g_dir)
-        g_ratioMode = _Flag(g_ratio "ratio")
+        dirs = _SizeDirs(g_dir)
+        ratioMode = _Flag(g_ratio "ratio")
         _SizeCorner(g_corner)
         _SizeMiterLimit(g_limit)
         _SizeRoundSegments(g_segments)
-        when(g_ratioMode && n_value <= 0.0
+        when(ratioMode && n_value <= 0.0
             error("%s: ratio value must be positive, got %A" t_ctx n_value)
         )
-        list(l_dirs g_ratioMode)
+        list(dirs ratioMode)
     )
 )
 
@@ -143,34 +143,34 @@ procedure(_SizeOrientRings(l_rings "l")  ; -> list[list[Point]]
     ;
     ; **返回**
     ;   (list[list[Point]]) - 定向后的环
-    let((n_max l_infos l_res)
-        foreach(l_ring l_rings
-            let((n_area)
-                l_ring = _CollinearClean(l_ring _Eps(nil))
-                n_area = abs(_SignedArea(l_ring))
-                l_infos = tconc(l_infos list(l_ring n_area))
-                when(n_max == nil || n_area > n_max
-                    n_max = n_area
+    let((max infos res)
+        foreach(ring l_rings
+            let((area)
+                ring = _CollinearClean(ring _Eps(nil))
+                area = abs(_SignedArea(ring))
+                infos = tconc(infos list(ring area))
+                when(max == nil || area > max
+                    max = area
                 )
             )
         )
-        l_infos = car(l_infos)
-        foreach(l_info l_infos
-            let((l_ring n_area)
-                l_ring = car(l_info)
-                n_area = cadr(l_info)
-                if(n_area == n_max
-                    when(_SignedArea(l_ring) < 0.0
-                        l_ring = reverse(l_ring)
+        infos = car(infos)
+        foreach(info infos
+            let((ring area)
+                ring = car(info)
+                area = cadr(info)
+                if(area == max
+                    when(_SignedArea(ring) < 0.0
+                        ring = reverse(ring)
                     )
-                    when(_SignedArea(l_ring) > 0.0
-                        l_ring = reverse(l_ring)
+                    when(_SignedArea(ring) > 0.0
+                        ring = reverse(ring)
                     )
                 )
-                l_res = tconc(l_res l_ring)
+                res = tconc(res ring)
             )
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -182,20 +182,20 @@ procedure(_SizeRingEdges(l_ring "l")  ; -> list
     ;
     ; **返回**
     ;   (list) - (a b nx ny) 记录
-    let((l_res n_len n_i g_a g_b n_dx n_dy n_lenr)
-        n_len = length(l_ring)
-        for(n_i 1 n_len
-            g_a = _Nth1(n_i l_ring)
-            g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_ring)
-            n_dx = g_b->x() - g_a->x()
-            n_dy = g_b->y() - g_a->y()
-            n_lenr = sqrt(n_dx * n_dx + n_dy * n_dy)
-            unless(n_lenr <= _Eps(nil)
-                l_res = tconc(l_res list(g_a g_b
-                    n_dy / n_lenr (-n_dx) / n_lenr))
+    let((res len i a b dx dy lenr)
+        len = length(l_ring)
+        for(i2 1 len
+            a = _Nth1(i2 l_ring)
+            b = _Nth1(if(i2 == len 1 (i2 + 1)) l_ring)
+            dx = b->x() - a->x()
+            dy = b->y() - a->y()
+            lenr = sqrt(dx * dx + dy * dy)
+            unless(lenr <= _Eps(nil)
+                res = tconc(res list(a b
+                    dy / lenr (-dx) / lenr))
             )
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -233,14 +233,14 @@ procedure(_SizeEdgeDistance(n_nx n_ny n_width n_height l_dirs n_value g_ratio "n
     ;   (float) - 带符号距离
     if(!g_ratio
         float(n_value)
-        let((n_halfx n_halfy)
-            n_halfx = if(member('left l_dirs) && member('right l_dirs)
+        let((halfx halfy)
+            halfx = if(member('left l_dirs) && member('right l_dirs)
                 0.5 1.0)
-            n_halfy = if(member('up l_dirs) && member('down l_dirs)
+            halfy = if(member('up l_dirs) && member('down l_dirs)
                 0.5 1.0)
             (float(n_value) - 1.0)
-                * (abs(n_nx) * n_width * n_halfx
-                    + abs(n_ny) * n_height * n_halfy)
+                * (abs(n_nx) * n_width * halfx
+                    + abs(n_ny) * n_height * halfy)
         )
     )
 )
@@ -256,17 +256,17 @@ procedure(_SizeLinePoint(g_p g_u g_q g_v "gggg")  ; -> Point | nil
     ;
     ; **返回**
     ;   (Point|nil) - 交点；平行时为 nil
-    let((n_ux n_uy n_vx n_vy n_det n_t)
-        n_ux = car(g_u)
-        n_uy = cadr(g_u)
-        n_vx = car(g_v)
-        n_vy = cadr(g_v)
-        n_det = n_ux * n_vy - n_uy * n_vx
-        unless(abs(n_det) <= _AngleTol()
-            n_t = ((g_q->x() - g_p->x()) * n_vy
-                - (g_q->y() - g_p->y()) * n_vx) / n_det
-            Point(list(g_p->x() + n_ux * n_t
-                g_p->y() + n_uy * n_t))
+    let((ux uy vx vy det value)
+        ux = car(g_u)
+        uy = cadr(g_u)
+        vx = car(g_v)
+        vy = cadr(g_v)
+        det = ux * vy - uy * vx
+        unless(abs(det) <= _AngleTol()
+            value = ((g_q->x() - g_p->x()) * vy
+                - (g_q->y() - g_p->y()) * vx) / det
+            Point(list(g_p->x() + ux * value
+                g_p->y() + uy * value))
         )
     )
 )
@@ -306,32 +306,32 @@ procedure(_SizeRoundCap(g_v g_v1 g_v2 n_d1 n_d2 n_segments "gggnnx")  ; -> Polyg
     ;
     ; **返回**
     ;   (Polygon|nil) - 圆角扇面
-    let((n_a1 n_a2 n_delta n_steps n_rad n_i l_res)
-        n_a1 = atan2(g_v1->y() - g_v->y() g_v1->x() - g_v->x())
-        n_a2 = atan2(g_v2->y() - g_v->y() g_v2->x() - g_v->x())
-        n_delta = n_a2 - n_a1
-        while(n_delta > 3.141592653589793
-            n_delta = n_delta - 6.283185307179586
+    let((a1 a2 delta steps rad i res)
+        a1 = atan2(g_v1->y() - g_v->y() g_v1->x() - g_v->x())
+        a2 = atan2(g_v2->y() - g_v->y() g_v2->x() - g_v->x())
+        delta = a2 - a1
+        while(delta > 3.141592653589793
+            delta = delta - 6.283185307179586
         )
-        while(n_delta < -3.141592653589793
-            n_delta = n_delta + 6.283185307179586
+        while(delta < -3.141592653589793
+            delta = delta + 6.283185307179586
         )
-        when(abs(n_delta) <= _AngleTol()
+        when(abs(delta) <= _AngleTol()
             nil
         )
-        n_steps = int(abs(n_delta) / 1.570796326794897 * n_segments)
-        when(n_steps < 1 n_steps = 1)
-        n_rad = max(abs(n_d1) abs(n_d2))
-        l_res = tconc(l_res g_v1)
-        for(n_i 1 n_steps - 1
-            l_res = tconc(l_res Point(list(
-                g_v->x() + n_rad * cos(n_a1 + n_delta * n_i / n_steps)
-                g_v->y() + n_rad * sin(n_a1 + n_delta * n_i / n_steps)
+        steps = int(abs(delta) / 1.570796326794897 * n_segments)
+        when(steps < 1 steps = 1)
+        rad = max(abs(n_d1) abs(n_d2))
+        res = tconc(res g_v1)
+        for(i2 1 steps - 1
+            res = tconc(res Point(list(
+                g_v->x() + rad * cos(a1 + delta * i2 / steps)
+                g_v->y() + rad * sin(a1 + delta * i2 / steps)
             )))
         )
-        l_res = tconc(l_res g_v2)
-        l_res = tconc(l_res g_v)
-        Polygon(car(l_res))
+        res = tconc(res g_v2)
+        res = tconc(res g_v)
+        Polygon(car(res))
     )
 )
 
@@ -350,31 +350,31 @@ procedure(_SizeCapSelected(g_v g_pa g_nb l_e1 l_e2 n_limit n_segments s_corner "
     ;
     ; **返回**
     ;   (Polygon|nil) - 拐角帽
-    let((n_nx1 n_ny1 n_d1 n_nx2 n_ny2 n_d2 g_v1 g_v2 g_m)
-        n_nx1 = _Nth1(3 l_e1)
-        n_ny1 = _Nth1(4 l_e1)
-        n_d1 = _Nth1(6 l_e1)
-        n_nx2 = _Nth1(3 l_e2)
-        n_ny2 = _Nth1(4 l_e2)
-        n_d2 = _Nth1(6 l_e2)
-        g_v1 = Point(list(g_v->x() + n_nx1 * n_d1
-            g_v->y() + n_ny1 * n_d1))
-        g_v2 = Point(list(g_v->x() + n_nx2 * n_d2
-            g_v->y() + n_ny2 * n_d2))
+    let((nx1 ny1 d1 nx2 ny2 d2 v1 v2 m)
+        nx1 = _Nth1(3 l_e1)
+        ny1 = _Nth1(4 l_e1)
+        d1 = _Nth1(6 l_e1)
+        nx2 = _Nth1(3 l_e2)
+        ny2 = _Nth1(4 l_e2)
+        d2 = _Nth1(6 l_e2)
+        v1 = Point(list(g_v->x() + nx1 * d1
+            g_v->y() + ny1 * d1))
+        v2 = Point(list(g_v->x() + nx2 * d2
+            g_v->y() + ny2 * d2))
         cond(
             (s_corner == 'none nil)
-            (s_corner == 'bevel Polygon(list(g_v1 g_v g_v2)))
+            (s_corner == 'bevel Polygon(list(v1 g_v v2)))
             (s_corner == 'round
-                _SizeRoundCap(g_v g_v1 g_v2 n_d1 n_d2 n_segments))
+                _SizeRoundCap(g_v v1 v2 d1 d2 n_segments))
             (s_corner == 'miter
-                g_m = _SizeLinePoint(g_v1
+                m = _SizeLinePoint(v1
                     list(g_v->x() - g_pa->x() g_v->y() - g_pa->y())
-                    g_v2
+                    v2
                     list(g_nb->x() - g_v->x() g_nb->y() - g_v->y()))
-                if(g_m && g_v->distanceTo(g_m)
-                        <= n_limit * max(abs(n_d1) abs(n_d2))
-                    Polygon(list(g_v1 g_m g_v2 g_v))
-                    Polygon(list(g_v1 g_v g_v2))
+                if(m && g_v->distanceTo(m)
+                        <= n_limit * max(abs(d1) abs(d2))
+                    Polygon(list(v1 m v2 g_v))
+                    Polygon(list(v1 g_v v2))
                 )
             )
         )
@@ -394,45 +394,45 @@ procedure(_SizeExtendCap(g_v g_pa g_nb l_e1 l_e2 g_corner "gggllg")  ; -> Polygo
     ;
     ; **返回**
     ;   (Polygon|nil) - 延伸帽
-    let((n_sel1 n_sel2 n_nx1 n_ny1 n_d1 n_nx2 n_ny2 n_d2 g_v1 g_v2 g_q g_cap)
+    let((sel1 sel2 nx1 ny1 d1 nx2 ny2 d2 v1 v2 q cap)
         unless(g_corner == 'none
-            n_sel1 = _Nth1(5 l_e1)
-            n_sel2 = _Nth1(5 l_e2)
-            n_nx1 = _Nth1(3 l_e1)
-            n_ny1 = _Nth1(4 l_e1)
-            n_d1 = _Nth1(6 l_e1)
-            n_nx2 = _Nth1(3 l_e2)
-            n_ny2 = _Nth1(4 l_e2)
-            n_d2 = _Nth1(6 l_e2)
-            when(n_sel1 && !n_sel2
+            sel1 = _Nth1(5 l_e1)
+            sel2 = _Nth1(5 l_e2)
+            nx1 = _Nth1(3 l_e1)
+            ny1 = _Nth1(4 l_e1)
+            d1 = _Nth1(6 l_e1)
+            nx2 = _Nth1(3 l_e2)
+            ny2 = _Nth1(4 l_e2)
+            d2 = _Nth1(6 l_e2)
+            when(sel1 && !sel2
                 progn(
-                    g_v1 = Point(list(g_v->x() + n_nx1 * n_d1
-                        g_v->y() + n_ny1 * n_d1))
-                    g_q = _SizeLinePoint(g_v1
+                    v1 = Point(list(g_v->x() + nx1 * d1
+                        g_v->y() + ny1 * d1))
+                    q = _SizeLinePoint(v1
                         list(g_v->x() - g_pa->x() g_v->y() - g_pa->y())
                         g_v
                         list(g_nb->x() - g_v->x() g_nb->y() - g_v->y()))
-                    when(g_q && !g_q->equals(g_v1 ?eps _Eps(nil))
-                        && !g_q->equals(g_v ?eps _Eps(nil))
-                        g_cap = Polygon(list(g_v1 g_q g_v))
+                    when(q && !q->equals(v1 ?eps _Eps(nil))
+                        && !q->equals(g_v ?eps _Eps(nil))
+                        cap = Polygon(list(v1 q g_v))
                     )
                 )
             )
-            when(!n_sel1 && n_sel2
+            when(!sel1 && sel2
                 progn(
-                    g_v2 = Point(list(g_v->x() + n_nx2 * n_d2
-                        g_v->y() + n_ny2 * n_d2))
-                    g_q = _SizeLinePoint(g_v
+                    v2 = Point(list(g_v->x() + nx2 * d2
+                        g_v->y() + ny2 * d2))
+                    q = _SizeLinePoint(g_v
                         list(g_v->x() - g_pa->x() g_v->y() - g_pa->y())
-                        g_v2
+                        v2
                         list(g_nb->x() - g_v->x() g_nb->y() - g_v->y()))
-                    when(g_q && !g_q->equals(g_v2 ?eps _Eps(nil))
-                        && !g_q->equals(g_v ?eps _Eps(nil))
-                        g_cap = Polygon(list(g_v g_q g_v2))
+                    when(q && !q->equals(v2 ?eps _Eps(nil))
+                        && !q->equals(g_v ?eps _Eps(nil))
+                        cap = Polygon(list(g_v q v2))
                     )
                 )
             )
-            g_cap
+            cap
         )
     )
 )
@@ -452,64 +452,64 @@ procedure(_SizePolygon(self n_value g_dir g_ratio g_corner g_miterLimit g_roundS
     ;
     ; **返回**
     ;   (Region) - 涨缩结果
-    let((l_check l_dirs g_ratioMode l_box n_width n_height n_limit n_segments
-         l_ops l_region l_rings l_enh g_src)
-        l_check = _SizeCheck(n_value g_dir g_ratio g_corner g_miterLimit
+    let((check dirs ratioMode box width height limit segments
+         ops region rings enh src)
+        check = _SizeCheck(n_value g_dir g_ratio g_corner g_miterLimit
             g_roundSegments t_ctx)
-        l_dirs = car(l_check)
-        g_ratioMode = cadr(l_check)
-        g_src = self->removeCollinear()
-        l_box = g_src->bBox()
-        n_width = car(cadr(l_box)) - car(car(l_box))
-        n_height = cadr(cadr(l_box)) - cadr(car(l_box))
-        n_limit = _SizeMiterLimit(g_miterLimit)
-        n_segments = _SizeRoundSegments(g_roundSegments)
-        l_region = Region(list(g_src) ?normalize nil)
+        dirs = car(check)
+        ratioMode = cadr(check)
+        src = self->removeCollinear()
+        box = src->bBox()
+        width = car(cadr(box)) - car(car(box))
+        height = cadr(cadr(box)) - cadr(car(box))
+        limit = _SizeMiterLimit(g_miterLimit)
+        segments = _SizeRoundSegments(g_roundSegments)
+        region = Region(list(src) ?normalize nil)
         unless((_Near(n_value 0.0 _Eps(nil))
-                || (g_ratioMode && _Near(n_value 1.0 _Eps(nil))))
+                || (ratioMode && _Near(n_value 1.0 _Eps(nil))))
             progn(
-            l_rings = _SizeOrientRings(_Rings(g_src->points()))
-            foreach(l_ring l_rings
-                let((l_recs n_len n_i l_e n_sel n_d g_a g_b n_nx n_ny)
-                    l_recs = _SizeRingEdges(l_ring)
-                    l_enh = nil
-                    foreach(l_e l_recs
-                        g_a = _Nth1(1 l_e)
-                        g_b = _Nth1(2 l_e)
-                        n_nx = _Nth1(3 l_e)
-                        n_ny = _Nth1(4 l_e)
-                        n_sel = _SizeEdgeSelected(n_nx n_ny l_dirs _Eps(nil))
-                        n_d = _SizeEdgeDistance(n_nx n_ny n_width n_height
-                            l_dirs n_value g_ratioMode)
-                        l_enh = tconc(l_enh list(g_a g_b n_nx n_ny n_sel n_d))
-                        when(n_sel
-                            l_ops = tconc(l_ops
-                                _SizeStrip(g_a g_b n_nx n_ny n_d))
+            rings = _SizeOrientRings(_Rings(src->points()))
+            foreach(ring rings
+                let((recs len i e sel d a b nx ny)
+                    recs = _SizeRingEdges(ring)
+                    enh = nil
+                    foreach(e2 recs
+                        a = _Nth1(1 e2)
+                        b = _Nth1(2 e2)
+                        nx = _Nth1(3 e2)
+                        ny = _Nth1(4 e2)
+                        sel = _SizeEdgeSelected(nx ny dirs _Eps(nil))
+                        d = _SizeEdgeDistance(nx ny width height
+                            dirs n_value ratioMode)
+                        enh = tconc(enh list(a b nx ny sel d))
+                        when(sel
+                            ops = tconc(ops
+                                _SizeStrip(a b nx ny d))
                         )
                     )
-                    l_enh = car(l_enh)
-                    n_len = length(l_enh)
-                    for(n_i 1 n_len
-                        let((l_e1 l_e2 g_v g_cap)
-                            l_e1 = _Nth1(n_i l_enh)
-                            l_e2 = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_enh)
-                            g_v = _Nth1(2 l_e1)
-                            when(_Nth1(5 l_e1) && _Nth1(5 l_e2)
+                    enh = car(enh)
+                    len = length(enh)
+                    for(i2 1 len
+                        let((e1 e2 v cap)
+                            e1 = _Nth1(i2 enh)
+                            e2 = _Nth1(if(i2 == len 1 (i2 + 1)) enh)
+                            v = _Nth1(2 e1)
+                            when(_Nth1(5 e1) && _Nth1(5 e2)
                                 progn(
-                                    g_cap = _SizeCapSelected(g_v _Nth1(1 l_e1)
-                                        _Nth1(2 l_e2) l_e1 l_e2 n_limit
-                                        n_segments g_corner)
-                                    when(g_cap
-                                        l_ops = tconc(l_ops g_cap)
+                                    cap = _SizeCapSelected(v _Nth1(1 e1)
+                                        _Nth1(2 e2) e1 e2 limit
+                                        segments g_corner)
+                                    when(cap
+                                        ops = tconc(ops cap)
                                     )
                                 )
                             )
-                            unless(_Nth1(5 l_e1) == _Nth1(5 l_e2)
+                            unless(_Nth1(5 e1) == _Nth1(5 e2)
                                 progn(
-                                    g_cap = _SizeExtendCap(g_v _Nth1(1 l_e1)
-                                        _Nth1(2 l_e2) l_e1 l_e2 g_corner)
-                                    when(g_cap
-                                        l_ops = tconc(l_ops g_cap)
+                                    cap = _SizeExtendCap(v _Nth1(1 e1)
+                                        _Nth1(2 e2) e1 e2 g_corner)
+                                    when(cap
+                                        ops = tconc(ops cap)
                                     )
                                 )
                             )
@@ -517,11 +517,11 @@ procedure(_SizePolygon(self n_value g_dir g_ratio g_corner g_miterLimit g_roundS
                     )
                 )
             )
-            foreach(l_op car(l_ops)
-                when(l_op
-                    l_region = Region(_Boolean(
-                        l_region->polygons() list(l_op)
-                        if(if(g_ratioMode n_value > 1.0 n_value > 0.0)
+            foreach(op car(ops)
+                when(op
+                    region = Region(_Boolean(
+                        region->polygons() list(op)
+                        if(if(ratioMode n_value > 1.0 n_value > 0.0)
                             'union 'difference)
                         nil _Eps(nil))
                         ?normalize nil)
@@ -529,7 +529,7 @@ procedure(_SizePolygon(self n_value g_dir g_ratio g_corner g_miterLimit g_roundS
             )
             )
         )
-        Region(_CleanPolygons(l_region->polygons() _Eps(nil)) ?normalize nil)
+        Region(_CleanPolygons(region->polygons() _Eps(nil)) ?normalize nil)
     )
 )
 
@@ -547,17 +547,17 @@ procedure(_SizeRegion(l_polys n_value g_dir g_ratio g_corner g_miterLimit g_roun
     ;
     ; **返回**
     ;   (Region) - 合并后的结果
-    let((l_res)
+    let((res)
         _SizeCheck(n_value g_dir g_ratio g_corner g_miterLimit g_roundSegments
             "ycGeom::Region->size")
-        foreach(g_poly l_polys
-            foreach(g_part _SizePolygon(g_poly n_value g_dir g_ratio
+        foreach(poly l_polys
+            foreach(part _SizePolygon(poly n_value g_dir g_ratio
                     g_corner g_miterLimit g_roundSegments
                     "ycGeom::Region->size")->polygons()
-                l_res = tconc(l_res g_part)
+                res = tconc(res part)
             )
         )
-        Region(car(l_res))
+        Region(car(res))
     )
 )
 

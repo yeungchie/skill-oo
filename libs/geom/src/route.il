@@ -68,14 +68,14 @@ procedure(_InstallRoute(self "g")  ; -> t
         ;
         ; **返回**
         ;   (list[Segment]) - 开放 n-1 段，闭合 n 段
-        let((l_res n_len n_i g_a g_b)
-            n_len = length(self->_data->points)
-            for(n_i 1 if(self->_data->closed n_len (n_len - 1))
-                g_a = _Nth1(n_i self->_data->points)
-                g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
-                l_res = tconc(l_res Segment(list(g_a g_b)))
+        let((res len i a b)
+            len = length(self->_data->points)
+            for(i2 1 if(self->_data->closed len (len - 1))
+                a = _Nth1(i2 self->_data->points)
+                b = _Nth1(if(i2 == len 1 (i2 + 1)) self->_data->points)
+                res = tconc(res Segment(list(a b)))
             )
-            car(l_res)
+            car(res)
         )
     )
     self->length = lambda(()  ; -> float
@@ -83,21 +83,21 @@ procedure(_InstallRoute(self "g")  ; -> t
         ;
         ; **返回**
         ;   (float) - 各段长度之和（补偿求和）
-        let((n_sum n_comp n_term n_next)
-            n_sum = 0.0
-            n_comp = 0.0
-            foreach(g_seg self->segments()
-                n_term = g_seg->length()
-                n_next = n_sum + n_term
-                if(abs(n_sum) >= abs(n_term)
+        let((sum comp term next)
+            sum = 0.0
+            comp = 0.0
+            foreach(seg self->segments()
+                term = seg->length()
+                next = sum + term
+                if(abs(sum) >= abs(term)
                 then
-                    n_comp = n_comp + ((n_sum - n_next) + n_term)
+                    comp = comp + ((sum - next) + term)
                 else
-                    n_comp = n_comp + ((n_term - n_next) + n_sum)
+                    comp = comp + ((term - next) + sum)
                 )
-                n_sum = n_next
+                sum = next
             )
-            n_sum + n_comp
+            sum + comp
         )
     )
     self->bBox = lambda(()  ; -> list[list[float]]
@@ -105,18 +105,18 @@ procedure(_InstallRoute(self "g")  ; -> t
         ;
         ; **返回**
         ;   (list[list[float]]) - ((xmin ymin) (xmax ymax))
-        let((n_xmin n_ymin n_xmax n_ymax)
-            n_xmin = car(self->_data->points)->x()
-            n_xmax = n_xmin
-            n_ymin = car(self->_data->points)->y()
-            n_ymax = n_ymin
-            foreach(g_p self->_data->points
-                n_xmin = min(n_xmin g_p->x())
-                n_xmax = max(n_xmax g_p->x())
-                n_ymin = min(n_ymin g_p->y())
-                n_ymax = max(n_ymax g_p->y())
+        let((xmin ymin xmax ymax)
+            xmin = car(self->_data->points)->x()
+            xmax = xmin
+            ymin = car(self->_data->points)->y()
+            ymax = ymin
+            foreach(p self->_data->points
+                xmin = min(xmin p->x())
+                xmax = max(xmax p->x())
+                ymin = min(ymin p->y())
+                ymax = max(ymax p->y())
             )
-            list(list(n_xmin n_ymin) list(n_xmax n_ymax))
+            list(list(xmin ymin) list(xmax ymax))
         )
     )
     self->toRect = lambda(()  ; -> Rect
@@ -141,15 +141,15 @@ procedure(_InstallRoute(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Route) - 闭合状态不变
-        let((l_acc n_len n_i)
-            n_len = length(self->_data->points)
-            for(n_i 1 n_len
-                l_acc = tconc(l_acc _Nth1((n_len - n_i + 1) self->_data->points))
+        let((acc len i)
+            len = length(self->_data->points)
+            for(i2 1 len
+                acc = tconc(acc _Nth1((len - i2 + 1) self->_data->points))
             )
             when(self->_data->closed
-                l_acc = tconc(l_acc car(car(l_acc)))
+                acc = tconc(acc car(car(acc)))
             )
-            Route(car(l_acc))
+            Route(car(acc))
         )
     )
     self->toSkill = lambda(()  ; -> list[list[float]]
@@ -157,14 +157,14 @@ procedure(_InstallRoute(self "g")  ; -> t
         ;
         ; **返回**
         ;   (list[list[float]]) - 闭合时末尾补回首点
-        let((l_acc)
-            foreach(g_p self->_data->points
-                l_acc = tconc(l_acc g_p->toSkill())
+        let((acc)
+            foreach(p self->_data->points
+                acc = tconc(acc p->toSkill())
             )
             when(self->_data->closed
-                l_acc = tconc(l_acc car(self->_data->points)->toSkill())
+                acc = tconc(acc car(self->_data->points)->toSkill())
             )
-            car(l_acc)
+            car(acc)
         )
     )
     t
@@ -194,42 +194,42 @@ procedure(Route(l_points \@key (eps nil) "lg")  ; -> Route
     ;
     ; **返回**
     ;   (Route) - 新折线；点数不足、重复点或格式非法 error
-    let((l_pts n_len n_eps g_closed n_i g_prev g_cur l_acc)
-        l_pts = _AsPointList(l_points "ycGeom::Route")
-        n_len = length(l_pts)
-        unless(n_len >= 1
+    let((pts len eps2 closed2 i prev cur acc)
+        pts = _AsPointList(l_points "ycGeom::Route")
+        len = length(pts)
+        unless(len >= 1
             error("ycGeom::Route: at least 2 points are required")
         )
-        n_eps = _Eps(eps)
-        when(n_len == 1
+        eps2 = _Eps(eps)
+        when(len == 1
             error("ycGeom::Route: at least 2 points are required")
         )
-        g_closed = _SamePoint(car(l_pts) _Nth1(n_len l_pts) n_eps)
-        when(g_closed
-            for(n_i 1 n_len - 1
-                l_acc = tconc(l_acc _Nth1(n_i l_pts))
+        closed2 = _SamePoint(car(pts) _Nth1(len pts) eps2)
+        when(closed2
+            for(i2 1 len - 1
+                acc = tconc(acc _Nth1(i2 pts))
             )
-            l_pts = car(l_acc)
-            n_len = length(l_pts)
-            unless(n_len >= 3
+            pts = car(acc)
+            len = length(pts)
+            unless(len >= 3
                 error("ycGeom::Route: closed route needs at least 3 distinct points")
             )
         )
-        unless(g_closed || n_len >= 2
+        unless(closed2 || len >= 2
             error("ycGeom::Route: at least 2 points are required")
         )
-        for(n_i 1 n_len
-            g_cur = _Nth1(n_i l_pts)
-            g_prev = when(!(n_i == 1 && !g_closed)
-                _Nth1(if(n_i == 1 n_len (n_i - 1)) l_pts)
+        for(i2 1 len
+            cur = _Nth1(i2 pts)
+            prev = when(!(i2 == 1 && !closed2)
+                _Nth1(if(i2 == 1 len (i2 - 1)) pts)
             )
-            when(g_prev && _Near(g_prev->x() g_cur->x() n_eps)
-                && _Near(g_prev->y() g_cur->y() n_eps)
-                error("ycGeom::Route: consecutive duplicate point at index %d" n_i)
+            when(prev && _Near(prev->x() cur->x() eps2)
+                && _Near(prev->y() cur->y() eps2)
+                error("ycGeom::Route: consecutive duplicate point at index %d" i2)
             )
         )
         makeInstance('Route ?_data makeInstance('_RouteData
-            ?points l_pts ?closed g_closed))
+            ?points pts ?closed closed2))
     )
 )
 

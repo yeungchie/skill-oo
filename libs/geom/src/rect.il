@@ -71,11 +71,11 @@ procedure(_RectPolygon(g_rect "g")  ; -> Polygon | nil
     unless(_RectP(g_rect)
         error("ycGeom: expected a Rect, got %A" g_rect)
     )
-    let((n_eps n_scale)
-        n_eps = _Eps(nil)
-        n_scale = max(g_rect->width() g_rect->height())
+    let((eps2 scale)
+        eps2 = _Eps(nil)
+        scale = max(g_rect->width() g_rect->height())
         unless(g_rect->width() <= 0.0 || g_rect->height() <= 0.0
-                || g_rect->area() <= n_eps * n_scale
+                || g_rect->area() <= eps2 * scale
             Polygon(list(
                 Point(list(g_rect->xmin() g_rect->ymin()))
                 Point(list(g_rect->xmax() g_rect->ymin()))
@@ -162,10 +162,10 @@ procedure(_InstallRect(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Region) - 结果区域；退化 Rect 为空 Region
-        let((g_poly)
-            g_poly = _RectPolygon(self)
-            if(g_poly
-                _SizePolygon(g_poly n_value dir ratio corner miterLimit
+        let((poly)
+            poly = _RectPolygon(self)
+            if(poly
+                _SizePolygon(poly n_value dir ratio corner miterLimit
                     roundSegments "ycGeom::Rect->size")
                 Region(nil)
             )
@@ -196,17 +196,17 @@ procedure(_InstallRect(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t|nil) - 属于矩形为 t；边界按 ?boundary 处理
-        let((g_p n_eps g_on)
-            g_p = _AsPoint(g_point "ycGeom::Rect->contains")
+        let((p eps2 on)
+            p = _AsPoint(g_point "ycGeom::Rect->contains")
             _BoundaryMode(boundary)
-            n_eps = _Eps(eps)
-            g_on = self->onBoundary(g_p ?eps n_eps)
-            if(g_on
+            eps2 = _Eps(eps)
+            on = self->onBoundary(p ?eps eps2)
+            if(on
                 boundary == "inside"
-                g_p->x() >= self->_data->xmin
-                    && g_p->x() <= self->_data->xmax
-                    && g_p->y() >= self->_data->ymin
-                    && g_p->y() <= self->_data->ymax
+                p->x() >= self->_data->xmin
+                    && p->x() <= self->_data->xmax
+                    && p->y() >= self->_data->ymin
+                    && p->y() <= self->_data->ymax
             )
         )
     )
@@ -219,22 +219,22 @@ procedure(_InstallRect(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t|nil) - 在边界上为 t
-        let((g_p n_eps n_x n_y n_minx n_miny n_maxx n_maxy n_on_v n_on_h n_inside)
-            g_p = _AsPoint(g_point "ycGeom::Rect->onBoundary")
-            n_eps = _Eps(eps)
-            n_x = g_p->x()
-            n_y = g_p->y()
-            n_minx = self->_data->xmin
-            n_miny = self->_data->ymin
-            n_maxx = self->_data->xmax
-            n_maxy = self->_data->ymax
-            n_on_v = _Near(n_x n_minx n_eps) || _Near(n_x n_maxx n_eps)
-            n_on_h = _Near(n_y n_miny n_eps) || _Near(n_y n_maxy n_eps)
-            n_inside = (n_x >= n_minx || _Near(n_x n_minx n_eps))
-                && (n_x <= n_maxx || _Near(n_x n_maxx n_eps))
-                && (n_y >= n_miny || _Near(n_y n_miny n_eps))
-                && (n_y <= n_maxy || _Near(n_y n_maxy n_eps))
-            n_inside && (n_on_v || n_on_h)
+        let((p eps2 x y minx miny maxx maxy on_v on_h inside)
+            p = _AsPoint(g_point "ycGeom::Rect->onBoundary")
+            eps2 = _Eps(eps)
+            x = p->x()
+            y = p->y()
+            minx = self->_data->xmin
+            miny = self->_data->ymin
+            maxx = self->_data->xmax
+            maxy = self->_data->ymax
+            on_v = _Near(x minx eps2) || _Near(x maxx eps2)
+            on_h = _Near(y miny eps2) || _Near(y maxy eps2)
+            inside = (x >= minx || _Near(x minx eps2))
+                && (x <= maxx || _Near(x maxx eps2))
+                && (y >= miny || _Near(y miny eps2))
+                && (y <= maxy || _Near(y maxy eps2))
+            inside && (on_v || on_h)
         )
     )
     self->bBox = lambda(()  ; -> list[list[float]]
@@ -338,20 +338,20 @@ procedure(Rect(l_data "l")  ; -> Rect
     ;
     ; **返回**
     ;   (Rect) - 新矩形；两个对角点自动规范化；零宽或零高合法
-    let((l_pts g_p1 g_p2 n_xmin n_ymin n_xmax n_ymax)
-        l_pts = _TwoPoints(l_data "ycGeom::Rect")
-        g_p1 = _Nth1(1 l_pts)
-        g_p2 = _Nth1(2 l_pts)
-        n_xmin = min(g_p1->x() g_p2->x())
-        n_ymin = min(g_p1->y() g_p2->y())
-        n_xmax = max(g_p1->x() g_p2->x())
-        n_ymax = max(g_p1->y() g_p2->y())
+    let((pts p1 p2 xmin2 ymin2 xmax2 ymax2)
+        pts = _TwoPoints(l_data "ycGeom::Rect")
+        p1 = _Nth1(1 pts)
+        p2 = _Nth1(2 pts)
+        xmin2 = min(p1->x() p2->x())
+        ymin2 = min(p1->y() p2->y())
+        xmax2 = max(p1->x() p2->x())
+        ymax2 = max(p1->y() p2->y())
         makeInstance('Rect ?_data
             makeInstance('_RectData
-                ?xmin n_xmin
-                ?ymin n_ymin
-                ?xmax n_xmax
-                ?ymax n_ymax))
+                ?xmin xmin2
+                ?ymin ymin2
+                ?xmax xmax2
+                ?ymax ymax2))
     )
 )
 

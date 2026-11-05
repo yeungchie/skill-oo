@@ -10,21 +10,21 @@ procedure(_SnapRing(l_pts g_grid n_eps "lgn")  ; -> list[Point]
     ;
     ; **返回**
     ;   (list[Point]) - 清理后的点列
-    let((l_res g_prev g_snap l_clean)
-        foreach(g_p l_pts
-            g_snap = Point(list(_Snap(g_p->x() g_grid) _Snap(g_p->y() g_grid)))
-            unless(g_prev && _Near(g_prev->x() g_snap->x() n_eps)
-                && _Near(g_prev->y() g_snap->y() n_eps)
-                l_res = tconc(l_res g_snap)
+    let((res prev snap clean)
+        foreach(p l_pts
+            snap = Point(list(_Snap(p->x() g_grid) _Snap(p->y() g_grid)))
+            unless(prev && _Near(prev->x() snap->x() n_eps)
+                && _Near(prev->y() snap->y() n_eps)
+                res = tconc(res snap)
             )
-            g_prev = g_snap
+            prev = snap
         )
-        l_clean = _RingPointsClean(car(l_res) n_eps)
-        unless(length(l_clean) >= 3
-                && abs(_SignedArea(l_clean)) > _AreaTol(l_clean n_eps)
+        clean = _RingPointsClean(car(res) n_eps)
+        unless(length(clean) >= 3
+                && abs(_SignedArea(clean)) > _AreaTol(clean n_eps)
             error("ycGeom: grid snapping collapsed polygon topology")
         )
-        l_clean
+        clean
     )
 )
 
@@ -39,25 +39,25 @@ procedure(_CollectRings(l_polys g_grid n_eps g_reg "lgng")  ; -> list[list[Point
     ;
     ; **返回**
     ;   (list[list[Point]]) - 环列表
-    let((l_res n_mag g_pt)
+    let((res mag pt)
         unless(g_reg["_canonScale"]
-            n_mag = 0.0
-            foreach(g_p l_polys
-                _AsPolygon(g_p "ycGeom::Boolean")
-                foreach(g_pt g_p->points()
-                    n_mag = max(n_mag max(abs(g_pt->x()) abs(g_pt->y())))
+            mag = 0.0
+            foreach(p l_polys
+                _AsPolygon(p "ycGeom::Boolean")
+                foreach(pt2 p->points()
+                    mag = max(mag max(abs(pt2->x()) abs(pt2->y())))
                 )
             )
-            g_reg["_canonScale"] = max(n_eps 1e-15 * n_mag)
+            g_reg["_canonScale"] = max(n_eps 1e-15 * mag)
         )
-        foreach(g_p l_polys
-            _AsPolygon(g_p "ycGeom::Boolean")
-            foreach(l_r _Rings(_CanonRing(
-                    _SnapRing(g_p->points() g_grid n_eps) n_eps g_reg))
-                l_res = tconc(l_res l_r)
+        foreach(p l_polys
+            _AsPolygon(p "ycGeom::Boolean")
+            foreach(r _Rings(_CanonRing(
+                    _SnapRing(p->points() g_grid n_eps) n_eps g_reg))
+                res = tconc(res r)
             )
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -69,17 +69,17 @@ procedure(_RingEdgeList(l_rings "l")  ; -> list[list[Point]]
     ;
     ; **返回**
     ;   (list[list[Point]]) - 边列表，每项为 (a b)
-    let((l_res n_len n_i)
-        foreach(l_r l_rings
-            n_len = length(l_r)
-            for(n_i 1 n_len
-                l_res = tconc(l_res list(
-                    _Nth1(n_i l_r)
-                    _Nth1(if(n_i == n_len 1 (n_i + 1)) l_r)
+    let((res len i)
+        foreach(r l_rings
+            len = length(r)
+            for(i2 1 len
+                res = tconc(res list(
+                    _Nth1(i2 r)
+                    _Nth1(if(i2 == len 1 (i2 + 1)) r)
                 ))
             )
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -94,17 +94,17 @@ procedure(_EdgeT(g_a g_b g_p n_eps "gggn")  ; -> float
     ;
     ; **返回**
     ;   (float) - 0..1 的参数
-    let((n_dx n_dy n_den n_t)
-        n_dx = g_b->x() - g_a->x()
-        n_dy = g_b->y() - g_a->y()
-        n_den = n_dx * n_dx + n_dy * n_dy
-        if(n_den <= n_eps * n_eps
+    let((dx dy den value)
+        dx = g_b->x() - g_a->x()
+        dy = g_b->y() - g_a->y()
+        den = dx * dx + dy * dy
+        if(den <= n_eps * n_eps
         then
             0.0
         else
-            n_t = ((g_p->x() - g_a->x()) * n_dx
-                + (g_p->y() - g_a->y()) * n_dy) / n_den
-            max(0.0 min(1.0 n_t))
+            value = ((g_p->x() - g_a->x()) * dx
+                + (g_p->y() - g_a->y()) * dy) / den
+            max(0.0 min(1.0 value))
         )
     )
 )
@@ -122,14 +122,14 @@ procedure(_AddCut(g_a g_b g_c g_d n_eps l_t "ggggnl")  ; -> list[float]
     ;
     ; **返回**
     ;   (list[float]) - 追加后的参数列表
-    let((g_x)
-        g_x = _SegSegIntersection(g_a g_b g_c g_d n_eps)
+    let((x2)
+        x2 = _SegSegIntersection(g_a g_b g_c g_d n_eps)
         cond(
-            (g_x == nil l_t)
-            (_PointP(g_x) cons(_EdgeT(g_a g_b g_x n_eps) l_t))
-            (_SegmentP(g_x)
-                cons(_EdgeT(g_a g_b g_x->start() n_eps)
-                    cons(_EdgeT(g_a g_b g_x->end() n_eps) l_t)))
+            (x2 == nil l_t)
+            (_PointP(x2) cons(_EdgeT(g_a g_b x2 n_eps) l_t))
+            (_SegmentP(x2)
+                cons(_EdgeT(g_a g_b x2->start() n_eps)
+                    cons(_EdgeT(g_a g_b x2->end() n_eps) l_t)))
             (t l_t)
         )
     )
@@ -160,17 +160,17 @@ procedure(_SortUniqueNums(l_vals n_eps "ln")  ; -> list[float]
     ;
     ; **返回**
     ;   (list[float]) - 排序去重后的参数
-    let((l_sorted l_res g_prev)
-        foreach(n_v l_vals
-            l_sorted = _InsertNum(l_sorted n_v)
+    let((sorted res prev)
+        foreach(v l_vals
+            sorted = _InsertNum(sorted v)
         )
-        foreach(n_v l_sorted
-            unless(g_prev && _Near(n_v g_prev n_eps)
-                l_res = tconc(l_res n_v)
+        foreach(v sorted
+            unless(prev && _Near(v prev n_eps)
+                res = tconc(res v)
             )
-            g_prev = n_v
+            prev = v
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -198,35 +198,35 @@ procedure(_SplitEdges(l_edges n_eps g_reg "lng")  ; -> list[list[Point]]
     ;
     ; **返回**
     ;   (list[list[Point]]) - 拆分后的无向边
-    let((t_seen l_res n_i n_len l_t g_a g_b g_prev g_cur t_key n_edge_len n_tol)
-        t_seen = makeTable("geomSplit" nil)
-        foreach(l_e l_edges
-            g_a = car(l_e)
-            g_b = cadr(l_e)
-            n_edge_len = sqrt((g_b->x() - g_a->x()) * (g_b->x() - g_a->x())
-                + (g_b->y() - g_a->y()) * (g_b->y() - g_a->y()))
-            n_tol = if(n_edge_len > n_eps n_eps / n_edge_len 0.0)
-            l_t = list(0.0 1.0)
-            foreach(l_o l_edges
-                unless(l_e == l_o
-                    l_t = _AddCut(g_a g_b car(l_o) cadr(l_o) n_eps l_t)
+    let((seen res i len value a b prev cur key edge_len tol)
+        seen = makeTable("geomSplit" nil)
+        foreach(e l_edges
+            a = car(e)
+            b = cadr(e)
+            edge_len = sqrt((b->x() - a->x()) * (b->x() - a->x())
+                + (b->y() - a->y()) * (b->y() - a->y()))
+            tol = if(edge_len > n_eps n_eps / edge_len 0.0)
+            value = list(0.0 1.0)
+            foreach(o l_edges
+                unless(e == o
+                    value = _AddCut(a b car(o) cadr(o) n_eps value)
                 )
             )
-            l_t = _SortUniqueNums(l_t n_tol)
-            n_len = length(l_t)
-            for(n_i 1 n_len - 1
-                g_prev = _CanonPoint(
-                    _Lerp(g_a g_b _Nth1(n_i l_t)) n_eps g_reg)
-                g_cur = _CanonPoint(
-                    _Lerp(g_a g_b _Nth1(n_i + 1 l_t)) n_eps g_reg)
-                t_key = _EdgeKey(g_prev g_cur)
-                unless(t_seen[t_key]
-                    t_seen[t_key] = t
-                    l_res = tconc(l_res list(g_prev g_cur))
+            value = _SortUniqueNums(value tol)
+            len = length(value)
+            for(i2 1 len - 1
+                prev = _CanonPoint(
+                    _Lerp(a b _Nth1(i2 value)) n_eps g_reg)
+                cur = _CanonPoint(
+                    _Lerp(a b _Nth1(i2 + 1 value)) n_eps g_reg)
+                key = _EdgeKey(prev cur)
+                unless(seen[key]
+                    seen[key] = t
+                    res = tconc(res list(prev cur))
                 )
             )
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -240,13 +240,13 @@ procedure(_InsideRings(l_rings g_p n_eps "lgn")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 奇偶结果为真
-    let((g_in)
-        foreach(l_r l_rings
-            when(_PointInRing(l_r g_p n_eps)
-                g_in = !g_in
+    let((in)
+        foreach(r l_rings
+            when(_PointInRing(r g_p n_eps)
+                in = !in
             )
         )
-        g_in
+        in
     )
 )
 
@@ -262,43 +262,43 @@ procedure(_ClassifyEdges(l_edges l_ra l_rb s_op n_eps "lllsn")  ; -> list[list[P
     ;
     ; **返回**
     ;   (list[list[Point]]) - 结果内部在左侧的有向边
-    let((l_res g_a g_b n_dx n_dy n_len n_scale n_mx n_my n_nx n_ny n_delta g_left g_right g_la g_lb g_ra g_rb g_lkeep g_rkeep)
-        n_scale = 0.0
-        foreach(l_e l_edges
-            n_dx = cadr(l_e)->x() - car(l_e)->x()
-            n_dy = cadr(l_e)->y() - car(l_e)->y()
-            n_len = sqrt(n_dx * n_dx + n_dy * n_dy)
-            n_scale = if(n_scale == 0.0 n_len min(n_scale n_len))
+    let((res a b dx dy len scale mx my nx ny delta left right la lb ra rb lkeep rkeep)
+        scale = 0.0
+        foreach(e l_edges
+            dx = cadr(e)->x() - car(e)->x()
+            dy = cadr(e)->y() - car(e)->y()
+            len = sqrt(dx * dx + dy * dy)
+            scale = if(scale == 0.0 len min(scale len))
         )
-        foreach(l_e l_edges
-            g_a = car(l_e)
-            g_b = cadr(l_e)
-            n_dx = g_b->x() - g_a->x()
-            n_dy = g_b->y() - g_a->y()
-            n_len = sqrt(n_dx * n_dx + n_dy * n_dy)
-            unless(n_len <= n_eps
+        foreach(e l_edges
+            a = car(e)
+            b = cadr(e)
+            dx = b->x() - a->x()
+            dy = b->y() - a->y()
+            len = sqrt(dx * dx + dy * dy)
+            unless(len <= n_eps
                 ; 采样偏移：至少 100 eps，最多 1e6 eps，并按最短边缩放
-                n_delta = max(n_eps * 100.0
-                    min(n_scale * 1e-3 n_eps * 1e6))
-                n_mx = (g_a->x() + g_b->x()) / 2.0
-                n_my = (g_a->y() + g_b->y()) / 2.0
-                n_nx = -n_dy / n_len
-                n_ny = n_dx / n_len
-                g_left = Point(list(n_mx + n_nx * n_delta n_my + n_ny * n_delta))
-                g_right = Point(list(n_mx - n_nx * n_delta n_my - n_ny * n_delta))
-                g_la = _InsideRings(l_ra g_left n_eps)
-                g_lb = _InsideRings(l_rb g_left n_eps)
-                g_ra = _InsideRings(l_ra g_right n_eps)
-                g_rb = _InsideRings(l_rb g_right n_eps)
-                g_lkeep = _InResult(s_op g_la g_lb)
-                g_rkeep = _InResult(s_op g_ra g_rb)
-                when(g_lkeep != g_rkeep
-                    l_res = tconc(l_res
-                        if(g_lkeep list(g_a g_b) list(g_b g_a)))
+                delta = max(n_eps * 100.0
+                    min(scale * 1e-3 n_eps * 1e6))
+                mx = (a->x() + b->x()) / 2.0
+                my = (a->y() + b->y()) / 2.0
+                nx = -dy / len
+                ny = dx / len
+                left = Point(list(mx + nx * delta my + ny * delta))
+                right = Point(list(mx - nx * delta my - ny * delta))
+                la = _InsideRings(l_ra left n_eps)
+                lb = _InsideRings(l_rb left n_eps)
+                ra = _InsideRings(l_ra right n_eps)
+                rb = _InsideRings(l_rb right n_eps)
+                lkeep = _InResult(s_op la lb)
+                rkeep = _InResult(s_op ra rb)
+                when(lkeep != rkeep
+                    res = tconc(res
+                        if(lkeep list(a b) list(b a)))
                 )
             )
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -311,13 +311,13 @@ procedure(_FirstTraceEdge(g_adj l_order "gl")  ; -> list[Point] | nil
     ;
     ; **返回**
     ;   (list[Point]|nil) - 有向边；用完为 nil
-    let((l_found)
-        foreach(t_key l_order
-            when(g_adj[t_key] && !l_found
-                l_found = car(g_adj[t_key])
+    let((found)
+        foreach(key l_order
+            when(g_adj[key] && !found
+                found = car(g_adj[key])
             )
         )
-        l_found
+        found
     )
 )
 
@@ -331,14 +331,14 @@ procedure(_RemoveEdge(l_edges g_from g_to "lgg")  ; -> list[list[Point]]
     ;
     ; **返回**
     ;   (list[list[Point]]) - 删除后的列表
-    let((l_res t_to)
-        t_to = _PtKey(g_to)
-        foreach(l_e l_edges
-            unless(_PtKey(cadr(l_e)) == t_to
-                l_res = tconc(l_res l_e)
+    let((res to)
+        to = _PtKey(g_to)
+        foreach(e l_edges
+            unless(_PtKey(cadr(e)) == to
+                res = tconc(res e)
             )
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -353,22 +353,22 @@ procedure(_ChooseNext(g_prev g_cur l_cands n_eps "ggln")  ; -> Point
     ;
     ; **返回**
     ;   (Point) - 下一条边的终点
-    let((n_refx n_refy g_best n_best n_dx n_dy n_cross n_dot n_ang n_cw)
-        n_refx = g_prev->x() - g_cur->x()
-        n_refy = g_prev->y() - g_cur->y()
-        foreach(l_e l_cands
-            n_dx = cadr(l_e)->x() - g_cur->x()
-            n_dy = cadr(l_e)->y() - g_cur->y()
-            n_cross = n_refx * n_dy - n_refy * n_dx
-            n_dot = n_refx * n_dx + n_refy * n_dy
-            n_ang = atan2(n_cross n_dot)
-            n_cw = if(n_ang <= 0.0 -n_ang (2.0 * 3.141592653589793 - n_ang))
-            when(g_best == nil || n_cw < n_best
-                g_best = cadr(l_e)
-                n_best = n_cw
+    let((refx refy best best2 dx dy cross dot ang cw)
+        refx = g_prev->x() - g_cur->x()
+        refy = g_prev->y() - g_cur->y()
+        foreach(e l_cands
+            dx = cadr(e)->x() - g_cur->x()
+            dy = cadr(e)->y() - g_cur->y()
+            cross = refx * dy - refy * dx
+            dot = refx * dx + refy * dy
+            ang = atan2(cross dot)
+            cw = if(ang <= 0.0 -ang (2.0 * 3.141592653589793 - ang))
+            when(best == nil || cw < best2
+                best = cadr(e)
+                best2 = cw
             )
         )
-        g_best
+        best
     )
 )
 
@@ -381,38 +381,38 @@ procedure(_TraceLoops(l_edges n_eps "ln")  ; -> list[list[Point]]
     ;
     ; **返回**
     ;   (list[list[Point]]) - 闭环点列
-    let((t_adj l_order l_res l_e g_start g_cur g_prev g_next l_ring l_cands t_key)
-        t_adj = makeTable("geomTrace" nil)
-        foreach(l_e l_edges
-            t_key = _PtKey(car(l_e))
-            unless(t_adj[t_key]
-                l_order = tconc(l_order t_key)
+    let((adj order res e start cur prev next ring cands key)
+        adj = makeTable("geomTrace" nil)
+        foreach(e2 l_edges
+            key = _PtKey(car(e2))
+            unless(adj[key]
+                order = tconc(order key)
             )
-            t_adj[t_key] = cons(l_e t_adj[t_key])
+            adj[key] = cons(e2 adj[key])
         )
-        l_order = car(l_order)
-        while(_FirstTraceEdge(t_adj l_order)
-            l_e = _FirstTraceEdge(t_adj l_order)
-            g_start = car(l_e)
-            g_cur = cadr(l_e)
-            g_prev = g_start
-            l_ring = tconc(nil g_start)
-            t_adj[_PtKey(g_start)] = _RemoveEdge(
-                t_adj[_PtKey(g_start)] g_start g_cur)
-            while(_PtKey(g_cur) != _PtKey(g_start)
-                l_ring = tconc(l_ring g_cur)
-                l_cands = t_adj[_PtKey(g_cur)]
-                unless(l_cands
+        order = car(order)
+        while(_FirstTraceEdge(adj order)
+            e = _FirstTraceEdge(adj order)
+            start = car(e)
+            cur = cadr(e)
+            prev = start
+            ring = tconc(nil start)
+            adj[_PtKey(start)] = _RemoveEdge(
+                adj[_PtKey(start)] start cur)
+            while(_PtKey(cur) != _PtKey(start)
+                ring = tconc(ring cur)
+                cands = adj[_PtKey(cur)]
+                unless(cands
                     error("ycGeom: boolean trace lost its boundary")
                 )
-                g_next = _ChooseNext(g_prev g_cur l_cands n_eps)
-                t_adj[_PtKey(g_cur)] = _RemoveEdge(l_cands g_cur g_next)
-                g_prev = g_cur
-                g_cur = g_next
+                next = _ChooseNext(prev cur cands n_eps)
+                adj[_PtKey(cur)] = _RemoveEdge(cands cur next)
+                prev = cur
+                cur = next
             )
-            l_res = tconc(l_res car(l_ring))
+            res = tconc(res car(ring))
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -443,11 +443,11 @@ procedure(_CleanPolygons(l_polys n_eps "ln")  ; -> list[Polygon]
     ;
     ; **返回**
     ;   (list[Polygon]) - 清理后的列表；空结果 nil
-    let((l_res)
-        foreach(g_p l_polys
-            l_res = tconc(l_res g_p->removeCollinear(?eps n_eps))
+    let((res)
+        foreach(p l_polys
+            res = tconc(res p->removeCollinear(?eps n_eps))
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -463,42 +463,42 @@ procedure(_Boolean(l_a l_b s_op g_grid n_eps "llsgn")  ; -> list[Polygon]
     ;
     ; **返回**
     ;   (list[Polygon]) - 结果多边形；空结果 nil
-    let((n_gridv n_epsv l_ra l_rb l_edges l_kept l_loops l_res t_reg)
+    let((gridv epsv ra rb edges kept loops res reg)
         unless(s_op == 'union || s_op == 'intersection || s_op == 'difference || s_op == 'xor
             error("ycGeom: unknown operation %A" s_op)
         )
-        foreach(g_p l_a
-            _AsPolygon(g_p "ycGeom::Boolean")
+        foreach(p l_a
+            _AsPolygon(p "ycGeom::Boolean")
         )
-        foreach(g_p l_b
-            _AsPolygon(g_p "ycGeom::Boolean")
+        foreach(p l_b
+            _AsPolygon(p "ycGeom::Boolean")
         )
-        n_gridv = _Grid(g_grid)
-        n_epsv = _Eps(n_eps)
+        gridv = _Grid(g_grid)
+        epsv = _Eps(n_eps)
         cond(
-            (l_a == nil && l_b == nil l_res = nil)
-            (l_a == nil && (s_op == 'union || s_op == 'xor) l_res = l_b)
-            (l_a == nil l_res = nil)
-            (l_b == nil && s_op == 'union l_res = l_a)
+            (l_a == nil && l_b == nil res = nil)
+            (l_a == nil && (s_op == 'union || s_op == 'xor) res = l_b)
+            (l_a == nil res = nil)
+            (l_b == nil && s_op == 'union res = l_a)
             (l_b == nil && (s_op == 'difference || s_op == 'xor)
-                l_res = l_a)
-            (l_b == nil l_res = nil)
+                res = l_a)
+            (l_b == nil res = nil)
             (t
-                t_reg = makeTable("geomCanon" nil)
-                l_ra = _CollectRings(l_a n_gridv n_epsv t_reg)
-                l_rb = _CollectRings(l_b n_gridv n_epsv t_reg)
-                l_edges = _SplitEdges(
-                    append(_RingEdgeList(l_ra) _RingEdgeList(l_rb))
-                    n_epsv t_reg)
-                l_kept = _ClassifyEdges(l_edges l_ra l_rb s_op n_epsv)
-                l_loops = _TraceLoops(l_kept n_epsv)
-                when(l_loops
-                    l_res = _BuildPolygons(
-                        _NestLoops(l_loops n_epsv) n_gridv n_epsv)
+                reg = makeTable("geomCanon" nil)
+                ra = _CollectRings(l_a gridv epsv reg)
+                rb = _CollectRings(l_b gridv epsv reg)
+                edges = _SplitEdges(
+                    append(_RingEdgeList(ra) _RingEdgeList(rb))
+                    epsv reg)
+                kept = _ClassifyEdges(edges ra rb s_op epsv)
+                loops = _TraceLoops(kept epsv)
+                when(loops
+                    res = _BuildPolygons(
+                        _NestLoops(loops epsv) gridv epsv)
                 )
             )
         )
-        l_res
+        res
     )
 )
 
@@ -524,22 +524,22 @@ procedure(_LoopDepth(l_loops n_idx n_eps "lnn")  ; -> int
     ;
     ; **返回**
     ;   (int) - 包含计数
-    let((n_depth n_area_i n_tol_i g_p n_j n_area_j n_tol_j)
-        n_depth = 0
-        n_area_i = abs(_SignedArea(_Nth1(n_idx l_loops)))
-        n_tol_i = _AreaTol(_Nth1(n_idx l_loops) n_eps)
-        g_p = car(_Nth1(n_idx l_loops))
-        for(n_j 1 length(l_loops)
-            unless(n_j == n_idx
-                n_area_j = abs(_SignedArea(_Nth1(n_j l_loops)))
-                n_tol_j = _AreaTol(_Nth1(n_j l_loops) n_eps)
-                when(n_area_j > n_area_i + max(n_tol_i n_tol_j)
-                    && _PointInRing(_Nth1(n_j l_loops) g_p n_eps)
-                    n_depth++
+    let((depth area_i tol_i p j area_j tol_j)
+        depth = 0
+        area_i = abs(_SignedArea(_Nth1(n_idx l_loops)))
+        tol_i = _AreaTol(_Nth1(n_idx l_loops) n_eps)
+        p = car(_Nth1(n_idx l_loops))
+        for(j2 1 length(l_loops)
+            unless(j2 == n_idx
+                area_j = abs(_SignedArea(_Nth1(j2 l_loops)))
+                tol_j = _AreaTol(_Nth1(j2 l_loops) n_eps)
+                when(area_j > area_i + max(tol_i tol_j)
+                    && _PointInRing(_Nth1(j2 l_loops) p n_eps)
+                    depth++
                 )
             )
         )
-        n_depth
+        depth
     )
 )
 
@@ -552,59 +552,59 @@ procedure(_NestLoops(l_loops n_eps "ln")  ; -> list
     ;
     ; **返回**
     ;   (list) - 每组 (外环 洞环列表)
-    let((l_infos l_groups n_i l_loop n_area n_depth l_info l_hole n_owner n_best n_k l_g l_new)
-        for(n_i 1 length(l_loops)
-            l_loop = _Nth1(n_i l_loops)
-            n_area = abs(_SignedArea(l_loop))
-            n_depth = _LoopDepth(l_loops n_i n_eps)
-            when((_EvenDepth(n_depth) && _SignedArea(l_loop) < 0.0)
-                || (!_EvenDepth(n_depth) && _SignedArea(l_loop) > 0.0)
-                l_loop = reverse(l_loop)
+    let((infos groups i loop area depth info hole owner best k g new)
+        for(i2 1 length(l_loops)
+            loop = _Nth1(i2 l_loops)
+            area = abs(_SignedArea(loop))
+            depth = _LoopDepth(l_loops i2 n_eps)
+            when((_EvenDepth(depth) && _SignedArea(loop) < 0.0)
+                || (!_EvenDepth(depth) && _SignedArea(loop) > 0.0)
+                loop = reverse(loop)
             )
-            l_infos = tconc(l_infos list(l_loop n_area n_depth))
+            infos = tconc(infos list(loop area depth))
         )
-        l_infos = car(l_infos)
-        foreach(l_info l_infos
-            when(_EvenDepth(caddr(l_info))
-                l_groups = tconc(l_groups list(car(l_info) nil cadr(l_info)))
+        infos = car(infos)
+        foreach(info2 infos
+            when(_EvenDepth(caddr(info2))
+                groups = tconc(groups list(car(info2) nil cadr(info2)))
             )
         )
-        l_groups = car(l_groups)
-        foreach(l_info l_infos
-            unless(_EvenDepth(caddr(l_info))
-                l_hole = car(l_info)
-                n_owner = nil
-                n_best = nil
-                for(n_k 1 length(l_groups)
-                    l_g = _Nth1(n_k l_groups)
-                    when(_PointInRing(car(l_g) car(l_hole) n_eps)
-                        when(n_owner == nil || caddr(l_g) < n_best
-                            n_owner = n_k
-                            n_best = caddr(l_g)
+        groups = car(groups)
+        foreach(info2 infos
+            unless(_EvenDepth(caddr(info2))
+                hole = car(info2)
+                owner = nil
+                best = nil
+                for(k2 1 length(groups)
+                    g = _Nth1(k2 groups)
+                    when(_PointInRing(car(g) car(hole) n_eps)
+                        when(owner == nil || caddr(g) < best
+                            owner = k2
+                            best = caddr(g)
                         )
                     )
                 )
-                unless(n_owner
+                unless(owner
                     error("ycGeom: hole has no containing outer loop")
                 )
-                l_new = nil
-                for(n_k 1 length(l_groups)
-                    l_g = _Nth1(n_k l_groups)
-                    l_new = tconc(l_new
-                        if(n_k == n_owner
-                            list(car(l_g) cons(l_hole cadr(l_g)) caddr(l_g))
-                            l_g
+                new = nil
+                for(k2 1 length(groups)
+                    g = _Nth1(k2 groups)
+                    new = tconc(new
+                        if(k2 == owner
+                            list(car(g) cons(hole cadr(g)) caddr(g))
+                            g
                         )
                     )
                 )
-                l_groups = car(l_new)
+                groups = car(new)
             )
         )
-        l_new = nil
-        foreach(l_g l_groups
-            l_new = tconc(l_new list(car(l_g) cadr(l_g)))
+        new = nil
+        foreach(g2 groups
+            new = tconc(new list(car(g2) cadr(g2)))
         )
-        car(l_new)
+        car(new)
     )
 )
 
@@ -617,21 +617,21 @@ procedure(_RightmostIndex(l_ring n_eps "ln")  ; -> int
     ;
     ; **返回**
     ;   (int) - 最右点下标；x 在容差内时取 y 更大者
-    let((n_best n_bx n_by n_i g_p)
-        n_best = 1
-        n_bx = _Nth1(1 l_ring)->x()
-        n_by = _Nth1(1 l_ring)->y()
-        for(n_i 2 length(l_ring)
-            g_p = _Nth1(n_i l_ring)
-            when(g_p->x() > n_bx + n_eps
-                || (abs(g_p->x() - n_bx) <= n_eps
-                    && g_p->y() > n_by + n_eps)
-                n_best = n_i
-                n_bx = g_p->x()
-                n_by = g_p->y()
+    let((best bx by i p)
+        best = 1
+        bx = _Nth1(1 l_ring)->x()
+        by = _Nth1(1 l_ring)->y()
+        for(i2 2 length(l_ring)
+            p = _Nth1(i2 l_ring)
+            when(p->x() > bx + n_eps
+                || (abs(p->x() - bx) <= n_eps
+                    && p->y() > by + n_eps)
+                best = i2
+                bx = p->x()
+                by = p->y()
             )
         )
-        n_best
+        best
     )
 )
 
@@ -644,16 +644,16 @@ procedure(_Rotate(l_ring n_start "lx")  ; -> list[Point]
     ;
     ; **返回**
     ;   (list[Point]) - 旋转后的点列
-    let((l_res n_len n_i n_idx)
-        n_len = length(l_ring)
-        for(n_i 1 n_len
-            n_idx = n_start + n_i - 1
-            when(n_idx > n_len
-                n_idx = n_idx - n_len
+    let((res len i idx)
+        len = length(l_ring)
+        for(i2 1 len
+            idx = n_start + i2 - 1
+            when(idx > len
+                idx = idx - len
             )
-            l_res = tconc(l_res _Nth1(n_idx l_ring))
+            res = tconc(res _Nth1(idx l_ring))
         )
-        car(l_res)
+        car(res)
     )
 )
 
@@ -668,63 +668,63 @@ procedure(_AxisHit(l_outer g_h n_eps g_blocked "lgng")  ; -> list | nil
     ;
     ; **返回**
     ;   (list(num int)|nil) - 交点 x 与所在边下标；无交点为 nil
-    let((t_seams n_len n_i g_a g_b n_x n_bestX n_bestI n_ay n_by)
-        t_seams = _SeamKeys(l_outer)
-        n_len = length(l_outer)
-        for(n_i 1 n_len
-            g_a = _Nth1(n_i l_outer)
-            g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_outer)
-            unless(t_seams[_EdgeKey(g_a g_b)] == 2
-                    || (g_blocked[_PtKey(g_a)] || g_blocked[_PtKey(g_b)])
-                n_ay = g_a->y()
-                n_by = g_b->y()
+    let((seams len i a b x2 bestX bestI ay by)
+        seams = _SeamKeys(l_outer)
+        len = length(l_outer)
+        for(i2 1 len
+            a = _Nth1(i2 l_outer)
+            b = _Nth1(if(i2 == len 1 (i2 + 1)) l_outer)
+            unless(seams[_EdgeKey(a b)] == 2
+                    || (g_blocked[_PtKey(a)] || g_blocked[_PtKey(b)])
+                ay = a->y()
+                by = b->y()
                 cond(
-                    (_Near(n_ay g_h->y() n_eps)
-                        && _Near(n_by g_h->y() n_eps)
-                        n_x = min(g_a->x() g_b->x())
-                        when(n_x > g_h->x() + n_eps
-                            when(n_bestX == nil || n_x < n_bestX
-                                n_bestX = n_x
-                                n_bestI = n_i
+                    (_Near(ay g_h->y() n_eps)
+                        && _Near(by g_h->y() n_eps)
+                        x2 = min(a->x() b->x())
+                        when(x2 > g_h->x() + n_eps
+                            when(bestX == nil || x2 < bestX
+                                bestX = x2
+                                bestI = i2
                             )
                         )
                     )
-                    (((n_ay < g_h->y() - n_eps
-                            && n_by > g_h->y() + n_eps)
-                        || (n_ay > g_h->y() + n_eps
-                            && n_by < g_h->y() - n_eps))
-                        n_x = g_a->x()
-                            + (g_h->y() - n_ay) * (g_b->x() - g_a->x())
-                            / (n_by - n_ay)
-                        when(n_x > g_h->x() + n_eps
-                            when(n_bestX == nil || n_x < n_bestX
-                                n_bestX = n_x
-                                n_bestI = n_i
+                    (((ay < g_h->y() - n_eps
+                            && by > g_h->y() + n_eps)
+                        || (ay > g_h->y() + n_eps
+                            && by < g_h->y() - n_eps))
+                        x2 = a->x()
+                            + (g_h->y() - ay) * (b->x() - a->x())
+                            / (by - ay)
+                        when(x2 > g_h->x() + n_eps
+                            when(bestX == nil || x2 < bestX
+                                bestX = x2
+                                bestI = i2
                             )
                         )
                     )
-                    (_Near(n_ay g_h->y() n_eps)
-                        n_x = g_a->x()
-                        when(n_x > g_h->x() + n_eps
-                            when(n_bestX == nil || n_x < n_bestX
-                                n_bestX = n_x
-                                n_bestI = n_i
+                    (_Near(ay g_h->y() n_eps)
+                        x2 = a->x()
+                        when(x2 > g_h->x() + n_eps
+                            when(bestX == nil || x2 < bestX
+                                bestX = x2
+                                bestI = i2
                             )
                         )
                     )
-                    (_Near(n_by g_h->y() n_eps)
-                        n_x = g_b->x()
-                        when(n_x > g_h->x() + n_eps
-                            when(n_bestX == nil || n_x < n_bestX
-                                n_bestX = n_x
-                                n_bestI = n_i
+                    (_Near(by g_h->y() n_eps)
+                        x2 = b->x()
+                        when(x2 > g_h->x() + n_eps
+                            when(bestX == nil || x2 < bestX
+                                bestX = x2
+                                bestI = i2
                             )
                         )
                     )
                 )
             )
         )
-        when(n_bestX list(n_bestX n_bestI))
+        when(bestX list(bestX bestI))
     )
 )
 
@@ -739,51 +739,51 @@ procedure(_SpliceHole(l_outer l_hole n_eps g_blocked "llng")  ; -> list[Point]
     ;
     ; **返回**
     ;   (list[Point]) - 新增水平切割线的 keyhole 点列
-    let((n_hi l_h g_h l_hit n_x n_ei n_len n_i g_a g_b g_o n_oi l_new l_prefix l_suffix)
-        n_hi = _RightmostIndex(l_hole n_eps)
-        l_h = _Rotate(l_hole n_hi)
-        g_h = car(l_h)
-        l_hit = _AxisHit(l_outer g_h n_eps g_blocked)
-        unless(l_hit
+    let((hi h h2 hit x2 ei len i a b o oi new prefix suffix)
+        hi = _RightmostIndex(l_hole n_eps)
+        h = _Rotate(l_hole hi)
+        h2 = car(h)
+        hit = _AxisHit(l_outer h2 n_eps g_blocked)
+        unless(hit
             error("ycGeom: no axis-aligned bridge for hole")
         )
-        n_x = car(l_hit)
-        n_ei = cadr(l_hit)
-        g_a = _Nth1(n_ei l_outer)
-        g_b = _Nth1(if(n_ei == length(l_outer) 1 (n_ei + 1)) l_outer)
-        g_o = Point(list(n_x g_h->y()))
+        x2 = car(hit)
+        ei = cadr(hit)
+        a = _Nth1(ei l_outer)
+        b = _Nth1(if(ei == length(l_outer) 1 (ei + 1)) l_outer)
+        o = Point(list(x2 h2->y()))
         cond(
-            (_SamePoint(g_o g_a n_eps)
-                n_oi = n_ei
+            (_SamePoint(o a n_eps)
+                oi = ei
             )
-            (_SamePoint(g_o g_b n_eps)
-                n_oi = if(n_ei == length(l_outer) 1 (n_ei + 1))
+            (_SamePoint(o b n_eps)
+                oi = if(ei == length(l_outer) 1 (ei + 1))
             )
             (t
-                l_new = nil
-                n_len = length(l_outer)
-                for(n_i 1 n_len
-                    l_new = tconc(l_new _Nth1(n_i l_outer))
-                    when(n_i == n_ei
-                        l_new = tconc(l_new g_o)
+                new = nil
+                len = length(l_outer)
+                for(i2 1 len
+                    new = tconc(new _Nth1(i2 l_outer))
+                    when(i2 == ei
+                        new = tconc(new o)
                     )
                 )
-                l_outer = car(l_new)
-                n_oi = n_ei + 1
+                l_outer = car(new)
+                oi = ei + 1
             )
         )
-        g_o = _Nth1(n_oi l_outer)
-        for(n_i 1 n_oi
-            l_prefix = tconc(l_prefix _Nth1(n_i l_outer))
+        o = _Nth1(oi l_outer)
+        for(i2 1 oi
+            prefix = tconc(prefix _Nth1(i2 l_outer))
         )
-        for(n_i n_oi + 1 length(l_outer)
-            l_suffix = tconc(l_suffix _Nth1(n_i l_outer))
+        for(i2 oi + 1 length(l_outer)
+            suffix = tconc(suffix _Nth1(i2 l_outer))
         )
-        append(car(l_prefix)
-            cons(g_h
-                append(cdr(l_h)
-                    cons(g_h
-                        cons(g_o car(l_suffix))))))
+        append(car(prefix)
+            cons(h2
+                append(cdr(h)
+                    cons(h2
+                        cons(o car(suffix))))))
     )
 )
 
@@ -797,21 +797,21 @@ procedure(_BuildPolygons(l_groups g_grid n_eps "lgn")  ; -> list[Polygon]
     ;
     ; **返回**
     ;   (list[Polygon]) - 结果多边形
-    let((l_res l_outer l_holes t_blocked)
-        foreach(l_g l_groups
-            l_outer = car(l_g)
-            l_holes = cadr(l_g)
-            t_blocked = makeTable("geomHolePoints" nil)
-            foreach(l_h l_holes
-                l_outer = _SpliceHole(l_outer l_h n_eps t_blocked)
-                foreach(g_p l_h
-                    t_blocked[_PtKey(g_p)] = t
+    let((res outer holes blocked)
+        foreach(g l_groups
+            outer = car(g)
+            holes = cadr(g)
+            blocked = makeTable("geomHolePoints" nil)
+            foreach(h holes
+                outer = _SpliceHole(outer h n_eps blocked)
+                foreach(p h
+                    blocked[_PtKey(p)] = t
                 )
             )
-            l_outer = _SnapRing(l_outer g_grid n_eps)
-            l_res = tconc(l_res Polygon(l_outer))
+            outer = _SnapRing(outer g_grid n_eps)
+            res = tconc(res Polygon(outer))
         )
-        car(l_res)
+        car(res)
     )
 )
 

@@ -104,12 +104,12 @@ procedure(_InstallLine(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point) - 投影点
-        let((g_p n_d)
-            g_p = _AsPoint(g_point "ycGeom::Line->project")
-            n_d = self->_data->a * g_p->x()
-                + self->_data->b * g_p->y() + self->_data->c
-            Point(list(g_p->x() - n_d * self->_data->a
-                g_p->y() - n_d * self->_data->b))
+        let((p d)
+            p = _AsPoint(g_point "ycGeom::Line->project")
+            d = self->_data->a * p->x()
+                + self->_data->b * p->y() + self->_data->c
+            Point(list(p->x() - d * self->_data->a
+                p->y() - d * self->_data->b))
         )
     )
     self->distanceTo = lambda((g_point "g")  ; -> float
@@ -120,10 +120,10 @@ procedure(_InstallLine(self "g")  ; -> t
         ;
         ; **返回**
         ;   (float) - 距离
-        let((g_p)
-            g_p = _AsPoint(g_point "ycGeom::Line->distanceTo")
-            abs(self->_data->a * g_p->x()
-                + self->_data->b * g_p->y() + self->_data->c)
+        let((p)
+            p = _AsPoint(g_point "ycGeom::Line->distanceTo")
+            abs(self->_data->a * p->x()
+                + self->_data->b * p->y() + self->_data->c)
         )
     )
     self->contains = lambda((g_point \@key (eps nil) "gg")  ; -> t | nil
@@ -135,11 +135,11 @@ procedure(_InstallLine(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t|nil) - 在直线上为 t
-        let((g_p n_eps)
-            g_p = _AsPoint(g_point "ycGeom::Line->contains")
-            n_eps = _Eps(eps)
-            abs(self->_data->a * g_p->x()
-                + self->_data->b * g_p->y() + self->_data->c) <= n_eps
+        let((p eps2)
+            p = _AsPoint(g_point "ycGeom::Line->contains")
+            eps2 = _Eps(eps)
+            abs(self->_data->a * p->x()
+                + self->_data->b * p->y() + self->_data->c) <= eps2
         )
     )
     self->isParallel = lambda((g_line \@key (eps nil) "gg")  ; -> t | nil
@@ -151,12 +151,12 @@ procedure(_InstallLine(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t|nil) - 平行或重合为 t
-        let((n_eps n_det g_o)
-            g_o = _AsLine(g_line "ycGeom::Line->isParallel")
-            n_eps = _Eps(eps)
-            n_det = self->_data->a * g_o->b()
-                - self->_data->b * g_o->a()
-            abs(n_det) <= n_eps
+        let((eps2 det o)
+            o = _AsLine(g_line "ycGeom::Line->isParallel")
+            eps2 = _Eps(eps)
+            det = self->_data->a * o->b()
+                - self->_data->b * o->a()
+            abs(det) <= eps2
         )
     )
     self->intersection = lambda((g_other \@key (eps nil) (as nil) "ggg")  ; -> Point | Segment | nil
@@ -169,26 +169,26 @@ procedure(_InstallLine(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point|Segment|nil) - 唯一交点、重叠线段或无交
-        let((n_eps g_o n_det n_x n_y)
-            n_eps = _Eps(eps)
-            g_o = _AsLineOrSegment(g_other as "ycGeom::Line->intersection")
+        let((eps2 o det x y)
+            eps2 = _Eps(eps)
+            o = _AsLineOrSegment(g_other as "ycGeom::Line->intersection")
             cond(
-                (_LineP(g_o)
-                    n_det = self->_data->a * g_o->b()
-                        - self->_data->b * g_o->a()
-                    unless(abs(n_det) <= n_eps
-                        n_x = (self->_data->b * g_o->c()
-                            - g_o->b() * self->_data->c) / n_det
-                        n_y = (self->_data->c * g_o->a()
-                            - g_o->c() * self->_data->a) / n_det
-                        Point(list(n_x n_y))
+                (_LineP(o)
+                    det = self->_data->a * o->b()
+                        - self->_data->b * o->a()
+                    unless(abs(det) <= eps2
+                        x = (self->_data->b * o->c()
+                            - o->b() * self->_data->c) / det
+                        y = (self->_data->c * o->a()
+                            - o->c() * self->_data->a) / det
+                        Point(list(x y))
                     )
                 )
-                (_SegmentP(g_o)
-                    _LineSegmentIntersection(self g_o n_eps))
+                (_SegmentP(o)
+                    _LineSegmentIntersection(self o eps2))
                 (t
                     error("ycGeom::Line->intersection: expected a Line or Segment, got %A"
-                        g_o))
+                        o))
             )
         )
     )
@@ -197,11 +197,11 @@ procedure(_InstallLine(self "g")  ; -> t
         ;
         ; **返回**
         ;   (list[list[float]]) - ((ax ay) (bx by))
-        let((g_a g_d)
-            g_a = self->anchor()
-            g_d = self->direction()
-            list(g_a->toSkill()
-                Point(list(g_a->x() + car(g_d) g_a->y() + cadr(g_d)))->toSkill())
+        let((a2 d)
+            a2 = self->anchor()
+            d = self->direction()
+            list(a2->toSkill()
+                Point(list(a2->x() + car(d) a2->y() + cadr(d)))->toSkill())
         )
     )
     t
@@ -230,22 +230,22 @@ procedure(Line(l_data "l")  ; -> Line
     ;
     ; **返回**
     ;   (Line) - 规范化 a*x+b*y+c=0；重合点或格式不合法 error
-    let((l_pts g_p1 g_p2 n_a n_b n_c n_norm)
-        l_pts = _TwoPoints(l_data "ycGeom::Line")
-        g_p1 = _Nth1(1 l_pts)
-        g_p2 = _Nth1(2 l_pts)
-        when(g_p1->equals(g_p2 ?eps _Eps(nil))
+    let((pts p1 p2 a2 b2 c2 norm)
+        pts = _TwoPoints(l_data "ycGeom::Line")
+        p1 = _Nth1(1 pts)
+        p2 = _Nth1(2 pts)
+        when(p1->equals(p2 ?eps _Eps(nil))
             error("ycGeom::Line: construction points must differ")
         )
-        n_a = g_p2->y() - g_p1->y()
-        n_b = g_p1->x() - g_p2->x()
-        n_c = -(n_a * g_p1->x() + n_b * g_p1->y())
-        n_norm = sqrt(n_a * n_a + n_b * n_b)
+        a2 = p2->y() - p1->y()
+        b2 = p1->x() - p2->x()
+        c2 = -(a2 * p1->x() + b2 * p1->y())
+        norm = sqrt(a2 * a2 + b2 * b2)
         makeInstance('Line ?_data
             makeInstance('_LineData
-                ?a n_a / n_norm
-                ?b n_b / n_norm
-                ?c n_c / n_norm))
+                ?a a2 / norm
+                ?b b2 / norm
+                ?c c2 / norm))
     )
 )
 

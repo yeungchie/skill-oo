@@ -38,14 +38,14 @@ procedure(_PolyToPathVerify(g_poly g_path n_eps "ggn")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 对称差面积在容差内为 t
-    let((l_box n_w n_h n_tol l_res)
-        l_box = g_poly->bBox()
-        n_w = abs(car(cadr(l_box)) - car(car(l_box)))
-        n_h = abs(cadr(cadr(l_box)) - cadr(car(l_box)))
-        n_tol = max(1e-12 n_eps * max(n_w n_h) * 4.0)
-        l_res = errset(g_poly->xor(g_path->toRegion() ?eps n_eps) nil)
-        when(l_res
-            car(l_res)->area() <= n_tol
+    let((box w h2 tol res)
+        box = g_poly->bBox()
+        w = abs(car(cadr(box)) - car(car(box)))
+        h2 = abs(cadr(cadr(box)) - cadr(car(box)))
+        tol = max(1e-12 n_eps * max(w h2) * 4.0)
+        res = errset(g_poly->xor(g_path->toRegion() ?eps n_eps) nil)
+        when(res
+            car(res)->area() <= tol
         )
     )
 )
@@ -61,69 +61,69 @@ procedure(_PolyToPathRect(g_poly l_ring n_eps g_horiz "glng")  ; -> Path | nil
     ;
     ; **返回**
     ;   (Path|nil) - 成功路径；非矩形 nil
-    let((l_pts n_len g_ok g_p0 g_p1 g_p2 g_p3
-            n_x0 n_y0 n_x1 n_y1 n_x2 n_y2
-            n_l0 n_l1 n_l2 n_l3 n_a0 n_a1 g_use0
-            n_width g_m1 g_m2 g_path)
-        l_pts = _CollinearClean(l_ring n_eps)
-        n_len = length(l_pts)
-        g_ok = (n_len == 4)
-        when(g_ok
-            g_p0 = _Nth1(1 l_pts)
-            g_p1 = _Nth1(2 l_pts)
-            g_p2 = _Nth1(3 l_pts)
-            g_p3 = _Nth1(4 l_pts)
-            n_x0 = g_p1->x() - g_p0->x()
-            n_y0 = g_p1->y() - g_p0->y()
-            n_x1 = g_p2->x() - g_p1->x()
-            n_y1 = g_p2->y() - g_p1->y()
-            n_x2 = g_p3->x() - g_p2->x()
-            n_y2 = g_p3->y() - g_p2->y()
-            n_l0 = sqrt(n_x0 * n_x0 + n_y0 * n_y0)
-            n_l1 = sqrt(n_x1 * n_x1 + n_y1 * n_y1)
-            n_l2 = sqrt(n_x2 * n_x2 + n_y2 * n_y2)
-            n_l3 = sqrt((g_p0->x() - g_p3->x()) * (g_p0->x() - g_p3->x())
-                + (g_p0->y() - g_p3->y()) * (g_p0->y() - g_p3->y()))
-            when(n_l0 <= n_eps || n_l1 <= n_eps || n_l2 <= n_eps || n_l3 <= n_eps
-                g_ok = nil
+    let((pts len ok p0 p1 p2 p3
+            x0 y0 x1 y1 x2 y2
+            l0 l1 l2 l3 a0 a1 use0
+            width m1 m2 path)
+        pts = _CollinearClean(l_ring n_eps)
+        len = length(pts)
+        ok = (len == 4)
+        when(ok
+            p0 = _Nth1(1 pts)
+            p1 = _Nth1(2 pts)
+            p2 = _Nth1(3 pts)
+            p3 = _Nth1(4 pts)
+            x0 = p1->x() - p0->x()
+            y0 = p1->y() - p0->y()
+            x1 = p2->x() - p1->x()
+            y1 = p2->y() - p1->y()
+            x2 = p3->x() - p2->x()
+            y2 = p3->y() - p2->y()
+            l0 = sqrt(x0 * x0 + y0 * y0)
+            l1 = sqrt(x1 * x1 + y1 * y1)
+            l2 = sqrt(x2 * x2 + y2 * y2)
+            l3 = sqrt((p0->x() - p3->x()) * (p0->x() - p3->x())
+                + (p0->y() - p3->y()) * (p0->y() - p3->y()))
+            when(l0 <= n_eps || l1 <= n_eps || l2 <= n_eps || l3 <= n_eps
+                ok = nil
             )
-            when(g_ok && !(_Near(n_l0 n_l2 n_eps) && _Near(n_l1 n_l3 n_eps))
-                g_ok = nil
+            when(ok && !(_Near(l0 l2 n_eps) && _Near(l1 l3 n_eps))
+                ok = nil
             )
-            when(g_ok && abs(n_x0 * n_x1 + n_y0 * n_y1) > n_eps * n_l0 * n_l1
-                g_ok = nil
+            when(ok && abs(x0 * x1 + y0 * y1) > n_eps * l0 * l1
+                ok = nil
             )
-            when(g_ok && abs(n_x0 * n_y2 - n_y0 * n_x2) > n_eps * n_l0 * n_l2
-                g_ok = nil
+            when(ok && abs(x0 * y2 - y0 * x2) > n_eps * l0 * l2
+                ok = nil
             )
-            when(g_ok
-                n_a0 = abs(n_y0) / n_l0
-                n_a1 = abs(n_y1) / n_l1
-                g_use0 = if(g_horiz
-                    if(abs(n_a0 - n_a1) <= 1e-12
-                        n_l0 >= n_l1
-                        n_a0 < n_a1)
-                    if(abs(n_a0 - n_a1) <= 1e-12
-                        n_l0 >= n_l1
-                        n_a0 > n_a1)
+            when(ok
+                a0 = abs(y0) / l0
+                a1 = abs(y1) / l1
+                use0 = if(g_horiz
+                    if(abs(a0 - a1) <= 1e-12
+                        l0 >= l1
+                        a0 < a1)
+                    if(abs(a0 - a1) <= 1e-12
+                        l0 >= l1
+                        a0 > a1)
                 )
-                if(g_use0
+                if(use0
                 then
-                    g_m1 = _PolyMid(g_p1 g_p2)
-                    g_m2 = _PolyMid(g_p3 g_p0)
-                    n_width = n_l1
+                    m1 = _PolyMid(p1 p2)
+                    m2 = _PolyMid(p3 p0)
+                    width = l1
                 else
-                    g_m1 = _PolyMid(g_p0 g_p1)
-                    g_m2 = _PolyMid(g_p2 g_p3)
-                    n_width = n_l0
+                    m1 = _PolyMid(p0 p1)
+                    m2 = _PolyMid(p2 p3)
+                    width = l0
                 )
-                g_path = Path(list(g_m1 g_m2) ?width n_width)
-                unless(_PolyToPathVerify(g_poly g_path n_eps)
-                    g_path = nil
+                path = Path(list(m1 m2) ?width width)
+                unless(_PolyToPathVerify(g_poly path n_eps)
+                    path = nil
                 )
             )
         )
-        g_path
+        path
     )
 )
 
@@ -139,126 +139,126 @@ procedure(_PolyToPathOpenAt(g_poly l_ring l_edges n_w n_eps "gllnn")  ; -> Path 
     ;
     ; **返回**
     ;   (Path|nil) - 成功路径
-    let((n_len n_len0 t_pair l_free n_i n_j l_ei l_ej g_ai g_bi g_aj g_bj
-            n_uix n_uiy n_ujx n_ujy n_leni n_dot n_dist
-            n_t1 n_t2 n_lo n_hi n_ov n_best n_score
-            n_cap1 n_cap2 n_cur g_done n_key l_seen l_order
-            g_start g_end l_route l_lines g_m1 g_m2 g_x g_path)
-        n_len0 = length(l_edges)
-        t_pair = makeTable("geomToPathPair" nil)
-        for(n_i 1 n_len0
-            l_ei = _Nth1(n_i l_edges)
-            g_ai = car(l_ei)
-            g_bi = cadr(l_ei)
-            n_uix = caddr(l_ei)
-            n_uiy = cadddr(l_ei)
-            n_leni = nth(4 l_ei)
-            n_best = nil
-            n_score = nil
-            for(n_j 1 n_len0
-                when(n_j != n_i
-                    l_ej = _Nth1(n_j l_edges)
-                    g_aj = car(l_ej)
-                    g_bj = cadr(l_ej)
-                    n_ujx = caddr(l_ej)
-                    n_ujy = cadddr(l_ej)
-                    n_dot = n_uix * n_ujx + n_uiy * n_ujy
-                    when(n_dot < -1.0 + 1e-9
-                        n_dist = _PolyLineDist(g_ai g_aj n_uix n_uiy)
-                        when(_Near(n_dist n_w n_eps)
-                            n_t1 = (g_aj->x() - g_ai->x()) * n_uix
-                                + (g_aj->y() - g_ai->y()) * n_uiy
-                            n_t2 = (g_bj->x() - g_ai->x()) * n_uix
-                                + (g_bj->y() - g_ai->y()) * n_uiy
-                            n_lo = min(n_t1 n_t2)
-                            n_hi = max(n_t1 n_t2)
-                            n_ov = min(n_hi n_leni) - max(n_lo 0.0)
-                            when(n_ov > n_eps
-                                && (n_score == nil || n_ov > n_score)
-                                n_best = n_j
-                                n_score = n_ov
+    let((len len0 pair free i j ei ej ai bi aj bj
+            uix uiy ujx ujy leni dot dist
+            t1 t2 lo hi ov best score
+            cap1 cap2 cur done key seen order
+            start end route lines m1 m2 x path)
+        len0 = length(l_edges)
+        pair = makeTable("geomToPathPair" nil)
+        for(i2 1 len0
+            ei = _Nth1(i2 l_edges)
+            ai = car(ei)
+            bi = cadr(ei)
+            uix = caddr(ei)
+            uiy = cadddr(ei)
+            leni = nth(4 ei)
+            best = nil
+            score = nil
+            for(j2 1 len0
+                when(j2 != i2
+                    ej = _Nth1(j2 l_edges)
+                    aj = car(ej)
+                    bj = cadr(ej)
+                    ujx = caddr(ej)
+                    ujy = cadddr(ej)
+                    dot = uix * ujx + uiy * ujy
+                    when(dot < -1.0 + 1e-9
+                        dist = _PolyLineDist(ai aj uix uiy)
+                        when(_Near(dist n_w n_eps)
+                            t1 = (aj->x() - ai->x()) * uix
+                                + (aj->y() - ai->y()) * uiy
+                            t2 = (bj->x() - ai->x()) * uix
+                                + (bj->y() - ai->y()) * uiy
+                            lo = min(t1 t2)
+                            hi = max(t1 t2)
+                            ov = min(hi leni) - max(lo 0.0)
+                            when(ov > n_eps
+                                && (score == nil || ov > score)
+                                best = j2
+                                score = ov
                             )
                         )
                     )
                 )
             )
-            when(n_best
-                t_pair[n_i] = n_best
+            when(best
+                pair[i2] = best
             )
         )
-        g_done = t
-        for(n_i 1 n_len0
-            when(t_pair[n_i]
-                unless(t_pair[t_pair[n_i]] == n_i
-                    g_done = nil
+        done = t
+        for(i2 1 len0
+            when(pair[i2]
+                unless(pair[pair[i2]] == i2
+                    done = nil
                 )
             )
         )
-        unless(g_done nil)
-        l_free = nil
-        for(n_i 1 n_len0
-            unless(t_pair[n_i]
-                l_free = tconc(l_free n_i)
+        unless(done nil)
+        free = nil
+        for(i2 1 len0
+            unless(pair[i2]
+                free = tconc(free i2)
             )
         )
-        l_free = car(l_free)
-        unless(length(l_free) == 2 nil)
-        n_cap1 = car(l_free)
-        n_cap2 = cadr(l_free)
-        l_ei = _Nth1(n_cap1 l_edges)
-        g_start = _PolyMid(car(l_ei) cadr(l_ei))
-        l_ej = _Nth1(n_cap2 l_edges)
-        g_end = _PolyMid(car(l_ej) cadr(l_ej))
-        n_cur = n_cap1
-        g_done = nil
-        for(n_i 1 n_len0
-            unless(g_done
-                n_cur = n_cur + 1
-                when(n_cur > n_len0 n_cur = 1)
-                if(n_cur == n_cap2
+        free = car(free)
+        unless(length(free) == 2 nil)
+        cap1 = car(free)
+        cap2 = cadr(free)
+        ei = _Nth1(cap1 l_edges)
+        start = _PolyMid(car(ei) cadr(ei))
+        ej = _Nth1(cap2 l_edges)
+        end = _PolyMid(car(ej) cadr(ej))
+        cur = cap1
+        done = nil
+        for(i2 1 len0
+            unless(done
+                cur = cur + 1
+                when(cur > len0 cur = 1)
+                if(cur == cap2
                 then
-                    g_done = t
+                    done = t
                 else
-                    when(t_pair[n_cur]
-                        n_key = min(n_cur t_pair[n_cur])
-                        unless(member(n_key l_seen)
-                            l_seen = tconc(l_seen n_key)
-                            l_order = tconc(l_order n_key)
+                    when(pair[cur]
+                        key = min(cur pair[cur])
+                        unless(member(key seen)
+                            seen = tconc(seen key)
+                            order = tconc(order key)
                         )
                     )
                 )
             )
         )
-        l_order = car(l_order)
-        unless(l_order nil)
-        l_lines = nil
-        foreach(n_key l_order
-            n_i = n_key
-            n_j = t_pair[n_i]
-            l_ei = _Nth1(n_i l_edges)
-            l_ej = _Nth1(n_j l_edges)
-            g_m1 = _PolyMid(car(l_ei) car(l_ej))
-            g_m2 = _PolyMid(cadr(l_ei) cadr(l_ej))
-            l_lines = tconc(l_lines list(
-                _PolyMid(g_m1 g_m2)
-                caddr(l_ei)
-                cadddr(l_ei)))
+        order = car(order)
+        unless(order nil)
+        lines = nil
+        foreach(key2 order
+            i = key2
+            j = pair[i]
+            ei = _Nth1(i l_edges)
+            ej = _Nth1(j l_edges)
+            m1 = _PolyMid(car(ei) car(ej))
+            m2 = _PolyMid(cadr(ei) cadr(ej))
+            lines = tconc(lines list(
+                _PolyMid(m1 m2)
+                caddr(ei)
+                cadddr(ei)))
         )
-        l_lines = car(l_lines)
-        l_route = tconc(nil g_start)
-        for(n_i 1 length(l_lines) - 1
-            l_ei = _Nth1(n_i l_lines)
-            l_ej = _Nth1((n_i + 1) l_lines)
-            g_x = _SizeLinePoint(car(l_ei)
-                list(cadr(l_ei) caddr(l_ei))
-                car(l_ej)
-                list(cadr(l_ej) caddr(l_ej)))
-            unless(g_x nil)
-            l_route = tconc(l_route g_x)
+        lines = car(lines)
+        route = tconc(nil start)
+        for(i2 1 length(lines) - 1
+            ei = _Nth1(i2 lines)
+            ej = _Nth1((i2 + 1) lines)
+            x = _SizeLinePoint(car(ei)
+                list(cadr(ei) caddr(ei))
+                car(ej)
+                list(cadr(ej) caddr(ej)))
+            unless(x nil)
+            route = tconc(route x)
         )
-        l_route = tconc(l_route g_end)
-        g_path = Path(car(l_route) ?width n_w)
-        when(_PolyToPathVerify(g_poly g_path n_eps) g_path)
+        route = tconc(route end)
+        path = Path(car(route) ?width n_w)
+        when(_PolyToPathVerify(g_poly path n_eps) path)
     )
 )
 
@@ -272,71 +272,71 @@ procedure(_PolyToPathOpen(g_poly l_ring n_eps "gln")  ; -> Path | nil
     ;
     ; **返回**
     ;   (Path|nil) - 唯一成功路径；无或多候选 nil
-    let((l_pts l_edges n_len n_i n_j l_ei l_ej n_uxi n_uyi n_uxj n_uyj
-            n_dot n_dist l_cands l_new g_found l_ok g_path)
-        l_pts = _CollinearClean(l_ring n_eps)
-        n_len = length(l_pts)
-        unless(n_len >= 4 nil)
-        for(n_i 1 n_len
-            l_ei = list(_Nth1(n_i l_pts)
-                _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts))
-            n_uxi = cadr(l_ei)->x() - car(l_ei)->x()
-            n_uyi = cadr(l_ei)->y() - car(l_ei)->y()
-            n_dist = sqrt(n_uxi * n_uxi + n_uyi * n_uyi)
-            unless(n_dist <= n_eps
-                l_edges = tconc(l_edges list(car(l_ei) cadr(l_ei)
-                    n_uxi / n_dist n_uyi / n_dist n_dist))
+    let((pts edges len i j ei ej uxi uyi uxj uyj
+            dot dist cands new found ok path)
+        pts = _CollinearClean(l_ring n_eps)
+        len = length(pts)
+        unless(len >= 4 nil)
+        for(i2 1 len
+            ei = list(_Nth1(i2 pts)
+                _Nth1(if(i2 == len 1 (i2 + 1)) pts))
+            uxi = cadr(ei)->x() - car(ei)->x()
+            uyi = cadr(ei)->y() - car(ei)->y()
+            dist = sqrt(uxi * uxi + uyi * uyi)
+            unless(dist <= n_eps
+                edges = tconc(edges list(car(ei) cadr(ei)
+                    uxi / dist uyi / dist dist))
             )
         )
-        l_edges = car(l_edges)
-        n_len = length(l_edges)
-        unless(n_len >= 4 nil)
-        for(n_i 1 n_len
-            l_ei = _Nth1(n_i l_edges)
-            n_uxi = caddr(l_ei)
-            n_uyi = cadddr(l_ei)
-            for(n_j (n_i + 1) n_len
-                l_ej = _Nth1(n_j l_edges)
-                n_uxj = caddr(l_ej)
-                n_uyj = cadddr(l_ej)
-                n_dot = n_uxi * n_uxj + n_uyi * n_uyj
-                when(n_dot < -1.0 + 1e-9
-                    n_dist = _PolyLineDist(car(l_ei) car(l_ej)
-                        n_uxi n_uyi)
-                    when(n_dist > n_eps
-                        g_found = nil
-                        l_new = nil
-                        foreach(l_co l_cands
-                            if(_Near(car(l_co) n_dist n_eps)
+        edges = car(edges)
+        len = length(edges)
+        unless(len >= 4 nil)
+        for(i2 1 len
+            ei = _Nth1(i2 edges)
+            uxi = caddr(ei)
+            uyi = cadddr(ei)
+            for(j2 (i2 + 1) len
+                ej = _Nth1(j2 edges)
+                uxj = caddr(ej)
+                uyj = cadddr(ej)
+                dot = uxi * uxj + uyi * uyj
+                when(dot < -1.0 + 1e-9
+                    dist = _PolyLineDist(car(ei) car(ej)
+                        uxi uyi)
+                    when(dist > n_eps
+                        found = nil
+                        new = nil
+                        foreach(co cands
+                            if(_Near(car(co) dist n_eps)
                             then
-                                g_found = t
-                                l_new = tconc(l_new list(car(l_co)
-                                    cadr(l_co) + 1))
+                                found = t
+                                new = tconc(new list(car(co)
+                                    cadr(co) + 1))
                             else
-                                l_new = tconc(l_new l_co)
+                                new = tconc(new co)
                             )
                         )
-                        l_new = car(l_new)
-                        unless(g_found
-                            l_new = append(l_new list(list(n_dist 1)))
+                        new = car(new)
+                        unless(found
+                            new = append(new list(list(dist 1)))
                         )
-                        l_cands = l_new
+                        cands = new
                     )
                 )
             )
         )
-        l_cands = l_cands
-        l_ok = nil
-        foreach(l_co l_cands
-            g_path = _PolyToPathOpenAt(g_poly l_pts l_edges
-                car(l_co) n_eps)
-            when(g_path
-                l_ok = tconc(l_ok g_path)
+        cands = cands
+        ok = nil
+        foreach(co cands
+            path = _PolyToPathOpenAt(g_poly pts edges
+                car(co) n_eps)
+            when(path
+                ok = tconc(ok path)
             )
         )
-        l_ok = car(l_ok)
-        when(l_ok && length(l_ok) == 1
-            car(l_ok)
+        ok = car(ok)
+        when(ok && length(ok) == 1
+            car(ok)
         )
     )
 )
@@ -352,76 +352,76 @@ procedure(_PolyToPathRing(g_poly l_outer l_inner n_eps "glln")  ; -> Path | nil
     ;
     ; **返回**
     ;   (Path|nil) - 成功路径；非等距环 nil
-    let((l_out l_in l_in_use n_len n_i n_j n_off n_ori
-            g_oa g_ob g_ia g_ib n_uxo n_uyo n_uxi n_uyi
-            n_lo n_li n_cross n_width l_mid g_ok g_path)
-        l_out = _CollinearClean(l_outer n_eps)
-        l_in = _CollinearClean(l_inner n_eps)
-        n_len = length(l_out)
-        unless(n_len == length(l_in) && n_len >= 3 nil)
-        g_path = nil
-        for(n_ori 0 1
-            unless(g_path
-                l_in_use = if(n_ori == 0 l_in reverse(l_in))
-                for(n_off 0 n_len - 1
-                    unless(g_path
-                        n_width = nil
-                        l_mid = nil
-                        g_ok = t
-                        for(n_i 1 n_len
-                            n_j = n_off + n_i
-                            while(n_j > n_len
-                                n_j = n_j - n_len
+    let((out in in_use len i j off ori
+            oa ob ia ib uxo uyo uxi uyi
+            lo li cross width mid ok path)
+        out = _CollinearClean(l_outer n_eps)
+        in = _CollinearClean(l_inner n_eps)
+        len = length(out)
+        unless(len == length(in) && len >= 3 nil)
+        path = nil
+        for(ori2 0 1
+            unless(path
+                in_use = if(ori2 == 0 in reverse(in))
+                for(off2 0 len - 1
+                    unless(path
+                        width = nil
+                        mid = nil
+                        ok = t
+                        for(i2 1 len
+                            j = off2 + i2
+                            while(j > len
+                                j = j - len
                             )
-                            g_oa = _Nth1(n_i l_out)
-                            g_ob = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_out)
-                            g_ia = _Nth1(n_j l_in_use)
-                            g_ib = _Nth1(if(n_j == n_len 1 (n_j + 1)) l_in_use)
-                            n_uxo = g_ob->x() - g_oa->x()
-                            n_uyo = g_ob->y() - g_oa->y()
-                            n_uxi = g_ib->x() - g_ia->x()
-                            n_uyi = g_ib->y() - g_ia->y()
-                            n_lo = sqrt(n_uxo * n_uxo + n_uyo * n_uyo)
-                            n_li = sqrt(n_uxi * n_uxi + n_uyi * n_uyi)
-                            when(n_lo <= n_eps || n_li <= n_eps
-                                g_ok = nil
+                            oa = _Nth1(i2 out)
+                            ob = _Nth1(if(i2 == len 1 (i2 + 1)) out)
+                            ia = _Nth1(j in_use)
+                            ib = _Nth1(if(j == len 1 (j + 1)) in_use)
+                            uxo = ob->x() - oa->x()
+                            uyo = ob->y() - oa->y()
+                            uxi = ib->x() - ia->x()
+                            uyi = ib->y() - ia->y()
+                            lo = sqrt(uxo * uxo + uyo * uyo)
+                            li = sqrt(uxi * uxi + uyi * uyi)
+                            when(lo <= n_eps || li <= n_eps
+                                ok = nil
                             )
-                            when(g_ok
-                                n_cross = (n_uxo * n_uyi - n_uyo * n_uxi)
-                                    / (n_lo * n_li)
-                                when(abs(n_cross) > 1e-6
-                                    g_ok = nil
+                            when(ok
+                                cross = (uxo * uyi - uyo * uxi)
+                                    / (lo * li)
+                                when(abs(cross) > 1e-6
+                                    ok = nil
                                 )
                             )
-                            when(g_ok
-                                n_cross = _PolyLineDist(g_oa g_ia
-                                    n_uxo / n_lo n_uyo / n_lo)
-                                if(n_width == nil
+                            when(ok
+                                cross = _PolyLineDist(oa ia
+                                    uxo / lo uyo / lo)
+                                if(width == nil
                                 then
-                                    n_width = n_cross
+                                    width = cross
                                 else
-                                    unless(_Near(n_width n_cross n_eps)
-                                        g_ok = nil
+                                    unless(_Near(width cross n_eps)
+                                        ok = nil
                                     )
                                 )
                             )
-                            when(g_ok
-                                l_mid = tconc(l_mid _PolyMid(g_oa g_ia))
+                            when(ok
+                                mid = tconc(mid _PolyMid(oa ia))
                             )
                         )
-                        when(g_ok && n_width > n_eps
-                            l_mid = car(l_mid)
-                            l_mid = append(l_mid list(car(l_mid)))
-                            g_path = Path(l_mid ?width n_width)
-                            unless(_PolyToPathVerify(g_poly g_path n_eps)
-                                g_path = nil
+                        when(ok && width > n_eps
+                            mid = car(mid)
+                            mid = append(mid list(car(mid)))
+                            path = Path(mid ?width width)
+                            unless(_PolyToPathVerify(g_poly path n_eps)
+                                path = nil
                             )
                         )
                     )
                 )
             )
         )
-        g_path
+        path
     )
 )
 
@@ -443,43 +443,43 @@ procedure(_InstallPolygonToPath(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Path|nil) - 描边区域与原多边形重合的路径；无法还原 nil
-        let((n_eps g_horiz l_rings g_path n_mag)
-            n_eps = _Eps(eps)
+        let((eps2 horiz rings path mag)
+            eps2 = _Eps(eps)
             ; 逆推宽度由坐标差得出，绝对误差随坐标量级增长（≈ ulp(坐标)）；
             ; 与 _CanonRing 的 _canonScale 一致地把容差下限抬到量级相关值，
             ; 否则大偏移处两次垂距测量之差的符号会翻转，配对失败返回 nil。
             ; 量级取 toSkill() 的全体坐标（含内环点），覆盖整张图；
             ; 只放大有量纲的距离判据，单位向量点积与叉积符号等无量纲判据不动。
-            n_mag = 0.0
-            foreach(l_p self->toSkill()
-                n_mag = max(n_mag abs(car(l_p)) abs(cadr(l_p)))
+            mag = 0.0
+            foreach(p self->toSkill()
+                mag = max(mag abs(car(p)) abs(cadr(p)))
             )
-            n_eps = max(n_eps 1e-15 * n_mag)
+            eps2 = max(eps2 1e-15 * mag)
             cond(
                 ((orient == 'horizontal || orient == 'h)
-                    g_horiz = t)
+                    horiz = t)
                 ((orient == 'vertical || orient == 'v)
-                    g_horiz = nil)
+                    horiz = nil)
                 (t
                     error("ycGeom::Polygon->toPath: ?orient must be horizontal, vertical, h, or v, got %A"
                         orient)
                 )
             )
-            l_rings = _Rings(self->_data->points)
+            rings = _Rings(self->_data->points)
             cond(
-                ((length(l_rings) == 1)
-                    g_path = _PolyToPathRect(self car(l_rings)
-                        n_eps g_horiz)
-                    unless(g_path
-                        g_path = _PolyToPathOpen(self car(l_rings) n_eps)
+                ((length(rings) == 1)
+                    path = _PolyToPathRect(self car(rings)
+                        eps2 horiz)
+                    unless(path
+                        path = _PolyToPathOpen(self car(rings) eps2)
                     )
                 )
-                ((length(l_rings) == 2)
-                    g_path = _PolyToPathRing(self car(l_rings)
-                        cadr(l_rings) n_eps)
+                ((length(rings) == 2)
+                    path = _PolyToPathRing(self car(rings)
+                        cadr(rings) eps2)
                 )
             )
-            g_path
+            path
         )
     )
     t

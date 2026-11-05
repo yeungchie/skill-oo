@@ -1,50 +1,50 @@
 _TestPolygonDone = nil
 
-let((g_sq)
-    g_sq = ycGeom::Polygon(list(
+let((sq)
+    sq = ycGeom::Polygon(list(
         ycGeom::Point(0:0)
         ycGeom::Point(10:0)
         ycGeom::Point(10:10)
         ycGeom::Point(0:10)
     ))
-    _Assert(classOf(g_sq) == findClass('ycGeom::Polygon)  "polygon: class identity")
-    _Assert(length(g_sq->points()) == 4  "polygon: point count")
-    _Assert(length(g_sq->edges()) == 4  "polygon: edge count")
-    _Assert(g_sq->area() == 100.0  "polygon: area")
-    _Assert(g_sq->perimeter() == 40.0  "polygon: perimeter")
-    _Assert(g_sq->bBox() == list(list(0.0 0.0) list(10.0 10.0))  "polygon: bBox")
-    _Assert(g_sq->toRect()->toSkill() == list(list(0.0 0.0) list(10.0 10.0))  "polygon: toRect")
+    _Assert(classOf(sq) == findClass('ycGeom::Polygon)  "polygon: class identity")
+    _Assert(length(sq->points()) == 4  "polygon: point count")
+    _Assert(length(sq->edges()) == 4  "polygon: edge count")
+    _Assert(sq->area() == 100.0  "polygon: area")
+    _Assert(sq->perimeter() == 40.0  "polygon: perimeter")
+    _Assert(sq->bBox() == list(list(0.0 0.0) list(10.0 10.0))  "polygon: bBox")
+    _Assert(sq->toRect()->toSkill() == list(list(0.0 0.0) list(10.0 10.0))  "polygon: toRect")
     _Assert(ycGeom::Polygon('((0 0) (4 0) (1 2)))->toRect()->toSkill() == list(list(0.0 0.0) list(4.0 2.0))  "polygon: toRect triangle")
-    _Assert(g_sq->isClockwise() == nil  "polygon: ccw")
-    _Assert(g_sq->reverse()->isClockwise()  "polygon: reverse cw")
-    _Assert(g_sq->toSkill() == list(
+    _Assert(sq->isClockwise() == nil  "polygon: ccw")
+    _Assert(sq->reverse()->isClockwise()  "polygon: reverse cw")
+    _Assert(sq->toSkill() == list(
         list(0.0 0.0) list(10.0 0.0) list(10.0 10.0) list(0.0 10.0)
     )  "polygon: toSkill")
 )
 
-let((g_p g_c)
-    g_p = ycGeom::Polygon('((0 0) (2 0) (4 0) (4 4) (0 4)))
-    g_c = g_p->removeCollinear()
-    _Assert(length(g_p->points()) == 5  "polygon: collinear original unchanged")
-    _Assert(length(g_c->points()) == 4  "polygon: removeCollinear count")
-    _Assert(g_c->toSkill() == list(
+let((p c)
+    p = ycGeom::Polygon('((0 0) (2 0) (4 0) (4 4) (0 4)))
+    c = p->removeCollinear()
+    _Assert(length(p->points()) == 5  "polygon: collinear original unchanged")
+    _Assert(length(c->points()) == 4  "polygon: removeCollinear count")
+    _Assert(c->toSkill() == list(
         list(0.0 0.0) list(4.0 0.0) list(4.0 4.0) list(0.0 4.0)
     )  "polygon: removeCollinear points")
 )
 _AssertError(lambda(() ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->removeCollinear(?eps "x") t)  "polygon: bad removeCollinear eps")
 
-let((g_hole g_clean)
-    g_hole = ycGeom::Polygon('((0 0) (5 0) (10 0) (10 7) (7 7) (7 3)
+let((hole clean)
+    hole = ycGeom::Polygon('((0 0) (5 0) (10 0) (10 7) (7 7) (7 3)
                               (3 3) (3 7) (7 7) (10 7) (10 10) (0 10)))
-    g_clean = g_hole->removeCollinear()
-    _Assert(length(g_hole->points()) == 12  "polygon: keyhole collinear original unchanged")
-    _Assert(length(g_clean->points()) == 11  "polygon: keyhole removeCollinear count")
-    _Assert(g_clean->area() == 84.0  "polygon: keyhole removeCollinear area")
-    _Assert(g_clean->perimeter() == 56.0  "polygon: keyhole removeCollinear perimeter")
+    clean = hole->removeCollinear()
+    _Assert(length(hole->points()) == 12  "polygon: keyhole collinear original unchanged")
+    _Assert(length(clean->points()) == 11  "polygon: keyhole removeCollinear count")
+    _Assert(clean->area() == 84.0  "polygon: keyhole removeCollinear area")
+    _Assert(clean->perimeter() == 56.0  "polygon: keyhole removeCollinear perimeter")
 )
 
-let((g_hole)
-    g_hole = ycGeom::Polygon(list(
+let((hole)
+    hole = ycGeom::Polygon(list(
         ycGeom::Point(0:0)
         ycGeom::Point(10:0)
         ycGeom::Point(10:7)
@@ -57,19 +57,19 @@ let((g_hole)
         ycGeom::Point(10:10)
         ycGeom::Point(0:10)
     ))
-    _Assert(g_hole->area() == 84.0  "polygon: keyhole area")
-    _Assert(g_hole->perimeter() == 56.0  "polygon: keyhole perimeter without seam")
-    _Assert(g_hole->perimeter(?includeSeams t) > 56.0  "polygon: keyhole perimeter includes seam")
+    _Assert(hole->area() == 84.0  "polygon: keyhole area")
+    _Assert(hole->perimeter() == 56.0  "polygon: keyhole perimeter without seam")
+    _Assert(hole->perimeter(?includeSeams t) > 56.0  "polygon: keyhole perimeter includes seam")
 )
 
 _AssertError(lambda(() ycGeom::Polygon('((0 0) (10 0) (3 3) (3 7) (7 7)
     (7 3) (3 3) (10 0) (10 10) (0 10))) t)
     "polygon: diagonal seam rejected")
-let((g_hole)
-    g_hole = ycGeom::Polygon('((0 0) (10 0) (10 10) (7 10) (7 7)
+let((hole)
+    hole = ycGeom::Polygon('((0 0) (10 0) (10 10) (7 10) (7 7)
                               (7 3) (3 3) (3 7) (7 7) (7 10) (0 10)))
-    _Assert(g_hole->area() == 84.0  "polygon: vertical seam area")
-    _Assert(g_hole->perimeter() == 56.0  "polygon: vertical seam perimeter")
+    _Assert(hole->area() == 84.0  "polygon: vertical seam area")
+    _Assert(hole->perimeter() == 56.0  "polygon: vertical seam perimeter")
 )
 _AssertError(lambda(() ycGeom::Polygon(nil) t)  "polygon: nil rejected")
 _AssertError(lambda(() ycGeom::Polygon(list(ycGeom::Point(0:0) ycGeom::Point(1:1))) t)  "polygon: fewer than 3 rejected")
@@ -81,74 +81,74 @@ _AssertError(lambda(() ycGeom::Polygon(list(
     ycGeom::Point(0:0) ycGeom::Point(10:10) ycGeom::Point(10:0) ycGeom::Point(0:10)
 )) t)  "polygon: self-intersection rejected")
 
-let((g_sq g_hole)
-    g_sq = ycGeom::Polygon(list(
+let((sq hole)
+    sq = ycGeom::Polygon(list(
         ycGeom::Point(0:0) ycGeom::Point(10:0)
         ycGeom::Point(10:10) ycGeom::Point(0:10)
     ))
-    _Assert(g_sq->centroid()->toSkill() == list(5.0 5.0)  "polygon: square centroid")
-    _Assert(g_sq->contains(ycGeom::Point(5:5))  "polygon: contains inside")
-    _Assert(!g_sq->contains(ycGeom::Point(15:5))  "polygon: contains outside")
-    _Assert(g_sq->onBoundary(ycGeom::Point(0:5))  "polygon: on boundary")
-    _Assert(g_sq->contains(ycGeom::Point(0:5))  "polygon: boundary defaults inside")
-    _Assert(!g_sq->contains(ycGeom::Point(0:5) ?boundary "outside")  "polygon: boundary outside")
-    g_hole = ycGeom::Polygon(list(
+    _Assert(sq->centroid()->toSkill() == list(5.0 5.0)  "polygon: square centroid")
+    _Assert(sq->contains(ycGeom::Point(5:5))  "polygon: contains inside")
+    _Assert(!sq->contains(ycGeom::Point(15:5))  "polygon: contains outside")
+    _Assert(sq->onBoundary(ycGeom::Point(0:5))  "polygon: on boundary")
+    _Assert(sq->contains(ycGeom::Point(0:5))  "polygon: boundary defaults inside")
+    _Assert(!sq->contains(ycGeom::Point(0:5) ?boundary "outside")  "polygon: boundary outside")
+    hole = ycGeom::Polygon(list(
         ycGeom::Point(0:0) ycGeom::Point(10:0) ycGeom::Point(10:7)
         ycGeom::Point(7:7) ycGeom::Point(7:3) ycGeom::Point(3:3)
         ycGeom::Point(3:7) ycGeom::Point(7:7) ycGeom::Point(10:7)
         ycGeom::Point(10:10) ycGeom::Point(0:10)
     ))
-    _Assert(g_hole->centroid()->toSkill() == list(5.0 5.0)  "polygon: keyhole centroid")
-    _Assert(!g_hole->contains(ycGeom::Point(5:5))  "polygon: hole excluded")
-    _Assert(g_hole->onBoundary(ycGeom::Point(3:7))  "polygon: hole boundary")
-    _Assert(!g_hole->onBoundary(ycGeom::Point(8.5:7))  "polygon: seam not boundary")
-    _Assert(g_hole->onBoundary(ycGeom::Point(8.5:7) ?includeSeams t)  "polygon: seam included")
+    _Assert(hole->centroid()->toSkill() == list(5.0 5.0)  "polygon: keyhole centroid")
+    _Assert(!hole->contains(ycGeom::Point(5:5))  "polygon: hole excluded")
+    _Assert(hole->onBoundary(ycGeom::Point(3:7))  "polygon: hole boundary")
+    _Assert(!hole->onBoundary(ycGeom::Point(8.5:7))  "polygon: seam not boundary")
+    _Assert(hole->onBoundary(ycGeom::Point(8.5:7) ?includeSeams t)  "polygon: seam included")
 )
 _AssertError(lambda(() ycGeom::Polygon(list(
     ycGeom::Point(0:0) ycGeom::Point(1:0) ycGeom::Point(0:1)
 ))->contains(ycGeom::Point(0:0) ?boundary "bad") t)  "polygon: bad boundary option")
 
-let((g_tri)
-    g_tri = ycGeom::Polygon(list(
+let((tri)
+    tri = ycGeom::Polygon(list(
         ycGeom::Point(0:0) ycGeom::Point(1:0) ycGeom::Point(0:1)
     ))
-    _AssertError(lambda(() g_tri->contains(ycGeom::Point(0:0) ?eps 0) t)  "polygon: eps 0 rejected")
-    _AssertError(lambda(() g_tri->contains(ycGeom::Point(0:0) ?eps -1) t)  "polygon: negative eps rejected")
-    _AssertError(lambda(() g_tri->contains(ycGeom::Point(0:0) ?eps "x") t)  "polygon: string eps rejected")
-    _AssertError(lambda(() g_tri->onBoundary(ycGeom::Point(0:0) ?includeSeams "x") t)  "polygon: bad includeSeams")
+    _AssertError(lambda(() tri->contains(ycGeom::Point(0:0) ?eps 0) t)  "polygon: eps 0 rejected")
+    _AssertError(lambda(() tri->contains(ycGeom::Point(0:0) ?eps -1) t)  "polygon: negative eps rejected")
+    _AssertError(lambda(() tri->contains(ycGeom::Point(0:0) ?eps "x") t)  "polygon: string eps rejected")
+    _AssertError(lambda(() tri->onBoundary(ycGeom::Point(0:0) ?includeSeams "x") t)  "polygon: bad includeSeams")
 )
 
-let((g_sq g_pairs)
-    g_sq = ycGeom::Polygon(list(
+let((sq pairs)
+    sq = ycGeom::Polygon(list(
         ycGeom::Point(0:0) ycGeom::Point(4:0)
         ycGeom::Point(4:4) ycGeom::Point(0:4)
     ))
-    g_pairs = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
-    _Assert(g_pairs->toSkill() == g_sq->toSkill()  "polygon: pair list form")
+    pairs = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
+    _Assert(pairs->toSkill() == sq->toSkill()  "polygon: pair list form")
     _AssertError(lambda(() ycGeom::Polygon(list(0 0 4 0 4 4 0 4)) t)
         "polygon: flat number form rejected")
-    _Assert(ycGeom::Polygon(g_sq->toSkill())->toSkill() == g_sq->toSkill()  "polygon: toSkill roundtrip")
+    _Assert(ycGeom::Polygon(sq->toSkill())->toSkill() == sq->toSkill()  "polygon: toSkill roundtrip")
     _Assert(ycGeom::Polygon('((0 0) (0 1) (1 1)))->area() == 0.5  "polygon: user pair example")
 )
 _AssertError(lambda(() ycGeom::Polygon(list(0 0 4 0 4)) t)  "polygon: odd flat list rejected")
 _AssertError(lambda(() ycGeom::Polygon(list(list(0 0) list(4 0))) t)  "polygon: two points rejected")
 
-let((g_a g_b g_r)
-    g_a = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
-    g_b = ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))
-    g_r = g_a->or(g_b)
-    _Assert(classOf(g_r) == findClass('ycGeom::Region)  "polygon: or returns Region")
-    _Assert(g_r->area() == 28.0  "polygon: or area")
-    _Assert(g_a->and(g_b)->area() == 4.0  "polygon: and area")
-    _Assert(g_a->not(g_b)->area() == 12.0  "polygon: not area")
-    _Assert(g_a->xor(g_b)->area() == 24.0  "polygon: xor area")
-    _Assert(g_a->and(ycGeom::Polygon('((10 10) (12 10) (12 12) (10 12))))->isEmpty()  "polygon: disjoint and empty")
-    _Assert(g_a->or('((2 2) (6 2) (6 6) (2 6)))->area() == 28.0  "polygon: raw list operand")
+let((a b r)
+    a = ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))
+    b = ycGeom::Polygon('((2 2) (6 2) (6 6) (2 6)))
+    r = a->or(b)
+    _Assert(classOf(r) == findClass('ycGeom::Region)  "polygon: or returns Region")
+    _Assert(r->area() == 28.0  "polygon: or area")
+    _Assert(a->and(b)->area() == 4.0  "polygon: and area")
+    _Assert(a->not(b)->area() == 12.0  "polygon: not area")
+    _Assert(a->xor(b)->area() == 24.0  "polygon: xor area")
+    _Assert(a->and(ycGeom::Polygon('((10 10) (12 10) (12 12) (10 12))))->isEmpty()  "polygon: disjoint and empty")
+    _Assert(a->or('((2 2) (6 2) (6 6) (2 6)))->area() == 28.0  "polygon: raw list operand")
 )
 _AssertError(lambda(() ycGeom::Polygon('((0 0) (4 0) (4 4) (0 4)))->or(1) t)  "polygon: bad boolean operand")
 
-let((g_hole)
-    g_hole = ycGeom::Polygon(list(
+let((hole)
+    hole = ycGeom::Polygon(list(
         ycGeom::Point(0:0)
         ycGeom::Point(10:0)
         ycGeom::Point(10:7)
@@ -161,36 +161,36 @@ let((g_hole)
         ycGeom::Point(10:10)
         ycGeom::Point(0:10)
     ))
-    _Assert(g_hole->area() == 84.0  "polygon: keyhole near seam area")
-    _Assert(g_hole->perimeter() == 56.0  "polygon: keyhole near seam perimeter")
-    _Assert(g_hole->perimeter(?includeSeams t) == 62.0
+    _Assert(hole->area() == 84.0  "polygon: keyhole near seam area")
+    _Assert(hole->perimeter() == 56.0  "polygon: keyhole near seam perimeter")
+    _Assert(hole->perimeter(?includeSeams t) == 62.0
         "polygon: keyhole near seam included perimeter")
 )
 
-let((g_p g_q t_reg)
-    g_p = ycGeom::Point(list(6500408.894374631 -5659520.731666292))
-    g_q = ycGeom::Point(list(6500408.894374632 -5659520.731666292))
-    t_reg = makeTable("geomCanonTest" nil)
-    _Assert(ycGeom::_SamePoint(g_p g_q 1e-9)
+let((p q reg)
+    p = ycGeom::Point(list(6500408.894374631 -5659520.731666292))
+    q = ycGeom::Point(list(6500408.894374632 -5659520.731666292))
+    reg = makeTable("geomCanonTest" nil)
+    _Assert(ycGeom::_SamePoint(p q 1e-9)
         "polygon: 1 ulp points compare equal")
-    _Assert(ycGeom::_PtKey(ycGeom::_CanonPoint(g_p 1e-9 t_reg))
-        == ycGeom::_PtKey(ycGeom::_CanonPoint(g_q 1e-9 t_reg))
+    _Assert(ycGeom::_PtKey(ycGeom::_CanonPoint(p 1e-9 reg))
+        == ycGeom::_PtKey(ycGeom::_CanonPoint(q 1e-9 reg))
         "polygon: 1 ulp points share a canonical representative")
 )
 
-let((g_p g_q t_reg)
-    g_p = ycGeom::Point(list(-1354119.7609392945 1809784.94827771))
-    g_q = ycGeom::Point(list(-1354119.7609392938 1809784.9482777116))
-    t_reg = makeTable("geomCanonTest" nil)
-    _Assert(ycGeom::_SamePoint(g_p g_q 1e-9)
+let((p q reg)
+    p = ycGeom::Point(list(-1354119.7609392945 1809784.94827771))
+    q = ycGeom::Point(list(-1354119.7609392938 1809784.9482777116))
+    reg = makeTable("geomCanonTest" nil)
+    _Assert(ycGeom::_SamePoint(p q 1e-9)
         "polygon: nearby points with different magnitudes compare equal")
-    _Assert(ycGeom::_PtKey(ycGeom::_CanonPoint(g_p 1e-9 t_reg))
-        == ycGeom::_PtKey(ycGeom::_CanonPoint(g_q 1e-9 t_reg))
+    _Assert(ycGeom::_PtKey(ycGeom::_CanonPoint(p 1e-9 reg))
+        == ycGeom::_PtKey(ycGeom::_CanonPoint(q 1e-9 reg))
         "polygon: canonical scale is stable across nearby magnitudes")
 )
 
-let((g_hole)
-    g_hole = ycGeom::Polygon(list(
+let((hole)
+    hole = ycGeom::Polygon(list(
         ycGeom::Point(1000000:2778.75)
         ycGeom::Point(1000010:2778.75)
         ycGeom::Point(1000010:2785.75)
@@ -203,14 +203,14 @@ let((g_hole)
         ycGeom::Point(1000010:2788.75)
         ycGeom::Point(1000000:2788.75)
     ))
-    _Assert(g_hole->perimeter() == 56.0
+    _Assert(hole->perimeter() == 56.0
         "polygon: shifted keyhole near seam perimeter")
-    _Assert(g_hole->perimeter(?includeSeams t) == 62.0
+    _Assert(hole->perimeter(?includeSeams t) == 62.0
         "polygon: shifted keyhole included perimeter")
 )
 
-let((g_hole)
-    g_hole = ycGeom::Polygon(list(
+let((hole)
+    hole = ycGeom::Polygon(list(
         ycGeom::Point(900000:900000)
         ycGeom::Point(900010:900000)
         ycGeom::Point(list(900010.0000000006 900007.0))
@@ -223,151 +223,151 @@ let((g_hole)
         ycGeom::Point(900010:900010)
         ycGeom::Point(900000:900010)
     ))
-    _Assert(g_hole->perimeter() == 56.0
+    _Assert(hole->perimeter() == 56.0
         "polygon: seam endpoints on cell boundary perimeter")
-    _Assert(abs(g_hole->perimeter(?includeSeams t) - 62.0) <= 1e-6
+    _Assert(abs(hole->perimeter(?includeSeams t) - 62.0) <= 1e-6
         "polygon: seam endpoints on cell boundary included perimeter")
 )
 
-let((l_pts n_i n_teeth n_w n_h n_amp g_hi g_p)
-    n_teeth = 997
-    n_w = 1e6
-    n_h = 1e6
-    n_amp = 4e5
-    l_pts = tconc(l_pts ycGeom::Point(list(1e9 3.7e8)))
-    for(n_i 1 n_teeth
-        l_pts = tconc(l_pts ycGeom::Point(list(
-            1e9 + n_w * n_i / (n_teeth + 1)
-            3.7e8 + if(g_hi n_h - n_amp n_amp))))
-        g_hi = !g_hi
+let((pts i teeth w h2 amp hi p)
+    teeth = 997
+    w = 1e6
+    h2 = 1e6
+    amp = 4e5
+    pts = tconc(pts ycGeom::Point(list(1e9 3.7e8)))
+    for(i2 1 teeth
+        pts = tconc(pts ycGeom::Point(list(
+            1e9 + w * i2 / (teeth + 1)
+            3.7e8 + if(hi h2 - amp amp))))
+        hi = !hi
     )
-    l_pts = tconc(l_pts ycGeom::Point(list(1e9 + n_w 3.7e8)))
-    l_pts = tconc(l_pts ycGeom::Point(list(1e9 + n_w 3.7e8 + n_h)))
-    l_pts = tconc(l_pts ycGeom::Point(list(1e9 3.7e8 + n_h)))
-    g_p = ycGeom::Polygon(car(l_pts))
+    pts = tconc(pts ycGeom::Point(list(1e9 + w 3.7e8)))
+    pts = tconc(pts ycGeom::Point(list(1e9 + w 3.7e8 + h2)))
+    pts = tconc(pts ycGeom::Point(list(1e9 3.7e8 + h2)))
+    p = ycGeom::Polygon(car(pts))
     ; 该梳形的精确周长（高精度基准）。
-    _Assert(abs(g_p->perimeter() - 203002502.4842986) <= 1e-6
+    _Assert(abs(p->perimeter() - 203002502.4842986) <= 1e-6
         "polygon: perimeter accumulation stable on long comb")
 )
 
-let((g_sq g_c)
-    g_sq = ycGeom::Polygon(list(
+let((sq c)
+    sq = ycGeom::Polygon(list(
         ycGeom::Point(100000:100000)
         ycGeom::Point(100000.1:100000)
         ycGeom::Point(100000.1:100000.1)
         ycGeom::Point(100000:100000.1)
     ))
-    _Assert(abs(g_sq->area() - 0.01) <= 1e-9  "polygon: large offset area stable")
-    _Assert(abs(g_sq->centroid()->x() - 100000.05) <= 1e-9
+    _Assert(abs(sq->area() - 0.01) <= 1e-9  "polygon: large offset area stable")
+    _Assert(abs(sq->centroid()->x() - 100000.05) <= 1e-9
         "polygon: large offset centroid x")
-    _Assert(abs(g_sq->centroid()->y() - 100000.05) <= 1e-9
+    _Assert(abs(sq->centroid()->y() - 100000.05) <= 1e-9
         "polygon: large offset centroid y")
-    g_c = ycGeom::Polygon('((0 0) (0.0005 1e-6) (0.001 0)
+    c = ycGeom::Polygon('((0 0) (0.0005 1e-6) (0.001 0)
                             (0.001 0.001) (0 0.001)))
-    _Assert(length(g_c->removeCollinear()->points()) == 5
+    _Assert(length(c->removeCollinear()->points()) == 5
         "polygon: small-angle collinear tolerance is scale independent")
 )
 
-let((l_tiny l_large)
-    l_tiny = errset(ycGeom::Polygon(list(
+let((tiny large)
+    tiny = errset(ycGeom::Polygon(list(
         ycGeom::Point(0:0) ycGeom::Point(1e-5:0)
         ycGeom::Point(1e-5:1e-5) ycGeom::Point(0:1e-5)
     )) nil)
-    _Assert(l_tiny  "polygon: tiny polygon constructed")
-    l_large = errset(ycGeom::Polygon(list(
+    _Assert(tiny  "polygon: tiny polygon constructed")
+    large = errset(ycGeom::Polygon(list(
         ycGeom::Point(1e7:1e7) ycGeom::Point(list(1e7 + 0.1 1e7))
         ycGeom::Point(list(1e7 + 0.1 1e7 + 0.1)) ycGeom::Point(list(1e7 1e7 + 0.1))
     )) nil)
-    _Assert(l_large && abs(car(l_large)->area() - 0.01) <= 1e-9
+    _Assert(large && abs(car(large)->area() - 0.01) <= 1e-9
         "polygon: very large offset area stable")
 )
 
-let((g_a g_b l_res g_r)
-    g_a = ycGeom::Polygon(list(
+let((a b res r)
+    a = ycGeom::Polygon(list(
         ycGeom::Point(10000000:0)
         ycGeom::Point(10000010:0)
         ycGeom::Point(10000010:10)
         ycGeom::Point(10000000:10)
     ))
-    g_b = ycGeom::Polygon(list(
+    b = ycGeom::Polygon(list(
         ycGeom::Point(10000005:0)
         ycGeom::Point(10000015:0)
         ycGeom::Point(10000015:10)
         ycGeom::Point(10000005:10)
     ))
-    l_res = errset(g_a->or(g_b ?grid 0.001) nil)
-    _Assert(l_res  "polygon: large-coordinate grid union succeeds")
-    when(l_res
-        g_r = car(l_res)
-        _Assert(abs(g_r->area() - 150.0) <= 1e-6
+    res = errset(a->or(b ?grid 0.001) nil)
+    _Assert(res  "polygon: large-coordinate grid union succeeds")
+    when(res
+        r = car(res)
+        _Assert(abs(r->area() - 150.0) <= 1e-6
             "polygon: large-coordinate grid union area")
-        _Assert(g_r->bBox() == list(list(10000000.0 0.0) list(10000015.0 10.0))
+        _Assert(r->bBox() == list(list(10000000.0 0.0) list(10000015.0 10.0))
             "polygon: large-coordinate grid union bbox")
     )
 )
 
-let((g_a g_b g_r)
-    g_a = ycGeom::Polygon(list(
+let((a b r)
+    a = ycGeom::Polygon(list(
         ycGeom::Point(0.15:0.15)
         ycGeom::Point(0.35:0.15)
         ycGeom::Point(0.35:0.35)
         ycGeom::Point(0.15:0.35)
     ))
-    g_b = ycGeom::Polygon(list(
+    b = ycGeom::Polygon(list(
         ycGeom::Point(0.15:0.15)
         ycGeom::Point(0.35:0.15)
         ycGeom::Point(0.35:0.35)
         ycGeom::Point(0.15:0.35)
     ))
-    g_r = g_a->or(g_b ?grid 0.1)
-    _Assert(g_r->bBox() == list(list(0.2 0.2) list(0.4 0.4))
+    r = a->or(b ?grid 0.1)
+    _Assert(r->bBox() == list(list(0.2 0.2) list(0.4 0.4))
         "polygon: grid snap corrects half-cell representation error")
 )
 
-let((g_a g_b g_r n_x)
-    n_x = 1.2 / (0.1 + 0.2) + 0.5
-    g_a = ycGeom::Polygon(list(
-        ycGeom::Point(list(n_x 0))
+let((a b r x)
+    x = 1.2 / (0.1 + 0.2) + 0.5
+    a = ycGeom::Polygon(list(
+        ycGeom::Point(list(x 0))
         ycGeom::Point(6:0)
         ycGeom::Point(6:1)
-        ycGeom::Point(list(n_x 1))
+        ycGeom::Point(list(x 1))
     ))
-    g_b = ycGeom::Polygon(list(
-        ycGeom::Point(list(n_x 0))
+    b = ycGeom::Polygon(list(
+        ycGeom::Point(list(x 0))
         ycGeom::Point(6:0)
         ycGeom::Point(6:1)
-        ycGeom::Point(list(n_x 1))
+        ycGeom::Point(list(x 1))
     ))
-    g_r = g_a->or(g_b ?grid 1.0)
-    _Assert(g_r->bBox() == list(list(5.0 0.0) list(6.0 1.0))
+    r = a->or(b ?grid 1.0)
+    _Assert(r->bBox() == list(list(5.0 0.0) list(6.0 1.0))
         "polygon: grid snap uses round2 tie at half cell")
 )
 
-let((g_rect g_sq g_p)
-    g_rect = ycGeom::Polygon(list(0:0 10:0 10:4 0:4))
-    g_p = g_rect->toPath()
-    _Assert(g_p  "polygon: rectangle toPath")
-    _Assert(g_p->width() == 4.0  "polygon: rectangle horizontal width")
-    _Assert(g_p->route()->toSkill() == list(list(0.0 2.0) list(10.0 2.0))
+let((rect sq p)
+    rect = ycGeom::Polygon(list(0:0 10:0 10:4 0:4))
+    p = rect->toPath()
+    _Assert(p  "polygon: rectangle toPath")
+    _Assert(p->width() == 4.0  "polygon: rectangle horizontal width")
+    _Assert(p->route()->toSkill() == list(list(0.0 2.0) list(10.0 2.0))
         "polygon: rectangle horizontal route")
-    _Assert(g_rect->xor(g_p->toRegion())->area() <= 1e-9
+    _Assert(rect->xor(p->toRegion())->area() <= 1e-9
         "polygon: rectangle horizontal overlaps")
 
-    g_p = g_rect->toPath(?orient 'v)
-    _Assert(g_p->width() == 10.0  "polygon: rectangle vertical width")
-    _Assert(g_p->route()->toSkill() == list(list(5.0 0.0) list(5.0 4.0))
+    p = rect->toPath(?orient 'v)
+    _Assert(p->width() == 10.0  "polygon: rectangle vertical width")
+    _Assert(p->route()->toSkill() == list(list(5.0 0.0) list(5.0 4.0))
         "polygon: rectangle vertical route")
-    _Assert(g_rect->xor(g_p->toRegion())->area() <= 1e-9
+    _Assert(rect->xor(p->toRegion())->area() <= 1e-9
         "polygon: rectangle vertical overlaps")
 
-    _Assert(g_rect->toPath(?orient 'h)->toSkill() == g_rect->toPath()->toSkill()
+    _Assert(rect->toPath(?orient 'h)->toSkill() == rect->toPath()->toSkill()
         "polygon: h alias")
-    _Assert(g_rect->toPath(?orient 'horizontal)->toSkill()
-        == g_rect->toPath()->toSkill()  "polygon: horizontal alias")
+    _Assert(rect->toPath(?orient 'horizontal)->toSkill()
+        == rect->toPath()->toSkill()  "polygon: horizontal alias")
 
-    g_sq = ycGeom::Polygon(list(0:0 4:0 4:4 0:4))
-    _Assert(g_sq->toPath()->width() == 4.0  "polygon: square horizontal")
-    _Assert(g_sq->toPath(?orient 'v)->width() == 4.0  "polygon: square vertical")
+    sq = ycGeom::Polygon(list(0:0 4:0 4:4 0:4))
+    _Assert(sq->toPath()->width() == 4.0  "polygon: square horizontal")
+    _Assert(sq->toPath(?orient 'v)->width() == 4.0  "polygon: square vertical")
 )
 
 _Assert(ycGeom::Polygon(list(0:0 4:0 0:4))->toPath() == nil
@@ -377,91 +377,91 @@ _AssertError(lambda(() ycGeom::Polygon(list(0:0 4:0 4:4 0:4))->toPath(?orient 'd
 _AssertError(lambda(() ycGeom::Polygon(list(0:0 4:0 4:4 0:4))->toPath(?eps 0) t)
     "polygon: bad eps rejected")
 
-let((g_src g_poly g_back)
-    g_src = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
-    g_poly = car(g_src->toRegion()->polygons())
-    g_back = g_poly->toPath()
-    _Assert(g_back  "polygon: open stroke toPath")
-    _Assert(g_back->width() == 2.0  "polygon: open stroke width")
-    _Assert(g_poly->xor(g_back->toRegion())->area() <= 1e-6
+let((src poly back)
+    src = ycGeom::Path(list(0:0 10:0 10:10) ?width 2)
+    poly = car(src->toRegion()->polygons())
+    back = poly->toPath()
+    _Assert(back  "polygon: open stroke toPath")
+    _Assert(back->width() == 2.0  "polygon: open stroke width")
+    _Assert(poly->xor(back->toRegion())->area() <= 1e-6
         "polygon: open stroke overlaps")
 
-    g_src = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
-    g_poly = car(g_src->toRegion()->polygons())
-    g_back = g_poly->toPath()
-    _Assert(g_back  "polygon: closed ring toPath")
-    _Assert(g_back->isClosed()  "polygon: closed ring closed")
-    _Assert(g_back->width() == 2.0  "polygon: closed ring width")
-    _Assert(g_poly->xor(g_back->toRegion())->area() <= 1e-6
+    src = ycGeom::Path(list(0:0 10:0 10:10 0:10 0:0) ?width 2)
+    poly = car(src->toRegion()->polygons())
+    back = poly->toPath()
+    _Assert(back  "polygon: closed ring toPath")
+    _Assert(back->isClosed()  "polygon: closed ring closed")
+    _Assert(back->width() == 2.0  "polygon: closed ring width")
+    _Assert(poly->xor(back->toRegion())->area() <= 1e-6
         "polygon: closed ring overlaps")
 )
 
-let((g_rot g_p)
-    g_rot = ycGeom::Polygon(list(
+let((rot p)
+    rot = ycGeom::Polygon(list(
         ycGeom::Point(0:0)
         ycGeom::Point(list(8.660254037844386 5))
         ycGeom::Point(list(6.660254037844386 8.464101615137753))
         ycGeom::Point(list(-2 3.4641016151377535))
     ))
-    g_p = g_rot->toPath(?orient 'vertical)
-    _Assert(g_p  "polygon: rotated rectangle toPath")
-    _Assert(abs(g_rot->xor(g_p->toRegion())->area()) <= 1e-6
+    p = rot->toPath(?orient 'vertical)
+    _Assert(p  "polygon: rotated rectangle toPath")
+    _Assert(abs(rot->xor(p->toRegion())->area()) <= 1e-6
         "polygon: rotated rectangle overlaps")
 )
 
-let((g_out g_in g_res g_poly)
-    g_out = ycGeom::Polygon(list(0:0 10:0 10:10 0:10))
-    g_in = ycGeom::Polygon(list(4:1 6:1 6:9 4:9))
-    g_res = g_out->not(g_in)
-    g_poly = car(g_res->polygons())
-    _Assert(g_poly->toPath() == nil  "polygon: non-offset ring not a stroke")
+let((out in res poly)
+    out = ycGeom::Polygon(list(0:0 10:0 10:10 0:10))
+    in = ycGeom::Polygon(list(4:1 6:1 6:9 4:9))
+    res = out->not(in)
+    poly = car(res->polygons())
+    _Assert(poly->toPath() == nil  "polygon: non-offset ring not a stroke")
 )
 
 ; 大坐标偏移下 toPath 的容差必须随坐标量级放大
-let((n_rad n_cos n_sin l_acc g_src g_poly g_back g_trap)
-    n_rad = 37.0 * 3.14159265358979323846 / 180.0
-    n_cos = cos(n_rad)
-    n_sin = sin(n_rad)
-    foreach(l_p list(0.0:0.0 10.0:0.0 10.0:10.0)
-        l_acc = tconc(l_acc list(
-            n_cos * car(l_p) - n_sin * cadr(l_p) + 5.0e6
-            n_sin * car(l_p) + n_cos * cadr(l_p) + 5.0e6
+let((rad cos sin acc src poly back trap)
+    rad = 37.0 * 3.14159265358979323846 / 180.0
+    cos = cos(rad)
+    sin = sin(rad)
+    foreach(p list(0.0:0.0 10.0:0.0 10.0:10.0)
+        acc = tconc(acc list(
+            cos * car(p) - sin * cadr(p) + 5.0e6
+            sin * car(p) + cos * cadr(p) + 5.0e6
         ))
     )
-    g_src = ycGeom::Path(car(l_acc) ?width 2)
-    g_poly = car(g_src->toRegion()->polygons())
-    g_back = g_poly->toPath()
-    _Assert(g_back  "polygon: open stroke toPath at 5e6 offset")
+    src = ycGeom::Path(car(acc) ?width 2)
+    poly = car(src->toRegion()->polygons())
+    back = poly->toPath()
+    _Assert(back  "polygon: open stroke toPath at 5e6 offset")
     ; 用 && 短路而不是 when 包裹：断言数固定，失败时不会连带少跑用例
-    _Assert(g_back && abs(g_back->width() - 2.0) <= 1e-8
+    _Assert(back && abs(back->width() - 2.0) <= 1e-8
         "polygon: large offset stroke width")
-    _Assert(g_back && g_poly->xor(g_back->toRegion())->area() <= 1e-6
+    _Assert(back && poly->xor(back->toRegion())->area() <= 1e-6
         "polygon: large offset stroke roundtrip")
     ; 同量级下「像描边但宽度不等」的四边形必须仍然返回 nil；
     ; 只用三角形会恒为 nil（至少 4 条边才进入等宽判定），测不到容差放大
-    g_trap = ycGeom::Polygon(list(
+    trap = ycGeom::Polygon(list(
         ycGeom::Point(5.0e6:5.0e6)
         ycGeom::Point(list(5.0e6 + 10.0 5.0e6))
         ycGeom::Point(list(5.0e6 + 9.0 5.0e6 + 5.0))
         ycGeom::Point(list(5.0e6 + 1.0 5.0e6 + 5.0))
     ))
-    _Assert(g_trap->toPath() == nil  "polygon: trapezoid at 5e6 not a stroke")
+    _Assert(trap->toPath() == nil  "polygon: trapezoid at 5e6 not a stroke")
 )
 
 ; 闭合描边环走的是 _PolyToPathRing 分支，失效门槛比开放描边更高
-let((n_rad n_cos n_sin l_acc g_poly g_back)
-    n_rad = 37.0 * 3.14159265358979323846 / 180.0
-    n_cos = cos(n_rad)
-    n_sin = sin(n_rad)
-    foreach(l_p list(0.0:0.0 10.0:0.0 10.0:10.0 0.0:10.0 0.0:0.0)
-        l_acc = tconc(l_acc list(
-            n_cos * car(l_p) - n_sin * cadr(l_p) + 1.0e8
-            n_sin * car(l_p) + n_cos * cadr(l_p) + 1.0e8
+let((rad cos sin acc poly back)
+    rad = 37.0 * 3.14159265358979323846 / 180.0
+    cos = cos(rad)
+    sin = sin(rad)
+    foreach(p list(0.0:0.0 10.0:0.0 10.0:10.0 0.0:10.0 0.0:0.0)
+        acc = tconc(acc list(
+            cos * car(p) - sin * cadr(p) + 1.0e8
+            sin * car(p) + cos * cadr(p) + 1.0e8
         ))
     )
-    g_poly = car(ycGeom::Path(car(l_acc) ?width 2)->toRegion()->polygons())
-    g_back = g_poly->toPath()
-    _Assert(g_back  "polygon: closed ring toPath at 1e8 offset")
+    poly = car(ycGeom::Path(car(acc) ?width 2)->toRegion()->polygons())
+    back = poly->toPath()
+    _Assert(back  "polygon: closed ring toPath at 1e8 offset")
 )
 
 _TestChildDone = t

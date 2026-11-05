@@ -57,49 +57,49 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
     ;
     ; **返回**
     ;   (t) - 合法；否则 error
-    let((n_len n_i n_j g_a g_b g_c g_d t_seams g_prev)
+    let((len i j a b c d seams prev)
         unless(listp(l_points)
             error("ycGeom::Polygon: expected a list of Points, got %A" l_points)
         )
-        n_len = length(l_points)
-        unless(n_len >= 3
+        len = length(l_points)
+        unless(len >= 3
             error("ycGeom::Polygon: at least 3 points are required")
         )
-        for(n_i 1 n_len
-            unless(_PointP(_Nth1(n_i l_points))
-                error("ycGeom::Polygon: element %d is not a Point: %A" n_i _Nth1(n_i l_points))
+        for(i2 1 len
+            unless(_PointP(_Nth1(i2 l_points))
+                error("ycGeom::Polygon: element %d is not a Point: %A" i2 _Nth1(i2 l_points))
             )
-            g_prev = _Nth1(if(n_i == 1 n_len (n_i - 1)) l_points)
-            when(_Near(g_prev->x() _Nth1(n_i l_points)->x() n_eps)
-                && _Near(g_prev->y() _Nth1(n_i l_points)->y() n_eps)
-                error("ycGeom::Polygon: consecutive duplicate point at index %d" n_i)
+            prev = _Nth1(if(i2 == 1 len (i2 - 1)) l_points)
+            when(_Near(prev->x() _Nth1(i2 l_points)->x() n_eps)
+                && _Near(prev->y() _Nth1(i2 l_points)->y() n_eps)
+                error("ycGeom::Polygon: consecutive duplicate point at index %d" i2)
             )
         )
         when(abs(_SignedArea(l_points)) <= _AreaTol(l_points n_eps)
             error("ycGeom::Polygon: zero-area point sequence")
         )
-        t_seams = _SeamKeys(l_points)
-        for(n_i 1 n_len
-            g_a = _Nth1(n_i l_points)
-            g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_points)
-            when(t_seams[_EdgeKey(g_a g_b)] == 2
-                unless(_Near(g_a->x() g_b->x() n_eps)
-                    || _Near(g_a->y() g_b->y() n_eps)
+        seams = _SeamKeys(l_points)
+        for(i2 1 len
+            a = _Nth1(i2 l_points)
+            b = _Nth1(if(i2 == len 1 (i2 + 1)) l_points)
+            when(seams[_EdgeKey(a b)] == 2
+                unless(_Near(a->x() b->x() n_eps)
+                    || _Near(a->y() b->y() n_eps)
                     error("ycGeom::Polygon: seam must be horizontal or vertical")
                 )
             )
-            unless(t_seams[_EdgeKey(g_a g_b)] == 2
-                for(n_j 1 n_len
-                    when(n_j > n_i
-                        let((g_c g_d)
-                            g_c = _Nth1(n_j l_points)
-                            g_d = _Nth1(if(n_j == n_len 1 (n_j + 1)) l_points)
-                            unless(t_seams[_EdgeKey(g_c g_d)] == 2
-                                unless(_SamePoint(g_a g_c n_eps)
-                                    || _SamePoint(g_a g_d n_eps)
-                                    || _SamePoint(g_b g_c n_eps)
-                                    || _SamePoint(g_b g_d n_eps)
-                                    when(_SegmentsCross(g_a g_b g_c g_d n_eps)
+            unless(seams[_EdgeKey(a b)] == 2
+                for(j2 1 len
+                    when(j2 > i2
+                        let((c2 d2)
+                            c2 = _Nth1(j2 l_points)
+                            d2 = _Nth1(if(j2 == len 1 (j2 + 1)) l_points)
+                            unless(seams[_EdgeKey(c2 d2)] == 2
+                                unless(_SamePoint(a c2 n_eps)
+                                    || _SamePoint(a d2 n_eps)
+                                    || _SamePoint(b c2 n_eps)
+                                    || _SamePoint(b d2 n_eps)
+                                    when(_SegmentsCross(a b c2 d2 n_eps)
                                         error("ycGeom::Polygon: non-seam edges intersect")
                                     )
                                 )
@@ -186,15 +186,15 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ;
         ; **返回**
         ;   (list[Segment]) - 边列表
-        let((l_res n_len n_i)
-            n_len = length(self->_data->points)
-            for(n_i 1 n_len
-                l_res = tconc(l_res Segment(list(
-                    _Nth1(n_i self->_data->points)
-                    _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
+        let((res len i)
+            len = length(self->_data->points)
+            for(i2 1 len
+                res = tconc(res Segment(list(
+                    _Nth1(i2 self->_data->points)
+                    _Nth1(if(i2 == len 1 (i2 + 1)) self->_data->points)
                 )))
             )
-            car(l_res)
+            car(res)
         )
     )
     self->area = lambda(()  ; -> float
@@ -213,31 +213,31 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ;
         ; **返回**
         ;   (float) - 周长
-        let((n_eps n_len n_i g_a g_b t_seams n_sum n_comp n_term n_next n_seam)
+        let((eps2 len i a b seams sum comp term next seam)
             _Flag(includeSeams "includeSeams")
-            n_eps = _Eps(eps)
-            t_seams = _SeamKeys(self->_data->points)
-            n_len = length(self->_data->points)
+            eps2 = _Eps(eps)
+            seams = _SeamKeys(self->_data->points)
+            len = length(self->_data->points)
             ; Kahan-Babuska-Neumaier 补偿求和：把每步舍入误差留在 n_comp。
-            n_sum = 0.0
-            n_comp = 0.0
-            for(n_i 1 n_len
-                g_a = _Nth1(n_i self->_data->points)
-                g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
-                n_seam = t_seams[_EdgeKey(g_a g_b)] == 2
-                unless(n_seam && !includeSeams
-                    n_term = Segment(list(g_a g_b))->length()
-                    n_next = n_sum + n_term
-                    if(abs(n_sum) >= abs(n_term)
+            sum = 0.0
+            comp = 0.0
+            for(i2 1 len
+                a = _Nth1(i2 self->_data->points)
+                b = _Nth1(if(i2 == len 1 (i2 + 1)) self->_data->points)
+                seam = seams[_EdgeKey(a b)] == 2
+                unless(seam && !includeSeams
+                    term = Segment(list(a b))->length()
+                    next = sum + term
+                    if(abs(sum) >= abs(term)
                     then
-                        n_comp = n_comp + ((n_sum - n_next) + n_term)
+                        comp = comp + ((sum - next) + term)
                     else
-                        n_comp = n_comp + ((n_term - n_next) + n_sum)
+                        comp = comp + ((term - next) + sum)
                     )
-                    n_sum = n_next
+                    sum = next
                 )
             )
-            n_sum + n_comp
+            sum + comp
         )
     )
     self->centroid = lambda(()  ; -> Point
@@ -245,30 +245,30 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point) - 质心；零面积 error
-        let((n_len n_i g_a g_b n_cross n_a n_cx n_cy n_ox n_oy)
-            n_len = length(self->_data->points)
-            n_a = 0.0
-            n_cx = 0.0
-            n_cy = 0.0
-            n_ox = car(self->_data->points)->x()
-            n_oy = car(self->_data->points)->y()
-            for(n_i 1 n_len
-                g_a = _Nth1(n_i self->_data->points)
-                g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
-                n_cross = (g_a->x() - n_ox) * (g_b->y() - n_oy)
-                    - (g_b->x() - n_ox) * (g_a->y() - n_oy)
-                n_a = n_a + n_cross
-                n_cx = n_cx
-                    + ((g_a->x() - n_ox) + (g_b->x() - n_ox)) * n_cross
-                n_cy = n_cy
-                    + ((g_a->y() - n_oy) + (g_b->y() - n_oy)) * n_cross
+        let((len i a b cross a2 cx cy ox oy)
+            len = length(self->_data->points)
+            a2 = 0.0
+            cx = 0.0
+            cy = 0.0
+            ox = car(self->_data->points)->x()
+            oy = car(self->_data->points)->y()
+            for(i2 1 len
+                a = _Nth1(i2 self->_data->points)
+                b = _Nth1(if(i2 == len 1 (i2 + 1)) self->_data->points)
+                cross = (a->x() - ox) * (b->y() - oy)
+                    - (b->x() - ox) * (a->y() - oy)
+                a2 = a2 + cross
+                cx = cx
+                    + ((a->x() - ox) + (b->x() - ox)) * cross
+                cy = cy
+                    + ((a->y() - oy) + (b->y() - oy)) * cross
             )
-            n_a = n_a / 2.0
-            when(abs(n_a) <= _AreaTol(self->_data->points _Eps(nil))
+            a2 = a2 / 2.0
+            when(abs(a2) <= _AreaTol(self->_data->points _Eps(nil))
                 error("ycGeom::Polygon->centroid: zero-area polygon")
             )
-            Point(list(n_ox + n_cx / (6.0 * n_a)
-                n_oy + n_cy / (6.0 * n_a)))
+            Point(list(ox + cx / (6.0 * a2)
+                oy + cy / (6.0 * a2)))
         )
     )
     self->contains = lambda((g_point \@key (boundary "inside") (eps nil) "ggg")  ; -> t | nil
@@ -281,24 +281,24 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t|nil) - 在内部或按选项在边界上为 t
-        let((g_p n_eps n_len n_i g_a g_b t_seams g_boundary)
-            g_p = _AsPoint(g_point "ycGeom::Polygon->contains")
+        let((p eps2 len i a b seams boundary2)
+            p = _AsPoint(g_point "ycGeom::Polygon->contains")
             _BoundaryMode(boundary)
-            n_eps = _Eps(eps)
-            t_seams = _SeamKeys(self->_data->points)
-            n_len = length(self->_data->points)
-            for(n_i 1 n_len
-                g_a = _Nth1(n_i self->_data->points)
-                g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
-                unless(t_seams[_EdgeKey(g_a g_b)] == 2
-                    when(_OnSegment(g_a g_b g_p n_eps)
-                        g_boundary = t
+            eps2 = _Eps(eps)
+            seams = _SeamKeys(self->_data->points)
+            len = length(self->_data->points)
+            for(i2 1 len
+                a = _Nth1(i2 self->_data->points)
+                b = _Nth1(if(i2 == len 1 (i2 + 1)) self->_data->points)
+                unless(seams[_EdgeKey(a b)] == 2
+                    when(_OnSegment(a b p eps2)
+                        boundary2 = t
                     )
                 )
             )
-            if(g_boundary
+            if(boundary2
                 boundary == "inside"
-                _PointInRing(self->_data->points g_p n_eps)
+                _PointInRing(self->_data->points p eps2)
             )
         )
     )
@@ -312,24 +312,24 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t|nil) - 在边界上为 t
-        let((g_p n_eps t_seams n_len n_i g_a g_b g_found)
-            g_p = _AsPoint(g_point "ycGeom::Polygon->onBoundary")
+        let((p eps2 seams len i a b found)
+            p = _AsPoint(g_point "ycGeom::Polygon->onBoundary")
             _Flag(includeSeams "includeSeams")
-            n_eps = _Eps(eps)
-            t_seams = _SeamKeys(self->_data->points)
-            n_len = length(self->_data->points)
-            for(n_i 1 n_len
-                when(!g_found
-                    g_a = _Nth1(n_i self->_data->points)
-                    g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) self->_data->points)
-                    unless(t_seams[_EdgeKey(g_a g_b)] == 2 && !includeSeams
-                        when(_OnSegment(g_a g_b g_p n_eps)
-                            g_found = t
+            eps2 = _Eps(eps)
+            seams = _SeamKeys(self->_data->points)
+            len = length(self->_data->points)
+            for(i2 1 len
+                when(!found
+                    a = _Nth1(i2 self->_data->points)
+                    b = _Nth1(if(i2 == len 1 (i2 + 1)) self->_data->points)
+                    unless(seams[_EdgeKey(a b)] == 2 && !includeSeams
+                        when(_OnSegment(a b p eps2)
+                            found = t
                         )
                     )
                 )
             )
-            g_found
+            found
         )
     )
     self->bBox = lambda(()  ; -> list[list[float]]
@@ -337,19 +337,19 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ;
         ; **返回**
         ;   (list[list[float]]) - ((xmin ymin) (xmax ymax))
-        let((n_xmin n_ymin n_xmax n_ymax n_i g_p)
-            n_xmin = _Nth1(1 self->_data->points)->x()
-            n_ymin = _Nth1(1 self->_data->points)->y()
-            n_xmax = n_xmin
-            n_ymax = n_ymin
-            for(n_i 2 length(self->_data->points)
-                g_p = _Nth1(n_i self->_data->points)
-                n_xmin = min(n_xmin g_p->x())
-                n_ymin = min(n_ymin g_p->y())
-                n_xmax = max(n_xmax g_p->x())
-                n_ymax = max(n_ymax g_p->y())
+        let((xmin ymin xmax ymax i p)
+            xmin = _Nth1(1 self->_data->points)->x()
+            ymin = _Nth1(1 self->_data->points)->y()
+            xmax = xmin
+            ymax = ymin
+            for(i2 2 length(self->_data->points)
+                p = _Nth1(i2 self->_data->points)
+                xmin = min(xmin p->x())
+                ymin = min(ymin p->y())
+                xmax = max(xmax p->x())
+                ymax = max(ymax p->y())
             )
-            list(list(n_xmin n_ymin) list(n_xmax n_ymax))
+            list(list(xmin ymin) list(xmax ymax))
         )
     )
     self->toRect = lambda(()  ; -> Rect
@@ -367,9 +367,9 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t|nil) - 顺时针为 t
-        let((n_eps)
-            n_eps = _Eps(eps)
-            _SignedArea(self->_data->points) < -_AreaTol(self->_data->points n_eps)
+        let((eps2)
+            eps2 = _Eps(eps)
+            _SignedArea(self->_data->points) < -_AreaTol(self->_data->points eps2)
         )
     )
     self->reverse = lambda(()  ; -> Polygon
@@ -458,11 +458,11 @@ procedure(_InstallPolygon(self "g")  ; -> t
         ;
         ; **返回**
         ;   (list[list[float]]) - ((x1 y1) ...)
-        let((l_res)
-            foreach(g_p self->_data->points
-                l_res = tconc(l_res g_p->toSkill())
+        let((res)
+            foreach(p self->_data->points
+                res = tconc(res p->toSkill())
             )
-            car(l_res)
+            car(res)
         )
     )
     t
@@ -491,15 +491,15 @@ procedure(Polygon(l_points "l")  ; -> Polygon
     ;
     ; **返回**
     ;   (Polygon) - 复制外层点列的新多边形；非法点列 error
-    let((l_pts t_reg n_eps)
-        n_eps = _Eps(nil)
-        l_pts = _AsPointList(l_points "ycGeom::Polygon")
-        _CheckPolygon(l_pts n_eps)
-        t_reg = makeTable("geomPolygonCanon" nil)
-        l_pts = _CanonRing(l_pts n_eps t_reg)
-        _CheckPolygon(l_pts n_eps)
+    let((pts reg eps2)
+        eps2 = _Eps(nil)
+        pts = _AsPointList(l_points "ycGeom::Polygon")
+        _CheckPolygon(pts eps2)
+        reg = makeTable("geomPolygonCanon" nil)
+        pts = _CanonRing(pts eps2 reg)
+        _CheckPolygon(pts eps2)
         makeInstance('Polygon ?_data
-            makeInstance('_PolygonData ?points copy(l_pts)))
+            makeInstance('_PolygonData ?points copy(pts)))
     )
 )
 

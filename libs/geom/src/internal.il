@@ -46,21 +46,21 @@ procedure(_SnapRound(n_q "n")  ; -> float
     ;
     ; **返回**
     ;   (float) - 最近整数；全程不经过 fixnum，避免大数截断
-    let((n_qv n_base n_frac n_adj)
-        n_qv = float(n_q)
+    let((qv base frac adj)
+        qv = float(n_q)
         ; %.0f 先给出 double 整数（半偶）；只有落在向零一侧的
         ; 近半格值时，再用 round2(小数部分) 修正到远离零一侧。
         ; 已知边界：round2 的半格判定窗口约 2e-7，表示误差使极靠近
         ; 半格的值仍按较远一侧取整；double 下不可细分，故不加额外修正。
-        n_base = atof(lsprintf("%.0f" n_qv))
-        n_frac = n_qv - n_base
-        when(abs(n_base) < abs(n_qv)
-            n_adj = round2(n_frac)
-            when(n_adj != 0
-                n_base = n_base + float(n_adj)
+        base = atof(lsprintf("%.0f" qv))
+        frac = qv - base
+        when(abs(base) < abs(qv)
+            adj = round2(frac)
+            when(adj != 0
+                base = base + float(adj)
             )
         )
-        if(n_base == 0.0 0.0 n_base)
+        if(base == 0.0 0.0 base)
     )
 )
 
@@ -101,12 +101,12 @@ procedure(_Near(n_a n_b n_eps "nnn")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 差值不超过绝对容差或机器精度相对容差为 t
-    let((n_fa n_fb n_diff n_rel)
-        n_fa = float(n_a)
-        n_fb = float(n_b)
-        n_diff = abs(n_fa - n_fb)
-        n_rel = 1e-15 * max(abs(n_fa) abs(n_fb))
-        n_diff <= max(float(n_eps) n_rel)
+    let((fa fb diff rel)
+        fa = float(n_a)
+        fb = float(n_b)
+        diff = abs(fa - fb)
+        rel = 1e-15 * max(abs(fa) abs(fb))
+        diff <= max(float(n_eps) rel)
     )
 )
 
@@ -242,7 +242,7 @@ procedure(_AsPointList(l_data t_ctx "lt")  ; -> list[Point]
     ;
     ; **返回**
     ;   (list[Point]) - 归一化点列；格式不合法时 error
-    let((l_res l_rest)
+    let((res2 rest)
         when(l_data
             unless(listp(l_data)
                 error("%s: expected a point list, got %A" t_ctx l_data)
@@ -254,26 +254,26 @@ procedure(_AsPointList(l_data t_ctx "lt")  ; -> list[Point]
             then
                 _AsPointList(car(l_data) t_ctx)
             else
-                l_rest = l_data
-                while(l_rest
+                rest = l_data
+                while(rest
                     cond(
-                        (_PointP(car(l_rest))
-                            l_res = tconc(l_res car(l_rest))
-                            l_rest = cdr(l_rest)
+                        (_PointP(car(rest))
+                            res2 = tconc(res2 car(rest))
+                            rest = cdr(rest)
                         )
-                        (_PairP(car(l_rest))
-                            l_res = tconc(l_res
-                                _PointAt(car(car(l_rest))
-                                    cadr(car(l_rest))))
-                            l_rest = cdr(l_rest)
+                        (_PairP(car(rest))
+                            res2 = tconc(res2
+                                _PointAt(car(car(rest))
+                                    cadr(car(rest))))
+                            rest = cdr(rest)
                         )
                         (t
                             error("%s: expected a Point or (x y) list, got %A"
-                                t_ctx car(l_rest))
+                                t_ctx car(rest))
                         )
                     )
                 )
-                car(l_res)
+                car(res2)
             )
         )
     )
@@ -288,11 +288,11 @@ procedure(_TwoPoints(l_data t_ctx "lt")  ; -> list[Point]
     ;
     ; **返回**
     ;   (list[Point]) - 两个点；格式不合法时 error
-    let((l_pts)
-        l_pts = errset(_AsPointList(l_data t_ctx) nil)
+    let((pts2)
+        pts2 = errset(_AsPointList(l_data t_ctx) nil)
         cond(
-            ((l_pts && car(l_pts) && length(car(l_pts)) == 2)
-                car(l_pts)
+            ((pts2 && car(pts2) && length(car(pts2)) == 2)
+                car(pts2)
             )
             (t
                 error("%s: expected a two-point list, got %A"
@@ -311,69 +311,69 @@ procedure(_AsPolygonList(l_data t_ctx "lt")  ; -> list[Polygon]
     ;
     ; **返回**
     ;   (list[Polygon]) - 归一化多边形列表；格式不合法时 error
-    let((l_res l_pts l_nested g_poly)
+    let((res2 pts2 nested poly2)
         when(l_data
             unless(listp(l_data)
                 error("%s: expected a Polygon list, got %A" t_ctx l_data)
             )
-            foreach(g_item l_data
+            foreach(item l_data
                 cond(
-                    (_PolygonP(g_item)
-                        l_res = tconc(l_res g_item)
+                    (_PolygonP(item)
+                        res2 = tconc(res2 item)
                     )
-                    (_RectP(g_item)
-                        g_poly = _RectPolygon(g_item)
-                        when(g_poly
-                            l_res = tconc(l_res g_poly)
+                    (_RectP(item)
+                        poly2 = _RectPolygon(item)
+                        when(poly2
+                            res2 = tconc(res2 poly2)
                         )
                     )
-                    (_RegionP(g_item)
-                        foreach(g_poly g_item->polygons()
-                            l_res = tconc(l_res g_poly)
+                    (_RegionP(item)
+                        foreach(poly3 item->polygons()
+                            res2 = tconc(res2 poly3)
                         )
                     )
-                    (listp(g_item)
-                        l_pts = errset(_AsPointList(g_item t_ctx) nil)
+                    (listp(item)
+                        pts2 = errset(_AsPointList(item t_ctx) nil)
                         cond(
-                            ((l_pts && car(l_pts))
-                                l_pts = car(l_pts)
+                            ((pts2 && car(pts2))
+                                pts2 = car(pts2)
                                 cond(
-                                    ((length(l_pts) == 2)
-                                        g_poly = _RectPolygon(Rect(l_pts))
-                                        when(g_poly
-                                            l_res = tconc(l_res g_poly)
+                                    ((length(pts2) == 2)
+                                        poly2 = _RectPolygon(Rect(pts2))
+                                        when(poly2
+                                            res2 = tconc(res2 poly2)
                                         )
                                     )
-                                    ((length(l_pts) >= 3)
-                                        l_res = tconc(l_res Polygon(l_pts))
+                                    ((length(pts2) >= 3)
+                                        res2 = tconc(res2 Polygon(pts2))
                                     )
                                     (t
                                         error("%s: expected a Polygon, Rect, Region, or point list, got %A"
-                                            t_ctx g_item)
+                                            t_ctx item)
                                     )
                                 )
                             )
                             (t
-                                l_nested = errset(_AsPolygonList(g_item t_ctx) nil)
-                                if(l_nested && car(l_nested)
+                                nested = errset(_AsPolygonList(item t_ctx) nil)
+                                if(nested && car(nested)
                                 then
-                                    foreach(g_poly car(l_nested)
-                                        l_res = tconc(l_res g_poly)
+                                    foreach(poly3 car(nested)
+                                        res2 = tconc(res2 poly3)
                                     )
                                 else
                                     error("%s: expected a Polygon, Rect, Region, or point list, got %A"
-                                        t_ctx g_item)
+                                        t_ctx item)
                                 )
                             )
                         )
                     )
                     (t
                         error("%s: expected a Polygon, Rect, Region, or point list, got %A"
-                            t_ctx g_item)
+                            t_ctx item)
                     )
                 )
             )
-            car(l_res)
+            car(res2)
         )
     )
 )
@@ -420,26 +420,26 @@ procedure(_AsLineOrSegment(g_x g_as t_ctx "ggt")  ; -> Line | Segment
     ;
     ; **返回**
     ;   (Line|Segment) - 归一化对象；数组歧义或类型非法时 error
-    let((t_as)
+    let((as2)
         when(g_as
             unless(symbolp(g_as)
                 error("%s: ?as must be 'Line or 'Segment, got %A" t_ctx g_as)
             )
-            t_as = symbolToString(g_as)
-            unless(member(t_as '("Line" "Segment"))
+            as2 = symbolToString(g_as)
+            unless(member(as2 '("Line" "Segment"))
                 error("%s: ?as must be 'Line or 'Segment, got %A" t_ctx g_as)
             )
         )
         cond(
             (_LineP(g_x)
-                when(g_as && t_as != "Line"
-                    error("%s: expected %s, got %A" t_ctx t_as g_x)
+                when(g_as && as2 != "Line"
+                    error("%s: expected %s, got %A" t_ctx as2 g_x)
                 )
                 g_x
             )
             (_SegmentP(g_x)
-                when(g_as && t_as != "Segment"
-                    error("%s: expected %s, got %A" t_ctx t_as g_x)
+                when(g_as && as2 != "Segment"
+                    error("%s: expected %s, got %A" t_ctx as2 g_x)
                 )
                 g_x
             )
@@ -449,8 +449,8 @@ procedure(_AsLineOrSegment(g_x g_as t_ctx "ggt")  ; -> Line | Segment
                         t_ctx)
                 )
                 cond(
-                    ((t_as == "Line") _AsLine(g_x t_ctx))
-                    ((t_as == "Segment") _AsSegment(g_x t_ctx))
+                    ((as2 == "Line") _AsLine(g_x t_ctx))
+                    ((as2 == "Segment") _AsSegment(g_x t_ctx))
                     (t
                         error("%s: ?as must be 'Line or 'Segment, got %A"
                             t_ctx g_as)
@@ -582,65 +582,65 @@ procedure(_ConvertToGeomObject(g_value t_ctx g_as "gtg")  ; -> any
     ;
     ; **返回**
     ;   (any) - Point/Segment/Line/Rect/Polygon/Region
-    let((t_kind t_as t_actual l_pts l_res)
+    let((kind as2 actual pts2 res2)
         when(g_as && !symbolp(g_as)
             error("%s: ?as must be a symbol, got %A" t_ctx g_as)
         )
         when(g_as
-            t_as = symbolToString(g_as)
-            unless(member(t_as '("Point" "Segment" "Line" "Rect" "Polygon" "Region"))
+            as2 = symbolToString(g_as)
+            unless(member(as2 '("Point" "Segment" "Line" "Rect" "Polygon" "Region"))
                 error("%s: ?as must be Point, Segment, Line, Rect, Polygon, or Region, got %A"
                     t_ctx g_as)
             )
         )
-        t_kind = _GeomKind(g_value)
+        kind = _GeomKind(g_value)
         cond(
-            (t_kind
-                t_actual = symbolToString(t_kind)
-                if(t_as == nil || t_as == t_actual
+            (kind
+                actual = symbolToString(kind)
+                if(as2 == nil || as2 == actual
                 then
                     cond(
-                        ((t_actual == "Point") Point(g_value->toSkill()))
-                        ((t_actual == "Segment") Segment(g_value->toSkill()))
-                        ((t_actual == "Line") Line(g_value->toSkill()))
-                        ((t_actual == "Rect") Rect(g_value->toSkill()))
-                        ((t_actual == "Polygon") Polygon(g_value->toSkill()))
-                        ((t_actual == "Region") Region(g_value->toSkill()))
+                        ((actual == "Point") Point(g_value->toSkill()))
+                        ((actual == "Segment") Segment(g_value->toSkill()))
+                        ((actual == "Line") Line(g_value->toSkill()))
+                        ((actual == "Rect") Rect(g_value->toSkill()))
+                        ((actual == "Polygon") Polygon(g_value->toSkill()))
+                        ((actual == "Region") Region(g_value->toSkill()))
                     )
                 else
-                    error("%s: expected %s, got %A" t_ctx t_as g_value)
+                    error("%s: expected %s, got %A" t_ctx as2 g_value)
                 )
             )
-            ((t_as == "Point") _AsPoint(g_value t_ctx))
-            ((t_as == "Segment") Segment(g_value))
-            ((t_as == "Line") Line(g_value))
-            ((t_as == "Rect") Rect(g_value))
-            ((t_as == "Polygon") Polygon(g_value))
-            ((t_as == "Region") _AsRegion(g_value t_ctx))
+            ((as2 == "Point") _AsPoint(g_value t_ctx))
+            ((as2 == "Segment") Segment(g_value))
+            ((as2 == "Line") Line(g_value))
+            ((as2 == "Rect") Rect(g_value))
+            ((as2 == "Polygon") Polygon(g_value))
+            ((as2 == "Region") _AsRegion(g_value t_ctx))
             (t
-                l_res = errset(_AsPoint(g_value t_ctx) nil)
-                if(l_res
+                res2 = errset(_AsPoint(g_value t_ctx) nil)
+                if(res2
                 then
-                    car(l_res)
+                    car(res2)
                 else
-                    l_pts = errset(_AsPointList(g_value t_ctx) nil)
+                    pts2 = errset(_AsPointList(g_value t_ctx) nil)
                     cond(
-                        ((l_pts && car(l_pts))
-                            l_pts = car(l_pts)
+                        ((pts2 && car(pts2))
+                            pts2 = car(pts2)
                             cond(
-                                ((length(l_pts) == 1) car(l_pts))
-                                ((length(l_pts) == 2)
+                                ((length(pts2) == 1) car(pts2))
+                                ((length(pts2) == 2)
                                     error("%s: ambiguous two-point array; specify ?as 'Segment, 'Line, 'Rect, or 'Region"
                                         t_ctx)
                                 )
-                                (t Polygon(l_pts))
+                                (t Polygon(pts2))
                             )
                         )
                         (t
-                            l_res = errset(_AsRegion(g_value t_ctx) nil)
-                            if(l_res
+                            res2 = errset(_AsRegion(g_value t_ctx) nil)
+                            if(res2
                             then
-                                car(l_res)
+                                car(res2)
                             else
                                 error("%s: expected a geometry object or coordinate array, got %A"
                                     t_ctx g_value)
@@ -725,12 +725,12 @@ procedure(_EdgeKey(g_a g_b "gg")  ; -> str
     ;
     ; **返回**
     ;   (str) - 两端点键按字典序拼接
-    let((t_a t_b)
-        t_a = _PtKey(g_a)
-        t_b = _PtKey(g_b)
-        if(alphalessp(t_a t_b)
-            lsprintf("%s|%s" t_a t_b)
-            lsprintf("%s|%s" t_b t_a)
+    let((a b)
+        a = _PtKey(g_a)
+        b = _PtKey(g_b)
+        if(alphalessp(a b)
+            lsprintf("%s|%s" a b)
+            lsprintf("%s|%s" b a)
         )
     )
 )
@@ -743,9 +743,9 @@ procedure(_CellNumKey(n_q "n")  ; -> str
     ;
     ; **返回**
     ;   (str) - 四舍五入的单元键；零统一为 "0"
-    let((t_key)
-        t_key = lsprintf("%.0f" float(n_q))
-        if(t_key == "-0" "0" t_key)
+    let((key)
+        key = lsprintf("%.0f" float(n_q))
+        if(key == "-0" "0" key)
     )
 )
 
@@ -759,37 +759,37 @@ procedure(_CanonPoint(g_p n_eps g_reg "gng")  ; -> Point
     ;
     ; **返回**
     ;   (Point) - 容差内已登记的规范点，或新登记的原点
-    let((n_eff n_cx n_cy n_dx n_dy t_key g_found g_q)
-        n_eff = g_reg["_canonScale"]
-        unless(n_eff
-            n_eff = max(n_eps 1e-15 * max(abs(g_p->x()) abs(g_p->y())))
-            g_reg["_canonScale"] = n_eff
+    let((eff cx cy dx dy key found q)
+        eff = g_reg["_canonScale"]
+        unless(eff
+            eff = max(n_eps 1e-15 * max(abs(g_p->x()) abs(g_p->y())))
+            g_reg["_canonScale"] = eff
         )
         ; 先取整格号，再在整数格号上做 ±2 探测；直接对未取整
         ; 商偏移会让 round-half-even 跳过一格。两个 _SamePoint
         ; 为真的点格号差最多 2，±1 会漏掉两者都落在 .5 边界的情况。
         ; atof 保留 double，不能用返回 fixnum 的取整函数。
-        n_cx = atof(_CellNumKey(g_p->x() / n_eff))
-        n_cy = atof(_CellNumKey(g_p->y() / n_eff))
-        for(n_dx -2 2
-            for(n_dy -2 2
-                t_key = lsprintf("%s|%s"
-                    _CellNumKey(n_cx + n_dx)
-                    _CellNumKey(n_cy + n_dy))
-                foreach(g_q g_reg[t_key]
-                    when(!g_found && _SamePoint(g_p g_q n_eps)
-                        g_found = g_q
+        cx = atof(_CellNumKey(g_p->x() / eff))
+        cy = atof(_CellNumKey(g_p->y() / eff))
+        for(dx2 -2 2
+            for(dy2 -2 2
+                key = lsprintf("%s|%s"
+                    _CellNumKey(cx + dx2)
+                    _CellNumKey(cy + dy2))
+                foreach(q2 g_reg[key]
+                    when(!found && _SamePoint(g_p q2 n_eps)
+                        found = q2
                     )
                 )
             )
         )
-        unless(g_found
-            t_key = lsprintf("%s|%s"
-                _CellNumKey(n_cx) _CellNumKey(n_cy))
-            g_reg[t_key] = cons(g_p g_reg[t_key])
-            g_found = g_p
+        unless(found
+            key = lsprintf("%s|%s"
+                _CellNumKey(cx) _CellNumKey(cy))
+            g_reg[key] = cons(g_p g_reg[key])
+            found = g_p
         )
-        g_found
+        found
     )
 )
 
@@ -803,18 +803,18 @@ procedure(_CanonRing(l_pts n_eps g_reg "lng")  ; -> list[Point]
     ;
     ; **返回**
     ;   (list[Point]) - 规范化并去除连续重复后的点列
-    let((l_res n_mag)
+    let((res2 mag)
         unless(g_reg["_canonScale"]
-            n_mag = 0.0
-            foreach(g_p l_pts
-                n_mag = max(n_mag max(abs(g_p->x()) abs(g_p->y())))
+            mag = 0.0
+            foreach(p l_pts
+                mag = max(mag max(abs(p->x()) abs(p->y())))
             )
-            g_reg["_canonScale"] = max(n_eps 1e-15 * n_mag)
+            g_reg["_canonScale"] = max(n_eps 1e-15 * mag)
         )
-        foreach(g_p l_pts
-            l_res = tconc(l_res _CanonPoint(g_p n_eps g_reg))
+        foreach(p l_pts
+            res2 = tconc(res2 _CanonPoint(p n_eps g_reg))
         )
-        _RingPointsClean(car(l_res) n_eps)
+        _RingPointsClean(car(res2) n_eps)
     )
 )
 
@@ -841,18 +841,18 @@ procedure(_AreaTol(l_pts n_eps "ln")  ; -> float
     ;
     ; **返回**
     ;   (float) - 容差面积；取 bbox 长边乘 n_eps
-    let((n_xmin n_ymin n_xmax n_ymax)
-        n_xmin = car(l_pts)->x()
-        n_xmax = n_xmin
-        n_ymin = car(l_pts)->y()
-        n_ymax = n_ymin
-        foreach(g_p l_pts
-            n_xmin = min(n_xmin g_p->x())
-            n_xmax = max(n_xmax g_p->x())
-            n_ymin = min(n_ymin g_p->y())
-            n_ymax = max(n_ymax g_p->y())
+    let((xmin ymin xmax ymax)
+        xmin = car(l_pts)->x()
+        xmax = xmin
+        ymin = car(l_pts)->y()
+        ymax = ymin
+        foreach(p l_pts
+            xmin = min(xmin p->x())
+            xmax = max(xmax p->x())
+            ymin = min(ymin p->y())
+            ymax = max(ymax p->y())
         )
-        n_eps * max(n_xmax - n_xmin n_ymax - n_ymin)
+        n_eps * max(xmax - xmin ymax - ymin)
     )
 )
 
@@ -864,19 +864,19 @@ procedure(_SignedArea(l_pts "l")  ; -> float
     ;
     ; **返回**
     ;   (float) - 有符号面积
-    let((n_len n_sum n_i g_a g_b n_ox n_oy)
-        n_len = length(l_pts)
-        n_sum = 0.0
-        n_ox = car(l_pts)->x()
-        n_oy = car(l_pts)->y()
-        for(n_i 1 n_len
-            g_a = _Nth1(n_i l_pts)
-            g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
-            n_sum = n_sum
-                + (g_a->x() - n_ox) * (g_b->y() - n_oy)
-                - (g_b->x() - n_ox) * (g_a->y() - n_oy)
+    let((len sum i a b ox oy)
+        len = length(l_pts)
+        sum = 0.0
+        ox = car(l_pts)->x()
+        oy = car(l_pts)->y()
+        for(i2 1 len
+            a = _Nth1(i2 l_pts)
+            b = _Nth1(if(i2 == len 1 (i2 + 1)) l_pts)
+            sum = sum
+                + (a->x() - ox) * (b->y() - oy)
+                - (b->x() - ox) * (a->y() - oy)
         )
-        n_sum / 2.0
+        sum / 2.0
     )
 )
 
@@ -890,26 +890,26 @@ procedure(_PointInRing(l_pts g_p n_eps "lgn")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 在环内或边界上为 t
-    let((n_len n_x n_y n_i g_a g_b g_in g_boundary n_xint)
-        n_len = length(l_pts)
-        n_x = g_p->x()
-        n_y = g_p->y()
-        for(n_i 1 n_len
-            g_a = _Nth1(n_i l_pts)
-            g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
-            when(_OnSegment(g_a g_b g_p n_eps)
-                g_boundary = t
+    let((len x y i a b in boundary xint)
+        len = length(l_pts)
+        x = g_p->x()
+        y = g_p->y()
+        for(i2 1 len
+            a = _Nth1(i2 l_pts)
+            b = _Nth1(if(i2 == len 1 (i2 + 1)) l_pts)
+            when(_OnSegment(a b g_p n_eps)
+                boundary = t
             )
-            when((g_a->y() > n_y) != (g_b->y() > n_y)
-                n_xint = g_a->x()
-                    + (n_y - g_a->y()) * (g_b->x() - g_a->x())
-                        / (g_b->y() - g_a->y())
-                when(n_x < n_xint
-                    g_in = !g_in
+            when((a->y() > y) != (b->y() > y)
+                xint = a->x()
+                    + (y - a->y()) * (b->x() - a->x())
+                        / (b->y() - a->y())
+                when(x < xint
+                    in = !in
                 )
             )
         )
-        if(g_boundary t g_in)
+        if(boundary t in)
     )
 )
 
@@ -924,26 +924,26 @@ procedure(_OnSegment(g_a g_b g_p n_eps "gggn")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 在线段上为 t
-    let((n_dx n_dy n_apx n_apy n_cross n_dot n_len2 n_len n_scale n_tol)
-        n_dx = g_b->x() - g_a->x()
-        n_dy = g_b->y() - g_a->y()
-        n_apx = g_p->x() - g_a->x()
-        n_apy = g_p->y() - g_a->y()
-        n_cross = n_dx * n_apy - n_dy * n_apx
-        n_dot = n_dx * n_apx + n_dy * n_apy
-        n_len2 = n_dx * n_dx + n_dy * n_dy
-        n_len = sqrt(n_len2)
-        if(n_len <= n_eps
+    let((dx dy apx apy cross dot len2 len scale tol)
+        dx = g_b->x() - g_a->x()
+        dy = g_b->y() - g_a->y()
+        apx = g_p->x() - g_a->x()
+        apy = g_p->y() - g_a->y()
+        cross = dx * apy - dy * apx
+        dot = dx * apx + dy * apy
+        len2 = dx * dx + dy * dy
+        len = sqrt(len2)
+        if(len <= n_eps
         then
-            abs(n_apx) <= n_eps && abs(n_apy) <= n_eps
+            abs(apx) <= n_eps && abs(apy) <= n_eps
         else
-            n_scale = max(abs(g_a->x()) abs(g_a->y()))
-            n_scale = max(n_scale max(abs(g_b->x()) abs(g_b->y())))
-            n_scale = max(n_scale max(abs(g_p->x()) abs(g_p->y())))
-            n_tol = max(n_eps * n_len 1e-15 * n_len * n_scale)
-            abs(n_cross) <= n_tol
-                && n_dot >= -n_tol
-                && n_dot <= n_len2 + n_tol
+            scale = max(abs(g_a->x()) abs(g_a->y()))
+            scale = max(scale max(abs(g_b->x()) abs(g_b->y())))
+            scale = max(scale max(abs(g_p->x()) abs(g_p->y())))
+            tol = max(n_eps * len 1e-15 * len * scale)
+            abs(cross) <= tol
+                && dot >= -tol
+                && dot <= len2 + tol
         )
     )
 )
@@ -973,25 +973,25 @@ procedure(_SegmentsCross(g_a g_b g_c g_d n_eps "ggggn")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 有交点、端点接触或共线重叠为 t
-    let((n_o1 n_o2 n_o3 n_o4 n_len_ab n_len_cd n_scale n_tol_ab n_tol_cd)
-        n_o1 = _Orient(g_a g_b g_c)
-        n_o2 = _Orient(g_a g_b g_d)
-        n_o3 = _Orient(g_c g_d g_a)
-        n_o4 = _Orient(g_c g_d g_b)
-        n_len_ab = sqrt((g_b->x() - g_a->x()) * (g_b->x() - g_a->x())
+    let((o1 o2 o3 o4 len_ab len_cd scale tol_ab tol_cd)
+        o1 = _Orient(g_a g_b g_c)
+        o2 = _Orient(g_a g_b g_d)
+        o3 = _Orient(g_c g_d g_a)
+        o4 = _Orient(g_c g_d g_b)
+        len_ab = sqrt((g_b->x() - g_a->x()) * (g_b->x() - g_a->x())
             + (g_b->y() - g_a->y()) * (g_b->y() - g_a->y()))
-        n_len_cd = sqrt((g_d->x() - g_c->x()) * (g_d->x() - g_c->x())
+        len_cd = sqrt((g_d->x() - g_c->x()) * (g_d->x() - g_c->x())
             + (g_d->y() - g_c->y()) * (g_d->y() - g_c->y()))
-        n_scale = max(abs(g_a->x()) abs(g_a->y()))
-        n_scale = max(n_scale max(abs(g_b->x()) abs(g_b->y())))
-        n_scale = max(n_scale max(abs(g_c->x()) abs(g_c->y())))
-        n_scale = max(n_scale max(abs(g_d->x()) abs(g_d->y())))
-        n_tol_ab = max(n_eps * n_len_ab 1e-15 * n_len_ab * n_scale)
-        n_tol_cd = max(n_eps * n_len_cd 1e-15 * n_len_cd * n_scale)
-        if(((n_o1 > n_tol_ab && n_o2 < -n_tol_ab)
-                || (n_o1 < -n_tol_ab && n_o2 > n_tol_ab))
-            && ((n_o3 > n_tol_cd && n_o4 < -n_tol_cd)
-                || (n_o3 < -n_tol_cd && n_o4 > n_tol_cd))
+        scale = max(abs(g_a->x()) abs(g_a->y()))
+        scale = max(scale max(abs(g_b->x()) abs(g_b->y())))
+        scale = max(scale max(abs(g_c->x()) abs(g_c->y())))
+        scale = max(scale max(abs(g_d->x()) abs(g_d->y())))
+        tol_ab = max(n_eps * len_ab 1e-15 * len_ab * scale)
+        tol_cd = max(n_eps * len_cd 1e-15 * len_cd * scale)
+        if(((o1 > tol_ab && o2 < -tol_ab)
+                || (o1 < -tol_ab && o2 > tol_ab))
+            && ((o3 > tol_cd && o4 < -tol_cd)
+                || (o3 < -tol_cd && o4 > tol_cd))
             t
             (_OnSegment(g_a g_b g_c n_eps)
                 || _OnSegment(g_a g_b g_d n_eps)
@@ -1009,14 +1009,14 @@ procedure(_SeamKeys(l_pts "l")  ; -> table
     ;
     ; **返回**
     ;   (table) - 无向边键 → 次数
-    let((n_len n_i t_cnt t_key)
-        n_len = length(l_pts)
-        t_cnt = makeTable("geomSeams" nil)
-        for(n_i 1 n_len
-            t_key = _EdgeKey(_Nth1(n_i l_pts) _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts))
-            t_cnt[t_key] = if(t_cnt[t_key] (t_cnt[t_key] + 1) 1)
+    let((len i cnt key)
+        len = length(l_pts)
+        cnt = makeTable("geomSeams" nil)
+        for(i2 1 len
+            key = _EdgeKey(_Nth1(i2 l_pts) _Nth1(if(i2 == len 1 (i2 + 1)) l_pts))
+            cnt[key] = if(cnt[key] (cnt[key] + 1) 1)
         )
-        t_cnt
+        cnt
     )
 )
 
@@ -1029,47 +1029,47 @@ procedure(_CollinearClean(l_pts n_eps "ln")  ; -> list[Point]
     ;
     ; **返回**
     ;   (list[Point]) - 去除共线点后的点列；切割边端点保留
-    let((n_len n_changed t_seams l_res n_i g_prev g_cur g_next n_dot n_line_len n_scale n_tol)
-        n_len = length(l_pts)
-        n_changed = t
-        while(n_changed && n_len > 3
-            n_changed = nil
-            t_seams = _SeamKeys(l_pts)
-            l_res = nil
-            for(n_i 1 n_len
-                g_prev = _Nth1(if(n_i == 1 n_len (n_i - 1)) l_pts)
-                g_cur = _Nth1(n_i l_pts)
-                g_next = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
-                n_dot = (g_cur->x() - g_prev->x())
-                        * (g_next->x() - g_cur->x())
-                    + (g_cur->y() - g_prev->y())
-                        * (g_next->y() - g_cur->y())
-                n_line_len = sqrt(
-                    (g_next->x() - g_prev->x())
-                        * (g_next->x() - g_prev->x())
-                    + (g_next->y() - g_prev->y())
-                        * (g_next->y() - g_prev->y()))
-                n_scale = max(abs(g_prev->x()) abs(g_prev->y()))
-                n_scale = max(n_scale max(abs(g_cur->x()) abs(g_cur->y())))
-                n_scale = max(n_scale max(abs(g_next->x()) abs(g_next->y())))
-                n_tol = max(n_eps * n_line_len
-                    1e-15 * n_line_len * n_scale)
+    let((len changed seams res2 i prev cur next dot line_len scale tol)
+        len = length(l_pts)
+        changed = t
+        while(changed && len > 3
+            changed = nil
+            seams = _SeamKeys(l_pts)
+            res2 = nil
+            for(i2 1 len
+                prev = _Nth1(if(i2 == 1 len (i2 - 1)) l_pts)
+                cur = _Nth1(i2 l_pts)
+                next = _Nth1(if(i2 == len 1 (i2 + 1)) l_pts)
+                dot = (cur->x() - prev->x())
+                        * (next->x() - cur->x())
+                    + (cur->y() - prev->y())
+                        * (next->y() - cur->y())
+                line_len = sqrt(
+                    (next->x() - prev->x())
+                        * (next->x() - prev->x())
+                    + (next->y() - prev->y())
+                        * (next->y() - prev->y()))
+                scale = max(abs(prev->x()) abs(prev->y()))
+                scale = max(scale max(abs(cur->x()) abs(cur->y())))
+                scale = max(scale max(abs(next->x()) abs(next->y())))
+                tol = max(n_eps * line_len
+                    1e-15 * line_len * scale)
                 cond(
-                    (t_seams[_EdgeKey(g_prev g_cur)] == 2
-                        || t_seams[_EdgeKey(g_cur g_next)] == 2
-                        l_res = tconc(l_res g_cur)
+                    (seams[_EdgeKey(prev cur)] == 2
+                        || seams[_EdgeKey(cur next)] == 2
+                        res2 = tconc(res2 cur)
                     )
-                    ((abs(_Cross(g_prev g_cur g_next)) <= n_tol
-                        && n_dot >= 0.0)
-                        n_changed = t
+                    ((abs(_Cross(prev cur next)) <= tol
+                        && dot >= 0.0)
+                        changed = t
                     )
                     (t
-                        l_res = tconc(l_res g_cur)
+                        res2 = tconc(res2 cur)
                     )
                 )
             )
-            l_pts = car(l_res)
-            n_len = length(l_pts)
+            l_pts = car(res2)
+            len = length(l_pts)
         )
         l_pts
     )
@@ -1084,14 +1084,14 @@ procedure(_RemovePoint(l_list g_p "lg")  ; -> list
     ;
     ; **返回**
     ;   (list[Point]) - 删除后的新列表
-    let((l_res t_key)
-        t_key = _PtKey(g_p)
-        foreach(g_x l_list
-            unless(_PtKey(g_x) == t_key
-                l_res = tconc(l_res g_x)
+    let((res2 key)
+        key = _PtKey(g_p)
+        foreach(x l_list
+            unless(_PtKey(x) == key
+                res2 = tconc(res2 x)
             )
         )
-        car(l_res)
+        car(res2)
     )
 )
 
@@ -1104,13 +1104,13 @@ procedure(_FirstAdjPoint(g_adj l_order "gl")  ; -> Point | nil
     ;
     ; **返回**
     ;   (Point|nil) - 仍有边的点；没有时为 nil
-    let((g_found)
-        foreach(t_key l_order
-            when(g_adj[t_key] && !g_found
-                g_found = car(g_adj[t_key])
+    let((found)
+        foreach(key l_order
+            when(g_adj[key] && !found
+                found = car(g_adj[key])
             )
         )
-        g_found
+        found
     )
 )
 
@@ -1122,52 +1122,52 @@ procedure(_Rings(l_pts "l")  ; -> list[list[Point]]
     ;
     ; **返回**
     ;   (list[list[Point]]) - 环列表；无法闭合时 error
-    let((n_len n_i g_a g_b t_seams t_adj l_order l_res g_start g_cur g_next l_ring l_nei t_sk t_nk)
-        n_len = length(l_pts)
-        t_seams = _SeamKeys(l_pts)
-        t_adj = makeTable("geomAdj" nil)
-        for(n_i 1 n_len
-            g_a = _Nth1(n_i l_pts)
-            g_b = _Nth1(if(n_i == n_len 1 (n_i + 1)) l_pts)
-            t_sk = _EdgeKey(g_a g_b)
-            unless(t_seams[t_sk] == 2
-                t_nk = _PtKey(g_a)
-                unless(t_adj[t_nk]
-                    l_order = tconc(l_order t_nk)
+    let((len i a b seams adj order res2 start cur next ring nei sk nk)
+        len = length(l_pts)
+        seams = _SeamKeys(l_pts)
+        adj = makeTable("geomAdj" nil)
+        for(i2 1 len
+            a = _Nth1(i2 l_pts)
+            b = _Nth1(if(i2 == len 1 (i2 + 1)) l_pts)
+            sk = _EdgeKey(a b)
+            unless(seams[sk] == 2
+                nk = _PtKey(a)
+                unless(adj[nk]
+                    order = tconc(order nk)
                 )
-                t_adj[t_nk] = cons(g_b t_adj[t_nk])
-                t_nk = _PtKey(g_b)
-                unless(t_adj[t_nk]
-                    l_order = tconc(l_order t_nk)
+                adj[nk] = cons(b adj[nk])
+                nk = _PtKey(b)
+                unless(adj[nk]
+                    order = tconc(order nk)
                 )
-                t_adj[t_nk] = cons(g_a t_adj[t_nk])
+                adj[nk] = cons(a adj[nk])
             )
         )
-        l_order = car(l_order)
-        while(_FirstAdjPoint(t_adj l_order)
-            g_start = _FirstAdjPoint(t_adj l_order)
-            g_cur = g_start
-            l_ring = tconc(nil g_start)
-            while(g_cur
-                l_nei = t_adj[_PtKey(g_cur)]
-                unless(l_nei
+        order = car(order)
+        while(_FirstAdjPoint(adj order)
+            start = _FirstAdjPoint(adj order)
+            cur = start
+            ring = tconc(nil start)
+            while(cur
+                nei = adj[_PtKey(cur)]
+                unless(nei
                     error("ycGeom: cannot close polygon ring")
                 )
-                g_next = car(l_nei)
-                t_adj[_PtKey(g_cur)] = cdr(l_nei)
-                t_adj[_PtKey(g_next)] = _RemovePoint(t_adj[_PtKey(g_next)] g_cur)
-                when(_PtKey(g_next) == _PtKey(g_start)
-                    l_res = tconc(l_res car(l_ring))
-                    g_cur = nil
-                    l_ring = nil
+                next = car(nei)
+                adj[_PtKey(cur)] = cdr(nei)
+                adj[_PtKey(next)] = _RemovePoint(adj[_PtKey(next)] cur)
+                when(_PtKey(next) == _PtKey(start)
+                    res2 = tconc(res2 car(ring))
+                    cur = nil
+                    ring = nil
                 )
-                when(g_cur
-                    l_ring = tconc(l_ring g_next)
-                    g_cur = g_next
+                when(cur
+                    ring = tconc(ring next)
+                    cur = next
                 )
             )
         )
-        car(l_res)
+        car(res2)
     )
 )
 
@@ -1180,14 +1180,14 @@ procedure(_RingPointsClean(l_pts n_eps "ln")  ; -> list[Point]
     ;
     ; **返回**
     ;   (list[Point]) - 清理后的点列
-    let((l_res g_prev)
-        foreach(g_p l_pts
-            unless(g_prev && _Near(g_prev->x() g_p->x() n_eps) && _Near(g_prev->y() g_p->y() n_eps)
-                l_res = tconc(l_res g_p)
+    let((res2 prev)
+        foreach(p l_pts
+            unless(prev && _Near(prev->x() p->x() n_eps) && _Near(prev->y() p->y() n_eps)
+                res2 = tconc(res2 p)
             )
-            g_prev = g_p
+            prev = p
         )
-        car(l_res)
+        car(res2)
     )
 )
 

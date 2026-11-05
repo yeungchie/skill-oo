@@ -65,11 +65,11 @@ procedure(_InstallPoint(self "g")  ; -> t
         ;
         ; **返回**
         ;   (float) - 欧氏距离
-        let((g_o n_dx n_dy)
-            g_o = _AsPoint(g_other "ycGeom::Point->distanceTo")
-            n_dx = g_o->x() - self->_data->x
-            n_dy = g_o->y() - self->_data->y
-            sqrt(n_dx * n_dx + n_dy * n_dy)
+        let((o dx dy)
+            o = _AsPoint(g_other "ycGeom::Point->distanceTo")
+            dx = o->x() - self->_data->x
+            dy = o->y() - self->_data->y
+            sqrt(dx * dx + dy * dy)
         )
     )
     self->midpoint = lambda((g_other "g")  ; -> Point
@@ -80,10 +80,10 @@ procedure(_InstallPoint(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point) - 中点
-        let((g_o)
-            g_o = _AsPoint(g_other "ycGeom::Point->midpoint")
-            Point(list((self->_data->x + g_o->x()) / 2.0
-                (self->_data->y + g_o->y()) / 2.0))
+        let((o)
+            o = _AsPoint(g_other "ycGeom::Point->midpoint")
+            Point(list((self->_data->x + o->x()) / 2.0
+                (self->_data->y + o->y()) / 2.0))
         )
     )
     self->translate = lambda((n_dx n_dy "nn")  ; -> Point
@@ -107,11 +107,11 @@ procedure(_InstallPoint(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t|nil) - 坐标均在容差内为 t
-        let((g_o n_eps)
-            g_o = _AsPoint(g_other "ycGeom::Point->equals")
-            n_eps = _Eps(eps)
-            _Near(self->_data->x g_o->x() n_eps)
-                && _Near(self->_data->y g_o->y() n_eps)
+        let((o eps2)
+            o = _AsPoint(g_other "ycGeom::Point->equals")
+            eps2 = _Eps(eps)
+            _Near(self->_data->x o->x() eps2)
+                && _Near(self->_data->y o->y() eps2)
         )
     )
     self->toSkill = lambda(()  ; -> list[float]

@@ -70,16 +70,16 @@ procedure(_AllApart(l_polys n_eps "ln")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 两两分离为 t
-    let((ok l_boxes)
+    let((ok boxes)
         ok = t
-        l_boxes = mapcar(lambda((g_p "g") g_p->bBox()) l_polys)
-        while(ok && cdr(l_boxes)
-            foreach(l_b cdr(l_boxes)
-                when(_BBoxNear(car(l_boxes) l_b n_eps)
+        boxes = mapcar(lambda((g_p "g") g_p->bBox()) l_polys)
+        while(ok && cdr(boxes)
+            foreach(b cdr(boxes)
+                when(_BBoxNear(car(boxes) b n_eps)
                     ok = nil
                 )
             )
-            l_boxes = cdr(l_boxes)
+            boxes = cdr(boxes)
         )
         ok
     )
@@ -96,20 +96,20 @@ procedure(_UnionAll(l_polys g_grid n_eps "lgn")  ; -> list[Polygon]
     ;
     ; **返回**
     ;   (list[Polygon]) - 互不重叠的结果
-    let((l_res)
+    let((res)
         when(l_polys
             if(_AllApart(l_polys n_eps)
             then
                 ; 两两分离：并集就是原集合，省去逐对布尔合并
-                l_res = copy(l_polys)
+                res = copy(l_polys)
             else
-                l_res = list(car(l_polys))
-                foreach(g_p cdr(l_polys)
-                    l_res = _Boolean(l_res list(g_p) 'union g_grid n_eps)
+                res = list(car(l_polys))
+                foreach(p cdr(l_polys)
+                    res = _Boolean(res list(p) 'union g_grid n_eps)
                 )
             )
         )
-        l_res
+        res
     )
 )
 
@@ -131,23 +131,23 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (float) - 面积
-        let((n_sum n_comp n_term n_next)
+        let((sum comp term next)
             ; 与 perimeter 相同的 Kahan-Babuska-Neumaier 补偿求和：
             ; 小面积多边形不会在大面积累加中被舍入吞掉。
-            n_sum = 0.0
-            n_comp = 0.0
-            foreach(g_p self->_data->polygons
-                n_term = g_p->area()
-                n_next = n_sum + n_term
-                if(abs(n_sum) >= abs(n_term)
+            sum = 0.0
+            comp = 0.0
+            foreach(p self->_data->polygons
+                term = p->area()
+                next = sum + term
+                if(abs(sum) >= abs(term)
                 then
-                    n_comp = n_comp + ((n_sum - n_next) + n_term)
+                    comp = comp + ((sum - next) + term)
                 else
-                    n_comp = n_comp + ((n_term - n_next) + n_sum)
+                    comp = comp + ((term - next) + sum)
                 )
-                n_sum = n_next
+                sum = next
             )
-            n_sum + n_comp
+            sum + comp
         )
     )
     self->perimeter = lambda((\@key (includeSeams nil) (eps nil) "gg")  ; -> float
@@ -159,25 +159,25 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (float) - 周长
-        let((n_sum n_comp n_term n_next n_eps)
+        let((sum comp term next eps2)
             _Flag(includeSeams "includeSeams")
-            n_eps = _Eps(eps)
+            eps2 = _Eps(eps)
             ; Kahan-Babuska-Neumaier 补偿求和：把每步舍入误差留在 n_comp。
-            n_sum = 0.0
-            n_comp = 0.0
-            foreach(g_p self->_data->polygons
-                n_term = g_p->perimeter(
-                    ?includeSeams includeSeams ?eps n_eps)
-                n_next = n_sum + n_term
-                if(abs(n_sum) >= abs(n_term)
+            sum = 0.0
+            comp = 0.0
+            foreach(p self->_data->polygons
+                term = p->perimeter(
+                    ?includeSeams includeSeams ?eps eps2)
+                next = sum + term
+                if(abs(sum) >= abs(term)
                 then
-                    n_comp = n_comp + ((n_sum - n_next) + n_term)
+                    comp = comp + ((sum - next) + term)
                 else
-                    n_comp = n_comp + ((n_term - n_next) + n_sum)
+                    comp = comp + ((term - next) + sum)
                 )
-                n_sum = n_next
+                sum = next
             )
-            n_sum + n_comp
+            sum + comp
         )
     )
     self->centroid = lambda(()  ; -> Point | nil
@@ -185,51 +185,51 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point|nil) - 质心；空区域为 nil
-        let((n_total n_totalc n_sx n_sxc n_sy n_syc g_c g_p n_a n_term n_next)
-            n_total = 0.0
-            n_totalc = 0.0
-            n_sx = 0.0
-            n_sxc = 0.0
-            n_sy = 0.0
-            n_syc = 0.0
+        let((total totalc sx sxc sy syc c p a term next)
+            total = 0.0
+            totalc = 0.0
+            sx = 0.0
+            sxc = 0.0
+            sy = 0.0
+            syc = 0.0
             ; 面积、a*x、a*y 三者量级差极大：共用同一个补偿量会把小项
             ; 的残差混进别的量里，等于没补偿，因此三路各自独立累加与并回。
-            foreach(g_p self->_data->polygons
-                n_a = g_p->area()
-                g_c = g_p->centroid()
-                n_term = n_a
-                n_next = n_total + n_term
-                if(abs(n_total) >= abs(n_term)
+            foreach(p2 self->_data->polygons
+                a = p2->area()
+                c = p2->centroid()
+                term = a
+                next = total + term
+                if(abs(total) >= abs(term)
                 then
-                    n_totalc = n_totalc + ((n_total - n_next) + n_term)
+                    totalc = totalc + ((total - next) + term)
                 else
-                    n_totalc = n_totalc + ((n_term - n_next) + n_total)
+                    totalc = totalc + ((term - next) + total)
                 )
-                n_total = n_next
-                n_term = n_a * g_c->x()
-                n_next = n_sx + n_term
-                if(abs(n_sx) >= abs(n_term)
+                total = next
+                term = a * c->x()
+                next = sx + term
+                if(abs(sx) >= abs(term)
                 then
-                    n_sxc = n_sxc + ((n_sx - n_next) + n_term)
+                    sxc = sxc + ((sx - next) + term)
                 else
-                    n_sxc = n_sxc + ((n_term - n_next) + n_sx)
+                    sxc = sxc + ((term - next) + sx)
                 )
-                n_sx = n_next
-                n_term = n_a * g_c->y()
-                n_next = n_sy + n_term
-                if(abs(n_sy) >= abs(n_term)
+                sx = next
+                term = a * c->y()
+                next = sy + term
+                if(abs(sy) >= abs(term)
                 then
-                    n_syc = n_syc + ((n_sy - n_next) + n_term)
+                    syc = syc + ((sy - next) + term)
                 else
-                    n_syc = n_syc + ((n_term - n_next) + n_sy)
+                    syc = syc + ((term - next) + sy)
                 )
-                n_sy = n_next
+                sy = next
             )
-            n_total = n_total + n_totalc
-            n_sx = n_sx + n_sxc
-            n_sy = n_sy + n_syc
-            when(n_total > 0.0
-                Point(list(n_sx / n_total n_sy / n_total))
+            total = total + totalc
+            sx = sx + sxc
+            sy = sy + syc
+            when(total > 0.0
+                Point(list(sx / total sy / total))
             )
         )
     )
@@ -243,18 +243,18 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t|nil) - 属于区域为 t
-        let((g_p n_eps g_found)
-            g_p = _AsPoint(g_point "ycGeom::Region->contains")
+        let((p eps2 found)
+            p = _AsPoint(g_point "ycGeom::Region->contains")
             _BoundaryMode(boundary)
-            n_eps = _Eps(eps)
-            foreach(g_poly self->_data->polygons
-                when(!g_found
-                    when(g_poly->contains(g_p ?boundary boundary ?eps n_eps)
-                        g_found = t
+            eps2 = _Eps(eps)
+            foreach(poly self->_data->polygons
+                when(!found
+                    when(poly->contains(p ?boundary boundary ?eps eps2)
+                        found = t
                     )
                 )
             )
-            g_found
+            found
         )
     )
     self->onBoundary = lambda((g_point \@key (includeSeams nil) (eps nil) "ggg")  ; -> t | nil
@@ -267,19 +267,19 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t|nil) - 在边界上为 t
-        let((g_p n_eps g_found)
-            g_p = _AsPoint(g_point "ycGeom::Region->onBoundary")
+        let((p eps2 found)
+            p = _AsPoint(g_point "ycGeom::Region->onBoundary")
             _Flag(includeSeams "includeSeams")
-            n_eps = _Eps(eps)
-            foreach(g_poly self->_data->polygons
-                when(!g_found
-                    when(g_poly->onBoundary(g_p
-                        ?includeSeams includeSeams ?eps n_eps)
-                        g_found = t
+            eps2 = _Eps(eps)
+            foreach(poly self->_data->polygons
+                when(!found
+                    when(poly->onBoundary(p
+                        ?includeSeams includeSeams ?eps eps2)
+                        found = t
                     )
                 )
             )
-            g_found
+            found
         )
     )
     self->bBox = lambda(()  ; -> list[list[float]] | nil
@@ -287,24 +287,24 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (list[list[float]]|nil) - ((xmin ymin) (xmax ymax))；空区域 nil
-        let((l_box l_b)
-            foreach(g_p self->_data->polygons
-                l_b = g_p->bBox()
-                if(l_box == nil
-                    l_box = copy(l_b)
-                    l_box = list(
+        let((box b)
+            foreach(p self->_data->polygons
+                b = p->bBox()
+                if(box == nil
+                    box = copy(b)
+                    box = list(
                         list(
-                            min(car(car(l_box)) car(car(l_b)))
-                            min(cadr(car(l_box)) cadr(car(l_b)))
+                            min(car(car(box)) car(car(b)))
+                            min(cadr(car(box)) cadr(car(b)))
                         )
                         list(
-                            max(car(cadr(l_box)) car(cadr(l_b)))
-                            max(cadr(cadr(l_box)) cadr(cadr(l_b)))
+                            max(car(cadr(box)) car(cadr(b)))
+                            max(cadr(cadr(box)) cadr(cadr(b)))
                         )
                     )
                 )
             )
-            l_box
+            box
         )
     )
     self->toRect = lambda(()  ; -> Rect | nil
@@ -312,9 +312,9 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Rect|nil) - 由 bBox 构造的轴对齐矩形；空区域 nil
-        let((l_box)
-            l_box = self->bBox()
-            when(l_box Rect(l_box))
+        let((box)
+            box = self->bBox()
+            when(box Rect(box))
         )
     )
     self->isEmpty = lambda(()  ; -> t | nil
@@ -393,11 +393,11 @@ procedure(_InstallRegion(self "g")  ; -> t
         ;
         ; **返回**
         ;   (list|nil) - 每个 Polygon 一个坐标点列；空区域 nil
-        let((l_res)
-            foreach(g_p self->_data->polygons
-                l_res = tconc(l_res g_p->toSkill())
+        let((res)
+            foreach(p self->_data->polygons
+                res = tconc(res p->toSkill())
             )
-            car(l_res)
+            car(res)
         )
     )
     t
@@ -432,17 +432,17 @@ procedure(Region(l_polygons \@key (normalize t) (grid nil) (eps nil) "lggg")  ; 
     ;
     ; **返回**
     ;   (Region) - 新区域；非法参数 error
-    let((t_polys n_grid n_eps)
+    let((polys grid2 eps2)
         _Flag(normalize "normalize")
-        n_grid = _Grid(grid)
-        n_eps = _Eps(eps)
-        t_polys = _AsPolygonList(l_polygons "ycGeom::Region")
-        when(normalize && t_polys
-            t_polys = _UnionAll(t_polys n_grid n_eps)
-            t_polys = _CleanPolygons(t_polys n_eps)
+        grid2 = _Grid(grid)
+        eps2 = _Eps(eps)
+        polys = _AsPolygonList(l_polygons "ycGeom::Region")
+        when(normalize && polys
+            polys = _UnionAll(polys grid2 eps2)
+            polys = _CleanPolygons(polys eps2)
         )
         makeInstance('Region ?_data
-            makeInstance('_RegionData ?polygons t_polys))
+            makeInstance('_RegionData ?polygons polys))
     )
 )
 

@@ -1,28 +1,28 @@
 _TestConvertDone = nil
 
-let((g_p g_s g_l g_r g_poly g_region)
-    g_p = ycGeom::Point(1:2)
-    g_s = ycGeom::Segment(list(0:0 1:1))
-    g_l = ycGeom::Line(list(0:0 1:1))
-    g_r = ycGeom::Rect(list(0:0 1:1))
-    g_poly = ycGeom::Polygon('((0 0) (1 0) (1 1) (0 1)))
-    g_region = ycGeom::Region(list(g_poly))
-    _Assert(!eq(ycGeom::ConvertToGeomObject(g_p) g_p)  "convert: Point object rebuilt")
-    _Assert(!eq(ycGeom::ConvertToGeomObject(g_s) g_s)  "convert: Segment object rebuilt")
-    _Assert(!eq(ycGeom::ConvertToGeomObject(g_l) g_l)  "convert: Line object rebuilt")
-    _Assert(!eq(ycGeom::ConvertToGeomObject(g_r) g_r)  "convert: Rect object rebuilt")
-    _Assert(!eq(ycGeom::ConvertToGeomObject(g_poly) g_poly)  "convert: Polygon object rebuilt")
-    _Assert(!eq(ycGeom::ConvertToGeomObject(g_region) g_region)  "convert: Region object rebuilt")
-    _Assert(ycGeom::ConvertToGeomObject(g_p)->toSkill() == g_p->toSkill()  "convert: Point object value")
-    _Assert(ycGeom::ConvertToGeomObject(g_s)->toSkill() == g_s->toSkill()  "convert: Segment object value")
-    let((g_n)
-        g_n = ycGeom::ConvertToGeomObject(g_l)
-        _Assert(g_l->isParallel(g_n) && g_n->contains(g_l->anchor())
+let((p s l r poly region)
+    p = ycGeom::Point(1:2)
+    s = ycGeom::Segment(list(0:0 1:1))
+    l = ycGeom::Line(list(0:0 1:1))
+    r = ycGeom::Rect(list(0:0 1:1))
+    poly = ycGeom::Polygon('((0 0) (1 0) (1 1) (0 1)))
+    region = ycGeom::Region(list(poly))
+    _Assert(!eq(ycGeom::ConvertToGeomObject(p) p)  "convert: Point object rebuilt")
+    _Assert(!eq(ycGeom::ConvertToGeomObject(s) s)  "convert: Segment object rebuilt")
+    _Assert(!eq(ycGeom::ConvertToGeomObject(l) l)  "convert: Line object rebuilt")
+    _Assert(!eq(ycGeom::ConvertToGeomObject(r) r)  "convert: Rect object rebuilt")
+    _Assert(!eq(ycGeom::ConvertToGeomObject(poly) poly)  "convert: Polygon object rebuilt")
+    _Assert(!eq(ycGeom::ConvertToGeomObject(region) region)  "convert: Region object rebuilt")
+    _Assert(ycGeom::ConvertToGeomObject(p)->toSkill() == p->toSkill()  "convert: Point object value")
+    _Assert(ycGeom::ConvertToGeomObject(s)->toSkill() == s->toSkill()  "convert: Segment object value")
+    let((n)
+        n = ycGeom::ConvertToGeomObject(l)
+        _Assert(l->isParallel(n) && n->contains(l->anchor())
             "convert: Line object value")
     )
-    _Assert(ycGeom::ConvertToGeomObject(g_r)->toSkill() == g_r->toSkill()  "convert: Rect object value")
-    _Assert(ycGeom::ConvertToGeomObject(g_poly)->toSkill() == g_poly->toSkill()  "convert: Polygon object value")
-    _Assert(ycGeom::ConvertToGeomObject(g_region)->area() == g_region->area()  "convert: Region object value")
+    _Assert(ycGeom::ConvertToGeomObject(r)->toSkill() == r->toSkill()  "convert: Rect object value")
+    _Assert(ycGeom::ConvertToGeomObject(poly)->toSkill() == poly->toSkill()  "convert: Polygon object value")
+    _Assert(ycGeom::ConvertToGeomObject(region)->area() == region->area()  "convert: Region object value")
 )
 
 _Assert(ycGeom::Point(1:2)->toSkill() == list(1.0 2.0)  "constructor: Point pair")
@@ -41,12 +41,12 @@ _Assert(ycGeom::Rect(list(ycGeom::Point(0:0) 1:1))->area() == 1.0
 _Assert(ycGeom::Polygon(list(0:0 ycGeom::Point(1:0) 1:1 0:1))->area() == 1.0
     "constructor: Polygon mixed points")
 
-let((g_r)
-    g_r = ycGeom::Region(list(
+let((r)
+    r = ycGeom::Region(list(
         list(0:0 1:0 1:1)
         ycGeom::Polygon(list(0:0 ycGeom::Point(2:0) 3:3))
     ))
-    _Assert(g_r->area() == 3.0  "constructor: Region mixed nested forms")
+    _Assert(r->area() == 3.0  "constructor: Region mixed nested forms")
 )
 
 _Assert(ycGeom::Point(list(list(1 2)))->toSkill() == list(1.0 2.0)  "constructor: Point nested pair")
@@ -79,26 +79,26 @@ _Assert(ycGeom::ConvertToGeomObject(list(0:0 1:0 1:1 0:1))->area() == 1.0
 _Assert(ycGeom::ConvertToGeomObject(list(list(0:0 1:0 1:1 0:1)))->area() == 1.0
     "convert: nested point list to Polygon")
 
-let((g_poly g_r1 g_r2 g_r)
-    g_poly = ycGeom::Polygon('((0 0) (1 0) (1 1) (0 1)))
-    g_r1 = list(0:0 1:0 1:1)
-    g_r2 = list(2:0 3:0 3:1)
-    _Assert(ycGeom::Region(list(list(g_poly)))->area() == 1.0
+let((poly r1 r2 r)
+    poly = ycGeom::Polygon('((0 0) (1 0) (1 1) (0 1)))
+    r1 = list(0:0 1:0 1:1)
+    r2 = list(2:0 3:0 3:1)
+    _Assert(ycGeom::Region(list(list(poly)))->area() == 1.0
         "constructor: Region nested Polygon object")
-    _Assert(ycGeom::Region(list(list(g_r1 g_r2)))->area() == 1.0
+    _Assert(ycGeom::Region(list(list(r1 r2)))->area() == 1.0
         "constructor: Region nested point lists")
     _Assert(ycGeom::Region(list(list(0:0 5:5)))->area() == 25.0
         "constructor: Region nested two-point rectangle")
-    _Assert(ycGeom::ConvertToGeomObject(list(list(g_poly)) ?as 'Region)->area() == 1.0
+    _Assert(ycGeom::ConvertToGeomObject(list(list(poly)) ?as 'Region)->area() == 1.0
         "convert: nested Polygon object as Region")
     _Assert(ycGeom::ConvertToGeomObject(list(list(0:0 5:5)) ?as 'Region)->area() == 25.0
         "convert: nested two-point rectangle as Region")
     _AssertError(lambda(() ycGeom::Polygon(list(0 0 ycGeom::Point(1:0) 1:1 0:1)) t)
         "constructor: Polygon mixed raw numbers rejected")
-    g_r = ycGeom::Rect(list(0:0 1:1))
-    _Assert(ycGeom::Rect(g_r->toSkill())->area() == 1.0
+    r = ycGeom::Rect(list(0:0 1:1))
+    _Assert(ycGeom::Rect(r->toSkill())->area() == 1.0
         "constructor: Rect toSkill roundtrip")
-    _AssertErrorMsg(lambda(() ycGeom::ConvertToGeomObject(g_poly ?as 'Region) t)
+    _AssertErrorMsg(lambda(() ycGeom::ConvertToGeomObject(poly ?as 'Region) t)
         "expected"  "convert: object target mismatch rejected")
 )
 

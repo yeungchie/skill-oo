@@ -70,34 +70,34 @@ procedure(_LineSegmentIntersection(g_line g_seg n_eps "ggn")  ; -> Point | Segme
     ;
     ; **返回**
     ;   (Point|Segment|nil) - 唯一交点、重叠线段或无交
-    let((n_a n_b n_c g_s g_e n_dx n_dy n_x0 n_y0 n_den n_t n_len n_tol)
-        n_a = g_line->a()
-        n_b = g_line->b()
-        n_c = g_line->c()
-        g_s = g_seg->start()
-        g_e = g_seg->end()
+    let((a b c s e dx dy x0 y0 den value len tol)
+        a = g_line->a()
+        b = g_line->b()
+        c = g_line->c()
+        s = g_seg->start()
+        e = g_seg->end()
         cond(
-            (g_s->equals(g_e ?eps n_eps)
-                when(g_line->contains(g_s ?eps n_eps) g_s)
+            (s->equals(e ?eps n_eps)
+                when(g_line->contains(s ?eps n_eps) s)
             )
-            (g_line->contains(g_s ?eps n_eps)
-                && g_line->contains(g_e ?eps n_eps)
+            (g_line->contains(s ?eps n_eps)
+                && g_line->contains(e ?eps n_eps)
                 g_seg
             )
-            (g_line->contains(g_s ?eps n_eps) g_s)
-            (g_line->contains(g_e ?eps n_eps) g_e)
+            (g_line->contains(s ?eps n_eps) s)
+            (g_line->contains(e ?eps n_eps) e)
             (t
-                n_dx = g_e->x() - g_s->x()
-                n_dy = g_e->y() - g_s->y()
-                n_len = sqrt(n_dx * n_dx + n_dy * n_dy)
-                n_den = n_a * n_dx + n_b * n_dy
-                unless(abs(n_den) <= n_eps
-                    n_x0 = g_s->x()
-                    n_y0 = g_s->y()
-                    n_t = -(n_a * n_x0 + n_b * n_y0 + n_c) / n_den
-                    n_tol = n_eps / n_len
-                    when(n_t >= -n_tol && n_t <= 1.0 + n_tol
-                        _SegPointAt(g_s g_e n_t)
+                dx = e->x() - s->x()
+                dy = e->y() - s->y()
+                len = sqrt(dx * dx + dy * dy)
+                den = a * dx + b * dy
+                unless(abs(den) <= n_eps
+                    x0 = s->x()
+                    y0 = s->y()
+                    value = -(a * x0 + b * y0 + c) / den
+                    tol = n_eps / len
+                    when(value >= -tol && value <= 1.0 + tol
+                        _SegPointAt(s e value)
                     )
                 )
             )
@@ -117,8 +117,8 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggn")  ; -> Point | Segme
     ;
     ; **返回**
     ;   (Point|Segment|nil) - 唯一交点、重叠线段或无交
-    let((n_rx n_ry n_sx n_sy n_qx n_qy n_qpx n_qpy n_rxs n_qpxr
-         n_rr n_lenr n_lens n_tolr n_tols n_t0 n_t1 n_min n_max n_t n_u)
+    let((rx ry sx sy qx qy qpx qpy rxs qpxr
+         rr lenr lens tolr tols t0 t1 min max value u)
         cond(
             (g_a->equals(g_b ?eps n_eps) && g_c->equals(g_d ?eps n_eps)
                 when(g_a->equals(g_c ?eps n_eps) g_a)
@@ -130,43 +130,43 @@ procedure(_SegSegIntersection(g_a g_b g_c g_d n_eps "ggggn")  ; -> Point | Segme
                 when(_OnSegment(g_a g_b g_c n_eps) g_c)
             )
             (t
-                n_rx = g_b->x() - g_a->x()
-                n_ry = g_b->y() - g_a->y()
-                n_sx = g_d->x() - g_c->x()
-                n_sy = g_d->y() - g_c->y()
-                n_qpx = g_c->x() - g_a->x()
-                n_qpy = g_c->y() - g_a->y()
-                n_rxs = n_rx * n_sy - n_ry * n_sx
-                n_qpxr = n_qpx * n_ry - n_qpy * n_rx
-                n_rr = n_rx * n_rx + n_ry * n_ry
-                n_lenr = sqrt(n_rr)
-                n_lens = sqrt(n_sx * n_sx + n_sy * n_sy)
-                n_tolr = n_eps / n_lenr
-                n_tols = n_eps / n_lens
-                if(abs(n_rxs) <= n_eps * n_lenr * n_lens
+                rx = g_b->x() - g_a->x()
+                ry = g_b->y() - g_a->y()
+                sx = g_d->x() - g_c->x()
+                sy = g_d->y() - g_c->y()
+                qpx = g_c->x() - g_a->x()
+                qpy = g_c->y() - g_a->y()
+                rxs = rx * sy - ry * sx
+                qpxr = qpx * ry - qpy * rx
+                rr = rx * rx + ry * ry
+                lenr = sqrt(rr)
+                lens = sqrt(sx * sx + sy * sy)
+                tolr = n_eps / lenr
+                tols = n_eps / lens
+                if(abs(rxs) <= n_eps * lenr * lens
                 then
-                    when(abs(n_qpxr) <= n_eps * n_lenr
-                        n_t0 = (n_qpx * n_rx + n_qpy * n_ry) / n_rr
-                        n_t1 = ((g_d->x() - g_a->x()) * n_rx
-                            + (g_d->y() - g_a->y()) * n_ry) / n_rr
-                        n_min = min(n_t0 n_t1)
-                        n_max = max(n_t0 n_t1)
-                        unless(n_max < -n_tolr || n_min > 1.0 + n_tolr
-                            n_min = max(n_min 0.0)
-                            n_max = min(n_max 1.0)
-                            if(_Near(n_min n_max n_tolr)
-                                _SegPointAt(g_a g_b n_min)
-                                Segment(list(_SegPointAt(g_a g_b n_min)
-                                    _SegPointAt(g_a g_b n_max)))
+                    when(abs(qpxr) <= n_eps * lenr
+                        t0 = (qpx * rx + qpy * ry) / rr
+                        t1 = ((g_d->x() - g_a->x()) * rx
+                            + (g_d->y() - g_a->y()) * ry) / rr
+                        min = min(t0 t1)
+                        max = max(t0 t1)
+                        unless(max < -tolr || min > 1.0 + tolr
+                            min = max(min 0.0)
+                            max = min(max 1.0)
+                            if(_Near(min max tolr)
+                                _SegPointAt(g_a g_b min)
+                                Segment(list(_SegPointAt(g_a g_b min)
+                                    _SegPointAt(g_a g_b max)))
                             )
                         )
                     )
                 else
-                    n_t = (n_qpx * n_sy - n_qpy * n_sx) / n_rxs
-                    n_u = (n_qpx * n_ry - n_qpy * n_rx) / n_rxs
-                    when(n_t >= -n_tolr && n_t <= 1.0 + n_tolr
-                        && n_u >= -n_tols && n_u <= 1.0 + n_tols
-                        _SegPointAt(g_a g_b n_t)
+                    value = (qpx * sy - qpy * sx) / rxs
+                    u = (qpx * ry - qpy * rx) / rxs
+                    when(value >= -tolr && value <= 1.0 + tolr
+                        && u >= -tols && u <= 1.0 + tols
+                        _SegPointAt(g_a g_b value)
                     )
                 )
             )
@@ -199,10 +199,10 @@ procedure(_InstallSegment(self "g")  ; -> t
         ;
         ; **返回**
         ;   (float) - 欧氏长度
-        let((n_dx n_dy)
-            n_dx = self->_data->end->x() - self->_data->start->x()
-            n_dy = self->_data->end->y() - self->_data->start->y()
-            sqrt(n_dx * n_dx + n_dy * n_dy)
+        let((dx dy)
+            dx = self->_data->end->x() - self->_data->start->x()
+            dy = self->_data->end->y() - self->_data->start->y()
+            sqrt(dx * dx + dy * dy)
         )
     )
     self->midpoint = lambda(()  ; -> Point
@@ -217,12 +217,12 @@ procedure(_InstallSegment(self "g")  ; -> t
         ;
         ; **返回**
         ;   (list[float]|nil) - 单位方向；零长度为 nil
-        let((n_dx n_dy n_len)
-            n_dx = self->_data->end->x() - self->_data->start->x()
-            n_dy = self->_data->end->y() - self->_data->start->y()
-            n_len = sqrt(n_dx * n_dx + n_dy * n_dy)
-            unless(n_len <= _Eps(nil)
-                list(n_dx / n_len n_dy / n_len)
+        let((dx dy len)
+            dx = self->_data->end->x() - self->_data->start->x()
+            dy = self->_data->end->y() - self->_data->start->y()
+            len = sqrt(dx * dx + dy * dy)
+            unless(len <= _Eps(nil)
+                list(dx / len dy / len)
             )
         )
     )
@@ -234,19 +234,19 @@ procedure(_InstallSegment(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point|nil) - 垂足落在线段内为投影点，落在线段外为 nil；零长度返回起点
-        let((g_p n_dx n_dy n_den n_t)
-            g_p = _AsPoint(g_point "ycGeom::Segment->project")
-            n_dx = self->_data->end->x() - self->_data->start->x()
-            n_dy = self->_data->end->y() - self->_data->start->y()
-            n_den = n_dx * n_dx + n_dy * n_dy
-            if(n_den <= _Eps(nil) * _Eps(nil)
+        let((p dx dy den value)
+            p = _AsPoint(g_point "ycGeom::Segment->project")
+            dx = self->_data->end->x() - self->_data->start->x()
+            dy = self->_data->end->y() - self->_data->start->y()
+            den = dx * dx + dy * dy
+            if(den <= _Eps(nil) * _Eps(nil)
             then
                 self->_data->start
             else
-                n_t = ((g_p->x() - self->_data->start->x()) * n_dx
-                    + (g_p->y() - self->_data->start->y()) * n_dy) / n_den
-                when(n_t >= 0.0 && n_t <= 1.0
-                    _SegPointAt(self->_data->start self->_data->end n_t)
+                value = ((p->x() - self->_data->start->x()) * dx
+                    + (p->y() - self->_data->start->y()) * dy) / den
+                when(value >= 0.0 && value <= 1.0
+                    _SegPointAt(self->_data->start self->_data->end value)
                 )
             )
         )
@@ -259,19 +259,19 @@ procedure(_InstallSegment(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point) - 线段上的最近点；零长度返回起点
-        let((g_p n_dx n_dy n_den n_t)
-            g_p = _AsPoint(g_point "ycGeom::Segment->nearestPoint")
-            n_dx = self->_data->end->x() - self->_data->start->x()
-            n_dy = self->_data->end->y() - self->_data->start->y()
-            n_den = n_dx * n_dx + n_dy * n_dy
-            if(n_den <= _Eps(nil) * _Eps(nil)
+        let((p dx dy den value)
+            p = _AsPoint(g_point "ycGeom::Segment->nearestPoint")
+            dx = self->_data->end->x() - self->_data->start->x()
+            dy = self->_data->end->y() - self->_data->start->y()
+            den = dx * dx + dy * dy
+            if(den <= _Eps(nil) * _Eps(nil)
             then
                 self->_data->start
             else
-                n_t = ((g_p->x() - self->_data->start->x()) * n_dx
-                    + (g_p->y() - self->_data->start->y()) * n_dy) / n_den
-                n_t = max(0.0 min(1.0 n_t))
-                _SegPointAt(self->_data->start self->_data->end n_t)
+                value = ((p->x() - self->_data->start->x()) * dx
+                    + (p->y() - self->_data->start->y()) * dy) / den
+                value = max(0.0 min(1.0 value))
+                _SegPointAt(self->_data->start self->_data->end value)
             )
         )
     )
@@ -283,9 +283,9 @@ procedure(_InstallSegment(self "g")  ; -> t
         ;
         ; **返回**
         ;   (float) - 最近距离
-        let((g_p)
-            g_p = _AsPoint(g_point "ycGeom::Segment->distanceTo")
-            g_p->distanceTo(self->nearestPoint(g_p))
+        let((p)
+            p = _AsPoint(g_point "ycGeom::Segment->distanceTo")
+            p->distanceTo(self->nearestPoint(p))
         )
     )
     self->contains = lambda((g_point \@key (eps nil) "gg")  ; -> t | nil
@@ -297,10 +297,10 @@ procedure(_InstallSegment(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t|nil) - 在线段上为 t
-        let((g_p n_eps)
-            g_p = _AsPoint(g_point "ycGeom::Segment->contains")
-            n_eps = _Eps(eps)
-            _OnSegment(self->_data->start self->_data->end g_p n_eps)
+        let((p eps2)
+            p = _AsPoint(g_point "ycGeom::Segment->contains")
+            eps2 = _Eps(eps)
+            _OnSegment(self->_data->start self->_data->end p eps2)
         )
     )
     self->bBox = lambda(()  ; -> list[list[float]]
@@ -336,18 +336,18 @@ procedure(_InstallSegment(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Point|Segment|nil) - 唯一交点、重叠线段或无交
-        let((n_eps g_o)
-            n_eps = _Eps(eps)
-            g_o = _AsLineOrSegment(g_other as "ycGeom::Segment->intersection")
+        let((eps2 o)
+            eps2 = _Eps(eps)
+            o = _AsLineOrSegment(g_other as "ycGeom::Segment->intersection")
             cond(
-                (_LineP(g_o)
-                    _LineSegmentIntersection(g_o self n_eps))
-                (_SegmentP(g_o)
+                (_LineP(o)
+                    _LineSegmentIntersection(o self eps2))
+                (_SegmentP(o)
                     _SegSegIntersection(self->_data->start self->_data->end
-                        g_o->start() g_o->end() n_eps))
+                        o->start() o->end() eps2))
                 (t
                     error("ycGeom::Segment->intersection: expected a Line or Segment, got %A"
-                        g_o))
+                        o))
             )
         )
     )
@@ -393,12 +393,12 @@ procedure(Segment(l_data "l")  ; -> Segment
     ;
     ; **返回**
     ;   (Segment) - 新线段；零长度合法；格式不合法 error
-    let((l_pts)
-        l_pts = _TwoPoints(l_data "ycGeom::Segment")
+    let((pts)
+        pts = _TwoPoints(l_data "ycGeom::Segment")
         makeInstance('Segment ?_data
             makeInstance('_SegmentData
-                ?start _Nth1(1 l_pts)
-                ?end _Nth1(2 l_pts)))
+                ?start _Nth1(1 pts)
+                ?end _Nth1(2 pts)))
     )
 )
 
