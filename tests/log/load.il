@@ -24,7 +24,11 @@ let((t_res t_self t_dir)
     unless(findNamespace("ycPathLib")
         loadi(strcat(t_dir "../../libs/pathlib/load.il"))
     )
-    unless(findNamespace("ycDateTime")
+    when(findNamespace("ycDateTime") == nil
+        when(findNamespace("ycLog") == nil
+            loadi(strcat(t_dir "../../libs/log/load.il"))
+        )
+        loadi(strcat(t_dir "isolated.il"))
         loadi(strcat(t_dir "../../libs/datetime/load.il"))
     )
     unless(findNamespace("ycLang")

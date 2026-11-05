@@ -1,5 +1,18 @@
 _WithCalls = nil
 _WithBodyRan = nil
+_WithEvals = nil
+
+
+; ---------- helpers ----------
+
+procedure(_WithMake()  ; -> WithOk
+    ; 记录一次对象表达式的求值，并返回新实例。
+    ;
+    ; **返回**
+    ;   (WithOk) - 新实例
+    _WithEvals = tconc(_WithEvals 'make)
+    makeInstance('WithOk)
+)
 
 
 ; ---------- probe classes ----------
@@ -298,6 +311,14 @@ _AssertSameSeq(car(_WithCalls) list('ok)
     "with: exit called on normal return")
 
 _WithCalls = nil
+_WithEvals = nil
+_Assert(ycWith(x _WithMake()
+        3) == 3
+    "with: object expression value is used once")
+_Assert(length(car(_WithEvals)) == 1
+    "with: object expression runs exactly once")
+
+_WithCalls = nil
 _Assert(ycWith(h makeInstance('WithHandle)
         h == 'handle)
     "with: enter return binds")
@@ -423,6 +444,16 @@ _WithCalls = nil
 _Assert(ycWith(__ycWithObj__ makeInstance('WithOk)
         className(__ycWithObj__)) == 'WithOk
     "with: binding name may reuse the former hidden name")
+
+let((seen)
+    ycWith(ycPathLib::Path makeInstance('WithOk)
+        seen = ycPathLib::Path
+    )
+    _Assert(seen && className(seen) == 'WithOk
+        "with: namespace-qualified binding name binds the scope value")
+)
+_Assert(fboundp('ycPathLib::Path)
+    "with: namespace-qualified binding does not clobber the global")
 
 _Assert(errset(expandMacro('(ycWith 42 makeInstance('WithOk) 1)) nil) == nil
     "with: non-symbol binding name rejected")
