@@ -43,7 +43,9 @@ procedure(_OffsetLine(g_a g_b n_dist "ggn")  ; -> list[Point]
     )
 )
 
-_OffsetLine(ycGeom::Point(0:0) ycGeom::Point(10:0) 1.0)   ; => 两点，y 均为 1.0
+offset = _OffsetLine(ycGeom::Point(0:0) ycGeom::Point(10:0) 1.0)
+length(offset)                                      ; => 2
+mapcar(lambda((p) p->y()) offset)                   ; => (1.0 1.0)
 ```
 
 ![两条偏移线分别位于法线的正负方向](img/offset-normal.svg)
