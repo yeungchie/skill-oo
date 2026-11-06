@@ -250,6 +250,42 @@ procedure(_InsideRings(l_rings g_p n_eps "lgn")  ; -> t | nil
     )
 )
 
+procedure(_EdgeClearance(l_edges g_edge "lg")  ; -> float | nil
+    ; 计算边中点到其余边的最短距离。
+    ;
+    ; **参数**
+    ;   l_edges  (list[list[Point]]) - 全部拆分边
+    ;   g_edge   (list[Point])       - 当前边
+    ;
+    ; **返回**
+    ;   (float|nil) - 最短距离；没有其他边时为 nil
+    let((mx my res dx dy len2 u qx qy d)
+        mx = (car(g_edge)->x() + cadr(g_edge)->x()) / 2.0
+        my = (car(g_edge)->y() + cadr(g_edge)->y()) / 2.0
+        foreach(o l_edges
+            unless(o == g_edge
+                dx = cadr(o)->x() - car(o)->x()
+                dy = cadr(o)->y() - car(o)->y()
+                len2 = dx * dx + dy * dy
+                if(len2 <= 0.0
+                then
+                    qx = car(o)->x()
+                    qy = car(o)->y()
+                else
+                    u = ((mx - car(o)->x()) * dx
+                        + (my - car(o)->y()) * dy) / len2
+                    u = max(0.0 min(1.0 u))
+                    qx = car(o)->x() + dx * u
+                    qy = car(o)->y() + dy * u
+                )
+                d = sqrt((mx - qx) * (mx - qx) + (my - qy) * (my - qy))
+                res = if(res == nil d min(res d))
+            )
+        )
+        res
+    )
+)
+
 procedure(_ClassifyEdges(l_edges l_ra l_rb s_op n_eps "lllsn")  ; -> list[list[Point]]
     ; 按两侧采样结果保留结果边界的有向边。
     ;
@@ -262,7 +298,7 @@ procedure(_ClassifyEdges(l_edges l_ra l_rb s_op n_eps "lllsn")  ; -> list[list[P
     ;
     ; **返回**
     ;   (list[list[Point]]) - 结果内部在左侧的有向边
-    let((res a b dx dy len scale mx my nx ny delta left right la lb ra rb lkeep rkeep)
+    let((res a b dx dy len scale mx my nx ny delta clear left right la lb ra rb lkeep rkeep)
         scale = 0.0
         foreach(e l_edges
             dx = cadr(e)->x() - car(e)->x()
@@ -277,9 +313,11 @@ procedure(_ClassifyEdges(l_edges l_ra l_rb s_op n_eps "lllsn")  ; -> list[list[P
             dy = b->y() - a->y()
             len = sqrt(dx * dx + dy * dy)
             unless(len <= n_eps
-                ; 采样偏移：至少 100 eps，最多 1e6 eps，并按最短边缩放
+                ; 采样偏移：至多最短边的千分之一，且不超过最近邻边距离的一半；
+                ; 后者防止采样点跨过窄缝落到另一侧边界上。下限 100 eps 抗浮点噪声。
+                clear = _EdgeClearance(l_edges e)
                 delta = max(n_eps * 100.0
-                    min(scale * 1e-3 n_eps * 1e6))
+                    if(clear min(scale * 1e-3 clear * 0.5) scale * 1e-3))
                 mx = (a->x() + b->x()) / 2.0
                 my = (a->y() + b->y()) / 2.0
                 nx = -dy / len

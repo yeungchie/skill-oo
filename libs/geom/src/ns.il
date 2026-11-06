@@ -112,6 +112,7 @@ addToNamespace("ycGeom"
         _SnapRing  ; proc
         _CollectRings  ; proc
         _InsideRings  ; proc
+        _EdgeClearance  ; proc
         _ClassifyEdges  ; proc
         _RingEdgeList  ; proc
         _EdgeT  ; proc

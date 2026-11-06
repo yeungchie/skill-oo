@@ -182,6 +182,42 @@ let((x bx a2 b2 r)
     _Assert(r && abs(car(r)->area() - 200.0) <= 1e-6
         "boolean: relative canonicalization area")
 )
+let((a2 b2 r)
+    ; 窄缝：采样偏移必须小于缝宽，否则采样点落到另一侧边界上
+    a2 = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
+    b2 = ycGeom::Polygon('((10.001 0) (20 0) (20 10) (10.001 10)))
+    r = errset(a2->or(b2) nil)
+    _Assert(r && length(car(r)->polygons()) == 2
+        "boolean: narrow gap keeps two polygons")
+    _Assert(r && abs(car(r)->area() - 199.99) <= 1e-9
+        "boolean: narrow gap union area")
+    _Assert(ycGeom::_Boolean(list(a2) list(b2)
+            'intersection nil 1e-9) == nil
+        "boolean: narrow gap intersection empty")
+)
+let((a2 b2 r)
+    a2 = ycGeom::Polygon('((0 0) (10 0) (10 10) (0 10)))
+    b2 = ycGeom::Polygon('((10.0005 0) (20 0) (20 10) (10.0005 10)))
+    r = errset(a2->or(b2) nil)
+    _Assert(r && length(car(r)->polygons()) == 2
+        "boolean: sub-milli gap keeps two polygons")
+    _Assert(r && abs(car(r)->area() - 199.995) <= 1e-9
+        "boolean: sub-milli gap union area")
+)
+let((off a2 b2 r)
+    off = 1e9
+    a2 = ycGeom::Polygon(list(
+        ycGeom::Point(list(off 0)) ycGeom::Point(list(off + 10.0 0))
+        ycGeom::Point(list(off + 10.0 10)) ycGeom::Point(list(off 10))))
+    b2 = ycGeom::Polygon(list(
+        ycGeom::Point(list(off + 10.001 0)) ycGeom::Point(list(off + 20.0 0))
+        ycGeom::Point(list(off + 20.0 10)) ycGeom::Point(list(off + 10.001 10))))
+    r = errset(a2->or(b2) nil)
+    _Assert(r && length(car(r)->polygons()) == 2
+        "boolean: narrow gap at large coordinates keeps two polygons")
+    _Assert(r && abs(car(r)->area() - 199.99) <= 1e-6
+        "boolean: narrow gap at large coordinates union area")
+)
 let((outer h1 h2 r p seams)
     outer = ycGeom::Polygon('((0 0) (20 0) (20 10) (0 10)))
     h1 = ycGeom::Polygon('((1 1) (3 1) (3 3) (1 3)))
