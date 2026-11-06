@@ -13,7 +13,7 @@ let((res path dir)
     unless(path
         error("codec load order: can't determine the current file - load this file with an explicit path")
     )
-    unless(pcreMatchp("^[~/]|^\.{1,2}/" path)
+    unless(pcreMatchp("^[~/]|^\\.{1,2}/" path)
         path = strcat("./" path)
     )
     dir = simplifyFilename(pcreReplace(pcreCompile("(?<=/)[^/]+/*$") path "" 0) t)
