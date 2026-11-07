@@ -39,7 +39,7 @@
 | 判断顺时针 / 反转 | [`Polygon->isClockwise`](../README.md#ycgeompolygon-function-class) / [`Polygon->reverse`](../README.md#ycgeompolygon-function-class) | [4.2](04-polygon-normalization.md) |
 | 去掉共线点 | [`Polygon->removeCollinear`](../README.md#ycgeompolygon-function-class) | [4.3](04-polygon-normalization.md) |
 | 构造带洞多边形 | [`Region->not`](../README.md#ycgeomregion-function-class) | [4.5](04-polygon-normalization.md) |
-| 求包围盒 | `->bBox`（各图形类都有） | — |
+| 求包围盒 | `->bBox`（Segment / Rect / Polygon / Region / Route / Path） | — |
 | 判断两点是否重合 | [`Point->equals`](../README.md#ycgeompoint-function-class)（`?eps`） | [1.3](01-tolerance-and-grid.md) |
 | 把折线加粗成区域 | [`Path->toRegion`](../README.md#ycgeompath-function-class)（`?cap` / `?join` / `?roundSegments`） | [第 7 章](07-path-stroke.md) |
 | 从区域反推中心线 | [`Polygon->toPath`](../README.md#ycgeompolygon-function-class)（`?orient`） | [7.7](07-path-stroke.md) |
@@ -54,7 +54,7 @@
 | 写法 | 作用 | 首次出现 |
 | --- | --- | --- |
 | `let((a b) ...)` | 绑定局部变量，返回最后一个表达式的值 | [第 1 章](01-tolerance-and-grid.md) |
-| `procedure(name (args) ...)` | 定义函数；形参可带类型串，如 `"nn"` 表示两个数值 | [第 1 章](01-tolerance-and-grid.md) |
+| `procedure(name(args) ...)` | 定义函数；形参可带类型串，如 `"nn"` 表示两个数值 | [第 1 章](01-tolerance-and-grid.md) |
 | `if(test then else)` | 两分支；分支里有多条语句时用 `then` / `else` | [第 2 章](02-lines-and-orientation.md) |
 | `when(cond ...)` / `unless(cond ...)` | 单分支：条件为真 / 为假时执行 | [第 2 章](02-lines-and-orientation.md) |
 | `for(i 0 n - 1 ...)` | 计数循环 | [第 2 章](02-lines-and-orientation.md) |
@@ -69,7 +69,7 @@
 | `mapcar(fn list)` | 对每个元素应用函数 | [第 7 章](07-path-stroke.md) |
 | `alphalessp(a b)` | 字符串按字典序比较 | [第 3 章](03-canonical-points-and-keys.md) |
 | `makeTable(name nil)` | 建哈希表 | [第 3 章](03-canonical-points-and-keys.md) |
-| `lsprintf(fmt ...)` / `sprintf(nil fmt ...)` / `strcat` | 格式化与拼接字符串 | [第 3 章](03-canonical-points-and-keys.md) |
+| `lsprintf(fmt ...)` / `sprintf(nil fmt ...)` / `strcat` | 格式化与拼接字符串 | [第 3 / 6 章](03-canonical-points-and-keys.md) |
 | `remainder(a b)` | 余数 | [第 3 章](03-canonical-points-and-keys.md) |
 | `round` / `sqrt` / `abs` / `max` / `min` / `float` | 取整、开方、绝对值、最值、转浮点 | [第 1 / 2 章](01-tolerance-and-grid.md) |
 | `error("...")` / `printf("...")` | 中断并报错 / 打印 | [第 5 / 6 章](05-boolean-pipeline.md) |
@@ -139,7 +139,7 @@
 示例按章顺序执行，后面的章会复用前面的变量与教学函数：
 
 - 第 5 章的 `_EdgeInResult` 调用第 2 章的 `_RayInside`，`_TraceLoop` 调用第 3 章的 `_PointKey`，示例还用到第 4 章的 `_SignedArea`；
-- 同名变量会在不同章重新赋值，例如 `square`（第 3、4、6 章）、`poly`（第 1、4 章）、`ring`（第 2 章）；跳读时先执行对应章开头的块；
+- 同名变量会在不同章重新赋值，例如 `square`（第 3、4、6 章）、`poly`（第 2、4 章）、`ring`（第 2 章）；跳读时先执行对应章开头的块；
 - 每章开头的「教学函数与库接口」表会列出该章新增的函数，遇到不认识的 `_` 函数先回查上一章。
 
-只跑单个代码块时，按「依赖」列补齐上一章的变量即可；第 8 章只依赖库接口，可以独立运行。
+只跑单个代码块时，按章首「教学函数与库接口」表与代码里的 `; 依赖` 注释补齐上一章的变量；第 8 章只依赖库接口，可以独立运行。

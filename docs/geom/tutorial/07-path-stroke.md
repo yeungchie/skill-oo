@@ -1,6 +1,6 @@
 # 第 7 章 路径描边
 
-[返回目录](README.md) ｜ [上一章：面积与质心的稳定计算](06-area-and-centroid.md)
+[返回目录](README.md) ｜ [上一章：面积与质心的稳定计算](06-area-and-centroid.md) ｜ [下一章：综合案例](08-end-to-end.md)
 
 ![描边的组成：边带、接头与端帽](img/stroke-parts.svg)
 
@@ -23,7 +23,7 @@
 
 ## 7.1 问题：把线加粗成面
 
-给定一条中心线（折线或闭合环）和一个总宽度 `w`，求「距离中心线不超过 `w / 2` 的点集」。这就是描边。听起来只是把线往两边平移，实际有四个难点：
+给定一条中心线（折线或闭合环）和一个总宽度 `w`，求「距离中心线不超过 `w / 2` 的点集」。这就是描边。严格的距离集对应 round 端帽与 round 接头；butt 端帽会在端点平切，miter 接头会伸出 `w / 2` 之外，都是工程变体。听起来只是把线往两边平移，实际有四个难点：
 
 1. **接头**：折线转弯处，两条偏移线不相交，需要补一个角。
 2. **端帽**：开放路径的起点和终点要封口，否则区域不闭合。
@@ -83,17 +83,19 @@ t = ((B + n2 * h) - (A + n1 * h)) × d2 / (d1 × d2)
 ```lisp
 ; 可运行
 procedure(_MiterPoint(g_a g_b g_c n_half "gggn")  ; -> Point | nil
-    ; 两条偏移线求交；?as 'Line 表示把两段偏移线当作无限直线
-    ycGeom::Segment(_OffsetLine(g_a g_b n_half))->intersection(
+    ; 两条同侧偏移线求交；toLine 与 ?as 'Line 把两边都当无限直线
+    ycGeom::Segment(_OffsetLine(g_a g_b n_half))->toLine()->intersection(
         _OffsetLine(g_b g_c n_half) ?as 'Line)
 )
 
 A = ycGeom::Point(0:0)
 B = ycGeom::Point(10:0)
-C = ycGeom::Point(10:10)
+C = ycGeom::Point(10:-10)   ; 右转：左法线落在弯道外侧
 
-_MiterPoint(A B C 1.0)->toSkill()   ; => (9.0 1.0)
+_MiterPoint(A B C 1.0)->toSkill()   ; => (11.0 1.0)，外侧尖角
 ```
+
+示例取右转，`_OffsetLine` 的左法线正好在弯道外侧；左转时左法线在内侧，求外侧尖角要换另一侧法线，库内会按转向选择。
 
 三种接头风格（图 7.3）：
 
@@ -107,7 +109,7 @@ _MiterPoint(A B C 1.0)->toSkill()   ; => (9.0 1.0)
 
 *图 7.3 miter 最尖、bevel 切平、round 圆弧。*
 
-θ 是两段中心线在拐点处的夹角（内角）：直角转弯 θ = 90°，miter 长度是宽度的 `√2` 倍。miter 长度按 `1 / sin(θ/2)` 增长。工程上用 **miter limit** 限制它：超过阈值就退回 bevel，否则尖角会伸出去很远。
+θ 是两段中心线在拐点处的夹角（内角）。从拐点到外侧尖角的距离是 `(w / 2) / sin(θ/2)`：直角时约 `0.707w`。内外尖角之间的 miter 长度是 `w / sin(θ/2)`；`?miterLimit` 限制的是「拐点到尖角的距离 / 半宽」，也就是 `1 / sin(θ/2)`。超过阈值就退回 bevel，否则尖角会伸出去很远。
 
 ![夹角越小 miter 越长，超过 limit 就退回 bevel](img/miter-limit.svg)
 
@@ -120,7 +122,7 @@ _MiterPoint(A B C 1.0)->toSkill()   ; => (9.0 1.0)
 | 风格 | 做法 | 面积增量 |
 | --- | --- | --- |
 | `'butt` | 在端点处平切 | 0 |
-| `'square`（方帽） | 沿方向再延伸 `w / 2` | 每端 `w² / 4` |
+| `'square`（方帽） | 沿方向再延伸 `w / 2` | 每端 `w² / 2` |
 | `'round` | 半圆（多边形近似） | 每端约 `π * w² / 8` |
 
 ![butt 平切、square 延伸、round 半圆](img/caps.svg)
@@ -168,7 +170,7 @@ bentPath->toRegion(?join 'bevel)->area()        ; => 39.5
 bentPath->toRegion(?join 'round)->area()        ; => 39.78036
 ```
 
-闭合路径没有端帽，面积等于「周长 x 宽度」：
+闭合路径没有端帽，面积等于「中心线长度 × 宽度」：
 
 ```lisp
 ; 可运行

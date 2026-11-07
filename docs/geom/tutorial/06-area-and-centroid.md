@@ -16,9 +16,9 @@
 
 | 教学函数 | 库里的等价接口 | 差别 |
 | --- | --- | --- |
-| `_ShoelaceRaw` | `Polygon->area` | 库版先平移再补偿求和 |
-| `_ShoelaceStable` | `Polygon->area` | 语义相同，库版还处理 keyhole 与退化 |
-| `_CentroidOf` | `Polygon->centroid` | 库版同样用平移与补偿 |
+| `_ShoelaceRaw` | `Polygon->area` | 库版先平移到首点再累加，单多边形不做补偿求和 |
+| `_ShoelaceStable` | `Polygon->area` | 教学版多了补偿；库内单多边形只平移，`Region` 才对成员做补偿求和 |
+| `_CentroidOf` | `Polygon->centroid` | 库版只平移，不做补偿 |
 
 ## 6.1 问题：公式对，答案错
 
@@ -88,7 +88,7 @@ x' = x - x0,  y' = y - y0
 
 ## 6.4 第二招：补偿求和
 
-即使平移了，累加大量同号项仍会丢小数（图 6.3）。Kahan–Babuška–Neumaier 求和把每步的舍入误差单独记下来，最后补回去：
+即使平移了，累加大量同号项仍会丢小数（图 6.3）。Kahan–Babuška–Neumaier 求和把每步的舍入误差单独记下来，最后补回去（伪代码）：
 
 ```text
 t = sum + term
@@ -104,7 +104,7 @@ sum = t
 
 *图 6.3 补偿项记下每步舍入误差，最后补回。*
 
-最终实现把平移与补偿合在一起：先减参考点，再用补偿累加。
+这是教学版的最终实现：先减参考点，再用补偿累加。库内的单多边形面积与质心只做平移；补偿求和用在 `Polygon->perimeter` 与 `Region` 的成员求和上。这里的例子平移后已经足够，所以库内结果与教学版一致。
 
 ```lisp
 ; 可运行

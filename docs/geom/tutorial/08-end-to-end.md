@@ -20,6 +20,8 @@
 | `?grid` | [第 1 章](01-tolerance-and-grid.md) | 把 `16.0001` 吸回 `16` |
 | `area` / `perimeter` / `centroid` / `bBox` | [第 6 章](06-area-and-centroid.md) | 汇总最终结果 |
 
+本章不引入新概念，故不设「本章未展开的部分」；新增的只有把前面接口串起来的流程。
+
 ## 8.1 场景
 
 上游给了一块 `20 x 12` 的板，板上有一个 `6 x 4` 的槽；另外有一个 `6 x 8` 的凸台要焊在板边（图 8.1）。凸台的左边界从 `x = 16.0001` 开始——这是上游坐标的舍入噪声，实际应该在 `x = 16`。
@@ -34,8 +36,8 @@
 
 ```lisp
 ; 可运行
-plate = ycGeom::Polygon('((0 0) (20 0) (20 12) (0 12)))
-slot = ycGeom::Polygon('((4 4) (10 4) (10 8) (4 8)))
+plate = ycGeom::Polygon(list(0:0 20:0 20:12 0:12))
+slot = ycGeom::Polygon(list(4:4 10:4 10:8 4:8))
 
 holed = ycGeom::Region(list(plate))->not(ycGeom::Region(list(slot)))
 
@@ -55,15 +57,15 @@ length(car(holed->polygons())->points())   ; => 11
 tab = ycGeom::Polygon('((16.0001 -2) (22 -2) (22 6) (16.0001 6)))
 
 plain = holed->or(ycGeom::Region(list(tab)))
-plain->area()                ; => 239.9998，凸台整体偏了 0.0001
-length(plain->polygons())    ; => 1
+sprintf(nil "%.17g" plain->area())    ; => "239.99979999999999"，凸台整体偏了 0.0001
+length(plain->polygons())             ; => 1
 
 joined = holed->or(ycGeom::Region(list(tab)) ?grid 0.001)
-joined->area()               ; => 240.0，吸附后 16.0001 变成 16
-length(joined->polygons())   ; => 1
+sprintf(nil "%.17g" joined->area())   ; => "240"，吸附后 16.0001 变成 16
+length(joined->polygons())            ; => 1
 ```
 
-不吸附时，凸台比目标宽 `0.0001`，面积差 `0.0002`；`?grid 0.001` 把它吸回整格，面积回到 `240.0`。
+不吸附时，凸台比目标窄 `0.0001`，并集面积少 `0.0002`；`?grid 0.001` 把它吸回整格，面积回到 `240.0`。
 
 ## 8.4 汇总结果
 
@@ -88,7 +90,7 @@ length(joined->toSkill())    ; => 1，一个 Region 仍只有一个成员
 
 `toSkill()` 输出只含 list 与 float 的原生数据，可以直接交给下游脚本或写回版图文件。
 
-## 8.6 小结
+## 小结
 
 - 构造 → 差集 → 并集 → 查询，是几何处理最常见的链。
 - 上游坐标有噪声时，先找最小特征尺寸，再决定 `?grid` 的间距。
@@ -102,7 +104,7 @@ length(joined->toSkill())    ; => 1，一个 Region 仍只有一个成员
 
 <details><summary>参考答案</summary>
 
-1. 凸台左边界偏了 `0.0001`，整体宽度多出 `0.0001`，面积多出约 `0.0008`；与板的重叠也相应变化，最终是 `239.9998`。
+1. 凸台左边界偏了 `0.0001`，整体宽度少了 `0.0001`；凸台自身面积少约 `0.0008`，其中大部分落在板内被并集吸收，净少 `0.0002`，所以是 `239.9998`。
 2. 网格过粗，`16.0001` 仍会被吸到 `16`，但其他更靠近的特征也可能被吸到同一格，导致小特征被抹平或碰撞。
 
 </details>

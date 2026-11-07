@@ -18,7 +18,7 @@
 | --- | --- | --- |
 | `_CutT` | 无公开接口；`Segment->intersection` 求交点 | 教学版只返回边上的参数 t |
 | `_Member` | `Region->or` / `and` / `not` / `xor`、`ycGeom::Boolean` | 库版是完整流水线 |
-| `_EdgeInResult` | 同上 | 教学版用固定采样偏移，库内自适应 |
+| `_EdgeInResult` | 同上 | 教学版用固定采样偏移（见 5.5），库内自适应 |
 | `_TraceLoop` | 无公开接口 | 教学版假设每个顶点只有一条出边 |
 
 ## 5.1 问题：集合运算比想象中难
@@ -89,11 +89,15 @@ procedure(_CutT(g_a g_b g_c g_d "gggg")  ; -> float | nil
 _CutT(ycGeom::Point(0:0) ycGeom::Point(4:0)
     ycGeom::Point(2:-2) ycGeom::Point(2:2))
 ; => 0.5，交点是中点
+
+_CutT(ycGeom::Point(0:0) ycGeom::Point(4:0)
+    ycGeom::Point(0:1) ycGeom::Point(4:1))
+; => nil，平行
 ```
 
 把一条边上的所有 t 排序，加上 0 和 1，相邻两个 t 之间就是一小段（图 5.2）。两个细节：
 
-- **交点要吸附到网格。** 同一点分别从 A 的边和 B 的边算出，浮点结果可能差最后几位；不吸附，后面按端点配对会失败。
+- **交点要吸附到网格。** 同一点分别从 A 的边和 B 的边算出，浮点结果可能差最后几位；默认管线会用 `?eps` 把容差内的近点规范到同一代表，超出容差的近似重合仍要给 `?grid`。
 - **共线重叠的边要特殊处理。** 重叠区间也要当作切分参数，而不是只算交点。
 
 ![交点把边切成小段，每段再单独判断](img/edge-split.svg)
@@ -104,7 +108,7 @@ _CutT(ycGeom::Point(0:0) ycGeom::Point(4:0)
 
 一条边是否属于结果边界，取决于它两侧的点是否属于结果：
 
-1. 取边中点，沿法线向两侧各偏一点，得到 `left`、`right`；
+1. 取边中点，沿法线向两侧各偏一点（法线见 7.2），得到 `left`、`right`；
 2. 分别判断这两个点是否在 A、B 内；
 3. 按运算决定左右是否属于结果；
 4. 两侧归属不同，这条边就是结果边界；把「结果内部」放在左侧，决定边的方向。
@@ -123,11 +127,17 @@ procedure(_Member(s_op g_inA g_inB "sgg")  ; -> t | nil
 )
 ```
 
+```lisp
+; 可运行
+_Member('and t nil)    ; => nil
+_Member('xor t t)      ; => nil
+```
+
 有了归属规则，再取边两侧的采样点（图 5.3）：
 
 ```lisp
 ; 可运行
-; 依赖第 2 章的 _RayInside 与第 3 章的 _PointKey
+; 依赖第 2 章的 _RayInside
 procedure(_EdgeInResult(g_a g_b l_ringA l_ringB s_op "gglls")  ; -> t | nil
     ; 边两侧各取一个采样点；两侧归属不同，这条边就是结果边界
     let((dx dy len mx my nx ny left right inL inR)
@@ -177,6 +187,7 @@ _EdgeInResult(ycGeom::Point(0:0) ycGeom::Point(4:0)
 
 ```lisp
 ; 可运行
+; 依赖第 3 章的 _PointKey
 procedure(_TraceLoop(l_directed "l")  ; -> list[Point] | nil
     ; 每条有向边按起点建索引，从第一条边出发走回起点
     let((tab start cur next ring)
@@ -232,7 +243,7 @@ ra->xor(rb)->area()    ; => 24.0
 length(ra->or(rb)->polygons())   ; => 1
 ```
 
-并集面积 `16 + 16 - 4 = 28`，交集 4，两块差集分别是 12 与 24。结果已经是一块规范化的多边形，不会留下重叠碎片。
+并集面积 `16 + 16 - 4 = 28`，交集 4，差集 12，对称差 24。结果已经是一块规范化的多边形，不会留下重叠碎片。
 
 ## 5.8 洞与嵌套
 
