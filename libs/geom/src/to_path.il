@@ -138,8 +138,8 @@ procedure(_PolyToPathOpenAt(g_poly l_ring l_edges n_w n_eps "gllnn")  ; -> Path 
     ;   n_eps    (float)       - 容差
     ;
     ; **返回**
-    ;   (Path|nil) - 成功路径
-    let((len len0 pair free i j ei ej ai bi aj bj
+    ;   (Path|nil) - 成功路径；无法配对 nil
+    prog((len len0 pair free i j ei ej ai bi aj bj
             uix uiy ujx ujy leni dot dist
             t1 t2 lo hi ov best score
             cap1 cap2 cur done key seen order
@@ -194,7 +194,9 @@ procedure(_PolyToPathOpenAt(g_poly l_ring l_edges n_w n_eps "gllnn")  ; -> Path 
                 )
             )
         )
-        unless(done nil)
+        unless(done
+            return(nil)
+        )
         free = nil
         for(i2 1 len0
             unless(pair[i2]
@@ -202,7 +204,9 @@ procedure(_PolyToPathOpenAt(g_poly l_ring l_edges n_w n_eps "gllnn")  ; -> Path 
             )
         )
         free = car(free)
-        unless(length(free) == 2 nil)
+        unless(length(free) == 2
+            return(nil)
+        )
         cap1 = car(free)
         cap2 = cadr(free)
         ei = _Nth1(cap1 l_edges)
@@ -230,7 +234,9 @@ procedure(_PolyToPathOpenAt(g_poly l_ring l_edges n_w n_eps "gllnn")  ; -> Path 
             )
         )
         order = car(order)
-        unless(order nil)
+        unless(order
+            return(nil)
+        )
         lines = nil
         foreach(key2 order
             i = key2
@@ -253,12 +259,17 @@ procedure(_PolyToPathOpenAt(g_poly l_ring l_edges n_w n_eps "gllnn")  ; -> Path 
                 list(cadr(ei) caddr(ei))
                 car(ej)
                 list(cadr(ej) caddr(ej)))
-            unless(x nil)
+            unless(x
+                return(nil)
+            )
             route = tconc(route x)
         )
         route = tconc(route end)
         path = Path(car(route) ?width n_w)
-        when(_PolyToPathVerify(g_poly path n_eps) path)
+        when(_PolyToPathVerify(g_poly path n_eps)
+            return(path)
+        )
+        return(nil)
     )
 )
 
@@ -272,11 +283,13 @@ procedure(_PolyToPathOpen(g_poly l_ring n_eps "gln")  ; -> Path | nil
     ;
     ; **返回**
     ;   (Path|nil) - 唯一成功路径；无或多候选 nil
-    let((pts edges len i j ei ej uxi uyi uxj uyj
+    prog((pts edges len i j ei ej uxi uyi uxj uyj
             dot dist cands new found ok path)
         pts = _CollinearClean(l_ring n_eps)
         len = length(pts)
-        unless(len >= 4 nil)
+        unless(len >= 4
+            return(nil)
+        )
         for(i2 1 len
             ei = list(_Nth1(i2 pts)
                 _Nth1(if(i2 == len 1 (i2 + 1)) pts))
@@ -290,7 +303,9 @@ procedure(_PolyToPathOpen(g_poly l_ring n_eps "gln")  ; -> Path | nil
         )
         edges = car(edges)
         len = length(edges)
-        unless(len >= 4 nil)
+        unless(len >= 4
+            return(nil)
+        )
         for(i2 1 len
             ei = _Nth1(i2 edges)
             uxi = caddr(ei)
@@ -336,8 +351,9 @@ procedure(_PolyToPathOpen(g_poly l_ring n_eps "gln")  ; -> Path | nil
         )
         ok = car(ok)
         when(ok && length(ok) == 1
-            car(ok)
+            return(car(ok))
         )
+        return(nil)
     )
 )
 
@@ -351,7 +367,7 @@ procedure(_PolyToPathRing(g_poly l_outer l_inner n_eps "glln")  ; -> Path | nil
     ;   n_eps    (float)       - 容差
     ;
     ; **返回**
-    ;   (Path|nil) - 成功路径；非等距环 nil
+    ;   (Path|nil) - 成功路径；两环点数不等或非等宽环 nil
     prog((out in in_use len i j off ori
             oa ob ia ib uxo uyo uxi uyi
             lo li cross width mid ok path)

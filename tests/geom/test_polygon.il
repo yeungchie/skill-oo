@@ -426,6 +426,21 @@ let((out in poly)
         "polygon: unequal ring sizes not a stroke")
 )
 
+; 自由端点不配对时必须安全返回 nil，不能越界读边
+_Assert(ycGeom::Polygon(list(0:0 5:0 8:4 3:4))->toPath() == nil
+    "polygon: unpaired free ends return nil")
+
+; 原始点数不等、清理共线后相等时仍应成功
+let((ring)
+    ring = ycGeom::Polygon(list(
+        ycGeom::Point(0:10) ycGeom::Point(0:0) ycGeom::Point(5:0)
+        ycGeom::Point(10:0) ycGeom::Point(10:7) ycGeom::Point(7:7)
+        ycGeom::Point(7:3) ycGeom::Point(3:3) ycGeom::Point(3:7)
+        ycGeom::Point(7:7) ycGeom::Point(10:7) ycGeom::Point(10:10)))
+    _Assert(ring->toPath() && ring->toPath()->width() == 3.0
+        "polygon: cleaned rings still restore stroke")
+)
+
 ; 大坐标偏移下 toPath 的容差必须随坐标量级放大
 let((rad cosV sinV acc src poly back trap)
     rad = 37.0 * 3.14159265358979323846 / 180.0
