@@ -352,13 +352,15 @@ procedure(_PolyToPathRing(g_poly l_outer l_inner n_eps "glln")  ; -> Path | nil
     ;
     ; **返回**
     ;   (Path|nil) - 成功路径；非等距环 nil
-    let((out in in_use len i j off ori
+    prog((out in in_use len i j off ori
             oa ob ia ib uxo uyo uxi uyi
             lo li cross width mid ok path)
         out = _CollinearClean(l_outer n_eps)
         in = _CollinearClean(l_inner n_eps)
         len = length(out)
-        unless(len == length(in) && len >= 3 nil)
+        unless(len == length(in) && len >= 3
+            return(nil)
+        )
         path = nil
         for(ori2 0 1
             unless(path
@@ -421,7 +423,7 @@ procedure(_PolyToPathRing(g_poly l_outer l_inner n_eps "glln")  ; -> Path | nil
                 )
             )
         )
-        path
+        return(path)
     )
 )
 

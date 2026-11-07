@@ -417,6 +417,15 @@ let((out in res poly)
     _Assert(poly->toPath() == nil  "polygon: non-offset ring not a stroke")
 )
 
+; 外环与内环点数不同时必须安全返回 nil，不能越界读点
+let((out in poly)
+    out = ycGeom::Polygon(list(0:0 10:0 10:10 6:10 6:6 0:6))
+    in = ycGeom::Polygon(list(1:1 2:1 2:2 1:2))
+    poly = car(out->not(in)->polygons())
+    _Assert(poly->toPath() == nil
+        "polygon: unequal ring sizes not a stroke")
+)
+
 ; 大坐标偏移下 toPath 的容差必须随坐标量级放大
 let((rad cosV sinV acc src poly back trap)
     rad = 37.0 * 3.14159265358979323846 / 180.0
