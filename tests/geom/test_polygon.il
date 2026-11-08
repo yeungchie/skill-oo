@@ -229,7 +229,7 @@ let((hole)
         "polygon: seam endpoints on cell boundary included perimeter")
 )
 
-let((pts i teeth w h2 amp hi p)
+let((pts i teeth w h2 amp hi)
     teeth = 997
     w = 1e6
     h2 = 1e6
@@ -244,9 +244,8 @@ let((pts i teeth w h2 amp hi p)
     pts = tconc(pts ycGeom::Point(list(1e9 + w 3.7e8)))
     pts = tconc(pts ycGeom::Point(list(1e9 + w 3.7e8 + h2)))
     pts = tconc(pts ycGeom::Point(list(1e9 3.7e8 + h2)))
-    p = ycGeom::Polygon(car(pts))
-    ; 该梳形的精确周长（高精度基准）。
-    _Assert(abs(p->perimeter() - 203002502.4842986) <= 1e-6
+    ; 该梳形的精确周长（高精度基准）；构造占主要耗时，故并入被断言表达式一起计时
+    _Assert(abs(ycGeom::Polygon(car(pts))->perimeter() - 203002502.4842986) <= 1e-6
         "polygon: perimeter accumulation stable on long comb")
 )
 
