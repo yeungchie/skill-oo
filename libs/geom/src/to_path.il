@@ -473,28 +473,36 @@ procedure(_InstallPolygonToPath(self "g")  ; -> t
                 mag = max(mag abs(car(p)) abs(cadr(p)))
             )
             eps2 = max(eps2 1e-15 * mag)
-            cond(
-                ((orient == 'horizontal || orient == 'h)
-                    horiz = t)
-                ((orient == 'vertical || orient == 'v)
-                    horiz = nil)
+            horiz = case(orient
+                ((horizontal h)
+                    t
+                )
+                ((vertical v)
+                    nil
+                )
                 (t
-                    error("ycGeom::Polygon->toPath: ?orient must be horizontal, vertical, h, or v, got %A"
-                        orient)
+                    error("ycGeom::Polygon->toPath: ?orient must be horizontal, vertical, h, or v, got %A" orient)
                 )
             )
+
             rings = _Rings(self->_data->points)
-            cond(
-                ((length(rings) == 1)
+            case(length(rings)
+                (1
+                    ; 1 环 = 矩形或加粗线段
                     path = _PolyToPathRect(self car(rings)
                         eps2 horiz)
                     unless(path
                         path = _PolyToPathOpen(self car(rings) eps2)
                     )
                 )
-                ((length(rings) == 2)
+                (2
+                    ; 2 环 = 等距闭环
                     path = _PolyToPathRing(self car(rings)
                         cadr(rings) eps2)
+                )
+                (t
+                    ; 3 环以上（多洞等）本库不还原，path 留 nil
+                    path = nil
                 )
             )
             path
