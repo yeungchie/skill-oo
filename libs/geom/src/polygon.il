@@ -58,7 +58,7 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
     ; **返回**
     ;   (t) - 合法；否则 error
     let((len idx prev cur first rest seams scale tol
-            edges a b c d seam ei ej mine
+            edges a b c d seam ei ej
             ex0 ey0 ex1 ey1 fx0 fy0 fx1 fy1)
         unless(listp(l_points)
             error("ycGeom::Polygon: expected a list of Points, got %A" l_points)
@@ -137,9 +137,7 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
                 ey0 = nth(3 ei)
                 ex1 = nth(4 ei)
                 ey1 = nth(5 ei)
-                mine = cdr(edges)
-                while(mine
-                    ej = car(mine)
+                foreach(ej cdr(edges)
                     unless(nth(6 ej)
                         fx0 = nth(2 ej)
                         fy0 = nth(3 ej)
@@ -159,7 +157,6 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
                             )
                         )
                     )
-                    mine = cdr(mine)
                 )
             )
             edges = cdr(edges)
