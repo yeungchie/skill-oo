@@ -19,15 +19,17 @@
 + [ycString](docs/string/README.md) —— 字符串操作、转义与标识符转换。
 + [ycTextwrap](docs/textwrap/README.md) —— 定宽折行、缩进与截断。
 
+### 编解码
+
++ [ycCodec](docs/codec/core/README.md) —— 编解码库共享的哨兵类型。
++ [ycJson](docs/codec/json/README.md) —— JSON、jsonc、jsonl 的解码与编码。
++ [ycYaml](docs/codec/yaml/README.md) —— YAML 1.2 的解码与编码。
++ [ycToml](docs/codec/toml/README.md) —— TOML 1.0 编解码。
++ [ycIni](docs/codec/ini/README.md) —— INI 配置读写。
++ [ycCsv](docs/codec/csv/README.md) —— CSV/TSV 编解码与 Table 模型。
+
 ### 数据与报告
 
-+ codec
-  + [ycCodec](docs/codec/core/README.md) —— 编解码库共享的哨兵类型。
-  + [ycJson](docs/codec/json/README.md) —— JSON、jsonc、jsonl 的解码与编码。
-  + [ycYaml](docs/codec/yaml/README.md) —— YAML 1.2 的解码与编码。
-  + [ycCsv](docs/codec/csv/README.md) —— CSV/TSV 编解码与 Table 模型。
-  + [ycToml](docs/codec/toml/README.md) —— TOML 1.0 编解码。
-  + [ycIni](docs/codec/ini/README.md) —— INI 配置读写。
 + [ycUnits](docs/units/README.md) —— SI 工程计数与单位解析/格式化。
 + [ycRadix](docs/radix/README.md) —— 任意进制整数解析、格式化与掩码。
 + [ycTabulate](docs/tabulate/README.md) —— 文本表格渲染。
