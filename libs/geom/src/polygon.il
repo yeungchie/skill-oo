@@ -57,7 +57,9 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
     ;
     ; **返回**
     ;   (t) - 合法；否则 error
-    let((len i j a b c d seams prev)
+    let((len idx prev cur first rest seams scale tol
+            edges a b c d seam ei ej mine
+            ex0 ey0 ex1 ey1 fx0 fy0 fx1 fy1)
         unless(listp(l_points)
             error("ycGeom::Polygon: expected a list of Points, got %A" l_points)
         )
@@ -65,49 +67,102 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
         unless(len >= 3
             error("ycGeom::Polygon: at least 3 points are required")
         )
-        for(i2 1 len
-            unless(_PointP(_Nth1(i2 l_points))
-                error("ycGeom::Polygon: element %d is not a Point: %A" i2 _Nth1(i2 l_points))
+        idx = 0
+        foreach(p l_points
+            idx++
+            unless(_PointP(p)
+                error("ycGeom::Polygon: element %d is not a Point: %A" idx p)
             )
-            prev = _Nth1(if(i2 == 1 len (i2 - 1)) l_points)
-            when(_Near(prev->x() _Nth1(i2 l_points)->x() n_eps)
-                && _Near(prev->y() _Nth1(i2 l_points)->y() n_eps)
-                error("ycGeom::Polygon: consecutive duplicate point at index %d" i2)
+        )
+        ; 连续重复点：沿链遍历，最后补首尾相接的一对
+        first = car(l_points)
+        prev = first
+        rest = cdr(l_points)
+        idx = 1
+        while(rest
+            cur = car(rest)
+            when(_Near(prev->x() cur->x() n_eps)
+                && _Near(prev->y() cur->y() n_eps)
+                error("ycGeom::Polygon: consecutive duplicate point at index %d"
+                    idx + 1)
             )
+            prev = cur
+            rest = cdr(rest)
+            idx++
+        )
+        when(_Near(prev->x() first->x() n_eps)
+            && _Near(prev->y() first->y() n_eps)
+            error("ycGeom::Polygon: consecutive duplicate point at index 1")
         )
         when(abs(_SignedArea(l_points)) <= _AreaTol(l_points n_eps)
             error("ycGeom::Polygon: zero-area point sequence")
         )
         seams = _SeamKeys(l_points)
-        for(i2 1 len
-            a = _Nth1(i2 l_points)
-            b = _Nth1(if(i2 == len 1 (i2 + 1)) l_points)
-            when(seams[_EdgeKey(a b)] == 2
+        ; 端点重合与线段相交的有效容差约 max(eps, 1e-15 * 坐标量级)；
+        ; 包围盒按它外扩后预筛，不会漏掉可能相交的边对。
+        scale = 0.0
+        foreach(p l_points
+            scale = max(scale max(abs(p->x()) abs(p->y())))
+        )
+        tol = max(n_eps 1e-15 * scale)
+        ; 一次遍历建立边表：(起点 终点 minX minY maxX maxY 是否切割边)
+        a = first
+        cur = cdr(l_points)
+        idx = 0
+        while(idx < len
+            b = if(cur car(cur) first)
+            seam = seams[_EdgeKey(a b)] == 2
+            when(seam
                 unless(_Near(a->x() b->x() n_eps)
                     || _Near(a->y() b->y() n_eps)
                     error("ycGeom::Polygon: seam must be horizontal or vertical")
                 )
             )
-            unless(seams[_EdgeKey(a b)] == 2
-                for(j2 1 len
-                    when(j2 > i2
-                        let((c2 d2)
-                            c2 = _Nth1(j2 l_points)
-                            d2 = _Nth1(if(j2 == len 1 (j2 + 1)) l_points)
-                            unless(seams[_EdgeKey(c2 d2)] == 2
-                                unless(_SamePoint(a c2 n_eps)
-                                    || _SamePoint(a d2 n_eps)
-                                    || _SamePoint(b c2 n_eps)
-                                    || _SamePoint(b d2 n_eps)
-                                    when(_SegmentsCross(a b c2 d2 n_eps)
-                                        error("ycGeom::Polygon: non-seam edges intersect")
-                                    )
+            edges = tconc(edges (list a b
+                min(a->x() b->x()) min(a->y() b->y())
+                max(a->x() b->x()) max(a->y() b->y())
+                seam))
+            a = b
+            cur = if(cur cdr(cur) nil)
+            idx++
+        )
+        edges = car(edges)
+        ; 全体非切割边两两校验：包围盒不相交的边对先跳过
+        while(edges
+            ei = car(edges)
+            unless(nth(6 ei)
+                a = car(ei)
+                b = cadr(ei)
+                ex0 = nth(2 ei)
+                ey0 = nth(3 ei)
+                ex1 = nth(4 ei)
+                ey1 = nth(5 ei)
+                mine = cdr(edges)
+                while(mine
+                    ej = car(mine)
+                    unless(nth(6 ej)
+                        fx0 = nth(2 ej)
+                        fy0 = nth(3 ej)
+                        fx1 = nth(4 ej)
+                        fy1 = nth(5 ej)
+                        when(ex0 <= fx1 + tol && fx0 <= ex1 + tol
+                            && ey0 <= fy1 + tol && fy0 <= ey1 + tol
+                            c = car(ej)
+                            d = cadr(ej)
+                            unless(_SamePoint(a c n_eps)
+                                || _SamePoint(a d n_eps)
+                                || _SamePoint(b c n_eps)
+                                || _SamePoint(b d n_eps)
+                                when(_SegmentsCross(a b c d n_eps)
+                                    error("ycGeom::Polygon: non-seam edges intersect")
                                 )
                             )
                         )
                     )
+                    mine = cdr(mine)
                 )
             )
+            edges = cdr(edges)
         )
         t
     )
@@ -491,15 +546,18 @@ procedure(Polygon(l_points "l")  ; -> Polygon
     ;
     ; **返回**
     ;   (Polygon) - 复制外层点列的新多边形；非法点列 error
-    let((pts reg eps2)
+    let((pts canon reg eps2)
         eps2 = _Eps(nil)
         pts = _AsPointList(l_points "ycGeom::Polygon")
         _CheckPolygon(pts eps2)
         reg = makeTable("geomPolygonCanon" nil)
-        pts = _CanonRing(pts eps2 reg)
-        _CheckPolygon(pts eps2)
+        canon = _CanonRing(pts eps2 reg)
+        ; 规范化没有改动点列时，等价输入已校验过，跳过第二次全量校验
+        unless(equal(canon pts)
+            _CheckPolygon(canon eps2)
+        )
         makeInstance('Polygon ?_data
-            makeInstance('_PolygonData ?points copy(pts)))
+            makeInstance('_PolygonData ?points copy(canon)))
     )
 )
 

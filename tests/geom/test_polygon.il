@@ -80,6 +80,12 @@ _AssertError(lambda(() ycGeom::Polygon(list(
 _AssertError(lambda(() ycGeom::Polygon(list(
     ycGeom::Point(0:0) ycGeom::Point(10:10) ycGeom::Point(10:0) ycGeom::Point(0:10)
 )) t)  "polygon: self-intersection rejected")
+_AssertError(lambda(() ycGeom::Polygon(list(0:0 4:4 4:0 1:5)) t)
+    "polygon: crossing non-seam edges rejected")
+_AssertError(lambda(() ycGeom::Polygon(list(
+    list(1e9 1e9) list(1e9 + 4 1e9 + 4)
+    list(1e9 + 4 1e9) list(1e9 + 1 1e9 + 5))) t)
+    "polygon: crossing edges at large offset rejected")
 
 let((sq hole)
     sq = ycGeom::Polygon(list(
