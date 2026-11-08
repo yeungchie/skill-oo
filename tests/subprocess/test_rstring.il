@@ -11,9 +11,9 @@ _Assert(ycSubProcess::CreateJob("echo ab | tr a-z A-Z")->await() == "AB\n" "pipe
 let((aj)
     aj = ycSubProcess::CreateJob("cat")
     aj->start()
-    aj->print("$HOME")
+    aj->send("$HOME")
     aj->close()
-    _Assert(aj->await() == "$HOME\n" "print data reaches the child without shell expansion")
+    _Assert(aj->await() == "$HOME\n" "send data reaches the child without shell expansion")
 )
 
 _TestChildDone = t

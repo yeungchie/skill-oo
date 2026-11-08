@@ -1,7 +1,7 @@
 let((aj)
     aj = ycSubProcess::CreateJob("cat")
     aj->start()
-    aj->print("a")
+    aj->send("a")
     _Assert(aj->close() == t "close returns t")
     _Assert(aj->await() == "a\n" "await drains the remaining output after close")
     _Assert(aj->state() == 'Dead "the job is dead after close ends cat")

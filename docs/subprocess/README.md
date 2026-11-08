@@ -11,7 +11,7 @@ Cadence SKILL++ 的子进程封装库：启动进程、实时读写输出、按�
 + 输出按条收进 `Stream` 对象：`text()` 全量拼接、`last()`/`shift()` 取单条；耗时由 `Elapsed` 记录。
 + 回调函数按事件符号触发：`'stdout`/`'stderr`/`'post`/`'beforeBegin`/`'afterBegin`。
 + 单参数形式的命令串交给 shell 解释（引号、`$` 展开、管道、重定向照常生效）；多参数形式按参数列表拼接，每个参数自动加引号保护，空格与元字符不再被解释。
-+ `print()` 写入的数据直接送达子进程标准输入、不经 shell。
++ `send()` 写入的数据直接送达子进程标准输入、不经 shell。
 + 例程中 `; =>` 表示返回值，括注「示例值」者为示意。
 
 ## 快速上手
@@ -28,7 +28,7 @@ aj->await()
 
 ; 链式调用：向子进程标准输入写入
 aj = ycSubProcess::CreateJob("cat")->start()
-aj->print("hello")->print("world")
+aj->send("hello")->send("world")
 aj->close()
 aj->await()
 ; => "hello\nworld\n"
@@ -414,10 +414,10 @@ aj->continue()
 aj->kill()
 ```
 
-#### print <sub>`method`</sub>
+#### send <sub>`method`</sub>
 
 ```text
-aj->print(
+aj->send(
     t_formatString
     [ l_args ... ]
     [ ?end t_string ]
@@ -438,13 +438,13 @@ aj = ycSubProcess::CreateJob("cat")
 aj->start()
 ; => <ycSubProcess::AsyncJob status=Active, returncode=nil>
 
-aj->print("123")
+aj->send("123")
 aj->wait(1)
 aj->stdout->text()
 ; => "123\n"
 
-aj->print("456")
-aj->print("789")
+aj->send("456")
+aj->send("789")
 aj->close()
 aj->await()
 ; => "123\n456\n789\n"
@@ -520,7 +520,7 @@ ycSubProcess::CreateJob("echo" "ok")->sleep(0.1)->await()
 以下方法支持链式调用。
 
 + `start`
-+ `print`
++ `send`
 + `wait`
 + `sleep`
 
@@ -529,8 +529,8 @@ ycSubProcess::CreateJob("echo" "ok")->sleep(0.1)->await()
 ```lisp
 aj = ycSubProcess::CreateJob("cat")\
     ->start()\
-    ->print("hello")\
-    ->print("world")
+    ->send("hello")\
+    ->send("world")
 
 aj->close()
 ; => t

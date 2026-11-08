@@ -205,7 +205,7 @@ defclass(AsyncJob () (
     state()
     stop()
     continue()
-    print()
+    send()
     close()
     signal()
     sleep()
@@ -242,7 +242,7 @@ procedure(_rstring(t_s "t")  ; -> str
 )
 
 defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
-    ; 安装 AsyncJob 全部方法：start/wait/await/kill/state/stop/continue/print/close/signal/sleep。
+    ; 安装 AsyncJob 全部方法：start/wait/await/kill/state/stop/continue/send/close/signal/sleep。
     ;
     ; **参数**
     ;   l_args  (list) - 变参：附加初始化参数，本实现忽略
@@ -393,7 +393,7 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         _checkStarted("continue")
         ipcContProcess(self->ipcId)
     )
-    self->print = lambda((t_formatString \@key end("\n") \@rest l_args "ttg")  ; -> self
+    self->send = lambda((t_formatString \@key end("\n") \@rest l_args "ttg")  ; -> self
         ; 向子进程标准输入写入一行（lsprintf 先格式化，再补 end 结尾）。
         ;
         ; **参数**
@@ -403,10 +403,10 @@ defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
         ;
         ; **返回**
         ;   (AsyncJob) - self；写入失败（进程已退出）时 error() 中断
-        _checkStarted("print")
+        _checkStarted("send")
         ipcWriteProcess(self->ipcId
             strcat(apply('lsprintf t_formatString l_args) end)
-        ) || _error("print" "job process has expired, current status is '%s'" self->state())
+        ) || _error("send" "job process has expired, current status is '%s'" self->state())
         self
     )
     self->close = lambda(()  ; -> t | nil

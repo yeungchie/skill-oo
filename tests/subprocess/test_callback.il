@@ -12,7 +12,7 @@ let((aj events)
     _TestCallbackUserData = nil
     aj = ycSubProcess::CreateJob("cat" ?callback _TestCallbackHook ?userData "UD-1")
     aj->start()
-    aj->print("a")
+    aj->send("a")
     aj->wait(1)
     aj->close()
     aj->await()
