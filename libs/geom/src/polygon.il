@@ -81,8 +81,7 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
         idx = 1
         while(rest
             cur = car(rest)
-            when(_Near(prev->x() cur->x() n_eps)
-                && _Near(prev->y() cur->y() n_eps)
+            when(_Near(prev->x() cur->x() n_eps) && _Near(prev->y() cur->y() n_eps)
                 error("ycGeom::Polygon: consecutive duplicate point at index %d"
                     idx + 1)
             )
@@ -90,8 +89,7 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
             rest = cdr(rest)
             idx++
         )
-        when(_Near(prev->x() first->x() n_eps)
-            && _Near(prev->y() first->y() n_eps)
+        when(_Near(prev->x() first->x() n_eps) && _Near(prev->y() first->y() n_eps)
             error("ycGeom::Polygon: consecutive duplicate point at index 1")
         )
         when(abs(_SignedArea(l_points)) <= _AreaTol(l_points n_eps)
@@ -114,8 +112,7 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
             b = if(cur car(cur) first)
             seam = seams[_EdgeKey(a b)] == 2
             when(seam
-                unless(_Near(a->x() b->x() n_eps)
-                    || _Near(a->y() b->y() n_eps)
+                unless(_Near(a->x() b->x() n_eps) || _Near(a->y() b->y() n_eps)
                     error("ycGeom::Polygon: seam must be horizontal or vertical")
                 )
             )
@@ -140,14 +137,20 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
             a = nth(4 ei)
             b = nth(5 ei)
             foreach(ej cdr(edges)
-                when(ex0 <= caddr(ej) + tol && car(ej) <= ex1 + tol
-                    && ey0 <= cadddr(ej) + tol && cadr(ej) <= ey1 + tol
+                when(and(
+                    ex0 <= caddr(ej) + tol
+                    car(ej) <= ex1 + tol
+                    ey0 <= cadddr(ej) + tol
+                    cadr(ej) <= ey1 + tol
+                )
                     c = nth(4 ej)
                     d = nth(5 ej)
-                    unless(_SamePoint(a c n_eps)
-                        || _SamePoint(a d n_eps)
-                        || _SamePoint(b c n_eps)
-                        || _SamePoint(b d n_eps)
+                    unless(or(
+                        _SamePoint(a c n_eps)
+                        _SamePoint(a d n_eps)
+                        _SamePoint(b c n_eps)
+                        _SamePoint(b d n_eps)
+                    )
                         when(_SegmentsCross(a b c d n_eps)
                             error("ycGeom::Polygon: non-seam edges intersect")
                         )
