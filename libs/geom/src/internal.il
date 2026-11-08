@@ -864,18 +864,21 @@ procedure(_SignedArea(l_pts "l")  ; -> float
     ;
     ; **返回**
     ;   (float) - 有符号面积
-    let((len sum i a b ox oy)
-        len = length(l_pts)
+    let((sum ox oy prev first)
+        first = car(l_pts)
+        ox = first->x()
+        oy = first->y()
         sum = 0.0
-        ox = car(l_pts)->x()
-        oy = car(l_pts)->y()
-        for(i2 1 len
-            a = _Nth1(i2 l_pts)
-            b = _Nth1(if(i2 == len 1 (i2 + 1)) l_pts)
+        prev = first
+        foreach(p cdr(l_pts)
             sum = sum
-                + (a->x() - ox) * (b->y() - oy)
-                - (b->x() - ox) * (a->y() - oy)
+                + (prev->x() - ox) * (p->y() - oy)
+                - (p->x() - ox) * (prev->y() - oy)
+            prev = p
         )
+        sum = sum
+            + (prev->x() - ox) * (first->y() - oy)
+            - (first->x() - ox) * (prev->y() - oy)
         sum / 2.0
     )
 )
@@ -890,23 +893,34 @@ procedure(_PointInRing(l_pts g_p n_eps "lgn")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 在环内或边界上为 t
-    let((len x y i a b in boundary xint)
-        len = length(l_pts)
+    let((x y first prev in boundary xint)
         x = g_p->x()
         y = g_p->y()
-        for(i2 1 len
-            a = _Nth1(i2 l_pts)
-            b = _Nth1(if(i2 == len 1 (i2 + 1)) l_pts)
-            when(_OnSegment(a b g_p n_eps)
+        first = car(l_pts)
+        prev = first
+        foreach(p cdr(l_pts)
+            when(_OnSegment(prev p g_p n_eps)
                 boundary = t
             )
-            when((a->y() > y) != (b->y() > y)
-                xint = a->x()
-                    + (y - a->y()) * (b->x() - a->x())
-                        / (b->y() - a->y())
+            when((prev->y() > y) != (p->y() > y)
+                xint = prev->x()
+                    + (y - prev->y()) * (p->x() - prev->x())
+                        / (p->y() - prev->y())
                 when(x < xint
                     in = !in
                 )
+            )
+            prev = p
+        )
+        when(_OnSegment(prev first g_p n_eps)
+            boundary = t
+        )
+        when((prev->y() > y) != (first->y() > y)
+            xint = prev->x()
+                + (y - prev->y()) * (first->x() - prev->x())
+                    / (first->y() - prev->y())
+            when(x < xint
+                in = !in
             )
         )
         if(boundary t in)
@@ -1009,13 +1023,16 @@ procedure(_SeamKeys(l_pts "l")  ; -> table
     ;
     ; **返回**
     ;   (table) - 无向边键 → 次数
-    let((len i cnt key)
-        len = length(l_pts)
+    let((cnt key prev)
         cnt = makeTable("geomSeams" nil)
-        for(i2 1 len
-            key = _EdgeKey(_Nth1(i2 l_pts) _Nth1(if(i2 == len 1 (i2 + 1)) l_pts))
+        prev = car(l_pts)
+        foreach(p cdr(l_pts)
+            key = _EdgeKey(prev p)
             cnt[key] = if(cnt[key] (cnt[key] + 1) 1)
+            prev = p
         )
+        key = _EdgeKey(prev car(l_pts))
+        cnt[key] = if(cnt[key] (cnt[key] + 1) 1)
         cnt
     )
 )
@@ -1029,17 +1046,27 @@ procedure(_CollinearClean(l_pts n_eps "ln")  ; -> list[Point]
     ;
     ; **返回**
     ;   (list[Point]) - 去除共线点后的点列；切割边端点保留
-    let((len changed seams res2 i prev cur next dot line_len scale tol)
+    let((len changed seams res2 first last prev cur next rest idx
+            dot line_len scale tol keyPrev keyCur)
         len = length(l_pts)
         changed = t
         while(changed && len > 3
             changed = nil
             seams = _SeamKeys(l_pts)
             res2 = nil
-            for(i2 1 len
-                prev = _Nth1(if(i2 == 1 len (i2 - 1)) l_pts)
-                cur = _Nth1(i2 l_pts)
-                next = _Nth1(if(i2 == len 1 (i2 + 1)) l_pts)
+            first = car(l_pts)
+            last = first
+            foreach(p l_pts
+                last = p
+            )
+            prev = last
+            cur = first
+            rest = cdr(l_pts)
+            keyPrev = _EdgeKey(prev cur)
+            idx = 0
+            while(idx < len
+                next = if(rest car(rest) first)
+                keyCur = _EdgeKey(cur next)
                 dot = (cur->x() - prev->x())
                         * (next->x() - cur->x())
                     + (cur->y() - prev->y())
@@ -1055,8 +1082,8 @@ procedure(_CollinearClean(l_pts n_eps "ln")  ; -> list[Point]
                 tol = max(n_eps * line_len
                     1e-15 * line_len * scale)
                 cond(
-                    (seams[_EdgeKey(prev cur)] == 2
-                        || seams[_EdgeKey(cur next)] == 2
+                    (seams[keyPrev] == 2
+                        || seams[keyCur] == 2
                         res2 = tconc(res2 cur)
                     )
                     ((abs(_Cross(prev cur next)) <= tol
@@ -1067,6 +1094,11 @@ procedure(_CollinearClean(l_pts n_eps "ln")  ; -> list[Point]
                         res2 = tconc(res2 cur)
                     )
                 )
+                prev = cur
+                cur = next
+                rest = if(rest cdr(rest) nil)
+                keyPrev = keyCur
+                idx++
             )
             l_pts = car(res2)
             len = length(l_pts)
@@ -1122,15 +1154,17 @@ procedure(_Rings(l_pts "l")  ; -> list[list[Point]]
     ;
     ; **返回**
     ;   (list[list[Point]]) - 环列表；无法闭合时 error
-    let((len i a b seams adj order res2 start cur next ring nei sk nk)
+    let((len a b seams adj order res2 start cur next ring nei nk first rest idx)
         len = length(l_pts)
         seams = _SeamKeys(l_pts)
         adj = makeTable("geomAdj" nil)
-        for(i2 1 len
-            a = _Nth1(i2 l_pts)
-            b = _Nth1(if(i2 == len 1 (i2 + 1)) l_pts)
-            sk = _EdgeKey(a b)
-            unless(seams[sk] == 2
+        first = car(l_pts)
+        a = first
+        rest = cdr(l_pts)
+        idx = 0
+        while(idx < len
+            b = if(rest car(rest) first)
+            unless(seams[_EdgeKey(a b)] == 2
                 nk = _PtKey(a)
                 unless(adj[nk]
                     order = tconc(order nk)
@@ -1142,6 +1176,9 @@ procedure(_Rings(l_pts "l")  ; -> list[list[Point]]
                 )
                 adj[nk] = cons(a adj[nk])
             )
+            a = b
+            rest = if(rest cdr(rest) nil)
+            idx++
         )
         order = car(order)
         while(_FirstAdjPoint(adj order)

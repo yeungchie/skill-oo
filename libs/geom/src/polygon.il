@@ -59,7 +59,7 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
     ;   (t) - 合法；否则 error
     let((len idx prev cur first rest seams scale tol
             edges a b c d seam ei ej
-            ex0 ey0 ex1 ey1 fx0 fy0 fx1 fy1)
+            ex0 ey0 ex1 ey1)
         unless(listp(l_points)
             error("ycGeom::Polygon: expected a list of Points, got %A" l_points)
         )
@@ -105,7 +105,8 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
             scale = max(scale max(abs(p->x()) abs(p->y())))
         )
         tol = max(n_eps 1e-15 * scale)
-        ; 一次遍历建立边表：(起点 终点 minX minY maxX maxY 是否切割边)
+        ; 一次遍历建立边表（只收非切割边）：(minX minY maxX maxY 起点 终点)
+        ; 包围盒放在前四位，热循环用 car 族直接取，避免逐字段 nth 走链表。
         a = first
         cur = cdr(l_points)
         idx = 0
@@ -118,43 +119,37 @@ procedure(_CheckPolygon(l_points n_eps "ln")  ; -> t
                     error("ycGeom::Polygon: seam must be horizontal or vertical")
                 )
             )
-            edges = tconc(edges (list a b
-                min(a->x() b->x()) min(a->y() b->y())
-                max(a->x() b->x()) max(a->y() b->y())
-                seam))
+            unless(seam
+                edges = tconc(edges (list
+                    min(a->x() b->x()) min(a->y() b->y())
+                    max(a->x() b->x()) max(a->y() b->y())
+                    a b))
+            )
             a = b
             cur = if(cur cdr(cur) nil)
             idx++
         )
         edges = car(edges)
-        ; 全体非切割边两两校验：包围盒不相交的边对先跳过
+        ; 非切割边两两校验：包围盒不相交的边对先跳过
         while(edges
             ei = car(edges)
-            unless(nth(6 ei)
-                a = car(ei)
-                b = cadr(ei)
-                ex0 = nth(2 ei)
-                ey0 = nth(3 ei)
-                ex1 = nth(4 ei)
-                ey1 = nth(5 ei)
-                foreach(ej cdr(edges)
-                    unless(nth(6 ej)
-                        fx0 = nth(2 ej)
-                        fy0 = nth(3 ej)
-                        fx1 = nth(4 ej)
-                        fy1 = nth(5 ej)
-                        when(ex0 <= fx1 + tol && fx0 <= ex1 + tol
-                            && ey0 <= fy1 + tol && fy0 <= ey1 + tol
-                            c = car(ej)
-                            d = cadr(ej)
-                            unless(_SamePoint(a c n_eps)
-                                || _SamePoint(a d n_eps)
-                                || _SamePoint(b c n_eps)
-                                || _SamePoint(b d n_eps)
-                                when(_SegmentsCross(a b c d n_eps)
-                                    error("ycGeom::Polygon: non-seam edges intersect")
-                                )
-                            )
+            ex0 = car(ei)
+            ey0 = cadr(ei)
+            ex1 = caddr(ei)
+            ey1 = cadddr(ei)
+            a = nth(4 ei)
+            b = nth(5 ei)
+            foreach(ej cdr(edges)
+                when(ex0 <= caddr(ej) + tol && car(ej) <= ex1 + tol
+                    && ey0 <= cadddr(ej) + tol && cadr(ej) <= ey1 + tol
+                    c = nth(4 ej)
+                    d = nth(5 ej)
+                    unless(_SamePoint(a c n_eps)
+                        || _SamePoint(a d n_eps)
+                        || _SamePoint(b c n_eps)
+                        || _SamePoint(b d n_eps)
+                        when(_SegmentsCross(a b c d n_eps)
+                            error("ycGeom::Polygon: non-seam edges intersect")
                         )
                     )
                 )
