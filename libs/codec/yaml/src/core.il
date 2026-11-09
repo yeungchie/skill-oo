@@ -261,12 +261,13 @@ procedure(_LineIndent(t_line n_line "tx")  ; -> int
     )
 )
 
-procedure(_QuoteStart(t_s n_i "tx")  ; -> t | nil
-    ; 判断引号是否位于标量起始位置：前一字符为空白或流式/映射分隔符。
+procedure(_QuoteStart(t_s n_i g_flow "txg")  ; -> t | nil
+    ; 判断引号是否位于标量起始位置：前一字符为空白；流式上下文中还包括 `:`、`[`、`{`、`,`。
     ;
     ; **参数**
-    ;   t_s  (str) - 输入串
-    ;   n_i  (int) - 引号位置（1-based）
+    ;   t_s    (str) - 输入串
+    ;   n_i    (int) - 引号位置（1-based）
+    ;   g_flow (t|nil) - 是否位于流式集合内
     ;
     ; **返回**
     ;   (t|nil) - 可视为引号起始时为 t
@@ -274,15 +275,16 @@ procedure(_QuoteStart(t_s n_i "tx")  ; -> t | nil
         t
         let((prev)
             prev = _Code(t_s n_i - 1)
-            or(
-                prev == 32
-                prev == 9
-                prev == 58
-                prev == 45
-                prev == 63
-                prev == 91
-                prev == 123
-                prev == 44
+            if(g_flow
+                or(
+                    prev == 32
+                    prev == 9
+                    prev == 58
+                    prev == 91
+                    prev == 123
+                    prev == 44
+                )
+                prev == 32 || prev == 9
             )
         )
     )
@@ -296,13 +298,14 @@ procedure(_StripComment(t_line "t")  ; -> str
     ;
     ; **返回**
     ;   (str) - 去注释后的文本
-    let((len i c cut prev sq dq esc)
+    let((len i c cut prev sq dq esc flow)
         len = length(t_line)
         i = 1
         cut = nil
         sq = nil
         dq = nil
         esc = nil
+        flow = 0
         while(i <= len && !cut
             c = _Code(t_line i)
             prev = if(i > 1 _Code(t_line i - 1) 0)
@@ -328,12 +331,22 @@ procedure(_StripComment(t_line "t")  ; -> str
                     )
                     i++
                 )
-                (c == 34 && _QuoteStart(t_line i)
+                (c == 34 && _QuoteStart(t_line i flow > 0)
                     dq = t
                     i++
                 )
-                (c == 39 && _QuoteStart(t_line i)
+                (c == 39 && _QuoteStart(t_line i flow > 0)
                     sq = t
+                    i++
+                )
+                (c == 91 || c == 123
+                    flow++
+                    i++
+                )
+                (c == 93 || c == 125
+                    when(flow > 0
+                        flow--
+                    )
                     i++
                 )
                 (c == 35 && (i == 1 || prev == 32 || prev == 9)

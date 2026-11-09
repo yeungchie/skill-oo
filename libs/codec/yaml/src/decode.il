@@ -68,8 +68,8 @@ procedure(_FindKeyColon(t_s "t")  ; -> int | nil
                 (sq
                     when(c == 39 sq = nil)
                 )
-                (c == 34 && _QuoteStart(t_s i) dq = t)
-                (c == 39 && _QuoteStart(t_s i) sq = t)
+                (c == 34 && _QuoteStart(t_s i flow > 0) dq = t)
+                (c == 39 && _QuoteStart(t_s i flow > 0) sq = t)
                 (c == 91 || c == 123 flow = flow + 1)
                 (c == 93 || c == 125 when(flow > 0 flow = flow - 1))
                 (c == 58 && flow == 0

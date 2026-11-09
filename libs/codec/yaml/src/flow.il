@@ -301,8 +301,8 @@ procedure(_FlowKey(t_s n_i "tx")  ; -> list
                 (sq
                     when(c == 39 sq = nil)
                 )
-                (c == 34 && _QuoteStart(t_s k) dq = t)
-                (c == 39 && _QuoteStart(t_s k) sq = t)
+                (c == 34 && _QuoteStart(t_s k t) dq = t)
+                (c == 39 && _QuoteStart(t_s k t) sq = t)
                 (c == 58
                     return(list(_ParseKeyText(substring(t_s start k - start) 1) k))
                 )

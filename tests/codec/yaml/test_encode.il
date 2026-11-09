@@ -37,6 +37,13 @@ let((v)
     v["a!"] = 2
     _Assert(ycYaml::Encode(v ?flow t ?sortKeys t) == "{a: 1, a!: 2}\n"  "encode: flow sortKeys uses key text")
 )
+let((v)
+    v = makeTable("ycTest")
+    v["a"] = 1
+    v['a] = 2
+    _AssertError(lambda(() ycYaml::Encode(v ?flow t))  "encode: flow duplicate key after encoding")
+    _AssertError(lambda(() ycYaml::Encode(v))  "encode: block duplicate key after encoding")
+)
 
 ; --- 序列输出 ---
 _Assert(ycYaml::Encode(nil) == "[]\n"  "encode: empty sequence")

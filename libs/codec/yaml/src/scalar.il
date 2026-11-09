@@ -424,10 +424,10 @@ procedure(_ParseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
                 last++
             )
             unless(stop || _Rtrim(line) == ""
-                when(content == nil && _Code(line ind + 1) == 9
-                    _ErrorLine("tab character in indentation" last ind + 1)
-                )
                 when(content == nil
+                    when(hint == 0 && ind == 0 && _Code(line 1) == 9
+                        _ErrorLine("tab character in indentation" last 1)
+                    )
                     content = if(hint > 0 n_parentIndent + hint ind)
                 )
                 cond(

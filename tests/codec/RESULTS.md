@@ -4,7 +4,7 @@
 | --- | --- |
 | core | PASS: 18 / FAIL: 0 |
 | json | PASS: 235 / FAIL: 0 |
-| yaml | PASS: 211 / FAIL: 0 |
+| yaml | PASS: 219 / FAIL: 0 |
 | csv | PASS: 240 / FAIL: 0 |
 | toml | PASS: 169 / FAIL: 0 |
 | ini | PASS: 129 / FAIL: 0 |
