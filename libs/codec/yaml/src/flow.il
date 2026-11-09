@@ -156,7 +156,7 @@ procedure(_FlowValue(t_s n_i n_max "txn")  ; -> list
                 v = _FlowMap(t_s n_i n_max - 1)
             )
             (c == 34 || c == 39
-                q = _ParseQuoted(t_s n_i 1)
+                q = _ParseQuoted(t_s n_i 1 1)
                 v = list(car(q) cadr(q))
             )
             (t
@@ -172,7 +172,7 @@ procedure(_FlowValue(t_s n_i n_max "txn")  ; -> list
                         end++
                     )
                 )
-                v = list(_ParseScalarText(_Rtrim(substring(t_s n_i end - n_i)) 1) end)
+                v = list(_ParseScalarText(_Rtrim(substring(t_s n_i end - n_i)) 1 n_i) end)
             )
         )
         val = car(v)
@@ -237,12 +237,13 @@ procedure(_FlowSeq(t_s n_i n_max "txn")  ; -> list
     )
 )
 
-procedure(_ParseKeyText(t_text n_line "tx")  ; -> any
+procedure(_ParseKeyText(t_text n_line n_base "txn")  ; -> any
     ; 解析映射键：引号键为字符串，整数键为 fixnum，其余为字符串。
     ;
     ; **参数**
     ;   t_text  (str) - 键文本
     ;   n_line  (int) - 行号（错误消息）
+    ;   n_base  (int) - 基准列号（`t_text` 首字符在行内的列号）
     ;
     ; **返回**
     ;   (any) - 键值
@@ -257,7 +258,7 @@ procedure(_ParseKeyText(t_text n_line "tx")  ; -> any
             return("")
         )
         when(_Code(t_text i) == 34 || _Code(t_text i) == 39
-            q = _ParseQuoted(t_text i n_line)
+            q = _ParseQuoted(t_text i n_line n_base + i - 1)
             return(car(q))
         )
         t_text = substring(t_text i len - i + 1)
@@ -304,7 +305,7 @@ procedure(_FlowKey(t_s n_i "tx")  ; -> list
                 (c == 34 && _QuoteStart(t_s k t) dq = t)
                 (c == 39 && _QuoteStart(t_s k t) sq = t)
                 (c == 58
-                    return(list(_ParseKeyText(substring(t_s start k - start) 1) k))
+                    return(list(_ParseKeyText(substring(t_s start k - start) 1 start) k))
                 )
                 (c == 44 || c == 93 || c == 125
                     error("ycYaml::Decode: expected ':' in flow mapping")

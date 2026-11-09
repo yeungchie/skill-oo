@@ -156,13 +156,14 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
     ;
     ; **返回**
     ;   (list) - (值 下一行号)
-    prog((tag anchor token end v val i len c stop)
+    prog((tag anchor token end v val i len c stop n_base pad)
         t_text = _Rtrim(t_text)
         len = length(t_text)
         i = 1
         while(i <= len && _Code(t_text i) == 32
             i++
         )
+        n_base = n_col + i - 1
         t_text = _Tail(t_text i)
         stop = nil
         while(!stop && t_text != ""
@@ -174,8 +175,9 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
                         end++
                     )
                     anchor = substring(t_text 2 end - 2)
-                    when(anchor == "" _ErrorLine("empty anchor name" n_line n_col))
+                    when(anchor == "" _ErrorLine("empty anchor name" n_line n_base))
                     t_text = _Rtrim(_StripComment(_Tail(t_text end)))
+                    n_base = n_base + end - 1
                 )
                 (c == 33
                     end = 2
@@ -184,20 +186,27 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
                     )
                     tag = substring(t_text 1 end - 1)
                     t_text = _Rtrim(_StripComment(_Tail(t_text end)))
+                    n_base = n_base + end - 1
                 )
                 (t
                     stop = t
                 )
             )
         )
-        t_text = _Ltrim(t_text)
+        pad = 1
+        len = length(t_text)
+        while(pad <= len && (_Code(t_text pad) == 32 || _Code(t_text pad) == 9)
+            pad++
+        )
+        n_base = n_base + pad - 1
+        t_text = _Tail(t_text pad)
         when(_Code(t_text 1) == 42
             end = 2
             while(end <= length(t_text) && _Code(t_text end) != 32
                 end++
             )
             unless(_Rtrim(_Tail(t_text end)) == ""
-                _ErrorLine("unexpected characters after alias" n_line n_col)
+                _ErrorLine("unexpected characters after alias" n_line n_base)
             )
             val = _AliasValue(substring(t_text 2 end - 2))
             when(tag val = _TagValue(val tag))
@@ -205,7 +214,7 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
         )
         when(anchor
             when(_ActiveAnchors[anchor]
-                _ErrorLine("recursive anchor" n_line n_col)
+                _ErrorLine("recursive anchor" n_line n_base)
             )
             _ActiveAnchors[anchor] = t
         )
@@ -214,22 +223,22 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
                 v = _ParseChild(l_lines n_pos n_parentIndent n_max ?indentless indentless)
             )
             ((_Code(t_text 1) == 124 || _Code(t_text 1) == 62)
-                v = _ParseBlockScalar(l_lines n_pos n_parentIndent t_text n_line n_col)
+                v = _ParseBlockScalar(l_lines n_pos n_parentIndent t_text n_line n_base)
             )
             (t
                 if(_Code(t_text 1) == 91 || _Code(t_text 1) == 123
                 then
                     v = errset(_FlowValue(t_text 1 n_max))
                     unless(v
-                        _ErrorLine(_InnerMessage(errset.errset) n_line n_col)
+                        _ErrorLine(_InnerMessage(errset.errset) n_line n_base)
                     )
                     v = car(v)
                     unless(_Rtrim(_Tail(t_text cadr(v))) == ""
-                        _ErrorLine("unexpected characters after value" n_line n_col)
+                        _ErrorLine("unexpected characters after value" n_line n_base)
                     )
                     v = list(car(v) n_pos)
                 else
-                    v = list(_ParseScalarText(t_text n_line) n_pos)
+                    v = list(_ParseScalarText(t_text n_line n_base) n_pos)
                 )
             )
         )
@@ -299,7 +308,7 @@ procedure(_ParseMapInto(g_map l_lines n_pos n_indent n_max g_inline n_line n_col
                 unless(colon
                     _ErrorLine("expected a mapping key" n_line n_col)
                 )
-                key = _ParseKeyText(substring(content 1 colon - 1) n_line)
+                key = _ParseKeyText(substring(content 1 colon - 1) n_line n_col)
                 rest = _Tail(content colon + 1)
                 v = _ParseValueText(rest l_lines n_pos n_indent n_max n_line n_col + colon ?indentless t)
                 n_pos = cadr(v)

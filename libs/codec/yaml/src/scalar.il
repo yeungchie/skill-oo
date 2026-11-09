@@ -20,13 +20,14 @@ procedure(_HexVal(n_c "x")  ; -> int | nil
     )
 )
 
-procedure(_ParseQuoted(t_s n_i n_line "txn")  ; -> list
+procedure(_ParseQuoted(t_s n_i n_line n_base "txnn")  ; -> list
     ; 解析单引号或双引号标量，返回 (值 下一位置)。
     ;
     ; **参数**
     ;   t_s    (str) - 当前行文本
     ;   n_i    (int) - 引号位置
     ;   n_line (int) - 行号（错误消息）
+    ;   n_base (int) - 基准列号（`t_s` 首字符在行内的列号）
     ;
     ; **返回**
     ;   (list) - (字符串值 闭引号后一位置)
@@ -38,7 +39,7 @@ procedure(_ParseQuoted(t_s n_i n_line "txn")  ; -> list
         done = nil
         while(!done
             when(pos > len
-                _ErrorLine("unterminated quoted scalar" n_line n_i)
+                _ErrorLine("unterminated quoted scalar" n_line n_base + n_i - 1)
             )
             c = _Code(t_s pos)
             cond(
@@ -76,7 +77,7 @@ procedure(_ParseQuoted(t_s n_i n_line "txn")  ; -> list
                             esc = pos
                             pos++
                             when(pos > len
-                                _ErrorLine("unterminated escape" n_line esc)
+                                _ErrorLine("unterminated escape" n_line n_base + esc - 1)
                             )
                             cp = _Code(t_s pos)
                             case(cp
@@ -102,7 +103,7 @@ procedure(_ParseQuoted(t_s n_i n_line "txn")  ; -> list
                                     for(k2 1 2
                                         cp = _HexVal(_Code(t_s pos + k2))
                                         unless(cp
-                                            _ErrorLine("invalid hex escape" n_line esc)
+                                            _ErrorLine("invalid hex escape" n_line n_base + esc - 1)
                                         )
                                         d = d * 16 + cp
                                     )
@@ -114,7 +115,7 @@ procedure(_ParseQuoted(t_s n_i n_line "txn")  ; -> list
                                     for(k2 1 4
                                         cp = _HexVal(_Code(t_s pos + k2))
                                         unless(cp
-                                            _ErrorLine("invalid unicode escape" n_line esc)
+                                            _ErrorLine("invalid unicode escape" n_line n_base + esc - 1)
                                         )
                                         d = d * 16 + cp
                                     )
@@ -126,7 +127,7 @@ procedure(_ParseQuoted(t_s n_i n_line "txn")  ; -> list
                                     for(k2 1 8
                                         cp = _HexVal(_Code(t_s pos + k2))
                                         unless(cp
-                                            _ErrorLine("invalid unicode escape" n_line esc)
+                                            _ErrorLine("invalid unicode escape" n_line n_base + esc - 1)
                                         )
                                         d = d * 16 + cp
                                     )
@@ -134,7 +135,7 @@ procedure(_ParseQuoted(t_s n_i n_line "txn")  ; -> list
                                     pos = pos + 8
                                 )
                                 (t
-                                    _ErrorLine("invalid escape" n_line esc)
+                                    _ErrorLine("invalid escape" n_line n_base + esc - 1)
                                 )
                             )
                             pos++
@@ -250,12 +251,13 @@ procedure(_ResolvePlain(t_s "t")  ; -> any
     )
 )
 
-procedure(_ParseScalarText(t_text n_line "tx")  ; -> any
+procedure(_ParseScalarText(t_text n_line n_base "txn")  ; -> any
     ; 解析已去注释的单行标量文本。
     ;
     ; **参数**
     ;   t_text  (str) - 行内标量文本
     ;   n_line  (int) - 行号（错误消息）
+    ;   n_base  (int) - 基准列号（`t_text` 首字符在行内的列号）
     ;
     ; **返回**
     ;   (any) - 标量值；引号未闭合或非法转义报错
@@ -271,9 +273,9 @@ procedure(_ParseScalarText(t_text n_line "tx")  ; -> any
         )
         if(_Code(t_text i) == 34 || _Code(t_text i) == 39
         then
-            q = _ParseQuoted(t_text i n_line)
+            q = _ParseQuoted(t_text i n_line n_base + i - 1)
             when(_Rtrim(_Tail(t_text cadr(q))) != ""
-                _ErrorLine("unexpected characters after quoted scalar" n_line cadr(q))
+                _ErrorLine("unexpected characters after quoted scalar" n_line n_base + cadr(q) - 1)
             )
             return(car(q))
         else

@@ -201,6 +201,7 @@ let((v)
 )
 _AssertError(lambda(() ycYaml::Decode("s: |\n\tx\n"))  "error: tab at column 1 in block content")
 _AssertError(lambda(() ycYaml::Decode("s: | foo\n  bar\n"))  "error: block scalar header trailing text")
+_AssertErrorMsg(lambda(() ycYaml::Decode("s: | foo\n  bar\n")) "column 4"  "error: block scalar header reports its column")
 _Assert(ycYaml::Decode("|\n  abc\n") == strcat("abc" intToChar(10))  "block: top-level literal")
 
 ; --- 文档标记 ---
@@ -246,10 +247,13 @@ let((v)
 
 ; --- 错误 ---
 _AssertError(lambda(() ycYaml::Decode("a: 1\n b: 2\n"))  "error: inconsistent indentation")
-_AssertError(lambda(() ycYaml::Decode("a: [1, 2\n"))  "error: unterminated flow sequence")
+_AssertErrorMsg(lambda(() ycYaml::Decode("a: [1, 2\n")) "column 4"  "error: flow value reports the bracket column")
 _AssertError(lambda(() ycYaml::Decode("a: {b: 1\n"))  "error: unterminated flow map")
 _AssertError(lambda(() ycYaml::Decode("a: \"x\n"))  "error: unterminated double quote")
 _AssertErrorMsg(lambda(() ycYaml::Decode("a: 1\nb: \"x\n")) "line 2"  "error: quoted scalar reports its line")
+_AssertErrorMsg(lambda(() ycYaml::Decode("a: 1\nb: \"x\n")) "column 4"  "error: quoted scalar reports the real column")
+_AssertErrorMsg(lambda(() ycYaml::Decode("a: !!str \"x\n")) "column 10"  "error: quoted scalar column counts tag prefix")
+_AssertErrorMsg(lambda(() ycYaml::Decode("\"a\\q\": 1\n")) "column 3"  "error: quoted key reports its column")
 _AssertErrorMsg(lambda(() ycYaml::Decode("[\"a\\q\"]")) "invalid escape"  "error: flow value keeps original cause")
 _AssertError(lambda(() ycYaml::Decode("a: 'x\n"))  "error: unterminated single quote")
 _AssertError(lambda(() ycYaml::Decode("a: *nope\n"))  "error: unknown alias")
