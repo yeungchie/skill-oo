@@ -3,9 +3,9 @@
 | 套件 | 结果 |
 | --- | --- |
 | core | PASS: 18 / FAIL: 0 |
-| json | PASS: 235 / FAIL: 0 |
-| yaml | PASS: 223 / FAIL: 0 |
-| csv | PASS: 240 / FAIL: 0 |
+| json | PASS: 237 / FAIL: 0 |
+| yaml | PASS: 224 / FAIL: 0 |
+| csv | PASS: 241 / FAIL: 0 |
 | toml | PASS: 169 / FAIL: 0 |
 | ini | PASS: 129 / FAIL: 0 |
 

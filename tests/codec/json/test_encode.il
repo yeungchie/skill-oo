@@ -43,6 +43,7 @@ _Assert(ycJson::Encode(list("a" "b")) == "[\"a\",\"b\"]"  "encode: list of strin
 _Assert(ycJson::Encode(list(t ycCodec::False ycCodec::Null)) == "[true,false,null]"  "encode: list of literals")
 _Assert(ycJson::Encode(list(nil)) == "[[]]"  "encode: list containing empty array")
 _Assert(ycJson::Encode(list(nil nil)) == "[[],[]]"  "encode: list of empty arrays")
+_Assert(ycJson::Encode(ycJson::Decode("{\"a\":[]}")) == "{\"a\":[]}"  "encode: empty array value round-trips")
 _Assert(ycJson::Encode(list(1 list(2 list(3)))) == "[1,[2,[3]]]"  "encode: nested lists")
 _AssertError(lambda(() ycJson::Encode(list('foo)))  "encode: list with symbol errors")
 
