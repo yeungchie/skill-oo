@@ -159,7 +159,7 @@ procedure(_ParseIntText(t_s "t")  ; -> any
     ;
     ; **返回**
     ;   (int|float) - 解析结果；非法时 nil
-    let((clean digits base i len sign v d c digit bad)
+    let((clean digits base i len sign v d c digit bad f)
         clean = pcreReplace(pcreCompile("_") t_s "" 0)
         sign = 1
         i = 1
@@ -179,6 +179,7 @@ procedure(_ParseIntText(t_s "t")  ; -> any
             )
         )
         v = 0
+        f = 0.0
         bad = nil
         while(i <= len && !bad
             c = _Code(clean i)
@@ -188,14 +189,25 @@ procedure(_ParseIntText(t_s "t")  ; -> any
                 (c >= 65 && c <= 70 c - 55)
             )
             if(digit == nil || digit >= base
+            then
                 bad = t
+            else
                 v = v * base + digit
+                f = f * base + digit
             )
             i++
         )
         unless(bad
             when(sign < 0 v = -v)
-            v
+            if(f > 2147483647.0
+            then
+                if(sign < 0 && f == 2147483648.0
+                    -2147483647 - 1
+                    sign * f
+                )
+            else
+                v
+            )
         )
     )
 )
@@ -238,11 +250,12 @@ procedure(_ResolvePlain(t_s "t")  ; -> any
     )
 )
 
-procedure(_ParseScalarText(t_text "t")  ; -> any
+procedure(_ParseScalarText(t_text n_line "tx")  ; -> any
     ; 解析已去注释的单行标量文本。
     ;
     ; **参数**
     ;   t_text  (str) - 行内标量文本
+    ;   n_line  (int) - 行号（错误消息）
     ;
     ; **返回**
     ;   (any) - 标量值；引号未闭合或非法转义报错
@@ -258,9 +271,9 @@ procedure(_ParseScalarText(t_text "t")  ; -> any
         )
         if(_Code(t_text i) == 34 || _Code(t_text i) == 39
         then
-            q = _ParseQuoted(t_text i 1)
+            q = _ParseQuoted(t_text i n_line)
             when(_Rtrim(_Tail(t_text cadr(q))) != ""
-                _ErrorLine("unexpected characters after quoted scalar" 1 cadr(q))
+                _ErrorLine("unexpected characters after quoted scalar" n_line cadr(q))
             )
             return(car(q))
         else
@@ -386,7 +399,12 @@ procedure(_ParseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
                 (c == 43 chomp = 1)
                 (c == 45 chomp = -1)
                 (c >= 49 && c <= 57 hint = c - 48)
-                (c == 32 || c == 9 i = len + 1)
+                (c == 32 || c == 9
+                    when(_Rtrim(substring(t_header i + 1 length(t_header) - i)) != ""
+                        _ErrorLine("unexpected characters after block scalar header" n_line n_col)
+                    )
+                    i = len + 1
+                )
                 (t _ErrorLine("invalid block scalar header" n_line n_col))
             )
             i++
@@ -397,17 +415,26 @@ procedure(_ParseBlockScalar(l_lines n_pos n_parentIndent t_header n_line n_col "
         stop = nil
         while(!stop && last <= length(l_lines)
             line = _Nth1(last l_lines)
-            ind = _LineIndent(line last)
+            ind = 0
+            while(ind < length(line) && _Code(line ind + 1) == 32
+                ind++
+            )
             when(_Rtrim(line) == ""
                 raw = tconc(raw "")
                 last++
             )
             unless(stop || _Rtrim(line) == ""
+                when(content == nil && _Code(line ind + 1) == 9
+                    _ErrorLine("tab character in indentation" last ind + 1)
+                )
                 when(content == nil
                     content = if(hint > 0 n_parentIndent + hint ind)
                 )
                 cond(
                     (ind < content
+                        when(_Code(line ind + 1) == 9
+                            _ErrorLine("tab character in indentation" last ind + 1)
+                        )
                         stop = t
                     )
                     (t

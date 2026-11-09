@@ -130,20 +130,32 @@ procedure(_ParseInlineTable(t_s n_i n_depth n_max "txxx")  ; -> list
         obj = _NewTable()
         meta = _MetaNew()
         n_i = _SkipWs(t_s n_i + 1 nil nil)
+        when(_Code(t_s n_i) == 10
+            _Error(t_s n_i "newline in inline table")
+        )
         done = nil
         when(_Code(t_s n_i) == 125
             done = t
             n_i++
         )
         while(!done
+            when(_Code(t_s n_i) == 10
+                _Error(t_s n_i "newline in inline table")
+            )
             key = n_i
             r = _ParseKeyPath(t_s n_i)
             path = car(r)
             n_i = _SkipWs(t_s cadr(r) nil nil)
+            when(_Code(t_s n_i) == 10
+                _Error(t_s n_i "newline in inline table")
+            )
             unless(_Code(t_s n_i) == 61
                 _Error(t_s n_i "expected '='")
             )
             n_i = _SkipWs(t_s n_i + 1 nil nil)
+            when(_Code(t_s n_i) == 10
+                _Error(t_s n_i "newline in inline table")
+            )
             v = _ParseValue(t_s n_i n_depth + 1 n_max)
             _AssignValue(t_s meta nil obj path car(v) key n_max)
             n_i = _SkipWs(t_s cadr(v) nil nil)

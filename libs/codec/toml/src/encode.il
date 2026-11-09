@@ -229,7 +229,7 @@ procedure(_EncodeTable(g_obj n_depth g_opt "gxg")  ; -> str
         foreach(key keys
             p = tconc(p
                 lsprintf("%s = %s"
-                    _KeyRender(key)
+                    _KeyRender(_KeyStr(key g_opt))
                     _EncodeValue(g_obj[key] n_depth + 1 g_opt)
                 )
             )

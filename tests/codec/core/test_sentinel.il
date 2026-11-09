@@ -15,6 +15,8 @@ _Assert(ycCodec::Missing->toSkill() == 'unbound  "sentinel: Missing toSkill is u
 _AssertError(lambda(() ycCodec::Type("xml"))  "sentinel: unknown Type name errors")
 _AssertError(lambda(() ycCodec::Type(42))  "sentinel: integer Type name errors")
 _AssertError(lambda(() ycCodec::Type(1.5))  "sentinel: float Type name errors")
+_AssertError(lambda(() makeInstance('ycCodec::Type ?_data makeInstance('ycCodec::_TypeData ?name "True")))  "sentinel: bypassing constructor is rejected")
+_AssertError(lambda(() makeInstance('ycCodec::Type ?_data makeInstance('ycCodec::_TypeData ?name "xml")))  "sentinel: unknown name via makeInstance is rejected")
 
 ; --- 打印 ---
 _Assert(printself(ycCodec::True) == "ycCodec::Type(\"True\")"  "sentinel: True printself format")

@@ -19,7 +19,7 @@ Cadence SKILL++ 编解码库共享的哨兵类型库：统一表示 `true`、`fa
 ; 哨兵与原生值
 ycCodec::True->toSkill()                             ; => t
 ycCodec::False->toSkill()                            ; => nil
-ycCodec::Null->toSkill()                             ; => unbound
+ycCodec::Null->toSkill()                             ; => 'unbound
 
 ; 相同规范名返回同一实例
 ycCodec::Type("TRUE") == ycCodec::True               ; => t
@@ -41,7 +41,7 @@ ycCodec::Type(t_name)
 
 **描述**
 
-构造哨兵对象（`true`/`false`/`null` 与缺键标记 `missing` 的库内表示）：`t_name` 接受任意大小写，返回规范名对应的**唯一实例**——相同参数总是同一对象，可直接用 `==` 比较。规范名随实例显示为 `"True"`、`"False"`、`"Null"`、`"Missing"`。
+构造哨兵对象（`true`/`false`/`null` 与缺键标记 `missing` 的库内表示）：`t_name` 接受任意大小写，返回规范名对应的**唯一实例**——相同参数总是同一对象，可直接用 `==` 比较。规范名随实例显示为 `"True"`、`"False"`、`"Null"`、`"Missing"`；显示串由 `printself` 生成，可直接重新求值得到同一实例。哨兵只能经本构造器创建，绕过构造器会以 `error()` 中断。
 
 **参数**
 
@@ -94,7 +94,7 @@ inst->toSkill()
 ```lisp
 ycCodec::True->toSkill()                       ; => t
 ycCodec::False->toSkill()                      ; => nil
-ycCodec::Null->toSkill()                       ; => unbound
+ycCodec::Null->toSkill()                       ; => 'unbound
 ```
 
 ### ycCodec::True <sub>`constant`</sub>

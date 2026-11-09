@@ -1,4 +1,4 @@
-_TestRun("ycCodec" 16
+_TestRun("ycCodec" 18
     "test_sentinel.il"
 )
 

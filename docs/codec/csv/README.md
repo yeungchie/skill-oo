@@ -183,7 +183,7 @@ row(g_row)
 => list[str]
 ```
 
-返回第 `g_row` 行（1-based）。行号非整数或越界时以 `error()` 中断。
+返回第 `g_row` 行的副本（1-based），可自由修改。行号非整数或越界时以 `error()` 中断。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -326,7 +326,7 @@ apple,3
 **例程**
 
 ```lisp
-res = ycCsv::Decode(csv ?header t)
+res = ycCsv::Decode(csv_header ?header t)
 res->render()
 ; => name   qty
 ;    -----  ---
@@ -388,7 +388,7 @@ ycCsv::Decode(
 
 **描述**
 
-解码 CSV/TSV 文本为 `Table`。`?format "csv"`（默认）以逗号为分隔符，`"tsv"` 以制表符为分隔符；`?delimiter` 可覆盖为任意单字节字符（不能是引号、CR、LF）。`?header t` 取首条记录作列名（`?skipEmpty t` 时取首条非空记录），`?header list` 使用给定列名，默认 `nil` 表示无表头。`?skipEmpty t` 跳过“单个空字段”的记录；`?stripBom` 默认 `t`，剥离开头 UTF-8 BOM。字段仅当以 `"` 开头时按引号规则解析；引号内 `""` 表示一个 `"`，可含分隔符与换行。空文本返回空 Table；行尾只作记录终止符，不额外产生空记录。
+解码 CSV/TSV 文本为 `Table`。`?format "csv"`（默认）以逗号为分隔符，`"tsv"` 以制表符为分隔符；`?delimiter` 可覆盖为任意单字节字符（不能是引号、CR、LF）。`?header t` 取首条记录作列名（`?skipEmpty t` 时取首条解码后不是单个空字段的记录），`?header list` 使用给定列名，默认 `nil` 表示无表头。`?skipEmpty t` 跳过“单个空字段”的记录；`?stripBom` 默认 `t`，剥离开头 UTF-8 BOM。字段仅当以 `"` 开头时按引号规则解析；引号内 `""` 表示一个 `"`，可含分隔符与换行。空文本返回空 Table；行尾只作记录终止符，不额外产生空记录。
 
 **参数**
 
@@ -396,7 +396,7 @@ ycCsv::Decode(
 | --- | --- | --- | --- |
 | t_str | str | | 输入文本 |
 | ?format t_format | str | "csv" | `"csv"` 或 `"tsv"`；其他值以 `error()` 中断 |
-| ?header l_header | t / list[str] / nil | nil | `t` 首行作表头（`?skipEmpty t` 时为首个非空行）；列表使用给定列名；`nil` 无表头 |
+| ?header l_header | t / list[str] / nil | nil | `t` 首行作表头（`?skipEmpty t` 时为首条非单空字段记录）；列表使用给定列名；`nil` 无表头 |
 | ?delimiter t_delimiter | str / nil | nil | 单字节分隔符覆盖；默认逗号或制表符 |
 | ?skipEmpty g_skipEmpty | t / nil | nil | t 时跳过单空字段记录 |
 | ?stripBom g_stripBom | t / nil | t | t 时剥离开头 UTF-8 BOM |
@@ -560,7 +560,7 @@ ycCsv::Encode(ycCsv::Table(list(list("a"))) ?eol "\r")
 
 ## 表头与缺位
 
-+ `?header t` 时首条记录为表头（`?skipEmpty t` 时为首条非空记录）；只有表头时返回 0 行、`columnCount()` 等于列名数的 Table。
++ `?header t` 时首条记录为表头（`?skipEmpty t` 时为首条解码后不是单个空字段的记录）；只有表头时返回 0 行、`columnCount()` 等于列名数的 Table。
 + `?header list` 时全部记录都是数据；空文本返回仅含表头的 0 行 Table。
 + 列名重复以 `error()` 中断；空列名允许，但必须唯一。
 + 有表头时，记录字段数超过列名数会以 `error()` 中断；短行合法，`cell()` / `columnAt()` / `value()` 返回 `ycCodec::Missing`。

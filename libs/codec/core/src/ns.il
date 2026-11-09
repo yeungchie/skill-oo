@@ -11,6 +11,8 @@ addToNamespace("ycCodec"
         Null  ; var
         Missing  ; var
         _TypeCache  ; var
+        _TypeCanon  ; proc
+        _TypeClaim  ; proc
     ))
 )
 unuseNamespace("ycCodec")

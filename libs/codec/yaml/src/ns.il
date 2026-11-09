@@ -8,6 +8,7 @@ addToNamespace("ycYaml"
         _DecodeStream  ; proc
         _DecodeText  ; proc
         _FindKeyColon  ; proc
+        _InnerMessage  ; proc
         _MergeInto  ; proc
         _ParseBlock  ; proc
         _ParseChild  ; proc
@@ -46,6 +47,7 @@ addToNamespace("ycYaml"
         _LineIndent  ; proc
         _Ltrim  ; proc
         _Nth1  ; proc
+        _QuoteStart  ; proc
         _Rtrim  ; proc
         _SplitLines  ; proc
         _StripComment  ; proc

@@ -17,7 +17,7 @@ procedure(_AssertDumpEq(g_a g_b t_msg "ggt")  ; -> t | nil
     )
 )
 
-_TestRun("ycYaml" 187
+_TestRun("ycYaml" 211
     "test_decode.il"
     "test_encode.il"
 )

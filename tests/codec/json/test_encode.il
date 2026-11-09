@@ -133,6 +133,8 @@ let((v item)
 _Assert(ycJson::Encode(ycCodec::True) == "true"  "encode: True -> true")
 _Assert(ycJson::Encode("x" ?format "jsonc") == "\"x\""  "encode: jsonc format behaves as json")
 _Assert(ycJson::Encode(list(1) ?format "jsonl") == "1\n"  "encode: jsonl format dispatch")
+_Assert(ycJson::Encode(list(list(1 2)) ?format "jsonl" ?indent 2) == strcat("[1,2]" intToChar(10))  "encode: jsonl ignores indent")
+_AssertDumpEq(ycJson::Decode(ycJson::Encode(list(list(1 2)) ?format "jsonl" ?indent 2) ?format "jsonl") list(list(1 2))  "encode: jsonl indent roundtrip")
 _AssertErrorMsg(lambda(() ycJson::Encode(1 ?format "xml")) "unknown format"  "encode: unknown format errors")
 _TestChildDone = t
 

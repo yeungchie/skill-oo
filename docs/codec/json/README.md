@@ -142,7 +142,7 @@ ycJson::Decode(jsonc ?format "jsonc")             ; => <table: a = 1>
 ycJson::Decode(jsonc_array ?format "jsonc")       ; => (1 2)
 ycJson::Decode(jsonl_values ?format "jsonl")      ; => (1 2)
 ycJson::Decode(jsonl_bad ?format "jsonl")
-; *Error* ycJson::Decode: invalid literal at line 3, column 1
+; *Error* ycJson::Decode: unexpected character at line 3, column 1
 
 ycJson::Decode("1" ?format "xml")
 ; *Error* ycJson::Decode: unknown format "xml"

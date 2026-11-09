@@ -24,11 +24,12 @@ procedure(_IndentStr(n_level n_indent "xx")  ; -> str
     )
 )
 
-procedure(_PlainSafe(t_s "t")  ; -> t | nil
+procedure(_PlainSafe(t_s \@key (flow nil) "tg")  ; -> t | nil
     ; 判断字符串能否安全地作为普通标量输出（不改变类型）。
     ;
     ; **参数**
-    ;   t_s  (str) - 待检查字符串
+    ;   t_s    (str) - 待检查字符串
+    ;   ?flow  (t|nil) - t 时额外拒绝流式分隔符 `,`/`[`/`]`/`{`/`}`
     ;
     ; **返回**
     ;   (t|nil) - 可安全输出为 t
@@ -65,6 +66,9 @@ procedure(_PlainSafe(t_s "t")  ; -> t | nil
                     bad = t
                 )
                 (c == 58 && i2 < len && (_Code(t_s i2 + 1) == 32 || _Code(t_s i2 + 1) == 9)
+                    bad = t
+                )
+                (flow && or(c == 44 c == 91 c == 93 c == 123 c == 125)
                     bad = t
                 )
             )
@@ -126,12 +130,13 @@ procedure(_EncodeString(t_s "t")  ; -> str
     )
 )
 
-procedure(_EncodeKey(g_key g_opt "gg")  ; -> str
+procedure(_EncodeKey(g_key g_opt \@key (flow nil) "ggg")  ; -> str
     ; 将 table 键转为 YAML 映射键文本。
     ;
     ; **参数**
     ;   g_key  (any) - 键值
     ;   g_opt  (table) - 编码选项
+    ;   ?flow  (t|nil) - t 时按流式规则引用键
     ;
     ; **返回**
     ;   (str) - 键文本
@@ -149,7 +154,7 @@ procedure(_EncodeKey(g_key g_opt "gg")  ; -> str
         )
         cond(
             (fixp(g_key) item)
-            (_PlainSafe(item) && !pcreMatchp("[ 	]" item) item)
+            (_PlainSafe(item ?flow flow) && !pcreMatchp("[ 	]" item) item)
             (t _EncodeString(item))
         )
     )
@@ -184,12 +189,13 @@ procedure(_NumText(n_num "n")  ; -> str
     )
 )
 
-procedure(_EncodeScalar(g_val g_opt "gg")  ; -> str
+procedure(_EncodeScalar(g_val g_opt \@key (flow nil) "ggg")  ; -> str
     ; 输出标量值。
     ;
     ; **参数**
     ;   g_val  (any) - 标量
     ;   g_opt  (table) - 编码选项
+    ;   ?flow  (t|nil) - t 时按流式规则引用字符串
     ;
     ; **返回**
     ;   (str) - 标量文本
@@ -202,7 +208,7 @@ procedure(_EncodeScalar(g_val g_opt "gg")  ; -> str
             error("ycYaml::Encode: cannot dump the Missing marker")
         )
         (stringp(g_val)
-            if(_PlainSafe(g_val)
+            if(_PlainSafe(g_val ?flow flow)
                 g_val
                 _EncodeString(g_val)
             )
@@ -230,7 +236,7 @@ procedure(_EncodeFlow(g_val n_level g_opt "gxg")  ; -> str
     cond(
         (g_val == nil "[]")
         (tablep(g_val)
-            prog((keys p orig ks)
+            prog((keys p orig ks ksList)
                 when(length(g_val) == 0
                     return("{}")
                 )
@@ -240,20 +246,25 @@ procedure(_EncodeFlow(g_val n_level g_opt "gxg")  ; -> str
                 )
                 keys = car(keys)
                 orig = makeTable("ycYamlKeys" ycCodec:::Missing)
-                p = nil
+                ksList = nil
                 foreach(k keys
-                    ks = _EncodeKey(k g_opt)
+                    ks = _EncodeKey(k g_opt ?flow t)
                     when(orig[ks] != ycCodec:::Missing
                         error("ycYaml::Encode: duplicate mapping key %A after encoding" ks)
                     )
                     orig[ks] = k
+                    ksList = tconc(ksList ks)
+                )
+                ksList = car(ksList)
+                when(g_opt["sortKeys"]
+                    ksList = sort(copy(ksList) 'alphalessp)
+                )
+                p = nil
+                foreach(ks ksList
                     p = tconc(p lsprintf("%s: %s"
                         ks
-                        _EncodeFlow(g_val[k] n_level + 1 g_opt)
+                        _EncodeFlow(g_val[orig[ks]] n_level + 1 g_opt)
                     ))
-                )
-                when(g_opt["sortKeys"]
-                    p = sort(car(p) 'alphalessp)
                 )
                 return(lsprintf("{%s}" _JoinBuild(p ", ")))
             )
@@ -267,7 +278,7 @@ procedure(_EncodeFlow(g_val n_level g_opt "gxg")  ; -> str
             )
         )
         (t
-            _EncodeScalar(g_val g_opt)
+            _EncodeScalar(g_val g_opt ?flow t)
         )
     )
 )

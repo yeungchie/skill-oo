@@ -255,7 +255,7 @@ procedure(_Number(t_s n_i "tx")  ; -> list
         when(_Code(t_s k) == 46
             k++
             unless(_Digitp(_Code(t_s k))
-                _Error(t_s n_i "invalid number")
+                _Error(t_s if(k <= len k len) "invalid number")
             )
             while(k <= len && _Digitp(_Code(t_s k))
                 k++
@@ -269,7 +269,7 @@ procedure(_Number(t_s n_i "tx")  ; -> list
                 k++
             )
             unless(_Digitp(_Code(t_s k))
-                _Error(t_s n_i "invalid number")
+                _Error(t_s if(k <= len k len) "invalid number")
             )
             while(k <= len && _Digitp(_Code(t_s k))
                 k++

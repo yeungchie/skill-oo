@@ -37,7 +37,7 @@ procedure(_NestArrayValue(n_n "n")  ; -> any（n 层嵌套 list 包裹 1）
     )
 )
 
-_TestRun("ycJson" 230
+_TestRun("ycJson" 235
     "test_decode.il"
     "test_encode.il"
     "test_variants.il"

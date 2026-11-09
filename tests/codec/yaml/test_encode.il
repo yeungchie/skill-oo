@@ -27,6 +27,17 @@ _Assert(ycYaml::Encode("a\nb") == "\"a\\nb\"\n"  "encode: newline escaped")
 _Assert(ycYaml::Encode("中") == "中\n"  "encode: unicode passes through")
 _AssertError(lambda(() ycYaml::Encode('foo))  "encode: symbol errors")
 
+; --- 流式转义与排序 ---
+_Assert(ycYaml::Encode(list("a,b") ?flow t) == "[\"a,b\"]\n"  "encode: flow quotes comma")
+_Assert(car(ycYaml::Decode(ycYaml::Encode(list("a,b") ?flow t))) == "a,b"  "encode: flow comma roundtrip")
+_Assert(car(ycYaml::Decode(ycYaml::Encode(list("a]b") ?flow t))) == "a]b"  "encode: flow bracket roundtrip")
+let((v)
+    v = makeTable("ycTest")
+    v["a"] = 1
+    v["a!"] = 2
+    _Assert(ycYaml::Encode(v ?flow t ?sortKeys t) == "{a: 1, a!: 2}\n"  "encode: flow sortKeys uses key text")
+)
+
 ; --- 序列输出 ---
 _Assert(ycYaml::Encode(nil) == "[]\n"  "encode: empty sequence")
 _Assert(ycYaml::Encode(list(1 2)) == "- 1\n- 2\n"  "encode: sequence")

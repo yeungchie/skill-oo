@@ -113,7 +113,7 @@ defmethod(initializeInstance (self(Table) \@rest _args)
         unless(fixp(g_row) && 1 <= g_row && g_row <= length(self->_data->rows)
             error("%A->row: row index %A out of range" className(self) g_row)
         )
-        nth(g_row - 1 self->_data->rows)
+        copy(nth(g_row - 1 self->_data->rows))
     )
 
     self->cell = lambda((g_row g_col "gg")  ; -> str | any
@@ -180,6 +180,9 @@ defmethod(initializeInstance (self(Table) \@rest _args)
         )
         unless(stringp(g_name)
             error("%A->value: column name must be a string" className(self))
+        )
+        unless(fixp(g_row) && 1 <= g_row && g_row <= length(self->_data->rows)
+            error("%A->value: row index %A out of range" className(self) g_row)
         )
         let((col)
             col = self->_data->index[g_name]

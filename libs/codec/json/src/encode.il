@@ -306,6 +306,8 @@ procedure(Encode(g_val \@key (format "json") (indent nil) (sortKeys nil) (strict
                     error("ycJson::Encode: format \"jsonl\" expects a list")
                 )
                 let((p item)
+                    ; jsonl 每条记录必须单行，?indent 不参与
+                    opt["indent"] = 0
                     p = nil
                     foreach(item2 g_val
                         p = tconc(p _EncodeValue(item2 0 opt))

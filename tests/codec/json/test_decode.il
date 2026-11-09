@@ -139,6 +139,9 @@ _AssertErrorMsg(lambda(() ycJson::Decode("\n\nx")) "line 3, column 1"  "decode: 
 _AssertErrorMsg(lambda(() ycJson::Decode("[1,\n2\n,x]")) "line 3, column 2"  "decode: array error position")
 _AssertErrorMsg(lambda(() ycJson::Decode("{\"a\": 1,\n \"b\" 2}")) "line 2, column 6"  "decode: object error position")
 _AssertErrorMsg(lambda(() ycJson::Decode("\"abc")) "unterminated string"  "decode: unterminated string message")
+_AssertErrorMsg(lambda(() ycJson::Decode("1.")) "column 2"  "decode: decimal error points at the dot")
+_AssertErrorMsg(lambda(() ycJson::Decode("1e")) "column 2"  "decode: exponent error points at the marker")
+_AssertErrorMsg(lambda(() ycJson::Decode("01")) "column 2"  "decode: leading zero points at the digit")
 
 ; --- 类型校验 ---
 _AssertError(lambda(() ycJson::Decode(5))  "decode: rejects non-string input")

@@ -7,6 +7,22 @@ useNamespace("ycCodec")
 
 ; ---------- 类型 ----------
 
+procedure(_TypeCanon(t_name "t")  ; -> str | nil
+    ; 把大小写不敏感的规范名折叠为 "True"/"False"/"Null"/"Missing"。
+    ;
+    ; **参数**
+    ;   t_name  (str) - 类型名
+    ;
+    ; **返回**
+    ;   (str|nil) - 规范名；非四名之一时为 nil
+    cond(
+        (pcreMatchp("(?i)^true\\z" t_name) "True")
+        (pcreMatchp("(?i)^false\\z" t_name) "False")
+        (pcreMatchp("(?i)^null\\z" t_name) "Null")
+        (pcreMatchp("(?i)^missing\\z" t_name) "Missing")
+    )
+)
+
 defclass(_TypeData () (
     ; _TypeData 数据桶：收纳规范名（"True"/"False"/"Null"/"Missing"），构造后禁写。
     name(
@@ -35,14 +51,17 @@ defmethod(printself (self(Type))  ; -> str
 
 inScheme(
 defmethod(initializeInstance (self(Type) \@rest _args)
-    ; 构造 Type 实例时安装方法集：toSkill。
+    ; 构造 Type 实例时安装方法集：toSkill；并拒绝绕过 ycCodec::Type 的伪哨兵。
     ;
     ; **参数**
     ;   _args  (list) - 变参：附加初始化参数，本实现忽略
     ;
     ; **返回**
-    ;   (t) - 安装 toSkill 后返回 t
-    self->toSkill = lambda(()  ; -> any
+    ;   (t) - 安装 toSkill 后返回 t；非规范名或重复构造以 error() 中断
+    let((name)
+        name = when(self->_data self->_data->name)
+        _TypeClaim(name)
+        self->toSkill = lambda(()  ; -> any
         ; 转换为 SKILL 原生值：True→t、False→nil、Null/Missing→'unbound。
         ;
         ; **返回**
@@ -56,13 +75,31 @@ defmethod(initializeInstance (self(Type) \@rest _args)
                 error("%A->toSkill: unknown type name %A" className(self) self->_data->name)
             )
         )
+        )
+        t
     )
-    t
 )
 )
 
 ; Type 实例驻留表：规范名 → 唯一实例（固定四键，无需容量上限）。
 _TypeCache = makeTable("typeCache" nil)
+
+procedure(_TypeClaim(t_name "t")  ; -> t
+    ; 构造 Type 实例前的准入检查：名字须为规范名且尚无驻留实例。
+    ;
+    ; **参数**
+    ;   t_name  (str) - 类型名
+    ;
+    ; **返回**
+    ;   (t) - 允许构造；非规范名或已有实例时以 error() 中断
+    let((canon)
+        canon = when(stringp(t_name) _TypeCanon(t_name))
+        unless(canon && _TypeCache[canon] == nil
+            error("ycCodec::Type: sentinels must be created with ycCodec::Type")
+        )
+        t
+    )
+)
 
 procedure(Type(t_name "t")  ; -> Type
     ; 取回/构造哨兵唯一实例：大小写不敏感接受 true/false/null/missing 四名。
@@ -76,12 +113,7 @@ procedure(Type(t_name "t")  ; -> Type
         unless(stringp(t_name)
             error("ycCodec::Type: unknown type name %A" t_name)
         )
-        canon = cond(
-            (pcreMatchp("(?i)^true\\z" t_name) "True")
-            (pcreMatchp("(?i)^false\\z" t_name) "False")
-            (pcreMatchp("(?i)^null\\z" t_name) "Null")
-            (pcreMatchp("(?i)^missing\\z" t_name) "Missing")
-        )
+        canon = _TypeCanon(t_name)
         unless(canon
             error("ycCodec::Type: unknown type name %A" t_name)
         )

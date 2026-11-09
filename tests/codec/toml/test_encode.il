@@ -3,7 +3,7 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-let((v a2 b out)
+let((v a2 b out inner)
     v = _Table()
     _Assert(ycToml::Encode(v) == ""  "encode: empty root")
 
@@ -59,6 +59,12 @@ let((v a2 b out)
     v = _Table()
     v["a"] = list(1 _Table())
     _Assert(ycToml::Encode(v) == "a = [1, {}]\n"  "encode: inline table in mixed array")
+
+    inner = _Table()
+    inner['sym] = 1
+    v = _Table()
+    v["arr"] = list(1 inner)
+    _Assert(ycToml::Encode(v) == "arr = [1, { sym = 1 }]\n"  "encode: inline table stringifies symbol keys")
 
     v = _Table()
     v["s"] = "a\"b\\c\n\t"
