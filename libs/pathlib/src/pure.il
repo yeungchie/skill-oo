@@ -300,7 +300,7 @@ self->match = lambda((t_pattern "t")  ; -> t | nil
 
 self->expandUser = lambda((\@key check "g")  ; -> Path
     ; 展开首部件的 "~" 或 "~user"（当前用户或指定用户的主目录），其余形式原样返回。
-    ; 只做路径处理，默认不检查展开结果是否存在。
+    ; 只做路径处理：默认不检查展开结果是否存在，也不输出用户库查询提示。
     ;
     ; **参数**
     ;   ?check  (t|nil) - 校验展开结果存在，缺失走 _error() 中断（默认 nil）
@@ -338,7 +338,9 @@ self->expandUser = lambda((\@key check "g")  ; -> Path
             (first && substring(first 1 1) == "~"
                 let((userName userHome home rest result)
                     userName = substring(first 2)
-                    userHome = car(errset(simplifyFilename(first) nil))
+                    ; 用户库查不到时 simplifyFilename 会报错并带一条提示，这里一并屏蔽，
+                    ; 保持「只处理路径、默认不检查」的语义。
+                    userHome = car(muffleWarnings(errset(simplifyFilename(first) nil)))
                     when(userHome == nil || userHome == ""
                         home = getShellEnvVar("HOME")
                         when(home == nil || home == ""
