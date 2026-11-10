@@ -28,7 +28,11 @@ let((res path dir)
         )
         loadi(strcat(dir "../../libs/pathlib/load.il"))
     )
-    when(findNamespace("ycUnits") == nil
+    unless(and(
+            findNamespace("ycUnits")
+            findSymbol("Parse" ?namespace "ycUnits")
+            fboundp(findSymbol("Parse" ?namespace "ycUnits"))
+        )
         loadi(strcat(dir "../../libs/units/load.il"))
     )
     _TestDir = dir

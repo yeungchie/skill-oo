@@ -28,7 +28,11 @@ let((res path dir)
         )
         loadi(strcat(dir "../../libs/pathlib/load.il"))
     )
-    when(findNamespace("ycGeom") == nil
+    unless(and(
+            findNamespace("ycGeom")
+            findSymbol("Point" ?namespace "ycGeom")
+            fboundp(findSymbol("Point" ?namespace "ycGeom"))
+        )
         loadi(strcat(dir "../../libs/geom/load.il"))
     )
     _TestDir = dir

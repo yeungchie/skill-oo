@@ -35,7 +35,11 @@ ycNamespace:::Require("ycIO")
 unless(fboundp('ycIO:::Open)
     loadi(strcat(_TestIODir "../../libs/io/load.il"))
 )
-unless(findNamespace("ycLang")
+unless(and(
+        findNamespace("ycLang")
+        findSymbol("_ycWithHas" ?namespace "ycLang")
+        fboundp(findSymbol("_ycWithHas" ?namespace "ycLang"))
+    )
     loadi(strcat(_TestIODir "../../libs/lang/load.il"))
 )
 _TestDir = _TestIODir

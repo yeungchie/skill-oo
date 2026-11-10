@@ -18,7 +18,11 @@ let((res path dir)
     unless(pcreMatchp("/$" dir)
         dir = strcat(dir "/")
     )
-    if(findNamespace("ycString") == nil
+    unless(and(
+            findNamespace("ycString")
+            findSymbol("Split" ?namespace "ycString")
+            fboundp(findSymbol("Split" ?namespace "ycString"))
+        )
         ; libs/string/load.il relies on ycPathLib; when ycPathLib is absent,
         ; enter through libs/load.il so the bootstrap order is respected.
         if(and(

@@ -37,7 +37,11 @@ let((res path dir dtReady)
         loadi(strcat(dir "isolated.il"))
         loadi(strcat(dir "../../libs/datetime/load.il"))
     )
-    unless(findNamespace("ycLang")
+    unless(and(
+            findNamespace("ycLang")
+            findSymbol("_ycWithHas" ?namespace "ycLang")
+            fboundp(findSymbol("_ycWithHas" ?namespace "ycLang"))
+        )
         loadi(strcat(dir "../../libs/lang/load.il"))
     )
     unless(and(
