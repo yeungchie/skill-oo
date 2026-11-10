@@ -299,11 +299,11 @@ self->match = lambda((t_pattern "t")  ; -> t | nil
 )
 
 self->expandUser = lambda(()  ; -> Path
-    ; 展开首部件的 "~"（用户主目录），其余形式原样返回。
+    ; 展开首部件的 "~" 或 "~user"（当前用户或指定用户的主目录），其余形式原样返回。
     ;
     ; **返回**
-    ;   (Path) - "~" 与 "~/..." 展开为 HOME；绝对路径、"." 及普通路径返回自身；
-    ;            "~other" 形式、HOME 未设置或为空串，走 _error() 中断
+    ;   (Path) - "~" 与 "~/..." 展开为当前用户 HOME；"~user" 与 "~user/..." 展开为该用户主目录；
+    ;            绝对路径、"." 及普通路径返回自身；用户不存在、HOME 未设置或为空串，走 _error() 中断
     let((first)
         first = self->_data->parts && car(self->_data->parts)
         cond(
@@ -324,7 +324,18 @@ self->expandUser = lambda(()  ; -> Path
                 )
             )
             (first && substring(first 1 1) == "~"
-                _error("expandUser" "user home directories are not supported: '%s'" first)
+                let((userHome rest)
+                    userHome = car(errset(simplifyFilename(first) nil))
+                    when(userHome == nil || userHome == ""
+                        _error("expandUser" "home directory of user '%s' is not known"
+                            substring(first 2))
+                    )
+                    rest = cdr(self->_data->parts)
+                    if(rest == nil
+                        Path(userHome)
+                        Path(lsprintf("%s/%s" userHome buildString(rest "/")))
+                    )
+                )
             )
             (t
                 self

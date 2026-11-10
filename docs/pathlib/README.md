@@ -574,7 +574,7 @@ p->expandUser()
 
 **描述**
 
-`~` 开头才展开：`~other` 以 `error()` 中断；`HOME` 未设置或为空串以 `error()` 中断。
+`~` 或 `~user` 开头才展开：`~` 使用当前用户的 `HOME`，`~user` 使用该用户的主目录；`HOME` 未设置或为空串、指定用户不存在时以 `error()` 中断。
 
 **参数**
 
@@ -582,15 +582,17 @@ p->expandUser()
 
 **返回值**
 
-`Path` — `~`、`~/...` 展开为 `HOME` 前缀，其余形式原样返回。
+`Path` — `~`、`~/...` 展开为当前用户主目录，`~user`、`~user/...` 展开为指定用户主目录；其余形式原样返回。
 
 **例程**
 
 ```lisp
 ycPathLib::Path("~")->expandUser()->str()    ; => $HOME
 ycPathLib::Path("~/x")->expandUser()->str()  ; => $HOME/x
-ycPathLib::Path("~other")->expandUser()
-; *Error* ycPathLib::Path->expandUser: user home directories are not supported: '~other'
+ycPathLib::Path(strcat("~" getShellEnvVar("USER")))->expandUser()->str()
+; => 当前用户的主目录
+ycPathLib::Path("~no_such_user")->expandUser()
+; *Error* ycPathLib::Path->expandUser: home directory of user 'no_such_user' is not known
 ```
 
 #### 文件系统
@@ -938,7 +940,7 @@ p->rename(g_target)
 
 **描述**
 
-重命名/移动（覆盖已有目标的移动语义）。以 `error()` 中断的情形：`g_target` 非 `str`/`Path`、源不存在、目标为已存在目录、移动后源仍存在或目标缺失。源与目标解析后相同则不做操作。实现经 shell 调用 `mv(1)`，需要 PATH 中存在该命令；路径中的 `~` 会先展开为 HOME。
+重命名/移动（覆盖已有目标的移动语义）。以 `error()` 中断的情形：`g_target` 非 `str`/`Path`、源不存在、目标为已存在目录、移动后源仍存在或目标缺失。源与目标解析后相同则不做操作。实现经 shell 调用 `mv(1)`，需要 PATH 中存在该命令；路径中的 `~` / `~user` 会先展开为对应用户主目录。
 
 **参数**
 
@@ -967,7 +969,7 @@ p->touch()
 
 **描述**
 
-文件不存在则创建；已存在不截断内容并更新修改时间（mtime）；目标为目录以 `error()` 中断。实现经 shell 调用 `touch(1)`，需要 PATH 中存在该命令；路径中的 `~` 会先展开为 HOME。
+文件不存在则创建；已存在不截断内容并更新修改时间（mtime）；目标为目录以 `error()` 中断。实现经 shell 调用 `touch(1)`，需要 PATH 中存在该命令；路径中的 `~` / `~user` 会先展开为对应用户主目录。
 
 **参数**
 
