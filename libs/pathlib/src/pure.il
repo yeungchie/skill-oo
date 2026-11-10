@@ -298,12 +298,12 @@ self->match = lambda((t_pattern "t")  ; -> t | nil
     )
 )
 
-self->expandUser = lambda((\@key check "g")  ; -> Path
+self->expandUser = lambda((\@key checkExists "g")  ; -> Path
     ; 展开首部件的 "~" 或 "~user"（当前用户或指定用户的主目录），其余形式原样返回。
     ; 只做路径处理：默认不检查展开结果是否存在，也不输出用户库查询提示。
     ;
     ; **参数**
-    ;   ?check  (t|nil) - 校验展开结果存在，缺失走 _error() 中断（默认 nil）
+    ;   ?checkExists  (t|nil) - 校验展开结果存在，缺失走 _error() 中断（默认 nil）
     ;
     ; **返回**
     ;   (Path) - "~" 与 "~/..." 展开为当前用户 HOME；"~user" 与 "~user/..." 展开为该用户主目录，
@@ -326,7 +326,7 @@ self->expandUser = lambda((\@key check "g")  ; -> Path
                         Path(home)
                         Path(lsprintf("%s/%s" home buildString(rest "/")))
                     )
-                    when(check
+                    when(checkExists
                         unless(result->exists()
                             _error("expandUser" "expanded path does not exist: %s"
                                 result->str())
@@ -354,7 +354,7 @@ self->expandUser = lambda((\@key check "g")  ; -> Path
                         Path(userHome)
                         Path(lsprintf("%s/%s" userHome buildString(rest "/")))
                     )
-                    when(check
+                    when(checkExists
                         unless(result->exists()
                             _error("expandUser" "expanded path does not exist: %s"
                                 result->str())

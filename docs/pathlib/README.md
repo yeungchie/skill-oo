@@ -569,7 +569,7 @@ ycPathLib::Path(".")->match(".")
 
 ```text
 p->expandUser(
-    [ ?check g_check ]
+    [ ?checkExists g_checkExists ]
 )
 => Path
 ```
@@ -582,7 +582,7 @@ p->expandUser(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?check g_check | t / nil | nil | 展开结果不存在时以 `error()` 中断；仅作用于发生 `~` / `~user` 展开的路径 |
+| ?checkExists g_checkExists | t / nil | nil | 展开结果不存在时以 `error()` 中断；仅作用于发生 `~` / `~user` 展开的路径 |
 
 **返回值**
 
@@ -597,7 +597,7 @@ ycPathLib::Path(strcat("~" getShellEnvVar("USER")))->expandUser()->str()
 ; => 当前用户的主目录
 ycPathLib::Path("~no_such_user")->expandUser()->str()
 ; => $HOME 的父目录/no_such_user（不检查是否存在）
-ycPathLib::Path("~no_such_user")->expandUser(?check t)
+ycPathLib::Path("~no_such_user")->expandUser(?checkExists t)
 ; *Error* ycPathLib::Path->expandUser: expanded path does not exist: /home/no_such_user
 ```
 
