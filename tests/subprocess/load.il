@@ -18,10 +18,18 @@ let((res path dir)
     unless(pcreMatchp("/$" dir)
         dir = strcat(dir "/")
     )
-    if(findNamespace("ycSubProcess") == nil
+    unless(and(
+            findNamespace("ycSubProcess")
+            findSymbol("CreateJob" ?namespace "ycSubProcess")
+            fboundp(findSymbol("CreateJob" ?namespace "ycSubProcess"))
+        )
         ; libs/subprocess/load.il relies on ycPathLib; when ycPathLib is absent,
         ; enter through libs/load.il so the bootstrap order is respected.
-        if(findNamespace("ycPathLib")
+        if(and(
+                findNamespace("ycPathLib")
+                findSymbol("Path" ?namespace "ycPathLib")
+                fboundp(findSymbol("Path" ?namespace "ycPathLib"))
+            )
             loadi(simplifyFilename(strcat(dir "../../libs/subprocess/load.il") t))
             loadi(simplifyFilename(strcat(dir "../../libs/load.il") t))
         )

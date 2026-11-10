@@ -21,7 +21,11 @@ let((res path dir)
     if(findNamespace("ycCodec") == nil
         ; libs/codec/core/load.il relies on ycPathLib; when ycPathLib is absent,
         ; enter through libs/load.il so the bootstrap order is respected.
-        if(findNamespace("ycPathLib")
+        if(and(
+                findNamespace("ycPathLib")
+                findSymbol("Path" ?namespace "ycPathLib")
+                fboundp(findSymbol("Path" ?namespace "ycPathLib"))
+            )
             loadi(simplifyFilename(strcat(dir "../../../libs/codec/core/load.il") t))
             loadi(simplifyFilename(strcat(dir "../../../libs/load.il") t))
         )

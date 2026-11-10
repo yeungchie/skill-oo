@@ -21,7 +21,11 @@ let((res path dir)
     if(findNamespace("ycCsv") == nil || findSymbol("Decode" ?namespace "ycCsv") == nil || !fboundp(findSymbol("Decode" ?namespace "ycCsv"))
         ; libs/codec/csv/load.il relies on ycPathLib; when ycPathLib is absent,
         ; enter through libs/load.il so the bootstrap order is respected.
-        if(findNamespace("ycPathLib")
+        if(and(
+                findNamespace("ycPathLib")
+                findSymbol("Path" ?namespace "ycPathLib")
+                fboundp(findSymbol("Path" ?namespace "ycPathLib"))
+            )
             loadi(simplifyFilename(strcat(dir "../../../libs/codec/csv/load.il") t))
             loadi(simplifyFilename(strcat(dir "../../../libs/load.il") t))
         )
@@ -32,10 +36,18 @@ let((res path dir)
 
 let((dir)
     dir = _TestCsvDir
-    unless(findNamespace("ycUtf8")
+    unless(and(
+            findNamespace("ycUtf8")
+            findSymbol("Decode" ?namespace "ycUtf8")
+            fboundp(findSymbol("Decode" ?namespace "ycUtf8"))
+        )
         loadi(simplifyFilename(strcat(dir "../../../libs/utf8/load.il") t))
     )
-    unless(findNamespace("ycTextwrap")
+    unless(and(
+            findNamespace("ycTextwrap")
+            findSymbol("Wrap" ?namespace "ycTextwrap")
+            fboundp(findSymbol("Wrap" ?namespace "ycTextwrap"))
+        )
         loadi(simplifyFilename(strcat(dir "../../../libs/textwrap/load.il") t))
     )
     unless(fboundp('ycTabulate:::Render)

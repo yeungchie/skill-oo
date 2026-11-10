@@ -24,7 +24,11 @@ let((res path dir)
     unless(findNamespace("ycNamespace")
         loadi(strcat(dir "../../libs/registry.il"))
     )
-    unless(findNamespace("ycPathLib")
+    unless(and(
+            findNamespace("ycPathLib")
+            findSymbol("Path" ?namespace "ycPathLib")
+            fboundp(findSymbol("Path" ?namespace "ycPathLib"))
+        )
         loadi(strcat(dir "../../libs/pathlib/load.il"))
     )
     unless(and(

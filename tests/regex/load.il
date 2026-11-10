@@ -18,10 +18,18 @@ let((res path dir)
     unless(pcreMatchp("/$" dir)
         dir = strcat(dir "/")
     )
-    if(findNamespace("ycRegEx") == nil
+    unless(and(
+            findNamespace("ycRegEx")
+            findSymbol("Compile" ?namespace "ycRegEx")
+            fboundp(findSymbol("Compile" ?namespace "ycRegEx"))
+        )
         ; libs/regex/load.il relies on ycPathLib; when ycPathLib is absent,
         ; enter through libs/load.il so the bootstrap order is respected.
-        if(findNamespace("ycPathLib")
+        if(and(
+                findNamespace("ycPathLib")
+                findSymbol("Path" ?namespace "ycPathLib")
+                fboundp(findSymbol("Path" ?namespace "ycPathLib"))
+            )
             loadi(simplifyFilename(strcat(dir "../../libs/regex/load.il") t))
             loadi(simplifyFilename(strcat(dir "../../libs/load.il") t))
         )
