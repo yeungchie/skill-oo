@@ -21,7 +21,11 @@ let((res path dir)
     unless(findNamespace("ycNamespace")
         loadi(strcat(dir "../../libs/registry.il"))
     )
-    if(findNamespace("ycPathLib") == nil
+    unless(and(
+            findNamespace("ycPathLib")
+            findSymbol("Path" ?namespace "ycPathLib")
+            fboundp(findSymbol("Path" ?namespace "ycPathLib"))
+        )
         loadi(strcat(dir "../../libs/pathlib/load.il"))
         printf("ycPathLib: re-running tests with previously loaded code; restart CIW if you edited libs/pathlib/src/\n")
     )

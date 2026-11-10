@@ -509,7 +509,7 @@ p->withSuffix(t_suffix)
 
 **描述**
 
-替换最后一个后缀；`""` 清除后缀；无后缀则追加。非法输入以 `error()` 中断：非空且不以 `.` 开头、等于 `"."`、含 `/` → `Invalid suffix`；self 无名（`.`、`/`）→ `has an empty name`。
+替换最后一个后缀；`""` 清除后缀；无后缀则追加。非法输入以 `error()` 中断：非空且不以 `.` 开头、等于 `"."`、含 `/` → `Invalid suffix`；self 无名（`.`、`/`）→ `has an empty name`；替换后的名称为 `.`（如 `..foo` 配合 `""`）→ `Invalid name '.'`。
 
 **参数**
 
@@ -529,6 +529,8 @@ ycPathLib::Path("a.tar.gz")->withSuffix(".xz") ; => "a.tar.xz"
 ycPathLib::Path("a/b")->withSuffix("")         ; => "a/b"
 ycPathLib::Path("a/b.txt")->withSuffix("c")
 ; *Error* ycPathLib::Path->withSuffix: Invalid suffix 'c'
+ycPathLib::Path("..foo")->withSuffix("")
+; *Error* ycPathLib::Path->withSuffix: Invalid name '.'
 ```
 
 ##### match <sub>`method`</sub>
@@ -540,7 +542,7 @@ p->match(t_pattern)
 
 **描述**
 
-按部件匹配：以 `/` 开头的 pattern 要求锚相等并按整路径部件比较（仅根路径例外，`/` 可与 `**` 对齐）；否则右对齐到部件边界比较；支持 `*`、`?` 与字符类 `[seq]` / `[!seq]`（不跨部件）；大小写敏感；解析后无部件（如 `"."`、`""`）以 `error()` 中断，消息 `empty pattern`。
+按部件匹配：以 `/` 开头的 pattern 要求锚相等并按整路径部件比较；否则右对齐到部件边界比较。支持 `*`、`?`、字符类 `[seq]` / `[!seq]`（均不跨部件），以及整段 `**`——单部件通配且允许匹配空部件，在 `match` 中不表示递归；仅根路径例外：`/` 可与 `**` 对齐。大小写敏感；pattern 锚为空且解析后无部件（如 `"."`、`""`）时以 `error()` 中断，消息 `empty pattern`。
 
 **参数**
 
@@ -909,7 +911,7 @@ p->unlink(
 
 **描述**
 
-删除文件。不存在 → 以 `error()` 中断，`?missingOk t` 静默；目标为目录 → 以 `error()` 中断（不提供递归删除）。
+删除文件。不存在 → 以 `error()` 中断，`?missingOk t` 静默；目标为真实目录 → 以 `error()` 中断（不提供递归删除）；指向目录的符号链接按链接处理：删除链接本体，保留目标目录。
 
 **参数**
 
@@ -936,7 +938,7 @@ p->rename(g_target)
 
 **描述**
 
-重命名/移动（覆盖已有目标的移动语义）。以 `error()` 中断的情形：`g_target` 非 `str`/`Path`、源不存在、目标为已存在目录、移动后源仍存在或目标缺失。源与目标解析后相同则不做操作。
+重命名/移动（覆盖已有目标的移动语义）。以 `error()` 中断的情形：`g_target` 非 `str`/`Path`、源不存在、目标为已存在目录、移动后源仍存在或目标缺失。源与目标解析后相同则不做操作。实现经 shell 调用 `mv(1)`，需要 PATH 中存在该命令；路径中的 `~` 会先展开为 HOME。
 
 **参数**
 
@@ -965,7 +967,7 @@ p->touch()
 
 **描述**
 
-文件不存在则创建；已存在不截断内容并更新修改时间（mtime）；目标为目录以 `error()` 中断。
+文件不存在则创建；已存在不截断内容并更新修改时间（mtime）；目标为目录以 `error()` 中断。实现经 shell 调用 `touch(1)`，需要 PATH 中存在该命令；路径中的 `~` 会先展开为 HOME。
 
 **参数**
 
@@ -993,7 +995,7 @@ p->open(
 
 **描述**
 
-打开文件并返回端口包装；模式 `"r"`（默认）/ `"w"` / `"a"`；其他模式、`"r"` 下目标为目录或文件不存在均以 `error()` 中断。返回对象的方法见 [ycIO](../io/README.md)；需要底层原生 port 时调用 `->port()`。
+打开文件并返回端口包装；模式 `"r"`（默认）/ `"w"` / `"a"`；其他模式、`"r"` 下目标为目录或文件不存在均以 `error()` 中断。打开前需要 ycIO 已加载，未加载时以 `error()` 中断并提示先加载；打开失败统一以 `ycPathLib::Path->open:` 前缀中断。返回对象的方法见 [ycIO](../io/README.md)；需要底层原生 port 时调用 `->port()`。
 
 **参数**
 
@@ -1378,13 +1380,13 @@ p->load([g_password])
 
 **描述**
 
-预检后执行该路径的 SKILL 文件（原生 `load`）。文件内的运行期错误照原生 `load` 外传。
+预检后执行该路径的文件（原生 `load`）。文件内的运行期错误照原生 `load` 外传。`g_password` 仅原样传给原生 `load`；加密文件能否加载由运行环境决定，本库不做额外处理。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_password | str / nil | nil | 加密文件密码；`nil` 表示无密码 |
+| g_password | str / nil | nil | 原样透传给原生 `load` 的密码；`nil` 不传密码 |
 
 **返回值**
 
@@ -1395,7 +1397,7 @@ p->load([g_password])
 ```lisp
 p = ycPathLib::Path("./script.il")
 p->load()            ; 加载脚本
-p->load("secret")    ; 传入密码串
+p->load("secret")    ; 密码原样透传给原生 load
 ```
 
 ##### loadi <sub>`method`</sub>
@@ -1407,13 +1409,13 @@ p->loadi([g_password])
 
 **描述**
 
-预检后执行该路径的 SKILL 文件（原生 `loadi`）。与 `load` 的差别仅在**文件内运行期错误**：`loadi` 打印 `*Error*` 后照常返回，`load` 则外传。
+预检后执行该路径的文件（原生 `loadi`）。与 `load` 的差别仅在**文件内运行期错误**：`loadi` 打印 `*Error*` 后照常返回，`load` 则外传。`g_password` 仅原样传给原生 `loadi`；加密文件能否加载由运行环境决定，本库不做额外处理。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_password | str / nil | nil | 加密文件密码；`nil` 表示无密码 |
+| g_password | str / nil | nil | 原样透传给原生 `loadi` 的密码；`nil` 不传密码 |
 
 **返回值**
 
@@ -1464,10 +1466,10 @@ p->glob(t_pattern)
 按 pattern 匹配直接/递归后代。
 
 + 模式按 `/` 分段，每段按通配符匹配（`*` `?`、字符类 `[seq]`/`[!seq]`，不跨部件）。
-+ `**` 段匹配零级或多级目录；非整段 `**`（如 `a**b`、`**txt`）按单个 `*` 处理；递归不跟随目录符号链接；终端 `**` 产出自身与全部条目（文件、目录、链接目录条目——链接目录只产出不进入）。
++ `**` 段匹配零级或多级目录；非整段 `**`（如 `a**b`、`**txt`）按单个 `*` 处理；`**` 递归不跟随目录符号链接（链接目录只产出条目、不进入），显式段（如 `linkdir/*`）按普通目录处理并跟随符号链接；终端 `**` 产出自身与全部条目（文件、目录、链接目录条目——链接目录只产出不进入）。
 + 点开头的隐藏名与普通名同等待遇：`*`、`**` 均可匹配、可进入。
 + 尾部 `/` 要求匹配项为目录；`..` 段按字面拼接（`p->glob("..")` 产出 `dir/..`）。
-+ 绝对 pattern → 以 `error()` 中断，消息 `ycPathLib: non-relative patterns are unsupported`；解析后无有效段（如空、`.`、`./`）→ 以 `error()` 中断，消息 `ycPathLib: unacceptable pattern: ...`。
++ 绝对 pattern → 以 `error()` 中断，消息 `ycPathLib::Path->glob: non-relative patterns are unsupported`；解析后无有效段（如空、`.`、`./`）→ 以 `error()` 中断，消息 `ycPathLib::Path->glob: unacceptable pattern: ...`。
 + 结果按字符串去重；顺序未定义（确定性但非文件系统返回顺序），比较请按集合。
 
 **参数**
@@ -1496,7 +1498,7 @@ p->rglob(t_pattern)
 
 **描述**
 
-递归版本，语义同 `glob`（规则见上）。等价于 `glob("**/" + t_pattern)`；例外：`rglob("")` 不以 `error()` 中断，等价 `glob("**/")`。
+递归版本，先拼 `**/` 再执行 `glob` 规则（规则见上）。等价于 `glob("**/" + t_pattern)`。因为拼接后总含 `**` 段，`.` / `./` 不会触发「无有效段」错误：`rglob(".")` 等价 `glob("**")`（全部条目）；`rglob("")` 与 `rglob("./")` 等价 `glob("**/")`（仅目录）。
 
 **参数**
 

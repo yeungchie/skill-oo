@@ -241,7 +241,7 @@ procedure(_StrMember(t_str l_list "tl")  ; -> t | nil
     )
 )
 
-ShellQuote.rec = pcreCompile("^[A-Za-z0-9_./:=@%+,^-]+$")
+ShellQuote.rec = pcreCompile("\\A[A-Za-z0-9_./:=@%+,^-]+\\z")
 
 procedure(ShellQuote(t_str "t")  ; -> str
     ; 把串转成可安全拼进 shell 命令的形式。
