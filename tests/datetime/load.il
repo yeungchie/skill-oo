@@ -18,7 +18,11 @@ let((res path dir)
     unless(pcreMatchp("/$" dir)
         dir = strcat(dir "/")
     )
-    if(findNamespace("ycDateTime") == nil
+    unless(and(
+            findNamespace("ycDateTime")
+            findSymbol("Current" ?namespace "ycDateTime")
+            fboundp(findSymbol("Current" ?namespace "ycDateTime"))
+        )
         ; libs/datetime/load.il relies on ycPathLib; when ycPathLib is absent,
         ; enter through libs/load.il so the bootstrap order is respected.
         if(findNamespace("ycPathLib")

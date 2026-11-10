@@ -113,24 +113,28 @@ procedure(_GlobChain(g_dir l_segs "gl")  ; -> list[Path] | nil
     )
 )
 
-procedure(_GlobPattern(g_base t_pattern "gt")  ; -> list[Path] | nil
+procedure(_GlobPattern(g_base t_pattern t_method "gtt")  ; -> list[Path] | nil
     ; 以 g_base 为起点执行 glob pattern：校验、解析、遍历并去重。
     ;
     ; **参数**
     ;   g_base     (Path) - 匹配起点目录
     ;   t_pattern  (str)  - 相对 pattern；尾部 "/" 要求匹配项为目录
+    ;   t_method   (str)  - 调用方方法名（"glob" 或 "rglob"），用于错误消息前缀
     ;
     ; **返回**
     ;   (list[Path]|nil) - 按字符串去重的匹配列表（顺序未定义）；g_base 非目录或无匹配返回 nil；绝对 pattern 抛
-    ;                      "ycPathLib: non-relative patterns are unsupported"；解析后无有效段（如 ""、"."）抛 "ycPathLib: unacceptable pattern"
+    ;                      "<类名>-><方法名>: non-relative patterns are unsupported"；解析后无有效段（如 ""、"."）抛
+    ;                      "<类名>-><方法名>: unacceptable pattern"
     let((parse segs)
         when(pcreMatchp("^/" t_pattern)
-            error("ycPathLib: non-relative patterns are unsupported")
+            error("%A->%s: non-relative patterns are unsupported"
+                className(g_base) t_method)
         )
         parse = _ParsePath(t_pattern)
         segs = cdr(parse)
         when(segs == nil
-            error("ycPathLib: unacceptable pattern: '%s'" t_pattern)
+            error("%A->%s: unacceptable pattern: '%s'"
+                className(g_base) t_method t_pattern)
         )
         when(_EndsWith(t_pattern "/")
             segs = append(segs list(""))
@@ -195,7 +199,7 @@ self->glob = lambda((t_pattern "t")  ; -> list[Path] | nil
     ;
     ; **返回**
     ;   (list[Path]|nil) - 去重后的匹配列表（顺序未定义）；起点非目录或无匹配返回 nil；绝对 pattern 或无有效段 pattern error() 中断
-    _GlobPattern(self t_pattern)
+    _GlobPattern(self t_pattern "glob")
 )
 
 self->rglob = lambda((t_pattern "t")  ; -> list[Path] | nil
@@ -209,7 +213,7 @@ self->rglob = lambda((t_pattern "t")  ; -> list[Path] | nil
     when(pcreMatchp("^/" t_pattern)
         _error("rglob" "non-relative patterns are unsupported")
     )
-    _GlobPattern(self strcat("**/" t_pattern))
+    _GlobPattern(self strcat("**/" t_pattern) "rglob")
 )
 
 ))

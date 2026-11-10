@@ -233,22 +233,24 @@ self->rename = lambda((g_target "g")  ; -> Path
     ; **返回**
     ;   (Path) - 目标路径对应的 Path；g_target 非 string/Path、源不存在、目标是已存在目录、
     ;            或移动后源仍存在或目标缺失，均走 _error() 中断
-    let((p_o src dst)
+    let((p_o p_src p_dst src dst)
         p_o = _AsPath(g_target)
         unless(p_o
             _error("rename" "expected string or Path, got %A" g_target)
         )
-        src = self->str()
-        dst = p_o->str()
-        unless(self->exists() || self->isSymlink()
+        p_src = self->expandUser()
+        p_dst = p_o->expandUser()
+        src = p_src->str()
+        dst = p_dst->str()
+        unless(p_src->exists() || p_src->isSymlink()
             _error("rename" "no such file: '%s'" src)
         )
         unless(simplifyFilename(src) == simplifyFilename(dst)
-            when(p_o->isDir()
+            when(p_dst->isDir()
                 _error("rename" "cannot rename '%s' to '%s'" src dst)
             )
             system(lsprintf("mv %s %s" ShellQuote(src) ShellQuote(dst)))
-            when(self->exists() || self->isSymlink() || !(p_o->exists() || p_o->isSymlink())
+            when(p_src->exists() || p_src->isSymlink() || !(p_dst->exists() || p_dst->isSymlink())
                 _error("rename" "cannot rename '%s' to '%s'" src dst)
             )
         )
@@ -261,13 +263,14 @@ self->touch = lambda(()  ; -> t
     ;
     ; **返回**
     ;   (t) - 成功返回 t；目标是目录、touch 命令失败或文件未生成，走 _error() 中断
-    let((str rc)
-        str = self->str()
-        when(self->isDir()
+    let((p_target str rc)
+        p_target = self->expandUser()
+        str = p_target->str()
+        when(p_target->isDir()
             _error("touch" "is a directory: %s" str)
         )
         rc = system(strcat("touch " ShellQuote(str)))
-        unless(rc == 0 && self->exists()
+        unless(rc == 0 && p_target->exists()
             _error("touch" "cannot touch: %s" str)
         )
         t
@@ -282,10 +285,13 @@ self->open = lambda((\@key mode("r") "t")  ; -> Port
     ;
     ; **返回**
     ;   (Port) - 端口包装；非法模式、"r" 下目标为目录或文件缺失、打开失败，均走 _error() 中断
-    let((str)
+    let((str res)
         str = self->str()
         unless(mode == "r" || mode == "w" || mode == "a"
             _error("open" "invalid mode: '%s'" mode)
+        )
+        unless(fboundp('ycIO:::Open)
+            _error("open" "ycIO is not loaded - load it first")
         )
         when(mode == "r"
             when(self->isDir()
@@ -295,7 +301,11 @@ self->open = lambda((\@key mode("r") "t")  ; -> Port
                 _error("open" "no such file: %s" str)
             )
         )
-        ycIO:::Open(str ?mode mode)
+        res = errset(ycIO:::Open(str ?mode mode) nil)
+        unless(res
+            _error("open" "cannot open: %s" str)
+        )
+        car(res)
     )
 )
 

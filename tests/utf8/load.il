@@ -18,7 +18,11 @@ let((res path dir)
     unless(pcreMatchp("/$" dir)
         dir = strcat(dir "/")
     )
-    if(findNamespace("ycUtf8") == nil
+    unless(and(
+            findNamespace("ycUtf8")
+            findSymbol("Decode" ?namespace "ycUtf8")
+            fboundp(findSymbol("Decode" ?namespace "ycUtf8"))
+        )
         ; libs/utf8/load.il relies on ycPathLib; when ycPathLib is absent,
         ; enter through libs/load.il so the bootstrap order is respected.
         if(findNamespace("ycPathLib")

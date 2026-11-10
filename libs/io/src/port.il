@@ -38,6 +38,7 @@ defclass(Port () (
     readLine()
     readAll()
     write()
+    flush()
     close()
     isClosed()
     port()
@@ -147,6 +148,20 @@ procedure(_InstallPort(self "g")  ; -> t
         self
     )
 
+    self->flush = lambda(()  ; -> self
+        ; 把写入缓冲刷到文件；只读端口无操作。
+        ;
+        ; **返回**
+        ;   (Port) - self；已关闭时 error() 中断
+        when(self->_data->closed
+            error("%A->flush: port is closed: %s" className(self) self->_data->path)
+        )
+        when(self->_data->mode != "r" && self->_data->port
+            drain(self->_data->port)
+        )
+        self
+    )
+
     self->close = lambda(()  ; -> t
         ; 关闭原生端口；可重复调用。
         ;
@@ -154,7 +169,10 @@ procedure(_InstallPort(self "g")  ; -> t
         ;   (t) - 恒为 t
         unless(self->_data->closed
             when(self->_data->port
-                close(self->_data->port)
+                unwindProtect(
+                    close(self->_data->port)
+                    self->_data->closed = t
+                )
             )
             self->_data->closed = t
         )
@@ -193,13 +211,22 @@ procedure(Open(t_path \@key (mode "r") "tt")  ; -> Port
     ;
     ; **返回**
     ;   (Port) - 新的端口包装；非法模式、打开失败时 error() 中断
-    let((port2)
+    let((port2 name)
         unless(mode == "r" || mode == "w" || mode == "a"
             error("ycIO::Open: invalid mode: '%s'" mode)
         )
+        when(t_path == ""
+            error("ycIO::Open: empty path")
+        )
+        name = _PortName(t_path)
+        when(mode == "r"
+            when(isDir(name)
+                error("ycIO::Open: is a directory: %s" t_path)
+            )
+        )
         port2 = if(mode == "r"
-            infile(_PortName(t_path))
-            outfile(_PortName(t_path) mode)
+            infile(name)
+            outfile(name mode)
         )
         unless(port2
             error("ycIO::Open: cannot open: %s" t_path)

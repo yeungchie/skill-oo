@@ -8,6 +8,7 @@ addToNamespace("ycLog"
         _LoggerData  ; class
         _LevelParts  ; proc
         _CheckFlag  ; proc
+        _TimeFormatReason  ; proc
         _LogLine  ; proc
         _InstallLogger  ; proc
     ))

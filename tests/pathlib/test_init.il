@@ -36,7 +36,7 @@ procedure(_SameIni(g_a g_b "gg")  ; -> t | nil
         == ycIni::Encode(g_b ?sortKeys t)
 )
 
-_TestRun("ycPathLib" 436
+_TestRun("ycPathLib" 452
     "test_pure.il"
     "test_fs.il"
     "test_codec.il"

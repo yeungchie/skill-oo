@@ -238,7 +238,7 @@ self->withSuffix = lambda((t_suffix "t")  ; -> Path
     ; **返回**
     ;   (Path) - 替换后的路径；self 无名，或非空且不以 "." 开头、等于 "."、
     ;            含 "/"，均走 _error() 中断
-    let((name2)
+    let((name2 newName)
         name2 = self->name()
         when(name2 == ""
             _error("withSuffix" "%s has an empty name" self->str())
@@ -248,15 +248,20 @@ self->withSuffix = lambda((t_suffix "t")  ; -> Path
                 _error("withSuffix" "Invalid suffix '%s'" t_suffix)
             )
         )
-        self->withName(strcat(self->stem() t_suffix))
+        newName = strcat(self->stem() t_suffix)
+        when(newName == "" || index(newName "/") != nil || newName == "."
+            _error("withSuffix" "Invalid name '%s'" newName)
+        )
+        self->withName(newName)
     )
 )
 
 self->match = lambda((t_pattern "t")  ; -> t | nil
-    ; 按 pathlib PurePath.match 语义做 fnmatch 式整路径匹配。
+    ; 按部件做 fnmatch 式匹配：绝对 pattern 要求锚相等并整路径比较，相对 pattern 右对齐到部件边界；
+    ; 整段 "**" 为单部件通配且允许匹配空部件（仅根路径例外，"/" 可与 "**" 对齐），不表示递归。
     ;
     ; **参数**
-    ;   t_pattern  (str) - 匹配模式："*" "?" 与 "[seq]"/"[!seq]"，段不跨部件，大小写敏感
+    ;   t_pattern  (str) - 匹配模式："*" "?"、"[seq]"/"[!seq]" 与整段 "**"（单部件，可匹配空），段不跨部件，大小写敏感
     ;
     ; **返回**
     ;   (t|nil) - 以 "/" 开头要求锚相等并整路径部件比较（root-only 路径例外，

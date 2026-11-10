@@ -3,7 +3,7 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-let((res path dir)
+let((res path dir dtReady)
     res = errset(get_filename(piport) nil)
     path = when(res && car(res) && stringp(car(res)) && car(res) != ""
         car(res)
@@ -24,17 +24,23 @@ let((res path dir)
     unless(findNamespace("ycPathLib")
         loadi(strcat(dir "../../libs/pathlib/load.il"))
     )
-    when(findNamespace("ycDateTime") == nil
-        when(findNamespace("ycLog") == nil
-            loadi(strcat(dir "../../libs/log/load.il"))
-        )
+    dtReady = and(
+        findNamespace("ycDateTime")
+        findSymbol("Current" ?namespace "ycDateTime")
+        fboundp(findSymbol("Current" ?namespace "ycDateTime"))
+    )
+    when(!dtReady
         loadi(strcat(dir "isolated.il"))
         loadi(strcat(dir "../../libs/datetime/load.il"))
     )
     unless(findNamespace("ycLang")
         loadi(strcat(dir "../../libs/lang/load.il"))
     )
-    when(findNamespace("ycLog") == nil
+    unless(and(
+            findNamespace("ycLog")
+            findSymbol("Logger" ?namespace "ycLog")
+            fboundp(findSymbol("Logger" ?namespace "ycLog"))
+        )
         loadi(strcat(dir "../../libs/log/load.il"))
     )
     _TestDir = dir

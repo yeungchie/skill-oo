@@ -166,6 +166,8 @@ _Assert(_P("a.b")->withSuffix(".x")->str() == "a.x"  "withSuffix: drops old suff
 _Assert(_P(".bashrc")->withSuffix(".txt")->str() == ".bashrc.txt"  "withSuffix: hidden")
 _Assert(_P("a")->withSuffix("")->str() == "a"  "withSuffix: empty on bare")
 _Assert(_P("..")->withSuffix("")->str() == ".."  "withSuffix: empty on dotdot")
+_AssertErrorMsg(lambda(() _P("..foo")->withSuffix(""))
+    "ycPathLib::Path->withSuffix:"  "withSuffix: dotted stem uses method prefix")
 _Assert(_P("a/b.c")->withSuffix(".d.e")->str() == "a/b.d.e"  "withSuffix: dotted suffix")
 
 _AssertError(lambda(() _P("a/b.txt")->withSuffix("c") t)  "withSuffix: no leading dot errors")
@@ -201,8 +203,8 @@ _Assert(_P("x")->match("**")  "match: ** single")
 _Assert(_P("a/b/c")->match("**")  "match: ** deep")
 _Assert(!_P("a")->match("a/**")  "match: pattern longer")
 _Assert(_P("a/b")->match("a/**")  "match: ** last")
-_Assert(_P("a/b/c")->match("a/**/c")  "match: ** zero components")
-_Assert(!_P("a/c")->match("a/**/c")  "match: ** needs component count")
+_Assert(_P("a/b/c")->match("a/**/c")  "match: ** matches one component")
+_Assert(!_P("a/c")->match("a/**/c")  "match: ** requires a component")
 _Assert(_P("a/b/c")->match("**/c")  "match: ** prefix")
 _Assert(!_P("")->match("*")  "match: empty path vs star")
 _Assert(!_P(".")->match("*")  "match: dot vs star")
@@ -293,6 +295,10 @@ _Assert(ycPathLib::ShellQuote("中文 x") == "'中文 x'"
     "ShellQuote: multibyte text is preserved")
 _Assert(ycPathLib::ShellQuote("$HOME") == "'$HOME'"
     "ShellQuote: variables are not expanded")
+_Assert(ycPathLib::ShellQuote("abc\n") == "'abc\n'"
+    "ShellQuote: trailing newline is quoted")
+_Assert(ycPathLib::ShellQuote("abc\nid") == "'abc\nid'"
+    "ShellQuote: embedded newline is quoted")
 _AssertError(lambda(() ycPathLib::ShellQuote(1) t)
     "ShellQuote: rejects a number")
 _AssertError(lambda(() ycPathLib::ShellQuote(nil) t)

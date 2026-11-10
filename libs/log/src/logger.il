@@ -125,6 +125,29 @@ procedure(_CheckFlag(g_value t_name t_ctx "gtt")  ; -> t | nil
     g_value
 )
 
+procedure(_TimeFormatReason(l_err "l")  ; -> str
+    ; 从 errset 的错误结果中提取可读原因。
+    ;
+    ; **参数**
+    ;   l_err  (list) - errset 的错误信息
+    ;
+    ; **返回**
+    ;   (str) - 去掉外层前缀的原始消息；取不到时返回通用说明
+    let((msg)
+        msg = car(last(l_err))
+        when(listp(msg) && msg
+            msg = car(msg)
+        )
+        unless(stringp(msg)
+            msg = "invalid time format"
+        )
+        when(pcreMatchp("^\\*Error\\* " msg)
+            msg = substring(msg 9 length(msg) - 8)
+        )
+        pcreReplace(pcreCompile("^ycDateTime::DateTime->format: ") msg "" 0)
+    )
+)
+
 procedure(_LogLine(t_name s_level g_timeFormat t_msg "tsgt")  ; -> str
     ; 拼一行日志：可选时间戳、级别标签、可选名称与正文。
     ;
@@ -172,14 +195,14 @@ procedure(_emit(t_method s_level t_fmt l_args)  ; -> Logger
     ; **返回**
     ;   (Logger) - self
     let((parts line msg)
-        unless(stringp(t_fmt)
-            error("%A->%s: message must be a string, got %A"
-                className(self) t_method t_fmt)
-        )
         parts = _LevelParts(s_level)
         unless(parts
             error("%A->%s: unknown level %A, expected debug, info, warn or error"
                 className(self) t_method s_level)
+        )
+        unless(stringp(t_fmt)
+            error("%A->%s: message must be a string, got %A"
+                className(self) t_method t_fmt)
         )
         when(car(parts) >= car(_LevelParts(self->_data->level))
             msg = if(l_args apply('lsprintf t_fmt l_args) t_fmt)
@@ -300,8 +323,10 @@ self->close = lambda(()  ; -> t
     ; **返回**
     ;   (t) - 恒为 t
     when(self->_data->port
-        close(self->_data->port)
-        self->_data->port = nil
+        unwindProtect(
+            close(self->_data->port)
+            self->_data->port = nil
+        )
     )
     t
 )
@@ -350,8 +375,13 @@ procedure(Logger(t_name \@key (level 'info) (file nil) (console t) (append t) (f
             unless(fboundp('ycDateTime:::Current)
                 error("ycLog::Logger: ycDateTime is not loaded")
             )
-            unless(errset(ycDateTime:::Current()->format(timeFormat) nil)
-                error("ycLog::Logger: invalid ?timeFormat %A" timeFormat)
+            let((res err)
+                res = errset(ycDateTime:::Current()->format(timeFormat) nil)
+                err = errset.errset
+                unless(res
+                    error("ycLog::Logger: invalid ?timeFormat %A: %s"
+                        timeFormat _TimeFormatReason(err))
+                )
             )
         )
         when(file
