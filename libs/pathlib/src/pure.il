@@ -298,12 +298,17 @@ self->match = lambda((t_pattern "t")  ; -> t | nil
     )
 )
 
-self->expandUser = lambda(()  ; -> Path
+self->expandUser = lambda((\@key check "g")  ; -> Path
     ; 展开首部件的 "~" 或 "~user"（当前用户或指定用户的主目录），其余形式原样返回。
+    ; 只做路径处理，默认不检查展开结果是否存在。
+    ;
+    ; **参数**
+    ;   ?check  (t|nil) - 校验展开结果存在，缺失走 _error() 中断（默认 nil）
     ;
     ; **返回**
-    ;   (Path) - "~" 与 "~/..." 展开为当前用户 HOME；"~user" 与 "~user/..." 展开为该用户主目录；
-    ;            绝对路径、"." 及普通路径返回自身；用户不存在、HOME 未设置或为空串，走 _error() 中断
+    ;   (Path) - "~" 与 "~/..." 展开为当前用户 HOME；"~user" 与 "~user/..." 展开为该用户主目录，
+    ;            用户不在用户库时按当前 HOME 的父目录推导；绝对路径、"." 及普通路径返回自身；
+    ;            HOME 未设置或为空串、且目标是未知用户时，走 _error() 中断
     let((first)
         first = self->_data->parts && car(self->_data->parts)
         cond(
@@ -311,30 +316,49 @@ self->expandUser = lambda(()  ; -> Path
                 self
             )
             (first == "~"
-                let((home rest)
+                let((home rest result)
                     home = getShellEnvVar("HOME")
                     when(home == nil || home == ""
                         _error("expandUser" "home directory is not known")
                     )
                     rest = cdr(self->_data->parts)
-                    if(rest == nil
+                    result = if(rest == nil
                         Path(home)
                         Path(lsprintf("%s/%s" home buildString(rest "/")))
                     )
+                    when(check
+                        unless(result->exists()
+                            _error("expandUser" "expanded path does not exist: %s"
+                                result->str())
+                        )
+                    )
+                    result
                 )
             )
             (first && substring(first 1 1) == "~"
-                let((userHome rest)
+                let((userName userHome home rest result)
+                    userName = substring(first 2)
                     userHome = car(errset(simplifyFilename(first) nil))
                     when(userHome == nil || userHome == ""
-                        _error("expandUser" "home directory of user '%s' is not known"
-                            substring(first 2))
+                        home = getShellEnvVar("HOME")
+                        when(home == nil || home == ""
+                            _error("expandUser" "home directory of user '%s' is not known"
+                                userName)
+                        )
+                        userHome = Path(home)->parent()->join(userName)->str()
                     )
                     rest = cdr(self->_data->parts)
-                    if(rest == nil
+                    result = if(rest == nil
                         Path(userHome)
                         Path(lsprintf("%s/%s" userHome buildString(rest "/")))
                     )
+                    when(check
+                        unless(result->exists()
+                            _error("expandUser" "expanded path does not exist: %s"
+                                result->str())
+                        )
+                    )
+                    result
                 )
             )
             (t

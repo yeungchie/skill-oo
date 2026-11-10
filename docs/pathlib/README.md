@@ -568,17 +568,21 @@ ycPathLib::Path(".")->match(".")
 ##### expandUser <sub>`method`</sub>
 
 ```text
-p->expandUser()
+p->expandUser(
+    [ ?check g_check ]
+)
 => Path
 ```
 
 **描述**
 
-`~` 或 `~user` 开头才展开：`~` 使用当前用户的 `HOME`，`~user` 使用该用户的主目录；`HOME` 未设置或为空串、指定用户不存在时以 `error()` 中断。
+展开首部件的 `~` 或 `~user`：`~` 使用当前用户的 `HOME`，`~user` 使用该用户的主目录。展开只做路径处理，默认不检查结果是否存在。用户不在用户库时，按当前 `HOME` 的父目录推导（如 `HOME` 为 `/home/yeung` 时 `~no_such_user` 展开为 `/home/no_such_user`），推导同样不检查该路径是否存在；此时底层查询会先输出一条提示，不影响返回值。`HOME` 未设置或为空串、且无法从用户库取得主目录时以 `error()` 中断。
 
 **参数**
 
-无
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?check g_check | t / nil | nil | 展开结果不存在时以 `error()` 中断；仅作用于发生 `~` / `~user` 展开的路径 |
 
 **返回值**
 
@@ -591,8 +595,10 @@ ycPathLib::Path("~")->expandUser()->str()    ; => $HOME
 ycPathLib::Path("~/x")->expandUser()->str()  ; => $HOME/x
 ycPathLib::Path(strcat("~" getShellEnvVar("USER")))->expandUser()->str()
 ; => 当前用户的主目录
-ycPathLib::Path("~no_such_user")->expandUser()
-; *Error* ycPathLib::Path->expandUser: home directory of user 'no_such_user' is not known
+ycPathLib::Path("~no_such_user")->expandUser()->str()
+; => $HOME 的父目录/no_such_user（不检查是否存在）
+ycPathLib::Path("~no_such_user")->expandUser(?check t)
+; *Error* ycPathLib::Path->expandUser: expanded path does not exist: /home/no_such_user
 ```
 
 #### 文件系统
