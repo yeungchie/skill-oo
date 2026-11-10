@@ -370,6 +370,92 @@ self->expandUser = lambda((\@key checkExists "g")  ; -> Path
     )
 )
 
+self->expandVars = lambda((\@key (undefined 'error) "s")  ; -> Path
+    ; 展开路径串中的环境变量引用：$NAME 与 ${NAME}，其余形式原样保留。
+    ; 单次扫描、不递归；默认遇到未定义变量以 _error() 中断。
+    ;
+    ; **参数**
+    ;   ?undefined  (sym) - 未定义变量处理：'error（默认）/ 'keep 保留引用 / 'empty 置空
+    ;
+    ; **返回**
+    ;   (Path) - 展开后的路径；未定义变量按 ?undefined 处理，非法取值走 _error() 中断
+    let((str n i ch name value end braced out nameStart nameChars)
+        case(undefined
+            ((error keep empty)
+                nil
+            )
+            (t
+                _error("expandVars" "invalid ?undefined %A (expected 'error, 'keep or 'empty)"
+                    undefined)
+            )
+        )
+        nameStart = "_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        nameChars = "_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        str = self->str()
+        n = length(str)
+        i = 1
+        while(i <= n
+            ch = substring(str i 1)
+            name = nil
+            end = nil
+            braced = nil
+            when(ch == "$"
+                let((j nm)
+                    j = i + 1
+                    when(j <= n && substring(str j 1) == "{"
+                        braced = t
+                        j++
+                    )
+                    when(j <= n && index(nameStart substring(str j 1))
+                        nm = ""
+                        while(j <= n && index(nameChars substring(str j 1))
+                            nm = strcat(nm substring(str j 1))
+                            j++
+                        )
+                        if(braced
+                            then
+                            when(j <= n && substring(str j 1) == "}"
+                                name = nm
+                                end = j + 1
+                            )
+                            else
+                            name = nm
+                            end = j
+                        )
+                    )
+                )
+            )
+            if(name
+                then
+                value = getShellEnvVar(name)
+                if(value == nil
+                    then
+                    case(undefined
+                        (keep
+                            out = tconc(out if(braced
+                                strcat("${" name "}")
+                                strcat("$" name)))
+                        )
+                        (empty
+                            nil
+                        )
+                        (t
+                            _error("expandVars" "undefined environment variable: %s" name)
+                        )
+                    )
+                    else
+                    out = tconc(out value)
+                )
+                i = end
+                else
+                out = tconc(out substring(str i 1))
+                i++
+            )
+        )
+        Path(if(out apply('strcat car(out)) ""))
+    )
+)
+
 self->absolute = lambda(()  ; -> Path
     ; 返回绝对化路径（不做规范化）。
     ;

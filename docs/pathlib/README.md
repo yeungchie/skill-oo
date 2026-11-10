@@ -601,6 +601,42 @@ ycPathLib::Path("~no_such_user")->expandUser(?checkExists t)
 ; *Error* ycPathLib::Path->expandUser: expanded path does not exist: /home/no_such_user
 ```
 
+##### expandVars <sub>`method`</sub>
+
+```text
+p->expandVars(
+    [ ?undefined s_undefined ]
+)
+=> Path
+```
+
+**描述**
+
+展开路径串中的环境变量引用，支持 `$NAME` 与 `${NAME}`（`NAME` 为 `[A-Za-z_][A-Za-z0-9_]*`）。替换值取自环境变量；本方法对原路径只扫描一次，不再次扫描替换进来的内容。以下形式按字面保留：单独的 `$`、`$1`、`$$`、`$(...)`、`%NAME%`、`${NAME:-default}`、`${}`、未闭合的 `${NAME`，以及 `$` 后不是合法名字首字符的写法。展开结果按 `Path` 的解析规则重新构造（如变量展开为空串时结果为 `"."`）。需要同时展开 `~` 时链式调用：`expandVars()->expandUser()`。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?undefined s_undefined | sym | 'error | 未定义变量处理：`'error` 以 `error()` 中断；`'keep` 保留原引用；`'empty` 替换为空串 |
+
+**返回值**
+
+`Path` — 展开后的路径；未定义变量按 `?undefined` 处理，非法取值以 `error()` 中断。
+
+**例程**
+
+```lisp
+ycPathLib::Path("$HOME")->expandVars()->str()      ; => $HOME
+ycPathLib::Path("${HOME}/x")->expandVars()->str()  ; => $HOME/x
+ycPathLib::Path("$NO_SUCH_VAR")->expandVars()
+; *Error* ycPathLib::Path->expandVars: undefined environment variable: NO_SUCH_VAR
+ycPathLib::Path("$NO_SUCH_VAR")->expandVars(?undefined 'keep)->str()
+; => "$NO_SUCH_VAR"
+ycPathLib::Path("${HOME:-/tmp}")->expandVars()->str()
+; => "${HOME:-/tmp}"
+```
+
 #### 文件系统
 
 ##### exists <sub>`method`</sub>

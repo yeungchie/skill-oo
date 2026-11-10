@@ -379,6 +379,7 @@ defclass(Path () (
     withSuffix()
     match()
     expandUser()
+    expandVars()
     absolute()
     resolve()
 
