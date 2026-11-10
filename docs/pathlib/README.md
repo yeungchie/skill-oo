@@ -612,7 +612,7 @@ p->expandVars(
 
 **描述**
 
-展开路径串中的环境变量引用，支持 `$NAME` 与 `${NAME}`（`NAME` 为 `[A-Za-z_][A-Za-z0-9_]*`）。替换值取自环境变量；本方法对原路径只扫描一次，不再次扫描替换进来的内容。以下形式按字面保留：单独的 `$`、`$1`、`$$`、`$(...)`、`%NAME%`、`${NAME:-default}`、`${}`、未闭合的 `${NAME`，以及 `$` 后不是合法名字首字符的写法。展开结果按 `Path` 的解析规则重新构造（如变量展开为空串时结果为 `"."`）。需要同时展开 `~` 时链式调用：`expandVars()->expandUser()`。
+展开路径串中的环境变量引用，支持 `$NAME`、`${NAME}` 与 `${NAME-default}`（`NAME` 为 `[A-Za-z_][A-Za-z0-9_]*`）。`${NAME-default}` 仅在 `NAME` 不存在时使用 `default` 字面量；`NAME` 存在但值为空串时仍使用其空值，不用默认值。`default` 取到第一个 `}` 为止，不再二次展开。替换值取自环境变量；本方法对原路径只扫描一次，不再次扫描替换进来的内容。以下形式按字面保留：单独的 `$`、`$1`、`$$`、`$(...)`、`%NAME%`、`${NAME:-default}`、`${}`、未闭合的 `${NAME` 或 `${NAME-default`，以及 `$` 后不是合法名字首字符的写法。展开结果按 `Path` 的解析规则重新构造（如变量展开为空串时结果为 `"."`）。需要同时展开 `~` 时链式调用：`expandVars()->expandUser()`。
 
 **参数**
 
@@ -633,6 +633,10 @@ ycPathLib::Path("$NO_SUCH_VAR")->expandVars()
 ; *Error* ycPathLib::Path->expandVars: undefined environment variable: NO_SUCH_VAR
 ycPathLib::Path("$NO_SUCH_VAR")->expandVars(?undefined 'keep)->str()
 ; => "$NO_SUCH_VAR"
+ycPathLib::Path("${NO_SUCH_VAR-fallback}")->expandVars()->str()
+; => "fallback"
+ycPathLib::Path("${NO_SUCH_VAR-a$b}")->expandVars()->str()
+; => "a$b"
 ycPathLib::Path("${HOME:-/tmp}")->expandVars()->str()
 ; => "${HOME:-/tmp}"
 ```

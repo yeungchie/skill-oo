@@ -371,7 +371,8 @@ self->expandUser = lambda((\@key checkExists "g")  ; -> Path
 )
 
 self->expandVars = lambda((\@key (undefined 'error) "s")  ; -> Path
-    ; 展开路径串中的环境变量引用：$NAME 与 ${NAME}，其余形式原样保留。
+    ; 展开路径串中的环境变量引用：$NAME、${NAME} 与 ${NAME-default}，其余形式原样保留。
+    ; ${NAME-default} 仅在 NAME 不存在时使用 default 字面量（NAME 存在但为空串时不使用）；
     ; 单次扫描、不递归；默认遇到未定义变量以 _error() 中断。
     ;
     ; **参数**
@@ -379,7 +380,7 @@ self->expandVars = lambda((\@key (undefined 'error) "s")  ; -> Path
     ;
     ; **返回**
     ;   (Path) - 展开后的路径；未定义变量按 ?undefined 处理，非法取值走 _error() 中断
-    let((str n i ch name value end braced out nameStart nameChars)
+    let((str n i ch name value end braced default out nameStart nameChars)
         case(undefined
             ((error keep empty)
                 nil
@@ -399,6 +400,7 @@ self->expandVars = lambda((\@key (undefined 'error) "s")  ; -> Path
             name = nil
             end = nil
             braced = nil
+            default = nil
             when(ch == "$"
                 let((j nm)
                     j = i + 1
@@ -414,9 +416,28 @@ self->expandVars = lambda((\@key (undefined 'error) "s")  ; -> Path
                         )
                         if(braced
                             then
-                            when(j <= n && substring(str j 1) == "}"
-                                name = nm
-                                end = j + 1
+                            when(j <= n
+                                if(substring(str j 1) == "}"
+                                    then
+                                    name = nm
+                                    end = j + 1
+                                    else
+                                    when(substring(str j 1) == "-"
+                                        let((k)
+                                            k = j + 1
+                                            while(k <= n && substring(str k 1) != "}"
+                                                k++
+                                            )
+                                            when(k <= n
+                                                name = nm
+                                                end = k + 1
+                                                default = if(k > j + 1
+                                                    substring(str j + 1 k - j - 1)
+                                                    "")
+                                            )
+                                        )
+                                    )
+                                )
                             )
                             else
                             name = nm
@@ -428,7 +449,7 @@ self->expandVars = lambda((\@key (undefined 'error) "s")  ; -> Path
             if(name
                 then
                 value = getShellEnvVar(name)
-                if(value == nil
+                if(value == nil && default == nil
                     then
                     case(undefined
                         (keep
@@ -444,7 +465,7 @@ self->expandVars = lambda((\@key (undefined 'error) "s")  ; -> Path
                         )
                     )
                     else
-                    out = tconc(out value)
+                    out = tconc(out if(value == nil default value))
                 )
                 i = end
                 else

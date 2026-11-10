@@ -336,6 +336,30 @@ _Assert(_P("x/$YC_NO_SUCH_VAR_XYZ/y")->expandVars(?undefined 'empty)->str() == "
     "expandVars: undefined empty")
 _Assert(_P("$YC_NO_SUCH_VAR_XYZ")->expandVars(?undefined 'empty)->str() == "."
     "expandVars: undefined empty whole path")
+_Assert(_P("${YC_NO_SUCH_VAR_XYZ-default}")->expandVars()->str() == "default"
+    "expandVars: braced default")
+_Assert(_P("${YC_NO_SUCH_VAR_XYZ-default}/x")->expandVars()->str() == "default/x"
+    "expandVars: default with suffix")
+_Assert(_P("${YC_NO_SUCH_VAR_XYZ-}")->expandVars()->str() == "."
+    "expandVars: empty default")
+_Assert(_P("${YC_NO_SUCH_VAR_XYZ-a$b}")->expandVars()->str() == "a$b"
+    "expandVars: default is literal")
+_Assert(_P("${YC_NO_SUCH_VAR_XYZ-default")->expandVars()->str()
+        == "${YC_NO_SUCH_VAR_XYZ-default"
+    "expandVars: unclosed default literal")
+_Assert(_P("${YC_NO_SUCH_VAR_XYZ-default}")->expandVars(?undefined 'keep)->str() == "default"
+    "expandVars: default wins over keep")
+let((home)
+    home = getShellEnvVar("HOME")
+    when(stringp(home) && home != ""
+        _Assert(_P("${HOME-other}")->expandVars()->str() == _S(home)
+            "expandVars: defined var ignores default")
+    )
+)
+setShellEnvVar("YC_EXPAND_EMPTY" "")
+_Assert(_P("${YC_EXPAND_EMPTY-fallback}")->expandVars()->str() == "."
+    "expandVars: defined empty ignores default")
+unsetShellEnvVar("YC_EXPAND_EMPTY")
 _AssertErrorMsg(lambda(() _P("$HOME")->expandVars(?undefined 'bogus) t)
     "invalid ?undefined"  "expandVars: invalid mode errors")
 _AssertError(lambda(() _P("$HOME")->expandVars(?undefined "keep") t)
