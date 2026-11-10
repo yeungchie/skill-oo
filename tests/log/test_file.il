@@ -37,6 +37,16 @@ let((lg)
         "file: close is idempotent")
 )
 
+; ---- close 错误路径 ----
+let((lg res after)
+    lg = ycLog::Logger("full" ?file "/dev/full" ?console nil ?flush nil ?timeFormat nil)
+    lg->info("hello")
+    res = errset(lg->close() nil)
+    _Assert(res == nil && errset.errset  "file: /dev/full close reports an error")
+    after = errset(lg->info("again") nil)
+    _Assert(after && car(after) == lg  "file: failed close resets the port")
+)
+
 ; ---- close 之后的控制台与文件 ----
 let((lg lines text)
     lg = ycLog::Logger("closed" ?file _LogTmp("closed.log") ?timeFormat nil)

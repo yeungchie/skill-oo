@@ -11,7 +11,8 @@ Cadence SKILL++ 的分级日志库：按级别过滤，同时写 CIW 与控制�
 - 文件默认追加打开；`?append nil` 时截断重写。
 - `?flush t`（默认）在每条记录后立即落盘，文件可被外部实时读取；高吞吐场景可置 `nil`，由 `flush()` 或 `close()` 统一落盘。
 - 时间戳默认 `[%F %T]`（形如 `[2026-11-14 21:32:47]`），可用 `?timeFormat` 传模板自定义；`?timeFormat nil` 关闭。
-- 构造器错误以 `ycLog::Logger:` 开头，方法错误以 `ycLog::Logger-><方法>:` 开头；格式串类型错误由方法报告，其余参数类型错误由参数绑定报告 `argument #N ...`。
+- 时间戳依赖 `ycDateTime`：默认模板要求 `ycDateTime` 已加载，未加载时构造器以 `error()` 中断；`?timeFormat nil` 可完全避开该依赖。
+- 构造器错误以 `ycLog::Logger:` 开头，方法错误以 `ycLog::Logger-><方法>:` 开头。级别方法（`debug`/`info`/`warn`/`error`/`log`）带可变参数，格式串类型错误由方法报告，额外参数交给格式化处理；普通方法（如 `setLevel`）的参数类型错误由参数绑定报告 `argument #N ...`。
 
 ## 快速上手
 
@@ -66,7 +67,7 @@ ycLog::Logger(
 [2026-11-14 21:32:47] [WARN] message
 ```
 
-`?timeFormat` 是 `ycDateTime` 的格式模板：`%F` / `%T` 等令牌原样生效，`%%` 表示字面 `%`，未支持的令牌以 `error()` 中断；格式结果后自动补一个空格再接级别标签。`nil` 去掉时间戳段；名称为空时去掉 `[name]` 段。
+`?timeFormat` 是 `ycDateTime` 的格式模板：`%F` / `%T` 等令牌原样生效，`%%` 表示字面 `%`，未支持的令牌以 `error()` 中断，错误消息会附带 `ycDateTime` 给出的具体原因（如 `unknown format token %z`）；格式结果后自动补一个空格再接级别标签。`nil` 去掉时间戳段；名称为空时去掉 `[name]` 段。使用非 `nil` 模板时要求 `ycDateTime` 已加载。
 
 ```lisp
 lg = ycLog::Logger("demo" ?timeFormat "%F")
@@ -99,7 +100,7 @@ lg->close()
 
 **返回值**
 
-`ycLog::Logger` — 新日志器；级别未知、选项不是 `t`/`nil`、文件参数非法或文件打不开时以 `error()` 中断。
+`ycLog::Logger` — 新日志器；级别未知、选项不是 `t`/`nil`、文件参数非法或文件打不开、时间戳开启但 `ycDateTime` 未加载、`?timeFormat` 非法时以 `error()` 中断。
 
 **例程**
 
@@ -129,7 +130,7 @@ lg->debug(t_fmt [ l_args ... ])
 => ycLog::Logger
 ```
 
-写 `DEBUG` 级记录；低于当前阈值时直接丢弃。`l_args` 非空时按 `lsprintf` 格式化；为空时 `t_fmt` 原样输出，消息中的 `%` 不参与格式解释。
+写 `DEBUG` 级记录；低于当前阈值时不输出。消息类型校验发生在阈值判断之前，因此即使该级别被过滤，传入非字符串格式串仍会以 `error()` 中断。`l_args` 非空时按 `lsprintf` 格式化；为空时 `t_fmt` 原样输出，消息中的 `%` 不参与格式解释。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -209,7 +210,7 @@ lg->log(s_level t_fmt [ l_args ... ])
 => ycLog::Logger
 ```
 
-按运行期级别写记录。`s_level` 必须是四个级别之一；未知级别以 `error()` 中断。
+按运行期级别写记录。`s_level` 必须是四个级别之一；未知级别以 `error()` 中断（级别校验先于消息类型校验）。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -296,7 +297,7 @@ lg->close()
 => t
 ```
 
-关闭文件端口并落盘；可重复调用。关闭后不再写文件，控制台输出仍然有效。
+关闭文件端口并落盘；可重复调用。关闭后不再写文件，控制台输出仍然有效。若底层关闭报错，文件端口仍会被释放（后续写日志不再访问已关闭端口），错误照常外传。
 
 ```lisp
 lg = ycLog::Logger("demo" ?file "./run.log")
