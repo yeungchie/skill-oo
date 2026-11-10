@@ -9,7 +9,7 @@ procedure(_IOTmp(t_name "t")  ; -> str
     strcat("ycIOTmpTest/" t_name)
 )
 
-_TestRun("ycIO" 25
+_TestRun("ycIO" 34
     "test_port.il"
 )
 

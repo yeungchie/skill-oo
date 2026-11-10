@@ -62,6 +62,33 @@ let((p2)
         "write: closed port errors")
 )
 
+; --- flush ---
+let((p2 r)
+    p2 = ycIO::Open(_IOTmp("flush.txt") ?mode "w")
+    p2->write("hello")
+    _Assert(car(errset(p2->flush() nil)) == p2  "flush: returns the port itself")
+    r = ycIO::Open(_IOTmp("flush.txt"))
+    _Assert(r->readAll() == "hello"  "flush: makes buffered content visible")
+    _Assert(car(errset(r->flush() nil)) == r  "flush: read port is a no-op")
+    r->close()
+    p2->close()
+)
+let((p2)
+    p2 = ycIO::Open(_IOTmp("flush.txt"))
+    p2->close()
+    _AssertErrorMsg(lambda(() p2->flush())  "port is closed"  "flush: closed port errors")
+)
+
+; --- close error path ---
+let((p2 res)
+    p2 = ycIO::Open("/dev/full" ?mode "w")
+    p2->write("x")
+    res = errset(p2->close() nil)
+    _Assert(res == nil && errset.errset  "close: /dev/full reports an error")
+    _Assert(p2->isClosed()  "close: state reset even when native close fails")
+    _Assert(p2->close() == t  "close: idempotent after a failed close")
+)
+
 ; --- with protocol ---
 let((p2)
     p2 = ycIO::Open(_IOTmp("with.txt") ?mode "w")
@@ -90,6 +117,10 @@ _AssertErrorMsg(lambda(() ycIO::Open(_IOTmp("x.txt") ?mode "b"))  "invalid mode"
     "open: invalid mode errors")
 _AssertErrorMsg(lambda(() ycIO::Open(_IOTmp("missing.txt")))  "cannot open"
     "open: missing file errors")
+_AssertErrorMsg(lambda(() ycIO::Open(_IOTmp("")))  "is a directory"
+    "open: directory rejected")
+_AssertErrorMsg(lambda(() ycIO::Open(""))  "empty path"
+    "open: empty path rejected")
 _AssertErrorMsg(lambda(() ycIO::Open(42))  "should be a string"
     "open: non-string path rejected")
 _AssertErrorMsg(lambda(() ycIO::Open(_IOTmp("x.txt") ?mode 42))  "should be a string"
