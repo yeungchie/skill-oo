@@ -4,9 +4,9 @@ useNamespace("ycQueue")
 ;
 ; 空读契约：「未指定 ?onEmpty」与「?onEmpty 显式给 nil」必须可区分，而引擎不会
 ; 把未传的关键字暴露给过程体。做法是让 ?onEmpty 的缺省位取私有标记符号
-; '_ycQueueNoneArg：该符号只在本模块内做 eq 比较，不定义变量、不登记命名空间，
-; 也不出现在任何错误消息或文档里。不写成命名空间限定形式——私有符号不在导出
-; 名单里，`ycQueue::_...` 会被 reader 拒绝。
+; 'ycQueue:::_NoneArg：该符号只在本模块内做 eq 比较，不定义变量、不登记导出名单，
+; 也不出现在任何错误消息或文档里。限定形式必须用三冒号：`ycQueue::_名` 要求该名
+; 在 export list 里，未登记的私有符号会被 reader 拒绝；`ycQueue:::_名` 不受该限制。
 ;
 ; 两个助手都由方法 lambda 显式传入队列对象（全局过程读不到调用方的 self）。
 
@@ -20,7 +20,7 @@ procedure(_EmptyResult(g_obj t_method g_onEmpty "gtg")  ; -> any
     ;
     ; **返回**
     ;   (any) - g_onEmpty 的原值；未指定时以 error() 中断
-    when(eq(g_onEmpty '_ycQueueNoneArg)
+    when(eq(g_onEmpty 'ycQueue:::_NoneArg)
         error("%A->%s: queue is empty" className(g_obj) t_method)
     )
     g_onEmpty

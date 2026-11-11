@@ -83,7 +83,7 @@ defmethod(initializeInstance (self(LIFO) \@rest _args)
         )
     )
 
-    self->get = lambda((\@key (onEmpty '_ycQueueNoneArg) "g")  ; -> any
+    self->get = lambda((\@key (onEmpty 'ycQueue:::_NoneArg) "g")  ; -> any
         ; 取出并移除最新元素；空队列按 ?onEmpty 契约处理。
         ;
         ; **参数**
@@ -105,7 +105,7 @@ defmethod(initializeInstance (self(LIFO) \@rest _args)
         )
     )
 
-    self->peek = lambda((\@key (index 0) (onEmpty '_ycQueueNoneArg) "xg")  ; -> any
+    self->peek = lambda((\@key (index 0) (onEmpty 'ycQueue:::_NoneArg) "xg")  ; -> any
         ; 返回指定位置的元素而不移除；空队列按 ?onEmpty 契约处理。
         ;
         ; **参数**
