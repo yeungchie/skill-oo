@@ -3,10 +3,11 @@ useNamespace("ycQueue")
 ; ---------- 共享助手 ----------
 ;
 ; 空读契约：「未指定 ?onEmpty」与「?onEmpty 显式给 nil」必须可区分，而引擎不会
-; 把未传的关键字暴露给过程体。做法是让 ?onEmpty 的缺省位取标记符号 _NoneArg：
-; 该符号在 ns.il 登记为 var，完整名是 ycQueue::_NoneArg；本库内直接写裸名
-; （三冒号只用于跨库引用）。「不供用户使用」只是命名约定，不是语言限制。
-; 标记不出现在错误消息或文档里。
+; 把未传的关键字暴露给过程体。标记是变量 _NoneArg（在 ns.il 登记为 var，完整名
+; ycQueue::_NoneArg，值即该命名空间符号自身）：空读比较直接读这个变量；方法
+; lambda 的 ?onEmpty 缺省位则写符号字面量 '_NoneArg——lambda 在实例化时求值，
+; 缺省位写变量引用会落到调用方上下文并报 unbound（探针实测）。本库内写裸名，
+; 三冒号只用于跨库引用；「不供用户使用」只是命名约定，不是语言限制。
 
 _NoneArg = '_NoneArg
 
@@ -22,7 +23,7 @@ procedure(_EmptyResult(g_obj t_method g_onEmpty "gtg")  ; -> any
     ;
     ; **返回**
     ;   (any) - g_onEmpty 的原值；未指定时以 error() 中断
-    when(eq(g_onEmpty '_NoneArg)
+    when(eq(g_onEmpty _NoneArg)
         error("%A->%s: queue is empty" className(g_obj) t_method)
     )
     g_onEmpty
