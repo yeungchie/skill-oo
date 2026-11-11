@@ -96,6 +96,10 @@ let((q)
         "fifo: peek index size errors")
     _AssertErrorMsg(lambda(() q->peek(?index -4)) "index -4 out of range (size 3)"
         "fifo: peek index below -size errors")
+    _AssertErrorMsg(lambda(() q->peek(?index 1.5)) "argument for keyword ?index should be an integer"
+        "fifo: peek float index rejected")
+    _AssertErrorMsg(lambda(() q->peek(?index "1")) "argument for keyword ?index should be an integer"
+        "fifo: peek string index rejected")
     _Assert(q->peek() == "a" && q->peek() == "a"  "fifo: repeated peek returns same value")
     _Assert(q->size() == 3  "fifo: peek does not change size")
 )
