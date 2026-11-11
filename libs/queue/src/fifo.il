@@ -45,7 +45,7 @@ defmethod(printself (self(FIFO))  ; -> str
 
 inScheme(
 defmethod(initializeInstance (self(FIFO) \@key (maxLimit nil))
-    ; 构造 FIFO 实例时在闭包里建状态桶并安装方法集：
+    ; 构造 FIFO 实例时校验容量上限，在闭包里建状态桶并安装方法集：
     ; put/get/peek/size/isEmpty/isFull/maxLimit/clear/toList。
     ;
     ; **参数**
@@ -53,6 +53,9 @@ defmethod(initializeInstance (self(FIFO) \@key (maxLimit nil))
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
+    when(maxLimit != nil && !(fixp(maxLimit) && maxLimit > 0)
+        error("%A: ?maxLimit must be nil or a positive integer, got %A" className(self) maxLimit)
+    )
     let((data)
         data = makeInstance('_FIFOData ?maxLimit maxLimit)
 
@@ -200,9 +203,6 @@ procedure(FIFO(\@key (maxLimit nil) "g")  ; -> FIFO
     ;
     ; **返回**
     ;   (FIFO) - 新队列实例；?maxLimit 非法时以 error() 中断
-    when(maxLimit != nil && !(fixp(maxLimit) && maxLimit > 0)
-        error("ycQueue::FIFO: ?maxLimit must be nil or a positive integer, got %A" maxLimit)
-    )
     makeInstance('FIFO ?maxLimit maxLimit)
 )
 
