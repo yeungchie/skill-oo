@@ -76,7 +76,7 @@ defmethod(initializeInstance (self(FIFO) \@rest _args)
         )
     )
 
-    self->get = lambda((\@key (onEmpty 'ycQueue:::_NoneArg) "g")  ; -> any
+    self->get = lambda((\@key (onEmpty 'ycQueue::_NoneArg) "g")  ; -> any
         ; 取出并移除最早元素；空队列按 ?onEmpty 契约处理。
         ;
         ; **参数**
@@ -98,7 +98,7 @@ defmethod(initializeInstance (self(FIFO) \@rest _args)
         )
     )
 
-    self->peek = lambda((\@key (index 0) (onEmpty 'ycQueue:::_NoneArg) "xg")  ; -> any
+    self->peek = lambda((\@key (index 0) (onEmpty 'ycQueue::_NoneArg) "xg")  ; -> any
         ; 返回指定位置的元素而不移除；空队列按 ?onEmpty 契约处理。
         ;
         ; **参数**
