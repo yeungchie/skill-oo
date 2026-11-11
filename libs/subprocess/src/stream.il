@@ -1,3 +1,5 @@
+ycNamespace:::Require("ycQueue")
+
 useNamespace("ycSubProcess")
 
 
@@ -25,15 +27,14 @@ defmethod(printself (self(Stream))  ; -> str
 ; ---------- 构造时安装全部方法 ----------
 
 inScheme(
-defmethod(initializeInstance (self(Stream) \@rest l_args)
+defmethod(initializeInstance (self(Stream))
     ; 安装 Stream 全部方法：push/last/shift/text/size/isEmpty。
-    ;
-    ; **参数**
-    ;   l_args  (list) - 变参：附加初始化参数，本实现忽略
+    ; 内部状态是一个 ycQueue::FIFO 实例，只在闭包里出现。
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
-    let((_data)
+    let((queue)
+        queue = ycQueue:::FIFO()
         self->push = lambda((t_text "t")  ; -> t
             ; 追加一条数据到流尾。
             ;
@@ -42,7 +43,7 @@ defmethod(initializeInstance (self(Stream) \@rest l_args)
             ;
             ; **返回**
             ;   (t) - 追加成功
-            _data = tconc(_data t_text)
+            queue->put(t_text)
             t
         )
         self->last = lambda(()  ; -> str | nil
@@ -50,21 +51,18 @@ defmethod(initializeInstance (self(Stream) \@rest l_args)
             ;
             ; **返回**
             ;   (str|nil) - 末条目
-            !self->isEmpty() && cadr(_data)
+            unless(queue->isEmpty()
+                queue->peek(?index -1)
+            )
         )
         self->shift = lambda(()  ; -> str | nil
             ; 取出并移除第一条数据；空流返回 nil。
             ;
             ; **返回**
             ;   (str|nil) - 首条目
-            unless(self->isEmpty()
-                prog1(
-                    caar(_data)
-                    car(_data) := cdar(_data)
-                )
-            )
+            queue->get(?onEmpty nil)
         )
-        self->text = lambda((\@key clear "g")  ; -> str
+        self->text = lambda((\@key (clear nil) "g")  ; -> str
             ; 拼接全量数据为字符串；?clear 非 nil 时取完清空。
             ;
             ; **参数**
@@ -72,26 +70,21 @@ defmethod(initializeInstance (self(Stream) \@rest l_args)
             ;
             ; **返回**
             ;   (str) - 全量拼接串，空流为 ""
-            self->isEmpty() && "" || prog1(
-                buildString(car(_data) "")
-                when(clear
-                    _data = nil
-                )
-            )
+            queue->isEmpty() && "" || buildString(queue->toList(?clear clear) "")
         )
         self->size = lambda(()  ; -> int
             ; 返回当前条目数。
             ;
             ; **返回**
             ;   (int) - 条目数
-            length(car(_data))
+            queue->size()
         )
         self->isEmpty = lambda(()  ; -> t | nil
             ; 判断流是否为空。
             ;
             ; **返回**
             ;   (t|nil) - 空流返回 t
-            !car(_data)
+            queue->isEmpty()
         )
         t
     )

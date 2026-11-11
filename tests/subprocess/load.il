@@ -35,6 +35,13 @@ let((res path dir)
         )
         printf("ycSubProcess: re-running tests with previously loaded code; restart CIW if you edited libs/subprocess/src/\n")
     )
+    unless(and(
+            findNamespace("ycQueue")
+            findSymbol("FIFO" ?namespace "ycQueue")
+            fboundp(findSymbol("FIFO" ?namespace "ycQueue"))
+        )
+        loadi(simplifyFilename(strcat(dir "../../libs/queue/load.il") t))
+    )
     _TestDir = dir
     unless(fboundp('_TestRun)
         loadi(strcat(_TestDir "../kit.il"))
