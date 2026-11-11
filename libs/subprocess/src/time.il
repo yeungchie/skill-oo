@@ -78,11 +78,8 @@ defmethod(printself (self(Elapsed))  ; -> str
 ; ---------- 构造时安装全部方法 ----------
 
 inScheme(
-defmethod(initializeInstance (self(Elapsed) \@rest l_args)
+defmethod(initializeInstance (self(Elapsed))
     ; 安装 Elapsed 全部方法：mark/getStart/getEnd/getSeconds/humanReadable。
-    ;
-    ; **参数**
-    ;   l_args  (list) - 变参：附加初始化参数，本实现忽略
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t

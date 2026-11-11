@@ -261,21 +261,115 @@ aj->start()
 
 **属性**
 
+`callback` / `userData` / `verbose` 是可读写属性；命令、进程 ID、退出码、耗时与两路输出通过只读方法读取（见下方方法）。
+
 | 名称 | 类型 | 说明 |
 | --- | --- | --- |
-| cmd | str | 执行的命令 |
-| userData | any | 可用于携带任意数据 |
 | callback | nil / sym / funobj | 特定事件触发的回调函数 |
+| userData | any | 可用于携带任意数据 |
 | verbose | nil / t | 控制是否实时打印子进程输出 |
-| ipcId | nil / ipcId | 进程间通信 ID，任务还未启动时的值为 `nil` |
-| returncode | nil / int | 进程退出状态码，任务还未启动时的值为 `nil` |
-| stdout | ycSubProcess::Stream | 标准输出流 |
-| stderr | ycSubProcess::Stream | 标准错误输出流 |
-| elapsed | ycSubProcess::Elapsed | 任务执行时间 |
 
 **方法**
 
 > 必须使用 `->` 符号调用方法。
+
+#### command <sub>`method`</sub>
+
+```text
+aj->command()
+=> str
+```
+
+返回创建任务时的完整命令串。
+
+```lisp
+ycSubProcess::CreateJob("echo" "ok")->command()
+; => "echo ok"
+```
+
+#### ipcId <sub>`method`</sub>
+
+```text
+aj->ipcId()
+=> nil | ipcId
+```
+
+返回底层进程间通信 ID；任务还未启动时为 `nil`。
+
+```lisp
+aj = ycSubProcess::CreateJob("cat")
+aj->ipcId()
+; => nil
+
+aj->start()
+aj->ipcId()
+; => <ipcId 对象>（示例值）
+```
+
+#### returncode <sub>`method`</sub>
+
+```text
+aj->returncode()
+=> nil | int
+```
+
+返回进程退出状态码；任务还未结束或超时后仍为 `nil`。
+
+```lisp
+aj = ycSubProcess::CreateJob("true")
+aj->returncode()
+; => nil
+
+aj->await()
+aj->returncode()
+; => 0
+```
+
+#### elapsed <sub>`method`</sub>
+
+```text
+aj->elapsed()
+=> ycSubProcess::Elapsed
+```
+
+返回任务执行时间对象；`start()` 与进程结束回调会自动记录起止时间。
+
+```lisp
+ycSubProcess::CreateJob("sleep 1")->start()->wait()->elapsed()->humanReadable()
+; => "1s"（示例值）
+```
+
+#### stdout <sub>`method`</sub>
+
+```text
+aj->stdout()
+=> ycSubProcess::Stream
+```
+
+返回标准输出流。
+
+```lisp
+aj = ycSubProcess::CreateJob("echo" "ok")
+aj->await()
+aj->stdout()->text()
+; => "ok\n"
+```
+
+#### stderr <sub>`method`</sub>
+
+```text
+aj->stderr()
+=> ycSubProcess::Stream
+```
+
+返回标准错误输出流。
+
+```lisp
+aj = ycSubProcess::CreateJob("ls /nonexistent-ycprobe")
+aj->await()
+aj->stderr()->text()
+; => "ls: cannot access '/nonexistent-ycprobe': No such file or directory\n"（示例值）
+```
 
 #### start <sub>`method`</sub>
 
@@ -310,7 +404,7 @@ aj->wait(
 | n_interval | int | 30 | 单位 **秒**，提示信息打印时间间隔 |
 
 ```lisp
-ycSubProcess::CreateJob("echo" "ok")->start()->wait()->stdout->last()
+ycSubProcess::CreateJob("echo" "ok")->start()->wait()->stdout()->last()
 ; => "ok\n"
 ```
 
@@ -440,7 +534,7 @@ aj->start()
 
 aj->send("123")
 aj->wait(1)
-aj->stdout->text()
+aj->stdout()->text()
 ; => "123\n"
 
 aj->send("456")
@@ -540,7 +634,7 @@ aj->close()
 ycSubProcess::CreateJob("sleep 1")\
     ->start()\
     ->wait()\
-    ->elapsed->humanReadable()
+    ->elapsed()->humanReadable()
 ; => "1s"（示例值）
 ```
 
@@ -555,7 +649,7 @@ ycSubProcess::CreateJob("sleep 1")\
 #### push <sub>`method`</sub>
 
 ```text
-aj->stdout->push(
+aj->stdout()->push(
     t_text
 )
 => t
@@ -568,15 +662,15 @@ aj->stdout->push(
 | t_text | str | 待追加的数据 |
 
 ```lisp
-aj->stdout->push("hello\n")
-aj->stdout->last()
+aj->stdout()->push("hello\n")
+aj->stdout()->last()
 ; => "hello\n"
 ```
 
 #### text <sub>`method`</sub>
 
 ```text
-aj->stdout->text(
+aj->stdout()->text(
     [ ?clear g_enable ]
 )
 => str
@@ -589,63 +683,63 @@ aj->stdout->text(
 | ?clear g_enable | t / nil | nil | t 时获取后清空数据流；nil 保留 |
 
 ```lisp
-aj->stdout->text()
+aj->stdout()->text()
 ; => "hello\n"
 ```
 
 #### size <sub>`method`</sub>
 
 ```text
-aj->stdout->size()
+aj->stdout()->size()
 => int
 ```
 
 获取数据流中数据数量。
 
 ```lisp
-ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout->size()
+ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout()->size()
 ; => 1
 ```
 
 #### isEmpty <sub>`method`</sub>
 
 ```text
-aj->stdout->isEmpty()
+aj->stdout()->isEmpty()
 => t | nil
 ```
 
 判断数据是否为空。
 
 ```lisp
-ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout->isEmpty()
+ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout()->isEmpty()
 ; => nil
 ```
 
 #### last <sub>`method`</sub>
 
 ```text
-aj->stdout->last()
+aj->stdout()->last()
 => str | nil
 ```
 
 获取最后一条数据，无数据时返回 nil。
 
 ```lisp
-ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout->last()
+ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout()->last()
 ; => "a\n"
 ```
 
 #### shift <sub>`method`</sub>
 
 ```text
-aj->stdout->shift()
+aj->stdout()->shift()
 => str | nil
 ```
 
 获取并移除第一条数据，无数据时返回 nil。
 
 ```lisp
-ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout->shift()
+ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout()->shift()
 ; => "a\n"
 ```
 
@@ -660,7 +754,7 @@ ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout->shift()
 #### mark <sub>`method`</sub>
 
 ```text
-aj->elapsed->mark()
+aj->elapsed()->mark()
 => str | nil
 ```
 
@@ -671,20 +765,20 @@ aj->elapsed->mark()
 跟随 `AsyncJob` 使用时不需要手动执行，任务会在进程启动和结束时会自动记录。
 
 ```lisp
-aj->elapsed->mark()
+aj->elapsed()->mark()
 ; => "Sep 27 19:46:09 2026"
 
-aj->elapsed->mark()
+aj->elapsed()->mark()
 ; => "Sep 27 19:46:10 2026"
 
-aj->elapsed->mark()
+aj->elapsed()->mark()
 ; => nil
 ```
 
 #### getStart <sub>`method`</sub>
 
 ```text
-aj->elapsed->getStart()
+aj->elapsed()->getStart()
 => str | nil
 ```
 
@@ -693,14 +787,14 @@ aj->elapsed->getStart()
 当开始时间未标记时返回 `nil`。
 
 ```lisp
-aj->elapsed->getStart()
+aj->elapsed()->getStart()
 ; => "Sep 27 19:46:09 2026"
 ```
 
 #### getEnd <sub>`method`</sub>
 
 ```text
-aj->elapsed->getEnd()
+aj->elapsed()->getEnd()
 => str | nil
 ```
 
@@ -709,14 +803,14 @@ aj->elapsed->getEnd()
 当结束时间未标记时返回 `nil`。
 
 ```lisp
-aj->elapsed->getEnd()
+aj->elapsed()->getEnd()
 ; => "Sep 27 19:46:10 2026"
 ```
 
 #### getSeconds <sub>`method`</sub>
 
 ```text
-aj->elapsed->getSeconds()
+aj->elapsed()->getSeconds()
 => int
 ```
 
@@ -725,14 +819,14 @@ aj->elapsed->getSeconds()
 当开始和结束时间未标记时会以 `error()` 中断。
 
 ```lisp
-aj->elapsed->getSeconds()
+aj->elapsed()->getSeconds()
 ; => 1
 ```
 
 #### humanReadable <sub>`method`</sub>
 
 ```text
-aj->elapsed->humanReadable()
+aj->elapsed()->humanReadable()
 => str
 ```
 
@@ -752,7 +846,7 @@ aj->elapsed->humanReadable()
 | 3661 | `1h1m1s` |
 
 ```lisp
-aj->elapsed->humanReadable()
+aj->elapsed()->humanReadable()
 ; => "1s"（示例值）
 ```
 
