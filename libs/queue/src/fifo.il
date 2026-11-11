@@ -44,24 +44,17 @@ defmethod(printself (self(FIFO))  ; -> str
 
 
 inScheme(
-defmethod(initializeInstance (self(FIFO) \@rest l_args)
+defmethod(initializeInstance (self(FIFO) \@key (maxLimit nil))
     ; 构造 FIFO 实例时在闭包里建状态桶并安装方法集：
     ; put/get/peek/size/isEmpty/isFull/maxLimit/clear/toList。
     ;
     ; **参数**
-    ;   l_args  (list) - 变参：构造器传入 (?maxLimit N)
+    ;   ?maxLimit  (int|nil) - 容量上限；默认 nil
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
-    let((data limit args)
-        args = l_args
-        while(args
-            when(car(args) == '?maxLimit
-                limit = cadr(args)
-            )
-            args = cddr(args)
-        )
-        data = makeInstance('_FIFOData ?maxLimit limit)
+    let((data)
+        data = makeInstance('_FIFOData ?maxLimit maxLimit)
 
         self->put = lambda((g_value "g")  ; -> self
             ; 把 g_value 追加到队尾；满队列时以 error() 中断且不入队。
