@@ -225,7 +225,7 @@ printf("%s" aj->await())
 
 ```text
 ycSubProcess::AsyncJob(
-    t_cmd
+    t_command
     [ ?callback g_funcobj ]
     [ ?userData g_data ]
     [ ?verbose g_enable ]
@@ -241,7 +241,7 @@ ycSubProcess::AsyncJob(
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| t_cmd | str | | 完整命令串 |
+| t_command | str | | 完整命令串 |
 | ?callback g_funcobj | nil / sym / funobj | nil | 可选，回调函数（签名见 `CreateJob`） |
 | ?userData g_data | any | nil | 可选，可用于携带任意数据 |
 | ?verbose g_enable | nil / t | nil | 可选，控制是否实时打印子进程输出 |

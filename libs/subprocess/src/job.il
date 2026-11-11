@@ -119,8 +119,8 @@ procedure(CreateJob(g_arg \@key callback userData verbose \@rest l_args "ggggg")
     ;
     ; **返回**
     ;   (AsyncJob) - 未启动的任务对象，需再调用 start() 启动
-    let((cmd2)
-        cmd2 = if(l_args
+    let((command)
+        command = if(l_args
         then
             buildString(foreach(mapcar x cons(g_arg l_args)
                 ycPathLib::ShellQuote(stringp(x) && x || lsprintf("%A" x))
@@ -128,7 +128,7 @@ procedure(CreateJob(g_arg \@key callback userData verbose \@rest l_args "ggggg")
         else
             stringp(g_arg) && g_arg || lsprintf("%A" g_arg)
         )
-        AsyncJob(cmd2
+        AsyncJob(command
             ?callback   callback
             ?userData   userData
             ?verbose    verbose
@@ -137,11 +137,11 @@ procedure(CreateJob(g_arg \@key callback userData verbose \@rest l_args "ggggg")
 )
 
 
-procedure(AsyncJob(t_cmd \@key callback userData verbose "tggg")  ; -> AsyncJob
+procedure(AsyncJob(t_command \@key callback userData verbose "tggg")  ; -> AsyncJob
     ; 构造 AsyncJob 实例（未启动）；一般经 CreateJob 使用，后者先拼接命令。
     ;
     ; **参数**
-    ;   t_cmd      (str) - 完整命令串
+    ;   t_command  (str) - 完整命令串
     ;   ?callback  (any) - 事件回调函数 callback(s_event job)；默认 nil
     ;   ?userData  (any) - 随对象携带的任意数据；默认 nil
     ;   ?verbose   (t|nil) - 是否实时打印子进程输出；默认 nil
@@ -149,7 +149,7 @@ procedure(AsyncJob(t_cmd \@key callback userData verbose "tggg")  ; -> AsyncJob
     ; **返回**
     ;   (AsyncJob) - 新任务对象，需再调用 start() 启动
     makeInstance('AsyncJob
-        ?cmd        t_cmd
+        ?command    t_command
         ?callback   callback
         ?userData   userData
         ?verbose    verbose && t
@@ -161,8 +161,8 @@ procedure(AsyncJob(t_cmd \@key callback userData verbose "tggg")  ; -> AsyncJob
 
 defclass(_AsyncJobData () (
     ; _AsyncJobData 数据桶：收纳任务命令与运行期状态，仅供 AsyncJob 方法闭包读写。
-    cmd(
-        \@initarg cmd
+    command(
+        \@initarg command
     )
     ipcId(
         \@initform nil
@@ -250,29 +250,29 @@ procedure(_rstring(t_s "t")  ; -> str
     pcreReplace(_rsrec t_s "\\\\\\0" 0)
 )
 
-defmethod(initializeInstance (self(AsyncJob) \@key (cmd nil) (callback nil) (userData nil) (verbose nil))
+defmethod(initializeInstance (self(AsyncJob) \@key (command nil) (callback nil) (userData nil) (verbose nil))
     ; 安装 AsyncJob 全部方法：start/wait/await/kill/state/stop/continue/send/close/signal/sleep。
     ; callback / userData / verbose 由主类槽的 @initarg 接收，这里声明只为关键字表完整。
     ;
     ; **参数**
-    ;   ?cmd      (str)     - 完整命令串；缺省或非字符串时报错
+    ;   ?command  (str)     - 完整命令串；缺省或非字符串时报错
     ;   ?callback (any)     - 回调函数；由主类槽接收
     ;   ?userData (any)     - 随对象数据；由主类槽接收
     ;   ?verbose  (t|nil)   - 实时打印开关；由主类槽接收
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
-    unless(stringp(cmd)
-        error("%A: ?cmd must be a string, got %A" className(self) cmd)
+    unless(stringp(command)
+        error("%A: ?command must be a string, got %A" className(self) command)
     )
     let((data)
-        data = makeInstance('_AsyncJobData ?cmd cmd)
+        data = makeInstance('_AsyncJobData ?command command)
         self->command = lambda(()  ; -> str
             ; 返回创建任务时的完整命令串。
             ;
             ; **返回**
             ;   (str) - 完整命令串
-            data->cmd
+            data->command
         )
         self->ipcId = lambda(()  ; -> ipcId | nil
             ; 返回底层进程间通信 ID；未启动时为 nil。
@@ -346,7 +346,7 @@ defmethod(initializeInstance (self(AsyncJob) \@key (cmd nil) (callback nil) (use
             when(self->callback
                 errset(funcall(self->callback 'beforeBegin self) t)
             )
-            data->ipcId = ipcBeginProcess(_rstring(data->cmd) ""
+            data->ipcId = ipcBeginProcess(_rstring(data->command) ""
                 lambda((g_cid t_data)
                     data->stdout->push(t_data)
                     when(self->verbose
