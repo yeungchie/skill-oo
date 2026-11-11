@@ -13,6 +13,16 @@ unless(findNamespace("ycNamespace")
     makeNamespace("ycNamespace")
 )
 
+; 所有命名空间符号都登记（2026-11-11 用户裁决）：图省事写成 ::: 定义并不等于
+; 「不登记」；这里补 addToNamespace，让 _ValidNames / Require 同在导出名单里。
+addToNamespace("ycNamespace"
+    mapcar('symbolToString '(
+        ; registry.il
+        _ValidNames  ; var
+        Require  ; proc
+    ))
+)
+
 ycNamespace:::_ValidNames = list(
     "ycPathLib"
     "ycIO"
