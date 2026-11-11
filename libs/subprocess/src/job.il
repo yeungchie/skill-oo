@@ -235,20 +235,7 @@ defmethod(printself (self(AsyncJob))  ; -> str
 
 ; ---------- 构造时安装全部方法 ----------
 
-inScheme(let((_rsrec)
-
-_rsrec = pcreCompile("[\"\\\\$]")
-
-procedure(_rstring(t_s "t")  ; -> str
-    ; 将命令串转为原始字符串：转义 " 与 $，阻止 shell 展开。
-    ;
-    ; **参数**
-    ;   t_s  (str) - 待转义命令串
-    ;
-    ; **返回**
-    ;   (str) - 转义后的命令串
-    pcreReplace(_rsrec t_s "\\\\\\0" 0)
-)
+inScheme(
 
 defmethod(initializeInstance (self(AsyncJob) \@key (command nil) (callback nil) (userData nil) (verbose nil))
     ; 安装 AsyncJob 全部方法：start/wait/await/kill/state/stop/continue/send/close/signal/sleep。
@@ -346,7 +333,9 @@ defmethod(initializeInstance (self(AsyncJob) \@key (command nil) (callback nil) 
             when(self->callback
                 errset(funcall(self->callback 'beforeBegin self) t)
             )
-            data->ipcId = ipcBeginProcess(_rstring(data->command) ""
+            data->ipcId = ipcBeginProcess(  ; #. 读期编译一次，等价于原 _rsrec 缓存
+                pcreReplace(#.pcreCompile("[\"\\\\$]") data->command "\\\\\\0" 0)
+                ""
                 lambda((g_cid t_data)
                     data->stdout->push(t_data)
                     when(self->verbose
@@ -503,7 +492,7 @@ defmethod(initializeInstance (self(AsyncJob) \@key (command nil) (callback nil) 
     )
 )
 
-))
+)
 
 
 unuseNamespace("ycSubProcess")
