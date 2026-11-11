@@ -32,7 +32,7 @@ procedure(Run(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; 
         job->wait(wait_timeout wait_interval)
         ; ipcWait 永远返回 t，超时只能靠 returncode 还是 nil 来观察；
         ; 退出码由 post 回调写入，wait 返回时可能尚未送达。
-        when(timeout && job->returncode == nil
+        when(timeout && job->returncode() == nil
             let((alive)
                 ; 仍非 'Dead 说明进程还在跑，必须 kill；'Dead 则等回调收尾。
                 alive = job->state() != 'Dead
@@ -41,13 +41,13 @@ procedure(Run(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; 
                 )
                 job->wait(5)
                 ; 超时，或退出码始终没有落地：一律报错，绝不返回 nil 或半截结果。
-                when(alive || job->returncode == nil
+                when(alive || job->returncode() == nil
                     error("ycSubProcess::Run: command timed out after %ds: %s"
-                        timeout job->cmd)
+                        timeout job->command())
                 )
             )
         )
-        job->returncode == 0
+        job->returncode() == 0
     )
 )
 
@@ -79,7 +79,7 @@ procedure(RunWithRead(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gg
         job->wait(wait_timeout wait_interval)
         ; ipcWait 永远返回 t，超时只能靠 returncode 还是 nil 来观察；
         ; 退出码由 post 回调写入，wait 返回时可能尚未送达。
-        when(timeout && job->returncode == nil
+        when(timeout && job->returncode() == nil
             let((alive)
                 ; 仍非 'Dead 说明进程还在跑，必须 kill；'Dead 则等回调收尾。
                 alive = job->state() != 'Dead
@@ -88,16 +88,16 @@ procedure(RunWithRead(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gg
                 )
                 job->wait(5)
                 ; 超时，或退出码始终没有落地：一律报错，绝不返回半截三元结果。
-                when(alive || job->returncode == nil
+                when(alive || job->returncode() == nil
                     error("ycSubProcess::RunWithRead: command timed out after %ds: %s"
-                        timeout job->cmd)
+                        timeout job->command())
                 )
             )
         )
         list(
-            job->returncode
-            job->stdout->text()
-            job->stderr->text()
+            job->returncode()
+            job->stdout()->text()
+            job->stderr()->text()
         )
     )
 )
@@ -159,12 +159,32 @@ procedure(AsyncJob(t_cmd \@key callback userData verbose "tggg")  ; -> AsyncJob
 
 ; ---------- 类定义 ----------
 
-defclass(AsyncJob () (
-    ; AsyncJob 任务对象：控制子进程生命周期并持有 stdout/stderr/耗时状态，构造后 start() 启动。
-    ; argument
+defclass(_AsyncJobData () (
+    ; _AsyncJobData 数据桶：收纳任务命令与运行期状态，仅供 AsyncJob 方法闭包读写。
     cmd(
         \@initarg cmd
     )
+    ipcId(
+        \@initform nil
+    )
+    returncode(
+        \@initform nil
+    )
+    elapsed(
+        \@initform makeInstance('Elapsed)
+    )
+    stdout(
+        \@initform makeInstance('Stream)
+    )
+    stderr(
+        \@initform makeInstance('Stream)
+    )
+))
+
+defclass(AsyncJob () (
+    ; AsyncJob 任务对象：控制子进程生命周期并持有 stdout/stderr/耗时状态，构造后 start() 启动。
+    ; 状态在 initializeInstance 的闭包里（_AsyncJobData），只经只读方法读取。
+    ; 可写配置：callback / userData / verbose。
     callback(
         \@initarg callback
         \@initform lambda((s_event job "sg") nil)
@@ -178,24 +198,13 @@ defclass(AsyncJob () (
         \@initform nil
     )
 
-    ; parameter
-    ipcId(
-        \@initform nil
-    )
-    returncode(
-        \@initform nil
-    )
-    elapsed(
-        \@initform makeInstance('Elapsed)
-    )
-
-    ; stream
-    stdout(
-        \@initform makeInstance('Stream)
-    )
-    stderr(
-        \@initform makeInstance('Stream)
-    )
+    ; 只读访问方法
+    command()
+    ipcId()
+    returncode()
+    elapsed()
+    stdout()
+    stderr()
 
     ; method
     start()
@@ -219,7 +228,7 @@ defmethod(printself (self(AsyncJob))  ; -> str
     lsprintf("<%A status=%A, returncode=%A>"
         className(self)
         self->state()
-        self->returncode
+        self->returncode()
     )
 )
 
@@ -241,205 +250,254 @@ procedure(_rstring(t_s "t")  ; -> str
     pcreReplace(_rsrec t_s "\\\\\\0" 0)
 )
 
-defmethod(initializeInstance (self(AsyncJob) \@rest l_args)
+defmethod(initializeInstance (self(AsyncJob) \@key (cmd nil) (callback nil) (userData nil) (verbose nil))
     ; 安装 AsyncJob 全部方法：start/wait/await/kill/state/stop/continue/send/close/signal/sleep。
+    ; callback / userData / verbose 由主类槽的 @initarg 接收，这里声明只为关键字表完整。
     ;
     ; **参数**
-    ;   l_args  (list) - 变参：附加初始化参数，本实现忽略
+    ;   ?cmd      (str|nil) - 完整命令串；默认 nil
+    ;   ?callback (any)     - 回调函数；由主类槽接收
+    ;   ?userData (any)     - 随对象数据；由主类槽接收
+    ;   ?verbose  (t|nil)   - 实时打印开关；由主类槽接收
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
-    procedure(_error(t_method t_formatString \@rest l_args "ttg")  ; -> never
-        ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
-        ;
-        ; **参数**
-        ;   t_method        (str) - 出错的方法名
-        ;   t_formatString  (str) - 错误说明格式串（lsprintf 格式）
-        ;   l_args          (list) - 变参：格式串实参
-        ;
-        ; **返回**
-        ;   (never) - 总是调用 error()，不返回
-        error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString l_args))
-    )
-    procedure(_checkStarted(t_method "t")
-        ; 前置校验：任务未启动（ipcId 为 nil）时以 _error 中断。
-        ;
-        ; **参数**
-        ;   t_method  (str) - 归属的方法名，并入错误消息
-        ;
-        ; **返回**
-        ;   (t) - 已启动时返回 t
-        unless(self->ipcId
-            _error(t_method "job has not started, current status is '%s'" self->state())
+    let((data)
+        data = makeInstance('_AsyncJobData ?cmd cmd)
+        self->command = lambda(()  ; -> str
+            ; 返回创建任务时的完整命令串。
+            ;
+            ; **返回**
+            ;   (str) - 完整命令串
+            data->cmd
         )
-    )
-    self->start = lambda(()  ; -> self
-        ; 启动子进程：注册 stdout/stderr/退出回调并等待到进程启动完成；
-        ; 'beforeBegin 在启动前、'afterBegin 在启动后触发；回调抛出的错误只打印、不打断任务。
-        ; 已启动（ipcId 非 nil）时 error() 中断。
-        ;
-        ; **返回**
-        ;   (AsyncJob) - self
-        when(self->ipcId
-            _error("start" "job already started, current status is '%s'" self->state())
+        self->ipcId = lambda(()  ; -> ipcId | nil
+            ; 返回底层进程间通信 ID；未启动时为 nil。
+            ;
+            ; **返回**
+            ;   (ipcId|nil) - 进程间通信 ID；未启动为 nil
+            data->ipcId
         )
-        when(self->callback
-            errset(funcall(self->callback 'beforeBegin self) t)
+        self->returncode = lambda(()  ; -> int | nil
+            ; 返回进程退出码；未结束或超时后仍为 nil。
+            ;
+            ; **返回**
+            ;   (int|nil) - 退出码；未落地为 nil
+            data->returncode
         )
-        self->ipcId = ipcBeginProcess(_rstring(self->cmd) ""
-            lambda((g_cid t_data)
-                self->stdout->push(t_data)
-                when(self->verbose
-                    fprintf(inSkill(IL::stdout) "%s" t_data)
+        self->elapsed = lambda(()  ; -> Elapsed
+            ; 返回任务耗时记录对象。
+            ;
+            ; **返回**
+            ;   (Elapsed) - 耗时记录对象
+            data->elapsed
+        )
+        self->stdout = lambda(()  ; -> Stream
+            ; 返回标准输出流对象。
+            ;
+            ; **返回**
+            ;   (Stream) - 标准输出流
+            data->stdout
+        )
+        self->stderr = lambda(()  ; -> Stream
+            ; 返回标准错误输出流对象。
+            ;
+            ; **返回**
+            ;   (Stream) - 标准错误输出流
+            data->stderr
+        )
+        procedure(_error(t_method t_formatString \@rest l_args "ttg")  ; -> never
+            ; 按统一格式 error() 中断：消息形如 <类名>-><方法名>: <说明>。
+            ;
+            ; **参数**
+            ;   t_method        (str) - 出错的方法名
+            ;   t_formatString  (str) - 错误说明格式串（lsprintf 格式）
+            ;   l_args          (list) - 变参：格式串实参
+            ;
+            ; **返回**
+            ;   (never) - 总是调用 error()，不返回
+            error("%A->%s: %s" className(self) t_method apply('lsprintf t_formatString l_args))
+        )
+        procedure(_checkStarted(t_method "t")
+            ; 前置校验：任务未启动（ipcId 为 nil）时以 _error 中断。
+            ;
+            ; **参数**
+            ;   t_method  (str) - 归属的方法名，并入错误消息
+            ;
+            ; **返回**
+            ;   (t) - 已启动时返回 t
+            unless(data->ipcId
+                _error(t_method "job has not started, current status is '%s'" self->state())
+            )
+        )
+        self->start = lambda(()  ; -> self
+            ; 启动子进程：注册 stdout/stderr/退出回调并等待到进程启动完成；
+            ; 'beforeBegin 在启动前、'afterBegin 在启动后触发；回调抛出的错误只打印、不打断任务。
+            ; 已启动（ipcId 非 nil）时 error() 中断。
+            ;
+            ; **返回**
+            ;   (AsyncJob) - self
+            when(data->ipcId
+                _error("start" "job already started, current status is '%s'" self->state())
+            )
+            when(self->callback
+                errset(funcall(self->callback 'beforeBegin self) t)
+            )
+            data->ipcId = ipcBeginProcess(_rstring(data->cmd) ""
+                lambda((g_cid t_data)
+                    data->stdout->push(t_data)
+                    when(self->verbose
+                        fprintf(inSkill(IL::stdout) "%s" t_data)
+                    )
+                    when(self->callback
+                        errset(funcall(self->callback 'stdout self) t)
+                    )
                 )
-                when(self->callback
-                    errset(funcall(self->callback 'stdout self) t)
+                lambda((g_cid t_data)
+                    data->stderr->push(t_data)
+                    when(self->verbose
+                        fprintf(inSkill(IL::stderr) "%s" t_data)
+                    )
+                    when(self->callback
+                        errset(funcall(self->callback 'stderr self) t)
+                    )
+                )
+                lambda((g_cid n_code)
+                    data->returncode = n_code
+                    data->elapsed->mark()
+                    when(self->callback
+                        errset(funcall(self->callback 'post self) t)
+                    )
                 )
             )
-            lambda((g_cid t_data)
-                self->stderr->push(t_data)
-                when(self->verbose
-                    fprintf(inSkill(IL::stderr) "%s" t_data)
-                )
-                when(self->callback
-                    errset(funcall(self->callback 'stderr self) t)
-                )
+            data->elapsed->mark()
+            ipcWaitForProcess(data->ipcId)
+            when(self->callback
+                errset(funcall(self->callback 'afterBegin self) t)
             )
-            lambda((g_cid n_code)
-                self->returncode = n_code
-                self->elapsed->mark()
-                when(self->callback
-                    errset(funcall(self->callback 'post self) t)
+            self
+        )
+        self->wait = lambda((\@optional n_timeout(1000000) wait_interval(30) "xx")  ; -> self
+            ; 等待进程结束或超时；间隔 wait_interval 提示一次（单位与默认值见 README）。
+            ;
+            ; **参数**
+            ;   n_timeout   (int) - 等待超时（默认 1000000）
+            ;   wait_interval  (int) - 提示打印间隔（默认 30）
+            ;
+            ; **返回**
+            ;   (AsyncJob) - self
+            _checkStarted("wait")
+            ipcWait(data->ipcId wait_interval n_timeout)
+            self
+        )
+        self->await = lambda((\@key check "g")  ; -> str
+            ; 未启动则先启动，随后等待进程结束；?check 非 nil 且返回码非零时
+            ; 打印 stderr 全量并以 error() 中断；任务处于 'Stopped 时无法等到
+            ; 结束，会以 error() 中断。
+            ;
+            ; **参数**
+            ;   ?check  (t|nil) - 返回码非零时是否报错；默认 nil
+            ;
+            ; **返回**
+            ;   (str) - 进程 stdout 全量文本
+            unless(data->ipcId
+                self->start()
+            )
+            while(!data->returncode
+                when(self->state() == 'Stopped
+                    _error("await" "job is stopped and cannot finish; continue() or kill() it first")
                 )
+                self->wait(1)
             )
-        )
-        self->elapsed->mark()
-        ipcWaitForProcess(self->ipcId)
-        when(self->callback
-            errset(funcall(self->callback 'afterBegin self) t)
-        )
-        self
-    )
-    self->wait = lambda((\@optional n_timeout(1000000) wait_interval(30) "xx")  ; -> self
-        ; 等待进程结束或超时；间隔 wait_interval 提示一次（单位与默认值见 README）。
-        ;
-        ; **参数**
-        ;   n_timeout   (int) - 等待超时（默认 1000000）
-        ;   wait_interval  (int) - 提示打印间隔（默认 30）
-        ;
-        ; **返回**
-        ;   (AsyncJob) - self
-        _checkStarted("wait")
-        ipcWait(self->ipcId wait_interval n_timeout)
-        self
-    )
-    self->await = lambda((\@key check "g")  ; -> str
-        ; 未启动则先启动，随后等待进程结束；?check 非 nil 且返回码非零时
-        ; 打印 stderr 全量并以 error() 中断；任务处于 'Stopped 时无法等到
-        ; 结束，会以 error() 中断。
-        ;
-        ; **参数**
-        ;   ?check  (t|nil) - 返回码非零时是否报错；默认 nil
-        ;
-        ; **返回**
-        ;   (str) - 进程 stdout 全量文本
-        unless(self->ipcId
-            self->start()
-        )
-        while(!self->returncode
-            when(self->state() == 'Stopped
-                _error("await" "job is stopped and cannot finish; continue() or kill() it first")
-            )
-            self->wait(1)
-        )
-        when(check && (self->returncode != 0)
-            let((info)
-                unless(blankstrp(info = self->stderr->text())
-                    fprintf(inSkill(IL::stderr) "%s" info)
+            when(check && (data->returncode != 0)
+                let((info)
+                    unless(blankstrp(info = data->stderr->text())
+                        fprintf(inSkill(IL::stderr) "%s" info)
+                    )
                 )
+                _error("await" "job failed, returncode is %d" data->returncode)
             )
-            _error("await" "job failed, returncode is %d" self->returncode)
+            data->stdout->text()
         )
-        self->stdout->text()
+        self->kill = lambda(()  ; -> t | nil
+            ; 向进程发送 SIGKILL；返回底层 ipcKillProcess 的结果。
+            ;
+            ; **返回**
+            ;   (t|nil) - 成功返回 t
+            _checkStarted("kill")
+            ipcKillProcess(data->ipcId)
+        )
+        self->state = lambda(()  ; -> sym
+            ; 返回进程状态符号：'None（未启动）/ 'Active / 'Dead / 'Stopped。
+            ;
+            ; **返回**
+            ;   (sym) - 未启动为 'None，否则透传 ipcId 的 state
+            data->ipcId && data->ipcId->state || 'None
+        )
+        self->stop = lambda(()  ; -> t | nil
+            ; 暂停进程，类似 Ctrl+Z；返回底层 ipcStopProcess 的结果。
+            ;
+            ; **返回**
+            ;   (t|nil) - 成功返回 t
+            _checkStarted("stop")
+            ipcStopProcess(data->ipcId)
+        )
+        self->continue = lambda(()  ; -> t | nil
+            ; 继续已暂停的进程，类似 fg；返回底层 ipcContProcess 的结果。
+            ;
+            ; **返回**
+            ;   (t|nil) - 成功返回 t
+            _checkStarted("continue")
+            ipcContProcess(data->ipcId)
+        )
+        self->send = lambda((t_formatString \@key end("\n") \@rest l_args "ttg")  ; -> self
+            ; 向子进程标准输入写入一行（lsprintf 先格式化，再补 end 结尾）。
+            ;
+            ; **参数**
+            ;   t_formatString  (str) - 格式串
+            ;   ?end            (str) - 行结尾（默认 "\n"）
+            ;   l_args          (list) - 变参：格式串实参
+            ;
+            ; **返回**
+            ;   (AsyncJob) - self；写入失败（进程已退出）时 error() 中断
+            _checkStarted("send")
+            ipcWriteProcess(data->ipcId
+                strcat(apply('lsprintf t_formatString l_args) end)
+            ) || _error("send" "job process has expired, current status is '%s'" self->state())
+            self
+        )
+        self->close = lambda(()  ; -> t | nil
+            ; 关闭子进程标准输入通道，类似 Ctrl+D；返回底层 ipcCloseProcess 的结果。
+            ;
+            ; **返回**
+            ;   (t|nil) - 成功返回 t
+            _checkStarted("close")
+            ipcCloseProcess(data->ipcId)
+        )
+        self->signal = lambda((s_signal "s")  ; -> t | nil
+            ; 向进程发送信号；返回底层 ipcSignalProcess 的结果。
+            ;
+            ; **参数**
+            ;   s_signal  (sym) - 信号符号：'INT 'TERM 'QUIT 'KILL
+            ;
+            ; **返回**
+            ;   (t|nil) - 成功返回 t
+            _checkStarted("signal")
+            ipcSignalProcess(data->ipcId s_signal)
+        )
+        self->sleep = lambda((\@optional n_second(0) "n")  ; -> self
+            ; 令父进程（当前会话）休眠指定秒数。
+            ;
+            ; **参数**
+            ;   n_second  (num) - 休眠秒数（默认 0）
+            ;
+            ; **返回**
+            ;   (AsyncJob) - self
+            ipcSleepMilli(fix2(n_second * 1e3))
+            self
+        )
+        t
     )
-    self->kill = lambda(()  ; -> t | nil
-        ; 向进程发送 SIGKILL；返回底层 ipcKillProcess 的结果。
-        ;
-        ; **返回**
-        ;   (t|nil) - 成功返回 t
-        _checkStarted("kill")
-        ipcKillProcess(self->ipcId)
-    )
-    self->state = lambda(()  ; -> sym
-        ; 返回进程状态符号：'None（未启动）/ 'Active / 'Dead / 'Stopped。
-        ;
-        ; **返回**
-        ;   (sym) - 未启动为 'None，否则透传 ipcId 的 state
-        self->ipcId && self->ipcId->state || 'None
-    )
-    self->stop = lambda(()  ; -> t | nil
-        ; 暂停进程，类似 Ctrl+Z；返回底层 ipcStopProcess 的结果。
-        ;
-        ; **返回**
-        ;   (t|nil) - 成功返回 t
-        _checkStarted("stop")
-        ipcStopProcess(self->ipcId)
-    )
-    self->continue = lambda(()  ; -> t | nil
-        ; 继续已暂停的进程，类似 fg；返回底层 ipcContProcess 的结果。
-        ;
-        ; **返回**
-        ;   (t|nil) - 成功返回 t
-        _checkStarted("continue")
-        ipcContProcess(self->ipcId)
-    )
-    self->send = lambda((t_formatString \@key end("\n") \@rest l_args "ttg")  ; -> self
-        ; 向子进程标准输入写入一行（lsprintf 先格式化，再补 end 结尾）。
-        ;
-        ; **参数**
-        ;   t_formatString  (str) - 格式串
-        ;   ?end            (str) - 行结尾（默认 "\n"）
-        ;   l_args          (list) - 变参：格式串实参
-        ;
-        ; **返回**
-        ;   (AsyncJob) - self；写入失败（进程已退出）时 error() 中断
-        _checkStarted("send")
-        ipcWriteProcess(self->ipcId
-            strcat(apply('lsprintf t_formatString l_args) end)
-        ) || _error("send" "job process has expired, current status is '%s'" self->state())
-        self
-    )
-    self->close = lambda(()  ; -> t | nil
-        ; 关闭子进程标准输入通道，类似 Ctrl+D；返回底层 ipcCloseProcess 的结果。
-        ;
-        ; **返回**
-        ;   (t|nil) - 成功返回 t
-        _checkStarted("close")
-        ipcCloseProcess(self->ipcId)
-    )
-    self->signal = lambda((s_signal "s")  ; -> t | nil
-        ; 向进程发送信号；返回底层 ipcSignalProcess 的结果。
-        ;
-        ; **参数**
-        ;   s_signal  (sym) - 信号符号：'INT 'TERM 'QUIT 'KILL
-        ;
-        ; **返回**
-        ;   (t|nil) - 成功返回 t
-        _checkStarted("signal")
-        ipcSignalProcess(self->ipcId s_signal)
-    )
-    self->sleep = lambda((\@optional n_second(0) "n")  ; -> self
-        ; 令父进程（当前会话）休眠指定秒数。
-        ;
-        ; **参数**
-        ;   n_second  (num) - 休眠秒数（默认 0）
-        ;
-        ; **返回**
-        ;   (AsyncJob) - self
-        ipcSleepMilli(fix2(n_second * 1e3))
-        self
-    )
-    t
 )
 
 ))

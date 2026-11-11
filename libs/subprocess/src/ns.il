@@ -7,6 +7,7 @@ addToNamespace("ycSubProcess"
         Stream  ; class
 
         ; job.il
+        _AsyncJobData  ; class
         AsyncJob  ; proc, class
         Run  ; proc
         RunWithRead  ; proc
