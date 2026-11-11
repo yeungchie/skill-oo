@@ -53,7 +53,7 @@ defmethod(initializeInstance (self(FIFO) \@key (maxLimit nil))
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
-    when(maxLimit != nil && !(fixp(maxLimit) && maxLimit > 0)
+    when(maxLimit && !(fixp(maxLimit) && maxLimit > 0)
         error("%A: ?maxLimit must be nil or a positive integer, got %A" className(self) maxLimit)
     )
     let((data)
@@ -67,7 +67,7 @@ defmethod(initializeInstance (self(FIFO) \@key (maxLimit nil))
             ;
             ; **返回**
             ;   (FIFO) - self，支持链式
-            when(data->maxLimit != nil && data->count >= data->maxLimit
+            when(data->maxLimit && data->count >= data->maxLimit
                 error("%A->put: queue is full (maxLimit %d)" className(self) data->maxLimit)
             )
             data->items = tconc(data->items g_value)
@@ -147,7 +147,7 @@ defmethod(initializeInstance (self(FIFO) \@key (maxLimit nil))
             ;
             ; **返回**
             ;   (t|nil) - 达到上限为 t；不限容量或未满为 nil
-            data->maxLimit != nil && data->count >= data->maxLimit
+            data->maxLimit && data->count >= data->maxLimit
         )
 
         self->maxLimit = lambda(()  ; -> int | nil
