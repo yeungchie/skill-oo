@@ -19,6 +19,8 @@ let((q)
     _Assert(q->isFull() == nil  "fifo: makeInstance is never full")
     q->put("x")
     _Assert(q->get() == "x"  "fifo: makeInstance put/get works")
+    _AssertErrorMsg(lambda(() makeInstance('ycQueue::FIFO ?maxLimit 0)) "?maxLimit must be nil or a positive integer"
+        "fifo: makeInstance validates maxLimit")
 )
 
 ; ---------- 3. 顺序与成员类型 ----------
@@ -26,6 +28,7 @@ let((q)
 let((q a b c)
     q = ycQueue::FIFO()
     q->put("a")->put("b")->put("c")
+    _Assert(printself(q) == "<ycQueue::FIFO size=3>"  "fifo: printself shows size 3")
     a = q->get()
     b = q->get()
     c = q->get()
@@ -100,6 +103,8 @@ let((q)
         "fifo: peek float index rejected")
     _AssertErrorMsg(lambda(() q->peek(?index "1")) "argument for keyword ?index should be an integer"
         "fifo: peek string index rejected")
+    _AssertErrorMsg(lambda(() q->peek(?index list(1 2))) "argument for keyword ?index should be an integer"
+        "fifo: peek list index rejected")
     _Assert(q->peek() == "a" && q->peek() == "a"  "fifo: repeated peek returns same value")
     _Assert(q->size() == 3  "fifo: peek does not change size")
 )
@@ -150,6 +155,7 @@ let((q)
     _Assert(q->toList() == list("a" "b")  "fifo: rejected put kept order")
     q->get()
     _Assert(q->isFull() == nil  "fifo: get clears full state")
+    _Assert(q->maxLimit() == 2  "fifo: maxLimit unchanged after get")
     _Assert(q->put("c")->size() == 2  "fifo: put works after get")
 )
 
@@ -175,11 +181,14 @@ _AssertErrorMsg(lambda(() ycQueue::FIFO(?maxLimit t)) "?maxLimit must be nil or 
 
 let((q)
     q = ycQueue::FIFO(?maxLimit 3)
-    q->put(1)->put(2)
+    q->put(1)->put(2)->put(3)
+    _Assert(q->isFull() == t  "fifo: bounded queue reaches full")
     q->clear()
     _Assert(q->size() == 0  "fifo: clear empties the queue")
     _Assert(q->maxLimit() == 3  "fifo: clear keeps maxLimit")
+    _Assert(q->isFull() == nil  "fifo: clear resets full state")
     _Assert(q->put(4)->size() == 1  "fifo: clear allows put")
+    _Assert(q->put(5)->put(6)->isFull() == t  "fifo: can refill to maxLimit after clear")
 )
 
 let((q l)
@@ -246,6 +255,25 @@ let((q)
     _Assert(q->size() == 0 && q->isEmpty()  "fifo: 100 gets drain the queue")
 )
 
+let((q)
+    q = ycQueue::FIFO()
+    q->put(1)->put(2)
+    q->get()
+    _Assert(q->peek(?index -1) == 2  "fifo: index -1 after partial drain")
+    q->get()
+    q->put(3)
+    _Assert(q->toList() == list(3) && q->peek(?index -1) == 3  "fifo: refill rebuilds tail")
+)
+
+let((q s)
+    q = ycQueue::FIFO()
+    s = ycQueue::LIFO()
+    q->put(1)->put(2)
+    s->put("a")->put("b")
+    _Assert(q->get() == 1 && s->get() == "b" && q->get() == 2 && s->get() == "a"
+        "fifo: interleaved fifo and lifo are independent")
+)
+
 let((q1 q2)
     q1 = ycQueue::FIFO()
     q2 = ycQueue::FIFO()
@@ -269,6 +297,14 @@ let((q)
     q = ycQueue::FIFO()
     _AssertErrorMsg(lambda(() q->size(1)) "too many arguments (0 expected, 1 given)"
         "fifo: size rejects extra arguments")
+    _AssertErrorMsg(lambda(() q->isEmpty(1)) "too many arguments (0 expected, 1 given)"
+        "fifo: isEmpty rejects extra arguments")
+    _AssertErrorMsg(lambda(() q->isFull(1)) "too many arguments (0 expected, 1 given)"
+        "fifo: isFull rejects extra arguments")
+    _AssertErrorMsg(lambda(() q->maxLimit(1)) "too many arguments (0 expected, 1 given)"
+        "fifo: maxLimit rejects extra arguments")
+    _AssertErrorMsg(lambda(() q->clear(1)) "too many arguments (0 expected, 1 given)"
+        "fifo: clear rejects extra arguments")
 )
 
 _TestChildDone = t

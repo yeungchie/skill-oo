@@ -19,6 +19,8 @@ let((q)
     _Assert(q->isFull() == nil  "lifo: makeInstance is never full")
     q->put("x")
     _Assert(q->get() == "x"  "lifo: makeInstance put/get works")
+    _AssertErrorMsg(lambda(() makeInstance('ycQueue::LIFO ?maxLimit 0)) "?maxLimit must be nil or a positive integer"
+        "lifo: makeInstance validates maxLimit")
 )
 
 ; ---------- 3. 顺序与成员类型 ----------
@@ -26,6 +28,7 @@ let((q)
 let((q a b c)
     q = ycQueue::LIFO()
     q->put("a")->put("b")->put("c")
+    _Assert(printself(q) == "<ycQueue::LIFO size=3>"  "lifo: printself shows size 3")
     a = q->get()
     b = q->get()
     c = q->get()
@@ -100,6 +103,8 @@ let((q)
         "lifo: peek float index rejected")
     _AssertErrorMsg(lambda(() q->peek(?index "1")) "argument for keyword ?index should be an integer"
         "lifo: peek string index rejected")
+    _AssertErrorMsg(lambda(() q->peek(?index list(1 2))) "argument for keyword ?index should be an integer"
+        "lifo: peek list index rejected")
     _Assert(q->peek() == "c" && q->peek() == "c"  "lifo: repeated peek returns same value")
     _Assert(q->size() == 3  "lifo: peek does not change size")
 )
@@ -150,6 +155,7 @@ let((q)
     _Assert(q->toList() == list("b" "a")  "lifo: rejected put kept order")
     q->get()
     _Assert(q->isFull() == nil  "lifo: get clears full state")
+    _Assert(q->maxLimit() == 2  "lifo: maxLimit unchanged after get")
     _Assert(q->put("c")->size() == 2  "lifo: put works after get")
 )
 
@@ -175,11 +181,14 @@ _AssertErrorMsg(lambda(() ycQueue::LIFO(?maxLimit t)) "?maxLimit must be nil or 
 
 let((q)
     q = ycQueue::LIFO(?maxLimit 3)
-    q->put(1)->put(2)
+    q->put(1)->put(2)->put(3)
+    _Assert(q->isFull() == t  "lifo: bounded queue reaches full")
     q->clear()
     _Assert(q->size() == 0  "lifo: clear empties the queue")
     _Assert(q->maxLimit() == 3  "lifo: clear keeps maxLimit")
+    _Assert(q->isFull() == nil  "lifo: clear resets full state")
     _Assert(q->put(4)->size() == 1  "lifo: clear allows put")
+    _Assert(q->put(5)->put(6)->isFull() == t  "lifo: can refill to maxLimit after clear")
 )
 
 let((q)
@@ -246,6 +255,16 @@ let((q i ok)
     _Assert(ok && q->size() == 0  "lifo: 100 gets return last-in-first-out")
 )
 
+let((q)
+    q = ycQueue::LIFO()
+    q->put(1)->put(2)
+    q->get()
+    _Assert(q->peek(?index -1) == 1  "lifo: index -1 after partial drain")
+    q->get()
+    q->put(3)
+    _Assert(q->toList() == list(3) && q->peek(?index -1) == 3  "lifo: refill restores tail")
+)
+
 let((q1 q2)
     q1 = ycQueue::LIFO()
     q2 = ycQueue::LIFO()
@@ -269,6 +288,14 @@ let((q)
     q = ycQueue::LIFO()
     _AssertErrorMsg(lambda(() q->size(1)) "too many arguments (0 expected, 1 given)"
         "lifo: size rejects extra arguments")
+    _AssertErrorMsg(lambda(() q->isEmpty(1)) "too many arguments (0 expected, 1 given)"
+        "lifo: isEmpty rejects extra arguments")
+    _AssertErrorMsg(lambda(() q->isFull(1)) "too many arguments (0 expected, 1 given)"
+        "lifo: isFull rejects extra arguments")
+    _AssertErrorMsg(lambda(() q->maxLimit(1)) "too many arguments (0 expected, 1 given)"
+        "lifo: maxLimit rejects extra arguments")
+    _AssertErrorMsg(lambda(() q->clear(1)) "too many arguments (0 expected, 1 given)"
+        "lifo: clear rejects extra arguments")
 )
 
 ; ---------- 10. LIFO 顺序专项 ----------
