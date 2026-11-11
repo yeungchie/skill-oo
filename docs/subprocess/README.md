@@ -396,7 +396,7 @@ aj->wait(
 => ycSubProcess::AsyncJob
 ```
 
-等待任务完成；任务未启动时以 `error()` 中断。超时返回后任务并未结束：`returncode` 仍为 `nil`，`state()` 也不会是 `'Dead`；该方法不终止进程，需要终止请调用 `kill()`。
+等待任务完成；任务未启动时以 `error()` 中断。超时返回后任务并未结束：`returncode()` 仍为 `nil`，`state()` 也不会是 `'Dead`；该方法不终止进程，需要终止请调用 `kill()`。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -662,9 +662,11 @@ aj->stdout()->push(
 | t_text | str | 待追加的数据 |
 
 ```lisp
+aj = ycSubProcess::CreateJob("cat")->start()
 aj->stdout()->push("hello\n")
 aj->stdout()->last()
 ; => "hello\n"
+aj->kill()
 ```
 
 #### text <sub>`method`</sub>
@@ -683,7 +685,7 @@ aj->stdout()->text(
 | ?clear g_enable | t / nil | nil | t 时获取后清空数据流；nil 保留 |
 
 ```lisp
-aj->stdout()->text()
+ycSubProcess::CreateJob("echo" "hello")->start()->wait()->stdout()->text()
 ; => "hello\n"
 ```
 

@@ -182,7 +182,7 @@ defclass(_AsyncJobData () (
 ))
 
 defclass(AsyncJob () (
-    ; AsyncJob 任务对象：控制子进程生命周期并持有 stdout/stderr/耗时状态，构造后 start() 启动。
+    ; AsyncJob 任务对象：控制子进程生命周期，状态经 _AsyncJobData 持有，构造后 start() 启动。
     ; 状态在 initializeInstance 的闭包里（_AsyncJobData），只经只读方法读取。
     ; 可写配置：callback / userData / verbose。
     callback(
@@ -255,13 +255,16 @@ defmethod(initializeInstance (self(AsyncJob) \@key (cmd nil) (callback nil) (use
     ; callback / userData / verbose 由主类槽的 @initarg 接收，这里声明只为关键字表完整。
     ;
     ; **参数**
-    ;   ?cmd      (str|nil) - 完整命令串；默认 nil
+    ;   ?cmd      (str)     - 完整命令串；缺省或非字符串时报错
     ;   ?callback (any)     - 回调函数；由主类槽接收
     ;   ?userData (any)     - 随对象数据；由主类槽接收
     ;   ?verbose  (t|nil)   - 实时打印开关；由主类槽接收
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
+    unless(stringp(cmd)
+        error("%A: ?cmd must be a string, got %A" className(self) cmd)
+    )
     let((data)
         data = makeInstance('_AsyncJobData ?cmd cmd)
         self->command = lambda(()  ; -> str
