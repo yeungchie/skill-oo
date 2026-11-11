@@ -76,7 +76,7 @@ defmethod(initializeInstance (self(FIFO) \@rest _args)
         )
     )
 
-    self->get = lambda((\@key (onEmpty 'ycQueue::_NoneArg) "g")  ; -> any
+    self->get = lambda((\@key (onEmpty '_NoneArg) "g")  ; -> any
         ; 取出并移除最早元素；空队列按 ?onEmpty 契约处理。
         ;
         ; **参数**
@@ -88,7 +88,7 @@ defmethod(initializeInstance (self(FIFO) \@rest _args)
             data = self->_data
             if(data->count == 0
             then
-                ycQueue::_EmptyResult(self "get" onEmpty)
+                _EmptyResult(self "get" onEmpty)
             else
                 value = caar(data->items)
                 car(data->items) := cdar(data->items)
@@ -98,7 +98,7 @@ defmethod(initializeInstance (self(FIFO) \@rest _args)
         )
     )
 
-    self->peek = lambda((\@key (index 0) (onEmpty 'ycQueue::_NoneArg) "xg")  ; -> any
+    self->peek = lambda((\@key (index 0) (onEmpty '_NoneArg) "xg")  ; -> any
         ; 返回指定位置的元素而不移除；空队列按 ?onEmpty 契约处理。
         ;
         ; **参数**
@@ -111,7 +111,7 @@ defmethod(initializeInstance (self(FIFO) \@rest _args)
             data = self->_data
             if(data->count == 0
             then
-                ycQueue::_EmptyResult(self "peek" onEmpty)
+                _EmptyResult(self "peek" onEmpty)
             else
                 cond(
                     (index == 0
@@ -121,7 +121,7 @@ defmethod(initializeInstance (self(FIFO) \@rest _args)
                         car(cdr(data->items))
                     )
                     (t
-                        pos = ycQueue::_Position(self "peek" index data->count)
+                        pos = _Position(self "peek" index data->count)
                         nth(pos car(data->items))
                     )
                 )
