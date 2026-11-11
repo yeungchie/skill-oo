@@ -34,6 +34,7 @@ ycNamespace:::_ValidNames = list(
     "ycTabulate"
     "ycDateTime"
     "ycLog"
+    "ycQueue"
 )
 
 procedure(ycNamespace:::Require(@rest l_names "t")  ; -> t

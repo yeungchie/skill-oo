@@ -37,6 +37,7 @@ let((dir pkgs)
         "tabulate"
         "datetime"
         "log"
+        "queue"
     )
     foreach(pkg pkgs
         dir->join(pkg "load.il")->load()
