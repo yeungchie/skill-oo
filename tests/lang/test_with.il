@@ -460,6 +460,13 @@ _Assert(errset(expandMacro('(ycWith 42 makeInstance('WithOk) 1)) nil) == nil
 _AssertErrorMsg(lambda(() expandMacro('(ycWith t makeInstance('WithOk) 1)))
     "symbol other than t"  "with: t is not a usable binding name")
 
+; ---------- 共享标记 ----------
+
+_Assert('ycLang:::NoneArg == findSymbol("NoneArg" ?namespace "ycLang")
+    "lang: NoneArg is the namespace symbol constant")
+_Assert(!fboundp('ycLang:::NoneArg) && !boundp('ycLang:::NoneArg)
+    "lang: NoneArg stays a symbol constant, not a binding")
+
 _TestChildDone = t
 
 ; END

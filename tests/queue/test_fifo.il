@@ -128,6 +128,8 @@ let((q obj res)
     q = ycQueue::FIFO()
     _AssertErrorMsg(lambda(() q->get()) "ycQueue::FIFO->get: queue is empty"
         "fifo: empty get without onEmpty errors")
+    _AssertErrorMsg(lambda(() q->get(?onEmpty 'ycLang:::NoneArg)) "ycQueue::FIFO->get: queue is empty"
+        "fifo: explicit NoneArg flag keeps the empty-read error")
     _Assert(q->get(?onEmpty nil) == nil  "fifo: empty get onEmpty nil")
     _Assert(q->get(?onEmpty 0) == 0  "fifo: empty get onEmpty 0")
     _Assert(q->get(?onEmpty "") == ""  "fifo: empty get onEmpty empty string")

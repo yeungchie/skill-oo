@@ -1,3 +1,5 @@
+ycNamespace:::Require("ycLang")
+
 useNamespace("ycQueue")
 
 ; ---------- LIFO 数据桶 ----------
@@ -82,7 +84,7 @@ defmethod(initializeInstance (self(LIFO) \@key (maxLimit nil))
             self
         )
 
-        self->get = lambda((\@key (onEmpty '_NoneArg) "g")  ; -> any
+        self->get = lambda((\@key (onEmpty 'ycLang:::NoneArg) "g")  ; -> any
             ; 取出并移除最新元素；空队列按 ?onEmpty 契约处理。
             ;
             ; **参数**
@@ -103,7 +105,7 @@ defmethod(initializeInstance (self(LIFO) \@key (maxLimit nil))
             )
         )
 
-        self->peek = lambda((\@key (index 0) (onEmpty '_NoneArg) "xg")  ; -> any
+        self->peek = lambda((\@key (index 0) (onEmpty 'ycLang:::NoneArg) "xg")  ; -> any
             ; 返回指定位置的元素而不移除；空队列按 ?onEmpty 契约处理。
             ;
             ; **参数**

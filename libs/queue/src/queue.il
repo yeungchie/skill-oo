@@ -1,12 +1,14 @@
+ycNamespace:::Require("ycLang")
+
 useNamespace("ycQueue")
 
 ; ---------- 共享助手 ----------
 ;
 ; 空读契约：「未指定 ?onEmpty」与「?onEmpty 显式给 nil」必须可区分，而引擎不会
-; 把未传的关键字暴露给过程体。标记是符号常量 _NoneArg（在 ns.il 登记为 sym，
-; 完整名 ycQueue::_NoneArg，不做变量绑定）；它留在命名空间里，不做裸全局符号。
-; 缺省位与空读比较都写符号字面量 '_NoneArg（useNamespace 下即 ycQueue::_NoneArg），
-; 比较用值相等 ==。本库内写裸名，三冒号只用于跨库引用。
+; 把未传的关键字暴露给过程体。标记是语言层的公共符号常量 ycLang::NoneArg
+; （在 ycLang 的 ns.il 登记为 sym，不做变量绑定）；跨库引用一律写三冒号
+; 'ycLang:::NoneArg，本文件不把它导入默认命名空间。缺省位与空读比较都用该
+; 字面量，比较用值相等 ==。
 
 ; 两个助手都由方法 lambda 显式传入队列对象（全局过程读不到调用方的 self）。
 
@@ -16,11 +18,11 @@ procedure(_EmptyResult(g_obj t_method g_onEmpty "gtg")  ; -> any
     ; **参数**
     ;   g_obj      (any) - 调用方队列对象，用于错误消息里的类名
     ;   t_method   (str) - 错误消息里的方法名
-    ;   g_onEmpty  (any) - 空读返回值；未指定时为内部标记符号
+    ;   g_onEmpty  (any) - 空读返回值；未指定时为共享标记 ycLang::NoneArg
     ;
     ; **返回**
     ;   (any) - g_onEmpty 的原值；未指定时以 error() 中断
-    when(g_onEmpty == '_NoneArg
+    when(g_onEmpty == 'ycLang:::NoneArg
         error("%A->%s: queue is empty" className(g_obj) t_method)
     )
     g_onEmpty

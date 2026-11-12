@@ -10,6 +10,7 @@ Cadence SKILL++ 的队列库：提供先进先出与后进先出两个队列类�
 + 成员可以是任意 SKILL 值——字符串、数字、符号、列表、`nil`、对象都能入队；`nil` 是合法成员，与「队列为空」互不混淆。
 + `put` / `get` / `size` / `isEmpty` / `isFull` / `maxLimit` / `clear` 均为 O(1)；`peek` 的两个端点 O(1)，其余位置 O(n)。
 + 空队列读取默认以 `error()` 中断；用 `?onEmpty` 指定返回值可改为返回给定值。
++ 空读的缺省标记是语言层共享符号常量 `ycLang::NoneArg`；调用方一般无需关心，显式把它传给 `?onEmpty` 等同未指定。
 + 可选容量上限 `?maxLimit`：达到上限后 `put` 以 `error()` 中断且不入队；不指定则不限容量。
 + 记法约定：例程中的 `; =>` 表示该表达式的返回值。
 
@@ -116,7 +117,7 @@ q->get(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?onEmpty g_fallback | any | | 可选，空队列时的返回值；未指定时空读中断 |
+| ?onEmpty g_fallback | any | | 可选，空队列时的返回值；未指定（或传入共享标记 `ycLang::NoneArg`）时空读中断 |
 
 ```lisp
 q = ycQueue::FIFO()
@@ -146,7 +147,7 @@ q->peek(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | ?index n_position | int | 0 | 可选，0-based 位置；负值从队尾数 |
-| ?onEmpty g_fallback | any | | 可选，空队列时的返回值；未指定时空读中断 |
+| ?onEmpty g_fallback | any | | 可选，空队列时的返回值；未指定（或传入共享标记 `ycLang::NoneArg`）时空读中断 |
 
 ```lisp
 q = ycQueue::FIFO()
@@ -360,7 +361,7 @@ s->get(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?onEmpty g_fallback | any | | 可选，空队列时的返回值；未指定时空读中断 |
+| ?onEmpty g_fallback | any | | 可选，空队列时的返回值；未指定（或传入共享标记 `ycLang::NoneArg`）时空读中断 |
 
 ```lisp
 s = ycQueue::LIFO()
@@ -390,7 +391,7 @@ s->peek(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | ?index n_position | int | 0 | 可选，0-based 位置；负值从最早一端数 |
-| ?onEmpty g_fallback | any | | 可选，空队列时的返回值；未指定时空读中断 |
+| ?onEmpty g_fallback | any | | 可选，空队列时的返回值；未指定（或传入共享标记 `ycLang::NoneArg`）时空读中断 |
 
 ```lisp
 s = ycQueue::LIFO()

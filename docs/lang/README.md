@@ -15,6 +15,7 @@ Cadence SKILL++ 的语言级辅助库：`ycWith` 作用域宏与配套的对象�
 - 根类 `t` 上有默认钩子，只在绕过宏直接调用通用函数时给出带类名的错误，不计入「已接入」。
 - 进入前检查两个钩子；缺任一钩子时以 `error()` 中断，体内的代码不会执行。
 - `ycWith` 是全局宏，不能写成 `ycLang::ycWith`。
+- `ycLang::NoneArg` 是「关键字没有提供」的共享符号标记，供需要区分「未指定」与「显式给 `nil`」的接口使用。
 
 ## 快速上手
 
@@ -192,6 +193,33 @@ defmethod(__ycWithExit__ (self(MyScope))
     printf("leaving scope\n")
     t
 )
+```
+
+### ycLang::NoneArg <sub>`constant`</sub>
+
+「关键字没有提供」的共享符号标记：需要区分「未指定」与「显式给 `nil`」的接口，把它放在关键字参数的缺省位，并据此判断。它是符号常量 `ycLang::NoneArg`，不做变量绑定；其他库跨模块引用时写 `'ycLang:::NoneArg`。该标记只表示「参数缺席」，不是合法的参数值：调用方把它当实际值传入时，接口应视同未指定。
+
+**例程**
+
+```lisp
+'ycLang:::NoneArg == findSymbol("NoneArg" ?namespace "ycLang")
+; => t
+
+; 典型用法：缺省值就是该标记，读取时据此判断
+procedure(greet(t_name "t" \@key (greeting 'ycLang:::NoneArg))
+    if(greeting == 'ycLang:::NoneArg
+    then
+        strcat("Hello, " t_name)
+    else
+        greeting
+    )
+)
+greet("Ann")
+; => "Hello, Ann"
+greet("Ann" ?greeting "Hi")
+; => "Hi"
+greet("Ann" ?greeting nil)
+; => nil
 ```
 
 ## 接入 with 协议

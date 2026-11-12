@@ -128,6 +128,8 @@ let((q obj)
     q = ycQueue::LIFO()
     _AssertErrorMsg(lambda(() q->get()) "ycQueue::LIFO->get: queue is empty"
         "lifo: empty get without onEmpty errors")
+    _AssertErrorMsg(lambda(() q->get(?onEmpty 'ycLang:::NoneArg)) "ycQueue::LIFO->get: queue is empty"
+        "lifo: explicit NoneArg flag keeps the empty-read error")
     _Assert(q->get(?onEmpty nil) == nil  "lifo: empty get onEmpty nil")
     _Assert(q->get(?onEmpty 0) == 0  "lifo: empty get onEmpty 0")
     _Assert(q->get(?onEmpty "") == ""  "lifo: empty get onEmpty empty string")

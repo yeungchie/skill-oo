@@ -6,7 +6,6 @@ addToNamespace("ycQueue"
         ; queue.il
         _EmptyResult  ; proc
         _Position  ; proc
-        _NoneArg  ; sym
 
         ; fifo.il
         _FIFOData  ; class
