@@ -93,6 +93,10 @@ defmethod(initializeInstance (self(FIFO) \@key (maxLimit nil))
                     value = caar(data->items)
                     car(data->items) := cdar(data->items)
                     data->count = data->count - 1
+                    when(data->count == 0
+                        ; 排空后换新容器，避免尾指针悬空
+                        data->items = cons(nil nil)
+                    )
                     value
                 )
             )

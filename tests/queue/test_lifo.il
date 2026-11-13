@@ -122,6 +122,13 @@ let((q)
     _Assert(q->peek(?onEmpty 'none) == "x"  "lifo: non-empty peek ignores onEmpty")
 )
 
+let((q)
+    q = ycQueue::LIFO()
+    q->put("x")
+    _AssertErrorMsg(lambda(() q->peek(?index 5 ?onEmpty 'none)) "index 5 out of range (size 1)"
+        "lifo: non-empty peek checks the index before onEmpty")
+)
+
 ; ---------- 6. 空读契约 ----------
 
 let((q obj)
@@ -164,6 +171,14 @@ let((q)
 let((q)
     q = ycQueue::LIFO()
     _Assert(q->isFull() == nil  "lifo: unlimited queue isFull stays nil")
+)
+
+let((q)
+    q = ycQueue::LIFO(?maxLimit 1)
+    _Assert(q->put(1)->isFull()  "lifo: maxLimit 1 fills on the first put")
+    _AssertErrorMsg(lambda(() q->put(2)) "queue is full (maxLimit 1)"
+        "lifo: maxLimit 1 rejects the second put")
+    _Assert(q->get() == 1 && q->isFull() == nil  "lifo: maxLimit 1 reopens after get")
 )
 
 _AssertErrorMsg(lambda(() ycQueue::LIFO(?maxLimit 0)) "?maxLimit must be nil or a positive integer"
@@ -232,6 +247,25 @@ let((q)
     _Assert(q->toList(?clear t) == nil  "lifo: empty toList with clear is nil")
 )
 
+let((q)
+    q = ycQueue::LIFO(?maxLimit 2)
+    _Assert(eq(q->clear() q)  "lifo: clear on an empty queue returns self")
+    _Assert(q->size() == 0 && q->isEmpty()  "lifo: clear on an empty queue keeps it empty")
+    _Assert(q->maxLimit() == 2  "lifo: clear on an empty queue keeps maxLimit")
+    _Assert(q->put(1)->size() == 1  "lifo: empty clear leaves the queue usable")
+)
+
+let((q inner l)
+    q = ycQueue::LIFO()
+    inner = list(1 2)
+    q->put(inner)
+    l = q->toList()
+    _Assert(!eq(l car(q->toList()))  "lifo: toList copies the outer list")
+    _Assert(eq(car(l) inner)  "lifo: toList shares nested members")
+    car(car(l)) := 9
+    _Assert(car(q->peek()) == 9  "lifo: editing a nested member is visible to the queue")
+)
+
 ; ---------- 9. 边界 ----------
 
 let((q)
@@ -288,6 +322,8 @@ let((q res)
 
 let((q)
     q = ycQueue::LIFO()
+    _AssertErrorMsg(lambda(() q->put()) "too few arguments (1 expected, 0 given)"
+        "lifo: put rejects zero arguments")
     _AssertErrorMsg(lambda(() q->size(1)) "too many arguments (0 expected, 1 given)"
         "lifo: size rejects extra arguments")
     _AssertErrorMsg(lambda(() q->isEmpty(1)) "too many arguments (0 expected, 1 given)"
