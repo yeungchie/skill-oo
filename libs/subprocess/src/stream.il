@@ -29,10 +29,14 @@ defmethod(printself (self(Stream))  ; -> str
 inScheme(
 defmethod(initializeInstance (self(Stream))
     ; 安装 Stream 全部方法：push/last/shift/text/size/isEmpty。
-    ; 内部状态是一个 ycQueue::FIFO 实例，只在闭包里出现。
+    ; 内部状态是一个 ycQueue::FIFO 实例，只在闭包里出现；
+    ; ycQueue 未加载时以 error() 中断。
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
+    unless(fboundp('ycQueue:::FIFO)
+        error("%A: ycQueue is not loaded - load it first" className(self))
+    )
     let((queue)
         queue = ycQueue:::FIFO()
         self->push = lambda((t_text "t")  ; -> t

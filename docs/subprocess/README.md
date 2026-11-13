@@ -235,7 +235,7 @@ ycSubProcess::AsyncJob(
 
 **描述**
 
-异步任务对象，用于控制和获取任务及进程信息。命令串为已拼接好的完整命令；一般经 `CreateJob()`（先拼接命令段）创建。
+异步任务对象，用于控制和获取任务及进程信息。命令串为已拼接好的完整命令；一般经 `CreateJob()`（先拼接命令段）创建。`?command` 缺省或不是字符串时以 `error()` 中断，消息形如 `ycSubProcess::AsyncJob: ?command must be a string, got 123`。
 
 **参数**
 
@@ -378,7 +378,7 @@ aj->start()
 => ycSubProcess::AsyncJob
 ```
 
-运行任务，启动进程；已启动或参数非法时以 `error()` 中断。
+运行任务，启动进程；已启动时以 `error()` 中断。
 
 ```lisp
 aj = ycSubProcess::CreateJob("cat")
