@@ -133,6 +133,9 @@ let((p_f p_sub)
     _AssertSameStrs(_Sl(p_base->glob("b/*"))
         nil
         "glob: missing literal dir empty")
+    _AssertSameStrs(_Sl(p_base->glob("[z-a]*"))
+        nil
+        "glob: descending range never matches")
     _AssertSameStrs(_Sl(p_base->glob("sub/../hello.txt"))
         list(p_base->join("sub/../hello.txt")->str())
         "glob: dotdot segment textual")

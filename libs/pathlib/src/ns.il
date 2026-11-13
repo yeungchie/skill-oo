@@ -28,6 +28,7 @@ addToNamespace("ycPathLib"
 
         ; fnmatch.il
         _FnmatchBracket  ; proc
+        _ClassRangeInvalid  ; proc
         _FnmatchToPcre  ; proc
         _Fnmatch1  ; proc
         _CanMatchEmpty  ; proc
