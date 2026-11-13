@@ -80,24 +80,19 @@ procedure(_FnmatchBracket(t_pattern n_open n_len "txx")  ; -> (str, int)
 
 procedure(_ClassRangeInvalid(t_stuff "t")  ; -> t | nil
     ; 判断字符类内容里是否有降序区间（如 "z-a"）。
-    ; 只把 X-Y 形式的 "-" 当区间；首尾的 "-" 与紧邻反斜杠的 "-" 按字面处理。
+    ; 只把 X-Y 形式的 "-" 当区间；首尾的 "-" 按字面处理。
+    ; 反斜杠是普通字符，参与比较（其字符码为 92）。
     ;
     ; **参数**
     ;   t_stuff  (str) - 已去掉前导 "!" 的字符类内容
     ;
     ; **返回**
     ;   (t|nil) - 存在降序区间返回 t
-    let((bad k len prev next)
+    let((bad k len)
         len = length(t_stuff)
         for(k 2 len - 1
             when(substring(t_stuff k 1) == "-"
-                prev = substring(t_stuff k - 1 1)
-                next = substring(t_stuff k + 1 1)
-                when(and(
-                        prev != "\\"
-                        next != "\\"
-                        charToInt(getchar(t_stuff k - 1)) > charToInt(getchar(t_stuff k + 1))
-                    )
+                when(charToInt(getchar(t_stuff k - 1)) > charToInt(getchar(t_stuff k + 1))
                     bad = t
                 )
             )
