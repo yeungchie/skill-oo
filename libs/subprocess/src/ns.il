@@ -9,6 +9,7 @@ addToNamespace("ycSubProcess"
         ; job.il
         _AsyncJobData  ; class
         AsyncJob  ; proc, class
+        _WaitJob  ; proc
         Run  ; proc
         RunWithRead  ; proc
         CreateJob  ; proc

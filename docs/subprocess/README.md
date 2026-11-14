@@ -11,6 +11,7 @@ Cadence SKILL++ 的子进程封装库：启动进程、实时读写输出、按�
 + 输出按条收进 `Stream` 对象：`text()` 全量拼接、`last()`/`shift()` 取单条；耗时由 `Elapsed` 记录。
 + 回调函数按事件符号触发：`'stdout`/`'stderr`/`'post`/`'beforeBegin`/`'afterBegin`。
 + 单参数形式的命令串交给 shell 解释（引号、`$` 展开、管道、重定向照常生效）；多参数形式按参数列表拼接，每个参数自动加引号保护，空格与元字符不再被解释。
++ 输出缓冲依赖 `ycQueue`；未加载时构造任务会以 `error()` 中断并提示 `ycQueue is not loaded`。
 + `send()` 写入的数据直接送达子进程标准输入、不经 shell。
 + 例程中 `; =>` 表示返回值，括注「示例值」者为示意。
 
@@ -378,7 +379,7 @@ aj->start()
 => ycSubProcess::AsyncJob
 ```
 
-运行任务，启动进程；已启动时以 `error()` 中断。
+运行任务，启动进程；已启动时以 `error()` 中断。命令串中的 `"`、`\`、`$` 会先补一层转义再交给进程接口，接口剥离后 shell 仍收到原文（引号与变量展开语义不变）。
 
 ```lisp
 aj = ycSubProcess::CreateJob("cat")

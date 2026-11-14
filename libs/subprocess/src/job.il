@@ -5,6 +5,38 @@ useNamespace("ycSubProcess")
 
 ; ---------- 函数 ----------
 
+procedure(_WaitJob(g_job g_timeout n_interval "ggx")  ; -> int | nil
+    ; 等待任务结束并取回退出码；?timeout 为 nil 时分段等待，无总上限。
+    ;
+    ; **参数**
+    ;   g_job      (AsyncJob) - 已启动的任务对象
+    ;   g_timeout  (int|nil)  - 等待上限（秒）；nil 表示不限
+    ;   n_interval (int)      - 等待提示间隔（秒）
+    ;
+    ; **返回**
+    ;   (int|nil) - 退出码；进程已结束但回调仍未落地时为 nil
+    if(g_timeout
+    then
+        g_job->wait(g_timeout n_interval)
+    else
+        ; ipcWait 单次上限 1,000,000 秒：按天分段等待，直到进程结束。
+        while(g_job->state() != 'Dead
+            g_job->wait(86400 n_interval)
+        )
+    )
+    ; 退出码由 post 回调写入，ipcWait 返回时可能尚未送达：
+    ; 进程已结束而退出码仍为空时，给回调一个短宽限窗口（最多 5 秒）。
+    let((tries)
+        tries = 0
+        while(g_job->state() == 'Dead && g_job->returncode() == nil && tries < 50
+            g_job->sleep(0.1)
+            tries++
+        )
+        g_job->returncode()
+    )
+)
+
+
 procedure(Run(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; -> t | nil
     ; 执行命令并等待任务完成，子进程输出实时打印到终端。
     ;
@@ -16,7 +48,7 @@ procedure(Run(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; 
     ;
     ; **返回**
     ;   (t|nil) - 正常结束（退出码 0）返回 t；退出码非零返回 nil；超时 error
-    let((job wait_timeout wait_interval)
+    let((job wait_interval code)
         unless(timeout == nil || (fixp(timeout) && timeout > 0)
             error("ycSubProcess::Run: ?timeout must be a positive integer, got %A"
                 timeout)
@@ -25,29 +57,29 @@ procedure(Run(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; 
             error("ycSubProcess::Run: ?interval must be a positive integer, got %A"
                 interval)
         )
-        ; 省略 ?timeout 时沿用 wait() 的默认上限，保持旧行为不变。
-        wait_timeout = if(timeout timeout 1000000)
         wait_interval = if(interval interval 30)
         job = apply('CreateJob g_arg ?verbose t l_args)->start()
-        job->wait(wait_timeout wait_interval)
-        ; ipcWait 永远返回 t，超时只能靠 returncode 还是 nil 来观察；
-        ; 退出码由 post 回调写入，wait 返回时可能尚未送达。
-        when(timeout && job->returncode() == nil
+        code = _WaitJob(job timeout wait_interval)
+        when(timeout && code == nil
             let((alive)
                 ; 仍非 'Dead 说明进程还在跑，必须 kill；'Dead 则等回调收尾。
                 alive = job->state() != 'Dead
                 when(alive
                     job->kill()
                 )
-                job->wait(5)
+                code = _WaitJob(job 5 wait_interval)
                 ; 超时，或退出码始终没有落地：一律报错，绝不返回 nil 或半截结果。
-                when(alive || job->returncode() == nil
+                when(alive || code == nil
                     error("ycSubProcess::Run: command timed out after %ds: %s"
                         timeout job->command())
                 )
             )
         )
-        job->returncode() == 0
+        when(code == nil
+            error("ycSubProcess::Run: exit status is not available after the command finished: %s"
+                job->command())
+        )
+        code == 0
     )
 )
 
@@ -63,7 +95,7 @@ procedure(RunWithRead(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gg
     ;
     ; **返回**
     ;   (returncode:int, stdout:str, stderr:str) - 固定三元列表：退出码、标准输出、标准错误；超时 error
-    let((job wait_timeout wait_interval)
+    let((job wait_interval code)
         unless(timeout == nil || (fixp(timeout) && timeout > 0)
             error("ycSubProcess::RunWithRead: ?timeout must be a positive integer, got %A"
                 timeout)
@@ -72,30 +104,30 @@ procedure(RunWithRead(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gg
             error("ycSubProcess::RunWithRead: ?interval must be a positive integer, got %A"
                 interval)
         )
-        ; 省略 ?timeout 时沿用 wait() 的默认上限，保持旧行为不变。
-        wait_timeout = if(timeout timeout 1000000)
         wait_interval = if(interval interval 30)
         job = apply('CreateJob g_arg l_args)->start()
-        job->wait(wait_timeout wait_interval)
-        ; ipcWait 永远返回 t，超时只能靠 returncode 还是 nil 来观察；
-        ; 退出码由 post 回调写入，wait 返回时可能尚未送达。
-        when(timeout && job->returncode() == nil
+        code = _WaitJob(job timeout wait_interval)
+        when(timeout && code == nil
             let((alive)
                 ; 仍非 'Dead 说明进程还在跑，必须 kill；'Dead 则等回调收尾。
                 alive = job->state() != 'Dead
                 when(alive
                     job->kill()
                 )
-                job->wait(5)
+                code = _WaitJob(job 5 wait_interval)
                 ; 超时，或退出码始终没有落地：一律报错，绝不返回半截三元结果。
-                when(alive || job->returncode() == nil
+                when(alive || code == nil
                     error("ycSubProcess::RunWithRead: command timed out after %ds: %s"
                         timeout job->command())
                 )
             )
         )
+        when(code == nil
+            error("ycSubProcess::RunWithRead: exit status is not available after the command finished: %s"
+                job->command())
+        )
         list(
-            job->returncode()
+            code
             job->stdout()->text()
             job->stderr()->text()
         )
@@ -333,6 +365,8 @@ defmethod(initializeInstance (self(AsyncJob) \@key (command nil) (callback nil) 
             when(self->callback
                 errset(funcall(self->callback 'beforeBegin self) t)
             )
+            ; ipcBeginProcess 自己会剥离一层反斜杠：先给 " \ $ 补一层转义，
+            ; 抵消它的剥离，shell 最终收到原始命令串。
             data->ipcId = ipcBeginProcess(  ; #. 读期编译一次，等价于原 _rsrec 缓存
                 pcreReplace(#.pcreCompile("[\"\\\\$]") data->command "\\\\\\0" 0)
                 ""

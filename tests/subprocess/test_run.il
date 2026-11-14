@@ -34,6 +34,27 @@ _Assert(errset(ycSubProcess::RunWithRead() nil) == nil "RunWithRead requires a c
 _Assert(ycSubProcess::Run("true" ?timeout 5) == t
     "Run accepts ?timeout and still returns t")
 
+let((ok)
+    ok = t
+    for(i 1 10
+        unless(ycSubProcess::Run("true")
+            ok = nil
+        )
+    )
+    _Assert(ok  "Run: default ?timeout keeps a stable result for quick commands")
+)
+
+let((ok res)
+    ok = t
+    for(i 1 10
+        res = ycSubProcess::RunWithRead("echo hello")
+        unless(res && car(res) == 0 && cadr(res) == "hello\n"
+            ok = nil
+        )
+    )
+    _Assert(ok  "RunWithRead: default ?timeout keeps a stable triple for quick commands")
+)
+
 let((res)
     res = ycSubProcess::RunWithRead("echo" "hi" ?timeout 5)
     _Assert(car(res) == 0 "RunWithRead with ?timeout returns the exit code")
