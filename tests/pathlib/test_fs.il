@@ -483,12 +483,25 @@ let((r)
 )
 
 ; --- dash-prefixed relative names ---
-_P("-n")->touch()
-_Assert(_P("-n")->exists()  "touch: dash-prefixed name is a file, not an option")
-_P("-n")->rename("-f")
-_Assert(_P("-f")->exists() && !_P("-n")->exists()  "rename: dash-prefixed names")
-_P("-f")->unlink()
-_Assert(!_P("-f")->exists()  "unlink: dash-prefixed name removed")
+; 破折号文件名必须以相对形式传给 shell 才会触发选项解析；
+; 在独立临时目录内执行，结束后恢复工作目录，避免碰到运行目录中的同名文件。
+let((p_dash saved_dir)
+    saved_dir = getWorkingDir()
+    p_dash = p_base->join("dash")
+    p_dash->mkdir()
+    changeWorkingDir(p_dash->absolute()->str())
+    unwindProtect(
+        progn(
+            _P("-n")->touch()
+            _Assert(_P("-n")->exists()  "touch: dash-prefixed name is a file, not an option")
+            _P("-n")->rename("-f")
+            _Assert(_P("-f")->exists() && !_P("-n")->exists()  "rename: dash-prefixed names")
+            _P("-f")->unlink()
+            _Assert(!_P("-f")->exists()  "unlink: dash-prefixed name removed")
+        )
+        changeWorkingDir(saved_dir)
+    )
+)
 
 ; --- cleanup ---
 system(strcat("rm -rf " tmp))
