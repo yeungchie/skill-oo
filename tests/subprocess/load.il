@@ -3,7 +3,7 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-let((res path dir)
+let((res path dir queueReady)
     res = errset(get_filename(piport) nil)
     path = when(res && car(res) && stringp(car(res)) && car(res) != ""
         car(res)
@@ -18,29 +18,32 @@ let((res path dir)
     unless(pcreMatchp("/$" dir)
         dir = strcat(dir "/")
     )
+    unless(findNamespace("ycNamespace")
+        loadi(strcat(dir "../../libs/registry.il"))
+    )
+    unless(and(
+            findNamespace("ycPathLib")
+            findSymbol("Path" ?namespace "ycPathLib")
+            fboundp(findSymbol("Path" ?namespace "ycPathLib"))
+        )
+        loadi(strcat(dir "../../libs/pathlib/load.il"))
+    )
     unless(and(
             findNamespace("ycSubProcess")
             findSymbol("CreateJob" ?namespace "ycSubProcess")
             fboundp(findSymbol("CreateJob" ?namespace "ycSubProcess"))
         )
-        ; libs/subprocess/load.il relies on ycPathLib; when ycPathLib is absent,
-        ; enter through libs/load.il so the bootstrap order is respected.
-        if(and(
-                findNamespace("ycPathLib")
-                findSymbol("Path" ?namespace "ycPathLib")
-                fboundp(findSymbol("Path" ?namespace "ycPathLib"))
-            )
-            loadi(simplifyFilename(strcat(dir "../../libs/subprocess/load.il") t))
-            loadi(simplifyFilename(strcat(dir "../../libs/load.il") t))
-        )
-        printf("ycSubProcess: re-running tests with previously loaded code; restart CIW if you edited libs/subprocess/src/\n")
+        loadi(strcat(dir "../../libs/subprocess/load.il"))
     )
-    unless(and(
-            findNamespace("ycQueue")
-            findSymbol("FIFO" ?namespace "ycQueue")
-            fboundp(findSymbol("FIFO" ?namespace "ycQueue"))
-        )
-        loadi(simplifyFilename(strcat(dir "../../libs/queue/load.il") t))
+    queueReady = and(
+        findNamespace("ycQueue")
+        findSymbol("FIFO" ?namespace "ycQueue")
+        fboundp(findSymbol("FIFO" ?namespace "ycQueue"))
+    )
+    unless(queueReady
+        ; ycQueue 尚未加载：这是唯一能走到守卫错误路径的窗口。
+        loadi(strcat(dir "isolated.il"))
+        loadi(strcat(dir "../../libs/queue/load.il"))
     )
     _TestDir = dir
     unless(fboundp('_TestRun)
