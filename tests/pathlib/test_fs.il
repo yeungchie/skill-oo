@@ -501,6 +501,7 @@ let((p_dash saved_dir)
         )
         changeWorkingDir(saved_dir)
     )
+    _Assert(getWorkingDir() == saved_dir  "dash fixture: working directory restored")
 )
 
 ; --- cleanup ---
