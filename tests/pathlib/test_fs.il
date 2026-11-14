@@ -482,6 +482,14 @@ let((r)
     _Assert(r && numberp(car(r))  "size: directory returns a number (CPython stat().st_size)")
 )
 
+; --- dash-prefixed relative names ---
+_P("-n")->touch()
+_Assert(_P("-n")->exists()  "touch: dash-prefixed name is a file, not an option")
+_P("-n")->rename("-f")
+_Assert(_P("-f")->exists() && !_P("-n")->exists()  "rename: dash-prefixed names")
+_P("-f")->unlink()
+_Assert(!_P("-f")->exists()  "unlink: dash-prefixed name removed")
+
 ; --- cleanup ---
 system(strcat("rm -rf " tmp))
 _Assert(!p_base->exists()  "fixture: cleanup")
