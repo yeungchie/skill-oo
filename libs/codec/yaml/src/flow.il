@@ -43,11 +43,13 @@ procedure(_FlowTokenEnd(t_s n_i "tx")  ; -> int
         while(!stop && n_i <= len
             c = _Code(t_s n_i)
             if(c == 32 || c == 9 || c == 44 || c == 93 || c == 125
+            then
                 stop = t
+            else
                 n_i++
             )
         )
-        if(stop n_i - 1 n_i)
+        n_i
     )
 )
 
@@ -62,7 +64,7 @@ procedure(_AliasValue(t_name "t")  ; -> any
     when(_ActiveAnchors[t_name]
         error("ycYaml::Decode: recursive alias %A" t_name)
     )
-    unless(_Anchors[t_name]
+    unless(_DefinedAnchors[t_name]
         error("ycYaml::Decode: unknown alias %A" t_name)
     )
     _Anchors[t_name]
@@ -182,6 +184,7 @@ procedure(_FlowValue(t_s n_i n_max "txn")  ; -> list
         )
         when(anchor
             _Anchors[anchor] = val
+            _DefinedAnchors[anchor] = t
             _ActiveAnchors[anchor] = nil
         )
         return(v)

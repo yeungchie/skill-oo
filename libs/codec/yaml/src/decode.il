@@ -246,6 +246,7 @@ procedure(_ParseValueText(t_text l_lines n_pos n_parentIndent n_max n_line n_col
         when(tag val = _TagValue(val tag))
         when(anchor
             _Anchors[anchor] = val
+            _DefinedAnchors[anchor] = t
             _ActiveAnchors[anchor] = nil
         )
         return(list(val cadr(v)))
@@ -567,6 +568,7 @@ procedure(_DecodeText(l_lines n_max "lx")  ; -> any
     ;   (any) - 文档值
     let((r pos)
         _Anchors = makeTable("yamlAnchors" nil)
+        _DefinedAnchors = makeTable("yamlDefinedAnchors" nil)
         _ActiveAnchors = makeTable("yamlActiveAnchors" nil)
         r = _ParseBlock(l_lines 1 0 n_max)
         pos = _SkipIgnorable(l_lines cadr(r))

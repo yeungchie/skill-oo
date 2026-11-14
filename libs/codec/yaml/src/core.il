@@ -5,6 +5,7 @@ useNamespace("ycYaml")
 _MaxDecodeDepth = 800
 _MaxEncodeDepth = 800
 _Anchors = makeTable("yamlAnchors" nil)
+_DefinedAnchors = makeTable("yamlDefinedAnchors" nil)
 _ActiveAnchors = makeTable("yamlActiveAnchors" nil)
 
 procedure(_Nth1(n_i l_list "xl")  ; -> any

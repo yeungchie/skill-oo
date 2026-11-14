@@ -4,9 +4,9 @@
 | --- | --- |
 | core | PASS: 18 / FAIL: 0 |
 | json | PASS: 237 / FAIL: 0 |
-| yaml | PASS: 224 / FAIL: 0 |
+| yaml | PASS: 231 / FAIL: 0 |
 | csv | PASS: 241 / FAIL: 0 |
 | toml | PASS: 169 / FAIL: 0 |
 | ini | PASS: 129 / FAIL: 0 |
 
-结果来自最近一次运行（2026-11-09）。用例总数由 `test_init.il` 的 `_TestRun` 第二个参数声明，增删用例后同步本表；运行方式见 [测试说明](../README.md)。
+结果来自最近一次运行（2026-11-14）。用例总数由 `test_init.il` 的 `_TestRun` 第二个参数声明，增删用例后同步本表；运行方式见 [测试说明](../README.md)。

@@ -36,6 +36,7 @@ addToNamespace("ycYaml"
         _MaxDecodeDepth  ; var
         _MaxEncodeDepth  ; var
         _Anchors  ; var
+        _DefinedAnchors  ; var
         _ActiveAnchors  ; var
         _Blankp  ; proc
         _Build  ; proc
