@@ -14,6 +14,7 @@ Cadence SKILL++ 的 SQLite 客户端封装库：默认客户端可用时直接�
 + 支持位置参数 `?`；参数值由模块安全转义。
 + SQLite 类型会被保留：`NULL`、整数、浮点、文本与 `BLOB` 分别映射为 `nil`、fixnum 或字符串、flonum、字符串与 `ycSQLite::Blob`。
 + 超出 32 位的整数以十进制字符串返回，避免静默截断；`BLOB` 默认以十六进制文本保存。
++ 外键约束默认开启：`Open` 的 `?foreignKeys` 默认 `t`，显式传 `nil` 可关闭；该选项设置会话启动状态，之后仍可用 `PRAGMA foreign_keys` 改变当前会话。
 + SQL 能力取决于所配置客户端的版本；模块只透传，不模拟客户端缺失的 SQL 特性。
 
 ## 快速上手
@@ -61,13 +62,14 @@ ycSQLite::Open(
     t_path
     [ ?timeout n_timeout ]
     [ ?busyTimeout n_busyTimeout ]
+    [ ?foreignKeys g_enable ]
 )
 => ycSQLite::Database
 ```
 
 **描述**
 
-打开数据库并启动长驻会话。`t_path` 是文件路径时使用文件数据库；文件不存在时会创建。`":memory:"` 是 SQLite 的特殊路径，表示只在当前 `Database` 会话内存在的内存数据库：不会生成文件，`close()` 后其中的表和数据全部消失。需要临时计算、演示或验证 SQL 时使用它；需要长期保存数据时使用普通文件路径。客户端使用 `DefaultClient()`；未配置或验证失败时以 `error()` 中断。
+打开数据库并启动长驻会话。`t_path` 是文件路径时使用文件数据库；文件不存在时会创建。`":memory:"` 是 SQLite 的特殊路径，表示只在当前 `Database` 会话内存在的内存数据库：不会生成文件，`close()` 后其中的表和数据全部消失。需要临时计算、演示或验证 SQL 时使用它；需要长期保存数据时使用普通文件路径。外键约束默认开启；声明了 `references` 的表会按 SQLite 外键规则校验。批量导入或兼容旧数据时可传 `?foreignKeys nil` 关闭。客户端使用 `DefaultClient()`；未配置或验证失败时以 `error()` 中断。
 
 **参数**
 
@@ -76,6 +78,7 @@ ycSQLite::Open(
 | t_path | `str` |  | 文件路径，或 `":memory:"`（临时内存数据库，关闭后丢失） |
 | ?timeout n_timeout | `int / nil` | `nil` | 会话请求等待秒数 |
 | ?busyTimeout n_busyTimeout | `int / nil` | `nil` | `busy_timeout` 毫秒数 |
+| ?foreignKeys g_enable | `t / nil` | `t` | 会话启动时的外键开关；`nil` 关闭 |
 
 **返回值**
 
@@ -95,6 +98,22 @@ mem->execute("create table temp_value(x integer);")
 car(mem->query("select count(*) from temp_value;")->rows())->get(0)
 ; => 0（表中没有记录）
 mem->close()
+
+; 外键默认开启：孤儿行会被拒绝
+fk = ycSQLite::Open(":memory:")
+fk->execute("create table parent(id integer primary key);")
+fk->execute("create table child(pid integer references parent(id));")
+fk->execute("insert into child(pid) values (1);")
+; => 以 error() 中断（外键约束失败）
+fk->close()
+
+; 批量导入或兼容旧数据时，可显式关闭
+raw = ycSQLite::Open(":memory:" ?foreignKeys nil)
+raw->execute("create table parent(id integer primary key);")
+raw->execute("create table child(pid integer references parent(id));")
+raw->execute("insert into child(pid) values (1);")
+; => 成功（未校验外键）
+raw->close()
 ```
 
 ### ycSQLite::Database <sub>`class`</sub>
@@ -958,6 +977,7 @@ info->version()
 | 表 | 由若干列组成的二维数据集合，类似一张带固定列名的表 |
 | 行 | 表中的一条记录 |
 | 列 | 记录中的一个字段，例如 `id`、`name` |
+| 外键 | 一个表中的列引用另一个表的主键；是否校验由会话的外键开关决定，`Open` 默认开启 |
 | SQL | 操作数据库的语句；建表、插入、查询、更新、删除都通过 SQL 完成 |
 
 + `query` 用于读取数据，SQL 通常以 `SELECT` 开头；`execute` 用于建表、插入、更新和删除。

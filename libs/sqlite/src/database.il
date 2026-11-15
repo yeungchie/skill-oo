@@ -1,4 +1,5 @@
 ycNamespace:::Require("ycCsv")
+ycNamespace:::Require("ycLang")
 ycNamespace:::Require("ycSubProcess")
 
 useNamespace("ycSQLite")
@@ -20,6 +21,10 @@ defclass(_DatabaseData () (
     )
     busyTimeout(
         \@initarg busyTimeout
+        \@initform nil
+    )
+    foreignKeys(
+        \@initarg foreignKeys
         \@initform nil
     )
     job(
@@ -205,6 +210,10 @@ procedure(_StartSession(g_obj g_data "gg")  ; -> t
                 _SessionSend(g_obj g_data ".headers off" "open")
                 _SessionSend(g_obj g_data ".mode list" "open")
                 _SessionSend(g_obj g_data ".separator |" "open")
+                _SessionSend(g_obj g_data
+                    lsprintf("pragma foreign_keys=%s;"
+                        if(g_data->foreignKeys "on" "off"))
+                    "open")
                 _SessionSend(g_obj g_data "select 1;" "open")
                 when(g_data->busyTimeout
                     _SessionSend(g_obj g_data
@@ -633,13 +642,14 @@ procedure(_InstallDatabase(self "g")  ; -> t
 )
 
 
-procedure(Open(t_path \@key (timeout nil) (busyTimeout nil) "tgg")  ; -> Database
+procedure(Open(t_path \@key (timeout nil) (busyTimeout nil) (foreignKeys 'ycLang:::NoneArg) "tggg")  ; -> Database
     ; 打开数据库并启动长驻会话。
     ;
     ; **参数**
     ;   t_path        (str) - 数据库路径或 ":memory:"
     ;   ?timeout      (int|nil) - 会话等待秒数
     ;   ?busyTimeout  (int|nil) - PRAGMA busy_timeout 毫秒数
+    ;   ?foreignKeys  (t|nil) - 会话启动时的外键开关；省略为 t
     ;
     ; **返回**
     ;   (Database) - 数据库对象；配置或会话失败时 error() 中断
@@ -657,6 +667,12 @@ procedure(Open(t_path \@key (timeout nil) (busyTimeout nil) "tgg")  ; -> Databas
                 error("ycSQLite::Open: ?busyTimeout must be a non-negative integer or nil")
             )
         )
+        when(foreignKeys == 'ycLang:::NoneArg
+            foreignKeys = t
+        )
+        unless(foreignKeys == t || foreignKeys == nil
+            error("ycSQLite::Open: ?foreignKeys must be t or nil")
+        )
         client2 = DefaultClient()
         client2->validate()
         unless(client2->isValid()
@@ -673,6 +689,7 @@ procedure(Open(t_path \@key (timeout nil) (busyTimeout nil) "tgg")  ; -> Databas
             ?client client2
             ?timeout limit
             ?busyTimeout busyTimeout
+            ?foreignKeys foreignKeys
         ))
     )
 )
