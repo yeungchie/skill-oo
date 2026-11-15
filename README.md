@@ -14,7 +14,7 @@ load("<path-to-dir>/skill-oo/load.il")
 
 ### 文件与进程
 
-+ [ycIO](docs/io/README.md) —— 文件读写：按行或全文读取、写入与关闭。
++ [ycIO](docs/io/README.md) —— 文件与字符串端口：按行/全文读写、定位与关闭。
 + [ycPathLib](docs/pathlib/README.md) —— POSIX 路径与文件系统操作。
 + [ycSubProcess](docs/subprocess/README.md) —— 子进程启动、交互与输出管理。
 

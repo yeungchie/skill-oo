@@ -37,8 +37,11 @@ defclass(Port () (
     )
     readLine()
     readAll()
+    fscanf()
     write()
     flush()
+    seek()
+    tell()
     close()
     isClosed()
     port()
@@ -88,6 +91,126 @@ procedure(_PortName(t_path "t")  ; -> str
 )
 
 
+procedure(_ErrText(g_err "g")  ; -> str
+    ; 从 errset.errset 提取错误消息。
+    ;
+    ; **参数**
+    ;   g_err  (list|nil) - errset.errset
+    ;
+    ; **返回**
+    ;   (str) - 错误消息；无法提取时返回通用说明
+    if(g_err && 4 <= length(g_err) && car(car(cdr(cdr(cdr(cdr(g_err))))))
+    then
+        car(car(cdr(cdr(cdr(cdr(g_err))))))
+    else
+        "unknown port error"
+    )
+)
+
+
+procedure(_PortError(g_obj t_method t_format \@rest l_args "gttg")  ; -> never
+    ; 按 Port/StringPort 方法上下文报错。
+    ;
+    ; **参数**
+    ;   g_obj     (Port|StringPort) - 端口对象
+    ;   t_method  (str) - 方法名
+    ;   t_format  (str) - 消息格式
+    ;   l_args    (list) - 格式参数
+    ;
+    ; **返回**
+    ;   (never) - 总是 error() 中断
+    error("%A->%s: %s" className(g_obj) t_method
+        apply('lsprintf t_format l_args))
+)
+
+
+procedure(_Fscanf(g_obj g_port t_format l_vars "ggtl")  ; -> int | nil
+    ; 在原生 port 上执行 fscanf，变量名以符号列表传入。
+    ;
+    ; **参数**
+    ;   g_obj     (Port|StringPort) - 端口对象
+    ;   g_port    (port) - 原生 port
+    ;   t_format  (str) - 格式串
+    ;   l_vars    (list[symbol]) - 接收值的变量名
+    ;
+    ; **返回**
+    ;   (int|nil) - 成功读取的项数；EOF 返回 nil
+    unless(portp(g_port)
+        _PortError(g_obj "fscanf" "not a native port")
+    )
+    when(l_vars
+        unless(listp(l_vars)
+            _PortError(g_obj "fscanf" "?l_vars must be a list of symbols")
+        )
+        foreach(var l_vars
+            unless(symbolp(var)
+                _PortError(g_obj "fscanf"
+                    "?l_vars element must be a symbol, got %A" var)
+            )
+        )
+    )
+    let((res)
+        res = errset(
+            apply('fscanf cons(g_port cons(t_format l_vars)))
+            nil
+        )
+        unless(res
+            _PortError(g_obj "fscanf" "%s" _ErrText(errset.errset))
+        )
+        car(res)
+    )
+)
+
+
+procedure(_Seek(g_obj g_port x_offset x_whence "ggxx")  ; -> t | nil
+    ; 在原生 port 上执行 fileSeek。
+    ;
+    ; **参数**
+    ;   g_obj     (Port|StringPort) - 端口对象
+    ;   g_port    (port) - 原生 port
+    ;   x_offset  (int) - 偏移量
+    ;   x_whence  (int) - 0 起始、1 当前位置、2 末尾
+    ;
+    ; **返回**
+    ;   (t|nil) - 原生 fileSeek 的返回值
+    unless(portp(g_port)
+        _PortError(g_obj "seek" "not a native port")
+    )
+    unless(x_whence == 0 || x_whence == 1 || x_whence == 2
+        _PortError(g_obj "seek" "?whence must be 0, 1 or 2")
+    )
+    let((res)
+        res = errset(fileSeek(g_port x_offset x_whence) nil)
+        unless(res
+            _PortError(g_obj "seek" "%s" _ErrText(errset.errset))
+        )
+        car(res)
+    )
+)
+
+
+procedure(_Tell(g_obj g_port "gg")  ; -> int
+    ; 在原生 port 上执行 fileTell。
+    ;
+    ; **参数**
+    ;   g_obj   (Port|StringPort) - 端口对象
+    ;   g_port  (port) - 原生 port
+    ;
+    ; **返回**
+    ;   (int) - 当前字节偏移
+    unless(portp(g_port)
+        _PortError(g_obj "tell" "not a native port")
+    )
+    let((res)
+        res = errset(fileTell(g_port) nil)
+        unless(res
+            _PortError(g_obj "tell" "%s" _ErrText(errset.errset))
+        )
+        car(res)
+    )
+)
+
+
 ; ---------- method installer ----------
 
 inScheme(
@@ -106,6 +229,10 @@ procedure(_InstallPort(self "g")  ; -> t
             error("%A->readLine: port is closed: %s"
                 className(self) self->_data->path)
         )
+        unless(self->_data->mode == "r"
+            error("%A->readLine: port is not readable: %s"
+                className(self) self->_data->path)
+        )
         let((line)
             gets(line self->_data->port)
             line
@@ -119,6 +246,10 @@ procedure(_InstallPort(self "g")  ; -> t
         ;   (str) - 文件剩余内容的拼接；已关闭时 error() 中断
         when(self->_data->closed
             error("%A->readAll: port is closed: %s"
+                className(self) self->_data->path)
+        )
+        unless(self->_data->mode == "r"
+            error("%A->readAll: port is not readable: %s"
                 className(self) self->_data->path)
         )
         let((line res)
@@ -144,8 +275,32 @@ procedure(_InstallPort(self "g")  ; -> t
             error("%A->write: port is closed: %s"
                 className(self) self->_data->path)
         )
+        when(self->_data->mode == "r"
+            error("%A->write: port is not writable: %s"
+                className(self) self->_data->path)
+        )
         fprintf(self->_data->port "%s" t_text)
         self
+    )
+
+    self->fscanf = lambda((t_format l_vars "tl")  ; -> int | nil
+        ; 从端口按格式读取，变量名以符号列表传入。
+        ;
+        ; **参数**
+        ;   t_format  (str) - 格式串
+        ;   l_vars    (list[symbol]) - 接收值的变量名
+        ;
+        ; **返回**
+        ;   (int|nil) - 成功读取的项数；EOF 返回 nil；已关闭或非读端口时 error() 中断
+        when(self->_data->closed
+            error("%A->fscanf: port is closed: %s"
+                className(self) self->_data->path)
+        )
+        unless(self->_data->mode == "r"
+            error("%A->fscanf: port is not readable: %s"
+                className(self) self->_data->path)
+        )
+        _Fscanf(self self->_data->port t_format l_vars)
     )
 
     self->flush = lambda(()  ; -> self
@@ -160,6 +315,34 @@ procedure(_InstallPort(self "g")  ; -> t
             drain(self->_data->port)
         )
         self
+    )
+
+    self->seek = lambda((x_offset \@key (whence 0) "xx")  ; -> t | nil
+        ; 移动端口位置，对应 fileSeek。
+        ;
+        ; **参数**
+        ;   x_offset  (int) - 偏移量
+        ;   ?whence x_whence (int) - 0 起始、1 当前位置、2 末尾（默认 0）
+        ;
+        ; **返回**
+        ;   (t|nil) - 原生 fileSeek 的返回值；已关闭时 error() 中断
+        when(self->_data->closed
+            error("%A->seek: port is closed: %s"
+                className(self) self->_data->path)
+        )
+        _Seek(self self->_data->port x_offset whence)
+    )
+
+    self->tell = lambda(()  ; -> int
+        ; 返回当前字节偏移，对应 fileTell。
+        ;
+        ; **返回**
+        ;   (int) - 当前偏移；已关闭时 error() 中断
+        when(self->_data->closed
+            error("%A->tell: port is closed: %s"
+                className(self) self->_data->path)
+        )
+        _Tell(self self->_data->port)
     )
 
     self->close = lambda(()  ; -> t

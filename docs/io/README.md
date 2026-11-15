@@ -2,35 +2,50 @@
 
 [返回首页](../../README.md)
 
-Cadence SKILL++ 的文件端口库：包装原生 file port，提供方法式读写、幂等关闭与 `ycWith` 自动关闭。
+Cadence SKILL++ 的文件与字符串端口库：包装原生 port，提供方法式读写、定位、格式化读取、幂等关闭与 `ycWith` 自动关闭。
 
 ## 概要
 
 - `ycIO::Open` 按模式打开文件并返回 `ycIO::Port`：`"r"` 读取、`"w"` 截断写入、`"a"` 追加写入。
-- 读取方法保留行尾换行；`readLine` 在文件末尾返回 `nil`。
-- `write` 返回端口自身，可以链式调用；写入内容可能先进入缓冲，`flush()` 或 `close()` 才落盘。
-- `flush()` 把写入缓冲刷到文件并返回端口自身；只读端口上无操作。
-- `close` 幂等；即使底层关闭报错，端口也会标记为已关闭。关闭后的 `readLine`、`readAll`、`write`、`flush` 都以 `error()` 中断。
-- `Port` 独占底层原生 port；需要底层对象时调用 `port()`。
-- `ycWith` 在正常退出与体内出错两条路径上都会调用 `close()`。
-- 只包装文件 port，不涉及标准输入输出与管道。
+- `ycIO::FromString` 从字符串创建只读 `ycIO::StringPort`；`ycIO::ToString` 创建只写 `StringPort`。
+- 读取方法保留行尾换行；`readLine` 在末尾返回 `nil`，`readAll` 在空内容上返回 `""`。
+- `write` 返回端口自身，可以链式调用；文件写入可能需要 `flush()` 或 `close()` 才落盘，字符串 writer 用 `text()` 取内容。
+- `fscanf` 的变量名以符号列表传入；`seek` / `tell` 对应原生 `fileSeek` / `fileTell`。
+- `close` 幂等；关闭后的读写、格式化与定位都以 `error()` 中断。
+- `StringPort` 的 writer 在 `close()` 时捕获文本，因此 `text()` 在 `ycWith` 退出后仍可读取。
+- `Port` 与 `StringPort` 是两个独立类，共享同一套端口方法协议；`StringPort` 内部组合一个 `Port`。
+- `port()` 返回原生 port，仅作逃生口；常规读写、格式化与定位不需要它。
+- 只包装文件与字符串 port，不涉及标准输入输出与管道。
 
 ## 快速上手
 
 ```lisp
-; 覆盖写入后关闭
+; 文件：覆盖写入后读取
 p = ycIO::Open("./a.txt" ?mode "w")
 p->write("hello\n")->close()
 
-; 追加
-p = ycIO::Open("./a.txt" ?mode "a")
-p->write("world\n")->close()
+r = ycIO::Open("./a.txt")
+r->readAll()
+; => "hello\n"
+r->close()
 
-; 读取全文
-p = ycIO::Open("./a.txt")
-text = p->readAll()
-p->close()
-; text => "hello\nworld\n"
+; 字符串 reader：格式化读取与定位
+sr = ycIO::FromString("10 20 hello\nsecond\n")
+sr->fscanf("%d %d %s" list('a 'b 'c))
+; => 3（a=10，b=20，c="hello"）
+sr->seek(0)
+sr->readLine()
+; => "10 20 hello\n"
+sr->close()
+
+; 字符串 writer：关闭后仍可取内容
+sw = ycIO::ToString()
+sw->write("x\n")->write("y\n")
+sw->text()
+; => "x\ny\n"
+sw->close()
+sw->text()
+; => "x\ny\n"
 
 ; with：离开作用域自动关闭
 ycWith(q ycIO::Open("./b.txt" ?mode "w")
@@ -90,9 +105,74 @@ ycIO::Open("./a.txt" ?mode "b")
 ; *Error* ycIO::Open: invalid mode: 'b'
 ```
 
+### ycIO::FromString <sub>`function`</sub>
+
+```text
+ycIO::FromString(
+    t_text
+)
+=> ycIO::StringPort
+```
+
+**描述**
+
+从字符串创建只读字符串端口。读取按字节进行，UTF-8 内容原样保留；空串是合法的，首次读取即返回 `nil`。reader 的 `seek` 会重建内部输入 port，因此读到 EOF 后仍可回到起点重新读取。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| t_text | str | 输入字符串 |
+
+**返回值**
+
+`ycIO::StringPort` — 只读字符串端口；输入不是字符串时以 `error()` 中断。
+
+**例程**
+
+```lisp
+r = ycIO::FromString("a\nb\n")
+r->readLine()
+; => "a\n"
+r->readAll()
+; => "b\n"
+r->close()
+```
+
+### ycIO::ToString <sub>`function`</sub>
+
+```text
+ycIO::ToString()
+=> ycIO::StringPort
+```
+
+**描述**
+
+创建只写字符串端口。写入内容保存在内存中；`text()` 在端口打开时返回当前内容，在 `close()` 后返回关闭时捕获的内容。writer 的 `seek` 只能回退或原地定位，不能向前 seek；追加内容直接在当前位置 `write()`。
+
+**参数**
+
+无。
+
+**返回值**
+
+`ycIO::StringPort` — 只写字符串端口。
+
+**例程**
+
+```lisp
+w = ycIO::ToString()
+w->write("abc")->write("def")
+w->text()
+; => "abcdef"
+w->close()
+w->text()
+; => "abcdef"
+```
+
 ### ycIO::Port <sub>`class`</sub>
 
-文件端口包装类。实例由 `ycIO::Open` 构造，不直接调用 `makeInstance`。
+文件端口包装类。实例由 `ycIO::Open` 构造，不直接调用 `makeInstance`；`StringPort` 通过组合一个 `Port` 复用其底层操作。
 
 **方法**
 
@@ -105,7 +185,7 @@ p->readLine()
 => str / nil
 ```
 
-读取一行，保留行尾换行；到达文件末尾返回 `nil`。端口已关闭时以 `error()` 中断。
+读取一行，保留行尾换行；到达文件末尾返回 `nil`。端口已关闭或不是读端口时以 `error()` 中断。
 
 **返回值**
 
@@ -134,7 +214,7 @@ p->readAll()
 => str
 ```
 
-读取到文件末尾并拼接，保留换行；空文件返回空串。端口已关闭时以 `error()` 中断。
+读取到文件末尾并拼接，保留换行；空文件返回空串。端口已关闭或不是读端口时以 `error()` 中断。
 
 **返回值**
 
@@ -152,6 +232,47 @@ r->readAll()
 r->close()
 ```
 
+#### fscanf <sub>`method`</sub>
+
+```text
+p->fscanf(
+    t_format
+    l_vars
+)
+=> int / nil
+```
+
+从文件读端口按格式读取。`l_vars` 是接收结果的变量名列表；结果写入调用方同名变量。返回成功读取的项数；格式不匹配返回 `0`；EOF 返回 `nil`。端口已关闭或不是读端口时以 `error()` 中断；`l_vars` 不是符号列表时以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| t_format | str | 格式串 |
+| l_vars | list[symbol] | 接收值的变量名 |
+
+**返回值**
+
+`int / nil` — 成功读取的项数；EOF 返回 `nil`。
+
+**例程**
+
+```lisp
+p = ycIO::Open("./a.txt" ?mode "w")
+p->write("10 20 hello\n")->close()
+
+r = ycIO::Open("./a.txt")
+r->fscanf("%d %d %s" list('a 'b 'c))
+; => 3
+a
+; => 10
+b
+; => 20
+c
+; => "hello"
+r->close()
+```
+
 #### write <sub>`method`</sub>
 
 ```text
@@ -161,7 +282,7 @@ p->write(
 => ycIO::Port
 ```
 
-向端口写入字符串并返回自身，便于链式调用。写入内容可能先进入缓冲，需要 `flush()` 或 `close()` 才落盘。`t_text` 非字符串时以 `error()` 中断；端口已关闭时以 `error()` 中断。
+向端口写入字符串并返回自身，便于链式调用。写入内容可能先进入缓冲，需要 `flush()` 或 `close()` 才落盘。`t_text` 非字符串、端口已关闭或不是写端口时以 `error()` 中断。
 
 **参数**
 
@@ -203,6 +324,83 @@ p = ycIO::Open("./a.txt" ?mode "w")
 p->write("x")->flush()
 ; 此时其他读者可读到 x
 p->close()
+```
+
+#### seek <sub>`method`</sub>
+
+```text
+p->seek(
+    x_offset
+    [ ?whence x_whence ]
+)
+=> t / nil
+```
+
+移动文件端口位置，对应原生 `fileSeek`。偏移按字节计；返回 `t` 表示原生调用成功，`nil` 表示原生调用失败。边界行为遵循原生 `fileSeek`：本环境中超出文件末尾的绝对定位可以成功，随后读取得到 EOF。端口已关闭时以 `error()` 中断；`?whence` 不是 `0/1/2` 时以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| x_offset | int |  | 偏移量 |
+| ?whence x_whence | int | `0` | 定位基准 |
+
+`?whence` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `0` | 从起始位置偏移 |
+| `1` | 从当前位置偏移 |
+| `2` | 从末尾偏移 |
+
+**返回值**
+
+`t / nil` — 成功为 `t`，失败为 `nil`。
+
+**例程**
+
+```lisp
+p = ycIO::Open("./a.txt" ?mode "w")
+p->write("abcdef\n")->close()
+
+r = ycIO::Open("./a.txt")
+r->seek(2)
+; => t
+r->readLine()
+; => "cdef\n"
+r->seek(-1 ?whence 2)
+; => t
+r->readLine()
+; => "\n"
+r->close()
+```
+
+#### tell <sub>`method`</sub>
+
+```text
+p->tell()
+=> int
+```
+
+返回当前字节偏移，对应原生 `fileTell`。端口已关闭时以 `error()` 中断。
+
+**返回值**
+
+`int` — 当前偏移。
+
+**例程**
+
+```lisp
+p = ycIO::Open("./a.txt" ?mode "w")
+p->write("abc")->close()
+
+r = ycIO::Open("./a.txt")
+r->tell()
+; => 0
+r->seek(2)
+r->tell()
+; => 2
+r->close()
 ```
 
 #### close <sub>`method`</sub>
@@ -259,7 +457,7 @@ p->port()
 => port
 ```
 
-返回底层原生 file port。关闭后仍返回原对象，便于调用原生函数或排查状态。
+返回底层原生 file port。常规读写、格式化与定位应使用包装方法；`port()` 只作逃生口。关闭后仍返回原对象。
 
 **返回值**
 
@@ -275,6 +473,343 @@ let((line)
     gets(line port)
 )
 p->close()
+```
+
+### ycIO::StringPort <sub>`class`</sub>
+
+字符串端口类。只读实例由 `ycIO::FromString` 构造，只写实例由 `ycIO::ToString` 构造；不直接调用 `makeInstance`。实现 `ycWith`：正常退出和体内出错都会关闭端口，writer 的文本保留。
+
+**方法**
+
+> 必须使用 `->` 符号调用方法。
+
+#### readLine <sub>`method`</sub>
+
+```text
+sp->readLine()
+=> str / nil
+```
+
+读取一行，保留行尾换行；到达末尾返回 `nil`。只写端口或已关闭端口以 `error()` 中断。
+
+**返回值**
+
+`str / nil` — 一行文本；EOF 返回 `nil`。
+
+**例程**
+
+```lisp
+r = ycIO::FromString("a\nb\n")
+r->readLine()
+; => "a\n"
+r->readLine()
+; => "b\n"
+r->readLine()
+; => nil
+r->close()
+```
+
+#### readAll <sub>`method`</sub>
+
+```text
+sp->readAll()
+=> str
+```
+
+读取到末尾并拼接，保留换行；空内容返回空串。只写端口或已关闭端口以 `error()` 中断。
+
+**返回值**
+
+`str` — 剩余内容；空内容为 `""`。
+
+**例程**
+
+```lisp
+r = ycIO::FromString("a\nb\n")
+r->readAll()
+; => "a\nb\n"
+r->readAll()
+; => ""
+r->close()
+```
+
+#### fscanf <sub>`method`</sub>
+
+```text
+sp->fscanf(
+    t_format
+    l_vars
+)
+=> int / nil
+```
+
+从字符串读端口按格式读取。`l_vars` 是接收结果的变量名列表；结果写入调用方同名变量。返回成功读取的项数；格式不匹配返回 `0`；EOF 返回 `nil`。只写端口或已关闭端口以 `error()` 中断；`l_vars` 不是符号列表时以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| t_format | str | 格式串 |
+| l_vars | list[symbol] | 接收值的变量名 |
+
+**返回值**
+
+`int / nil` — 成功读取的项数；EOF 返回 `nil`。
+
+**例程**
+
+```lisp
+r = ycIO::FromString("10 20 hello\n")
+r->fscanf("%d %d %s" list('a 'b 'c))
+; => 3
+a
+; => 10
+b
+; => 20
+c
+; => "hello"
+r->close()
+```
+
+#### write <sub>`method`</sub>
+
+```text
+sp->write(
+    t_text
+)
+=> ycIO::StringPort
+```
+
+向字符串 writer 写入内容并返回自身，便于链式调用。`t_text` 非字符串、端口已关闭或不是写端口时以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| t_text | str | 写入内容 |
+
+**返回值**
+
+`ycIO::StringPort` — 端口自身。
+
+**例程**
+
+```lisp
+w = ycIO::ToString()
+w->write("x\n")->write("y\n")
+w->text()
+; => "x\ny\n"
+w->close()
+```
+
+#### flush <sub>`method`</sub>
+
+```text
+sp->flush()
+=> ycIO::StringPort
+```
+
+刷新字符串 writer 的写缓冲并返回自身；读端口上无操作。端口已关闭时以 `error()` 中断。
+
+**返回值**
+
+`ycIO::StringPort` — 端口自身。
+
+**例程**
+
+```lisp
+w = ycIO::ToString()
+w->write("x")->flush()
+w->text()
+; => "x"
+w->close()
+```
+
+#### seek <sub>`method`</sub>
+
+```text
+sp->seek(
+    x_offset
+    [ ?whence x_whence ]
+)
+=> t / nil
+```
+
+移动字符串端口位置。读端口支持三种基准，并在每次 `seek` 时重建内部输入 port，因此 EOF 后可以重新读取；写端口只支持绝对偏移（`?whence 0`），只能回退或原地定位，向前 seek 返回 `nil`。端口已关闭时以 `error()` 中断；`?whence` 不是 `0/1/2` 时以 `error()` 中断。
+
+读端口的定位超出内容范围时返回 `nil`；写端口向前定位失败时保持当前位置，追加内容直接在当前位置 `write()`。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| x_offset | int |  | 偏移量 |
+| ?whence x_whence | int | `0` | 定位基准 |
+
+`?whence` 的有效值：
+
+| 有效值 | 结果 |
+| --- | --- |
+| `0` | 从起始位置偏移；reader 与 writer 都支持 |
+| `1` | 从当前位置偏移；仅 reader 支持 |
+| `2` | 从末尾偏移；仅 reader 支持 |
+
+**返回值**
+
+`t / nil` — 成功为 `t`，失败为 `nil`。
+
+**例程**
+
+```lisp
+r = ycIO::FromString("abcdef")
+r->readAll()
+; => "abcdef"
+r->seek(0)
+; => t
+r->readLine()
+; => "abcdef"
+r->close()
+
+w = ycIO::ToString()
+w->write("abc")
+w->seek(0)
+; => t
+w->write("XY")
+w->text()
+; => "XYc"
+w->seek(3)
+; => nil（写端口不能向前 seek）
+w->close()
+```
+
+#### tell <sub>`method`</sub>
+
+```text
+sp->tell()
+=> int
+```
+
+返回当前字节偏移。读端口在 EOF 时返回内容长度；写端口返回当前写入位置。端口已关闭时以 `error()` 中断。
+
+**返回值**
+
+`int` — 当前偏移。
+
+**例程**
+
+```lisp
+r = ycIO::FromString("abc")
+r->readAll()
+; => "abc"
+r->tell()
+; => 3
+r->close()
+
+w = ycIO::ToString()
+w->write("xy")
+w->tell()
+; => 2
+w->close()
+```
+
+#### text <sub>`method`</sub>
+
+```text
+sp->text()
+=> str
+```
+
+返回字符串 writer 写入的内容。端口打开时返回当前内容；`close()` 后返回关闭时捕获的内容。读端口以 `error()` 中断。
+
+**返回值**
+
+`str` — 写入内容。
+
+**例程**
+
+```lisp
+w = ycIO::ToString()
+w->write("x\n")
+w->text()
+; => "x\n"
+w->close()
+w->text()
+; => "x\n"
+```
+
+#### close <sub>`method`</sub>
+
+```text
+sp->close()
+=> t
+```
+
+关闭字符串端口。writer 在关闭前捕获文本，因此 `text()` 在关闭后仍可读取；可重复调用，已关闭时直接返回 `t`。
+
+**返回值**
+
+`t` — 恒为 `t`。
+
+**例程**
+
+```lisp
+w = ycIO::ToString()
+w->write("abc")
+w->close()
+; => t
+w->text()
+; => "abc"
+```
+
+#### isClosed <sub>`method`</sub>
+
+```text
+sp->isClosed()
+=> t / nil
+```
+
+查询字符串端口是否已关闭。
+
+**返回值**
+
+`t / nil` — 已关闭为 `t`，否则为 `nil`。
+
+**例程**
+
+```lisp
+w = ycIO::ToString()
+w->isClosed()
+; => nil
+w->close()
+w->isClosed()
+; => t
+```
+
+#### port <sub>`method`</sub>
+
+```text
+sp->port()
+=> port
+```
+
+返回当前底层原生 port。常规读写、格式化与定位应使用包装方法；`port()` 只作逃生口。reader 每次 `seek` 都会替换内部 port，不要跨 `seek` 持有旧的原生 port。
+
+**返回值**
+
+`port` — 原生字符串 port。
+
+**例程**
+
+```lisp
+r = ycIO::FromString("abc")
+inportp(r->port())
+; => t
+r->close()
+
+w = ycIO::ToString()
+outportp(w->port())
+; => t
+w->close()
 ```
 
 [返回首页](../../README.md)
