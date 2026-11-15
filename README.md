@@ -2,6 +2,14 @@
 
 基于 Cadence SKILL++ 开发的模块化工具库。
 
+## 安装
+
+在 `.cdsinit` 文件中追加：
+
+```lisp
+load("<path-to-dir>/skill-oo/load.il")
+```
+
 ## 模块
 
 按用途分组；一次加载即可使用全部模块，每个名称链接到对应手册。
@@ -47,15 +55,13 @@
 
 ### 几何
 
-+ [ycGeom](docs/geom/README.md) —— 平面点、线段、直线、矩形、keyhole 多边形、区域布尔运算、零宽度折线 Route 与带宽度描边 Path；另有[图形算法原理教程](docs/geom/tutorial/README.md)。
++ [ycGeom](docs/geom/README.md) —— 平面点、线段、直线、矩形、keyhole 多边形、区域布尔运算、零宽度折线 Route 与带宽度描边 Path。
 
-## 安装
+## 教程
 
-在 `.cdsinit` 文件中追加：
+教程独立成册，讲原理、算法与完整案例；接口细节以对应模块手册为准。
 
-```lisp
-load("<path-to-dir>/skill-oo/load.il")
-```
++ [ycGeom 图形算法教程](docs/geom/tutorial/README.md) —— 平面几何算法：从问题到实现，再用 `ycGeom` 跑通。
 
 ## License
 
