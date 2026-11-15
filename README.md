@@ -12,8 +12,6 @@ load("<path-to-dir>/skill-oo/load.il")
 
 ## 模块
 
-按用途分组；一次加载即可使用全部模块，每个名称链接到对应手册。
-
 ### 文件与进程
 
 + [ycIO](docs/io/README.md) —— 文件读写：按行或全文读取、写入与关闭。
