@@ -45,6 +45,7 @@ _ValidNames = list(
     "ycDateTime"
     "ycLog"
     "ycQueue"
+    "ycSQLite"
 )
 
 procedure(Require(@rest l_names "t")  ; -> t

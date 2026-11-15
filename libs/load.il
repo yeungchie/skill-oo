@@ -38,6 +38,7 @@ let((dir pkgs)
         "datetime"
         "log"
         "queue"
+        "sqlite"
     )
     foreach(pkg pkgs
         dir->join(pkg "load.il")->load()

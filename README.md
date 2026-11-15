@@ -36,6 +36,7 @@
 + [ycDateTime](docs/datetime/README.md) —— Unix 时间对象、格式化与偏移。
 + [ycLog](docs/log/README.md) —— 分级日志：级别过滤、控制台输出与文件追加（时间戳依赖 ycDateTime）。
 + [ycQueue](docs/queue/README.md) —— FIFO/LIFO 队列：任意值存取、空读契约与容量上限。
++ [ycSQLite](docs/sqlite/README.md) —— 外部 SQLite 客户端的面向对象封装：查询、执行、事务与 schema（会话依赖 ycSubProcess）。
 
 ### 语言辅助
 
