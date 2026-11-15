@@ -43,7 +43,7 @@
 
 ### 语言辅助
 
-+ [ycLang](docs/lang/README.md) —— 语言级辅助宏：`ycWith` 作用域资源管理。
++ [ycLang](docs/lang/README.md) —— 作用域资源管理：`ycWith` 与对象进入/退出协议。
 
 ### 几何
 
