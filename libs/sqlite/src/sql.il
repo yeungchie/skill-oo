@@ -348,7 +348,8 @@ procedure(_SqlScan(t_sql t_context "tt")  ; -> list[str|nil int t|nil]
     ;
     ; **返回**
     ;   (list[str|nil int t|nil]) - 首条非空语句的首关键字（小写）、
-    ;   语句数与「是否存在行首点命令」标志；引号或注释未闭合时 error() 中断
+    ;   语句数与「是否存在语句边界的行首点命令」标志；
+    ;   引号或注释未闭合时 error() 中断
     unless(stringp(t_sql)
         error("%s: SQL must be a string, got %A" t_context t_sql)
     )
@@ -364,7 +365,7 @@ procedure(_SqlScan(t_sql t_context "tt")  ; -> list[str|nil int t|nil]
             cond(
                 (state == 'normal
                     cond(
-                        (bol && c == "."
+                        (bol && !content && c == "."
                             dot = t
                             content = t
                         )
@@ -472,7 +473,7 @@ procedure(_SqlScan(t_sql t_context "tt")  ; -> list[str|nil int t|nil]
 
 
 procedure(_CheckNoDotCommands(t_sql t_context "tt")  ; -> t
-    ; 拒绝 SQL 文本中出现在行首的客户端点命令。
+    ; 拒绝 SQL 文本中出现在语句边界行首的客户端点命令。
     ;
     ; **参数**
     ;   t_sql      (str) - SQL 文本

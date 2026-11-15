@@ -41,6 +41,14 @@ let((db)
         "errors: dot command text inside a line comment is allowed")
     _Assert(db->executeScript("select 1;\n/*\n.quit\n*/\nselect 2;") == t
         "errors: dot command text inside a block comment is allowed")
+    _Assert(db->execute("select\n.5;")->changes() == 0
+        "errors: a continuation line may start with a dot")
+    _Assert(db->execute(
+        "create table rb(a); begin; insert into rb values (1); rollback;"
+        )->changes() == 1
+        "errors: rolled-back changes stay counted")
+    _Assert(car(db->query("select count(*) from rb;")->rows())->get(0) == 0
+        "errors: rolled-back insert left no rows")
     _AssertError(lambda(() ycSQLite::Open(""))
         "errors: empty database path errors")
     _AssertError(lambda(() ycSQLite::Open(42))
