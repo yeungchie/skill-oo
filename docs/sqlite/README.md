@@ -9,6 +9,7 @@ Cadence SKILL++ 的 SQLite 客户端封装库：默认客户端可用时直接�
 + SQLite 由外部客户端进程提供；模块不内置 SQLite，也不依赖 SKILL 引擎的原生数据库接口。
 + 可用 `YC_SKILL_OO_SQLITE_CLIENT` 环境变量或 `ycSQLite::Configure` 指定客户端。
 + 一个 `Database` 对应一个长驻会话；查询、执行与事务共享同一连接。
++ `":memory:"` 创建临时内存数据库：不生成文件，关闭 `Database` 后内容消失。
 + `Database` 支持 `ycWith`：正常退出和体内出错都会关闭会话。
 + 支持位置参数 `?`；参数值由模块安全转义。
 + SQLite 类型会被保留：`NULL`、整数、浮点、文本与 `BLOB` 分别映射为 `nil`、fixnum 或字符串、flonum、字符串与 `ycSQLite::Blob`。
@@ -16,6 +17,8 @@ Cadence SKILL++ 的 SQLite 客户端封装库：默认客户端可用时直接�
 + SQL 能力取决于所配置客户端的版本；模块只透传，不模拟客户端缺失的 SQL 特性。
 
 ## 快速上手
+
+下面的例子使用文件数据库 `./app.sqlite`；如果只需要临时数据，可以把路径换成 `":memory:"`，它不会创建文件，关闭会话后内容会消失。
 
 ```lisp
 ; 打开数据库文件；文件不存在时会创建
@@ -51,299 +54,6 @@ ycWith(db2 ycSQLite::Open("./app.sqlite")
 
 ## API 参考
 
-### ycSQLite::Client <sub>`function`</sub> <sub>`class`</sub>
-
-```text
-ycSQLite::Client(
-    [ ?command l_command ]
-    [ ?executable t_executable ]
-    [ ?unsetEnv l_unsetEnv ]
-    [ ?timeout n_timeout ]
-)
-=> ycSQLite::Client
-```
-
-**描述**
-
-构造一个尚未验证的客户端配置。`?command` 是完整命令列表；`?executable` 是单个可执行文件路径或命令名，二者互斥。`?unsetEnv` 指定从子进程环境中移除的变量名。客户端验证由 `validate()` 完成。
-
-**参数**
-
-| 名称 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| ?command l_command | `list[str] / nil` | `nil` | 完整基础命令列表 |
-| ?executable t_executable | `str / nil` | `"sqlite3"` | 客户端路径或命令名 |
-| ?unsetEnv l_unsetEnv | `list[str] / nil` | `nil` | 需要移除的环境变量名 |
-| ?timeout n_timeout | `int / nil` | `nil` | 验证与会话等待秒数 |
-
-**返回值**
-
-`ycSQLite::Client` — 未验证的客户端对象。
-
-**方法**
-
-> 必须使用 `->` 符号调用方法。
-
-#### command <sub>`method`</sub>
-
-```text
-c->command()
-=> list[str]
-```
-
-返回基础命令列表的浅拷贝。
-
-```lisp
-ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))->command()
-; => ("env" "-u" "LD_LIBRARY_PATH" "sqlite3")
-```
-
-#### timeout <sub>`method`</sub>
-
-```text
-c->timeout()
-=> int / nil
-```
-
-返回构造时设置的等待秒数。
-
-```lisp
-ycSQLite::Client(?timeout 10)->timeout()
-; => 10
-```
-
-#### validate <sub>`method`</sub>
-
-```text
-c->validate()
-=> ycSQLite::Client
-```
-
-执行版本、内存数据库、`stdbuf` 与会话往返验证。失败时只记录诊断，不抛错；重复调用复用已有结果。
-
-```lisp
-c = ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))
-c->validate()->isValid()
-; => t
-```
-
-#### isValid <sub>`method`</sub>
-
-```text
-c->isValid()
-=> t / nil
-```
-
-返回客户端是否已经验证通过。
-
-```lisp
-c = ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))
-c->isValid()
-; => nil
-c->validate()
-c->isValid()
-; => t
-```
-
-#### version <sub>`method`</sub>
-
-```text
-c->version()
-=> str / nil
-```
-
-返回客户端报告的 SQLite 版本串。
-
-```lisp
-ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))->validate()->version()
-; => "3.x.y"（实际值取决于客户端）
-```
-
-#### versionTuple <sub>`method`</sub>
-
-```text
-c->versionTuple()
-=> list[int] / nil
-```
-
-返回主版本、次版本与补丁版本。
-
-```lisp
-ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))->validate()->versionTuple()
-; => (3 7 17)（示例值）
-```
-
-#### features <sub>`method`</sub>
-
-```text
-c->features()
-=> list[sym]
-```
-
-返回验证得到的能力符号；典型值包括 `'session`、`'memory` 与 `'csv`。
-
-```lisp
-ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))->validate()->features()
-; => (session memory csv)（示例值）
-```
-
-#### supports <sub>`method`</sub>
-
-```text
-c->supports(s_feature)
-=> t / nil
-```
-
-查询是否支持指定能力。
-
-```lisp
-c = ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))->validate()
-c->supports('session)
-; => t
-```
-
-#### diagnostics <sub>`method`</sub>
-
-```text
-c->diagnostics()
-=> str
-```
-
-返回最近一次验证的诊断；成功时为空串。
-
-```lisp
-ycSQLite::Client(?executable "/no/such/sqlite3")->validate()->diagnostics()
-; => 非空诊断文本
-```
-
-#### sessionCommand <sub>`method`</sub>
-
-```text
-c->sessionCommand(t_path)
-=> list[str]
-```
-
-返回长驻会话的启动命令，供高级调用方检查或自定义启动方式。
-
-```lisp
-ycSQLite::Client(?executable "sqlite3")
-    ->sessionCommand("./app.sqlite")
-; => ("stdbuf" "-oL" "-eL" "sqlite3" "-batch" "./app.sqlite")（示例值）
-```
-
-### ycSQLite::Configure <sub>`function`</sub>
-
-```text
-ycSQLite::Configure(
-    [ ?client g_client ]
-    [ ?command l_command ]
-    [ ?executable t_executable ]
-    [ ?unsetEnv l_unsetEnv ]
-    [ ?timeout n_timeout ]
-)
-=> ycSQLite::Client
-```
-
-**描述**
-
-设置并验证全局默认客户端。`?client` 直接使用已构造对象；其余参数创建新客户端。未提供任何参数时使用环境变量或默认客户端配置。验证失败时以 `error()` 中断。
-
-**参数**
-
-| 名称 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| ?client g_client | `ycSQLite::Client / nil` | `nil` | 已构造客户端 |
-| ?command l_command | `list[str] / nil` | `nil` | 完整基础命令列表 |
-| ?executable t_executable | `str / nil` | `nil` | 客户端路径或命令名 |
-| ?unsetEnv l_unsetEnv | `list[str] / nil` | `nil` | 需要移除的环境变量名 |
-| ?timeout n_timeout | `int / nil` | `nil` | 验证与会话等待秒数 |
-
-**返回值**
-
-`ycSQLite::Client` — 已设置并验证的全局客户端。
-
-**例程**
-
-```lisp
-ycSQLite::Configure(
-    ?executable "sqlite3"
-    ?unsetEnv list("LD_LIBRARY_PATH")
-)
-; => <ycSQLite::Client valid=t version="3.x.y">
-```
-
-### ycSQLite::DefaultClient <sub>`function`</sub>
-
-```text
-ycSQLite::DefaultClient()
-=> ycSQLite::Client
-```
-
-**描述**
-
-返回全局默认客户端。首次调用时按“显式配置、`YC_SKILL_OO_SQLITE_CLIENT`、默认客户端配置”的顺序解析并缓存。后续 `Open` 与 SQL 调用直接复用，不需要再次指定客户端。
-
-**参数**
-
-无。
-
-**返回值**
-
-`ycSQLite::Client` — 默认客户端对象。
-
-**例程**
-
-```lisp
-ycSQLite::Configure(
-    ?executable "sqlite3"
-    ?unsetEnv list("LD_LIBRARY_PATH")
-)
-ycSQLite::DefaultClient()->command()
-; => ("env" "-u" "LD_LIBRARY_PATH" "sqlite3")
-```
-
-### ycSQLite::ProbeClient <sub>`function`</sub>
-
-```text
-ycSQLite::ProbeClient(
-    [ ?command l_command ]
-    [ ?executable t_executable ]
-    [ ?unsetEnv l_unsetEnv ]
-    [ ?timeout n_timeout ]
-)
-=> ycSQLite::Client
-```
-
-**描述**
-
-构造并验证客户端，但不修改全局默认配置。适合在正式使用前检查环境。
-
-**参数**
-
-| 名称 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| ?command l_command | `list[str] / nil` | `nil` | 完整基础命令列表 |
-| ?executable t_executable | `str / nil` | `"sqlite3"` | 客户端路径或命令名 |
-| ?unsetEnv l_unsetEnv | `list[str] / nil` | `nil` | 需要移除的环境变量名 |
-| ?timeout n_timeout | `int / nil` | `nil` | 验证等待秒数 |
-
-**返回值**
-
-`ycSQLite::Client` — 验证结果；失败原因见 `diagnostics()`。
-
-**例程**
-
-```lisp
-info = ycSQLite::ProbeClient(
-    ?executable "sqlite3"
-    ?unsetEnv list("LD_LIBRARY_PATH")
-)
-info->isValid()
-; => t
-info->version()
-; => "3.x.y"
-```
-
 ### ycSQLite::Open <sub>`function`</sub>
 
 ```text
@@ -357,13 +67,13 @@ ycSQLite::Open(
 
 **描述**
 
-打开文件数据库或 `:memory:` 数据库并启动长驻会话。客户端使用 `DefaultClient()`；未配置或验证失败时以 `error()` 中断。
+打开数据库并启动长驻会话。`t_path` 是文件路径时使用文件数据库；文件不存在时会创建。`":memory:"` 是 SQLite 的特殊路径，表示只在当前 `Database` 会话内存在的内存数据库：不会生成文件，`close()` 后其中的表和数据全部消失。需要临时计算、演示或验证 SQL 时使用它；需要长期保存数据时使用普通文件路径。客户端使用 `DefaultClient()`；未配置或验证失败时以 `error()` 中断。
 
 **参数**
 
 | 名称 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| t_path | `str` |  | 数据库路径或 `":memory:"` |
+| t_path | `str` |  | 文件路径，或 `":memory:"`（临时内存数据库，关闭后丢失） |
 | ?timeout n_timeout | `int / nil` | `nil` | 会话请求等待秒数 |
 | ?busyTimeout n_busyTimeout | `int / nil` | `nil` | `busy_timeout` 毫秒数 |
 
@@ -378,6 +88,13 @@ db = ycSQLite::Open("./app.sqlite" ?busyTimeout 1000)
 db->path()
 ; => "./app.sqlite"
 db->close()
+
+; 内存数据库：不创建文件，关闭后数据消失
+mem = ycSQLite::Open(":memory:")
+mem->execute("create table temp_value(x integer);")
+car(mem->query("select count(*) from temp_value;")->rows())->get(0)
+; => 0（表中没有记录）
+mem->close()
 ```
 
 ### ycSQLite::Database <sub>`class`</sub>
@@ -938,6 +655,299 @@ b->toList()
 ```lisp
 ycSQLite::Blob("00ff")->toList()
 ; => (0 255)
+```
+
+### ycSQLite::Client <sub>`function`</sub> <sub>`class`</sub>
+
+```text
+ycSQLite::Client(
+    [ ?command l_command ]
+    [ ?executable t_executable ]
+    [ ?unsetEnv l_unsetEnv ]
+    [ ?timeout n_timeout ]
+)
+=> ycSQLite::Client
+```
+
+**描述**
+
+构造一个尚未验证的客户端配置。`?command` 是完整命令列表；`?executable` 是单个可执行文件路径或命令名，二者互斥。`?unsetEnv` 指定从子进程环境中移除的变量名。客户端验证由 `validate()` 完成。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?command l_command | `list[str] / nil` | `nil` | 完整基础命令列表 |
+| ?executable t_executable | `str / nil` | `"sqlite3"` | 客户端路径或命令名 |
+| ?unsetEnv l_unsetEnv | `list[str] / nil` | `nil` | 需要移除的环境变量名 |
+| ?timeout n_timeout | `int / nil` | `nil` | 验证与会话等待秒数 |
+
+**返回值**
+
+`ycSQLite::Client` — 未验证的客户端对象。
+
+**方法**
+
+> 必须使用 `->` 符号调用方法。
+
+#### command <sub>`method`</sub>
+
+```text
+c->command()
+=> list[str]
+```
+
+返回基础命令列表的浅拷贝。
+
+```lisp
+ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))->command()
+; => ("env" "-u" "LD_LIBRARY_PATH" "sqlite3")
+```
+
+#### timeout <sub>`method`</sub>
+
+```text
+c->timeout()
+=> int / nil
+```
+
+返回构造时设置的等待秒数。
+
+```lisp
+ycSQLite::Client(?timeout 10)->timeout()
+; => 10
+```
+
+#### validate <sub>`method`</sub>
+
+```text
+c->validate()
+=> ycSQLite::Client
+```
+
+执行版本、内存数据库、`stdbuf` 与会话往返验证。失败时只记录诊断，不抛错；重复调用复用已有结果。
+
+```lisp
+c = ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))
+c->validate()->isValid()
+; => t
+```
+
+#### isValid <sub>`method`</sub>
+
+```text
+c->isValid()
+=> t / nil
+```
+
+返回客户端是否已经验证通过。
+
+```lisp
+c = ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))
+c->isValid()
+; => nil
+c->validate()
+c->isValid()
+; => t
+```
+
+#### version <sub>`method`</sub>
+
+```text
+c->version()
+=> str / nil
+```
+
+返回客户端报告的 SQLite 版本串。
+
+```lisp
+ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))->validate()->version()
+; => "3.x.y"（实际值取决于客户端）
+```
+
+#### versionTuple <sub>`method`</sub>
+
+```text
+c->versionTuple()
+=> list[int] / nil
+```
+
+返回主版本、次版本与补丁版本。
+
+```lisp
+ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))->validate()->versionTuple()
+; => (3 7 17)（示例值）
+```
+
+#### features <sub>`method`</sub>
+
+```text
+c->features()
+=> list[sym]
+```
+
+返回验证得到的能力符号；典型值包括 `'session`、`'memory` 与 `'csv`。
+
+```lisp
+ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))->validate()->features()
+; => (session memory csv)（示例值）
+```
+
+#### supports <sub>`method`</sub>
+
+```text
+c->supports(s_feature)
+=> t / nil
+```
+
+查询是否支持指定能力。
+
+```lisp
+c = ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))->validate()
+c->supports('session)
+; => t
+```
+
+#### diagnostics <sub>`method`</sub>
+
+```text
+c->diagnostics()
+=> str
+```
+
+返回最近一次验证的诊断；成功时为空串。
+
+```lisp
+ycSQLite::Client(?executable "/no/such/sqlite3")->validate()->diagnostics()
+; => 非空诊断文本
+```
+
+#### sessionCommand <sub>`method`</sub>
+
+```text
+c->sessionCommand(t_path)
+=> list[str]
+```
+
+返回长驻会话的启动命令，供高级调用方检查或自定义启动方式。
+
+```lisp
+ycSQLite::Client(?executable "sqlite3")
+    ->sessionCommand("./app.sqlite")
+; => ("stdbuf" "-oL" "-eL" "sqlite3" "-batch" "./app.sqlite")（示例值）
+```
+
+### ycSQLite::Configure <sub>`function`</sub>
+
+```text
+ycSQLite::Configure(
+    [ ?client g_client ]
+    [ ?command l_command ]
+    [ ?executable t_executable ]
+    [ ?unsetEnv l_unsetEnv ]
+    [ ?timeout n_timeout ]
+)
+=> ycSQLite::Client
+```
+
+**描述**
+
+设置并验证全局默认客户端。`?client` 直接使用已构造对象；其余参数创建新客户端。未提供任何参数时使用环境变量或默认客户端配置。验证失败时以 `error()` 中断。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?client g_client | `ycSQLite::Client / nil` | `nil` | 已构造客户端 |
+| ?command l_command | `list[str] / nil` | `nil` | 完整基础命令列表 |
+| ?executable t_executable | `str / nil` | `nil` | 客户端路径或命令名 |
+| ?unsetEnv l_unsetEnv | `list[str] / nil` | `nil` | 需要移除的环境变量名 |
+| ?timeout n_timeout | `int / nil` | `nil` | 验证与会话等待秒数 |
+
+**返回值**
+
+`ycSQLite::Client` — 已设置并验证的全局客户端。
+
+**例程**
+
+```lisp
+ycSQLite::Configure(
+    ?executable "sqlite3"
+    ?unsetEnv list("LD_LIBRARY_PATH")
+)
+; => <ycSQLite::Client valid=t version="3.x.y">
+```
+
+### ycSQLite::DefaultClient <sub>`function`</sub>
+
+```text
+ycSQLite::DefaultClient()
+=> ycSQLite::Client
+```
+
+**描述**
+
+返回全局默认客户端。首次调用时按“显式配置、`YC_SKILL_OO_SQLITE_CLIENT`、默认客户端配置”的顺序解析并缓存。后续 `Open` 与 SQL 调用直接复用，不需要再次指定客户端。
+
+**参数**
+
+无。
+
+**返回值**
+
+`ycSQLite::Client` — 默认客户端对象。
+
+**例程**
+
+```lisp
+ycSQLite::Configure(
+    ?executable "sqlite3"
+    ?unsetEnv list("LD_LIBRARY_PATH")
+)
+ycSQLite::DefaultClient()->command()
+; => ("env" "-u" "LD_LIBRARY_PATH" "sqlite3")
+```
+
+### ycSQLite::ProbeClient <sub>`function`</sub>
+
+```text
+ycSQLite::ProbeClient(
+    [ ?command l_command ]
+    [ ?executable t_executable ]
+    [ ?unsetEnv l_unsetEnv ]
+    [ ?timeout n_timeout ]
+)
+=> ycSQLite::Client
+```
+
+**描述**
+
+构造并验证客户端，但不修改全局默认配置。适合在正式使用前检查环境。
+
+**参数**
+
+| 名称 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?command l_command | `list[str] / nil` | `nil` | 完整基础命令列表 |
+| ?executable t_executable | `str / nil` | `"sqlite3"` | 客户端路径或命令名 |
+| ?unsetEnv l_unsetEnv | `list[str] / nil` | `nil` | 需要移除的环境变量名 |
+| ?timeout n_timeout | `int / nil` | `nil` | 验证等待秒数 |
+
+**返回值**
+
+`ycSQLite::Client` — 验证结果；失败原因见 `diagnostics()`。
+
+**例程**
+
+```lisp
+info = ycSQLite::ProbeClient(
+    ?executable "sqlite3"
+    ?unsetEnv list("LD_LIBRARY_PATH")
+)
+info->isValid()
+; => t
+info->version()
+; => "3.x.y"
 ```
 
 ## 数据库概念
