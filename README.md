@@ -4,13 +4,13 @@
 
 ## 模块
 
-按用途分组。
+按用途分组；一次加载即可使用全部模块，每个名称链接到对应手册。
 
 ### 文件与进程
 
-+ [ycIO](docs/io/README.md) —— 文件端口包装：方法式读写、幂等关闭与 with 自动关闭。
++ [ycIO](docs/io/README.md) —— 文件端口：方法式读写、幂等关闭与 `ycWith` 自动关闭。
 + [ycPathLib](docs/pathlib/README.md) —— POSIX 路径与文件系统操作。
-+ [ycSubProcess](docs/subprocess/README.md) —— 子进程启动、交互与输出管理（输出缓冲依赖 ycQueue）。
++ [ycSubProcess](docs/subprocess/README.md) —— 子进程启动、交互与输出管理。
 
 ### 文本处理
 
@@ -21,22 +21,25 @@
 
 ### 编解码
 
-+ [ycCodec](docs/codec/core/README.md) —— 编解码库共享的哨兵类型。
++ [ycCodec](docs/codec/core/README.md) —— 编解码哨兵：`true`、`false`、`null` 与缺键标记。
 + [ycJson](docs/codec/json/README.md) —— JSON、jsonc、jsonl 的解码与编码。
 + [ycYaml](docs/codec/yaml/README.md) —— YAML 1.2 的解码与编码。
 + [ycToml](docs/codec/toml/README.md) —— TOML 1.0 编解码。
 + [ycIni](docs/codec/ini/README.md) —— INI 配置读写。
 + [ycCsv](docs/codec/csv/README.md) —— CSV/TSV 编解码与 Table 模型。
 
-### 数据与报告
+### 数据与存储
 
 + [ycUnits](docs/units/README.md) —— SI 工程计数与单位解析/格式化。
 + [ycRadix](docs/radix/README.md) —— 任意进制整数解析、格式化与掩码。
-+ [ycTabulate](docs/tabulate/README.md) —— 文本表格渲染。
 + [ycDateTime](docs/datetime/README.md) —— Unix 时间对象、格式化与偏移。
-+ [ycLog](docs/log/README.md) —— 分级日志：级别过滤、控制台输出与文件追加（时间戳依赖 ycDateTime）。
 + [ycQueue](docs/queue/README.md) —— FIFO/LIFO 队列：任意值存取、空读契约与容量上限。
-+ [ycSQLite](docs/sqlite/README.md) —— 外部 SQLite 客户端的面向对象封装：查询、执行、事务与 schema（会话依赖 ycSubProcess）。
++ [ycSQLite](docs/sqlite/README.md) —— SQLite 数据库：连接、查询、执行、事务与 schema。
+
+### 输出与日志
+
++ [ycTabulate](docs/tabulate/README.md) —— 文本表格渲染。
++ [ycLog](docs/log/README.md) —— 分级日志：级别过滤、控制台输出与文件追加。
 
 ### 语言辅助
 
