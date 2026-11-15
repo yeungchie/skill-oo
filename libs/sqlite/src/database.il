@@ -122,7 +122,9 @@ procedure(_SessionErrorLine(t_text "t")  ; -> str | nil
     ;   (str|nil) - 第一条错误行
     let((found)
         foreach(line _SplitLines(t_text)
-            when(!found && pcreMatchp("^(Error|Parse error|Runtime error):" line)
+            when(!found && pcreMatchp(
+                "^(Error|Parse error|Runtime error)( near line [0-9]+)?:"
+                line)
                 found = line
             )
         )
@@ -252,7 +254,7 @@ procedure(_Query(g_obj g_data t_sql "ggt")  ; -> Result
                 _SessionSend(g_obj g_data
                     "drop table if exists temp.__yc_sqlite_q;" "query")
                 _SessionSend(g_obj g_data
-                    lsprintf("create temp table __yc_sqlite_q as %s" t_sql)
+                    lsprintf("create temp table __yc_sqlite_q as %s\n;" t_sql)
                     "query")
                 _SessionSend(g_obj g_data ".mode csv" "query")
                 header = _SessionSend(g_obj g_data
@@ -525,13 +527,28 @@ procedure(_InstallDatabase(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Result) - changes 与 lastInsertRowid
-        let((text parsed)
-            _SessionSend(self self->_data _BindSql(t_sql params) "execute")
+        let((text lines baseline parsed delta)
+            text = _SessionSend(self self->_data
+                lsprintf("select total_changes();\n%s\n;\nselect changes(), last_insert_rowid(), total_changes();"
+                    _BindSql(t_sql params))
+                "execute")
+            lines = _SplitLines(text)
+            unless(2 <= length(lines)
+                error("ycSQLite::Database->execute: unexpected session output %A"
+                    text)
+            )
+            baseline = atoi(car(lines))
+            unless(fixp(baseline)
+                error("ycSQLite::Database->execute: invalid total_changes() output %A"
+                    car(lines))
+            )
             parsed = _ParseChanges(
-                _SessionSend(self self->_data
-                    "select changes(), last_insert_rowid();" "execute")
-                "ycSQLite::Database->execute")
-            Result(?changes car(parsed) ?lastInsertRowid cadr(parsed))
+                car(reverse(lines)) "ycSQLite::Database->execute")
+            delta = nth(2 parsed) - baseline
+            Result(
+                ?changes if(delta > 0 car(parsed) 0)
+                ?lastInsertRowid cadr(parsed)
+            )
         )
     )
     self->executeScript = lambda((t_sql "t")  ; -> t
@@ -542,7 +559,7 @@ procedure(_InstallDatabase(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t) - 执行完成
-        _SessionSend(self self->_data t_sql "executeScript")
+        _SessionSend(self self->_data strcat(t_sql "\n;") "executeScript")
         t
     )
     self->transaction = lambda((g_body "g")  ; -> any

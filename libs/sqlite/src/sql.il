@@ -339,21 +339,151 @@ procedure(_SplitBy(t_text t_sep "tt")  ; -> list[str]
 )
 
 
+procedure(_SqlScan(t_sql t_context "tt")  ; -> list[str|nil int]
+    ; 扫描 SQL 文本，返回首条语句的关键字与非空语句数。
+    ;
+    ; **参数**
+    ;   t_sql      (str) - SQL 文本
+    ;   t_context  (str) - 错误消息上下文
+    ;
+    ; **返回**
+    ;   (list[str|nil int]) - 首条非空语句的首关键字（小写）与语句数；
+    ;   引号或注释未闭合时 error() 中断
+    unless(stringp(t_sql)
+        error("%s: SQL must be a string, got %A" t_context t_sql)
+    )
+    let((len i c nxt state word keyword count content)
+        len = length(t_sql)
+        i = 1
+        state = 'normal
+        count = 0
+        while(i <= len
+            c = substring(t_sql i 1)
+            nxt = if(i < len substring(t_sql i + 1 1) "")
+            cond(
+                (state == 'normal
+                    cond(
+                        (c == "'" state = 'single)
+                        (c == "\"" state = 'double)
+                        (c == "`" state = 'backtick)
+                        (c == "[" state = 'bracket)
+                        (c == "-" && nxt == "-"
+                            state = 'lineComment
+                            i++
+                        )
+                        (c == "/" && nxt == "*"
+                            state = 'blockComment
+                            i++
+                        )
+                        (t
+                            when(word && !pcreMatchp("[A-Za-z0-9_]" c)
+                                when(!keyword && count == 0
+                                    keyword = lowerCase(word)
+                                )
+                                word = nil
+                            )
+                            cond(
+                                (c == ";"
+                                    when(content count++)
+                                    content = nil
+                                )
+                                ((c == " " || c == "\t" || c == "\n"
+                                    || c == "\r") nil)
+                                (t
+                                    content = t
+                                    when(pcreMatchp("[A-Za-z0-9_]" c)
+                                        word = strcat(if(word word "") c)
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+                (state == 'single
+                    content = t
+                    when(c == "'"
+                        if(nxt == "'"
+                        then i++
+                        else state = 'normal
+                        )
+                    )
+                )
+                (state == 'double
+                    content = t
+                    when(c == "\""
+                        if(nxt == "\""
+                        then i++
+                        else state = 'normal
+                        )
+                    )
+                )
+                (state == 'backtick
+                    content = t
+                    when(c == "`"
+                        if(nxt == "`"
+                        then i++
+                        else state = 'normal
+                        )
+                    )
+                )
+                (state == 'bracket
+                    content = t
+                    when(c == "]"
+                        state = 'normal
+                    )
+                )
+                (state == 'lineComment
+                    when(c == "\n"
+                        state = 'normal
+                    )
+                )
+                (state == 'blockComment
+                    when(c == "*" && nxt == "/"
+                        i++
+                        state = 'normal
+                    )
+                )
+            )
+            i++
+        )
+        unless(state == 'normal || state == 'lineComment
+            error("%s: unterminated SQL quote or comment" t_context)
+        )
+        when(word
+            when(!keyword && count == 0
+                keyword = lowerCase(word)
+            )
+        )
+        when(content count++)
+        list(keyword count)
+    )
+)
+
+
 procedure(_CheckQuery(t_sql "t")  ; -> t
-    ; 校验 query 的 SQL 为只读 SELECT/WITH/VALUES。
+    ; 校验 query 的 SQL 为单条只读 SELECT/WITH/VALUES。
     ;
     ; **参数**
     ;   t_sql  (str) - SQL 文本
     ;
     ; **返回**
     ;   (t) - 合法；否则 error() 中断
-    unless(stringp(t_sql)
-        error("ycSQLite::Database->query: SQL must be a string, got %A" t_sql)
+    let((scan keyword count)
+        unless(stringp(t_sql)
+            error("ycSQLite::Database->query: SQL must be a string, got %A"
+                t_sql)
+        )
+        scan = _SqlScan(t_sql "ycSQLite::Database->query")
+        keyword = car(scan)
+        count = cadr(scan)
+        unless(count <= 1
+            error("ycSQLite::Database->query: SQL must contain a single statement")
+        )
+        unless(keyword && pcreMatchp("^(select|with|values)$" keyword)
+            error("ycSQLite::Database->query: SQL must start with SELECT, WITH, or VALUES")
+        )
+        t
     )
-    unless(pcreMatchp("(?i)^\\s*(select|with|values)\\b" t_sql)
-        error("ycSQLite::Database->query: SQL must start with SELECT, WITH, or VALUES")
-    )
-    t
 )
 
 
@@ -527,21 +657,21 @@ procedure(_ParseRows(t_text l_columns t_context "tlt")  ; -> list[Row]
 
 
 procedure(_ParseChanges(t_text t_context "tt")  ; -> list
-    ; 解析 changes() 与 last_insert_rowid() 输出。
+    ; 解析 changes()、last_insert_rowid() 与 total_changes() 输出。
     ;
     ; **参数**
-    ;   t_text     (str) - 一行两列输出
+    ;   t_text     (str) - 一行三列输出
     ;   t_context  (str) - 错误消息上下文
     ;
     ; **返回**
-    ;   (list(int int|str)) - changes 与 lastInsertRowid
-    let((lines fields changes lastId)
+    ;   (list(int int|str int)) - changes、lastInsertRowid 与 totalChanges
+    let((lines fields changes lastId total)
         lines = _SplitLines(t_text)
         unless(lines
             error("%s: missing changes() output" t_context)
         )
         fields = _SplitBy(car(lines) "|")
-        unless(length(fields) == 2
+        unless(length(fields) == 3
             error("%s: malformed changes() output %A" t_context car(lines))
         )
         changes = _ParseInteger(nth(0 fields) t_context)
@@ -549,7 +679,11 @@ procedure(_ParseChanges(t_text t_context "tt")  ; -> list
             error("%s: changes() is not a fixnum" t_context)
         )
         lastId = _ParseInteger(nth(1 fields) t_context)
-        list(changes lastId)
+        total = atoi(nth(2 fields))
+        unless(fixp(total)
+            error("%s: total_changes() is not an integer" t_context)
+        )
+        list(changes lastId total)
     )
 )
 

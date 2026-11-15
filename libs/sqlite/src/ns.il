@@ -14,6 +14,7 @@ addToNamespace("ycSQLite"
         _BindSql  ; proc
         _SplitBy  ; proc
         _SplitLines  ; proc
+        _SqlScan  ; proc
         _CheckQuery  ; proc
         _EncodedColumn  ; proc
         _EncodedSelect  ; proc
@@ -50,6 +51,7 @@ addToNamespace("ycSQLite"
         _ErrText  ; proc
         _RunCommand  ; proc
         _SessionProbe  ; proc
+        _ParseVersion  ; proc
         _ValidateClient  ; proc
         _CommandExists  ; proc
         _InstallClient  ; proc

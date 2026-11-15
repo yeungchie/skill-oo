@@ -12,6 +12,7 @@ Cadence SKILL++ 的 SQLite 客户端封装库：默认客户端可用时直接�
 + `":memory:"` 创建临时内存数据库：不生成文件，关闭 `Database` 后内容消失。
 + `Database` 支持 `ycWith`：正常退出和体内出错都会关闭会话。
 + 支持位置参数 `?`；参数值由模块安全转义。
++ 最后一条语句末尾的分号可以省略；语句之间仍需用分号分隔。
 + SQLite 类型会被保留：`NULL`、整数、浮点、文本与 `BLOB` 分别映射为 `nil`、fixnum 或字符串、flonum、字符串与 `ycSQLite::Blob`。
 + 超出 32 位的整数以十进制字符串返回，避免静默截断；`BLOB` 默认以十六进制文本保存。
 + 外键约束默认开启：`Open` 的 `?foreignKeys` 默认 `t`，显式传 `nil` 可关闭；该选项设置会话启动状态，之后仍可用 `PRAGMA foreign_keys` 改变当前会话。
@@ -210,7 +211,7 @@ db->query(
 => ycSQLite::Result
 ```
 
-执行只读查询。SQL 必须以 `SELECT`、`WITH` 或 `VALUES` 开头。结果列名与行内容会被完整返回。
+执行只读查询。SQL 必须是单条语句，且以 `SELECT`、`WITH` 或 `VALUES` 开头；前导注释允许出现，分号可以出现在字符串字面量或注释里，但第一条语句结束后不能再有其他语句。违反时以 `error()` 中断，后续语句不会执行。`WITH` 与 `VALUES` 需要客户端支持；旧客户端会直接返回语法错误。结果列名与行内容会被完整返回。
 
 ```lisp
 ; 建表：a 是整数列，b 是文本列
@@ -223,6 +224,10 @@ db->execute("insert into t values (?, ?);" ?params list(1 "x"))
 ; 查询结果按行返回，每行是值列表
 db->query("select a, b from t;")->toList()
 ; => ((1 "x"))
+
+; 多语句会被拒绝，后面的 DELETE 不会执行
+db->query("select 1; delete from t;")
+; => 以 error() 中断（只允许单条查询语句）
 db->close()
 ```
 
@@ -236,7 +241,7 @@ db->execute(
 => ycSQLite::Result
 ```
 
-执行 DDL/DML 并返回 `changes()` 与最近插入 rowid。参数数量或类型不匹配时以 `error()` 中断。
+执行 DDL/DML 并返回本次语句的 `changes` 与最近插入 rowid。`changes` 只统计本次调用改动的数据行；`CREATE`、`DROP`、`ALTER`、`PRAGMA` 等非 DML 语句与没有匹配行的 DML 都为 `0`。参数数量或类型不匹配、SQL 执行失败时以 `error()` 中断。
 
 ```lisp
 db = ycSQLite::Open(":memory:")
@@ -250,6 +255,10 @@ res->changes()
 ; => 1（影响一行）
 res->lastInsertRowid()
 ; => 1（新行的 id）
+
+; 先插入再建表：建表不改变数据行数
+db->execute("create table log(msg text);")->changes()
+; => 0
 db->close()
 ```
 
@@ -463,7 +472,7 @@ r->changes()
 => int
 ```
 
-返回最近 DML 的影响行数；查询结果为 `0`。
+返回所属 `execute` 调用改动的数据行数；非 DML 语句为 `0`。查询结果上的 `changes` 恒为 `0`。
 
 ```lisp
 db = ycSQLite::Open(":memory:")
@@ -791,7 +800,7 @@ c->versionTuple()
 => list[int] / nil
 ```
 
-返回主版本、次版本与补丁版本。
+返回主版本、次版本与补丁版本。只取版本串的前三段：多出的第四段（如 `3.45.1.1`）与后缀（如 `3.50.0-prelease`）会被忽略。
 
 ```lisp
 ycSQLite::Client(?executable "sqlite3" ?unsetEnv list("LD_LIBRARY_PATH"))->validate()->versionTuple()

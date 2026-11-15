@@ -1,4 +1,4 @@
-let((tmp wrapper envPath db info bad)
+let((tmp wrapper envPath db info bad parse)
     tmp = "ycSQLiteTmpTest"
     system(strcat("rm -rf " tmp " && mkdir -p " tmp))
     wrapper = strcat(_TestDir "../../libs/sqlite/src/sqlite3.sh")
@@ -47,6 +47,19 @@ let((tmp wrapper envPath db info bad)
         "client: command elements must be strings")
     _AssertError(lambda(() ycSQLite::Client(?timeout 0))
         "client: timeout must be positive")
+
+    ; --- version parsing ---
+    info = ycSQLite::_ParseVersion("3.45.1.1 2024-01-01" "probe")
+    _Assert(car(info) == "3.45.1.1"
+        "client: four-part version keeps the original string")
+    _Assert(cadr(info) == list(3 45 1)
+        "client: four-part version keeps the first three components")
+    parse = ycSQLite::_ParseVersion("3.50.0-prelease" "probe")
+    _Assert(cadr(parse) == list(3 50 0)
+        "client: version suffix keeps the numeric components")
+    _AssertErrorMsg(lambda(() ycSQLite::_ParseVersion("sqlite3" "probe"))
+        "unsupported version output"
+        "client: non-numeric version is rejected")
 
     system(strcat("rm -rf " tmp))
 )

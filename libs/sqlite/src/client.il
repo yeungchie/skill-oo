@@ -67,6 +67,38 @@ defclass(Client () (
 ))
 
 
+procedure(_ParseVersion(t_text t_context "tt")  ; -> list
+    ; 解析 sqlite3 --version 输出的版本号。
+    ;
+    ; **参数**
+    ;   t_text     (str) - --version 的完整输出
+    ;   t_context  (str) - 错误消息上下文
+    ;
+    ; **返回**
+    ;   (list[str list[int]]) - 原始版本串与前三个数值分量；格式非法时 error() 中断
+    let((line text parts)
+        unless(stringp(t_text)
+            error("%s: version output must be a string, got %A"
+                t_context t_text)
+        )
+        line = car(_SplitLines(t_text))
+        unless(line
+            error("%s: --version returned no output" t_context)
+        )
+        text = car(_SplitBy(line " "))
+        unless(pcreMatchp("^[0-9]+\\.[0-9]+\\.[0-9]+" text)
+            error("%s: unsupported version output %A" t_context line)
+        )
+        parts = _SplitBy(text ".")
+        list(text list(
+            atoi(nth(0 parts))
+            atoi(nth(1 parts))
+            atoi(nth(2 parts))
+        ))
+    )
+)
+
+
 procedure(_CheckCommandList(l_cmd "l")  ; -> list[str]
     ; 校验并返回命令列表。
     ;
@@ -197,7 +229,7 @@ procedure(_ValidateClient(g_data "g")  ; -> t
     ;
     ; **返回**
     ;   (t) - 验证通过；失败时 error() 中断
-    let((res versionLine versionText parts testOut sessionCmd)
+    let((res versionLine parsed testOut sessionCmd)
         g_data->validated = nil
         g_data->valid = nil
         g_data->diagnostics = ""
@@ -216,21 +248,9 @@ procedure(_ValidateClient(g_data "g")  ; -> t
         unless(versionLine
             error("ycSQLite::Client->validate: --version returned no output")
         )
-        versionText = car(_SplitBy(versionLine " "))
-        parts = _SplitBy(versionText ".")
-        unless(parts && length(parts) == 3
-            && pcreMatchp("^[0-9]+$" nth(0 parts))
-            && pcreMatchp("^[0-9]+$" nth(1 parts))
-            && pcreMatchp("^[0-9]+$" nth(2 parts))
-            error("ycSQLite::Client->validate: unsupported version output %A"
-                versionLine)
-        )
-        g_data->version = versionText
-        g_data->versionTuple = list(
-            atoi(nth(0 parts))
-            atoi(nth(1 parts))
-            atoi(nth(2 parts))
-        )
+        parsed = _ParseVersion(versionLine "ycSQLite::Client->validate")
+        g_data->version = car(parsed)
+        g_data->versionTuple = cadr(parsed)
         res = _RunCommand(
             append(g_data->command
                 list("-csv" ":memory:" "select 1, typeof(1);"))

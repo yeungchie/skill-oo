@@ -7,7 +7,8 @@ let((db n)
     n = db->execute("insert into child(pid) values (1);")->changes()
     _Assert(n == 1
         "foreign keys: default session accepts a valid reference")
-    _AssertError(lambda(() db->execute("insert into child(pid) values (2);"))
+    _AssertErrorMsg(lambda(() db->execute("insert into child(pid) values (2);"))
+        "constraint failed"
         "foreign keys: default session rejects an orphan row")
     db->execute("delete from parent where id = 1;")
     _Assert(car(db->query("select count(*) from child;")->rows())->get(0) == 0
@@ -31,7 +32,8 @@ let((db n)
     db = ycSQLite::Open(":memory:" ?foreignKeys t)
     db->execute("create table parent(id integer primary key);")
     db->execute("create table child(pid integer references parent(id));")
-    _AssertError(lambda(() db->execute("insert into child(pid) values (1);"))
+    _AssertErrorMsg(lambda(() db->execute("insert into child(pid) values (1);"))
+        "constraint failed"
         "foreign keys: explicit t rejects an orphan row")
     db->close()
 

@@ -3,14 +3,23 @@ let((db)
     db->execute("create table t(id integer primary key, name text unique);")
     db->execute("insert into t(name) values ('a');")
 
-    _AssertError(lambda(() db->query("select * from missing;"))
-        "errors: missing table query errors")
-    _AssertError(lambda(() db->query("select from;"))
-        "errors: syntax error errors")
-    _AssertError(lambda(() db->execute("insert into t(name) values ('a');"))
-        "errors: constraint violation errors")
-    _AssertError(lambda(() db->execute("select * from missing;"))
-        "errors: execute reports SQL errors")
+    _AssertErrorMsg(lambda(() db->query("select * from missing;"))
+        "no such table"
+        "errors: missing table query names the table")
+    _AssertErrorMsg(lambda(() db->query("select from;"))
+        "syntax error"
+        "errors: syntax error message is reported")
+    let((res msg)
+        res = errset(db->execute("insert into t(name) values ('a');") nil)
+        when(!res
+            msg = car(car(cdr(cdr(cdr(cdr(errset.errset))))))
+        )
+        _Assert(!res && msg && index(lowerCase(msg) "unique")
+            "errors: constraint violation message reports the unique failure")
+    )
+    _AssertErrorMsg(lambda(() db->execute("select * from missing;"))
+        "no such table"
+        "errors: execute reports the SQL error reason")
     _AssertError(lambda(() ycSQLite::Open(""))
         "errors: empty database path errors")
     _AssertError(lambda(() ycSQLite::Open(42))
@@ -30,6 +39,22 @@ let((db)
         "errors: execute after close errors")
     _AssertError(lambda(() db->executeScript("select 1;"))
         "errors: executeScript after close errors")
+
+    ; --- session error line formats ---
+    _Assert(ycSQLite::_SessionErrorLine(
+        "Error: near line 3: column a is not unique")
+        == "Error: near line 3: column a is not unique"
+        "errors: legacy client error line is recognized")
+    _Assert(ycSQLite::_SessionErrorLine(
+        "Runtime error near line 15: UNIQUE constraint failed: t.a (19)")
+        == "Runtime error near line 15: UNIQUE constraint failed: t.a (19)"
+        "errors: runtime error line is recognized")
+    _Assert(ycSQLite::_SessionErrorLine(
+        "Parse error near line 1: no such table: missing")
+        == "Parse error near line 1: no such table: missing"
+        "errors: parse error line is recognized")
+    _Assert(ycSQLite::_SessionErrorLine("1|2|3") == nil
+        "errors: ordinary output is not an error")
 )
 
 _TestChildDone = t
