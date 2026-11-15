@@ -139,15 +139,15 @@ procedure(_InstallRow(self "g")  ; -> t
         when(self->_data->values copy(self->_data->values))
     )
     self->toAlist = lambda(()  ; -> list
-        ; 返回 (("column" . value) ...) 形式的关联列表。
+        ; 返回 (("column" value) ...) 形式的关联列表。
         ;
         ; **返回**
-        ;   (list) - 列名与值的点对列表
+        ;   (list) - 列名与值的二元列表
         let((res column value)
             for(i 1 length(self->_data->columns)
                 column = nth(i - 1 self->_data->columns)
                 value = nth(i - 1 self->_data->values)
-                res = tconc(res cons(column value))
+                res = tconc(res list(column value))
             )
             car(res)
         )

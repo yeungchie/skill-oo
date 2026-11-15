@@ -406,6 +406,10 @@ procedure(Client(\@key (command nil) (executable nil) (unsetEnv nil) (timeout ni
         when(command && executable
             error("ycSQLite::Client: ?command and ?executable are mutually exclusive")
         )
+        unless(executable == nil || stringp(executable)
+            error("ycSQLite::Client: ?executable must be a string or nil, got %A"
+                executable)
+        )
         when(unsetEnv
             unless(listp(unsetEnv)
                 error("ycSQLite::Client: ?unsetEnv must be a list of strings, got %A"

@@ -861,13 +861,13 @@ row->toAlist()
 => list
 ```
 
-返回 `(("列名" . 值) ...)` 形式的关联列表。
+返回 `(("列名" 值) ...)` 形式的关联列表；每一项是列名与值的二元列表。
 
 ```lisp
 db = ycSQLite::Open(":memory:")
 ; 关联列表便于按列名查找
 car(db->query("select 1 as a, 'x' as b;")->rows())->toAlist()
-; => (("a" . 1) ("b" . "x"))
+; => (("a" 1) ("b" "x"))
 db->close()
 ```
 

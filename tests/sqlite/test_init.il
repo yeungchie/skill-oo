@@ -1,6 +1,7 @@
-_TestRun("ycSQLite" 86
+_TestRun("ycSQLite" 139
     "test_client.il"
     "test_with.il"
+    "test_edges.il"
     "test_query.il"
     "test_types.il"
     "test_transaction.il"
