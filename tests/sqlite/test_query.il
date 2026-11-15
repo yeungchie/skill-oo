@@ -89,6 +89,20 @@ let((db result row ins)
         "query: delete reports one changed row")
     _Assert(db->execute("create table t3(y);")->changes() == 0
         "query: DDL keeps reporting zero changes")
+    _Assert(db->execute(
+        "insert into t(name) values ('x'); delete from t where name = 'x';"
+        )->changes() == 2
+        "query: execute sums changes across statements")
+    _Assert(db->execute(
+        "insert into t(name) values ('y'); delete from t where 0;"
+        )->changes() == 1
+        "query: trailing zero-row DML does not hide earlier changes")
+    _Assert(car(db->query("select count(*) from t;")->rows())->get(0) == 3
+        "query: multi-statement execute ran every statement")
+    _Assert(db->execute(
+        "insert into t(name) values ('z'); create table t4(q); delete from t where 0;"
+        )->changes() == 1
+        "query: DDL between DML statements does not reset changes")
     db->close()
 )
 

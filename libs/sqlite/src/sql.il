@@ -339,30 +339,35 @@ procedure(_SplitBy(t_text t_sep "tt")  ; -> list[str]
 )
 
 
-procedure(_SqlScan(t_sql t_context "tt")  ; -> list[str|nil int]
-    ; 扫描 SQL 文本，返回首条语句的关键字与非空语句数。
+procedure(_SqlScan(t_sql t_context "tt")  ; -> list[str|nil int t|nil]
+    ; 扫描 SQL 文本，返回首条语句的关键字、非空语句数与点命令标志。
     ;
     ; **参数**
     ;   t_sql      (str) - SQL 文本
     ;   t_context  (str) - 错误消息上下文
     ;
     ; **返回**
-    ;   (list[str|nil int]) - 首条非空语句的首关键字（小写）与语句数；
-    ;   引号或注释未闭合时 error() 中断
+    ;   (list[str|nil int t|nil]) - 首条非空语句的首关键字（小写）、
+    ;   语句数与「是否存在行首点命令」标志；引号或注释未闭合时 error() 中断
     unless(stringp(t_sql)
         error("%s: SQL must be a string, got %A" t_context t_sql)
     )
-    let((len i c nxt state word keyword count content)
+    let((len i c nxt state word keyword count content bol dot)
         len = length(t_sql)
         i = 1
         state = 'normal
         count = 0
+        bol = t
         while(i <= len
             c = substring(t_sql i 1)
             nxt = if(i < len substring(t_sql i + 1 1) "")
             cond(
                 (state == 'normal
                     cond(
+                        (bol && c == "."
+                            dot = t
+                            content = t
+                        )
                         (c == "'" state = 'single)
                         (c == "\"" state = 'double)
                         (c == "`" state = 'backtick)
@@ -444,6 +449,12 @@ procedure(_SqlScan(t_sql t_context "tt")  ; -> list[str|nil int]
                     )
                 )
             )
+            if(c == "\n"
+            then
+                bol = t
+            else
+                bol = nil
+            )
             i++
         )
         unless(state == 'normal || state == 'lineComment
@@ -455,8 +466,24 @@ procedure(_SqlScan(t_sql t_context "tt")  ; -> list[str|nil int]
             )
         )
         when(content count++)
-        list(keyword count)
+        list(keyword count dot)
     )
+)
+
+
+procedure(_CheckNoDotCommands(t_sql t_context "tt")  ; -> t
+    ; 拒绝 SQL 文本中出现在行首的客户端点命令。
+    ;
+    ; **参数**
+    ;   t_sql      (str) - SQL 文本
+    ;   t_context  (str) - 错误消息上下文
+    ;
+    ; **返回**
+    ;   (t) - 无点命令；否则 error() 中断
+    when(caddr(_SqlScan(t_sql t_context))
+        error("%s: dot commands are not allowed in SQL" t_context)
+    )
+    t
 )
 
 
@@ -664,7 +691,7 @@ procedure(_ParseChanges(t_text t_context "tt")  ; -> list
     ;   t_context  (str) - 错误消息上下文
     ;
     ; **返回**
-    ;   (list(int int|str int)) - changes、lastInsertRowid 与 totalChanges
+    ;   (list(int int|str int|str)) - changes、lastInsertRowid 与 totalChanges
     let((lines fields changes lastId total)
         lines = _SplitLines(t_text)
         unless(lines
@@ -679,10 +706,7 @@ procedure(_ParseChanges(t_text t_context "tt")  ; -> list
             error("%s: changes() is not a fixnum" t_context)
         )
         lastId = _ParseInteger(nth(1 fields) t_context)
-        total = atoi(nth(2 fields))
-        unless(fixp(total)
-            error("%s: total_changes() is not an integer" t_context)
-        )
+        total = _ParseInteger(nth(2 fields) t_context)
         list(changes lastId total)
     )
 )

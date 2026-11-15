@@ -15,6 +15,7 @@ addToNamespace("ycSQLite"
         _SplitBy  ; proc
         _SplitLines  ; proc
         _SqlScan  ; proc
+        _CheckNoDotCommands  ; proc
         _CheckQuery  ; proc
         _EncodedColumn  ; proc
         _EncodedSelect  ; proc

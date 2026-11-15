@@ -113,10 +113,10 @@ procedure(_SessionAlive(g_data "g")  ; -> t | nil
 
 
 procedure(_SessionErrorLine(t_text "t")  ; -> str | nil
-    ; 从会话输出中找 SQLite 错误行。
+    ; 从客户端诊断输出中找 SQLite 错误行。
     ;
     ; **参数**
-    ;   t_text  (str) - 会话输出
+    ;   t_text  (str) - 客户端诊断输出（stderr）
     ;
     ; **返回**
     ;   (str|nil) - 第一条错误行
@@ -183,7 +183,7 @@ procedure(_SessionSend(g_obj g_data t_text t_method "ggtt")  ; -> str
         body = if(pos > 1 substring(text 1 pos - 1) "")
         job->stdout()->text(?clear t)
         errText = job->stderr()->text(?clear t)
-        errMsg = _SessionErrorLine(strcat(body "\n" errText))
+        errMsg = _SessionErrorLine(errText)
         when(errMsg
             _DbError(g_obj t_method "%s" errMsg)
         )
@@ -527,26 +527,32 @@ procedure(_InstallDatabase(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Result) - changes 与 lastInsertRowid
-        let((text lines baseline parsed delta)
+        let((text lines baseline parsed total delta sql)
+            sql = _BindSql(t_sql params)
+            _CheckNoDotCommands(sql "ycSQLite::Database->execute")
             text = _SessionSend(self self->_data
                 lsprintf("select total_changes();\n%s\n;\nselect changes(), last_insert_rowid(), total_changes();"
-                    _BindSql(t_sql params))
+                    sql)
                 "execute")
             lines = _SplitLines(text)
             unless(2 <= length(lines)
                 error("ycSQLite::Database->execute: unexpected session output %A"
                     text)
             )
-            baseline = atoi(car(lines))
+            baseline = _ParseInteger(car(lines)
+                "ycSQLite::Database->execute")
             unless(fixp(baseline)
-                error("ycSQLite::Database->execute: invalid total_changes() output %A"
-                    car(lines))
+                error("ycSQLite::Database->execute: total_changes() exceeds the fixnum range; reopen the database to reset it")
             )
             parsed = _ParseChanges(
                 car(reverse(lines)) "ycSQLite::Database->execute")
-            delta = nth(2 parsed) - baseline
+            total = nth(2 parsed)
+            unless(fixp(total)
+                error("ycSQLite::Database->execute: total_changes() exceeds the fixnum range; reopen the database to reset it")
+            )
+            delta = total - baseline
             Result(
-                ?changes if(delta > 0 car(parsed) 0)
+                ?changes delta
                 ?lastInsertRowid cadr(parsed)
             )
         )
@@ -559,6 +565,7 @@ procedure(_InstallDatabase(self "g")  ; -> t
         ;
         ; **返回**
         ;   (t) - 执行完成
+        _CheckNoDotCommands(t_sql "ycSQLite::Database->executeScript")
         _SessionSend(self self->_data strcat(t_sql "\n;") "executeScript")
         t
     )

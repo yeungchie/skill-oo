@@ -20,6 +20,27 @@ let((db)
     _AssertErrorMsg(lambda(() db->execute("select * from missing;"))
         "no such table"
         "errors: execute reports the SQL error reason")
+    _Assert(db->execute("select 'Error: fake' as x;")->changes() == 0
+        "errors: user output that looks like an error is not treated as one")
+    _AssertErrorMsg(lambda(() db->execute(".quit"))
+        "dot commands are not allowed"
+        "errors: execute rejects a dot command")
+    _AssertErrorMsg(lambda(() db->execute("select 1;\n.quit"))
+        "dot commands are not allowed"
+        "errors: execute rejects a dot command after a statement")
+    _AssertErrorMsg(lambda(() db->executeScript("select 1;\n.shell echo x"))
+        "dot commands are not allowed"
+        "errors: executeScript rejects a dot command")
+    _Assert(car(db->query("select 5 as v;")->rows())->get(0) == 5
+        "errors: rejected dot command keeps the session alive")
+    _Assert(car(db->query("select '.quit' as v;")->rows())->get(0) == ".quit"
+        "errors: dot command text inside a quoted literal is allowed")
+    _Assert(db->executeScript("select 'a\n.quit' as v;") == t
+        "errors: dot command text inside a multi-line literal is allowed")
+    _Assert(db->executeScript("select 1;\n-- .quit\nselect 2;") == t
+        "errors: dot command text inside a line comment is allowed")
+    _Assert(db->executeScript("select 1;\n/*\n.quit\n*/\nselect 2;") == t
+        "errors: dot command text inside a block comment is allowed")
     _AssertError(lambda(() ycSQLite::Open(""))
         "errors: empty database path errors")
     _AssertError(lambda(() ycSQLite::Open(42))

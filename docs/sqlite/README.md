@@ -241,7 +241,7 @@ db->execute(
 => ycSQLite::Result
 ```
 
-执行 DDL/DML 并返回本次语句的 `changes` 与最近插入 rowid。`changes` 只统计本次调用改动的数据行；`CREATE`、`DROP`、`ALTER`、`PRAGMA` 等非 DML 语句与没有匹配行的 DML 都为 `0`。参数数量或类型不匹配、SQL 执行失败时以 `error()` 中断。
+执行一条或多条 DDL/DML 并返回本次调用改动的数据行数与最近插入 rowid。`t_sql` 可以包含多条以分号分隔的语句；`changes` 是这些语句改动的数据行总数，`CREATE`、`DROP`、`ALTER`、`PRAGMA` 等非 DML 语句与没有匹配行的 DML 不计数。`lastInsertRowid` 是会话中最近一次 `INSERT` 生成的 rowid。SQL 不得包含以 `.` 开头的客户端点命令；违反时以 `error()` 中断，语句不会发送。参数数量或类型不匹配、SQL 执行失败时以 `error()` 中断；会话累计改动数超出 fixnum 范围时同样以 `error()` 中断，重新打开数据库可重置计数。
 
 ```lisp
 db = ycSQLite::Open(":memory:")
@@ -269,7 +269,7 @@ db->executeScript(t_sql)
 => t
 ```
 
-执行多语句脚本，不返回结果集。
+执行多语句脚本，不返回结果集。SQL 不得包含以 `.` 开头的客户端点命令；违反时以 `error()` 中断，脚本不会发送。
 
 ```lisp
 db = ycSQLite::Open(":memory:")
@@ -472,7 +472,7 @@ r->changes()
 => int
 ```
 
-返回所属 `execute` 调用改动的数据行数；非 DML 语句为 `0`。查询结果上的 `changes` 恒为 `0`。
+返回所属 `execute` 调用改动的数据行总数；一次调用包含多条语句时累加各语句的结果，非 DML 语句不计数。查询结果上的 `changes` 恒为 `0`。
 
 ```lisp
 db = ycSQLite::Open(":memory:")
@@ -489,7 +489,7 @@ r->lastInsertRowid()
 => int / str / nil
 ```
 
-返回最近插入 rowid；超出 fixnum 范围时返回十进制字符串。
+返回会话中最近一次 `INSERT` 生成的 rowid；一次 `execute` 包含多条语句时，取最后一条插入语句的值。超出 fixnum 范围时返回十进制字符串。
 
 ```lisp
 db = ycSQLite::Open(":memory:")
