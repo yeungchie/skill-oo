@@ -209,21 +209,18 @@ procedure(_InstallStringPort(self "g")  ; -> t
     )
 
     self->seek = lambda((x_offset \@key (whence 0) "xx")  ; -> t | nil
-        ; 移动字符串端口位置。
+        ; 移动字符串端口位置，目标须落在已写内容范围内。
         ;
         ; **参数**
         ;   x_offset  (int) - 偏移量
         ;   ?whence x_whence (int) - 0 起始、1 当前位置、2 末尾（默认 0）
         ;
         ; **返回**
-        ;   (t|nil) - 成功为 t；失败为 nil；writer 仅支持 0
+        ;   (t|nil) - 成功为 t；目标小于 0 或超出已写内容时为 nil；
+        ;   已关闭或 ?whence 非法时 error() 中断
         _CheckStringPort(self "seek" nil)
         unless(whence == 0 || whence == 1 || whence == 2
             _PortError(self "seek" "?whence must be 0, 1 or 2")
-        )
-        when(self->_data->mode == "w" && whence != 0
-            _PortError(self "seek"
-                "string writer only supports absolute seek (whence 0)")
         )
         if(self->_data->mode == "r"
         then
@@ -247,11 +244,36 @@ procedure(_InstallStringPort(self "g")  ; -> t
                 )
             )
         else
-            let((pos)
-                pos = _Tell(self self->_data->port->port())
-                if(x_offset == pos
-                    t
-                    _Seek(self self->_data->port->port() x_offset 0)
+            let((cur end content target)
+                cur = _Tell(self self->_data->port->port())
+                content = getOutstring(self->_data->port->port())
+                end = length(content)
+                target = case(whence
+                    (0 x_offset)
+                    (1 cur + x_offset)
+                    (2 end + x_offset)
+                )
+                cond(
+                    ((!fixp(target) || target < 0 || target > end) nil)
+                    ((target == cur) t)
+                    ((target < cur)
+                        _Seek(self self->_data->port->port() target 0)
+                    )
+                    (t
+                        ; 字符串输出端口只能回退、不能前跳；
+                        ; 前跳时用已有内容重建端口，再从末尾回退到目标。
+                        self->_data->port->close()
+                        self->_data->port = _MakeStringOutputPort()
+                        when(end > 0
+                            self->_data->port->write(content)
+                        )
+                        if(target < end
+                        then
+                            _Seek(self self->_data->port->port() target 0)
+                        else
+                            t
+                        )
+                    )
                 )
             )
         )

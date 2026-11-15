@@ -47,17 +47,34 @@ let((w a)
         "string writer: backward overwrite")
     _Assert(w->seek(2) == t
         "string writer: seek at current position is a no-op")
-    _Assert(w->seek(3) == nil
-        "string writer: forward seek returns nil")
-    _Assert(w->tell() == 2
-        "string writer: failed forward seek keeps position")
+    _Assert(w->seek(3) == t
+        "string writer: forward seek to the written end succeeds")
+    _Assert(w->tell() == 3
+        "string writer: tell after forward seek to end")
     w->write("D")
-    _Assert(w->text() == "XZD"
-        "string writer: write at current position")
+    _Assert(w->text() == "XZcD"
+        "string writer: write at the end appends")
+    _Assert(w->seek(1) == t
+        "string writer: forward seek inside the written text")
+    w->write("A")
+    _Assert(w->text() == "XAcD"
+        "string writer: forward seek keeps the tail")
+    _Assert(w->seek(0 ?whence 2) == t
+        "string writer: end-relative seek")
+    _Assert(w->tell() == 4
+        "string writer: tell after end-relative seek")
+    _Assert(w->seek(-2 ?whence 1) == t
+        "string writer: current-relative seek")
+    _Assert(w->tell() == 2
+        "string writer: tell after current-relative seek")
     _Assert(w->seek(9) == nil
         "string writer: seek beyond end returns nil")
+    _Assert(w->seek(-9 ?whence 1) == nil
+        "string writer: seek before start returns nil")
+    _Assert(w->tell() == 2
+        "string writer: rejected seek keeps position")
     w->write("E")
-    _Assert(w->text() == "XZDE"
+    _Assert(w->text() == "XAED"
         "string writer: failed seek keeps write position")
     w->close()
 
@@ -69,10 +86,6 @@ let((w a)
         "string writer: readAll on writer errors")
     _AssertError(lambda(() w->fscanf("%d" list('a)))
         "string writer: fscanf on writer errors")
-    _AssertError(lambda(() w->seek(0 ?whence 1))
-        "string writer: relative seek errors")
-    _AssertError(lambda(() w->seek(0 ?whence 2))
-        "string writer: end-relative seek errors")
     _AssertError(lambda(() w->seek(0 ?whence 3))
         "string writer: invalid whence errors")
     _Assert(outportp(w->port())
