@@ -209,7 +209,7 @@ procedure(_InstallStringPort(self "g")  ; -> t
     )
 
     self->seek = lambda((x_offset \@key (whence 0) "xx")  ; -> t | nil
-        ; 移动字符串端口位置，目标须落在已写内容范围内。
+        ; 移动字符串端口位置，目标须落在内容范围内。
         ;
         ; **参数**
         ;   x_offset  (int) - 偏移量

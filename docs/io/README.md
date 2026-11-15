@@ -799,7 +799,7 @@ sp->port()
 => port
 ```
 
-返回当前底层原生 port。常规读写、格式化与定位应使用包装方法；`port()` 只作逃生口。reader 每次 `seek` 都会替换内部 port，不要跨 `seek` 持有旧的原生 port。
+返回当前底层原生 port。常规读写、格式化与定位应使用包装方法；`port()` 只作逃生口。reader 每次 `seek`、writer 向前定位时都会替换内部 port，不要跨 `seek` 持有旧的原生 port。
 
 **返回值**
 
