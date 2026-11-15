@@ -318,19 +318,42 @@ procedure(_InstallPort(self "g")  ; -> t
     )
 
     self->seek = lambda((x_offset \@key (whence 0) "xx")  ; -> t | nil
-        ; 移动端口位置，对应 fileSeek。
+        ; 移动端口位置，目标须落在文件范围内。
         ;
         ; **参数**
         ;   x_offset  (int) - 偏移量
         ;   ?whence x_whence (int) - 0 起始、1 当前位置、2 末尾（默认 0）
         ;
         ; **返回**
-        ;   (t|nil) - 原生 fileSeek 的返回值；已关闭时 error() 中断
+        ;   (t|nil) - 成功为 t；目标小于 0 或超出文件长度时为 nil；
+        ;   已关闭或 ?whence 非法时 error() 中断
         when(self->_data->closed
             error("%A->seek: port is closed: %s"
                 className(self) self->_data->path)
         )
-        _Seek(self self->_data->port x_offset whence)
+        unless(whence == 0 || whence == 1 || whence == 2
+            _PortError(self "seek" "?whence must be 0, 1 or 2")
+        )
+        let((cur end target)
+            when(self->_data->mode != "r"
+                drain(self->_data->port)
+            )
+            cur = _Tell(self self->_data->port)
+            _Seek(self self->_data->port 0 2)
+            end = _Tell(self self->_data->port)
+            _Seek(self self->_data->port cur 0)
+            target = case(whence
+                (0 x_offset)
+                (1 cur + x_offset)
+                (2 end + x_offset)
+            )
+            if(target >= 0 && target <= end
+            then
+                _Seek(self self->_data->port target 0)
+            else
+                nil
+            )
+        )
     )
 
     self->tell = lambda(()  ; -> int

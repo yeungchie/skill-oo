@@ -10,7 +10,7 @@ Cadence SKILL++ 的文件与字符串端口库：包装原生 port，提供方�
 - `ycIO::FromString` 从字符串创建只读 `ycIO::StringPort`；`ycIO::ToString` 创建只写 `StringPort`。
 - 读取方法保留行尾换行；`readLine` 在末尾返回 `nil`，`readAll` 在空内容上返回 `""`。
 - `write` 返回端口自身，可以链式调用；文件写入可能需要 `flush()` 或 `close()` 才落盘，字符串 writer 用 `text()` 取内容。
-- `fscanf` 的变量名以符号列表传入；`seek` / `tell` 对应原生 `fileSeek` / `fileTell`。
+- `fscanf` 的变量名以符号列表传入；`seek` / `tell` 基于原生定位接口，两个端口类的 `seek` 对越界目标都返回 `nil`。
 - `close` 幂等；关闭后的读写、格式化与定位都以 `error()` 中断。
 - `StringPort` 的 writer 在 `close()` 时捕获文本，因此 `text()` 在 `ycWith` 退出后仍可读取。
 - `Port` 与 `StringPort` 是两个独立类，共享同一套端口方法协议；`StringPort` 内部组合一个 `Port`。
@@ -336,7 +336,7 @@ p->seek(
 => t / nil
 ```
 
-移动文件端口位置，对应原生 `fileSeek`。偏移按字节计；返回 `t` 表示原生调用成功，`nil` 表示原生调用失败。边界行为遵循原生 `fileSeek`：本环境中超出文件末尾的绝对定位可以成功，随后读取得到 EOF。端口已关闭时以 `error()` 中断；`?whence` 不是 `0/1/2` 时以 `error()` 中断。
+移动文件端口位置。偏移按字节计；目标位置必须落在 `0` 到文件长度之间（含两端），否则返回 `nil` 且位置不变。读端口到达文件末尾后读取得到 EOF；写端口在定位前会先刷新缓冲，因此文件长度按已写入内容计算。端口已关闭时以 `error()` 中断；`?whence` 不是 `0/1/2` 时以 `error()` 中断。
 
 **参数**
 
@@ -372,6 +372,10 @@ r->seek(-1 ?whence 2)
 ; => t
 r->readLine()
 ; => "\n"
+r->seek(99)
+; => nil（超出文件末尾）
+r->tell()
+; => 7（失败时不改变位置）
 r->close()
 ```
 

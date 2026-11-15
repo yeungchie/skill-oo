@@ -278,7 +278,7 @@ procedure(_InstallStringPort(self "g")  ; -> t
         ; **返回**
         ;   (str) - 写入内容；非写端口时 error() 中断
         unless(self->_data->mode == "w"
-            _PortError(self "text" "string port is not writable")
+            _PortError(self "text" "text() is only available on a string writer")
         )
         if(self->_data->port->isClosed()
             self->_data->value

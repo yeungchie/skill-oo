@@ -136,8 +136,8 @@ let((r line a b c p)
     r = ycIO::FromString("x")
     _AssertError(lambda(() r->write("x"))
         "string reader: write on reader errors")
-    _AssertError(lambda(() r->text())
-        "string reader: text on reader errors")
+    _AssertErrorMsg(lambda(() r->text()) "only available on a string writer"
+        "string reader: text on reader reports writer-only method")
     _Assert(r->flush() == r
         "string reader: flush returns self")
     p = r->port()
