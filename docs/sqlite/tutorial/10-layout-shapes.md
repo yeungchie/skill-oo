@@ -1,6 +1,6 @@
 # 第 10 章 版图图形快照
 
-[返回目录](README.md) ｜ [上一章：连接快照](09-connectivity.md)
+[返回目录](README.md) ｜ [上一章：连接快照](09-connectivity.md) ｜ [选做：项目库](appendix-projects.md)
 
 ![版图图形用 bbox 和文本顶点存入一张表](img/layout-shapes.svg)
 
@@ -267,4 +267,4 @@ lay->close()
 
 数据库保存的是“图形目录”和“可查询的摘要”，不是几何引擎。把精确几何留给 OA 或几何库，数据库就能专注于统计、关联和追踪。
 
-[返回目录](README.md) ｜ [上一章：连接快照](09-connectivity.md)
+[返回目录](README.md) ｜ [上一章：连接快照](09-connectivity.md) ｜ [选做：项目库](appendix-projects.md)

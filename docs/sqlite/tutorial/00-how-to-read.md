@@ -94,6 +94,8 @@ ycSQLiteTutorialSetup(?stage 'full)
 
 第 9、10 章分别用 `?stage 'sch` 和 `?stage 'layout` 单独建连接库和版图库；想一次建好四个库，用 `?stage 'all`。
 
+第 9、10 章之后还有一个[选做项目库](appendix-projects.md)，给出四个方向的起步 schema 与问题清单；不影响主线阅读。
+
 只想清空、不想建库时：
 
 ```lisp

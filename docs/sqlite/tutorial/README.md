@@ -37,6 +37,7 @@
 | [8](08-capstone-drc.md) | 综合实战 | 一次完整的 nightly 导入与看板 |
 | [9](09-connectivity.md) | 连接快照 | `sch.db` 的 instance、net 与 terminal |
 | [10](10-layout-shapes.md) | 版图图形快照 | `layout.db` 的 shapes 表与包围盒 |
+| [项目库](appendix-projects.md) | 选做 | 四个方向的起步 schema 与问题清单 |
 | [附录](appendix-cheatsheet.md) | 速查 | Excel、SQL、`ycSQLite` 对照表 |
 
 ## 教程资产
@@ -60,6 +61,6 @@
 
 ## 从哪开始
 
-第一次读，按 0 到 10 章顺序走。每章开头都会说明从哪个数据库状态开始；如果跳读，先执行该章开头的 `setup` 命令。
+第一次读，按 0 到 10 章顺序走。每章开头都会说明从哪个数据库状态开始；如果跳读，先执行该章开头的 `setup` 命令。读完主线后，可以挑一个[选做项目](appendix-projects.md)练手。
 
 [开始读第 0 章](00-how-to-read.md)
