@@ -171,7 +171,7 @@ errset(sdb->execute(
 ; => nil
 ```
 
-`(1, 1)` 已经存在，复合主键拒绝。CIW 里会看到类似 `columns block_id, check_id are not unique` 的诊断。
+`(1, 1)` 已经存在，复合主键拒绝。教程的期望输出基于 SQLite 3.7.17：会给出类似 `columns block_id, check_id are not unique` 的诊断；较新的客户端会写成 `UNIQUE constraint failed: block_checks.block_id, block_checks.check_id`。
 
 如果主键只有 `block_id`，一个 block 只能有一条检查记录；如果只有 `check_id`，一个检查只能属于一个 block。两列一起做主键，才能表达多对多。
 

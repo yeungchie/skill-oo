@@ -40,6 +40,8 @@
 
 ### 查询
 
+下面的片段按第 3 章之后的完整 `drc.db` 写：`rule_name`、`layer` 已经拆到 `rules`、`layers`，要用 `JOIN` 取回。如果还在第 2 章的扁平库，可以直接写 `where rule_name ...`。
+
 ```sql
 -- 取列、筛选、排序、截断
 select cell, x, y
@@ -48,20 +50,28 @@ where status = 'open'
 order by x, y
 limit 10;
 
--- 去重
-select distinct layer from violations;
+-- 去重（拆表后从 layers 取）
+select distinct l.name
+from violations v
+join layers l on l.layer_id = v.layer_id;
 
 -- 空值
 select * from violations where owner is null;
 
--- 文本匹配
-select * from violations where rule_name like 'M1%';
+-- 文本匹配（拆表后从 rules 取）
+select v.violation_id, ru.name
+from violations v
+join rules ru on ru.rule_id = v.rule_id
+where ru.name like 'M1%';
 
 -- 区间
 select * from violations where x between 10 and 20;
 
--- 列表
-select * from violations where layer in ('M1', 'V1');
+-- 列表（拆表后从 layers 取）
+select v.violation_id, l.name
+from violations v
+join layers l on l.layer_id = v.layer_id
+where l.name in ('M1', 'V1');
 ```
 
 ### 聚合
@@ -186,7 +196,7 @@ drop view if exists open_violations;
 | `database is locked` | 另一个会话在写 | 等它结束，或只留一个写入者 |
 | `datatype mismatch` | 值类型和列差太多 | 检查参数类型 |
 
-错误消息会随客户端版本变化。教程里写的是常见形式，实际以 CIW 输出为准。
+上表是教程期望输出所用的 SQLite 3.7.17 形式。较新的客户端会把唯一、非空、`CHECK` 约束写成 `UNIQUE constraint failed: 表.列`、`NOT NULL constraint failed: 表.列`、`CHECK constraint failed: 条件`；含义相同。模块会在客户端原文前加 `ycSQLite::Database->execute:` 前缀，`near line N` 是会话内的输入行号，不是文件行号。
 
 ## A.6 旧客户端的 SQL 限制
 

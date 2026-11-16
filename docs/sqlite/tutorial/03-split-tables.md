@@ -205,6 +205,8 @@ db->executeScript(ycPathLib::Path("skill-oo/docs/sqlite/tutorial/data/03_relatio
 
 `ycPathLib::Path(...)->readText()` 只是把文件内容读成字符串，再交给 `executeScript`。`ycPathLib` 随库一起加载，不需要单独配置。
 
+`03_relational.sql` 只能对第 2 章的扁平库执行一次：它会新建表、迁移数据，然后 `drop` 旧表并改名。重复执行会报 `table rules already exists`。要重来，先跑 `ycSQLiteTutorialSetup(?stage 'flat)`，再执行这个文件。
+
 ## 3.7 拆完以后长什么样
 
 ```lisp
@@ -302,7 +304,7 @@ car(db->query("select count(*) from violations;")->rows())->get(0)
 ; => 12
 ```
 
-再跑一遍 3.8 的 JOIN，结果也应该是 12 行（去掉 `limit 5` 后）。如果少于 12，说明有违例的 `rule_id`、`run_id` 或 `layer_id` 没匹配上。
+再跑一遍 3.8 的 JOIN：去掉 `limit 5` 后是 **8** 行（仍然只统计 open 违例）；再去掉 `where v.status = 'open'` 后是 **12** 行（全部违例）。如果后者少于 12，说明有违例的 `rule_id`、`run_id` 或 `layer_id` 没匹配上。
 
 ## 3.11 常见错误
 

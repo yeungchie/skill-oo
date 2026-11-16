@@ -9,6 +9,7 @@ Cadence SKILL++ 的 SQLite 客户端封装库：默认客户端可用时直接�
 ## 概要
 
 + SQLite 由外部客户端进程提供；模块不内置 SQLite，也不依赖 SKILL 引擎的原生数据库接口。
++ 模块随附的 `sqlite3.sh` 不是 SQLite 引擎，只是启动系统 `sqlite3` 的包装脚本；真正执行 SQL 的仍是外部 `sqlite3` 客户端。
 + 可用 `YC_SKILL_OO_SQLITE_CLIENT` 环境变量或 `ycSQLite::Configure` 指定客户端。
 + 一个 `Database` 对应一个长驻会话；查询、执行与事务共享同一连接。
 + `":memory:"` 创建临时内存数据库：不生成文件，关闭 `Database` 后内容消失。

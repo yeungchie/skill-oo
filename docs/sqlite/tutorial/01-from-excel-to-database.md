@@ -141,7 +141,9 @@ errset(mem->execute("insert into layers(name, purpose) values ('M1', 'duplicate'
 ; => nil
 ```
 
-`errset` 捕获了错误，返回 `nil`。CIW 里会看到类似 `column name is not unique` 的诊断。具体文案随客户端版本变化，关键是插入没有成功。
+`errset` 捕获了错误，返回 `nil`。CIW 里会看到类似 `ycSQLite::Database->execute: Error: near line 12: column name is not unique` 的诊断：前缀 `ycSQLite::Database->execute:` 是模块加的，`near line` 是会话内的输入行号，不是文件行号，后面才是客户端原文。关键是插入没有成功。
+
+教程的期望输出基于 SQLite 3.7.17：唯一约束的原文是 `column name is not unique`；较新的客户端会写成 `UNIQUE constraint failed: layers.name`。两种写法含义相同。
 
 唯一约束的价值是：不依赖某个人记得“图层名不能重复”。数据库自己守住这条规则。
 
@@ -183,6 +185,8 @@ ycSQLiteTutorialShow(db->columns("layers"))
 
 `cid` 是列序号，`notnull` 是“不能为空”，`pk` 是“主键”。`dflt_value` 是默认值，这里三列都没有默认值。
 
+教程的期望输出基于 SQLite 3.7.17：`type` 显示为建表时的小写；较新的客户端会显示 `INTEGER`、`TEXT`。两种都表示同一类型。
+
 再看建表语句：
 
 ```lisp
@@ -195,6 +199,8 @@ printf("%s\n" db->schema(?table "layers"))
 ```
 
 `schema` 返回数据库里保存的原始建表文本。注意它不会帮你美化，也不会补上分号；格式就是你当初写的样子。
+
+上面的 `;` 和它后面的对齐空格是文档标记，不是输出；`schema()` 返回的第二行开头就是 4 个空格。
 
 查数据：
 

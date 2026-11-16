@@ -40,6 +40,8 @@ printf("%s\n" db->schema(?table "waivers"))
 ;    )
 ```
 
+上面的 `;` 和对齐空格是文档标记，不是输出；真实缩进以 `data/04_waivers.sql` 里的建表语句为准。
+
 逐条读：
 
 - 每条 waiver 有独立 `waiver_id`；
@@ -71,7 +73,7 @@ errset(mem->execute("insert into t(id, name, status) values (2, 'a', 'open');") 
 ; => nil
 ```
 
-CIW 里会看到类似 `column name is not unique` 的诊断。`name` 上写了 `unique`，第二行 `a` 被拒绝。
+教程的期望输出基于 SQLite 3.7.17：会给出类似 `column name is not unique` 的诊断；较新的客户端会写成 `UNIQUE constraint failed: t.name`。`name` 上写了 `unique`，第二行 `a` 被拒绝。
 
 `CHECK`：
 
@@ -80,7 +82,7 @@ errset(mem->execute("update t set status = 'done' where id = 1;") nil)
 ; => nil
 ```
 
-`status` 只允许 `open` 和 `fixed`，`done` 被拒绝。诊断类似 `constraint failed`。
+`status` 只允许 `open` 和 `fixed`，`done` 被拒绝。SQLite 3.7.17 的诊断是 `constraint failed`；较新的客户端会写成 `CHECK constraint failed: status in ('open', 'fixed')`。
 
 `NOT NULL`：
 
@@ -89,7 +91,7 @@ errset(mem->execute("insert into t(id, name, status) values (3, null, 'open');")
 ; => nil
 ```
 
-`name` 不能为空，诊断类似 `t.name may not be NULL`。
+`name` 不能为空。SQLite 3.7.17 的诊断是 `t.name may not be NULL`；较新的客户端会写成 `NOT NULL constraint failed: t.name`。
 
 外键：
 
