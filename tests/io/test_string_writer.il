@@ -55,7 +55,7 @@ let((w a)
     _Assert(w->text() == "XZcD"
         "string writer: write at the end appends")
     _Assert(w->seek(1) == t
-        "string writer: forward seek inside the written text")
+        "string writer: backward seek inside the written text")
     w->write("A")
     _Assert(w->text() == "XAcD"
         "string writer: forward seek keeps the tail")
@@ -76,6 +76,22 @@ let((w a)
     w->write("E")
     _Assert(w->text() == "XAED"
         "string writer: failed seek keeps write position")
+    w->close()
+    _Assert(w->text() == "XAED"
+        "string writer: text after seeks survives close")
+
+    ; --- forward seek inside the written content ---
+    w = ycIO::ToString()
+    w->write("abcdef")
+    _Assert(w->seek(1) == t
+        "string writer: rewind before forward seek")
+    _Assert(w->seek(3) == t
+        "string writer: forward seek inside the written text")
+    _Assert(w->tell() == 3
+        "string writer: tell after forward seek inside")
+    w->write("X")
+    _Assert(w->text() == "abcXef"
+        "string writer: forward inside seek keeps the tail")
     w->close()
 
     ; --- direction / whence errors ---
