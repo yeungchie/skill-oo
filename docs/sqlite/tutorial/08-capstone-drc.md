@@ -1,6 +1,6 @@
 # 第 8 章 综合实战：一次 nightly 导入
 
-[返回目录](README.md) ｜ [上一章：约束、索引与 VIEW](07-constraints-index-view.md)
+[返回目录](README.md) ｜ [上一章：约束、索引与 VIEW](07-constraints-index-view.md) ｜ [下一章：连接快照](09-connectivity.md)
 
 ![drc.db 的五张表](img/drc-er.svg)
 
@@ -252,4 +252,4 @@ db->executeScript(strcat(
 db->close()
 ```
 
-[返回目录](README.md) ｜ [上一章：约束、索引与 VIEW](07-constraints-index-view.md)
+[返回目录](README.md) ｜ [上一章：约束、索引与 VIEW](07-constraints-index-view.md) ｜ [下一章：连接快照](09-connectivity.md)

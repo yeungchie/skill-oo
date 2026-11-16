@@ -40,20 +40,26 @@ Excel 上手快，但信息经常藏在格式里：
 
 这只是入门对照。数据库不是“另一个 Excel”，第 3 章会主动打破这个类比：Excel 的一张表可以随便塞，数据库要求你先说清楚实体、属性和关系。
 
-## 0.3 教程里的两个数据库
+## 0.3 教程里的四个数据库
 
-教程做两个库，分别对应两类常见问题。
+教程做四个库，分别对应四类常见问题。
 
 **`drc.db`**：主线。先把一张扁平的 DRC Excel 表原样搬进来，再拆成 `layers`、`rules`、`runs`、`violations`、`waivers` 五张表。它回答：一条违例属于哪条规则、哪次运行、哪个图层？谁负责？有没有豁免？豁免过期了吗？
 
 **`signoff.db`**：副线。用 `blocks`、`checks`、`block_checks` 三张表讲多对多：一个 block 要做很多检查，一个检查也适用于很多 block。它回答：哪些 block 还没签？哪些检查组合漏了？
 
-两个库都放在 `./sqlite-tutorial/`：
+**`sch.db`**：连接快照。用 `instances`、`nets`、`terminals` 三张表记录一个反相器链：哪个 pin 连到哪条网络？哪个 pin 悬空？一条网络有几个端子？
+
+**`layout.db`**：版图图形快照。用一张 `shapes` 表记录矩形、多边形、路径和 via，练习按层统计、包围盒、矩形面积和窗口预筛。它不替代 OA，也不做精确几何运算。
+
+四个库都放在 `./sqlite-tutorial/`：
 
 ```text
 ./sqlite-tutorial/
     drc.db
     signoff.db
+    sch.db
+    layout.db
 ```
 
 这个目录可以随时删掉重建，不会影响 `oa` 库。
@@ -84,7 +90,9 @@ ycSQLiteTutorialSetup(?stage 'full)
 ; => ("sqlite-tutorial/drc.db" "sqlite-tutorial/signoff.db")
 ```
 
-`?stage 'full` 会重建 `drc.db`，包含拆表后的五张表和样例豁免记录。每次执行都会先删掉旧的教程库，所以不用担心重复执行。
+`?stage 'full` 会重建 `drc.db`，包含拆表后的五张表和样例豁免记录。每次执行都会先删掉本次要重建的教程库，所以不用担心重复执行。
+
+第 9、10 章分别用 `?stage 'sch` 和 `?stage 'layout` 单独建连接库和版图库；想一次建好四个库，用 `?stage 'all`。
 
 只想清空、不想建库时：
 

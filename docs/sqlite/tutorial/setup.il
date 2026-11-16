@@ -86,37 +86,65 @@ procedure(ycSQLiteTutorialSetup(\@key (dir "./sqlite-tutorial") (stage 'full) "g
     ;
     ; **参数**
     ;   ?dir    (str) - 数据库目录；默认 ./sqlite-tutorial
-    ;   ?stage  (sym) - flat 或 full；flat 只建第 2 章的扁平表
+    ;   ?stage  (sym) - flat/full 建 drc 与 signoff；sch 建连接库；layout 建版图库；all 建四个
     ;
     ; **返回**
-    ;   (list) - (drc.db 路径 signoff.db 路径)
-    let((p t_drc t_signoff db sdb)
-        unless(stage == 'flat || stage == 'full
-            error("ycSQLiteTutorialSetup: stage must be 'flat or 'full")
+    ;   (list) - 本次建好的数据库路径
+    let((p t_drc t_signoff t_sch t_layout l_paths l_built db sdb)
+        unless(member(stage '(flat full sch layout all))
+            error("ycSQLiteTutorialSetup: stage must be flat, full, sch, layout or all")
         )
         p = ycPathLib::Path(dir)
         p->mkdir(?parents t ?existOk t)
         t_drc = p->join("drc.db")->str()
         t_signoff = p->join("signoff.db")->str()
-        foreach(t_path list(t_drc t_signoff)
+        t_sch = p->join("sch.db")->str()
+        t_layout = p->join("layout.db")->str()
+        when(stage == 'flat || stage == 'full || stage == 'all
+            l_paths = append(l_paths list(t_drc t_signoff))
+        )
+        when(stage == 'sch || stage == 'all
+            l_paths = append(l_paths list(t_sch))
+        )
+        when(stage == 'layout || stage == 'all
+            l_paths = append(l_paths list(t_layout))
+        )
+        foreach(t_path l_paths
             ycPathLib::Path(t_path)->unlink(?missingOk t)
         )
 
-        db = ycSQLite::Open(t_drc)
-        _TutorialApply(db "01_layers.sql")
-        _TutorialApply(db "02_flat.sql")
-        when(stage == 'full
-            _TutorialApply(db "03_relational.sql")
-            _TutorialApply(db "04_waivers.sql")
-        )
-        db->close()
+        when(stage == 'flat || stage == 'full || stage == 'all
+            db = ycSQLite::Open(t_drc)
+            _TutorialApply(db "01_layers.sql")
+            _TutorialApply(db "02_flat.sql")
+            when(stage == 'full || stage == 'all
+                _TutorialApply(db "03_relational.sql")
+                _TutorialApply(db "04_waivers.sql")
+            )
+            db->close()
 
-        sdb = ycSQLite::Open(t_signoff)
-        _TutorialApply(sdb "05_signoff.sql")
-        sdb->close()
+            sdb = ycSQLite::Open(t_signoff)
+            _TutorialApply(sdb "05_signoff.sql")
+            sdb->close()
+            l_built = append(l_built list(t_drc t_signoff))
+        )
+
+        when(stage == 'sch || stage == 'all
+            db = ycSQLite::Open(t_sch)
+            _TutorialApply(db "06_sch.sql")
+            db->close()
+            l_built = append(l_built list(t_sch))
+        )
+
+        when(stage == 'layout || stage == 'all
+            db = ycSQLite::Open(t_layout)
+            _TutorialApply(db "07_layout.sql")
+            db->close()
+            l_built = append(l_built list(t_layout))
+        )
 
         printf("tutorial setup: stage=%A dir=%s\n" stage dir)
-        list(t_drc t_signoff)
+        l_built
     )
 )
 
@@ -131,7 +159,7 @@ procedure(ycSQLiteTutorialReset(\@key (dir "./sqlite-tutorial") "g")  ; -> t
     let((p)
         p = ycPathLib::Path(dir)
         when(p->exists()
-            foreach(t_name list("drc.db" "signoff.db" "scratch.db")
+            foreach(t_name list("drc.db" "signoff.db" "sch.db" "layout.db" "scratch.db")
                 p->join(t_name)->unlink(?missingOk t)
             )
         )
