@@ -60,6 +60,7 @@ load("<path-to-dir>/skill-oo/load.il")
 教程独立成册，讲原理、算法与完整案例；接口细节以对应模块手册为准。
 
 + [ycGeom 图形算法教程](docs/geom/tutorial/README.md) —— 平面几何算法：从问题到实现，再用 `ycGeom` 跑通。
++ [ycSQLite 数据库教程](docs/sqlite/tutorial/README.md) —— 从 Excel 表格迁移到 SQLite：建表、关联、汇总、事务与约束。
 
 ## License
 

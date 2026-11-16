@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 320" role="img" aria-label="事务提交与回滚">
+  <rect width="760" height="320" fill="#ffffff"/>
+  <text x="30" y="32" font-family="sans-serif" font-size="17" fill="#111">事务：一组修改要么全成，要么全退</text>
+
+  <line x1="60" y1="120" x2="700" y2="120" stroke="#94a3b8" stroke-width="2"/>
+  <circle cx="100" cy="120" r="7" fill="#3b82f6"/>
+  <text x="82" y="100" font-family="sans-serif" font-size="13" fill="#1e3a8a">BEGIN</text>
+
+  <circle cx="250" cy="120" r="7" fill="#3b82f6"/>
+  <text x="220" y="100" font-family="sans-serif" font-size="13" fill="#1e3a8a">INSERT</text>
+
+  <circle cx="400" cy="120" r="7" fill="#3b82f6"/>
+  <text x="370" y="100" font-family="sans-serif" font-size="13" fill="#1e3a8a">UPDATE</text>
+
+  <circle cx="550" cy="120" r="7" fill="#22c55e"/>
+  <text x="520" y="100" font-family="sans-serif" font-size="13" fill="#166534">COMMIT</text>
+  <text x="500" y="145" font-family="sans-serif" font-size="12" fill="#166534">全部落盘</text>
+
+  <path d="M400 127 C400 200 300 220 250 235" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5 3"/>
+  <polygon points="250,235 260,228 255,241" fill="#ef4444"/>
+  <circle cx="250" cy="235" r="7" fill="#ef4444"/>
+  <text x="280" y="225" font-family="sans-serif" font-size="13" fill="#991b1b">出错 → ROLLBACK</text>
+  <text x="280" y="248" font-family="sans-serif" font-size="12" fill="#991b1b">这一段全部撤销</text>
+
+  <rect x="80" y="260" width="600" height="42" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="95" y="286" font-family="sans-serif" font-size="12" fill="#475569">嵌套事务用 SAVEPOINT：内层失败只退内层，外层仍可继续。</text>
+
+  <circle cx="400" cy="235" r="5" fill="#a855f7"/>
+  <text x="415" y="240" font-family="sans-serif" font-size="12" fill="#6b21a8">SAVEPOINT</text>
+</svg>

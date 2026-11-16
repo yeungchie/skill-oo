@@ -4,6 +4,8 @@
 
 Cadence SKILL++ 的 SQLite 客户端封装库：默认客户端可用时直接使用，也可配置一次外部客户端后复用。
 
+从零开始学数据库，见 [SQLite 教程](tutorial/README.md)。
+
 ## 概要
 
 + SQLite 由外部客户端进程提供；模块不内置 SQLite，也不依赖 SKILL 引擎的原生数据库接口。
