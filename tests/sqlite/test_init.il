@@ -1,4 +1,4 @@
-_TestRun("ycSQLite" 226
+_TestRun("ycSQLite" 232
     "test_client.il"
     "test_with.il"
     "test_edges.il"

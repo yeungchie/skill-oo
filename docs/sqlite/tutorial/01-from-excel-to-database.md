@@ -141,7 +141,7 @@ errset(mem->execute("insert into layers(name, purpose) values ('M1', 'duplicate'
 ; => nil
 ```
 
-`errset` 捕获了错误，返回 `nil`。CIW 里会看到类似 `ycSQLite::Database->execute: Error: near line 12: column name is not unique` 的诊断：前缀 `ycSQLite::Database->execute:` 是模块加的，`near line` 是会话内的输入行号，不是文件行号，后面才是客户端原文。关键是插入没有成功。
+`errset` 捕获了错误，返回 `nil`。CIW 里会看到类似 `ycSQLite::Database->execute: Error: near line N: column name is not unique` 的诊断：前缀 `ycSQLite::Database->execute:` 是模块加的，`near line` 是会话内的输入行号（`N` 会随前面的语句数变化），不是文件行号，后面才是客户端原文。关键是插入没有成功。
 
 教程的期望输出基于 SQLite 3.7.17：唯一约束的原文是 `column name is not unique`；较新的客户端会写成 `UNIQUE constraint failed: layers.name`。两种写法含义相同。
 

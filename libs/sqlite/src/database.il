@@ -122,9 +122,11 @@ procedure(_SessionErrorLine(t_text "t")  ; -> str | nil
     ;   (str|nil) - 第一条错误行
     let((found)
         foreach(line _SplitLines(t_text)
-            when(!found && pcreMatchp(
-                "^(Error|Parse error|Runtime error)( near line [0-9]+)?:"
-                line)
+            when(!found
+                && !_StrPos(line "__YC_SQLITE_BARRIER")
+                && pcreMatchp(
+                    "^(Error|Parse error|Runtime error)( near line [0-9]+)?:"
+                    line)
                 found = line
             )
         )
@@ -133,18 +135,20 @@ procedure(_SessionErrorLine(t_text "t")  ; -> str | nil
 )
 
 
-procedure(_StripBarrier(t_text t_barrier "tt")  ; -> str
+procedure(_StripBarrier(t_text "t")  ; -> str
     ; 去掉 stderr 屏障产生的诊断行。
     ;
+    ; 按内部前缀匹配所有屏障 id，而不是只匹配当前请求的 id：
+    ; 慢客户端上，上一条屏障的后续行可能在本轮才到达。
+    ;
     ; **参数**
-    ;   t_text     (str) - 客户端诊断输出
-    ;   t_barrier  (str) - 屏障函数名
+    ;   t_text  (str) - 客户端诊断输出
     ;
     ; **返回**
     ;   (str) - 不含屏障行的诊断输出
     let((res)
         foreach(line _SplitLines(t_text)
-            unless(_StrPos(line t_barrier)
+            unless(_StrPos(line "__YC_SQLITE_BARRIER")
                 res = strcat(if(res res "") if(res "\n" "") line)
             )
         )
@@ -215,7 +219,7 @@ procedure(_SessionSend(g_obj g_data t_text t_method "ggtt")  ; -> str
             n++
         )
         job->stdout()->text(?clear t)
-        errText = _StripBarrier(job->stderr()->text(?clear t) barrier)
+        errText = _StripBarrier(job->stderr()->text(?clear t))
         errMsg = _SessionErrorLine(errText)
         when(errMsg
             _DbError(g_obj t_method "%s" errMsg)

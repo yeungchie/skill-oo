@@ -94,6 +94,8 @@ let((db res before)
         "multistatement: dot text inside a trailing comment is allowed")
 
     ; --- mid-script syntax error ---
+    ; 三条语句必须保持在同一行：sqlite3 客户端按行处理输入，
+    ; 同一行内遇到语法错误会停止执行该行剩余部分；拆成多行时后续语句仍会执行。
     _AssertErrorMsg(lambda(() db->execute(strcat(
             "insert into t(id, name) values (10, 'x');"
             "bogus;"
