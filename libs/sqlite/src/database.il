@@ -527,7 +527,7 @@ procedure(_InstallDatabase(self "g")  ; -> t
         ;
         ; **返回**
         ;   (Result) - changes 与 lastInsertRowid
-        let((text lines baseline parsed total delta sql)
+        let((text lines baselineText baseline parsed total delta sql)
             sql = _BindSql(t_sql params)
             _CheckNoDotCommands(sql "ycSQLite::Database->execute")
             text = _SessionSend(self self->_data
@@ -539,7 +539,12 @@ procedure(_InstallDatabase(self "g")  ; -> t
                 error("ycSQLite::Database->execute: unexpected session output %A"
                     text)
             )
-            baseline = _ParseInteger(car(lines)
+            baselineText = car(lines)
+            unless(pcreMatchp("^[0-9]+$" baselineText)
+                error("ycSQLite::Database->execute: invalid total_changes() output %A"
+                    baselineText)
+            )
+            baseline = _ParseInteger(baselineText
                 "ycSQLite::Database->execute")
             unless(fixp(baseline)
                 error("ycSQLite::Database->execute: total_changes() exceeds the fixnum range; reopen the database to reset it")

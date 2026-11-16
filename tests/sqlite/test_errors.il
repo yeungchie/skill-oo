@@ -49,6 +49,13 @@ let((db)
         "errors: rolled-back changes stay counted")
     _Assert(car(db->query("select count(*) from rb;")->rows())->get(0) == 0
         "errors: rolled-back insert left no rows")
+    _Assert(db->execute(
+        "create table p2(v text); insert into p2 values (?);"
+        ?params list("a\n.quit")
+        )->changes() == 1
+        "errors: dot text in a bound parameter is allowed")
+    _Assert(car(db->query("select v from p2;")->rows())->get(0) == "a\n.quit"
+        "errors: bound parameter with a dot line round-trips")
     _AssertError(lambda(() ycSQLite::Open(""))
         "errors: empty database path errors")
     _AssertError(lambda(() ycSQLite::Open(42))
