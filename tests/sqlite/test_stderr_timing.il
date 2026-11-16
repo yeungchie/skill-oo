@@ -33,6 +33,8 @@ let((saved client db res next msg i stripped)
                 "insert into t(name) values (null);"
             ) nil)
             next = errset(db->query("select 1 as v;") nil)
+            ; 目标客户端在屏障预算内报出错误，因此本用例要求 execute 本次就失败；
+            ; 诊断显著滞后时错误可能延后到下一次调用（见 README 的自定义客户端说明）。
             _Assert(!res && next
                 "stderr timing: delayed diagnostics are still reported by execute")
             i = 1

@@ -161,6 +161,8 @@ procedure(_SessionSend(g_obj g_data t_text t_method "ggtt")  ; -> str
     ; 向长驻会话发送请求并读取到唯一标记。
     ; 每次请求后额外发送一个必然失败的函数调用作为 stderr 屏障，
     ; 确保客户端诊断已进入读取缓冲后再判断错误。
+    ; stderr 严重滞后时，真实诊断可能落到下一次请求；
+    ; 本函数无法把迟到的诊断归回原请求。
     ;
     ; **参数**
     ;   g_obj     (Database) - 数据库对象
