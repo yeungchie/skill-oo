@@ -1,4 +1,4 @@
-_TestRun("ycSQLite" 193
+_TestRun("ycSQLite" 194
     "test_client.il"
     "test_with.il"
     "test_edges.il"
@@ -9,6 +9,7 @@ _TestRun("ycSQLite" 193
     "test_schema.il"
     "test_file.il"
     "test_errors.il"
+    "test_stderr_timing.il"
 )
 
 ; END

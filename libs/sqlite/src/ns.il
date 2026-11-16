@@ -67,6 +67,7 @@ addToNamespace("ycSQLite"
         _CheckDatabase  ; proc
         _SessionAlive  ; proc
         _SessionErrorLine  ; proc
+        _StripBarrier  ; proc
         _SessionSend  ; proc
         _StartSession  ; proc
         _Query  ; proc

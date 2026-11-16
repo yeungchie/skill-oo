@@ -133,8 +133,30 @@ procedure(_SessionErrorLine(t_text "t")  ; -> str | nil
 )
 
 
+procedure(_StripBarrier(t_text t_barrier "tt")  ; -> str
+    ; 去掉 stderr 屏障产生的诊断行。
+    ;
+    ; **参数**
+    ;   t_text     (str) - 客户端诊断输出
+    ;   t_barrier  (str) - 屏障函数名
+    ;
+    ; **返回**
+    ;   (str) - 不含屏障行的诊断输出
+    let((res)
+        foreach(line _SplitLines(t_text)
+            unless(_StrPos(line t_barrier)
+                res = strcat(if(res res "") if(res "\n" "") line)
+            )
+        )
+        if(res res "")
+    )
+)
+
+
 procedure(_SessionSend(g_obj g_data t_text t_method "ggtt")  ; -> str
     ; 向长驻会话发送请求并读取到唯一标记。
+    ; 每次请求后额外发送一个必然失败的函数调用作为 stderr 屏障，
+    ; 确保客户端诊断已进入读取缓冲后再判断错误。
     ;
     ; **参数**
     ;   g_obj     (Database) - 数据库对象
@@ -144,7 +166,7 @@ procedure(_SessionSend(g_obj g_data t_text t_method "ggtt")  ; -> str
     ;
     ; **返回**
     ;   (str) - 标记之前的输出；超时、进程退出或 SQL 错误时 error() 中断
-    let((job marker text pos body errText errMsg limit n)
+    let((job marker barrier text pos body errText errMsg limit n)
         _CheckDatabase(g_obj g_data t_method)
         job = g_data->job
         unless(job && job->state() != 'Dead
@@ -155,7 +177,10 @@ procedure(_SessionSend(g_obj g_data t_text t_method "ggtt")  ; -> str
         g_data->counter = g_data->counter + 1
         marker = lsprintf("__YC_SQLITE_%A_%d__"
             gensym() g_data->counter)
+        barrier = lsprintf("__YC_SQLITE_BARRIER_%d__"
+            g_data->counter)
         job->send("%s" t_text)
+        job->send("select %s();" barrier)
         job->send(".print %s" marker)
         limit = if(g_data->timeout g_data->timeout 10)
         n = 0
@@ -181,8 +206,16 @@ procedure(_SessionSend(g_obj g_data t_text t_method "ggtt")  ; -> str
                 body)
         )
         body = if(pos > 1 substring(text 1 pos - 1) "")
+        ; 等待 stderr 屏障；标准 sqlite3 会立即出现，超时则按旧路径处理。
+        n = 0
+        errText = job->stderr()->text()
+        while(n < 15 && !_StrPos(errText barrier) && job->state() != 'Dead
+            job->sleep(0.02)
+            errText = job->stderr()->text()
+            n++
+        )
         job->stdout()->text(?clear t)
-        errText = job->stderr()->text(?clear t)
+        errText = _StripBarrier(job->stderr()->text(?clear t) barrier)
         errMsg = _SessionErrorLine(errText)
         when(errMsg
             _DbError(g_obj t_method "%s" errMsg)
