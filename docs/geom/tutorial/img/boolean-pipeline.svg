@@ -3,23 +3,23 @@
   <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">区域布尔运算的六个阶段</text>
 
   <g font-family="sans-serif" font-size="13">
-    <rect x="170" y="46" width="180" height="30" rx="6" fill="#eff6ff" stroke="#2563eb"/>
+    <rect x="160" y="46" width="200" height="30" rx="6" fill="#eff6ff" stroke="#2563eb"/>
     <text x="260" y="66" text-anchor="middle" fill="#1e3a8a">1 拆边：交点切段</text>
 
-    <rect x="170" y="86" width="180" height="30" rx="6" fill="#eff6ff" stroke="#2563eb"/>
+    <rect x="160" y="86" width="200" height="30" rx="6" fill="#eff6ff" stroke="#2563eb"/>
     <text x="260" y="106" text-anchor="middle" fill="#1e3a8a">2 分类：两侧采样</text>
 
-    <rect x="170" y="126" width="180" height="30" rx="6" fill="#eff6ff" stroke="#2563eb"/>
+    <rect x="160" y="126" width="200" height="30" rx="6" fill="#eff6ff" stroke="#2563eb"/>
     <text x="260" y="146" text-anchor="middle" fill="#1e3a8a">3 追踪：接成闭环</text>
 
-    <rect x="170" y="166" width="180" height="30" rx="6" fill="#eff6ff" stroke="#2563eb"/>
+    <rect x="160" y="166" width="200" height="30" rx="6" fill="#eff6ff" stroke="#2563eb"/>
     <text x="260" y="186" text-anchor="middle" fill="#1e3a8a">4 嵌套：区分外环与洞</text>
 
-    <rect x="170" y="206" width="180" height="30" rx="6" fill="#eff6ff" stroke="#2563eb"/>
+    <rect x="160" y="206" width="200" height="30" rx="6" fill="#eff6ff" stroke="#2563eb"/>
     <text x="260" y="226" text-anchor="middle" fill="#1e3a8a">5 拼接：切割线并入外环</text>
 
-    <rect x="170" y="246" width="180" height="30" rx="6" fill="#eff6ff" stroke="#2563eb"/>
-    <text x="260" y="266" text-anchor="middle" fill="#1e3a8a">6 规范化：去重、定向</text>
+    <rect x="160" y="246" width="200" height="30" rx="6" fill="#eff6ff" stroke="#2563eb"/>
+    <text x="260" y="266" text-anchor="middle" fill="#1e3a8a" font-size="12">6 规范化：去重、去共线、定向</text>
   </g>
 
   <g stroke="#6b7280" stroke-width="1.5">

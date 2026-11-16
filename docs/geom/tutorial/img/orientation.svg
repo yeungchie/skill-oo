@@ -11,10 +11,12 @@
   <text x="24" y="28" font-family="sans-serif" font-size="15" fill="#111">有符号面积的正负就是环的方向</text>
 
   <rect x="80" y="60" width="120" height="120" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
-  <path d="M 80 180 A 120 120 0 0 1 200 60" fill="none" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ao)"/>
-  <text x="96" y="206" font-family="sans-serif" font-size="13" fill="#2563eb">逆时针：2A = +16</text>
+  <line x1="90" y1="170" x2="180" y2="170" stroke="#2563eb" stroke-width="3" marker-end="url(#ao)"/>
+  <line x1="190" y1="70" x2="100" y2="70" stroke="#2563eb" stroke-width="3" marker-end="url(#ao)"/>
+  <text x="96" y="206" font-family="sans-serif" font-size="13" fill="#2563eb">逆时针：A &gt; 0</text>
 
   <rect x="320" y="60" width="120" height="120" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
-  <path d="M 320 60 A 120 120 0 0 1 440 180" fill="none" stroke="#dc2626" stroke-width="1.5" marker-end="url(#aor)"/>
-  <text x="336" y="206" font-family="sans-serif" font-size="13" fill="#dc2626">顺时针：2A = −16</text>
+  <line x1="430" y1="170" x2="340" y2="170" stroke="#dc2626" stroke-width="3" marker-end="url(#aor)"/>
+  <line x1="330" y1="70" x2="420" y2="70" stroke="#dc2626" stroke-width="3" marker-end="url(#aor)"/>
+  <text x="336" y="206" font-family="sans-serif" font-size="13" fill="#dc2626">顺时针：A &lt; 0</text>
 </svg>
