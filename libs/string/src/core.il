@@ -304,22 +304,15 @@ procedure(Join(l_items \@key (sep "") "lt")  ; -> str
     unless(stringp(sep)
         error("ycString::Join: separator must be a string (%A)" sep)
     )
-    let((p i)
+    let((i)
         i = 0
         foreach(item l_items
             i++
             unless(stringp(item)
                 error("ycString::Join: item #%d is not a string (%A)" i item)
             )
-            unless(i == 1
-                p = tconc(p sep)
-            )
-            p = tconc(p item)
         )
-        if(p
-            apply('strcat car(p))
-            ""
-        )
+        buildString(l_items sep)
     )
 )
 
@@ -411,7 +404,7 @@ procedure(Replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
 )
 
 procedure(Count(t_s t_sub \@key (regex nil) "ttg")  ; -> int
-    ; 统计非重叠出现次数（字面量或正则）。
+    ; 统计非重叠出现次数（字面量或正则）；t_sub 不能为空，t_s 为空时返回 0。
     ;
     ; **参数**
     ;   t_s    (str) - 输入串
@@ -420,37 +413,47 @@ procedure(Count(t_s t_sub \@key (regex nil) "ttg")  ; -> int
     ;
     ; **返回**
     ;   (int) - 出现次数
+    when(t_sub == ""
+        error(if(regex
+            "ycString::Count: pattern must not be empty"
+            "ycString::Count: search string must not be empty"
+        ))
+    )
     cond(
         (regex
-            when(t_sub == ""
-                error("ycString::Count: pattern must not be empty")
-            )
             length(ycRegEx:::Findall(t_sub t_s))
         )
+        (t_s == ""
+            0
+        )
         (t
-            when(t_sub == ""
-                error("ycString::Count: search string must not be empty")
-            )
-            let((n rest cut pos len sub done)
-                n = 0
-                rest = t_s
-                sub = length(t_sub)
-                while(!done
-                    cut = index(rest t_sub)
-                    if(cut
-                    then
-                        n++
-                        len = length(rest)
-                        pos = len - length(cut) + 1
-                        rest = if(pos + sub > len
-                            ""
-                            substring(rest pos + sub len - pos - sub + 1)
+            case(strlen(t_sub)
+                (1
+                    length(parseString(t_s t_sub t)) - 1
+                )
+                (t
+                    let((n rest cut pos len sub done)
+                        n = 0
+                        rest = t_s
+                        sub = length(t_sub)
+                        while(!done
+                            cut = index(rest t_sub)
+                            if(cut
+                            then
+                                n++
+                                len = length(rest)
+                                pos = len - length(cut) + 1
+                                rest = if(pos + sub > len
+                                    ""
+                                    substring(rest pos + sub len - pos - sub + 1)
+                                )
+                            else
+                                done = t
+                            )
                         )
-                    else
-                        done = t
+                        n
                     )
                 )
-                n
             )
         )
     )

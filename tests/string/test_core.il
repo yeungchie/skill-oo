@@ -66,6 +66,8 @@ _AssertErrorMsg(
 ; ---- join ----
 _Assert(ycString::Join(list("a" "b" "c")) == "abc"  "Join: default")
 _Assert(ycString::Join(list("a" "b") ?sep "-") == "a-b"  "Join: custom separator")
+_Assert(ycString::Join(list("a" "b") ?sep "--") == "a--b"  "Join: multi-character separator")
+_Assert(ycString::Join(list("" "") ?sep "-") == "-"  "Join: empty items keep the separator")
 _Assert(ycString::Join(nil) == ""  "Join: empty list")
 _AssertErrorMsg(
     lambda(() ycString::Join(list("a" 1)))
@@ -110,11 +112,35 @@ _Assert(ycString::Count("banana" "a") == 3  "count: literal")
 _Assert(ycString::Count("aaaa" "aa") == 2  "count: non-overlap")
 _Assert(ycString::Count("abc" "x") == 0  "count: none")
 _Assert(ycString::Count("banana" "a+" ?regex t) == 3  "count: regex")
+_Assert(ycString::Count("-a-" "-") == 2  "count: leading and trailing separators")
+_Assert(ycString::Count("a--b" "-") == 2  "count: consecutive separators")
+_Assert(ycString::Count("a.b.c" ".") == 2  "count: punctuation separator")
+_Assert(ycString::Count("a\\b\\c" "\\") == 2  "count: backslash separator")
+_Assert(ycString::Count("中a中" "中") == 2  "count: multi-byte separator")
+_Assert(ycString::Count("" "a") == 0  "count: empty input")
+_Assert(ycString::Count("" "a+" ?regex t) == 0  "count: empty input in regex mode")
 _AssertErrorMsg(
     lambda(() ycString::Count("a" ""))
     "ycString::Count: search string must not be empty"
     "count: empty search"
 )
+_AssertErrorMsg(
+    lambda(() ycString::Count("" ""))
+    "ycString::Count: search string must not be empty"
+    "count: empty input with empty search"
+)
+_AssertErrorMsg(
+    lambda(() ycString::Count("" "" ?regex t))
+    "ycString::Count: pattern must not be empty"
+    "count: empty input with empty regex"
+)
+_TestErrorBegin("ycString::Count invalid regex")
+_AssertErrorMsg(
+    lambda(() ycString::Count("" "[" ?regex t))
+    "pattern compilation failed"
+    "count: invalid regex on empty input"
+)
+_TestErrorEnd()
 
 _TestChildDone = t
 

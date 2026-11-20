@@ -313,7 +313,7 @@ ycString::Join(
 
 **描述**
 
-以 `?sep` 连接字符串列表；元素须全为字符串，否则以 `error()` 中断。空列表返回空串。
+以 `?sep` 连接字符串列表；元素须全为字符串，否则以 `error()` 中断。默认空串，即直接拼接；需要空格时显式传 `?sep " "`。空列表返回空串。
 
 **参数**
 
@@ -331,6 +331,7 @@ ycString::Join(
 ```lisp
 ycString::Join(list("a" "b" "c"))      ; => "abc"
 ycString::Join(list("a" "b") ?sep "-") ; => "a-b"
+ycString::Join(list("a" "b") ?sep " ") ; => "a b"
 ycString::Join(nil)                    ; => ""
 ycString::Join(list("a" 1))
 ; *Error* ycString::Join: item #2 is not a string (1)
@@ -459,7 +460,7 @@ ycString::Count(
 
 **描述**
 
-统计 `t_sub` 在 `t_s` 中的非重叠出现次数。默认按字面量匹配；`?regex t` 时按正则模式统计。`t_sub` 不能为空。
+统计 `t_sub` 在 `t_s` 中的非重叠出现次数。默认按字面量匹配；`?regex t` 时按正则模式统计。`t_sub` 不能为空；`t_s` 为空时返回 0。
 
 **参数**
 
@@ -479,6 +480,7 @@ ycString::Count(
 ycString::Count("banana" "a")           ; => 3
 ycString::Count("aaaa" "aa")            ; => 2
 ycString::Count("abc" "x")              ; => 0
+ycString::Count("" "a")                 ; => 0
 ycString::Count("banana" "a+" ?regex t) ; => 3
 ycString::Count("a" "")
 ; *Error* ycString::Count: search string must not be empty
