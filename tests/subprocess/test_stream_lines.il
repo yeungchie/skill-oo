@@ -35,30 +35,31 @@ let((st)
 
 let((st)
     st = makeInstance('ycSubProcess::Stream)
-    _Assert(st->read() == nil "read defaults to no waiting")
+    _Assert(st->read() == nil "read returns nil on an empty manual stream")
     _Assert(st->read(?timeout 0) == nil "read with timeout 0 does not wait")
     st->push("x")
     _Assert(st->read(?timeout 0) == "x" "read returns available data with timeout 0")
     _Assert(st->read() == nil "read returns nil on an empty stream")
     _Assert(st->read(?timeout 1) == nil "read without an owner does not wait")
+    _Assert(st->read(?timeout nil) == nil "read with nil does not wait without an owner")
     _AssertErrorMsg(
         lambda(() st->read(?timeout -1))
-        "?timeout must be a non-negative number"
+        "?timeout must be nil or a non-negative number"
         "read rejects a negative timeout"
     )
     _AssertErrorMsg(
         lambda(() st->readLine(?timeout -1))
-        "?timeout must be a non-negative number"
+        "?timeout must be nil or a non-negative number"
         "readLine rejects a negative timeout"
     )
     _AssertErrorMsg(
         lambda(() st->read(?timeout "1"))
-        "should be a number"
+        "?timeout must be nil or a non-negative number"
         "read rejects a string timeout"
     )
     _AssertErrorMsg(
         lambda(() st->readLine(?timeout "1"))
-        "should be a number"
+        "?timeout must be nil or a non-negative number"
         "readLine rejects a string timeout"
     )
 )
@@ -181,9 +182,16 @@ let((aj)
     aj = ycSubProcess::CreateJob("cat")->start()
     _Assert(aj->stdout()->read(?timeout 0) == nil "read returns nil before cat output")
     aj->send("abc")
-    _Assert(aj->stdout()->read(?timeout 1) == "abc\n" "read waits for cat output")
+    _Assert(aj->stdout()->read() == "abc\n" "read defaults to waiting for cat output")
     aj->kill()
     _Assert(aj->state() == 'Dead "cat job is dead after kill")
+)
+
+let((aj)
+    aj = ycSubProcess::CreateJob("sh -c 'sleep 0.2; printf x'")->start()
+    _Assert(aj->stdout()->read(?timeout nil) == "x" "read with nil waits for data")
+    aj->wait()
+    _Assert(aj->returncode() == 0 "the nil-timeout read job exits with zero")
 )
 
 let((aj)
@@ -191,10 +199,10 @@ let((aj)
         "sh -c 'printf 123; sleep 0.5; printf \"\\n\"'"
     )->start()
     aj->sleep(0.1)
-    _Assert(aj->stdout()->readLine() == nil "readLine defaults to no waiting")
+    _Assert(aj->stdout()->readLine(?timeout 0) == nil "readLine with timeout 0 does not wait")
     _Assert(aj->stdout()->text() == "123" "readLine leaves partial data in place")
-    _Assert(aj->stdout()->readLine(?timeout 1) == "123\n" "readLine waits for a newline")
-    _Assert(aj->stdout()->readLine() == nil "readLine returns nil after the waited line")
+    _Assert(aj->stdout()->readLine() == "123\n" "readLine defaults to waiting for a newline")
+    _Assert(aj->stdout()->readLine(?timeout nil) == nil "readLine with nil returns nil after the stream ends")
     aj->wait()
     _Assert(aj->returncode() == 0 "the waited job exits with zero")
 )
@@ -211,7 +219,11 @@ let((aj)
     aj = ycSubProcess::CreateJob("cat")->start()
     aj->stop()
     _Assert(aj->state() == 'Stopped "cat job is stopped")
-    _Assert(aj->stdout()->readLine() == nil "readLine does not wait on a stopped job by default")
+    _AssertErrorMsg(
+        lambda(() aj->stdout()->readLine())
+        "job is stopped"
+        "readLine with nil reports a stopped job"
+    )
     _AssertErrorMsg(
         lambda(() aj->stdout()->readLine(?timeout 1))
         "job is stopped"

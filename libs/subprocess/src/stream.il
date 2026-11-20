@@ -48,18 +48,18 @@ defmethod(initializeInstance (self(Stream) \@key (owner nil))
     let((queue front)
         queue = ycQueue:::FIFO()
         front = ""
-        procedure(_checkTimeout(t_method n_timeout "tn")  ; -> t
-            ; 校验 timeout：必须是大于等于 0 的数值。
+        procedure(_checkTimeout(t_method g_timeout "tg")  ; -> t
+            ; 校验 timeout：必须是 nil 或大于等于 0 的数值。
             ;
             ; **参数**
             ;   t_method   (str) - 调用方方法名
-            ;   n_timeout  (num) - 等待秒数
+            ;   g_timeout  (num|nil) - 等待秒数；nil 表示不限时
             ;
             ; **返回**
             ;   (t) - 合法时返回 t；负数中断
-            unless(numberp(n_timeout) && n_timeout >= 0
-                error("%A->%s: ?timeout must be a non-negative number, got %A"
-                    className(self) t_method n_timeout)
+            unless(g_timeout == nil || (numberp(g_timeout) && g_timeout >= 0)
+                error("%A->%s: ?timeout must be nil or a non-negative number, got %A"
+                    className(self) t_method g_timeout)
             )
             t
         )
@@ -277,37 +277,41 @@ defmethod(initializeInstance (self(Stream) \@key (owner nil))
                 if(front == "" nil front)
             )
         )
-        self->read = lambda((\@key (timeout 0) "n")  ; -> str | nil
+        self->read = lambda((\@key (timeout nil) "g")  ; -> str | nil
             ; 取走一条原始数据；没有数据时按 ?timeout 等待。
             ;
             ; **参数**
-            ;   ?timeout  (num) - 最多等待秒数；默认 0 不等待
+            ;   ?timeout  (num|nil) - 最多等待秒数；默认 nil 不限时，0 不等待
             ;
             ; **返回**
             ;   (str|nil) - 原始数据；无数据为 nil
             _checkTimeout("read" timeout)
-            if(front != "" || !queue->isEmpty()
-                _takeRead()
-                if(timeout > 0 && _canWait("read")
+            cond(
+                ((front != "" || !queue->isEmpty())
+                    _takeRead()
+                )
+                ((timeout == nil || timeout > 0)
                     let((i ticks)
-                        ticks = fix(timeout / 0.02) + 1
+                        ticks = if(timeout == nil nil fix(timeout / 0.02) + 1)
                         i = 0
-                        while(i < ticks && front == "" && queue->isEmpty()
+                        while((timeout == nil || i < ticks)
+                            && front == "" && queue->isEmpty()
+                            && !_atEnd()
                             && _canWait("read")
                             _pump()
                             i++
                         )
                         _takeRead()
                     )
-                    nil
                 )
+                (t nil)
             )
         )
-        self->readLine = lambda((\@key (timeout 0) "n")  ; -> str | nil
+        self->readLine = lambda((\@key (timeout nil) "g")  ; -> str | nil
             ; 读取第一行（含换行符）；没有换行时按 ?timeout 等待。
             ;
             ; **参数**
-            ;   ?timeout  (num) - 最多等待秒数；默认 0 不等待
+            ;   ?timeout  (num|nil) - 最多等待秒数；默认 nil 不限时，0 不等待
             ;
             ; **返回**
             ;   (str|nil) - 一行；无数据为 nil
@@ -319,11 +323,12 @@ defmethod(initializeInstance (self(Stream) \@key (owner nil))
                 (_atEnd()
                     _takeAll()
                 )
-                ((timeout > 0 && _canWait("readLine"))
+                ((timeout == nil || timeout > 0)
                     let((i ticks)
-                        ticks = fix(timeout / 0.02) + 1
+                        ticks = if(timeout == nil nil fix(timeout / 0.02) + 1)
                         i = 0
-                        while(i < ticks && !_hasNewline() && !_atEnd()
+                        while((timeout == nil || i < ticks)
+                            && !_hasNewline() && !_atEnd()
                             && _canWait("readLine")
                             _pump()
                             i++

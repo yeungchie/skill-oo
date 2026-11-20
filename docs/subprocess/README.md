@@ -9,7 +9,7 @@ Cadence SKILL++ 的子进程封装库：启动进程、实时读写输出、按�
 + 同步接口 `Run()` 执行并等待；异步接口 `CreateJob()` 返回 `AsyncJob` 对象，控制进程生命周期。
 + 进程状态以符号表示：`'None`（未启动）/ `'Active`（运行中）/ `'Dead`（已结束）/ `'Stopped`（已暂停）。
 + 输出按条收进 `Stream` 对象：`text()` 全量拼接，`last()`/`peek()`/`read()` 读取原始数据块，`readLine()`/`peekLine()` 按行读取，`lines()` 统计行数；耗时由 `Elapsed` 记录。
-+ `read()` 与 `readLine()` 默认只看当前数据、不等待；传正数 `?timeout` 才最多等待指定秒数。
++ `read()` 与 `readLine()` 默认用 `?timeout nil` 一直等待到有数据或数据源结束；`?timeout 0` 只看当前数据，正数则最多等待指定秒数。
 + 回调函数按事件符号触发：`'stdout`/`'stderr`/`'post`/`'beforeBegin`/`'afterBegin`。
 + 单参数形式的命令串交给 shell 解释（引号、`$` 展开、管道、重定向照常生效）；多参数形式按参数列表拼接，每个参数自动加引号保护，空格与元字符不再被解释。
 + 输出缓冲依赖 `ycQueue`；未加载时构造任务会以 `error()` 中断并提示 `ycQueue is not loaded`。
@@ -784,16 +784,16 @@ st->peek(2)
 
 ```text
 aj->stdout()->read(
-    [ ?timeout n_timeout ]
+    [ ?timeout g_timeout ]
 )
 => str | nil
 ```
 
-获取并移除一条原始数据；它可能是一行、多行，或半行。无数据时默认立即返回 nil；给了正数 `?timeout` 才最多等待指定秒数，超时仍返回 nil；负数以 `error()` 中断。按行读取拆分后剩下的数据会作为一条原始数据返回。
+获取并移除一条原始数据；它可能是一行、多行，或半行。默认 `?timeout nil` 一直等待到有数据或数据源结束；`?timeout 0` 只看当前数据，无数据立即返回 nil；正数最多等待指定秒数，超时仍返回 nil；负数或非数值以 `error()` 中断。手工创建且没有关联任务的 `Stream` 没有可等待的数据源，立即返回 nil。按行读取拆分后剩下的数据会作为一条原始数据返回。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?timeout n_timeout | int / float | 0 | 最多等待秒数；0 不等待，正数可含小数 |
+| ?timeout g_timeout | int / float / nil | nil | 等待上限（秒）；nil 一直等待，0 不等待，正数可含小数 |
 
 ```lisp
 ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout()->read()
@@ -801,7 +801,7 @@ ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout()->read()
 
 aj = ycSubProcess::CreateJob("cat")->start()
 aj->send("hello")
-aj->stdout()->read(?timeout 1)
+aj->stdout()->read()
 ; => "hello\n"
 aj->kill()
 ```
@@ -810,24 +810,24 @@ aj->kill()
 
 ```text
 aj->stdout()->readLine(
-    [ ?timeout n_timeout ]
+    [ ?timeout g_timeout ]
 )
 => str | nil
 ```
 
-读取第一行并移除；一行指到第一个换行符为止，返回值包含该换行符。末尾没有换行符的残行也算一行。默认不等待：当前没有换行时立即返回 nil，已有数据保持不变；给正数 `?timeout` 才最多等待指定秒数，负数以 `error()` 中断。进程已经结束时，直接把剩余残行作为最后一行返回；没有数据则返回 nil。
+读取第一行并移除；一行指到第一个换行符为止，返回值包含该换行符。末尾没有换行符的残行也算一行。默认 `?timeout nil` 一直等待到出现换行或数据源结束；`?timeout 0` 只看当前数据，当前没有换行时立即返回 nil 且已有数据保持不变；正数最多等待指定秒数；负数或非数值以 `error()` 中断。进程已经结束时，直接把剩余残行作为最后一行返回；没有数据则返回 nil。手工创建且没有关联任务的 `Stream` 没有可等待的数据源，立即返回 nil。
 
 按行读取会拆开原始数据块，拆出的剩余部分会留在流首；因此下一次 `text()`、`peek()`、`size()` 或 `read()` 都能看到它。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| ?timeout n_timeout | int / float | 0 | 最多等待秒数；0 不等待，正数可含小数 |
+| ?timeout g_timeout | int / float / nil | nil | 等待上限（秒）；nil 一直等待，0 不等待，正数可含小数 |
 
 ```lisp
 st = makeInstance('ycSubProcess::Stream)
 st->push("hello")
 st->readLine()
-; => nil（没有换行，默认不等待）
+; => nil（没有换行，手工 Stream 没有数据源可等）
 st->push("\n")
 st->readLine()
 ; => "hello\n"
@@ -836,7 +836,7 @@ st->readLine()
 
 aj = ycSubProcess::CreateJob("cat")->start()
 aj->send("hello")
-aj->stdout()->readLine(?timeout 1)
+aj->stdout()->readLine()
 ; => "hello\n"
 aj->kill()
 ```
