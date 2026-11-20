@@ -7,6 +7,7 @@ Cadence SKILL++ 的字符串工具库：常用操作、转义与标识符转换�
 ## 概要
 
 + 字符级操作按 UTF-8 码点处理；显示宽度与 `ycUtf8` 的宽度规则一致。
++ `ycString::String` 是不可变链式包装：每个调整方法返回新对象，原对象不变，末尾用 `->str()` 取原生字符串；`join` 以包装值作分隔符。
 + 字面量接口（`ycString::Replace` / `ycString::Count` / `ycString::Split`）默认区分大小写、按字面量匹配；`?regex t` 时按 `ycRegEx` 的模式与替换模板语义。
 + 命名风格转换（`ycString::Words` / `ycString::JoinWords` / `ycString::Sanitize`）按大小写与数字边界切词；ASCII 字母数字以外的码点算词内字符。
 + 自然序比较（`ycString::NaturalLess` / `ycString::NaturalSort`）把连续数字段按数值比较，其余按大小写不敏感比较；数字段任意长度都不丢精度。
@@ -16,6 +17,11 @@ Cadence SKILL++ 的字符串工具库：常用操作、转义与标识符转换�
 ## 快速上手
 
 ```lisp
+; 链式调整（每个方法返回新的 String）
+ycString::String("  HTML Parser  ")->trim()->toSnake()->str()     ; => "html_parser"
+ycString::String("ab")->pad(5 ?fill "-")->replace("-" "_")->str() ; => "ab___"
+ycString::String("-")->join(list("a" "b"))->str()                 ; => "a-b"
+
 ; 修剪、补宽与宽度
 ycString::Trim("  hello  ")                    ; => "hello"
 ycString::Pad("ab" 5 ?fill "-")                ; => "ab---"
@@ -40,6 +46,463 @@ ycString::NaturalSort(list("VDD10" "VDD2" "VDD1"))  ; => ("VDD1" "VDD2" "VDD10")
 ```
 
 ## API 参考
+
+### ycString::String <sub>`function`</sub> <sub>`class`</sub>
+
+```text
+ycString::String(t_s)
+=> ycString::String
+```
+
+**描述**
+
+构造不可变字符串包装对象。每个调整方法都返回新的 `String`，原对象保持不变；末尾用 `->str()` 取原生字符串。值比较请比较 `->str()` 的结果（`==` 对实例按身份比较）。
+
+**参数**
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| t_s | str | 原生字符串 |
+
+**返回值**
+
+`ycString::String` — 新的包装对象。
+
+**例程**
+
+```lisp
+s = ycString::String("  HTML Parser  ")
+s->str()                                  ; => "  HTML Parser  "
+s->trim()->toSnake()->str()               ; => "html_parser"
+s->str()                                  ; => "  HTML Parser  "
+printself(s)                              ; => ycString::String("  HTML Parser  ")
+```
+
+**方法**
+
+> 必须使用 `->` 符号调用方法。
+
+#### 取值
+
+##### str <sub>`method`</sub>
+
+```text
+s->str()
+=> str
+```
+
+返回当前包装的原生字符串。
+
+无参数。
+
+```lisp
+ycString::String("abc")->str()  ; => "abc"
+```
+
+#### 修剪与补宽
+
+##### trim <sub>`method`</sub>
+
+```text
+s->trim(
+    [ ?chars t_chars ]
+)
+=> ycString::String
+```
+
+去除两端字符集内字符，返回新的 `String`；原对象不变。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?chars t_chars | str | `" \t\r\n"` | 待剥离的字面字符集 |
+
+```lisp
+ycString::String("  ab  ")->trim()->str()              ; => "ab"
+ycString::String("xxabxx")->trim(?chars "x")->str()    ; => "ab"
+```
+
+##### trimStart <sub>`method`</sub>
+
+```text
+s->trimStart(
+    [ ?chars t_chars ]
+)
+=> ycString::String
+```
+
+只去除前端字符集内字符，返回新的 `String`；原对象不变。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?chars t_chars | str | `" \t\r\n"` | 待剥离的字面字符集 |
+
+```lisp
+ycString::String("  ab  ")->trimStart()->str()  ; => "ab  "
+```
+
+##### trimEnd <sub>`method`</sub>
+
+```text
+s->trimEnd(
+    [ ?chars t_chars ]
+)
+=> ycString::String
+```
+
+只去除尾端字符集内字符，返回新的 `String`；原对象不变。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?chars t_chars | str | `" \t\r\n"` | 待剥离的字面字符集 |
+
+```lisp
+ycString::String("  ab  ")->trimEnd()->str()  ; => "  ab"
+```
+
+##### pad <sub>`method`</sub>
+
+```text
+s->pad(
+    n_width
+    [ ?fill t_fill ]
+    [ ?side t_side ]
+    [ ?unit t_unit ]
+    [ ?ambiguous n_ambiguous ]
+)
+=> ycString::String
+```
+
+补足到目标宽度，返回新的 `String`；永不截断。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| n_width | int |  | 目标宽度（`>= 0`） |
+| ?fill t_fill | str | `" "` | 填充字符（单字符） |
+| ?side t_side | str | `"end"` | `"end"` 尾补 / `"start"` 首补 |
+| ?unit t_unit | str | `"display"` | `"display"` 显示列宽 / `"char"` 码点数 |
+| ?ambiguous n_ambiguous | int | `1` | East Asian Ambiguous 宽度（`1` 或 `2`） |
+
+```lisp
+ycString::String("ab")->pad(5 ?fill "-")->str()                  ; => "ab---"
+ycString::String("ab")->pad(5 ?side "start" ?fill "-")->str()    ; => "---ab"
+ycString::String("中")->pad(4 ?unit "char" ?fill "-")->str()     ; => "中---"
+```
+
+#### 查询
+
+##### width <sub>`method`</sub>
+
+```text
+s->width(
+    [ ?unit t_unit ]
+    [ ?ambiguous n_ambiguous ]
+)
+=> int
+```
+
+计算当前字符串的显示列宽或码点数。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?unit t_unit | str | `"display"` | `"display"` 显示列宽 / `"char"` 码点数 |
+| ?ambiguous n_ambiguous | int | `1` | East Asian Ambiguous 宽度（`1` 或 `2`） |
+
+```lisp
+ycString::String("中文")->width()              ; => 4
+ycString::String("中文")->width(?unit "char")  ; => 2
+```
+
+##### startsWith <sub>`method`</sub>
+
+```text
+s->startsWith(t_prefix)
+=> t / nil
+```
+
+判断当前字符串是否以指定前缀开始；空前缀回 `t`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| t_prefix | str |  | 前缀 |
+
+```lisp
+ycString::String("abc")->startsWith("ab")  ; => t
+ycString::String("abc")->startsWith("bc")  ; => nil
+```
+
+##### endsWith <sub>`method`</sub>
+
+```text
+s->endsWith(t_suffix)
+=> t / nil
+```
+
+判断当前字符串是否以指定后缀结束；空后缀回 `t`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| t_suffix | str |  | 后缀 |
+
+```lisp
+ycString::String("abc")->endsWith("bc")  ; => t
+ycString::String("abc")->endsWith("ab")  ; => nil
+```
+
+##### count <sub>`method`</sub>
+
+```text
+s->count(
+    t_sub
+    [ ?regex g_regex ]
+)
+=> int
+```
+
+统计非重叠出现次数；`t_sub` 不能为空。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| t_sub | str |  | 待计数子串或正则模式 |
+| ?regex g_regex | any | `nil` | 非 `nil` 时 `t_sub` 按正则模式解释 |
+
+```lisp
+ycString::String("banana")->count("a")              ; => 3
+ycString::String("banana")->count("a+" ?regex t)    ; => 3
+```
+
+##### words <sub>`method`</sub>
+
+```text
+s->words()
+=> list[str]
+```
+
+按大小写与数字边界切分为词列表；无词时为 `nil`。
+
+无参数。
+
+```lisp
+ycString::String("HTMLParser")->words()  ; => ("HTML" "Parser")
+```
+
+##### naturalLess <sub>`method`</sub>
+
+```text
+s->naturalLess(t_other)
+=> t / nil
+```
+
+按自然序比较当前字符串与 `t_other`；当前串排在前面回 `t`，相等或在后回 `nil`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| t_other | str |  | 右串 |
+
+```lisp
+ycString::String("VDD2")->naturalLess("VDD10")   ; => t
+ycString::String("VDD10")->naturalLess("VDD2")   ; => nil
+```
+
+#### 切分与连接
+
+##### split <sub>`method`</sub>
+
+```text
+s->split(
+    [ ?sep t_sep ]
+    [ ?regex g_regex ]
+    [ ?keepEmpty g_keepEmpty ]
+)
+=> list[str]
+```
+
+切分当前字符串，返回切分段列表。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?sep t_sep | str / nil | `nil` | 分隔符或正则模式；缺省时按空白符切分 |
+| ?regex g_regex | any | `nil` | 非 `nil` 时 `?sep` 按正则模式解释 |
+| ?keepEmpty g_keepEmpty | any | `t` | 非 `nil` 时保留空段 |
+
+```lisp
+ycString::String("  a\tb\n c ")->split()                    ; => ("a" "b" "c")
+ycString::String("a,,b")->split(?sep ",")                   ; => ("a" "" "b")
+ycString::String("a1b2c")->split(?sep "[0-9]" ?regex t)     ; => ("a" "b" "c")
+```
+
+##### join <sub>`method`</sub>
+
+```text
+s->join(l_items)
+=> ycString::String
+```
+
+以当前字符串为分隔符连接 `l_items`，返回新的 `String`；空列表为空串。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| l_items | list[str] |  | 待连接项（全部须为字符串） |
+
+```lisp
+ycString::String("-")->join(list("a" "b"))->str()   ; => "a-b"
+ycString::String("")->join(list("a" "b"))->str()    ; => "ab"
+```
+
+#### 替换与转义
+
+##### replace <sub>`method`</sub>
+
+```text
+s->replace(
+    t_old
+    t_new
+    [ ?regex g_regex ]
+)
+=> ycString::String
+```
+
+替换全部出现，返回新的 `String`；无匹配时新对象内容相同。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| t_old | str |  | 待替换串或正则模式 |
+| t_new | str |  | 替换串 |
+| ?regex g_regex | any | `nil` | 非 `nil` 时 `t_old` 按正则模式解释 |
+
+```lisp
+ycString::String("abcabc")->replace("a" "X")->str()             ; => "XbcXbc"
+ycString::String("baaacaa")->replace("a+" "X" ?regex t)->str()  ; => "bXcX"
+```
+
+##### escape <sub>`method`</sub>
+
+```text
+s->escape(
+    [ ?quote g_quote ]
+)
+=> ycString::String
+```
+
+转义反斜杠、双引号、换行、制表与回车，返回新的 `String`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?quote g_quote | any | `nil` | 非 `nil` 时包裹双引号 |
+
+```lisp
+ycString::String("a\nb")->escape()->str()          ; => "a\\nb"
+ycString::String("a\nb")->escape(?quote t)->str()  ; => "\"a\\nb\""
+```
+
+##### unescape <sub>`method`</sub>
+
+```text
+s->unescape(
+    [ ?strict g_strict ]
+)
+=> ycString::String
+```
+
+还原转义序列，返回新的 `String`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?strict g_strict | any | `nil` | 非 `nil` 时未知转义与悬尾反斜杠报错 |
+
+```lisp
+ycString::String("a\\nb")->unescape()->str()  ; => "a\nb"
+```
+
+#### 命名转换
+
+##### sanitize <sub>`method`</sub>
+
+```text
+s->sanitize(
+    [ ?style t_style ]
+)
+=> ycString::String
+```
+
+清洗为合法标识符形态，返回新的 `String`；数字开头补下划线，无可用字符时报错。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| ?style t_style | str | `"snake"` | `"snake"` / `"kebab"` / `"camel"` / `"pascal"` |
+
+```lisp
+ycString::String("HTMLParser")->sanitize()->str()              ; => "html_parser"
+ycString::String("HTMLParser")->sanitize(?style "camel")->str() ; => "htmlParser"
+```
+
+##### toSnake <sub>`method`</sub>
+
+```text
+s->toSnake()
+=> ycString::String
+```
+
+转换为 snake 形式标识符，返回新的 `String`。
+
+无参数。
+
+```lisp
+ycString::String("HTMLParser")->toSnake()->str()  ; => "html_parser"
+```
+
+##### toKebab <sub>`method`</sub>
+
+```text
+s->toKebab()
+=> ycString::String
+```
+
+转换为 kebab 形式标识符，返回新的 `String`。
+
+无参数。
+
+```lisp
+ycString::String("HTMLParser")->toKebab()->str()  ; => "html-parser"
+```
+
+##### toCamel <sub>`method`</sub>
+
+```text
+s->toCamel()
+=> ycString::String
+```
+
+转换为 camel 形式标识符，返回新的 `String`。
+
+无参数。
+
+```lisp
+ycString::String("HTMLParser")->toCamel()->str()  ; => "htmlParser"
+```
+
+##### toPascal <sub>`method`</sub>
+
+```text
+s->toPascal()
+=> ycString::String
+```
+
+转换为 pascal 形式标识符，返回新的 `String`。
+
+无参数。
+
+```lisp
+ycString::String("HTMLParser")->toPascal()->str()  ; => "HtmlParser"
+```
+
+#### 方法链
+
+返回 `ycString::String` 的方法均可继续链式调用；查询方法返回原生值并结束当前链。`JoinWords` / `NaturalSort` 以列表为操作对象，继续使用函数形式。
+
+```lisp
+ycString::String("  HTML Parser  ")->trim()->toSnake()->str()  ; => "html_parser"
+ycString::String("-")->join(list("a" "b"))->toPascal()->str()  ; => "AB"
+```
 
 ### ycString::Trim <sub>`function`</sub>
 

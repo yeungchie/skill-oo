@@ -7,7 +7,7 @@
 ; needs CurrentFile() and Path::load to reach every source below.
 let((dir)
     dir = ycPathLib::CurrentFile()->parent()
-    foreach(file '("ns.il" "core.il" "escape.il" "naming.il" "sort.il")
+    foreach(file '("ns.il" "core.il" "escape.il" "naming.il" "sort.il" "string.il")
         dir->join("src" file)->load()
     )
 )

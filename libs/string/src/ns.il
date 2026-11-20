@@ -41,6 +41,11 @@ addToNamespace("ycString"
         NaturalSort  ; proc
         _DigitRunEnd  ; proc
         _StripZeros  ; proc
+
+        ; string.il
+        String  ; proc, class
+        _MkString  ; proc
+        _InstallString  ; proc
     ))
 )
 unuseNamespace("ycString")
