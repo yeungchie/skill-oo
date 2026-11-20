@@ -103,12 +103,12 @@ let((st)
     _Assert(st->peek() == nil "peek on an empty Stream returns nil")
     _AssertErrorMsg(
         lambda(() st->peek("0"))
-        "ycSubProcess::Stream->peek: index must be an integer"
+        "argument #1 should be an integer"
         "peek rejects a string index"
     )
     _AssertErrorMsg(
         lambda(() st->peek(0.5))
-        "ycSubProcess::Stream->peek: index must be an integer"
+        "argument #1 should be an integer"
         "peek rejects a float index"
     )
     st->push("a")

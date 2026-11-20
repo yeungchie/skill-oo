@@ -754,7 +754,7 @@ ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout()->last()
 
 ```text
 aj->stdout()->peek(
-    [ g_index ]
+    [ x_index ]
 )
 => str | nil
 ```
@@ -763,9 +763,9 @@ aj->stdout()->peek(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| g_index | int | 0 | 索引；0 起算，负值从末尾算 |
+| x_index | int | 0 | 索引；0 起算，负值从末尾算 |
 
-> 调用时按下标传参（如 `peek(1)`）；参数名 `g_index` 中的 `g_` 是类型标记，不是关键字。
+> 调用时按下标传参（如 `peek(1)`）。
 
 ```lisp
 st = makeInstance('ycSubProcess::Stream)
