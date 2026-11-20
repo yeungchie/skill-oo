@@ -6,6 +6,10 @@ _Assert(ycString::Words("foo_bar-baz") == list("foo" "bar" "baz")  "words: separ
 _Assert(ycString::Words("foo2Bar") == list("foo2" "Bar")  "words: digit to upper")
 _Assert(ycString::Words("  ") == nil  "words: no words")
 _Assert(ycString::Words("中文 abc") == list("中文" "abc")  "words: cjk kept")
+let((w)
+    w = ycString::Pad("a" 200 ?fill "a" ?unit "char")
+    _Assert(ycString::Words(w) == list(w)  "words: long word stays one word")
+)
 
 _Assert(ycString::JoinWords(list("a" "b")) == "a_b"  "JoinWords: snake default")
 _Assert(ycString::JoinWords(list("a" "b") ?style "kebab") == "a-b"  "JoinWords: kebab")

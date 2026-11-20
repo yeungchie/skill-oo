@@ -7,28 +7,6 @@ ycNamespace:::Require("ycUtf8")
 
 useNamespace("ycString")
 
-procedure(_IsUpperChar(t_ch "t")  ; -> t | nil
-    ; 判断单字符是否为 ASCII 大写字母（内部实现）。
-    ;
-    ; **参数**
-    ;   t_ch (str) - 单字符
-    ;
-    ; **返回**
-    ;   (t|nil) - 命中回 t
-    index("ABCDEFGHIJKLMNOPQRSTUVWXYZ" t_ch)
-)
-
-procedure(_IsLowerChar(t_ch "t")  ; -> t | nil
-    ; 判断单字符是否为 ASCII 小写字母（内部实现）。
-    ;
-    ; **参数**
-    ;   t_ch (str) - 单字符
-    ;
-    ; **返回**
-    ;   (t|nil) - 命中回 t
-    index("abcdefghijklmnopqrstuvwxyz" t_ch)
-)
-
 procedure(_IsDigitChar(t_ch "t")  ; -> t | nil
     ; 判断单字符是否为 ASCII 数字（内部实现）。
     ;
@@ -40,20 +18,6 @@ procedure(_IsDigitChar(t_ch "t")  ; -> t | nil
     index("0123456789" t_ch)
 )
 
-procedure(_IsWordChar(t_ch "t")  ; -> t | nil
-    ; 判断单字符是否算词内字符：ASCII 字母数字或非 ASCII 码点（内部实现）。
-    ;
-    ; **参数**
-    ;   t_ch (str) - 单字符（码点完整）
-    ;
-    ; **返回**
-    ;   (t|nil) - 是则回 t
-    if(length(t_ch) > 1
-        t
-        _IsUpperChar(t_ch) || _IsLowerChar(t_ch) || _IsDigitChar(t_ch)
-    )
-)
-
 procedure(Words(t_s "t")  ; -> list[str]
     ; 切分为词列表（标识符转换的基础）。
     ;
@@ -62,38 +26,39 @@ procedure(Words(t_s "t")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]) - 词列表；无词时为 nil
-    let((p cur prev ch nx len)
-        cur = ""
-        prev = ""
-        len = ycUtf8:::CharCount(t_s)
-        when(len > 0
-            for(i 1 len
-                ch = ycUtf8:::Slice(t_s i 1)
-                nx = if(i < len ycUtf8:::Slice(t_s i + 1 1) "")
-                cond(
-                    (!_IsWordChar(ch)
-                        when(cur != ""
-                            p = tconc(p cur)
-                            cur = ""
-                        )
-                    )
-                    ((cur != "" && _IsUpperChar(ch) && (_IsLowerChar(prev) || _IsDigitChar(prev)))
-                        p = tconc(p cur)
-                        cur = ch
-                    )
-                    ((cur != "" && _IsUpperChar(prev) && _IsUpperChar(ch) && _IsLowerChar(nx))
-                        p = tconc(p cur)
-                        cur = ch
-                    )
-                    (t
-                        cur = strcat(cur ch)
+    let((p chars prev cp nx rest)
+        prev = 0
+        rest = ycUtf8:::Decode(t_s)
+        while(rest
+            cp = car(rest)
+            nx = if(cdr(rest) car(cdr(rest)) nil)
+            cond(
+                (!(cp > 127 || (cp >= 65 && cp <= 90) || (cp >= 97 && cp <= 122)
+                        || (cp >= 48 && cp <= 57))
+                    when(chars
+                        p = tconc(p ycUtf8:::Encode(car(chars)))
+                        chars = nil
                     )
                 )
-                prev = ch
+                ((chars && cp >= 65 && cp <= 90
+                        && ((prev >= 97 && prev <= 122) || (prev >= 48 && prev <= 57)))
+                    p = tconc(p ycUtf8:::Encode(car(chars)))
+                    chars = tconc(nil cp)
+                )
+                ((chars && prev >= 65 && prev <= 90 && cp >= 65 && cp <= 90
+                        && nx && nx >= 97 && nx <= 122)
+                    p = tconc(p ycUtf8:::Encode(car(chars)))
+                    chars = tconc(nil cp)
+                )
+                (t
+                    chars = tconc(chars cp)
+                )
             )
+            prev = cp
+            rest = cdr(rest)
         )
-        when(cur != ""
-            p = tconc(p cur)
+        when(chars
+            p = tconc(p ycUtf8:::Encode(car(chars)))
         )
         car(p)
     )

@@ -17,7 +17,6 @@ addToNamespace("ycString"
         Count  ; proc
         _TrimSide  ; proc
         _Repeat  ; proc
-        _IsWhitespace  ; proc
         _SplitWhitespace  ; proc
         _SplitLiteral  ; proc
         _KeepNonEmpty  ; proc
@@ -34,10 +33,7 @@ addToNamespace("ycString"
         ToKebab  ; proc
         ToCamel  ; proc
         ToPascal  ; proc
-        _IsUpperChar  ; proc
-        _IsLowerChar  ; proc
         _IsDigitChar  ; proc
-        _IsWordChar  ; proc
         _CapWord  ; proc
 
         ; sort.il

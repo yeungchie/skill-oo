@@ -164,17 +164,6 @@ procedure(Pad(t_s n_width \@key (fill " ") (side "end") (unit "display") (ambigu
     )
 )
 
-procedure(_IsWhitespace(t_ch "t")  ; -> t | nil
-    ; 判断单字符是否为默认空白字符（空格/制表/回车/换行）。
-    ;
-    ; **参数**
-    ;   t_ch (str) - 单字符
-    ;
-    ; **返回**
-    ;   (t|nil) - 命中回 t
-    index(" \t\r\n" t_ch)
-)
-
 procedure(_SplitWhitespace(t_s "t")  ; -> list[str]
     ; 按空白字符连续段切分并丢弃空段（内部实现）。
     ;
@@ -183,24 +172,7 @@ procedure(_SplitWhitespace(t_s "t")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]) - 非空词列表；无词时为 nil
-    let((p i j len)
-        len = length(t_s)
-        i = 1
-        while(i <= len
-            while(i <= len && _IsWhitespace(substring(t_s i 1))
-                i++
-            )
-            j = i
-            while(j <= len && !_IsWhitespace(substring(t_s j 1))
-                j++
-            )
-            when(j > i
-                p = tconc(p substring(t_s i j - i))
-            )
-            i = j
-        )
-        car(p)
-    )
+    parseString(t_s " \t\r\n")
 )
 
 procedure(_SplitLiteral(t_s t_sep "tt")  ; -> list[str]
@@ -212,26 +184,32 @@ procedure(_SplitLiteral(t_s t_sep "tt")  ; -> list[str]
     ;
     ; **返回**
     ;   (list[str]) - 切分段（含空段）
-    let((p rest cut pos len sep2 done)
-        rest = t_s
-        sep2 = length(t_sep)
-        while(!done
-            cut = index(rest t_sep)
-            if(cut
-            then
-                len = length(rest)
-                pos = len - length(cut) + 1
-                p = tconc(p if(pos > 1 substring(rest 1 pos - 1) ""))
-                rest = if(pos + sep2 > len
-                    ""
-                    substring(rest pos + sep2 len - pos - sep2 + 1)
-                )
-            else
-                p = tconc(p rest)
-                done = t
-            )
+    if(strlen(t_sep) == 1
+        if(t_s == ""
+            list("")
+            parseString(t_s t_sep t)
         )
-        car(p)
+        let((p rest cut pos len sep2 done)
+            rest = t_s
+            sep2 = length(t_sep)
+            while(!done
+                cut = index(rest t_sep)
+                if(cut
+                then
+                    len = length(rest)
+                    pos = len - length(cut) + 1
+                    p = tconc(p if(pos > 1 substring(rest 1 pos - 1) ""))
+                    rest = if(pos + sep2 > len
+                        ""
+                        substring(rest pos + sep2 len - pos - sep2 + 1)
+                    )
+                else
+                    p = tconc(p rest)
+                    done = t
+                )
+            )
+            car(p)
+        )
     )
 )
 
@@ -377,27 +355,30 @@ procedure(Replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
             when(t_old == ""
                 error("ycString::Replace: search string must not be empty")
             )
-            let((p rest cut pos len old done)
-                rest = t_s
-                old = length(t_old)
-                while(!done
-                    cut = index(rest t_old)
-                    if(cut
-                    then
-                        len = length(rest)
-                        pos = len - length(cut) + 1
-                        p = tconc(p if(pos > 1 substring(rest 1 pos - 1) ""))
-                        p = tconc(p t_new)
-                        rest = if(pos + old > len
-                            ""
-                            substring(rest pos + old len - pos - old + 1)
+            if(strlen(t_old) == 1
+                buildString(parseString(t_s t_old t) t_new)
+                let((p rest cut pos len old done)
+                    rest = t_s
+                    old = length(t_old)
+                    while(!done
+                        cut = index(rest t_old)
+                        if(cut
+                        then
+                            len = length(rest)
+                            pos = len - length(cut) + 1
+                            p = tconc(p if(pos > 1 substring(rest 1 pos - 1) ""))
+                            p = tconc(p t_new)
+                            rest = if(pos + old > len
+                                ""
+                                substring(rest pos + old len - pos - old + 1)
+                            )
+                        else
+                            p = tconc(p rest)
+                            done = t
                         )
-                    else
-                        p = tconc(p rest)
-                        done = t
                     )
+                    apply('strcat car(p))
                 )
-                apply('strcat car(p))
             )
         )
     )
