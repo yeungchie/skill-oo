@@ -827,10 +827,10 @@ aj->stdout()->readLine(
 st = makeInstance('ycSubProcess::Stream)
 st->push("hello")
 st->readLine()
-; => nil（没有换行，手工 Stream 没有数据源可等）
+; => "hello"（手工 Stream 没有数据源可等，残行立即作为最后一行交出）
 st->push("\n")
 st->readLine()
-; => "hello\n"
+; => "\n"
 st->readLine()
 ; => nil
 
