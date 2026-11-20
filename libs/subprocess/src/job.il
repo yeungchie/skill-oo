@@ -206,10 +206,10 @@ defclass(_AsyncJobData () (
         \@initform makeInstance('Elapsed)
     )
     stdout(
-        \@initform makeInstance('Stream)
+        \@initform nil
     )
     stderr(
-        \@initform makeInstance('Stream)
+        \@initform nil
     )
 ))
 
@@ -286,6 +286,8 @@ defmethod(initializeInstance (self(AsyncJob) \@key (command nil) (callback nil) 
     )
     let((data)
         data = makeInstance('_AsyncJobData ?command command)
+        data->stdout = makeInstance('Stream ?owner self)
+        data->stderr = makeInstance('Stream ?owner self)
         self->command = lambda(()  ; -> str
             ; 返回创建任务时的完整命令串。
             ;

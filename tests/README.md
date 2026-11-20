@@ -36,7 +36,7 @@ load("<path-to-dir>/skill-oo/tests/codec/load_order.il")
 
 log 套件首次加载时会先在未加载 `ycDateTime` 的会话里跑一次隔离检查（`tests/log/isolated.il`），成功输出 `YC LOG ISOLATED PASSED`；会话里已加载 `ycDateTime` 时该检查跳过。
 
-subprocess 套件同理：首次加载时先在未加载 `ycQueue` 的会话里跑一次隔离检查（`tests/subprocess/isolated.il`），成功输出 `YC SUBPROCESS ISOLATED PASSED`；会话里已加载 `ycQueue` 时该检查跳过。
+subprocess 套件同理：首次加载时先在未加载 `ycQueue` / `ycString` 的会话里跑隔离检查（`tests/subprocess/isolated.il`、`tests/subprocess/isolated_string.il`），成功输出 `YC SUBPROCESS ISOLATED PASSED` 与 `YC SUBPROCESS STRING ISOLATED PASSED`；对应依赖已加载时该检查跳过。
 
 > 修改某个 `libs/<模块>/src/` 后必须**重启 CIW** 再跑对应 `load.il`：同一会话内已加载过对应库时，`load.il` 会打印提示并复用内存中的旧代码，改动静默无效。
 
