@@ -45,6 +45,13 @@ let((res path dir queueReady)
         loadi(strcat(dir "isolated.il"))
         loadi(strcat(dir "../../libs/queue/load.il"))
     )
+    unless(and(
+            findNamespace("ycString")
+            findSymbol("Count" ?namespace "ycString")
+            fboundp(findSymbol("Count" ?namespace "ycString"))
+        )
+        loadi(strcat(dir "../../libs/string/load.il"))
+    )
     _TestDir = dir
     unless(fboundp('_TestRun)
         loadi(strcat(_TestDir "../kit.il"))

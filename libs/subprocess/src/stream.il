@@ -1,4 +1,4 @@
-ycNamespace:::Require("ycQueue")
+ycNamespace:::Require("ycQueue" "ycString")
 
 useNamespace("ycSubProcess")
 
@@ -10,8 +10,10 @@ defclass(Stream () (
     push()
     last()
     shift()
+    peek()
     text()
     size()
+    lines()
     isEmpty()
 ))
 
@@ -28,7 +30,7 @@ defmethod(printself (self(Stream))  ; -> str
 
 inScheme(
 defmethod(initializeInstance (self(Stream))
-    ; 安装 Stream 全部方法：push/last/shift/text/size/isEmpty。
+    ; 安装 Stream 全部方法：push/last/peek/shift/text/lines/size/isEmpty。
     ; 内部状态是一个 ycQueue::FIFO 实例，只在闭包里出现；
     ; ycQueue 未加载时以 error() 中断。
     ;
@@ -66,6 +68,21 @@ defmethod(initializeInstance (self(Stream))
             ;   (str|nil) - 首条目
             queue->get(?onEmpty nil)
         )
+        self->peek = lambda((\@optional n_index(0) "x")  ; -> str | nil
+            ; 返回指定索引的条目但不移除；索引 0 起算，负值从末尾算。
+            ;
+            ; **参数**
+            ;   n_index  (int) - 索引；默认 0
+            ;
+            ; **返回**
+            ;   (str|nil) - 索引条目；空流或索引越界为 nil
+            let((n_size)
+                n_size = queue->size()
+                when(n_size > 0 && n_index < n_size && n_index >= -n_size
+                    queue->peek(?index n_index)
+                )
+            )
+        )
         self->text = lambda((\@key (clear nil) "g")  ; -> str
             ; 拼接全量数据为字符串；?clear 非 nil 时取完清空。
             ;
@@ -82,6 +99,24 @@ defmethod(initializeInstance (self(Stream))
             ; **返回**
             ;   (int) - 条目数
             queue->size()
+        )
+        self->lines = lambda(()  ; -> int
+            ; 统计当前行数；末尾没有换行的残行也计一行。
+            ;
+            ; **返回**
+            ;   (int) - 行数；空流为 0
+            let((text c)
+                text = self->text()
+                if(text == ""
+                then 0
+                else
+                    c = ycString:::Count(text "\n")
+                    unless(ycString:::EndsWith(text "\n")
+                        c += 1
+                    )
+                    c
+                )
+            )
         )
         self->isEmpty = lambda(()  ; -> t | nil
             ; 判断流是否为空。

@@ -8,7 +8,7 @@ Cadence SKILL++ 的子进程封装库：启动进程、实时读写输出、按�
 
 + 同步接口 `Run()` 执行并等待；异步接口 `CreateJob()` 返回 `AsyncJob` 对象，控制进程生命周期。
 + 进程状态以符号表示：`'None`（未启动）/ `'Active`（运行中）/ `'Dead`（已结束）/ `'Stopped`（已暂停）。
-+ 输出按条收进 `Stream` 对象：`text()` 全量拼接、`last()`/`shift()` 取单条；耗时由 `Elapsed` 记录。
++ 输出按条收进 `Stream` 对象：`text()` 全量拼接，`last()`/`peek()`/`shift()` 读取单条，`lines()` 统计行数；耗时由 `Elapsed` 记录。
 + 回调函数按事件符号触发：`'stdout`/`'stderr`/`'post`/`'beforeBegin`/`'afterBegin`。
 + 单参数形式的命令串交给 shell 解释（引号、`$` 展开、管道、重定向照常生效）；多参数形式按参数列表拼接，每个参数自动加引号保护，空格与元字符不再被解释。
 + 输出缓冲依赖 `ycQueue`；未加载时构造任务会以 `error()` 中断并提示 `ycQueue is not loaded`。
@@ -704,6 +704,23 @@ ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout()->size()
 ; => 1
 ```
 
+#### lines <sub>`method`</sub>
+
+```text
+aj->stdout()->lines()
+=> int
+```
+
+获取数据流的行数；末尾没有换行符的残行也计一行，空流为 0。
+
+```lisp
+st = makeInstance('ycSubProcess::Stream)
+st->push("a\nb")
+st->push("\nc\n")
+st->lines()
+; => 3
+```
+
 #### isEmpty <sub>`method`</sub>
 
 ```text
@@ -730,6 +747,33 @@ aj->stdout()->last()
 ```lisp
 ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout()->last()
 ; => "a\n"
+```
+
+#### peek <sub>`method`</sub>
+
+```text
+aj->stdout()->peek(
+    [ n_index ]
+)
+=> str | nil
+```
+
+获取指定索引的数据但不移除；索引 0 起算，负值从末尾算。空流或索引越界时返回 nil。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| n_index | int | 0 | 索引；0 起算，负值从末尾算 |
+
+```lisp
+st = makeInstance('ycSubProcess::Stream)
+st->push("a")
+st->push("b")
+st->peek()
+; => "a"
+st->peek(-1)
+; => "b"
+st->peek(2)
+; => nil
 ```
 
 #### shift <sub>`method`</sub>
