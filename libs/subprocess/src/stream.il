@@ -162,6 +162,7 @@ defmethod(initializeInstance (self(Stream) \@key (owner nil))
                         className(self))
                 )
                 pos = len - length(cut) + 1
+                ; index 返回从换行符起的子串，用长度差反推它前面的字符数。
                 list(
                     strcat(if(pos > 1 substring(t_text 1 pos - 1) "") "\n")
                     if(pos < len substring(t_text pos + 1 len - pos) "")
@@ -173,17 +174,17 @@ defmethod(initializeInstance (self(Stream) \@key (owner nil))
             ;
             ; **返回**
             ;   (str) - 取出的行
-            let((line parts item found)
-                line = ""
+            let((pieces parts item found)
+                pieces = cons(nil nil)
                 when(front != ""
                     if(index(front "\n")
                     then
                         parts = _splitAtNewline(front)
-                        line = car(parts)
+                        pieces = tconc(pieces car(parts))
                         front = cadr(parts)
                         found = t
                     else
-                        line = front
+                        pieces = tconc(pieces front)
                         front = ""
                     )
                 )
@@ -192,14 +193,14 @@ defmethod(initializeInstance (self(Stream) \@key (owner nil))
                     if(index(item "\n")
                     then
                         parts = _splitAtNewline(item)
-                        line = strcat(line car(parts))
+                        pieces = tconc(pieces car(parts))
                         front = cadr(parts)
                         found = t
                     else
-                        line = strcat(line item)
+                        pieces = tconc(pieces item)
                     )
                 )
-                line
+                buildString(car(pieces) "")
             )
         )
         procedure(_takeAll()  ; -> str | nil
