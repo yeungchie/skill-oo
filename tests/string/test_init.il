@@ -1,4 +1,4 @@
-_TestRun("ycString" 147
+_TestRun("ycString" 150
     "test_core.il"
     "test_escape.il"
     "test_naming.il"
