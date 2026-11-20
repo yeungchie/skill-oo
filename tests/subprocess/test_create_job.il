@@ -101,8 +101,16 @@ let((st)
     st = makeInstance('ycSubProcess::Stream)
     _Assert(st->lines() == 0 "lines of an empty Stream is 0")
     _Assert(st->peek() == nil "peek on an empty Stream returns nil")
-    _Assert(errset(st->peek("0") nil) == nil "peek rejects a string index")
-    _Assert(errset(st->peek(0.5) nil) == nil "peek rejects a float index")
+    _AssertErrorMsg(
+        lambda(() st->peek("0"))
+        "ycSubProcess::Stream->peek: index must be an integer"
+        "peek rejects a string index"
+    )
+    _AssertErrorMsg(
+        lambda(() st->peek(0.5))
+        "ycSubProcess::Stream->peek: index must be an integer"
+        "peek rejects a float index"
+    )
     st->push("a")
     st->push("b\nc")
     _Assert(st->peek() == "a" "peek defaults to the first entry")

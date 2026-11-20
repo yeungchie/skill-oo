@@ -3,7 +3,7 @@
 ; Language : Cadence Skill
 ;--------------------------
 
-let((res path dir queueReady)
+let((res path dir queueReady stringReady)
     res = errset(get_filename(piport) nil)
     path = when(res && car(res) && stringp(car(res)) && car(res) != ""
         car(res)
@@ -45,11 +45,14 @@ let((res path dir queueReady)
         loadi(strcat(dir "isolated.il"))
         loadi(strcat(dir "../../libs/queue/load.il"))
     )
-    unless(and(
-            findNamespace("ycString")
-            findSymbol("Count" ?namespace "ycString")
-            fboundp(findSymbol("Count" ?namespace "ycString"))
-        )
+    stringReady = and(
+        findNamespace("ycString")
+        findSymbol("Count" ?namespace "ycString")
+        fboundp(findSymbol("Count" ?namespace "ycString"))
+    )
+    unless(stringReady
+        ; ycString 尚未加载：这是唯一能走到 lines 守卫错误路径的窗口。
+        loadi(strcat(dir "isolated_string.il"))
         loadi(strcat(dir "../../libs/string/load.il"))
     )
     _TestDir = dir

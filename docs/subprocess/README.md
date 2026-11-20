@@ -12,6 +12,7 @@ Cadence SKILL++ 的子进程封装库：启动进程、实时读写输出、按�
 + 回调函数按事件符号触发：`'stdout`/`'stderr`/`'post`/`'beforeBegin`/`'afterBegin`。
 + 单参数形式的命令串交给 shell 解释（引号、`$` 展开、管道、重定向照常生效）；多参数形式按参数列表拼接，每个参数自动加引号保护，空格与元字符不再被解释。
 + 输出缓冲依赖 `ycQueue`；未加载时构造任务会以 `error()` 中断并提示 `ycQueue is not loaded`。
++ `lines()` 额外依赖 `ycString`；未加载时以 `error()` 中断并提示 `ycString is not loaded`。
 + `send()` 写入的数据直接送达子进程标准输入、不经 shell。
 + 例程中 `; =>` 表示返回值，括注「示例值」者为示意。
 
@@ -711,7 +712,7 @@ aj->stdout()->lines()
 => int
 ```
 
-获取数据流的行数；末尾没有换行符的残行也计一行，空流为 0。
+获取数据流的行数；末尾没有换行符的残行也计一行，空流为 0。每次调用按当前流内容重新统计。
 
 ```lisp
 st = makeInstance('ycSubProcess::Stream)
@@ -753,16 +754,16 @@ ycSubProcess::CreateJob("echo" "a")->start()->wait()->stdout()->last()
 
 ```text
 aj->stdout()->peek(
-    [ n_index ]
+    [ g_index ]
 )
 => str | nil
 ```
 
-获取指定索引的数据但不移除；索引 0 起算，负值从末尾算。空流或索引越界时返回 nil。
+获取指定索引的数据但不移除；索引 0 起算，负值从末尾算。空流或索引越界时返回 nil；非整数索引以 `error()` 中断。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| n_index | int | 0 | 索引；0 起算，负值从末尾算 |
+| g_index | int | 0 | 索引；0 起算，负值从末尾算 |
 
 ```lisp
 st = makeInstance('ycSubProcess::Stream)

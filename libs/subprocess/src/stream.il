@@ -68,18 +68,21 @@ defmethod(initializeInstance (self(Stream))
             ;   (str|nil) - 首条目
             queue->get(?onEmpty nil)
         )
-        self->peek = lambda((\@optional n_index(0) "x")  ; -> str | nil
+        self->peek = lambda((\@optional g_index(0) "g")  ; -> str | nil
             ; 返回指定索引的条目但不移除；索引 0 起算，负值从末尾算。
             ;
             ; **参数**
-            ;   n_index  (int) - 索引；默认 0
+            ;   g_index  (int) - 索引；默认 0
             ;
             ; **返回**
             ;   (str|nil) - 索引条目；空流或索引越界为 nil
             let((n_size)
+                unless(fixp(g_index)
+                    error("%A->peek: index must be an integer (%A)" className(self) g_index)
+                )
                 n_size = queue->size()
-                when(n_size > 0 && n_index < n_size && n_index >= -n_size
-                    queue->peek(?index n_index)
+                when(n_size > 0 && g_index < n_size && g_index >= -n_size
+                    queue->peek(?index g_index)
                 )
             )
         )
@@ -105,6 +108,9 @@ defmethod(initializeInstance (self(Stream))
             ;
             ; **返回**
             ;   (int) - 行数；空流为 0
+            unless(fboundp('ycString:::Count)
+                error("%A->lines: ycString is not loaded - load it first" className(self))
+            )
             let((text c)
                 text = self->text()
                 if(text == ""
