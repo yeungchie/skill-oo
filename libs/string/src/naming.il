@@ -124,10 +124,7 @@ procedure(JoinWords(l_words \@key (style "snake") "lt")  ; -> str
             )
             p = tconc(p w)
         )
-        if(p
-            apply('strcat car(p))
-            ""
-        )
+        buildString(car(p) "")
     )
 )
 

@@ -25,6 +25,7 @@ _Assert(ycString::Pad("中" 4 ?unit "char" ?fill "-") == "中---"  "pad: char un
 _Assert(ycString::Width(ycString::Pad("中" 4)) == 4  "pad: display unit")
 _Assert(ycString::Pad("ab" 1) == "ab"  "pad: no truncation")
 _Assert(ycString::Pad("a" 2 ?unit "char" ?fill "中") == "a中"  "pad: wide fill in char mode")
+_Assert(ycString::Width(ycString::Pad("" 500 ?unit "char" ?fill "x") ?unit "char") == 500  "pad: large repeat")
 _AssertErrorMsg(
     lambda(() ycString::Pad("a" -1))
     "ycString::Pad: width must be"
@@ -104,6 +105,7 @@ _Assert(ycString::Replace("aaa" "aa" "b") == "ba"  "replace: non-overlap")
 _Assert(ycString::Replace("abc" "x" "y") == "abc"  "replace: no match")
 _Assert(ycString::Replace("a,b," "," "-") == "a-b-"  "replace: empty edge segments")
 _Assert(ycString::Replace("" "," "-") == ""  "replace: empty input")
+_Assert(ycString::Replace("" "xx" "y") == ""  "replace: empty input with a multi-character search")
 _Assert(ycString::Replace("a.b.c" "." "-") == "a-b-c"  "replace: punctuation separator")
 _Assert(ycString::Replace("a\\b" "\\" "/") == "a/b"  "replace: backslash separator")
 _Assert(ycString::Replace("a--b--c" "--" "-") == "a-b-c"  "replace: multi-character search")

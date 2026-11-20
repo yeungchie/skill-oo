@@ -104,14 +104,13 @@ procedure(_Repeat(t_fill n_times "tx")  ; -> str
     ;
     ; **返回**
     ;   (str) - 重复结果；0 次为空串
-    let((res)
-        res = ""
+    let((p)
         when(n_times > 0
             for(i 1 n_times
-                res = strcat(res t_fill)
+                p = tconc(p t_fill)
             )
         )
-        res
+        buildString(car(p) "")
     )
 )
 
@@ -377,7 +376,7 @@ procedure(Replace(t_s t_old t_new \@key (regex nil) "tttg")  ; -> str
                             done = t
                         )
                     )
-                    apply('strcat car(p))
+                    buildString(car(p) "")
                 )
             )
         )

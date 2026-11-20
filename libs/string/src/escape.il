@@ -30,10 +30,7 @@ procedure(Escape(t_s \@key (quote nil) "tg")  ; -> str
                 p = tconc(p out)
             )
         )
-        out = if(p
-            apply('strcat car(p))
-            ""
-        )
+        out = buildString(car(p) "")
         if(quote
             lsprintf("\"%s\"" out)
             out
@@ -81,10 +78,7 @@ procedure(Unescape(t_s \@key (strict nil) "tg")  ; -> str
                 i++
             )
         )
-        if(p
-            apply('strcat car(p))
-            ""
-        )
+        buildString(car(p) "")
     )
 )
 

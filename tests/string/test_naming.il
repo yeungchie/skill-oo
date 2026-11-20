@@ -12,6 +12,7 @@ let((w)
 )
 
 _Assert(ycString::JoinWords(list("a" "b")) == "a_b"  "JoinWords: snake default")
+_Assert(ycString::JoinWords(nil) == ""  "JoinWords: empty list")
 _Assert(ycString::JoinWords(list("a" "b") ?style "kebab") == "a-b"  "JoinWords: kebab")
 _Assert(ycString::JoinWords(list("HTML" "Parser") ?style "camel") == "htmlParser"  "JoinWords: camel")
 _Assert(ycString::JoinWords(list("HTML" "Parser") ?style "pascal") == "HtmlParser"  "JoinWords: pascal")
