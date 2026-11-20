@@ -465,17 +465,12 @@ defmethod(initializeInstance (self(AsyncJob) \@key (command nil) (callback nil) 
             ;   (sym) - 未启动为 'none，否则把 ipcId 的大驼峰状态转成小写符号
             let((state)
                 state = data->ipcId && data->ipcId->state
-                if(state
-                then
-                    cond(
-                        ((state == 'None) 'none)
-                        ((state == 'Active) 'active)
-                        ((state == 'Dead) 'dead)
-                        ((state == 'Stopped) 'stopped)
-                        (t state)
-                    )
-                else
-                    'none
+                case(state
+                    (nil      'none)
+                    (Active   'active)
+                    (Dead     'dead)
+                    (Stopped  'stopped)
+                    (t        state)
                 )
             )
         )
