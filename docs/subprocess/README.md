@@ -7,7 +7,7 @@ Cadence SKILL++ 的子进程封装库：启动进程、实时读写输出、按�
 ## 概要
 
 + 同步接口 `Run()` 执行并等待；异步接口 `CreateJob()` 返回 `AsyncJob` 对象，控制进程生命周期。
-+ 进程状态以符号表示：`'None`（未启动）/ `'Active`（运行中）/ `'Dead`（已结束）/ `'Stopped`（已暂停）。
++ 进程状态以小写符号表示：`'none`（未启动）/ `'active`（运行中）/ `'dead`（已结束）/ `'stopped`（已暂停）。
 + 输出按条收进 `Stream` 对象：`text()` 全量拼接，`last()`/`peek()`/`read()` 读取原始数据块，`readLine()`/`peekLine()` 按行读取，`lines()` 统计行数；耗时由 `Elapsed` 记录。
 + `read()` 与 `readLine()` 默认用 `?timeout nil` 一直等待到有数据或数据源结束；`?timeout 0` 只看当前数据，正数则最多等待指定秒数（约 20 ms 轮询，实际返回可能多出一个轮询周期）。
 + 回调函数按事件符号触发：`'stdout`/`'stderr`/`'post`/`'beforeBegin`/`'afterBegin`。
@@ -216,7 +216,7 @@ ycSubProcess::CreateJob(
 
 ```lisp
 aj = ycSubProcess::CreateJob("free -h")
-; => <ycSubProcess::AsyncJob status=None, returncode=nil>
+; => <ycSubProcess::AsyncJob status=none, returncode=nil>
 
 printf("%s" aj->await())
 ;               total        used        free      shared  buff/cache   available
@@ -257,9 +257,9 @@ ycSubProcess::AsyncJob(
 
 ```lisp
 aj = ycSubProcess::AsyncJob("cat")
-; => <ycSubProcess::AsyncJob status=None, returncode=nil>
+; => <ycSubProcess::AsyncJob status=none, returncode=nil>
 aj->start()
-; => <ycSubProcess::AsyncJob status=Active, returncode=nil>
+; => <ycSubProcess::AsyncJob status=active, returncode=nil>
 ```
 
 **属性**
@@ -386,7 +386,7 @@ aj->start()
 ```lisp
 aj = ycSubProcess::CreateJob("cat")
 aj->start()
-; => <ycSubProcess::AsyncJob status=Active, returncode=nil>
+; => <ycSubProcess::AsyncJob status=active, returncode=nil>
 ```
 
 #### wait <sub>`method`</sub>
@@ -399,7 +399,7 @@ aj->wait(
 => ycSubProcess::AsyncJob
 ```
 
-等待任务完成；任务未启动时以 `error()` 中断。超时返回后任务并未结束：`returncode()` 仍为 `nil`，`state()` 也不会是 `'Dead`；该方法不终止进程，需要终止请调用 `kill()`。
+等待任务完成；任务未启动时以 `error()` 中断。超时返回后任务并未结束：`returncode()` 仍为 `nil`，`state()` 也不会是 `'dead`；该方法不终止进程，需要终止请调用 `kill()`。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -422,7 +422,7 @@ aj->await(
 
 自动启动并等待完成，返回标准输出内容。永不超时：任务未结束就一直等待下去。
 
-任务处于 `'Stopped` 时无法等到结束，会以 `error()` 中断，需先 `continue()` 继续或 `kill()` 终止。
+任务处于 `'stopped` 时无法等到结束，会以 `error()` 中断，需先 `continue()` 继续或 `kill()` 终止。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -466,16 +466,16 @@ aj->state()
 
 | 状态 | 说明 |
 | --- | --- |
-| `'None` | 未启动 |
-| `'Active` | 运行中 |
-| `'Dead` | 已结束 |
-| `'Stopped` | 已暂停 |
+| `'none` | 未启动 |
+| `'active` | 运行中 |
+| `'dead` | 已结束 |
+| `'stopped` | 已暂停 |
 
 ```lisp
 aj = ycSubProcess::CreateJob("true")
 aj->await()
 aj->state()
-; => 'Dead
+; => 'dead
 ```
 
 #### stop <sub>`method`</sub>
@@ -533,7 +533,7 @@ aj->send(
 ```lisp
 aj = ycSubProcess::CreateJob("cat")
 aj->start()
-; => <ycSubProcess::AsyncJob status=Active, returncode=nil>
+; => <ycSubProcess::AsyncJob status=active, returncode=nil>
 
 aj->send("123")
 aj->wait(1)

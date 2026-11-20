@@ -32,7 +32,7 @@ let((aj)
     aj->stop()
     _Assert(errset(aj->await() nil) == nil "await raises while the job is stopped")
     aj->kill()
-    _Assert(aj->state() == 'Dead "the stopped job is cleared by kill")
+    _Assert(aj->state() == 'dead "the stopped job is cleared by kill")
 )
 
 let((aj)

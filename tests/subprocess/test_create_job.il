@@ -5,9 +5,9 @@ _Assert(ycSubProcess::CreateJob("echo" 123)->await() == "123\n" "non-string argu
 let((aj res)
     aj = ycSubProcess::CreateJob("cat")
     res = errset({
-        _Assert(aj->state() == 'None "state is 'None before start")
+        _Assert(aj->state() == 'none "state is 'none before start")
         _Assert(aj->start() == aj "start returns the job itself")
-        _Assert(aj->state() == 'Active "state is 'Active after start")
+        _Assert(aj->state() == 'active "state is 'active after start")
 
         _Assert(aj->send("123") == aj "send returns the job itself")
         aj->wait(1)
@@ -37,10 +37,10 @@ let((aj res)
         fprintf(errport "%A\n" errset.errset)
         _TestErrorEnd()
     )
-    when(aj->state() == 'Active
+    when(aj->state() == 'active
         aj->kill()
     )
-    _Assert(aj->state() == 'Dead "state is 'Dead after kill")
+    _Assert(aj->state() == 'dead "state is 'dead after kill")
 )
 
 let((aj s)
@@ -63,24 +63,24 @@ let((aj s)
     aj->stdout()->push("z")
     _Assert(s == "xy" "later pushes do not change the returned string")
     _Assert(aj->stdout()->text() == "z" "push after text with ?clear works")
-    when(aj->state() == 'Active
+    when(aj->state() == 'active
         aj->kill()
     )
-    _Assert(aj->state() == 'Dead "state is 'Dead after kill in the drain block")
+    _Assert(aj->state() == 'dead "state is 'dead after kill in the drain block")
 )
 
 let((aj)
     aj = ycSubProcess::CreateJob("echo 123")
-    _Assert(printself(aj) == "<ycSubProcess::AsyncJob status=None, returncode=nil>" "AsyncJob printself format")
+    _Assert(printself(aj) == "<ycSubProcess::AsyncJob status=none, returncode=nil>" "AsyncJob printself format")
     _Assert(printself(aj->stdout()) == "<ycSubProcess::Stream size=0>" "Stream printself format")
 )
 
 let((aj)
     aj = ycSubProcess::AsyncJob("echo direct")
-    _Assert(aj->state() == 'None "a directly constructed AsyncJob starts in 'None")
+    _Assert(aj->state() == 'none "a directly constructed AsyncJob starts in 'none")
     _Assert(aj->await() == "direct\n" "a directly constructed AsyncJob runs its whole command string")
     _Assert(aj->returncode() == 0 "a directly constructed AsyncJob finishes with returncode 0")
-    _Assert(printself(aj) == "<ycSubProcess::AsyncJob status=Dead, returncode=0>" "direct AsyncJob printself after finish")
+    _Assert(printself(aj) == "<ycSubProcess::AsyncJob status=dead, returncode=0>" "direct AsyncJob printself after finish")
 )
 
 _Assert(errset(ycSubProcess::AsyncJob("echo" "direct") nil) == nil "a directly constructed AsyncJob accepts one command string only")

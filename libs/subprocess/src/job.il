@@ -20,7 +20,7 @@ procedure(_WaitJob(g_job g_timeout n_interval "ggx")  ; -> int | nil
         g_job->wait(g_timeout n_interval)
     else
         ; ipcWait 单次上限 1,000,000 秒：按天分段等待，直到进程结束。
-        while(g_job->state() != 'Dead
+        while(g_job->state() != 'dead
             g_job->wait(86400 n_interval)
         )
     )
@@ -28,7 +28,7 @@ procedure(_WaitJob(g_job g_timeout n_interval "ggx")  ; -> int | nil
     ; 进程已结束而退出码仍为空时，给回调一个短宽限窗口（最多 5 秒）。
     let((tries)
         tries = 0
-        while(g_job->state() == 'Dead && g_job->returncode() == nil && tries < 50
+        while(g_job->state() == 'dead && g_job->returncode() == nil && tries < 50
             g_job->sleep(0.1)
             tries++
         )
@@ -62,8 +62,8 @@ procedure(Run(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gggg")  ; 
         code = _WaitJob(job timeout wait_interval)
         when(timeout && code == nil
             let((alive)
-                ; 仍非 'Dead 说明进程还在跑，必须 kill；'Dead 则等回调收尾。
-                alive = job->state() != 'Dead
+                ; 仍非 'dead 说明进程还在跑，必须 kill；'dead 则等回调收尾。
+                alive = job->state() != 'dead
                 when(alive
                     job->kill()
                 )
@@ -109,8 +109,8 @@ procedure(RunWithRead(g_arg \@key (timeout nil) (interval nil) \@rest l_args "gg
         code = _WaitJob(job timeout wait_interval)
         when(timeout && code == nil
             let((alive)
-                ; 仍非 'Dead 说明进程还在跑，必须 kill；'Dead 则等回调收尾。
-                alive = job->state() != 'Dead
+                ; 仍非 'dead 说明进程还在跑，必须 kill；'dead 则等回调收尾。
+                alive = job->state() != 'dead
                 when(alive
                     job->kill()
                 )
@@ -253,7 +253,7 @@ defclass(AsyncJob () (
 ))
 
 defmethod(printself (self(AsyncJob))  ; -> str
-    ; 返回任务对象的打印描述串，形如 <ycSubProcess::AsyncJob status=None, returncode=nil>。
+    ; 返回任务对象的打印描述串，形如 <ycSubProcess::AsyncJob status=none, returncode=nil>。
     ;
     ; **返回**
     ;   (str) - lsprintf 生成；status 取 state()，returncode 取当前值
@@ -420,7 +420,7 @@ defmethod(initializeInstance (self(AsyncJob) \@key (command nil) (callback nil) 
         )
         self->await = lambda((\@key check "g")  ; -> str
             ; 未启动则先启动，随后等待进程结束；?check 非 nil 且返回码非零时
-            ; 打印 stderr 全量并以 error() 中断；任务处于 'Stopped 时无法等到
+            ; 打印 stderr 全量并以 error() 中断；任务处于 'stopped 时无法等到
             ; 结束，会以 error() 中断。
             ;
             ; **参数**
@@ -432,7 +432,7 @@ defmethod(initializeInstance (self(AsyncJob) \@key (command nil) (callback nil) 
                 self->start()
             )
             while(!data->returncode
-                when(self->state() == 'Stopped
+                when(self->state() == 'stopped
                     _error("await" "job is stopped and cannot finish; continue() or kill() it first")
                 )
                 self->wait(1)
@@ -456,11 +456,28 @@ defmethod(initializeInstance (self(AsyncJob) \@key (command nil) (callback nil) 
             ipcKillProcess(data->ipcId)
         )
         self->state = lambda(()  ; -> sym
-            ; 返回进程状态符号：'None（未启动）/ 'Active / 'Dead / 'Stopped。
+            ; 返回进程状态符号：'none（未启动）/ 'active / 'dead / 'stopped。
+            ; 状态值刻意使用小写符号：useNamespace 会把与命名空间成员同名的
+            ; 引号符号限定到命名空间，而本库导出名统一为大驼峰，小写状态值
+            ; 不会与它们重名。
             ;
             ; **返回**
-            ;   (sym) - 未启动为 'None，否则透传 ipcId 的 state
-            data->ipcId && data->ipcId->state || 'None
+            ;   (sym) - 未启动为 'none，否则把 ipcId 的大驼峰状态转成小写符号
+            let((state)
+                state = data->ipcId && data->ipcId->state
+                if(state
+                then
+                    cond(
+                        ((state == 'None) 'none)
+                        ((state == 'Active) 'active)
+                        ((state == 'Dead) 'dead)
+                        ((state == 'Stopped) 'stopped)
+                        (t state)
+                    )
+                else
+                    'none
+                )
+            )
         )
         self->stop = lambda(()  ; -> t | nil
             ; 暂停进程，类似 Ctrl+Z；返回底层 ipcStopProcess 的结果。

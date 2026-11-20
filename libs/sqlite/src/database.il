@@ -108,7 +108,7 @@ procedure(_SessionAlive(g_data "g")  ; -> t | nil
     ;
     ; **返回**
     ;   (t|nil) - 存活为 t
-    g_data->job && !g_data->closed && g_data->job->state() != 'Dead
+    g_data->job && !g_data->closed && g_data->job->state() != 'dead
 )
 
 
@@ -175,7 +175,7 @@ procedure(_SessionSend(g_obj g_data t_text t_method "ggtt")  ; -> str
     let((job marker barrier text pos body errText errMsg limit n)
         _CheckDatabase(g_obj g_data t_method)
         job = g_data->job
-        unless(job && job->state() != 'Dead
+        unless(job && job->state() != 'dead
             g_data->closed = t
             _DbError(g_obj t_method "database session is not running: %s"
                 g_data->path)
@@ -193,10 +193,10 @@ procedure(_SessionSend(g_obj g_data t_text t_method "ggtt")  ; -> str
         text = ""
         while(n < limit * 20
             text = job->stdout()->text()
-            when(_StrPos(text marker) || job->state() == 'Dead
+            when(_StrPos(text marker) || job->state() == 'dead
                 n = limit * 20
             )
-            unless(_StrPos(text marker) || job->state() == 'Dead
+            unless(_StrPos(text marker) || job->state() == 'dead
                 job->sleep(0.05)
                 n++
             )
@@ -215,7 +215,7 @@ procedure(_SessionSend(g_obj g_data t_text t_method "ggtt")  ; -> str
         ; 等待 stderr 屏障；标准 sqlite3 会立即出现，超时则按旧路径处理。
         n = 0
         errText = job->stderr()->text()
-        while(n < 15 && !_StrPos(errText barrier) && job->state() != 'Dead
+        while(n < 15 && !_StrPos(errText barrier) && job->state() != 'dead
             job->sleep(0.02)
             errText = job->stderr()->text()
             n++
@@ -409,10 +409,10 @@ procedure(_CloseDatabase(g_obj g_data "gg")  ; -> t
     unless(g_data->closed
         g_data->closed = t
         when(g_data->job
-            when(g_data->job->state() != 'Dead
+            when(g_data->job->state() != 'dead
                 errset(g_data->job->send(".quit") nil)
                 g_data->job->sleep(0.2)
-                when(g_data->job->state() != 'Dead
+                when(g_data->job->state() != 'dead
                     errset(g_data->job->kill() nil)
                 )
             )

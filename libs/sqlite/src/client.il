@@ -163,11 +163,11 @@ procedure(_RunCommand(l_cmd g_timeout "lg")  ; -> list
         limit = if(g_timeout g_timeout 5)
         job->wait(limit 1)
         n = 0
-        while(n < 50 && job->state() != 'Dead && job->returncode() == nil
+        while(n < 50 && job->state() != 'dead && job->returncode() == nil
             job->sleep(0.1)
             n++
         )
-        when(job->state() != 'Dead
+        when(job->state() != 'dead
             job->kill()
             error("ycSQLite::Client: command timed out after %ds: %s"
                 limit _CommandText(l_cmd))
@@ -198,7 +198,7 @@ procedure(_SessionProbe(l_cmd g_timeout "lg")  ; -> t | nil
         job->sleep(0.2)
         job->send(".print %s" marker)
         n = 0
-        while(n < limit * 10 && job->state() != 'Dead
+        while(n < limit * 10 && job->state() != 'dead
             text = job->stdout()->text()
             when(index(text marker)
                 n = limit * 10
@@ -209,10 +209,10 @@ procedure(_SessionProbe(l_cmd g_timeout "lg")  ; -> t | nil
             )
         )
         text = job->stdout()->text()
-        when(job->state() != 'Dead
+        when(job->state() != 'dead
             job->send(".quit")
             job->sleep(0.2)
-            when(job->state() != 'Dead
+            when(job->state() != 'dead
                 job->kill()
             )
         )
