@@ -18,7 +18,7 @@ procedure(_IsDigitChar(t_ch "t")  ; -> t | nil
     index("0123456789" t_ch)
 )
 
-; ASCII 码点区间：A-Z 65..90、a-z 97..122、0-9 48..57；>127 视为非 ASCII 词内字符。
+; ASCII 码点区间：A-Z 65..90、a-z 97..122、0-9 48..57；>127 视为词内字符（非 ASCII）。
 procedure(Words(t_s "t")  ; -> list[str]
     ; 切分为词列表（标识符转换的基础）。
     ;

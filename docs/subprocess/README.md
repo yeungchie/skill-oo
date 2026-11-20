@@ -765,6 +765,8 @@ aj->stdout()->peek(
 | --- | --- | --- | --- |
 | g_index | int | 0 | 索引；0 起算，负值从末尾算 |
 
+> 调用时按下标传参（如 `peek(1)`）；参数名 `g_index` 中的 `g_` 是类型标记，不是关键字。
+
 ```lisp
 st = makeInstance('ycSubProcess::Stream)
 st->push("a")

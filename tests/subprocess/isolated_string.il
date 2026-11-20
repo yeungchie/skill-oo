@@ -53,6 +53,7 @@ when(fboundp('ycString:::Count)
 let((res msg st)
     st = makeInstance('ycSubProcess::Stream)
     res = errset(st->lines() nil)
+    ; errset.errset 为 ("error" 序号 t nil (消息))，消息在末层子表。
     when(errset.errset && 4 <= length(errset.errset)
         msg = car(car(cdr(cdr(cdr(cdr(errset.errset))))))
     )
