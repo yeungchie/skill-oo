@@ -32,9 +32,12 @@ procedure(_TrimSide(t_s t_chars g_left g_right "ttgg")  ; -> str
                 end--
             )
         )
-        if(start > end
-            ""
-            ycUtf8:::Slice(t_s start end - start + 1)
+        if(start == 1 && end == len
+            t_s
+            if(start > end
+                ""
+                ycUtf8:::Slice(t_s start end - start + 1)
+            )
         )
     )
 )

@@ -16,6 +16,7 @@ _Assert(ycString::Unescape("a\\tb") == "a\tb"  "unescape: tab")
 _Assert(ycString::Unescape("a\\rb") == "a\rb"  "unescape: carriage return")
 _Assert(ycString::Unescape("a\\qb") == "a\\qb"  "unescape: unknown kept")
 _Assert(ycString::Unescape("") == ""  "unescape: empty input")
+_Assert(ycString::Unescape("abc") == "abc"  "unescape: plain")
 _Assert(ycString::Unescape("a\\") == "a\\"  "unescape: trailing backslash kept")
 _AssertErrorMsg(
     lambda(() ycString::Unescape("a\\qb" ?strict t))

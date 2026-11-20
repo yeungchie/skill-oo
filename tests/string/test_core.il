@@ -7,6 +7,12 @@ _Assert(ycString::Trim("xxx" ?chars "x") == ""  "trim: all stripped")
 _Assert(ycString::TrimStart("  ab  ") == "ab  "  "trimStart: leading only")
 _Assert(ycString::TrimEnd("  ab  ") == "  ab"  "trimEnd: trailing only")
 _Assert(ycString::Trim("中中a中中" ?chars "中") == "a"  "trim: cjk chars")
+_Assert(ycString::Trim("abc") == "abc"  "trim: no-op")
+_Assert(ycString::TrimStart("abc") == "abc"  "trimStart: no-op")
+_Assert(ycString::TrimEnd("abc") == "abc"  "trimEnd: no-op")
+_Assert(ycString::Trim("") == ""  "trim: empty input")
+_Assert(ycString::Trim("abc" ?chars "") == "abc"  "trim: empty chars")
+_Assert(ycString::Trim("中文") == "中文"  "trim: cjk no-op")
 
 ; ---- width ----
 _Assert(ycString::Width("中文") == 4  "width: display")
