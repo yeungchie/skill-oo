@@ -10,11 +10,23 @@ let((s)
 _Assert(ycString::String("")->str() == ""  "String: empty input")
 _Assert(makeInstance('ycString::String)->str() == ""  "String: direct makeInstance starts empty")
 _AssertErrorMsg(
+    lambda(() makeInstance('ycString::String ?value 123))
+    "?value must be a string"
+    "String: direct makeInstance rejects a non-string value"
+)
+_AssertErrorMsg(
     lambda(() ycString::String(123))
     "argument #1 should be a string"
     "String: constructor rejects a non-string"
 )
 _Assert(printself(ycString::String("a\nb")) == "ycString::String(\"a\\nb\")"  "String: printself escapes the value")
+
+let((a b)
+    a = ycString::String("same")
+    b = ycString::String("same")
+    _Assert(a != b  "String: equal values are distinct instances")
+    _Assert(a->str() == b->str()  "String: equal values compare through str")
+)
 
 ; ---- 不可变与返回新对象 ----
 let((s r)

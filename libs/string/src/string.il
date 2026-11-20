@@ -316,6 +316,9 @@ defmethod(initializeInstance (self(String) \@key (value ""))
     ;
     ; **返回**
     ;   (t) - 安装完成后返回 t
+    unless(stringp(value)
+        error("%A: ?value must be a string, got %A" className(self) value)
+    )
     _InstallString(self value)
     t
 )
